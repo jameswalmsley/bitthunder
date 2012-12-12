@@ -3,6 +3,7 @@
 
 #include "bt_config.h"
 #include "bt_types.h"
+#include "bt_error.h"
 #include "mm/bt_mm.h"
 #include "handles/bt_handle.h"
 

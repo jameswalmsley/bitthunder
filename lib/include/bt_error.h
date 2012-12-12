@@ -12,7 +12,7 @@ typedef BT_u32	BT_ERROR;
 
 
 
-
+#define BT_ERR_NONE	0
 
 
 
