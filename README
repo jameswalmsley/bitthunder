@@ -1,7 +1,19 @@
 /**
- *	BitThunder - A Reliable Real-Time operating system.
+ *	BitThunder - A Reliable Real-Time Operating System & Application Framework
  *
- *	@copyright 2012 James Walmsley <james@fullfat-fs.co.uk>
- *	@license   Apache 2.0
- *
+ *	(c) 2012 James Walmsley <james@fullfat-fs.co.uk>
  **/
+
+
+Directory Tree
+========================
+.dbuild					- Dark Builder build system. (BitThunder edition).
+arch	  		  	  	- Contains architecture specific code & bootstrapping for the OS.
++$(ARCH)				-
+++$(MACH)				- Machine sub-architectures, e.g. zynq, or cortex-m3 etc etc.
++++$(BSP)				-
+doc						- Documentation...
+drivers 				- Architecture independent drivers, e.g. I2C/USB/PCIe devices etc.
+kernel					- Contains the RTOS scheduler (FreeRTOS).
+lib						- Contains all BitThunder library code, i.e. the stuff not implementing the OS. Useful structures etc.
+os						- Contains all of the BitThunder platform independent OS code.
