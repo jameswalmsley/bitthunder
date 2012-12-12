@@ -7,3 +7,4 @@
 #
 OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/mm/bt_mm.o
 
+OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)arch/$(ARCH)/mach/$(SUBARCH)/$(SUBARCH).o
