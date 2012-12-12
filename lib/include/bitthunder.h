@@ -6,17 +6,6 @@
 #include "bt_error.h"
 #include "mm/bt_mm.h"
 #include "handles/bt_handle.h"
-
-
-
-
-
-
-
-
-
-
-
-
+#include "machines/bt_machines.h"
 
 #endif
