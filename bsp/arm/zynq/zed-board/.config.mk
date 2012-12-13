@@ -13,14 +13,17 @@ BT_CONFIG_KERNEL=FreeRTOS
 #BT_CONFIG_KERNEL=BtKernel
 
 
+ARCH=arm
+SUBARCH=zynq
 
 #
-#	Automated build configuration switches.
+#	Arch Specific configuration.
 #
-ifeq ($(BT_CONFIG_OS),y)
-BT_CONFIG_LIB=n
-BT_CONFIG_KERNEL=y
-SUB_OBJDIRS += kernel/
-else
-BT_CONFIG_LIB=y
-endif
+
+#
+#	This enables the default BitThunder startup code,
+#	You can replace this with your own code by disabling this option.
+#
+BT_CONFIG_MACH_ZYNQ_USE_STARTUP=y
+
+include $(BASE).config.mk

@@ -27,12 +27,20 @@ SECTIONS
 	    KEEP(*(.init))
 	} > ZYNQ_RAM0 = 0
 
-	.module_entries : {
-	    __module_entries_start = .;
+	.bt.arch.init : {
+	    __bt_arch_init_start = .;
+		KEEP(*(.bt.arch.init))
+		KEEP(*(.bt.arch.init.*))
+		__bt_arch_init_end = .;
+		__bt_arch_init_size = SIZEOF(.bt.arch.init);
+	} > ZYNQ_RAM0
+
+	.bt.module.entries : {
+	    __bt_module_entries_start = .;
 		KEEP(*(.module_entries))
 		KEEP(*(.module_entries.*))
-		__module_entries_end = .;
-		__module_entries_size = SIZEOF(.module_entries);
+		__bt_module_entries_end = .;
+		__bt_module_entries_size = SIZEOF(.bt.module.entries);
 	} > ZYNQ_RAM0
 
     .text : {
