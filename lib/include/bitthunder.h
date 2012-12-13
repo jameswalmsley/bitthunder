@@ -8,4 +8,8 @@
 #include "handles/bt_handle.h"
 #include "machines/bt_machines.h"
 
+#ifdef BT_CONFIG_OS
+#include "devman/bt_devman.h"
+#endif
+
 #endif
