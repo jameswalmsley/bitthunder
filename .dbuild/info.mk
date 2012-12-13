@@ -1,2 +1,0 @@
-info.subdirs:
-	@echo $(SUBDIRS)
