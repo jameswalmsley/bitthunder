@@ -26,7 +26,7 @@ DBUILD_VERSION_DATE=November 2012
 #
 MAKEFLAGS += -rR --no-print-directory
 
-all: dbuild_splash _all
+all: dbuild_entry _all
 #
 #	Optional Include directive, blue build attempts to build using lists of objects,
 #	targets and subdirs as found in objects.mk and subdirs.mk
@@ -93,6 +93,7 @@ include $(BASE).dbuild/distclean.mk
 #	nothing to do.
 #
 dbuild_entry: dbuild_splash | _all
+$(TARGETS) $(SUBDIR_LIST) $(MODULE_TARGET) $(OBJECTS) clean: | dbuild_splash
 _all: $(TARGETS) $(SUBDIR_LIST) $(MODULE_TARGET) | silent
 
 #

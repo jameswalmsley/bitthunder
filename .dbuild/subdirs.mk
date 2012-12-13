@@ -16,6 +16,8 @@
 #
 include $(addsuffix objects.mk, $(SUB_OBJDIRS))
 include $(addsuffix objects.mk, $(SUB_OBJDIRS-y))
+-include $(addsuffix .config.mk, $(SUB_OBJDIRS))
+-include $(addsuffix .config.mk, $(SUB_OBJDIRS-y))
 
 #
 #	Add optional SUBDIR variables for simple build configuration system.
