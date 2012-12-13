@@ -8,6 +8,12 @@
 
 typedef BT_u32				BT_ERROR;
 
+typedef BT_u32				BT_BOOL;
+
+#define BT_FALSE			0
+#define BT_TRUE				1
+
+
 struct _BT_OPAQUE_HANDLE;
 typedef struct _BT_OPAQUE_HANDLE *BT_HANDLE;
 
