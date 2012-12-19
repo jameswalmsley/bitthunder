@@ -76,7 +76,7 @@ typedef struct _ZYNQ_UART_REGS {
 	BT_u32	TXTRIG;       			//      0x44  -- TX fifo level trigger register.
 } ZYNQ_UART_REGS;
 
-#define UART0	((ZYNQ_UART_REGS *) 0xE0000000)
-#define UART1	((ZYNQ_UART_REGS *) 0xE0001000)
+#define UART0						((ZYNQ_UART_REGS *) 0xE0000000)
+#define UART1						((ZYNQ_UART_REGS *) 0xE0001000)
 
 #endif
