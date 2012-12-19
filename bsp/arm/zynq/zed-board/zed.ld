@@ -32,7 +32,6 @@ SECTIONS
 		KEEP(*(.bt.arch.init))
 		KEEP(*(.bt.arch.init.*))
 		__bt_arch_init_end = .;
-		__bt_arch_init_size = SIZEOF(.bt.arch.init);
 	} > ZYNQ_RAM0
 
 	.bt.module.entries : {
@@ -40,7 +39,6 @@ SECTIONS
 		KEEP(*(.module_entries))
 		KEEP(*(.module_entries.*))
 		__bt_module_entries_end = .;
-		__bt_module_entries_size = SIZEOF(.bt.module.entries);
 	} > ZYNQ_RAM0
 
     .text : {
