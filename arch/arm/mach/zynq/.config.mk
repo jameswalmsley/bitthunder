@@ -1,3 +1,11 @@
 CFLAGS += -I $(BASE)arch/arm/include/
 
 BT_CONFIG_ARCH_ARM_USE_GIC=y
+
+#
+#	Configure the GIC parameters for this platform.
+#
+BT_CONFIG_ARCH_ARM_GIC_BASE=0xF8F00100
+BT_CONFIG_ARCH_ARM_GIC_DIST_BASE=0xF8F01000
+BT_CONFIG_ARCH_ARM_GIC_TOTAL_IRQS=95
+

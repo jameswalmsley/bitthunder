@@ -46,38 +46,56 @@ fiq_handler:        .word fiq
 reset:
 
 	ldr	sp, =_stack
-	bl ps7_init
-	b _boot
 
-	;@ Copy the interrupt vector tables back to address 0x0
+	@ Enable Neon
 
-	ldr	r0, =_init_begin
-	mov r1,#0x00000000
+	MRC	p15,0,r0,c1,c0,2		;
 
-	ldmia r0!,{r2,r3,r4,r5,r6,r7,r8,r9}
-	stmia r1!,{r2-r9}
+	bl 	_bt_startup_init_hook
+	bl  _bt_startup_boot
 
-	ldmia r0!,{r2-r9}
-	stmia r1!,{r2-r9}
+@ 	;@ Copy the interrupt vector tables back to address 0x0
+@
+@ 	ldr	r0, =_init_begin
+@ 	mov r1,#0x00000000
+@
+@ 	ldmia r0!,{r2,r3,r4,r5,r6,r7,r8,r9}
+@ 	stmia r1!,{r2-r9}
+@
+@ 	ldmia r0!,{r2-r9}
+@ 	stmia r1!,{r2-r9}
+@
+@ 	/*mrs	r0, CPSR
+@ 	orr	r0, r0, #0xC0			;@ Disable interrupts!
+@ 	msr CPSR, r0*/
+@
+@ 	/*b reset*/
+@
+@
+@
+@ 	bl	ps7_init
+@#	b	_boot
+@ 	;@	In the reset handler, we need to copy our interrupt vector table to 0x0000, its currently at 0x8000
+@
+@
+@ 	;@	Zero BSS section.
+@ 	ldr	r0, =__bss_start
+@ 	ldr	r1,	=__bss_end
+@
+@ 	mov	r2,	#0
+@
+@ 	bl	main
 
-	/*mrs	r0, CPSR
-	orr	r0, r0, #0xC0			;@ Disable interrupts!
-	msr CPSR, r0*/
+.globl _bt_startup_init_hook
+.weak _bt_startup_init_hook
+_bt_startup_init_hook:
+	bx	lr
 
-	/*b reset*/
+.globl _bt_startup_boot
+.weak _bt_startup_boot
+_bt_startup_boot:
+	bx 	lr
 
-
-
-	bl	ps7_init
-#	b	_boot
-	;@	In the reset handler, we need to copy our interrupt vector table to 0x0000, its currently at 0x8000
-
-
-	;@	Zero BSS section.
-	ldr	r0, =__bss_start
-	ldr	r1,	=__bss_end
-
-	mov	r2,	#0
 
 zero_loop:
 	cmp		r0, r1

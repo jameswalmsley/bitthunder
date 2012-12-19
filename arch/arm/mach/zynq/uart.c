@@ -12,17 +12,18 @@
  *	@copyright	(c)2012 Riegl Laser Measurement Systems GmbH
  *
  **/
-#include <bitthunder.h>			 	// Include all those wonderful BitThunder APIs.
-#include "zynq_hw.h"				// Hardware definitions for Zynq
+#include <bitthunder.h>	 				// Include all those wonderful BitThunder APIs.
+#include "uart.h"						// Includes a full hardware definition for the integrated uarts.
+#include "slcr.h"						// Used for getting access to slcr regs, to determine the real Clock Freq.
 
 /**
  *	All driver modules in the system shall be tagged with some helpful information.
  *	This way we know who to blame when things go wrong!
  **/
-BT_DEF_MODULE_NAME			("ZYNQ-USART")
-BT_DEF_MODULE_DESCRIPTION	("Simple Uart device for the Zynq Embedded Platform")
-BT_DEF_MODULE_AUTHOR		("James Walmsley")
-BT_DEF_MODULE_EMAIL			("jwalmsley@riegl.com")
+BT_DEF_MODULE_NAME						("ZYNQ-USART")
+BT_DEF_MODULE_DESCRIPTION				("Simple Uart device for the Zynq Embedded Platform")
+BT_DEF_MODULE_AUTHOR					("James Walmsley")
+BT_DEF_MODULE_EMAIL						("jwalmsley@riegl.com")
 
 /**
  *	This is a simple FIFO implementation for the UART driver.
@@ -49,33 +50,6 @@ struct _BT_OPAQUE_HANDLE {
 };
 
 /**
- *	Here we define the register layout.
- *	Any decent micro-processor should have its registers aligned, and together will
- *	almost no reserved spaces in the register layouts.
- *
- *	Thats one reason for choosing ARM  (ST) -- Simple Drivers!
- **/
-typedef struct {
-	BT_u32 	CR;			//		0x00  -- Control register.
-	BT_u32	MR;			//		0x04  -- Mode Register
-	BT_u32	IER;		//      0x08  -- Interrupt Enable Register.
-	BT_u32	IDR;        //      0x0C  -- Interrupt Disable Register.
-	BT_u32	IMR;        //      0x10  -- Interrupt Mask register.
-	BT_u32	ISR;        //      0x14  -- Interrupt Status register.
-	BT_u32	BAUDGEN;    //      0x18  -- Baud rate generator.
-	BT_u32	RXTOUT;     //      0x1C  -- RX timeout register.
-	BT_u32	RXWM;       //      0x20  -- RX fifo trigger level.
-	BT_u32	MODEMCR;    //      0x24  -- Modem control register.
-	BT_u32	MODEMSR;    //      0x28  -- Modem status register.
-	BT_u32	SR;         //      0x2C  -- Channel status register.
-	BT_u32	FIFO;       //      0x30  -- TX_RX fifo.
-	BT_u32	BAUDDIV;    //      0x34  -- Baudrate divider.
-	BT_u32	FLOWDEL;    //      0x38  -- Flow delay register
-	BT_u32	RESERVED[2];//      0x3C, 0x40
-	BT_u32	TXWM;       //      0x44  -- TX fifo level trigger register.
-} ZYNQ_UART_REGISTERS;
-
-/**
  *	Now let's define an array of pointer's to the BASE_ADDRESS of each UART register block:
  *
  *	Such a declaration makes the pointers constant, i.e. in ROM, but allows the de-referenced
@@ -83,19 +57,21 @@ typedef struct {
  *
  *	This is important, because we want this table to be placed in ROM by the linker, not our
  *	limited RAM! -- Remember RAM is for the USER application where possible!
+ *
+ *	The reason for having a table like this, is that its better for code density overall
+ *	if we had to do a switch or if..else statement for detecting which base address to use
+ *	we would require more code.
+ *
+ *	Using such a table allows use to quick index using the uartID number,
+ *	and requires few instructions to achieve.
+ *
  **/
-static volatile ZYNQ_UART_REGISTERS * const g_UARTS[] = {
-	(ZYNQ_UART_REGISTERS *) (0xE0000000),		// USART_1
-	(ZYNQ_UART_REGISTERS *) (0xE0001000),		// USART_2
+static volatile ZYNQ_UART_REGS * const g_UARTS[] = {
+	UART0,		// UART_0	-- These register definitions come from uart.h
+	UART1,		// UART_1
 };
 
-/**
- *	Probably no STM32 goes over 8 UARTS in a chip, so we can use a CHAR here.
- *	Its just for flagging if a device is already opened! I.e. prevent multiple
- *	instances of the same UART module.
- **/
-//static BT_u8 g_bmpInUse = 0;				// Used for determining if a UART device is already in use.
-static BT_HANDLE g_USART_HANDLES[sizeof(g_UARTS)/sizeof(ZYNQ_UART_REGISTERS *)] = {
+static BT_HANDLE g_USART_HANDLES[sizeof(g_UARTS)/sizeof(ZYNQ_UART_REGS *)] = {
 	NULL,
 	NULL,
 };
@@ -105,7 +81,7 @@ static void disableUartPeripheralClock(BT_u32 nUartID);
 
 /*
 static void usartRxHandler(int id) {
-	volatile ZYNQ_UART_REGISTERS *pRegs = g_UARTS[id];
+	volatile ZYNQ_UART_REGS *pRegs = g_UARTS[id];
 	BT_HANDLE hUart = g_USART_HANDLES[id];
 
 	*hUart->oRxBuf.pIn++ = pRegs->FIFO & 0xFF;
@@ -115,7 +91,7 @@ static void usartRxHandler(int id) {
 }
 
 static void usartTxHandler(int id) {
-	volatile ZYNQ_UART_REGISTERS *pRegs = g_UARTS[id];
+	volatile ZYNQ_UART_REGS *pRegs = g_UARTS[id];
 	BT_HANDLE hUart = g_USART_HANDLES[id];
 
 	if(hUart->oTxBuf.pOut != hUart->oTxBuf.pIn) {
@@ -162,7 +138,7 @@ void USART3_IRQHandler(void) {
  *
  **/
 static BT_ERROR uartCleanup(BT_HANDLE hUart) {
-	//volatile ZYNQ_UART_REGISTERS *pRegs = g_UARTS[hUart->ulUartID];
+	//volatile ZYNQ_UART_REGS *pRegs = g_UARTS[hUart->ulUartID];
 	//BT_u32 ulSize;
 	// Disable interrupts of USART module.
 	//pRegs->CR1 &= ~(USART_CR1_TXEIE | USART_CR1_RXNEIE);
@@ -227,7 +203,7 @@ static BT_HANDLE uartOpen(BT_u32 nDeviceID, BT_ERROR *pError) {
 	hUart->ulUartID = nDeviceID;								// Set the device ID for further use in the API.
 
 	// Reset all registers to their defaults!
-	volatile ZYNQ_UART_REGISTERS *pRegs = g_UARTS[hUart->ulUartID];
+	volatile ZYNQ_UART_REGS *pRegs = g_UARTS[hUart->ulUartID];
 	pRegs->CR	= 0x00000128;
 	pRegs->MR 	= 0;
 	pRegs->IER 	= 0;
@@ -236,7 +212,7 @@ static BT_HANDLE uartOpen(BT_u32 nDeviceID, BT_ERROR *pError) {
 	//pRegs->ISR  = 0x00000200;
 	pRegs->BAUDGEN	= 0x0000028B;
 	pRegs->RXTOUT   = 0;
-	pRegs->RXWM		= 0;
+	pRegs->RXTRIG	= 0;
 	pRegs->MODEMCR 	= 0;
 
 	return hUart;
@@ -260,7 +236,7 @@ static BT_ERROR uartEnable(BT_HANDLE hUart);
 #define MAX_BAUD_ERROR_RATE	3	/* max % error allowed */
 
 static BT_ERROR uartSetBaudrate(BT_HANDLE hUart, BT_u32 ulBaudrate) {
-	volatile ZYNQ_UART_REGISTERS *pRegs = g_UARTS[hUart->ulUartID];
+	volatile ZYNQ_UART_REGS *pRegs = g_UARTS[hUart->ulUartID];
 
 	BT_u8	IterBAUDDIV;
 	BT_u32	BRGR_Value;
@@ -273,7 +249,34 @@ static BT_ERROR uartSetBaudrate(BT_HANDLE hUart, BT_u32 ulBaudrate) {
 	BT_u32	InputClk;
 	BT_u32	BaudRate = ulBaudrate;
 
-	InputClk = UART_FREQ;
+	/*
+	 *	We must determine the input clock frequency to the UART peripheral.
+	 */
+
+	ZYNQ_SLCR_REGS *pSLCR = ZYNQ_SLCR;
+	/*
+	 *	Determine the clock source!
+	 */
+
+	BT_u32 clk_sel = ZYNQ_SLCR_CLK_CTRL_SRCSEL_VAL(pSLCR->UART_CLK_CTRL);
+	switch(clk_sel) {
+	case ZYNQ_SLCR_CLK_CTRL_SRCSEL_ARMPLL:
+		InputClk = BT_ZYNQ_GetArmPLLFrequency();
+		break;
+	case ZYNQ_SLCR_CLK_CTRL_SRCSEL_IOPLL:
+		InputClk = BT_ZYNQ_GetIOPLLFrequency();
+		break;
+
+	case ZYNQ_SLCR_CLK_CTRL_SRCSEL_DDRPLL:
+		InputClk = BT_ZYNQ_GetDDRPLLFrequency();
+		break;
+
+	default:
+		return -1;
+
+	}
+
+	InputClk /= ZYNQ_SLCR_CLK_CTRL_DIVISOR_VAL(pSLCR->UART_CLK_CTRL);
 
 	/*
 	 * Determine the Baud divider. It can be 4to 254.
@@ -443,7 +446,7 @@ static BT_ERROR uartGetPowerState(BT_HANDLE hUart, BT_POWER_STATE *pePowerState)
  *	Complete a full configuration of the UART.
  **/
 static BT_ERROR uartSetConfig(BT_HANDLE hUart, BT_UART_CONFIG *pConfig) {
-	//volatile ZYNQ_UART_REGISTERS *pRegs = g_UARTS[hUart->ulUartID];
+	//volatile ZYNQ_UART_REGS *pRegs = g_UARTS[hUart->ulUartID];
 //	BT_u32 ulSize;
 
 	uartSetBaudrate(hUart, pConfig->ulBaudrate);
@@ -510,10 +513,37 @@ static BT_ERROR uartSetConfig(BT_HANDLE hUart, BT_UART_CONFIG *pConfig) {
  *	Get a full configuration of the UART.
  **/
 static BT_ERROR uartGetConfig(BT_HANDLE hUart, BT_UART_CONFIG *pConfig) {
-	volatile ZYNQ_UART_REGISTERS *pRegs = g_UARTS[hUart->ulUartID];
+	volatile ZYNQ_UART_REGS *pRegs = g_UARTS[hUart->ulUartID];
 
 	pConfig->eMode 			= hUart->eMode;
-	pConfig->ulBaudrate 	= (UART_FREQ / pRegs->BAUDDIV);		// Clk / Divisor == ~Baudrate
+
+	BT_u32 InputClk;
+	ZYNQ_SLCR_REGS *pSLCR = ZYNQ_SLCR;
+	/*
+	 *	Determine the clock source!
+	 */
+
+	BT_u32 clk_sel = ZYNQ_SLCR_CLK_CTRL_SRCSEL_VAL(pSLCR->UART_CLK_CTRL);
+	switch(clk_sel) {
+	case ZYNQ_SLCR_CLK_CTRL_SRCSEL_ARMPLL:
+		InputClk = BT_ZYNQ_GetArmPLLFrequency();
+		break;
+	case ZYNQ_SLCR_CLK_CTRL_SRCSEL_IOPLL:
+		InputClk = BT_ZYNQ_GetIOPLLFrequency();
+		break;
+
+	case ZYNQ_SLCR_CLK_CTRL_SRCSEL_DDRPLL:
+		InputClk = BT_ZYNQ_GetDDRPLLFrequency();
+		break;
+
+	default:
+		return -1;
+
+	}
+
+	InputClk /= ZYNQ_SLCR_CLK_CTRL_DIVISOR_VAL(pSLCR->UART_CLK_CTRL);
+
+	pConfig->ulBaudrate 	= (InputClk / pRegs->BAUDDIV);		// Clk / Divisor == ~Baudrate
 	pConfig->ulTxBufferSize = (BT_u32) (hUart->oTxBuf.pEnd - hUart->oTxBuf.pBuf);
 	pConfig->ulRxBufferSize = (BT_u32) (hUart->oRxBuf.pEnd - hUart->oRxBuf.pBuf);
 	pConfig->ucDataBits 	= 8;
@@ -525,13 +555,12 @@ static BT_ERROR uartGetConfig(BT_HANDLE hUart, BT_UART_CONFIG *pConfig) {
  *	Make the UART active (Set the Enable bit).
  **/
 static BT_ERROR uartEnable(BT_HANDLE hUart) {
-	volatile ZYNQ_UART_REGISTERS *pRegs = g_UARTS[hUart->ulUartID];
+	volatile ZYNQ_UART_REGS *pRegs = g_UARTS[hUart->ulUartID];
 
-
-	pRegs->CR  = XUARTPS_CR_RX_EN | XUARTPS_CR_TX_EN;				// Enable Rx and TX lines.
-	pRegs->CR  |= XUARTPS_CR_TXRST | XUARTPS_CR_RXRST;
-	pRegs->CR  |= XUARTPS_CR_STOPBRK;
-	pRegs->CR  |= XUARTPS_CR_TORST;
+	pRegs->CR 	= ZYNQ_UART_CR_RXEN  | ZYNQ_UART_CR_TXEN;		// Enable TX and RX lines.
+	pRegs->CR  |= ZYNQ_UART_CR_RXRES | ZYNQ_UART_CR_TXRES;		// Reset TX and RX data paths in uart logic.
+	pRegs->CR  |= ZYNQ_UART_CR_STPBRK;							// Stop transmission break enabled.
+	pRegs->CR  |= ZYNQ_UART_CR_RSTTO;							// Restart the receiver Timeout counter.
 
 	return BT_ERR_NONE;
 }
@@ -540,9 +569,9 @@ static BT_ERROR uartEnable(BT_HANDLE hUart) {
  *	Make the UART inactive (Clear the Enable bit).
  **/
 static BT_ERROR uartDisable(BT_HANDLE hUart) {
-	volatile ZYNQ_UART_REGISTERS *pRegs = g_UARTS[hUart->ulUartID];
+	volatile ZYNQ_UART_REGS *pRegs = g_UARTS[hUart->ulUartID];
 
-	pRegs->CR |= XUARTPS_CR_RX_DIS | XUARTPS_CR_TX_DIS;
+	pRegs->CR |= ZYNQ_UART_CR_RXDIS | ZYNQ_UART_CR_TXDIS;
 
 	return BT_ERR_NONE;
 }
@@ -562,12 +591,12 @@ static BT_ERROR uartDisable(BT_HANDLE hUart) {
 	XUARTPS_SR_RXEMPTY) == XUARTPS_SR_RXEMPTY)
 
 static BT_ERROR uartRead(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, BT_u8 *pucDest) {
-	volatile ZYNQ_UART_REGISTERS *pRegs = g_UARTS[hUart->ulUartID];
+	volatile ZYNQ_UART_REGS *pRegs = g_UARTS[hUart->ulUartID];
 	switch(hUart->eMode) {
 	case BT_UART_MODE_POLLED:
 	{
 		while(ulSize) {
-			while((pRegs->SR & XUARTPS_SR_RXEMPTY)) {
+			while((pRegs->SR & ZYNQ_UART_SR_RXEMPTY)) {
 				//BT_ThreadYield();
 			}
 
@@ -607,12 +636,12 @@ static BT_ERROR uartRead(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, BT_u8 *
  *	Note, this doesn't implement ulFlags specific options yet!
  **/
 static BT_ERROR uartWrite(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const BT_u8 *pucSource) {
-	volatile ZYNQ_UART_REGISTERS *pRegs = g_UARTS[hUart->ulUartID];
+	volatile ZYNQ_UART_REGS *pRegs = g_UARTS[hUart->ulUartID];
 	switch(hUart->eMode) {
 	case BT_UART_MODE_POLLED:
 	{
 		while(ulSize) {
-			while(pRegs->SR & XUARTPS_SR_TXFULL) {
+			while(pRegs->SR & ZYNQ_UART_SR_TXFULL) {
 				//BT_ThreadYield();
 			}
 			pRegs->FIFO = *pucSource++;
@@ -656,7 +685,7 @@ static BT_ERROR uartPutch(BT_HANDLE hUart, BT_u32 ulFlags, BT_u8 ucData) {
 }
 */
 
-static const BT_CONFIG_IF_UART oUartConfigInterface = {
+static const BT_DEV_IF_UART oUartConfigInterface = {
 	uartSetBaudrate,											///< UART setBaudrate implementation.
 	uartSetConfig,												///< UART set config imple.
 	uartGetConfig,
@@ -676,22 +705,22 @@ static const BT_IF_CHARDEV oCharDevInterface = {
 	NULL,//uartPutch,											///< :: Therefore the pointer must be NULL for BT to handle.
 };
 
-static const BT_DEV_CONFIG_IFS oConfigInterface = {
-	(BT_INTERFACE) &oUartConfigInterface,
+static const BT_DEV_IFS oConfigInterface = {
+	(BT_DEV_INTERFACE) &oUartConfigInterface,
 };
 
-static const BT_IF_DEVICE oDeviceInterface = {
-	sizeof(g_UARTS)/sizeof(ZYNQ_UART_REGISTERS *),				///< Allow upto 3 uart instances!
+const BT_IF_DEVICE BT_ZYNQ_UART_oDeviceInterface = {
+	sizeof(g_UARTS)/sizeof(ZYNQ_UART_REGS *),					///< Allow upto 3 uart instances!
 	uartOpen,													///< Special Open interface.
 	&oPowerInterface,											///< Device does not support powerstate functionality.
-	BT_DEV_CONFIG_IF_UART,												///< Allow configuration through the UART api.
+	BT_DEV_IF_T_UART,											///< Allow configuration through the UART api.
 	&oConfigInterface,											///< This is the implementation of UART configuration API.
-//	&oCharDevInterface,											///< Provide a Character device interface implementation.
+	&oCharDevInterface,											///< Provide a Character device interface implementation.
 };
 
 
 static const BT_UN_IFS oDevIF = {
-	(BT_HANDLE_INTERFACE) &oDeviceInterface,
+	(BT_HANDLE_INTERFACE) &BT_ZYNQ_UART_oDeviceInterface,
 };
 
 static const BT_IF_HANDLE oHandleInterface = {
@@ -704,16 +733,11 @@ static const BT_IF_HANDLE oHandleInterface = {
 	uartCleanup,												///< Handle's cleanup routine.
 };
 
-static BT_ERROR driver_init(void) {
-	return BT_ERR_NONE;
-}
 
 static const BT_MODULE_ENTRY_DESCRIPTOR entryDescriptor = {
 	(BT_s8 *) "usart",
-	driver_init,
+	NULL,					///< No driver init function required!
 	&oHandleInterface,
 };
 
 BT_MODULE_ENTRY(entryDescriptor);
-
-

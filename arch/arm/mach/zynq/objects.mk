@@ -1,7 +1,24 @@
 #
 #	Zynq Platform objects
 #
-OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/zynq.o
-OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/uart.o
-OBJECTS-$(BT_CONFIG_MACH_ZYNQ_USE_STARTUP) += $(BUILD_DIR)arch/arm/mach/zynq/startup.o
+MACH_ZYNQ_OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/zynq.o			# Provides machine description.
 
+MACH_ZYNQ_OBJECTS-$(BT_CONFIG_MACH_ZYNQ_USE_STARTUP) += $(BUILD_DIR)arch/arm/mach/zynq/startup.o
+MACH_ZYNQ_OBJECTS-$(BT_CONFIG_MACH_ZYNQ_USE_STARTUP) += $(BUILD_DIR)arch/arm/mach/zynq/cpuinit.o
+MACH_ZYNQ_OBJECTS-$(BT_CONFIG_MACH_ZYNQ_USE_STARTUP) += $(BUILD_DIR)arch/arm/mach/zynq/crtinit.o
+
+
+MACH_ZYNQ_OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/slcr.o
+MACH_ZYNQ_OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/uart.o
+MACH_ZYNQ_OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/timer.o
+
+
+
+MACH_ZYNQ_OBJECTS += $(MACH_ZYNQ_OBJECTS-y)
+
+$(MACH_ZYNQ_OBJECTS): MODULE_NAME="HAL"
+$(MACH_ZYNQ_OBJECTS): CFLAGS += -D BT_CONFIG_MACH_ZYNQ_SYSCLOCK_FREQ=$(BT_CONFIG_MACH_ZYNQ_SYSCLOCK_FREQ)
+$(MACH_ZYNQ_OBJECTS): CFLAGS += -D BT_CONFIG_MACH_ZYNQ_SYSTICK_TIMER_ID=$(BT_CONFIG_MACH_ZYNQ_SYSTICK_TIMER_ID)
+$(MACH_ZYNQ_OBJECTS): CFLAGS += -D BT_CONFIG_MACH_ZYNQ_BOOT_UART_ID=$(BT_CONFIG_MACH_ZYNQ_BOOT_UART_ID)
+
+OBJECTS += $(MACH_ZYNQ_OBJECTS)
