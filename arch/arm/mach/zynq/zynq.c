@@ -1,7 +1,7 @@
 #include <bitthunder.h>
 #include "timer.h"
 #include "uart.h"
-#include <arch/gic.h>
+#include <arch/common/gic.h>
 
 
 

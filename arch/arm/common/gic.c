@@ -1,5 +1,5 @@
 #include <bitthunder.h>
-#include <arch/gic.h>
+#include <arch/common/gic.h>
 #include <interrupts/bt_interrupts.h>
 #include <bt_module.h>
 
