@@ -25,5 +25,8 @@ SUBARCH=zynq
 #	You can replace this with your own code by disabling this option.
 #
 BT_CONFIG_MACH_ZYNQ_USE_STARTUP=y
+BT_CONFIG_MACH_ZYNQ_SYSCLOCK_FREQ=33333333
+BT_CONFIG_MACH_ZYNQ_SYSTICK_TIMER_ID=0
+BT_CONFIG_MACH_ZYNQ_BOOT_UART_ID=1
 
 include $(BASE).config.mk
