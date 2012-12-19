@@ -25,5 +25,6 @@ typedef struct {
 
 
 BT_HANDLE BT_DeviceOpen(BT_u32 ulId, const BT_s8 *szpDevicePath, BT_ERROR *pError);
+BT_MACHINE_DESCRIPTION *BT_GetMachineDescription(BT_ERROR *pError);
 
 #endif
