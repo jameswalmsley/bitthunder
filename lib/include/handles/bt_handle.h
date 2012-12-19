@@ -17,7 +17,7 @@ typedef struct _BT_HANDLE_HEADER {
 
 
 BT_HANDLE BT_CreateHandle(const BT_IF_HANDLE *pIf, BT_u32 ulHandleMemory, BT_ERROR *pError);
-
+BT_ERROR 	BT_CloseHandle(BT_HANDLE hHandle);
 
 
 
