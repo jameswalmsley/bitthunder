@@ -53,7 +53,7 @@ typedef struct {
 	BT_CONFIG_IF_UART_GET_CONFIG	pfnGetConfig;
 	BT_CONFIG_IF_UART_ENABLE		pfnEnable;
 	BT_CONFIG_IF_UART_DISABLE		pfnDisable;
-} BT_CONFIG_IF_UART;
+} BT_DEV_IF_UART;
 
 /*
  *	Define the unified API for UART devices in BlueThunder
