@@ -7,7 +7,7 @@ BUILD_BASE=$(BASE)
 MODULE_NAME="zed-bsp"
 
 TARGETS=kernel.img
-# kernel.list kernel.syms kernel.map
+#kernel.list kernel.syms kernel.map
 LINKER_SCRIPT=zed.ld
 
 TARGET_DEPS=kernel.elf

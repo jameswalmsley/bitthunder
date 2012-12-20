@@ -2,6 +2,7 @@
 .extern ps7_init
 .globl _bt_startup_boot
 _bt_startup_boot:
+	ldr	r0,=0xDEADBEEF
 	bl	ps7_init			@ Run the clock configurator, as exported from Xilinx HW generator.
 	b _boot					@ Call the libxil boot.
 							@ note, this bypasses the usual BitThunder boot sequence for now,
