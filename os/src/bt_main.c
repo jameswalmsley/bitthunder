@@ -54,7 +54,7 @@ int bt_main(int argc, char **argv) {
 	string = "Initialise interrupt controller...\r\n";
 	BT_CharDeviceWrite(hUart, 0, strlen(string), (BT_u8 *)string);
 
-	Error = pMachine->pInterruptController->pfnInitialise();
+	Error = pMachine->pInterruptController->pfnInitialise(pMachine->ulTotalIRQs);
 
 	// Start Scheduler
 	string = "Enter user-mode, and start user-space application...\r\n";
