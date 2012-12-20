@@ -2,6 +2,9 @@
  *	BitThunder - A Reliable Real-Time Operating System & Application Framework
  *
  *	(c) 2012 James Walmsley <james@fullfat-fs.co.uk>
+ *
+ *	License Apache 2.0
+ *
  **/
 
 
@@ -11,7 +14,7 @@ Directory Tree
 arch	  		  	  	- Contains architecture specific code & bootstrapping for the OS.
 +$(ARCH)				-
 ++$(MACH)				- Machine sub-architectures, e.g. zynq, or cortex-m3 etc etc.
-+++$(BSP)				-
+bsp						- All board-support packages found here, this is where you build from!
 doc						- Documentation...
 drivers 				- Architecture independent drivers, e.g. I2C/USB/PCIe devices etc.
 kernel					- Contains the RTOS scheduler (FreeRTOS).
