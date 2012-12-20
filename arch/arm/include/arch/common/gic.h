@@ -66,6 +66,6 @@ typedef struct _GICD_REGS {
 
 } GICD_REGS;
 
-const BT_INTC BT_ARM_GIC_oInterface;
+const BT_INTERRUPT_CONTROLLER BT_ARM_GIC_oInterface;
 
 #endif
