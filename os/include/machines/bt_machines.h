@@ -17,27 +17,20 @@ typedef enum {
 
 
 typedef struct _BT_MACHINE_DESCRIPTION {
-	BT_MACH_ARCHITECTURE		eArchitecture;
-	BT_MACH_TYPE				eMachType;
-	const BT_i8				   *szpName;
+	BT_MACH_ARCHITECTURE			eArchitecture;
+	BT_MACH_TYPE					eMachType;
+	const BT_i8				   	   *szpName;
 
-	BT_u32						ulSystemClockHz;
+	BT_u32							ulSystemClockHz;
 
+	const BT_INTERRUPT_CONTROLLER  *pInterruptController;	/// Primary system interrupt controller.
+	BT_u32							ulTotalIRQs;
 
-	const BT_INTC 				   *pInterruptController;
+	const BT_IF_DEVICE		   	   *pSystemTimer;
+	BT_u32							ulTimerID;
 
-	BT_u32						ulTotalIRQs;
-
-	// Integrated IRQ Interface
-
-	// Integrated Timer Interface
-	const BT_IF_DEVICE		   *pSystemTimer;
-	BT_u32						ulTimerID;
-
-	// Integrated Terminal Device -- Usually a uart driver.
-	const BT_IF_DEVICE		   *pBootUart;				/// Pointer to device supporting chardev if.
-	BT_u32						ulBootUartID;			/// Which instance number to use.
-
+	const BT_IF_DEVICE		   	   *pBootUart;				/// Pointer to device supporting chardev if.
+	BT_u32							ulBootUartID;			/// Which instance number to use.
 } BT_MACHINE_DESCRIPTION;
 
 
