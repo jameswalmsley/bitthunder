@@ -14,10 +14,10 @@ typedef struct _ZYNQ_UART_REGS {
 #define ZYNQ_UART_CR_STPBRK			0x00000100
 #define ZYNQ_UART_CR_STTBRK			0x00000080
 #define ZYNQ_UART_CR_RSTTO 			0x00000040
-#define ZYNQ_UART_CR_TXDIS 			0x00000020
-#define ZYNQ_UART_CR_TXEN			0x00000010
-#define ZYNQ_UART_CR_RXDIS			0x00000008
-#define ZYNQ_UART_CR_RXEN 			0x00000004
+#define ZYNQ_UART_CR_TXDIS 			0x00000020		///< TX Set Disable bit.
+#define ZYNQ_UART_CR_TXEN			0x00000010		///< TX Set Enable bit.
+#define ZYNQ_UART_CR_RXDIS			0x00000008		///< RX Set Disable bit.
+#define ZYNQ_UART_CR_RXEN 			0x00000004		///< RX Set Enable bit.
 #define ZYNQ_UART_CR_TXRES 			0x00000002
 #define ZYNQ_UART_CR_RXRES			0x00000001
 
