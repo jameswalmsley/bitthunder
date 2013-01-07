@@ -41,18 +41,12 @@ typedef struct {
 	BT_u16					ulTxBufferSize;		///<
 } BT_UART_CONFIG;
 
-typedef BT_ERROR (*BT_CONFIG_IF_UART_SET_BAUDRATE)	(BT_HANDLE hUart, BT_u32 ulBaudrate);
-typedef BT_ERROR (*BT_CONFIG_IF_UART_SET_CONFIG)	(BT_HANDLE hUart, BT_UART_CONFIG *pConfig);
-typedef BT_ERROR (*BT_CONFIG_IF_UART_GET_CONFIG)	(BT_HANDLE hUart, BT_UART_CONFIG *pConfig);
-typedef BT_ERROR (*BT_CONFIG_IF_UART_ENABLE)		(BT_HANDLE hUart);
-typedef BT_ERROR (*BT_CONFIG_IF_UART_DISABLE)		(BT_HANDLE hUart);
-
 typedef struct {
-	BT_CONFIG_IF_UART_SET_BAUDRATE	pfnSetBaudrate;
-	BT_CONFIG_IF_UART_SET_CONFIG	pfnSetConfig;
-	BT_CONFIG_IF_UART_GET_CONFIG	pfnGetConfig;
-	BT_CONFIG_IF_UART_ENABLE		pfnEnable;
-	BT_CONFIG_IF_UART_DISABLE		pfnDisable;
+	BT_ERROR (*pfnSetBaudrate)	(BT_HANDLE hUart, BT_u32 ulBaudrate);
+	BT_ERROR (*pfnSetConfig)	(BT_HANDLE hUart, BT_UART_CONFIG *pConfig);
+	BT_ERROR (*pfnGetConfig)	(BT_HANDLE hUart, BT_UART_CONFIG *pConfig);
+	BT_ERROR (*pfnEnable)		(BT_HANDLE hUart);
+	BT_ERROR (*pfnDisable)		(BT_HANDLE hUart);
 } BT_DEV_IF_UART;
 
 /*
@@ -65,4 +59,3 @@ BT_ERROR BT_UartEnable				(BT_HANDLE hUart);
 BT_ERROR BT_UartDisable				(BT_HANDLE hUart);
 
 #endif
-
