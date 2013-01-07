@@ -10,8 +10,7 @@
 #include "machines/bt_machines.h"
 
 #ifdef BT_CONFIG_OS
-#include "bt_export.h"
-#include "devman/bt_devman.h"
+#include "bt_os.h"
 #endif
 
 #endif
