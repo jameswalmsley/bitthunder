@@ -1,17 +1,17 @@
-/**
- * BlueThunder Linker Script for the raspberry Pi!
- *
- *
- *
- **/
+ENTRY(reset)
+
+_STACK_SIZE = DEFINED(_STACK_SIZE) ? _STACK_SIZE : 0x2000;
+_HEAP_SIZE = DEFINED(_HEAP_SIZE) ? _HEAP_SIZE : 0x2000;
+
+_ABORT_STACK_SIZE = DEFINED(_ABORT_STACK_SIZE) ? _ABORT_STACK_SIZE : 1024;
+_SUPERVISOR_STACK_SIZE = DEFINED(_SUPERVISOR_STACK_SIZE) ? _SUPERVISOR_STACK_SIZE : 2048;
+
 MEMORY
 {
 	RESERVED	(r)		: ORIGIN = 0x00000000, LENGTH = 32K
 	INIT_RAM	(rwx)	: ORIGIN = 0x00008000, LENGTH = 32K
 	RAM			(rwx)	: ORIGIN = 0x00010000, LENGTH = 128M
 }
-
-ENTRY(reset)
 
 SECTIONS {
     /*
@@ -26,21 +26,45 @@ SECTIONS {
 		KEEP(*(.init))
 	} > INIT_RAM = 0
 
-	.module_entries : {
-		__module_entries_start = .;
-	  	KEEP(*(.module_entries))
-		KEEP(*(.module_entries.*))
-		__module_entries_end = .;
-		__module_entries_size = SIZEOF(.module_entries);
+	.bt.arch.init : {
+		__bt_arch_init_start = .;
+		KEEP(*(.bt.arch.init))
+		KEEP(*(.bt.arch.init.*))
+		__bt_arch_init_end = .;
 	} > INIT_RAM
 
+	.bt.arch.devices : {
+		__bt_arch_devices_start = .;
+	  	KEEP(*(.bt.arch.devices))
+		KEEP(*(.bt.arch.devices.*))
+		__bt_arch_devices_end = .;
+	} > INIT_RAM
+
+	.bt.module.entries : {
+		__bt_module_entries_start = .;
+	  	KEEP(*(.bt.module.entries))
+		KEEP(*(.bt.module.entries.*))
+		__bt_module_entries_end = .;
+	} > INIT_RAM
 
 	/**
  	 *	This is the main code section, it is essentially of unlimited size. (128Mb).
 	 *
 	 **/
 	.text : {
+		*(.vectors)
+		*(.boot)
 		*(.text)
+		*(.text.*)
+		*(.gnu.linkonce.t.*)
+		*(.plt)
+		*(.gnu_warning)
+   		*(.gcc_execpt_table)
+   		*(.glue_7)
+   		*(.glue_7t)
+   		*(.vfp11_veneer)
+   		*(.ARM.extab)
+   		*(.gnu.linkonce.armextab.*)
 	} > RAM
 
 	/*
@@ -58,13 +82,39 @@ SECTIONS {
 		__bss_end = .;
 	} > RAM
 
-	/**
-	 *	Place HEAP here???
-	 **/
 
-	/**
-	 *	Stack starts at the top of the RAM, and moves down!
-	 **/
-	_estack = ORIGIN(RAM) + LENGTH(RAM);
+	.heap (NOLOAD) : {
+   	    . = ALIGN(16);
+		_heap = .;
+		HeapBase = .;
+		_heap_start = .;
+		. += _HEAP_SIZE;
+		_heap_end = .;
+		HeapLimit = .;
+	} > RAM
+
+	.stack (NOLOAD) : {
+	   . = ALIGN(16);
+	   _stack_end = .;
+	   . += _STACK_SIZE;
+	   _stack = .;
+	   __stack = _stack;
+	   . = ALIGN(16);
+	   _irq_stack_end = .;
+	   . += _STACK_SIZE;
+	   __irq_stack = .;
+	   _supervisor_stack_end = .;
+	   . += _SUPERVISOR_STACK_SIZE;
+	   . = ALIGN(16);
+	   __supervisor_stack = .;
+	   _abort_stack_end = .;
+	   . += _ABORT_STACK_SIZE;
+	   . = ALIGN(16);
+	   __abort_stack = .;
+    } > RAM
+
+
+_end = .;
+
 }
 
