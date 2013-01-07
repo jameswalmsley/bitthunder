@@ -2,6 +2,7 @@
 .extern __bss_start
 .extern __bss_end
 .extern main
+.extern BT_ARCH_ARM_GIC_IRQHandler
 .extern vPortYieldProcessor
 .extern IRQInterruptHandler
 .extern ps7_init
@@ -38,7 +39,7 @@ swi_handler:        .word undef ;@vPortYieldProcessor
 prefetch_handler:   .word prefetch
 data_handler:       .word data
 unused_handler:     .word hang
-irq_handler:        .word undef ;@vFreeRTOS_IRQInterrupt
+irq_handler:        .word BT_ARCH_ARM_GIC_IRQHandler ;@vFreeRTOS_IRQInterrupt
 fiq_handler:        .word fiq
 
 	.extern _stack

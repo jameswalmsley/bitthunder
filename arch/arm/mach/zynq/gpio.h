@@ -1,0 +1,45 @@
+#ifndef _GPIO_H_
+#define _GPIO_H_
+
+#include <bitthunder.h>
+
+#define ZYNQ_GPIO_BASE	0xE000A000
+
+typedef struct {
+	BT_u32 lsw;
+	BT_u32 msw;
+} EMIO_MASK;
+
+typedef struct _ZYNQ_GPIO_BANK_REGS {
+	BT_u32 DIRM;
+	BT_u32 OEN;
+	BT_u32 INT_MASK;
+	BT_u32 INT_EN;
+	BT_u32 INT_DIS;
+	BT_u32 INT_STAT;
+	BT_u32 INT_TYPE;
+	BT_u32 INT_POLARITY;
+	BT_u32 INT_ANY;
+
+	BT_STRUCT_RESERVED_u32(0, 0x224, 0x244);
+
+} ZYNQ_GPIO_BANK_REGS;
+
+typedef struct _ZYNQ_GPIO_REGS {
+	BT_u32 		MASK_DATA[8];
+
+	BT_STRUCT_RESERVED_u32(0, 0x1C, 0x40);
+
+	BT_u32	  	DATA[4];
+
+	BT_STRUCT_RESERVED_u32(1, 0x4C, 0x60);
+
+	BT_u32		DATA_RO[4];
+
+	BT_STRUCT_RESERVED_u32(2, 0x6C, 0x204);
+
+	ZYNQ_GPIO_BANK_REGS bank[4];
+} ZYNQ_GPIO_REGS;
+
+
+#endif
