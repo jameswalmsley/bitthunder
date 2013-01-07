@@ -1,6 +1,3 @@
-ARCH=arm
-SUBARCH=raspberrypi
-
 #
 #	Build the BitThunder as an operating system, or a software framework?
 #
@@ -15,13 +12,17 @@ BT_CONFIG_OS=y
 BT_CONFIG_KERNEL=FreeRTOS
 #BT_CONFIG_KERNEL=BtKernel
 
+
+ARCH=arm
+SUBARCH=bcm2835
+
 #
-#	Automated build configuration switches.
+#	Arch Specific configuration.
 #
-ifeq ($(BT_CONFIG_OS),y)
-BT_CONFIG_LIB=n
-BT_CONFIG_KERNEL=y
-SUB_OBJDIRS += $(BASE)kernel/
-else
-BT_CONFIG_LIB=y
-endif
+
+#
+#	This enables the default BitThunder startup code,
+#	You can replace this with your own code by disabling this option.
+#
+
+include $(BASE).config.mk
