@@ -29,10 +29,10 @@ typedef struct _BT_IF_HANDLE {
 	const BT_i8		   *szpAuthor;
 	const BT_i8		   *szpEmail;
 
-	const BT_UN_IFS	   *pIfs;
+	const BT_UN_IFS	   	oIfs;
 
 	BT_HANDLE_TYPE 		eType;
-	BT_HANDLE_CLEANUP	pfnCleanup;
+	BT_ERROR			(*pfnCleanup)	(BT_HANDLE h);
 } BT_IF_HANDLE;
 
 
