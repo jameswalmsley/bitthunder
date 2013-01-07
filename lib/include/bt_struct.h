@@ -1,6 +1,15 @@
 #ifndef _BT_STRUCT_H_
 #define _BT_STRUCT_H_
 
+/**
+ *	Calculates the number of items within an array!
+ *
+ **/
+#define BT_ARRAY_SIZE(array)	(sizeof(array) / sizeof((array[0])))
+
+#define BT_SIZE_1K		(1024)
+#define BT_SIZE_4K		(BT_SIZE_1K * 4)
+
 /*
  *	@id		The reserved member number, e.g. reserved_1 ....
  *	@begin	Address that the field begins at, i.e. the last address of the previous field.
