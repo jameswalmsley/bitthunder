@@ -1,7 +1,7 @@
 
 /******************************************************************************
 *
-* (c) Copyright 2003-2011 Xilinx, Inc. All rights reserved.
+* (c) Copyright 2010-2012 Xilinx, Inc. All rights reserved.
 *
 * This file contains confidential and proprietary information of Xilinx, Inc.
 * and is protected under U.S. and international copyright and other
@@ -53,8 +53,6 @@
 
 
 
-/* Most probably .. this will be defined elsewhere...
- */
 //typedef unsigned int  u32;
 
 
@@ -114,5 +112,7 @@ extern unsigned long ps7_peripherals_init_data[];
 #define FPGA2_FREQ  50000000
 #define FPGA3_FREQ  50000000
 
+
 int ps7_config( unsigned long*);
 int ps7_init();
+
