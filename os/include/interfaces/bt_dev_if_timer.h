@@ -5,39 +5,23 @@
 
 typedef void 	 	(*BT_TIMER_CALLBACK)					(BT_HANDLE hTimer, void *pParam);
 
-typedef BT_u32		(*BT_DEV_IF_TIMER_GETINPUTCLOCK)		(BT_HANDLE hTimer, BT_ERROR *pError);
-typedef BT_ERROR 	(*BT_DEV_IF_TIMER_START) 				(BT_HANDLE hTimer);
-typedef BT_ERROR 	(*BT_DEV_IF_TIMER_STOP)  				(BT_HANDLE hTimer);
-typedef BT_ERROR 	(*BT_DEV_IF_TIMER_ENABLE_INTERRUPT)		(BT_HANDLE hTimer);
-typedef BT_ERROR 	(*BT_DEV_IF_TIMER_DISABLE_INTERRUPT)	(BT_HANDLE hTimer);
-typedef BT_HANDLE 	(*BT_DEV_IF_TIMER_REGISTER_CALLBACK)	(BT_HANDLE hTimer, BT_TIMER_CALLBACK pfnCallback, void *pParam, BT_ERROR *pError);
-typedef BT_ERROR	(*BT_DEV_IF_TIMER_UNREGISTER_CALLBACK)	(BT_HANDLE hTimer, BT_HANDLE hCallback);
-typedef BT_u32		(*BT_DEV_IF_TIMER_GETPRESCALER)			(BT_HANDLE hTimer, BT_ERROR *pError);
-typedef BT_ERROR	(*BT_DEV_IF_TIMER_SETPRESCALER)			(BT_HANDLE hTimer, BT_u32 ulPrescaler);
-typedef BT_u32		(*BT_DEV_IF_TIMER_GETPERIODCOUNT)		(BT_HANDLE hTimer, BT_ERROR *pError);
-typedef BT_ERROR	(*BT_DEV_IF_TIMER_SETPERIODCOUNT)		(BT_HANDLE hTimer, BT_u32 ulValue);
-typedef BT_ERROR	(*BT_DEV_IF_TIMER_ENABLE_RELOAD)		(BT_HANDLE hTimer);
-typedef BT_ERROR	(*BT_DEV_IF_TIMER_DISABLE_RELOAD)		(BT_HANDLE hTimer);
-typedef BT_u32		(*BT_DEV_IF_TIMER_GETVALUE)				(BT_HANDLE hTimer, BT_ERROR *pError);
-typedef BT_ERROR	(*BT_DEV_IF_TIMER_SETVALUE)				(BT_HANDLE hTimer, BT_u32 ulValue);
-typedef BT_u32		(*BT_DEV_IF_TIMER_GETMAXVALUE)			(BT_HANDLE hTimer, BT_ERROR *pError);
-
 typedef struct _BT_DEV_IF_TIMER {
-	BT_DEV_IF_TIMER_GETINPUTCLOCK 		pfnGetInputClock;
-	BT_DEV_IF_TIMER_START				pfnStart;
-	BT_DEV_IF_TIMER_STOP				pfnStop;
-	BT_DEV_IF_TIMER_ENABLE_INTERRUPT	pfnEnableInterrupt;
-	BT_DEV_IF_TIMER_DISABLE_INTERRUPT	pfnDisableInterrupt;
-	BT_DEV_IF_TIMER_REGISTER_CALLBACK 	pfnRegisterCallback;
-	BT_DEV_IF_TIMER_UNREGISTER_CALLBACK	pfnUnregisterCallback;
-	BT_DEV_IF_TIMER_GETPRESCALER 		pfnGetPrescaler;
-	BT_DEV_IF_TIMER_SETPRESCALER		pfnSetPrescaler;
-	BT_DEV_IF_TIMER_GETPERIODCOUNT		pfnGetPeriodCount;
-	BT_DEV_IF_TIMER_SETPERIODCOUNT 		pfnSetPeriodCount;
-	BT_DEV_IF_TIMER_ENABLE_RELOAD 		pfnEnableReload;
-	BT_DEV_IF_TIMER_DISABLE_RELOAD 		pfnDisableReload;
-	BT_DEV_IF_TIMER_GETVALUE 			pfnGetValue;
-	BT_DEV_IF_TIMER_SETVALUE 			pfnSetValue;
+	BT_u32		(*pfnGetIntputClock)		(BT_HANDLE hTimer, BT_ERROR *pError);
+	BT_ERROR 	(*pfnStart)					(BT_HANDLE hTimer);
+	BT_ERROR	(*pfnStop)					(BT_HANDLE hTimer);
+	BT_ERROR	(*pfnEnableInterrupt)		(BT_HANDLE hTimer);
+	BT_ERROR	(*pfnDisableInterrupt)		(BT_HANDLE hTimer);
+	BT_HANDLE	(*pfnRegisterCallback)		(BT_HANDLE hTimer, BT_TIMER_CALLBACK pfnCallback, void *pParam, BT_ERROR *pError);
+	BT_ERROR	(*pfnUnregisterCallback)	(BT_HANDLE hTimer, BT_HANDLE hCallback);
+	BT_u32 		(*pfnGetPrescaler)			(BT_HANDLE hTimer, BT_ERROR *pError);
+	BT_ERROR	(*pfnSetPrescaler)			(BT_HANDLE hTimer, BT_u32 ulPrescaler);
+	BT_u32		(*pfnGetPeriodCount)		(BT_HANDLE hTimer, BT_ERROR *pError);
+	BT_ERROR 	(*pfnSetPeriodCount)		(BT_HANDLE hTimer, BT_u32 ulValue);
+	BT_ERROR 	(*pfnEnableReload)			(BT_HANDLE hTimer);
+	BT_ERROR	(*pfnDisableReload)			(BT_HANDLE hTimer);
+	BT_u32 		(*pfnGetValue)				(BT_HANDLE hTimer, BT_ERROR *pError);
+	BT_ERROR	(*pfnSetValue)				(BT_HANDLE hTimer, BT_u32 ulValue);
+	BT_u32		(*pfnGetMaxValue)			(BT_HANDLE hTimer, BT_ERROR *pError);
 } BT_DEV_IF_TIMER;
 
 BT_ERROR 	BT_TimerStart				(BT_HANDLE hTimer);
