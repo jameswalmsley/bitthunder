@@ -179,7 +179,7 @@ static BT_ERROR uartCleanup(BT_HANDLE hUart) {
 static BT_HANDLE uartOpen(BT_u32 nDeviceID, BT_ERROR *pError) {
 	BT_HANDLE hUart;
 
-	if(nDeviceID >= oHandleInterface.pIfs->pDevIF->ulTotalDevices) {	// Ensure we're not out of range!
+	if(nDeviceID >= oHandleInterface.oIfs.pDevIF->ulTotalDevices) {	// Ensure we're not out of range!
 		// ERR -- Invalid Device ID.							// BT should ensure this doesn't happen anyway!
 		return NULL;
 	}
@@ -714,21 +714,21 @@ const BT_IF_DEVICE BT_ZYNQ_UART_oDeviceInterface = {
 	uartOpen,													///< Special Open interface.
 	&oPowerInterface,											///< Device does not support powerstate functionality.
 	BT_DEV_IF_T_UART,											///< Allow configuration through the UART api.
-	&oConfigInterface,											///< This is the implementation of UART configuration API.
+	.unConfigIfs = {
+		(BT_DEV_INTERFACE) &oUartConfigInterface,
+	},
 	&oCharDevInterface,											///< Provide a Character device interface implementation.
 };
 
-
-static const BT_UN_IFS oDevIF = {
-	(BT_HANDLE_INTERFACE) &BT_ZYNQ_UART_oDeviceInterface,
-};
 
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_NAME,												///< Provides the standard module name in ROM.
 	BT_MODULE_DESCRIPTION,
 	BT_MODULE_AUTHOR,
 	BT_MODULE_EMAIL,
-	&oDevIF,													///< Pointer to a Device interface if its a device.
+	.oIfs = {
+		(BT_HANDLE_INTERFACE) &BT_ZYNQ_UART_oDeviceInterface,
+	},
 	BT_HANDLE_T_DEVICE,											///< Handle Type!
 	uartCleanup,												///< Handle's cleanup routine.
 };
