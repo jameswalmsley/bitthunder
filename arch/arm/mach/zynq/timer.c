@@ -112,7 +112,9 @@ const BT_IF_DEVICE BT_ZYNQ_TIMER_oDeviceInterface = {
 	timer_open,
 	NULL,					/// No power interface for system timer.
 	BT_DEV_IF_T_TIMER,
-	&oDeviceInterface,		///< Structure implementing the actual device interface.
+	.unConfigIfs = {
+		(BT_DEV_INTERFACE) &oTimerDeviceInterface,
+	},
 };
 
 /*
@@ -130,7 +132,9 @@ static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DESCRIPTION,
 	BT_MODULE_AUTHOR,
 	BT_MODULE_EMAIL,
-	&oDevIF,													///< Pointer to a Device interface if its a device.
+	.oIfs = {
+		(BT_HANDLE_INTERFACE) &BT_ZYNQ_TIMER_oDeviceInterface,
+	},													///< Pointer to a Device interface if its a device.
 	BT_HANDLE_T_DEVICE,											///< Handle Type!
 	timer_cleanup,												///< Handle's cleanup routine.
 };
