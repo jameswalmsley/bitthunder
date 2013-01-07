@@ -6,6 +6,8 @@
 #include "mach/bt_machine_types.h"
 #include "interfaces/bt_interfaces.h"
 #include "interrupts/bt_interrupts.h"
+#include "devman/bt_integrated_device.h"
+#include "devman/bt_integrated_driver.h"
 
 
 typedef enum {
@@ -16,6 +18,7 @@ typedef enum {
 } BT_MACH_ARCHITECTURE;
 
 
+
 typedef struct _BT_MACHINE_DESCRIPTION {
 	BT_MACH_ARCHITECTURE			eArchitecture;
 	BT_MACH_TYPE					eMachType;
@@ -23,7 +26,9 @@ typedef struct _BT_MACHINE_DESCRIPTION {
 
 	BT_u32							ulSystemClockHz;
 
-	const BT_INTERRUPT_CONTROLLER  *pInterruptController;	/// Primary system interrupt controller.
+	BT_ERROR					   (*pfnMachineInit)	(struct _BT_MACHINE_DESCRIPTION *pMachine);
+
+	const BT_INTEGRATED_DEVICE	   *pInterruptController;
 	BT_u32							ulTotalIRQs;
 
 	const BT_IF_DEVICE		   	   *pSystemTimer;
