@@ -7,6 +7,9 @@
 #define _BT_DEVMAN_H_
 
 #include "bt_types.h"
+#include "bt_resource.h"
+#include "bt_integrated_device.h"
+#include "bt_integrated_driver.h"
 #include "interfaces/bt_interfaces.h"
 
 
@@ -26,5 +29,9 @@ typedef struct {
 
 BT_HANDLE BT_DeviceOpen(BT_u32 ulId, const BT_s8 *szpDevicePath, BT_ERROR *pError);
 BT_MACHINE_DESCRIPTION *BT_GetMachineDescription(BT_ERROR *pError);
+BT_INTEGRATED_DEVICE *BT_GetIntergratedDeviceByName(const BT_i8 *szpName);
+BT_INTEGRATED_DRIVER *BT_GetIntegratedDriverByName(const BT_i8 *szpName);
+
+BT_ERROR BT_ProbeIntegratedDevices(BT_HANDLE hLogDevice);
 
 #endif
