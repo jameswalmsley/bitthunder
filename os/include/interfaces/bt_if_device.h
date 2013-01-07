@@ -3,9 +3,12 @@
 
 #include "bt_types.h"
 #include "bt_if_chardev.h"
-#include "interfaces/bt_dev_if_timer.h"
-#include "interfaces/bt_if_power.h"
-#include "interfaces/bt_dev_if_uart.h"
+#include "bt_dev_if_irq.h"
+#include "bt_dev_if_gpio.h"
+#include "bt_dev_if_timer.h"
+#include "bt_if_power.h"
+#include "bt_dev_if_uart.h"
+
 
 typedef enum _BT_DEV_IF_TYPE {
 	BT_DEV_IF_T_NONE=0,
@@ -24,9 +27,10 @@ typedef struct _BT_DEV_INTERFACE *BT_DEV_INTERFACE;
 
 typedef union {
 	const BT_DEV_INTERFACE		p;
+	const BT_DEV_IF_GPIO	   *pGpioIF;
+	const BT_DEV_IF_IRQ		   *pIRQIF;
 	const BT_DEV_IF_TIMER	   *pTimerIF;
 	const BT_DEV_IF_UART 	   *pUartIF;
-
 } BT_DEV_IFS;
 
 
@@ -38,7 +42,7 @@ typedef struct _BT_IF_DEVICE {
 
 	const BT_IF_POWER	   *pPowerIF;
 	BT_DEV_IF_TYPE 			eConfigType;
-	const BT_DEV_IFS 	   *unConfigIfs;
+	const BT_DEV_IFS 	    unConfigIfs;
 
 	const BT_IF_CHARDEV	   *pCharDevIf;
 //	const BT_IF_BLOCKDEV   *pBlockDevIf;
