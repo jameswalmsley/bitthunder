@@ -22,10 +22,18 @@ SECTIONS
 	 *	adress 0x0000
 	 *
 	 **/
+
 	.init : {
-		_init_begin = .;
-	    KEEP(*(.init))
-	} > ZYNQ_RAM0 = 0
+		KEEP(*(.init))
+		KEEP(*(.init.*))
+	} > ZYNQ_RAM0
+
+	/*.init : {
+	    _bt_arch_vectors_begin = .;
+		KEEP(*(.bt.arch.vectors))
+		KEEP(*(.bt.arch.vectors.*))
+		_bt_arch_vectors_end = .;
+	} > ZYNQ_RAM0*/
 
 	.bt.arch.init : {
 	    __bt_arch_init_start = .;
@@ -34,10 +42,24 @@ SECTIONS
 		__bt_arch_init_end = .;
 	} > ZYNQ_RAM0
 
+	.bt.arch.devices : {
+	    __bt_arch_devices_start = .;
+		KEEP(*(.bt.arch.devices))
+		KEEP(*(.bt.arch.devices.*))
+		__bt_arch_devices_end = .;
+	} > ZYNQ_RAM0
+
+	.bt.arch.drivers : {
+	    __bt_arch_drivers_start = .;
+		KEEP(*(.bt.arch.drivers))
+		KEEP(*(.bt.arch.drivers.*))
+		__bt_arch_drivers_end = .;
+	} > ZYNQ_RAM0
+
 	.bt.module.entries : {
 	    __bt_module_entries_start = .;
-		KEEP(*(.module_entries))
-		KEEP(*(.module_entries.*))
+		KEEP(*(.bt.module.entries))
+		KEEP(*(.bt.module.entries.*))
 		__bt_module_entries_end = .;
 	} > ZYNQ_RAM0
 
