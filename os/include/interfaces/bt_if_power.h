@@ -13,12 +13,9 @@ typedef enum {
  *	All device drivers should implement a device sleep/wake function.
  *	This should allow any device to go into a low-power mode if supported, using a single API for any device.
  **/
-typedef BT_ERROR	(*BT_DEVICE_SET_POWERSTATE_FN) (BT_HANDLE hDevice, BT_POWER_STATE ePowerState);
-typedef BT_ERROR	(*BT_DEVICE_GET_POWERSTATE_FN) (BT_HANDLE hDevice, BT_POWER_STATE *pePowerState);
-
 typedef struct {
-	BT_DEVICE_SET_POWERSTATE_FN	pfnSetPowerState;
-	BT_DEVICE_GET_POWERSTATE_FN	pfnGetPowerState;
+	BT_ERROR (*pfnSetPowerState)(BT_HANDLE hDevice, BT_POWER_STATE ePowerState);
+	BT_ERROR (*pfnGetPowerState)(BT_HANDLE hDevice, BT_POWER_STATE *pePowerState);
 } BT_IF_POWER;
 
 BT_ERROR BT_SetPowerState(BT_HANDLE hDevice, BT_POWER_STATE eState);
