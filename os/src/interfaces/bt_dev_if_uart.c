@@ -11,7 +11,7 @@ struct _BT_OPAQUE_HANDLE {
 
 
 static BT_BOOL isUartHandle(BT_HANDLE hUart) {
-	if(!hUart || !hUart->h.pIf->oIfs.pDevIF || (hUart->h.pIf->oIfs.pDevIF->eConfigType != BT_DEV_IF_T_UART)) {
+	if(!hUart || !BT_IF_DEVICE(hUart) || (BT_IF_DEVICE_TYPE(hUart) != BT_DEV_IF_T_UART)) {
 		return BT_FALSE;
 	}
 	return BT_TRUE;
@@ -29,7 +29,7 @@ BT_ERROR BT_UartSetBaudrate(BT_HANDLE hUart, BT_u32 ulBaudrate) {
 
 	// If we did kernel mode switching we'd do it here, but for now its now supported.
 
-	return hUart->h.pIf->oIfs.pDevIF->unConfigIfs.pUartIF->pfnSetBaudrate(hUart, ulBaudrate);
+	return BT_IF_UART_OPS(hUart)->pfnSetBaudrate(hUart, ulBaudrate);
 }
 
 
@@ -42,7 +42,7 @@ BT_ERROR BT_UartSetConfiguration(BT_HANDLE hUart, BT_UART_CONFIG *pConfig) {
 		// ERR_INVALID_HANDLE_TYPE
 		return (BT_ERROR) -1;
 	}
-	return hUart->h.pIf->oIfs.pDevIF->unConfigIfs.pUartIF->pfnSetConfig(hUart, pConfig);
+	return BT_IF_UART_OPS(hUart)->pfnSetConfig(hUart, pConfig);
 }
 
 
@@ -55,7 +55,7 @@ BT_ERROR BT_UartGetConfiguration(BT_HANDLE hUart, BT_UART_CONFIG *pConfig) {
 		// ERR_INVALID_HANDLE_TYPE
 		return (BT_ERROR) -1;
 	}
-	return hUart->h.pIf->oIfs.pDevIF->unConfigIfs.pUartIF->pfnGetConfig(hUart, pConfig);
+	return BT_IF_UART_OPS(hUart)->pfnGetConfig(hUart, pConfig);
 }
 
 BT_ERROR BT_UartEnable(BT_HANDLE hUart) {
@@ -63,7 +63,7 @@ BT_ERROR BT_UartEnable(BT_HANDLE hUart) {
 		// ERR_INVALID_HANDLE_TYPE
 		return (BT_ERROR) -1;
 	}
-	return hUart->h.pIf->oIfs.pDevIF->unConfigIfs.pUartIF->pfnEnable(hUart);
+	return BT_IF_UART_OPS(hUart)->pfnEnable(hUart);
 }
 
 BT_ERROR BT_UartDisable(BT_HANDLE hUart) {
@@ -72,5 +72,5 @@ BT_ERROR BT_UartDisable(BT_HANDLE hUart) {
 		return (BT_ERROR) -1;
 	}
 
-	return hUart->h.pIf->oIfs.pDevIF->unConfigIfs.pUartIF->pfnDisable(hUart);
+	return BT_IF_UART_OPS(hUart)->pfnDisable(hUart);
 }
