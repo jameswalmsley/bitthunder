@@ -1,0 +1,61 @@
+\section{Sub Systems}
+BitThunder can be separated into a number of sub-systems. There are some base sub-systems,
+which all other sub-systems use for allocating and managing resources.
+
+This document covers the sub-systems required for version 1.0.0 of BitThunder.
+
+\begin{tabular}{|l|l|r|}
+\hline 
+Subsystem & Description & Completeness \\ 
+\hline 
+Handle Manager & Tracks all resources via handles, ensuring cleanup is possible. & 90\% \\ 
+\hline 
+Device Manager & Provides abstracted access to devices and their resources. & 50\% \\ 
+\hline 
+Process Manager & Fundamental process abstraction, allows clean killing. & 75\% \\ 
+\hline
+Real-Time Scheduler & Provides real-time slicing of the CPU resource. & 100\% \\ 
+\hline 
+Volume Manager & Manages volumes and their partitions, based on block device media. & 0\% \\ 
+\hline
+Filesystem Manager & Abstracts file-system implementations. & 50\% \\ 
+\hline 
+Network Stack & Manages network device and network APIs. & 25\% \\ 
+\hline 
+\end{tabular} 
+
+\subsection{Handle Manager}
+\input{subsystems/handlemanager.tex}
+
+\subsection{Device Manager}
+Provides several "directories" for finding and enumerating abstracted devices.
+\begin{itemize}
+\item BT_MACHINE_DESCRIPTION
+\item BT_INTEGRATED_DEVICE
+\end{itemize}
+
+The device manager, is one of the most complex aspects of BitThunder...
+\subsubsection{Machine Descriptions}
+\subsubsection{Integrated Devices}
+\subsubsection{GPIO}
+\subsubsection{Interrupts}
+
+\subsection{Memory Manager}
+Provides APIs for allocating and freeing memory. To begin with a simple implementation is provided
+but this should be replaced later, as the requirement for using protected / virtual memory becomes real.
+
+\subsection{Process Manager}
+
+\subsection{Real-Time Scheduler}
+This is the core of the process manager, providing the fundamental time-slicing of the CPU resource.
+
+
+\subsection{Block Device Manager}
+
+\subsection{Volume Manager}
+
+\subsection{Filesystem Manager}
+
+\subsection{Network Stack}
+
+

@@ -1,0 +1,7 @@
+BitThunder also provides an advanced file-system architecture, with optional support
+for a fully asychronous (event-driven) mode. The lower-level block device driver
+provides automated buffer caching, and support block queues.
+
+Devices which can optimised access based on a block buffer queue can utilise this to perform
+more efficient data transfers. Simple devices can simple process these queues sequentially,
+and expose a much simpler BlockRead and BlockWrite definition.

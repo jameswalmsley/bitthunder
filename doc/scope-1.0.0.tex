@@ -1,0 +1,68 @@
+\section{Scope (v1.0.0) - End of 2013}
+This is a short summary that shall describe the scope for the v1.0.0 BitThunder implementation.
+Any requests/features required outside of this scope will have to wait for future BitThunder development
+schedules. \textbf{ABSOLUTELY NO EXCEPTIONS}.
+
+\subsection{Basic Platform Abstraction}
+BitThunder will provide a mechanism to abstract the basic elements of an embedded micro-processor platform.
+This will include:
+
+\begin{itemize}
+\item Single Global Machine Description / Entry point.
+\item Interrupt Controller abstraction.
+\item GPIO Controller abstraction.
+\item System Timer Abstraction.
+\end{itemize}
+
+\subsection{Basic Device Management}
+BitThunder will provide a simple mechanism for describing devices and their associated resources.
+There will be a clear distinction between device description, and the associated driver required
+to utilise the device. This will ensure BitThunder drivers are easily ported between platforms.
+
+\subsubsection{Device Interfaces / APIs}
+BitThunder's device manager can support any device interface, but only the following device types
+will be supported in v1.0.0
+
+\begin{itemize}
+\item Interrupt controllers.
+\item GPIO controllers.
+\item UART devices.
+\item Timer devices.
+\item I2C Bus controllers.
+\item CAN Bus controllers.
+\item Ethernet / MAC interface controllers.
+\item Basic block devices.
+\item SDIO controllers.
+\end{itemize}
+
+\subsection{Core Operating System Services}
+BitThunder will provide the following core operating system services.
+
+\begin{itemize}
+\item Create/Destroy processes.
+\item Create/Destroy threads.
+\item Basic memory manager (alloc/free).
+\item Thread synchronisation objects (mutex/semaphores).
+\item IPC (Inter-process communication) (message queues).
+\item Virtual filesystem and basic APIs.
+\item Manage volumes, partitions, and file-system mountpoints.
+\item Open/Close devices.
+\item Provide access to mounted filesystems and files.
+\item Basic network stack and APIs.
+\item High and low-resolution kernel timestamps.
+\item System logging.
+\item Process watchdog.
+\end{itemize}
+
+\subsection{The answer is NO!}
+For clarity, and as reference for my refusal to compromise here is a quick list of items
+that do not come under v1.0.0 scope. Thats not to say that BitThunder cannot or will not
+support these features, simply they will not be planned until after completion of the 
+v1.0.0 milestone.
+
+\begin{itemize}
+\item Real-time tracing.
+\item MMU Support / Real process isolation.
+\item USB (all versions) and other complex plug and play busses.
+\item Support for high-level (libc based) applications. E.g. porting Samba / vi / ssh.
+\end{itemize}

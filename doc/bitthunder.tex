@@ -1,0 +1,59 @@
+\documentclass[10pt,a4paper,final]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{textcomp}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{moreverb}
+\usepackage{multicol}
+\usepackage{underscore}
+\ifx\pdftexversion\undefined
+\usepackage[dvips]{graphicx}
+\else
+\usepackage[pdftex]{graphicx}
+\DeclareGraphicsRule{*}{mps}{*}{}
+\fi
+
+\usepackage[cm]{fullpage}
+
+%\usepackage{listingray}{gray}{0.9}
+%\usepackage{lbcolor}{rgb}{0.9,0.9,0.9}
+
+\begin{document}
+
+\title{\huge{BitThunder}}
+\author{James Walmsley}
+\date{December 2012}
+\maketitle
+
+\begin {abstract}
+BitThunder is a reliable Real-Time operating system and application framework. It provides
+a complete platform abstraction layer above which embedded application software can sit. This allows
+application software to be completely decoupled from hardware proprietary libraries.
+
+In theory, such applications should require almost no porting to other platforms, provided
+a complete hardware abstraction layer is implemented for the new platform.
+\end {abstract}
+
+\newpage
+\tableofcontents
+\newpage
+
+\part{Overview}
+%\begin{multicols}[2]
+\input{overview.tex}
+%\end{multicols}
+
+\newpage
+\part{Architecture}
+\input{subsystems.tex}
+
+\newpage
+\part{API Reference}
+\input{api.tex}
+
+\end{document}
+
