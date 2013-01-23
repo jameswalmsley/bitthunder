@@ -55,7 +55,8 @@ BT_ERROR BT_GpioSet(BT_u32 ulGPIO, BT_BOOL bValue) {
 	}
 
 	BT_HANDLE hGPIO = pGPIO->hGPIO;
-	return  hGPIO->h.pIf->oIfs.pDevIF->unConfigIfs.pGpioIF->pfnSet(hGPIO, ulGPIO - pGPIO->ulBaseGPIO, bValue);
+
+	return BT_IF_GPIO_OPS(hGPIO)->pfnSet(hGPIO, ulGPIO - pGPIO->ulBaseGPIO, bValue);
 }
 
 BT_BOOL BT_GpioGet(BT_u32 ulGPIO, BT_ERROR *pError) {
@@ -68,7 +69,7 @@ BT_BOOL BT_GpioGet(BT_u32 ulGPIO, BT_ERROR *pError) {
 	}
 
 	BT_HANDLE hGPIO = pGPIO->hGPIO;
-	return hGPIO->h.pIf->oIfs.pDevIF->unConfigIfs.pGpioIF->pfnGet(hGPIO, ulGPIO - pGPIO->ulBaseGPIO, pError);
+	return BT_IF_GPIO_OPS(hGPIO)->pfnGet(hGPIO, ulGPIO - pGPIO->ulBaseGPIO, pError);
 }
 
 BT_ERROR BT_GpioSetDirection(BT_u32 ulGPIO, BT_GPIO_DIRECTION eDirection) {
@@ -78,7 +79,7 @@ BT_ERROR BT_GpioSetDirection(BT_u32 ulGPIO, BT_GPIO_DIRECTION eDirection) {
 	}
 
 	BT_HANDLE hGPIO = pGPIO->hGPIO;
-	return  hGPIO->h.pIf->oIfs.pDevIF->unConfigIfs.pGpioIF->pfnSetDirection(hGPIO, ulGPIO - pGPIO->ulBaseGPIO, eDirection);
+	return  BT_IF_GPIO_OPS(hGPIO)->pfnSetDirection(hGPIO, ulGPIO - pGPIO->ulBaseGPIO, eDirection);
 }
 
 BT_GPIO_DIRECTION BT_GpioGetDirection(BT_u32 ulGPIO, BT_ERROR *pError) {
@@ -91,7 +92,7 @@ BT_GPIO_DIRECTION BT_GpioGetDirection(BT_u32 ulGPIO, BT_ERROR *pError) {
 	}
 
 	BT_HANDLE hGPIO = pGPIO->hGPIO;
-	return hGPIO->h.pIf->oIfs.pDevIF->unConfigIfs.pGpioIF->pfnGetDirection(hGPIO, ulGPIO - pGPIO->ulBaseGPIO, pError);
+	return BT_IF_GPIO_OPS(hGPIO)->pfnGetDirection(hGPIO, ulGPIO - pGPIO->ulBaseGPIO, pError);
 }
 
 BT_ERROR BT_GpioEnableInterrupt(BT_u32 ulGPIO) {
@@ -101,7 +102,7 @@ BT_ERROR BT_GpioEnableInterrupt(BT_u32 ulGPIO) {
 	}
 
 	BT_HANDLE hGPIO = pGPIO->hGPIO;
-	return hGPIO->h.pIf->oIfs.pDevIF->unConfigIfs.pGpioIF->pfnEnableInterrupt(hGPIO, ulGPIO - pGPIO->ulBaseGPIO);
+	return BT_IF_GPIO_OPS(hGPIO)->pfnEnableInterrupt(hGPIO, ulGPIO - pGPIO->ulBaseGPIO);
 }
 
 
@@ -112,5 +113,5 @@ BT_ERROR BT_GpioDisableInterrupt(BT_u32 ulGPIO) {
 	}
 
 	BT_HANDLE hGPIO = pGPIO->hGPIO;
-	return hGPIO->h.pIf->oIfs.pDevIF->unConfigIfs.pGpioIF->pfnDisableInterrupt(hGPIO, ulGPIO - pGPIO->ulBaseGPIO);
+	return BT_IF_GPIO_OPS(hGPIO)->pfnDisableInterrupt(hGPIO, ulGPIO - pGPIO->ulBaseGPIO);
 }
