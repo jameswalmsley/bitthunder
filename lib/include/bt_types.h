@@ -17,9 +17,6 @@ typedef BT_u32				BT_BOOL;
 struct _BT_OPAQUE_HANDLE;
 typedef struct _BT_OPAQUE_HANDLE *BT_HANDLE;
 
-struct _BT_TL_HANDLE;
-typedef struct _BT_TL_HANDLE *BT_TL_HANDLE;
-
 
 typedef struct {
 #ifdef BT_CONFIG_ARCH_LITTLE_ENDIAN
@@ -42,6 +39,8 @@ typedef union _BT_POINTER {
 	void   *p;
 	BT_u64 	u64;
 } BT_POINTER;
+
+typedef BT_u32	BT_TICK;
 
 #ifndef NULL
 #define NULL	((void *) 0)
