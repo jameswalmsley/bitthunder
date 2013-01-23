@@ -5,6 +5,7 @@
 #include "mm/bt_heap.h"
 #include "devman/bt_devman.h"
 #include "gpio/bt_gpio.h"
+#include "timers/bt_timers.h"
 
 
 
