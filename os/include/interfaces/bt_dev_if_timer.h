@@ -2,15 +2,17 @@
 #define _BT_DEV_IF_TIMER_H_
 
 #include "bt_types.h"
+#include <interrupts/bt_interrupts.h>
 
 typedef void 	 	(*BT_TIMER_CALLBACK)					(BT_HANDLE hTimer, void *pParam);
 
 typedef struct _BT_DEV_IF_TIMER {
-	BT_u32		(*pfnGetIntputClock)		(BT_HANDLE hTimer, BT_ERROR *pError);
+	BT_u32		(*pfnGetInputClock)			(BT_HANDLE hTimer, BT_ERROR *pError);
 	BT_ERROR 	(*pfnStart)					(BT_HANDLE hTimer);
 	BT_ERROR	(*pfnStop)					(BT_HANDLE hTimer);
 	BT_ERROR	(*pfnEnableInterrupt)		(BT_HANDLE hTimer);
 	BT_ERROR	(*pfnDisableInterrupt)		(BT_HANDLE hTimer);
+	BT_ERROR	(*pfnOverrideInterrupt)		(BT_HANDLE hTimer, BT_FN_INTERRUPT_HANDLER pfnHandler, void *pParam);
 	BT_HANDLE	(*pfnRegisterCallback)		(BT_HANDLE hTimer, BT_TIMER_CALLBACK pfnCallback, void *pParam, BT_ERROR *pError);
 	BT_ERROR	(*pfnUnregisterCallback)	(BT_HANDLE hTimer, BT_HANDLE hCallback);
 	BT_u32 		(*pfnGetPrescaler)			(BT_HANDLE hTimer, BT_ERROR *pError);
