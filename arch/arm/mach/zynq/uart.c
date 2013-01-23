@@ -3,7 +3,7 @@
  *	UART Driver Implementation.
  *
  *	This driver serves as robust example as to how implement a fully functional UART device driver
- *	for BlueThunder.
+ *	for BitThunder.
  *
  *	This driver should be easily ported to UART peripherals on other processors with little effort.
  *
