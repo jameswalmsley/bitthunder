@@ -8,11 +8,14 @@
  *
  **/
 
+
 #include <bitthunder.h>
-#include "timer.h"
+#include <arch/common/gic.h>
+#include <arch/common/cortex-a9-cpu-timers.h>
+
+#include "slcr.h"
 #include "uart.h"
 #include "gpio.h"
-#include <arch/common/gic.h>
 
 static const BT_RESOURCE oZynq_gpio_resources[] = {
 	{
@@ -24,6 +27,11 @@ static const BT_RESOURCE oZynq_gpio_resources[] = {
 		.ulStart			= 0,
 		.ulEnd				= 53,
 		.ulFlags			= BT_RESOURCE_IO,
+	},
+	{
+		.ulStart			= 52,
+		.ulEnd				= 52,
+		.ulFlags			= BT_RESOURCE_IRQ,
 	},
 };
 
@@ -69,12 +77,43 @@ static const BT_INTEGRATED_DEVICE oZynq_intc_device = {
 	.pResources 			= oZynq_intc_resources,
 };
 
+static const BT_RESOURCE oZynq_cpu_timer_resources[] = {
+	{
+		.ulStart			= 0xF8F00600,
+		.ulEnd				= 0xF8F006FF,
+		.ulFlags			= BT_RESOURCE_MEM,
+	},
+	{
+		.ulStart			= 29,									///< Start provides the IRQ of the private timer.
+		.ulEnd				= 30,									///< End provides the IRQ of the watchdog timer.
+		.ulFlags			= BT_RESOURCE_IRQ,
+	},
+};
+
+static const BT_INTEGRATED_DEVICE oZynq_cpu_timer_device = {
+	.name					= "arm,cortex-a9,cpu-timer",
+	.ulTotalResources		= BT_ARRAY_SIZE(oZynq_cpu_timer_resources),
+	.pResources				= oZynq_cpu_timer_resources,
+};
+
+static const BT_INTEGRATED_DEVICE oZynq_watchdog_device = {
+	.name					= "arm,cortex-a9,wdt",
+	.ulTotalResources		= BT_ARRAY_SIZE(oZynq_cpu_timer_resources),
+	.pResources				= oZynq_cpu_timer_resources,
+};
+
+static BT_u32 zynq_get_cpu_clock_frequency() {
+	return BT_ZYNQ_GetCpuFrequency();
+}
+
 BT_MACHINE_START(ARM, ZYNQ, "Xilinx Embedded Zynq Platform")
-    .ulSystemClockHz 		= BT_CONFIG_MACH_ZYNQ_SYSCLOCK_FREQ,
-	.pInterruptController	= &oZynq_intc_device,
-	.ulTotalIRQs			= 95,
-	.pSystemTimer 			= &BT_ZYNQ_TIMER_oDeviceInterface,
-	.ulTimerID				= BT_CONFIG_MACH_ZYNQ_SYSTICK_TIMER_ID,
-	.pBootUart				= &BT_ZYNQ_UART_oDeviceInterface,
-	.ulBootUartID			= BT_CONFIG_MACH_ZYNQ_BOOT_UART_ID,
+    .ulSystemClockHz 			= BT_CONFIG_MACH_ZYNQ_SYSCLOCK_FREQ,
+	.pfnGetCpuClockFrequency 	= zynq_get_cpu_clock_frequency,
+
+	.pInterruptController		= &oZynq_intc_device,
+
+	.pSystemTimer 				= &oZynq_cpu_timer_device,
+
+	.pBootLogger				= &BT_ZYNQ_UART_oDeviceInterface,
+	.ulBootUartID				= BT_CONFIG_MACH_ZYNQ_BOOT_UART_ID,
 BT_MACHINE_END
