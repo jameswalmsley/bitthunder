@@ -1,3 +1,7 @@
+/**
+ *	BitThunder Machine Description API.
+ *
+ **/
 #ifndef _BT_MACHINES_H_
 #define _BT_MACHINES_H_
 
@@ -17,8 +21,6 @@ typedef enum {
 	BT_ARCH_MB,
 } BT_MACH_ARCHITECTURE;
 
-
-
 typedef struct _BT_MACHINE_DESCRIPTION {
 	BT_MACH_ARCHITECTURE			eArchitecture;
 	BT_MACH_TYPE					eMachType;
@@ -26,15 +28,14 @@ typedef struct _BT_MACHINE_DESCRIPTION {
 
 	BT_u32							ulSystemClockHz;
 
-	BT_ERROR					   (*pfnMachineInit)	(struct _BT_MACHINE_DESCRIPTION *pMachine);
+	BT_u32							(*pfnGetCpuClockFrequency) ();
+	BT_ERROR					   	(*pfnMachineInit)				(struct _BT_MACHINE_DESCRIPTION *pMachine);
 
 	const BT_INTEGRATED_DEVICE	   *pInterruptController;
-	BT_u32							ulTotalIRQs;
+	const BT_INTEGRATED_DEVICE	   *pSystemTimer;
+	const BT_INTEGRATED_DEVICE	   *pWatchdogTimer;
 
-	const BT_IF_DEVICE		   	   *pSystemTimer;
-	BT_u32							ulTimerID;
-
-	const BT_IF_DEVICE		   	   *pBootUart;				/// Pointer to device supporting chardev if.
+	const BT_IF_DEVICE		   	   *pBootLogger;				/// Pointer to device supporting chardev if.
 	BT_u32							ulBootUartID;			/// Which instance number to use.
 } BT_MACHINE_DESCRIPTION;
 
@@ -53,9 +54,6 @@ BT_ATTRIBUTE_SECTION(".bt.arch.init") = {				\
 };
 
 
-
-
-
-
+BT_u32 BT_GetCpuClockFrequency();
 
 #endif
