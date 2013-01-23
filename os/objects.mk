@@ -14,6 +14,10 @@ BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/interrupts/bt_interrupts.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/gpio/bt_gpio.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/devman/bt_devman.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/devman/bt_resources.o
+BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/machines/bt_machines.o
+BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/timers/bt_timers.o
+
+
 
 include $(BASE)os/src/interfaces/objects.mk
 
@@ -23,6 +27,8 @@ include $(BASE)arch/$(ARCH)/mach/$(SUBARCH)/objects.mk
 include $(BASE)arch/$(ARCH)/objects.mk
 #SUB_OBJDIRS += $(BASE)arch/$(ARCH)/mach/$(SUBARCH)/
 #SUB_OBJDIRS += $(BASE)arch/$(ARCH)/
+
+include $(BASE)drivers/objects.mk
 
 test2:
 	echo $(BT_CONFIG_KERNEL)
