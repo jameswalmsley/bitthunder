@@ -1,21 +1,9 @@
 #include <bitthunder.h>
 #include "slcr.h"
 
-//static volatile ZYNQ_SLCR_REGS *const pRegs = (ZYNQ_SLCR_REGS *) (0xF8000000);
-
-/*typedef enum _ZYNQ_PLL {
-
-
-} ZYNQ_PLL;
-
-
-BT_u32 BT_ZYNQ_GetPLLFrequency(ZYNQ_PLL ePLL) {
-
-}*/
-
 BT_u32 BT_ZYNQ_GetArmPLLFrequency() {
 
-	ZYNQ_SLCR_REGS *pRegs = ZYNQ_SLCR;
+	volatile ZYNQ_SLCR_REGS *pRegs = ZYNQ_SLCR;
 
 	BT_u32 ctl = pRegs->ARM_PLL_CTRL;
 	BT_BOOL	bBypassed = BT_FALSE;
@@ -46,7 +34,7 @@ BT_u32 BT_ZYNQ_GetArmPLLFrequency() {
 
 BT_u32 BT_ZYNQ_GetIOPLLFrequency() {
 
-	ZYNQ_SLCR_REGS *pRegs = ZYNQ_SLCR;
+	volatile ZYNQ_SLCR_REGS *pRegs = ZYNQ_SLCR;
 
 	BT_u32 ctl = pRegs->IO_PLL_CTRL;
 	BT_BOOL bBypassed = BT_FALSE;
@@ -75,7 +63,8 @@ BT_u32 BT_ZYNQ_GetIOPLLFrequency() {
 }
 
 BT_u32 BT_ZYNQ_GetDDRPLLFrequency() {
-	ZYNQ_SLCR_REGS *pRegs = ZYNQ_SLCR;
+
+	volatile ZYNQ_SLCR_REGS *pRegs = ZYNQ_SLCR;
 
 	BT_u32 ctl = pRegs->DDR_PLL_CTRL;
 	BT_BOOL bBypassed = BT_FALSE;
@@ -101,4 +90,34 @@ BT_u32 BT_ZYNQ_GetDDRPLLFrequency() {
 	//BT_u64 clk_div = ZYNQ_SLCR_CLK_CTRL_DIVISOR_VAL(pRegs->IO_CLK_CTRL);
 
 	return val;
+}
+
+BT_u32 BT_ZYNQ_GetCpuFrequency() {
+	volatile ZYNQ_SLCR_REGS *pRegs = ZYNQ_SLCR;
+
+	BT_u32 	ctl 		= pRegs->ARM_CLK_CTRL;
+	BT_u32 	srcsel 		= ZYNQ_SLCR_CLK_CTRL_SRCSEL_VAL(ctl);
+
+	BT_u32	InputClk;
+
+	switch(srcsel) {
+	case ZYNQ_SLCR_CLK_CTRL_SRCSEL_ARMPLL:
+		InputClk = BT_ZYNQ_GetIOPLLFrequency();		// This looks wrong! But the meaning of srcsel...
+		break;
+
+	case ZYNQ_SLCR_CLK_CTRL_SRCSEL_IOPLL:
+		InputClk = BT_ZYNQ_GetArmPLLFrequency();	// ... is switched for ARM_CLK_CTRL!! :S typical Xilinx!
+		break;
+
+	case ZYNQ_SLCR_CLK_CTRL_SRCSEL_DDRPLL:
+		InputClk = BT_ZYNQ_GetDDRPLLFrequency();
+		break;
+
+	default:
+		return 0;
+	}
+
+	InputClk /= ZYNQ_SLCR_CLK_CTRL_DIVISOR_VAL(pRegs->ARM_CLK_CTRL);
+
+	return InputClk;
 }

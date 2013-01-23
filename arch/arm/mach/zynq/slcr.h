@@ -1,3 +1,6 @@
+/**
+ *	ZYNQ System Level Control Register definitions.
+ **/
 #ifndef _SLCR_H_
 #define _SLCR_H_
 
@@ -242,5 +245,7 @@ typedef struct _ZYNQ_SLCR_REGS {
 BT_u32 BT_ZYNQ_GetArmPLLFrequency();
 BT_u32 BT_ZYNQ_GetIOPLLFrequency();
 BT_u32 BT_ZYNQ_GetDDRPLLFrequency();
+
+BT_u32 BT_ZYNQ_GetCpuFrequency();
 
 #endif
