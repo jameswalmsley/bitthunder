@@ -22,6 +22,10 @@ BT_ERROR BT_RegisterInterruptController(BT_u32 ulBaseIRQ, BT_u32 ulTotalIRQs, BT
 
 	BT_ERROR Error = BT_ERR_NONE;
 
+	if(!BT_IF_DEVICE(hIRQ) || BT_IF_DEVICE_TYPE(hIRQ) != BT_DEV_IF_T_INTC) {
+		return BT_ERR_GENERIC;
+	}
+
 	if(g_ulRegistered >= BT_CONFIG_MAX_INTERRUPT_CONTROLLERS) {
 		return -1;	/// Maximum controllers already registered.
 	}
@@ -75,7 +79,7 @@ BT_ERROR BT_RegisterInterrupt(BT_u32 ulIRQ, BT_FN_INTERRUPT_HANDLER pfnHandler, 
 		return -1;
 	}
 
-	return pIntc->hIRQ->h.pIf->oIfs.pDevIF->unConfigIfs.pIRQIF->pfnRegister(pIntc->hIRQ, ulIRQ-pIntc->ulBaseIRQ, pfnHandler, pParam);
+	return pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnRegister(pIntc->hIRQ, ulIRQ-pIntc->ulBaseIRQ, pfnHandler, pParam);
 }
 
 BT_ERROR BT_UnregisterInterrupt(BT_u32 ulIRQ, BT_FN_INTERRUPT_HANDLER pfnHandler, void *pParam) {
@@ -89,7 +93,7 @@ BT_ERROR BT_UnregisterInterrupt(BT_u32 ulIRQ, BT_FN_INTERRUPT_HANDLER pfnHandler
 
 	BT_DisableInterrupt(ulIRQ);
 
-	Error = pIntc->hIRQ->h.pIf->oIfs.pDevIF->unConfigIfs.pIRQIF->pfnUnregister(pIntc->hIRQ, ulIRQ-pIntc->ulBaseIRQ, pfnHandler, pParam);
+	Error = pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnUnregister(pIntc->hIRQ, ulIRQ-pIntc->ulBaseIRQ, pfnHandler, pParam);
 
 	return Error;
 }
@@ -100,7 +104,7 @@ BT_ERROR BT_SetInterruptPriority(BT_u32 ulIRQ, BT_u32 ulPriority) {
 		return -1;
 	}
 
-	return pIntc->hIRQ->h.pIf->oIfs.pDevIF->unConfigIfs.pIRQIF->pfnSetPriority(pIntc->hIRQ, ulIRQ-pIntc->ulBaseIRQ, ulPriority);
+	return pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnSetPriority(pIntc->hIRQ, ulIRQ-pIntc->ulBaseIRQ, ulPriority);
 }
 
 BT_u32 BT_GetInterruptPriority(BT_u32 ulIRQ, BT_ERROR *pError) {
@@ -112,7 +116,7 @@ BT_u32 BT_GetInterruptPriority(BT_u32 ulIRQ, BT_ERROR *pError) {
 		return 0;
 	}
 
-	return pIntc->hIRQ->h.pIf->oIfs.pDevIF->unConfigIfs.pIRQIF->pfnGetPriority(pIntc->hIRQ, ulIRQ-pIntc->ulBaseIRQ, pError);
+	return pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnGetPriority(pIntc->hIRQ, ulIRQ-pIntc->ulBaseIRQ, pError);
 }
 
 BT_ERROR BT_EnableInterrupt(BT_u32 ulIRQ) {
@@ -120,7 +124,7 @@ BT_ERROR BT_EnableInterrupt(BT_u32 ulIRQ) {
 	if(!pIntc) {
 		return -1;
 	}
-	return pIntc->hIRQ->h.pIf->oIfs.pDevIF->unConfigIfs.pIRQIF->pfnEnable(pIntc->hIRQ, ulIRQ-pIntc->ulBaseIRQ);
+	return pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnEnable(pIntc->hIRQ, ulIRQ-pIntc->ulBaseIRQ);
 }
 
 BT_ERROR BT_DisableInterrupt(BT_u32 ulIRQ) {
@@ -128,7 +132,7 @@ BT_ERROR BT_DisableInterrupt(BT_u32 ulIRQ) {
 	if(!pIntc) {
 		return -1;
 	}
-	return pIntc->hIRQ->h.pIf->oIfs.pDevIF->unConfigIfs.pIRQIF->pfnDisable(pIntc->hIRQ, ulIRQ-pIntc->ulBaseIRQ);
+	return pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnDisable(pIntc->hIRQ, ulIRQ-pIntc->ulBaseIRQ);
 }
 
 BT_ERROR BT_SetInterruptAffinity(BT_u32 ulIRQ, BT_u32 ulCPU) {
@@ -137,8 +141,8 @@ BT_ERROR BT_SetInterruptAffinity(BT_u32 ulIRQ, BT_u32 ulCPU) {
 		return -1;
 	}
 
-	if(pIntc->hIRQ->h.pIf->oIfs.pDevIF->unConfigIfs.pIRQIF->pfnSetAffinity) {
-		return pIntc->hIRQ->h.pIf->oIfs.pDevIF->unConfigIfs.pIRQIF->pfnSetAffinity(pIntc->hIRQ, ulIRQ, ulCPU);
+	if(pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnSetAffinity) {
+		return pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnSetAffinity(pIntc->hIRQ, ulIRQ, ulCPU);
 	}
 
 	return -1;
