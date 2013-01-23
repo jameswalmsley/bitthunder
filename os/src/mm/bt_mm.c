@@ -33,12 +33,12 @@ void free(void *p) {
 
 
 #ifdef BT_CONFIG_KERNEL_FREERTOS
-void *pvPortMalloc() {
-	return 0;
+void *pvPortMalloc(int size) {
+	return BT_kMalloc(size);
 }
 
 void vPortFree(void *p) {
-	return;
+	BT_kFree(p);
 }
 #endif
 
