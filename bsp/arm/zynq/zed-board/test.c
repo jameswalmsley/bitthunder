@@ -2,7 +2,6 @@
 
 extern BT_u32 BT_ZYNQ_GetArmPLLFrequency();
 
-
 /**
  *	This will be running within a FreeRTOS Thread, with lowest priority.
  *	It is the boot/startup thread, and you can return from it after starting all your own processes.
@@ -14,37 +13,56 @@ extern BT_u32 BT_ZYNQ_GetArmPLLFrequency();
  *	However, you can just use it as an already running process.
  **/
 
-static BT_ERROR gpioIRQHandler(BT_u32 ulIRQ, void *pParam) {
+#define BUF_SIZE	(1024*64)
 
+BT_u32 buffer_a[BUF_SIZE/4];
+BT_u32 *buffer_b = 0x01100000;
 
-	return BT_ERR_NONE;
-}
-
-extern void test_gic(void);
+//BT_u32 buffer_a[1024*4];
+//BT_u32 buffer_b[1024*4];
 
 int main(int argc, char **argv) {
 
-	int i;
+	BT_GpioSetDirection(0, BT_GPIO_DIR_OUTPUT);
+	BT_GpioSetDirection(7, BT_GPIO_DIR_OUTPUT);
 
-	int y = BT_ZYNQ_GetArmPLLFrequency();
+	//BT_GpioEnableInterrupt(0);
 
-	BT_GpioSetDirection(0, BT_GPIO_DIR_INPUT);
+	BT_u32 start, end;
 
-	BT_RegisterInterrupt(52, gpioIRQHandler, (void *) 1);
-	BT_EnableInterrupt(52);
-	BT_GpioEnableInterrupt(0);
+	buffer_a[0] = buffer_b[0];
+	BT_u32 i;
+	start = BT_GetSystemTimerOffset();
+	for(i = 0; i  < 1024; i++) {
+		buffer_a[i] = buffer_b[i];
+	}
+	end = BT_GetSystemTimerOffset();
+
+	start = BT_GetKernelTime();
+	for(i=0; i < 1024; i++) {
+		memcpy(buffer_a, buffer_b, BUF_SIZE);
+	}
+	end = BT_GetKernelTime();
 
 	while(1) {
 		BT_GpioSet(0, BT_TRUE);
 		BT_GpioSet(0, BT_FALSE);
-
-		test_gic();
-	}
-
-	while(1) {
-		y += 1;
-		i++;
-		y -=1;
+		BT_GpioSet(0, BT_TRUE);
+		BT_GpioSet(0, BT_FALSE);
+		BT_GpioSet(0, BT_TRUE);
+		BT_GpioSet(0, BT_FALSE);
+		BT_GpioSet(0, BT_TRUE);
+		BT_GpioSet(0, BT_FALSE);
+		BT_GpioSet(0, BT_TRUE);
+		BT_GpioSet(0, BT_FALSE);
+		BT_GpioSet(0, BT_TRUE);
+		BT_GpioSet(0, BT_FALSE);
+		BT_GpioSet(0, BT_TRUE);
+		BT_GpioSet(0, BT_FALSE);
+		BT_GpioSet(0, BT_TRUE);
+		BT_GpioSet(0, BT_FALSE);
+		BT_GpioSet(0, BT_TRUE);
+		BT_GpioSet(0, BT_FALSE);
 	}
 
 	return 0;
