@@ -1,0 +1,43 @@
+#ifndef _CORTEX_A9_CPU_TIMERS_H_
+#define _CORTEX_A9_CPU_TIMERS_H_
+
+#include <bt_types.h>
+#include <bt_struct.h>
+
+#define CA9_PRIV_TIMER	0
+#define CA9_WD_TIMER	1
+
+
+typedef struct _CA9_TIM_REGS {
+	BT_u32 	LOAD;
+	BT_u32	COUNT;
+	BT_u32	CONTROL;
+
+#define     CA9_TIM_CONTROL_ENABLE					0x00000001
+#define		CA9_TIM_CONTROL_ENABLE_GET(x)			((x & CA9_TIM_CONTROL_ENABLE) >> 0)
+#define 	CA9_TIM_CONTROL_ENABLE_SET(x, val)		(x | ((val & 0x00000001) << 0))
+
+#define 	CA9_TIM_CONTROL_AUTO_RELOAD 			0x00000002
+#define		CA9_TIM_CONTROL_AUTO_RELOAD_GET(x)		((x & CA9_TIM_CONTROL_RELOAD) >> 1)
+#define 	CA9_TIM_CONTROL_AUTO_RELOAD_SET(x, val)	(x | ((val & 0x00000001) << 1))
+
+#define 	CA9_TIM_CONTROL_IRQ_ENABLE 				0x00000004
+#define		CA9_TIM_CONTROL_IRQ_ENABLE_GET(x)		((x & CA9_TIM_CONTROL_IRQ_ENABLE) >> 2)
+#define 	CA9_TIM_CONTROL_IRQ_ENABLE_SET(x, val)	(x | ((val & 0x00000001) << 2))
+
+#define 	CA9_TIM_CONTROL_PRESCALER				0x0000FF00
+#define 	CA9_TIM_CONTROL_PRESCALER_GET(x)		((x & CA9_TIM_CONTROL_PRESCALER) >> 8)
+#define		CA9_TIM_CONTROL_PRESCALER_SET(x, val)	(x | ((val & 0x000000FF) << 8))
+
+
+	BT_u32	INT_STATUS;
+} CA9_TIM_REGS;
+
+typedef struct _CORTEX_A9_TIMER_REGS {
+	CA9_TIM_REGS 	timers[2];
+	BT_u32		  	WD_RSTATUS;
+	BT_u32			WD_DISABLE;
+} CORTEX_A9_TIMER_REGS;
+
+
+#endif
