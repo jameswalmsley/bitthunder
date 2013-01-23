@@ -30,12 +30,6 @@ struct _BT_OPAQUE_HANDLE {
 	GICD_REGS 		   	   	   *pGICD;
 };
 
-void test_gic(void) {
-	BT_HANDLE hGic = g_hActiveHandle;
-	BT_u32 i = 0;
-	i += 16;
-}
-
 extern void enable_irq(void);
 
 void BT_ARCH_ARM_GIC_IRQHandler() {
@@ -43,13 +37,16 @@ void BT_ARCH_ARM_GIC_IRQHandler() {
 
 	BT_u32 ulStatus, ulIRQ;
 
-	do {
-		ulStatus 	= hGic->pGICC->IAR;		// receive the first interrupt from the IAR.
-		ulIRQ 		= ulStatus & 0x01FF;	// Get the IRQ number.
+	ulStatus = hGic->pGICC->IAR;
+	ulIRQ = ulStatus & 0x01FF;
+
+	while(ulIRQ < 1020) {
 		ulIRQ 	   += hGic->ulBaseIRQ;		// Remap the IRQn into logical IRQ# space.
 		g_oVectorTable[ulIRQ].pfnHandler(ulIRQ, g_oVectorTable[ulIRQ].pParam);
 		hGic->pGICC->EOIR = ulIRQ;
-	} while(ulIRQ < 1020);
+		ulStatus 	= hGic->pGICC->IAR;		// receive the first interrupt from the IAR.
+		ulIRQ 		= ulStatus & 0x03FF;	// Get the IRQ number.
+	}
 }
 
 static BT_ERROR gic_stubhandler(BT_u32 ulIRQ, void *pParam) {
@@ -168,7 +165,7 @@ static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_EMAIL,
 	.pfnCleanup = gic_cleanup,
 	.oIfs = {
-		(BT_HANDLE_INTERFACE) &oDeviceInterface,
+		.pDevIF = &oDeviceInterface,
 	},
 };
 
@@ -237,6 +234,9 @@ static BT_HANDLE gic_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 	BT_u32 ulGicIRQs = hGic->pGICD->TYPER;
 	ulGicIRQs = (ulGicIRQs + 1) * 32;
 
+	/*
+	 *	GIC can support a mximum 1020 IRQs.
+	 */
 	if(ulGicIRQs > 1020) {
 		ulGicIRQs = 1020;
 	}
@@ -245,8 +245,6 @@ static BT_HANDLE gic_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 
 	gic_dist_init(hGic);
 	gic_cpu_init(hGic);
-
-	enable_irq();
 
 	return hGic;
 
