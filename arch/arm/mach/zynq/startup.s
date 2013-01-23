@@ -35,16 +35,19 @@ _vector_table:
 	;@ Here we create an exception address table! This means that reset/hang/irq can be absolute addresses
 reset_handler:      .word reset
 undefined_handler:  .word undef
-swi_handler:        .word undef ;@vPortYieldProcessor
+swi_handler:        .word vPortYieldProcessor
 prefetch_handler:   .word prefetch
 data_handler:       .word data
 unused_handler:     .word hang
-irq_handler:        .word BT_ARCH_ARM_GIC_IRQHandler ;@vFreeRTOS_IRQInterrupt
+irq_handler:        .word vFreeRTOS_IRQInterrupt
 fiq_handler:        .word fiq
 
 	.extern _stack
 	.extern _init_begin
 reset:
+	mrs	r0,cpsr			@@ disable IRQs ASAP!
+	orr	r0,r0,#0x80
+	msr	cpsr_c,r0
 
 	ldr	sp, =_stack
 
@@ -151,7 +154,14 @@ fiq:
 
 irq:
 	push {r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
+	mrs r0, cpsr
+	orr r0, r0, #0x80
+	msr cpsr_c, r0
+	bl	BT_ARCH_ARM_GIC_IRQHandler
 ;@	     bl IRQInterruptHandler
+	mrs r0, cpsr
+	bic	r0,r0, #0x80
+	msr cpsr_c, r0
     pop  {r0,r1,r2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,lr}
     subs pc,lr,#4
 
