@@ -91,6 +91,7 @@ static const BT_DEV_IF_TIMER oTimerDeviceInterface= {
 	timer_stop,
 	timer_enable_interrupt,
 	timer_disable_interrupt,
+	NULL,
 	timer_register_callback,
 	timer_unregister_callback,
 	timer_get_prescaler,
