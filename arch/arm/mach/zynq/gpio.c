@@ -12,8 +12,18 @@ BT_DEF_MODULE_EMAIL				("james@fullfat-fs.co.uk")
 
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER 	h;
-	ZYNQ_GPIO_REGS 	   *pRegs;
+	volatile ZYNQ_GPIO_REGS 	   *pRegs;
 };
+
+static BT_ERROR gpio_irq_handler(BT_u32 ulIRQ, void *pParam) {
+	BT_HANDLE hGPIO = (BT_HANDLE) pParam;
+
+	hGPIO->pRegs->bank[0].INT_STAT = 1;		///< Acknowledge the interrupt.
+
+	hGPIO->pRegs->DATA[0] ^= 1 << 12;
+
+	return BT_ERR_NONE;
+}
 
 static BT_ERROR gpio_cleanup(BT_HANDLE hGPIO) {
 	return BT_ERR_NONE;
@@ -31,7 +41,7 @@ static BT_ERROR gpio_set(BT_HANDLE hGPIO, BT_u32 ulGPIO, BT_BOOL bValue) {
 	/*while(1) {
 		hGPIO->pRegs->MASK_DATA[ulBank] = ulMask;
 		ulMask ^= (1 << ulBit);
-		}*/
+	}*/
 
 	hGPIO->pRegs->MASK_DATA[ulBank] = ulMask;
 
@@ -57,7 +67,7 @@ static BT_ERROR gpio_set_direction(BT_HANDLE hGPIO, BT_u32 ulGPIO, BT_GPIO_DIREC
 		break;
 
 	case BT_GPIO_DIR_INPUT:
-		hGPIO->pRegs->bank[ulBank].OEN 	&= ~(1 << ulBit);
+		hGPIO->pRegs->bank[ulBank].OEN 		&= ~(1 << ulBit);
 		hGPIO->pRegs->bank[ulBank].DIRM 	&= ~(1 << ulBit);
 		break;
 
@@ -81,7 +91,6 @@ static BT_ERROR gpio_enable_interrupt(BT_HANDLE hGPIO, BT_u32 ulGPIO) {
 	BT_u32 ulBit  = ulGPIO % 32;
 
 	hGPIO->pRegs->bank[ulBank].INT_EN = (1 << ulBit);
-
 
 	return BT_ERR_NONE;
 }
@@ -124,6 +133,8 @@ static const BT_IF_HANDLE oHandleInterface = {
 
 BT_HANDLE gpio_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
 
+	BT_u32 i;
+
 	BT_ERROR Error;
 	if(pError) {
 		*pError = BT_ERR_NONE;
@@ -151,12 +162,33 @@ BT_HANDLE gpio_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
 
 	hGPIO->pRegs = (ZYNQ_GPIO_REGS *) pResource->ulStart;
 
-	Error = BT_RegisterGpioController(base, total, hGPIO);
+	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_IRQ, 0);
+	if(!pResource) {
+		Error = BT_ERR_GENERIC;
+		goto err_free_out;
+	}
+
+	Error = BT_RegisterInterrupt(pResource->ulStart, gpio_irq_handler, hGPIO);
 	if(Error) {
 		goto err_free_out;
 	}
 
+	// Prevent Pending Interrupts
+	for(i = 0; i < total; i += 32) {
+		hGPIO->pRegs->bank[i/32].INT_DIS = 0xFFFFFFFF;
+	}
+
+	Error = BT_EnableInterrupt(pResource->ulStart);
+
+	Error = BT_RegisterGpioController(base, total, hGPIO);
+	if(Error) {
+		goto err_free_irq;
+	}
+
 	return hGPIO;
+
+err_free_irq:
+	BT_UnregisterInterrupt(pResource->ulStart, gpio_irq_handler, hGPIO);
 
 err_free_out:
 	BT_kFree(hGPIO);
@@ -173,5 +205,4 @@ err_out:
 BT_INTEGRATED_DRIVER_DEF gpio_driver = {
 	.name 		= "zynq,gpio",
 	.pfnProbe	= gpio_probe,
-//	.pfnRemove	= gpio_remove,
 };
