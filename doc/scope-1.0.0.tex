@@ -1,4 +1,4 @@
-\section{Scope (v1.0.0) - End of 2013}
+\section{Scope (v1.0.0) - Summer 2013}
 This is a short summary that shall describe the scope for the v1.0.0 BitThunder implementation.
 Any requests/features required outside of this scope will have to wait for future BitThunder development
 schedules. \textbf{ABSOLUTELY NO EXCEPTIONS}.
@@ -30,9 +30,11 @@ will be supported in v1.0.0
 \item Timer devices.
 \item I2C Bus controllers.
 \item CAN Bus controllers.
+\item SPI Bus controllers.
 \item Ethernet / MAC interface controllers.
 \item Basic block devices.
 \item SDIO controllers.
+\item ADCs.
 \end{itemize}
 
 \subsection{Core Operating System Services}
@@ -45,24 +47,27 @@ BitThunder will provide the following core operating system services.
 \item Thread synchronisation objects (mutex/semaphores).
 \item IPC (Inter-process communication) (message queues).
 \item Virtual filesystem and basic APIs.
-\item Manage volumes, partitions, and file-system mountpoints.
+\item Manage volumes, partitions.
+\item Manage filesystems, (e.g. FullFAT).
 \item Open/Close devices.
 \item Provide access to mounted filesystems and files.
 \item Basic network stack and APIs.
 \item High and low-resolution kernel timestamps.
 \item System logging.
 \item Process watchdog.
+\item Efficient RPC service.
 \end{itemize}
 
 \subsection{The answer is NO!}
 For clarity, and as reference for my refusal to compromise here is a quick list of items
 that do not come under v1.0.0 scope. Thats not to say that BitThunder cannot or will not
-support these features, simply they will not be planned until after completion of the 
+support these features, simply they will not be planned until after completion of the
 v1.0.0 milestone.
 
 \begin{itemize}
-\item Real-time tracing.
-\item MMU Support / Real process isolation.
-\item USB (all versions) and other complex plug and play busses.
-\item Support for high-level (libc based) applications. E.g. porting Samba / vi / ssh.
+\item Real-time tracing. (v1.1)
+\item MMU Support / Real process isolation. (v1.3)
+\item USB (all versions) and other complex plug and play busses. (v1.2)
+\item Support for high-level (libc based) applications. E.g. porting Samba / vi / ssh. (v3.0)
+\item DMA Support (v1.1)
 \end{itemize}
