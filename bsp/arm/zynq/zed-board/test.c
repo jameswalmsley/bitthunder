@@ -1,4 +1,5 @@
 #include <bitthunder.h>
+#include <string.h>
 
 extern BT_u32 BT_ZYNQ_GetArmPLLFrequency();
 
@@ -16,7 +17,7 @@ extern BT_u32 BT_ZYNQ_GetArmPLLFrequency();
 #define BUF_SIZE	(1024*64)
 
 BT_u32 buffer_a[BUF_SIZE/4];
-BT_u32 *buffer_b = 0x01100000;
+BT_u32 *buffer_b = (BT_u32 *) 0x01100000;
 
 //BT_u32 buffer_a[1024*4];
 //BT_u32 buffer_b[1024*4];
@@ -43,6 +44,9 @@ int main(int argc, char **argv) {
 		memcpy(buffer_a, buffer_b, BUF_SIZE);
 	}
 	end = BT_GetKernelTime();
+
+	end = start;
+	start = end;
 
 	while(1) {
 		BT_GpioSet(0, BT_TRUE);
