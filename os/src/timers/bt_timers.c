@@ -49,3 +49,7 @@ BT_u32 BT_GetKernelTime() {
 
 	return us + offsetus;
 }
+
+BT_u32 BT_GetKernelTick() {
+	return BT_kTickCount();
+}
