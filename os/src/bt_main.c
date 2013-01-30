@@ -20,16 +20,23 @@ struct _BT_OPAQUE_HANDLE {
 
 static void idle_task(void *pParam) {
 
-	BT_BOOL bState = BT_TRUE;
+	//BT_BOOL bState = BT_TRUE;
 	BT_GpioSetDirection(7, BT_GPIO_DIR_OUTPUT);
 
 	BT_TICK ticks = BT_kTickCount();
+	BT_TICK ticks_a = ticks;
 
 	while(1) {
-		BT_GpioSet(7, bState);
-		bState ^= 1;
+		ticks_a = BT_kTickCount();
+		BT_GpioSet(7, BT_TRUE);
+		BT_kTaskDelayUntil(&ticks_a, 25);
+		BT_GpioSet(7, BT_FALSE);
+		BT_kTaskDelayUntil(&ticks_a, 150);
+		BT_GpioSet(7, BT_TRUE);
+		BT_kTaskDelayUntil(&ticks_a, 25);
+		BT_GpioSet(7, BT_FALSE);
 
-		BT_kTaskDelayUntil(&ticks, 100);
+		BT_kTaskDelayUntil(&ticks, 1000);
 	}
 
 	BT_kTaskDelete(NULL);
