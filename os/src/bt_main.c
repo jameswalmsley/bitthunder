@@ -67,7 +67,7 @@ int bt_main(int argc, char **argv) {
 
 	BT_UartEnable(hUart);
 
-	char *string = "BitThunder 0.3.0 (Blinking Tortoise)\r\n";
+	char *string = BT_VERSION_STRING"\r\n";
 	BT_CharDeviceWrite(hUart, 0, strlen(string), (BT_u8 *)string);
 
 	string = "Start Loading kernel modules...\r\n";
