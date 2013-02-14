@@ -11,6 +11,7 @@ $(BUILD_DIR)arch/arm/common/gic.o: CFLAGS += -DBT_CONFIG_ARCH_ARM_GIC_TOTAL_IRQS
 
 $(BUILD_DIR)arch/arm/common/freertos-arm.o: CFLAGS += -I $(BASE)kernel/FreeRTOS/Source/include/
 $(BUILD_DIR)arch/arm/common/freertos-arm.o: CFLAGS += -I $(BASE)arch/arm/include/arch/common/
+$(BUILD_DIR)arch/arm/common/freertos-arm.o: CFLAGS += -D $(BT_CONFIG_FREERTOS_PORT_ARCH)
 $(BUILD_DIR)arch/arm/common/freertos-m0.o: CFLAGS += -I $(BASE)kernel/FreeRTOS/Source/include/
 $(BUILD_DIR)arch/arm/common/freertos-m0.o: CFLAGS += -I $(BASE)arch/arm/include/arch/common/
 $(BUILD_DIR)arch/arm/common/freertos-m0.o: CFLAGS += -D $(BT_CONFIG_FREERTOS_PORT_ARCH)
