@@ -166,6 +166,9 @@ extern void vTaskSwitchContext( void );
 #endif
 
 #ifdef BT_CONFIG_FREERTOS_M0
+
+
+
 /*
  * Set basepri to portMAX_SYSCALL_INTERRUPT_PRIORITY without effecting other
  * registers.  r0 is clobbered.

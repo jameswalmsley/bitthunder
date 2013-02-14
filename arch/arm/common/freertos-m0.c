@@ -15,9 +15,13 @@ struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;
 };
 
-/* Constants required to handle critical sections. */
-#define portNO_CRITICAL_NESTING		( ( unsigned long ) 0 )
-volatile unsigned long ulCriticalNesting = 9999UL;
+/* For backward compatibility, ensure configKERNEL_INTERRUPT_PRIORITY is
+defined.  The value should also ensure backward compatibility.
+FreeRTOS.org versions prior to V4.4.0 did not include this definition. */
+#ifndef configKERNEL_INTERRUPT_PRIORITY
+	#define configKERNEL_INTERRUPT_PRIORITY 255
+#endif
+
 
 static BT_ERROR tick_isr_handler(BT_u32 ulIRQ, void *pParam) {
 	vTaskIncrementTick();
@@ -30,12 +34,23 @@ static BT_ERROR tick_isr_handler(BT_u32 ulIRQ, void *pParam) {
 	return BT_ERR_NONE;
 }
 
+/* Constants required to manipulate the NVIC. */
+#define portNVIC_PENDSVSET			0x10000000
+
 /* Constants required to setup the task context. */
 /* System mode, ARM mode, interrupts enabled. */
-#define portINITIAL_SPSR				( ( portSTACK_TYPE ) 0x1f )
-#define portTHUMB_MODE_BIT				( ( portSTACK_TYPE ) 0x20 )
-#define portINSTRUCTION_SIZE			( ( portSTACK_TYPE ) 4 )
-#define portNO_CRITICAL_SECTION_NESTING	( ( portSTACK_TYPE ) 0 )
+#define portINITIAL_XPSR			( 0x01000000 )
+
+
+/*
+ * Exception handlers.
+ */
+void xPortPendSVHandler( void ) __attribute__ (( naked ));
+void xPortSysTickHandler( void );
+void vPortSVCHandler( void ) __attribute__ (( naked ));
+
+
+static unsigned portBASE_TYPE uxCriticalNesting = 0xaaaaaaaa;
 
 /**
  *	Initialise the stack of a task to look as if a call to
@@ -116,7 +131,7 @@ portBASE_TYPE xPortStartScheduler(void) {
 
 	//uxCriticalNesting = 0;
 
-	vPortISRStartFirstTask();
+	vPortStartFirstTask();
 
 	// Should not get here!
 	return 0;
@@ -156,26 +171,7 @@ void vPortEndScheduler( void )
 
 void vPortYieldProcessor( void ) __attribute__((interrupt("SWI"), naked));
 
-void vPortYieldProcessor( void )
-{
 
-	/* Within an IRQ ISR the link register has an offset from the true return
-	address, but an SWI ISR does not.  Add the offset manually so the same
-	ISR return code can be used in both cases. */
-	__asm volatile ( "ADD		LR, LR, #4" );
-
-	/* Perform the context switch. First save the context of the current
-	task.*/
-	portSAVE_CONTEXT();
-
-	/* Find the highest priority task that is ready to run. */
-	vTaskSwitchContext();
-
-	__asm volatile( "clrex" );
-
-	/* Restore the context of the new task. */
-	portRESTORE_CONTEXT();
-}
 
 /*
  * FreeRTOS bottom-level IRQ vector handler
@@ -187,9 +183,9 @@ void vFreeRTOS_IRQInterrupt ( void )
 	unsigned portLONG ulDummy;
 
 	/* If using preemption, also force a context switch. */
-	#if configUSE_PREEMPTION == 1
-		SCB->ICSR = portNVIC_PENDSVSET;
-	#endif
+	//#if configUSE_PREEMPTION == 1
+	//	SCB->ICSR = portNVIC_PENDSVSET;
+	//#endif
 
 	ulDummy = portSET_INTERRUPT_MASK_FROM_ISR();
 	{
@@ -198,17 +194,17 @@ void vFreeRTOS_IRQInterrupt ( void )
 	portCLEAR_INTERRUPT_MASK_FROM_ISR( ulDummy );
 
 	/* Save the context of the interrupted task. */
-	portSAVE_CONTEXT();
+	//portSAVE_CONTEXT();
 
-	ulCriticalNesting++;
+	//ulCriticalNesting++;
 
-	__asm volatile( "clrex" );
+	//__asm volatile( "clrex" );
 
 	/* Call the handler provided with the standalone BSP */
-	__asm volatile( "bl  BT_ARCH_ARM_GIC_IRQHandler" );
+	//__asm volatile( "bl  BT_ARCH_ARM_GIC_IRQHandler" );
 
-	ulCriticalNesting--;
+	//ulCriticalNesting--;
 
 	/* Restore the context of the new task. */
-	portRESTORE_CONTEXT();
+	//portRESTORE_CONTEXT();
 }
