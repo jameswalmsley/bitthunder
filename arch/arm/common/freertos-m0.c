@@ -9,6 +9,7 @@
 
 #include <FreeRTOS.h>
 #include <task.h>
+#include <portmacro.h>
 
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;
@@ -41,77 +42,24 @@ static BT_ERROR tick_isr_handler(BT_u32 ulIRQ, void *pParam) {
  *	portSAVE_CONTEXT has been called.
  *
  **/
-
-portSTACK_TYPE *pxPortInitialiseStack( portSTACK_TYPE *pxTopOfStack,
-									   pdTASK_CODE pxCode, void *pvParameters )
+/*
+ * See header file for description.
+ */
+portSTACK_TYPE *pxPortInitialiseStack( portSTACK_TYPE *pxTopOfStack, pdTASK_CODE pxCode, void *pvParameters )
 {
-	portSTACK_TYPE *pxOriginalTOS;
-	pxOriginalTOS = pxTopOfStack;
-
-	/* Setup the initial stack of the task.  The stack is set exactly as
-	expected by the portRESTORE_CONTEXT() macro. */
-
-	/* First on the stack is the return address - which in this case is the
-	start of the task.  The offset is added to make the return address appear
-	as it would within an IRQ ISR. */
-	*pxTopOfStack = ( portSTACK_TYPE ) pxCode + portINSTRUCTION_SIZE;
+	/* Simulate the stack frame as it would be created by a context switch
+	interrupt. */
+	*pxTopOfStack = portINITIAL_XPSR;	             /* xPSR */
 	pxTopOfStack--;
-
-	*pxTopOfStack = ( portSTACK_TYPE ) xPortStartScheduler;	/* R14 */
+	*pxTopOfStack = ( portSTACK_TYPE ) pxCode;	     /* Return address (new PC) */
 	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) pxOriginalTOS;
-								/* Stack used when task starts goes in R13. */
-	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x12121212;	/* R12 */
-	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x11111111;	/* R11 */
-	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x10101010;	/* R10 */
-	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x09090909;	/* R9 */
-	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x08080808;	/* R8 */
-	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x07070707;	/* R7 */
-	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x06060606;	/* R6 */
-	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x05050505;	/* R5 */
-	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x04040404;	/* R4 */
-	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x03030303;	/* R3 */
-	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x02020202;	/* R2 */
-	pxTopOfStack--;
-	*pxTopOfStack = ( portSTACK_TYPE ) 0x01010101;	/* R1 */
-	pxTopOfStack--;
-
-	/* When the task starts is will expect to find the function parameter in
-	R0. */
-	*pxTopOfStack = ( portSTACK_TYPE ) pvParameters; /* R0 */
-	pxTopOfStack--;
-
-	/* The last thing onto the stack is the status register, which is set for
-	system mode, with interrupts enabled. */
-	*pxTopOfStack = ( portSTACK_TYPE ) portINITIAL_SPSR;
-
-	if( ( ( unsigned long ) pxCode & 0x01UL ) != 0x00 )
-	{
-		/* We want the task to start in thumb mode. */
-		*pxTopOfStack |= portTHUMB_MODE_BIT;
-	}
-
-	pxTopOfStack--;
-
-	/* Some optimisation levels use the stack differently to others.  This
-	means the interrupt flags cannot always be stored on the stack and will
-	instead be stored in a variable, which is then saved as part of the
-	tasks context. */
-	*pxTopOfStack = portNO_CRITICAL_SECTION_NESTING;
-
+	*pxTopOfStack = 0;	                             /* LR (R14) */
+	pxTopOfStack -= 5;	                             /* R12, R3, R2, R1 */
+	*pxTopOfStack = ( portSTACK_TYPE ) pvParameters; /* and R0 */
+	pxTopOfStack -= 8;	/* R7, R6, R5, R4, R11, R10, R9, and R8. */
 	return pxTopOfStack;
 }
+
 
 void vPortExitTask( void ) {
 	vTaskDelete(NULL);
@@ -151,31 +99,22 @@ static void prvSetupTimerInterrupt(void) {
 
 extern void enable_irq(void);
 
-void vPortISRStartFirstTask( void )
+void vPortStartFirstTask( void )
 {
-
-	/* Change from System to IRQ mode.
-	 * portRESTORE_CONTEXT sets the desired CPSR by modifying SPSR, which
-	 * requires that the processor be in an Exception mode to actually
-	 * do anything by leaving that mode.
-	 */
-	__asm volatile (
-		"LDR    R0, =0x1D2       \n\t"
-		"MSR    CPSR, R0         \n\t"
-		:::"r0" \
-	);
-
-	enable_irq();
-
-	/* Simply start the scheduler.  This is included here as it can only be
-	called from ARM mode. */
-	portRESTORE_CONTEXT();
+	asm volatile(
+					" ldr r0, =0x0	\n" /* cm0 has fixed vector table at address 0x0 */
+					" ldr r0, [r0]	\n"
+					" msr msp, r0	\n" /* Set the msp back to the start of the stack. */
+					" svc 0			\n" /* System call to start first task. */
+				);
 }
 
 portBASE_TYPE xPortStartScheduler(void) {
 	// Setup Hardware Timer!
 	prvSetupTimerInterrupt();
 	// Start first task
+
+	//uxCriticalNesting = 0;
 
 	vPortISRStartFirstTask();
 
@@ -195,38 +134,15 @@ in a variable, which is then saved as part of the stack context. */
 void vPortEnterCritical( void )
 {
 	/* Disable interrupts as per portDISABLE_INTERRUPTS(); 					*/
-	__asm volatile (
-		"STMDB	SP!, {R0}			\n\t"	/* Push R0.						*/
-		"MRS	R0, CPSR			\n\t"	/* Get CPSR.					*/
-		"ORR	R0, R0, #0xC0		\n\t"	/* Disable IRQ, FIQ.			*/
-		"MSR	CPSR, R0			\n\t"	/* Write back modified value.	*/
-		"LDMIA	SP!, {R0}" );				/* Pop R0.						*/
-
-	/* Now interrupts are disabled ulCriticalNesting can be accessed
-	directly.  Increment ulCriticalNesting to keep a count of how many times
-	portENTER_CRITICAL() has been called. */
-	ulCriticalNesting++;
+	portDISABLE_INTERRUPTS();
+	uxCriticalNesting++;
 }
 
 void vPortExitCritical( void )
 {
-	if( ulCriticalNesting > portNO_CRITICAL_NESTING )
-	{
-		/* Decrement the nesting count as we are leaving a critical section. */
-		ulCriticalNesting--;
-
-		/* If the nesting level has reached zero then interrupts should be
-		re-enabled. */
-		if( ulCriticalNesting == portNO_CRITICAL_NESTING )
-		{
-			/* Enable interrupts as per portEXIT_CRITICAL().				*/
-			__asm volatile (
-				"STMDB	SP!, {R0}		\n\t"	/* Push R0.					*/
-				"MRS	R0, CPSR		\n\t"	/* Get CPSR.				*/
-				"BIC	R0, R0, #0xC0	\n\t"	/* Enable IRQ, FIQ.			*/
-				"MSR	CPSR, R0		\n\t"	/* Write back modified value.*/
-				"LDMIA	SP!, {R0}" );			/* Pop R0.					*/
-		}
+	uxCriticalNesting--;
+	if(!uxCriticalNesting) {
+		portENABLE_INTERRUPTS();
 	}
 }
 
@@ -267,6 +183,20 @@ void vPortYieldProcessor( void )
 void vFreeRTOS_IRQInterrupt ( void ) __attribute__((naked));
 void vFreeRTOS_IRQInterrupt ( void )
 {
+
+	unsigned portLONG ulDummy;
+
+	/* If using preemption, also force a context switch. */
+	#if configUSE_PREEMPTION == 1
+		SCB->ICSR = portNVIC_PENDSVSET;
+	#endif
+
+	ulDummy = portSET_INTERRUPT_MASK_FROM_ISR();
+	{
+		vTaskIncrementTick();
+	}
+	portCLEAR_INTERRUPT_MASK_FROM_ISR( ulDummy );
+
 	/* Save the context of the interrupted task. */
 	portSAVE_CONTEXT();
 

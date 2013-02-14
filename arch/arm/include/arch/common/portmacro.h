@@ -52,7 +52,7 @@ extern "C" {
  * are included here for efficiency.  An attempt to call one from
  * THUMB mode code will result in a compile time error.
  */
-
+#ifdef BT_CONFIG_FREERTOS_A9
 #define portRESTORE_CONTEXT()											\
 {																		\
 extern volatile void * volatile pxCurrentTCB;							\
@@ -137,13 +137,14 @@ extern volatile unsigned portLONG ulCriticalNesting;					\
 	( void ) ulCriticalNesting;											\
 	( void ) pxCurrentTCB;												\
 }
+#endif
 
 extern void vTaskSwitchContext( void );
 #define portYIELD_FROM_ISR()		vTaskSwitchContext()
 #define portYIELD()					__asm volatile ( "SWI 0" )
 /*-----------------------------------------------------------*/
 
-
+#if (defined BT_CONFIG_FREERTOS_A9)
 /* Critical section management. */
 
 	#define portDISABLE_INTERRUPTS()											\
@@ -161,6 +162,46 @@ extern void vTaskSwitchContext( void );
 			"BIC	R0, R0, #0xC0	\n\t"	/* Enable IRQ, FIQ.				*/	\
 			"MSR	CPSR, R0		\n\t"	/* Write back modified value.	*/	\
 			"LDMIA	SP!, {R0}			" )	/* Pop R0.						*/
+
+#endif
+
+#ifdef BT_CONFIG_FREERTOS_M0
+/*
+ * Set basepri to portMAX_SYSCALL_INTERRUPT_PRIORITY without effecting other
+ * registers.  r0 is clobbered.
+ */
+#define portSET_INTERRUPT_MASK()						\
+	__asm volatile										\
+	(													\
+		"	mov r0, %0								\n"	\
+		"	msr basepri, r0							\n" \
+		::"i"(configMAX_SYSCALL_INTERRUPT_PRIORITY):"r0"	\
+	)
+
+/*
+ * Set basepri back to 0 without effective other registers.
+ * r0 is clobbered.  FAQ:  Setting BASEPRI to 0 is not a bug.  Please see
+ * http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html before disagreeing.
+ */
+#define portCLEAR_INTERRUPT_MASK()			\
+	__asm volatile							\
+	(										\
+		"	mov r0, #0					\n"	\
+		"	msr basepri, r0				\n"	\
+		:::"r0"								\
+	)
+
+/* FAQ:  Setting BASEPRI to 0 in portCLEAR_INTERRUPT_MASK_FROM_ISR() is not a
+bug.  Please see http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html before
+disagreeing. */
+#define portSET_INTERRUPT_MASK_FROM_ISR()		0;portSET_INTERRUPT_MASK()
+#define portCLEAR_INTERRUPT_MASK_FROM_ISR(x)	portCLEAR_INTERRUPT_MASK();(void)x
+
+
+#define portDISABLE_INTERRUPTS()	portSET_INTERRUPT_MASK()
+#define portENABLE_INTERRUPTS()		portCLEAR_INTERRUPT_MASK()
+
+#endif
 
 extern void vPortEnterCritical( void );
 extern void vPortExitCritical( void );

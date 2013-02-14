@@ -3,6 +3,7 @@
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_USE_GIC) 	+= $(BUILD_DIR)arch/arm/common/gic.o
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-A9)	+= $(BUILD_DIR)arch/arm/common/cortex-a9-cpu-timers.o
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-A9)	+= $(BUILD_DIR)arch/arm/common/freertos-arm.o
+BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX_M0) += $(BUILD_DIR)arch/arm/common/freertos-m0.o
 
 BT_ARCH_ARM_OBJECTS += $(BT_ARCH_ARM_OBJECTS-y)
 
