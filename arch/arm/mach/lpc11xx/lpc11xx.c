@@ -48,7 +48,7 @@ static BT_u32 zynq_get_cpu_clock_frequency() {
 	return 0;
 }
 
-BT_MACHINE_START(ARM, LPC11xx, "LPC Microcontroller Platform")
+BT_MACHINE_START(ARM, CORTEX_M0, "LPC Microcontroller Platform")
     .ulSystemClockHz 			= 8000000,
 	.pfnGetCpuClockFrequency 	= zynq_get_cpu_clock_frequency,
 
