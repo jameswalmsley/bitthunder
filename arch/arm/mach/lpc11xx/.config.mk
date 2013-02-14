@@ -1,0 +1,6 @@
+CFLAGS += -I $(BASE)arch/arm/include/
+
+
+ifeq ($(BT_CONFIG_DRIVERS_SDCARD), y)
+BT_CONFIG_DRIVERS_SDCARD_HOST_SDHCI=y
+endif
