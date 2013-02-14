@@ -9,16 +9,16 @@ See LICENSE for more information.
 
 ## Directory Tree
 
-    .dbuild    - Dark Builder build system. (BitThunder edition).
-    arch       - Contains architecture specific code & bootstrapping for the OS.
-    +$(ARCH)   -
-    ++$(MACH)  - Machine sub-architectures, e.g. zynq, or cortex-m3 etc etc.
-    bsp        - All board-support packages found here, this is where you build from!
-    doc        - Documentation...
-    drivers    - Architecture independent drivers, e.g. I2C/USB/PCIe devices etc.
-    kernel     - Contains the RTOS scheduler (FreeRTOS).
-    lib        - Contains all BitThunder library code, i.e. the stuff not implementing the OS. Useful structures etc.
-    os         - Contains all of the BitThunder platform independent OS code.
+    .dbuild                 - Dark Builder build system. (BitThunder edition).
+    arch                    - Contains architecture specific code & bootstrapping for the OS.
+    + $(ARCH)               - Contains common architecture components, e.g. NVIC/GIC drivers for ARM.
+      + mach/$(SUBARCH)     - Machine sub-architectures, e.g. zynq, or cortex-m3/stm32 etc etc.
+    bsp                     - All board-support packages found here, this is where you build from!
+    doc                     - Documentation...
+    drivers                 - Architecture independent drivers, e.g. I2C/USB/PCIe devices etc.
+    kernel                  - Contains the RTOS scheduler (FreeRTOS).
+    lib                     - Contains all BitThunder library code, i.e. the stuff not implementing the OS. Useful structures etc.
+    os                      - Contains all of the BitThunder platform independent OS code.
 
 ## Development Process
 
@@ -48,4 +48,3 @@ Even though the master branch can be considered stable in this respect, if you r
 kernel, then you should use the last marked stable tag, e.g:
 
 stable-v1.0.0
-
