@@ -1,10 +1,10 @@
-ENTRY(reset)
+ENTRY(BT_NVIC_Reset_Handler)
 
 _STACK_SIZE = DEFINED(_STACK_SIZE) ? _STACK_SIZE : 0x200;
-_HEAP_SIZE = DEFINED(_HEAP_SIZE) ? _HEAP_SIZE : 0x200;
+_HEAP_SIZE = DEFINED(_HEAP_SIZE) ? _HEAP_SIZE : 0x1400;
 
-_ABORT_STACK_SIZE = DEFINED(_ABORT_STACK_SIZE) ? _ABORT_STACK_SIZE : 128;
-_SUPERVISOR_STACK_SIZE = DEFINED(_SUPERVISOR_STACK_SIZE) ? _SUPERVISOR_STACK_SIZE : 128;
+_ABORT_STACK_SIZE = DEFINED(_ABORT_STACK_SIZE) ? _ABORT_STACK_SIZE : 0;
+_SUPERVISOR_STACK_SIZE = DEFINED(_SUPERVISOR_STACK_SIZE) ? _SUPERVISOR_STACK_SIZE : 0;
 
 /* Define Memories in the system */
 MEMORY
@@ -22,9 +22,9 @@ SECTIONS
 	 *
 	 **/
 
-	.init : {
-		KEEP(*(.init))
-		KEEP(*(.init.*))
+	.bt.init.vectors : {
+		KEEP(*(.bt.init.vectors))
+		KEEP(*(.bt.init.vectors.*))
 	} > FLASH
 
 	.bt.arch.init : {
@@ -60,33 +60,22 @@ SECTIONS
 		*(.text)
 		*(.text.*)
 	} > FLASH
+	_etext =.;
 
 
 .data : {
+	  . = ALIGN(4);
    __data_start = .;
    *(.data)
    *(.data.*)
-   *(.gnu.linkonce.d.*)
-   *(.jcr)
-   *(.got)
-   *(.got.plt)
+   . = ALIGN(4);        /* Align the start of the fastrun part */
+   *(.fastrun)
+   *(.fastrun.*)
+   . = ALIGN(4);        /* Align the end of the section */
    __data_end = .;
-} > FLASH
-
-
-
-
-/* Generate Stack and Heap definitions */
-
-.heap (NOLOAD) : {
-   . = ALIGN(16);
-   _heap = .;
-   HeapBase = .;
-   _heap_start = .;
-   . += _HEAP_SIZE;
-   _heap_end = .;
-   HeapLimit = .;
 } > RAM
+_edata = .;
+
 
 .bss :
 {
@@ -100,6 +89,17 @@ _bss_end = .;
 __bss_end__ = _bss_end;
 } > RAM
 
+/* Generate Stack and Heap definitions */
+
+.heap (NOLOAD) : {
+   . = ALIGN(16);
+   _heap = .;
+   HeapBase = .;
+   _heap_start = .;
+   . += _HEAP_SIZE;
+   _heap_end = .;
+   HeapLimit = .;
+} > RAM
 
 .stack (NOLOAD) : {
    . = ALIGN(16);

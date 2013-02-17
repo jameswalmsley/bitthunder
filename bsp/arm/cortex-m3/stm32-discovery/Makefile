@@ -18,12 +18,17 @@ TOOLCHAIN=arm-none-eabi-
 
 include $(BASE).dbuild/dbuild.mk
 
+all: kernel.hex
+
 test:
 	@echo $(SUBARCH)
 	@echo $(SUB_OBJDIRS)
 
 all: kernel.elf kernel.list kernel.img kernel.syms
 	$(Q)$(SIZE) kernel.elf
+
+kernel.hex: kernel.elf
+	$(Q)$(TOOLCHAIN)objcopy -O ihex $< $@
 
 kernel.img: kernel.elf
 	$(Q)$(PRETTY) IMAGE $(MODULE_NAME) $@
@@ -38,13 +43,13 @@ kernel.syms: kernel.elf
 #	$(Q)$(OBJDUMP) -t kernel.elf > $@
 
 
-#kernel.elf: LDFLAGS += -L"c:/yagarto/lib/gcc/arm-none-eabi/4.7.2/thumb/"
-#kernel.elf: LDFLAGS += -L"c:/yagarto/arm-none-eabi/lib/thumb/"
-#kernel.elf: LDLIBS += -lc
+kernel.elf: LDFLAGS += -L"c:/yagarto/lib/gcc/arm-none-eabi/4.7.2/thumb/v6m/"
+kernel.elf: LDFLAGS += -L"c:/yagarto/arm-none-eabi/lib/thumb/v6m/"
+kernel.elf: LDLIBS += -lc -lgcc
 
-LDFLAGS = $(MCFLAGS) -mthumb -nostartfiles -Wl,-Map=kernel.map,--cref,--no-warn-mismatch $(LIBDIR)
+#LDFLAGS = $(MCFLAGS) -mthumb -nostartfiles -Wl,-Map=kernel.map,--cref,--no-warn-mismatch $(LIBDIR)
 
 kernel.elf: $(OBJECTS)
 	$(Q)$(PRETTY) --dbuild "LD" $(MODULE_NAME) $@
-	$(Q)$(CC) $(LDFLAGS) -o $@ -T $(LINKER_SCRIPT) $(OBJECTS) $(LDLIBS)
+	$(Q)$(LD) $(LDFLAGS) -Map kernel.map -o $@ -T $(LINKER_SCRIPT) $(OBJECTS) $(LDLIBS)
 

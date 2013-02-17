@@ -1,5 +1,5 @@
-.globl _bt_startup_boot
-_bt_startup_boot:
+.globl _bt_startup_init_hook
+_bt_startup_init_hook:
 	ldr	r0,=0xDEADBEEF
 							@ note, this bypasses the usual BitThunder boot sequence for now,
 							@ but it will call main, which is the BitThunder main system entry,
