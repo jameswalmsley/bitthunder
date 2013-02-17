@@ -208,3 +208,22 @@ void vFreeRTOS_IRQInterrupt ( void )
 	/* Restore the context of the new task. */
 	//portRESTORE_CONTEXT();
 }
+
+void BT_NVIC_SVC_Handler( void )
+{
+	__asm volatile (
+					"	ldr	r3, pxCurrentTCBConst2		\n" /* Restore the context. */
+					"	ldr r1, [r3]					\n" /* Use pxCurrentTCBConst to get the pxCurrentTCB address. */
+					"	ldr r0, [r1]					\n" /* The first item in pxCurrentTCB is the task top of stack. */
+					"	ldmia r0!, {r4-r11}				\n" /* Pop the registers that are not automatically saved on exception entry and the critical nesting count. */
+					"	msr psp, r0						\n" /* Restore the task stack pointer. */
+					"	mov r0, #0 						\n"
+					"	msr	basepri, r0					\n"
+					"	orr r14, #0xd					\n"
+					"	bx r14							\n"
+					"									\n"
+					"	.align 2						\n"
+					"pxCurrentTCBConst2: .word pxCurrentTCB				\n"
+				);
+}
+

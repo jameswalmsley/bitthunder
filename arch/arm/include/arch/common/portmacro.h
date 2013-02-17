@@ -140,8 +140,16 @@ extern volatile unsigned portLONG ulCriticalNesting;					\
 #endif
 
 extern void vTaskSwitchContext( void );
+
 #define portYIELD_FROM_ISR()		vTaskSwitchContext()
+
+#if (defined BT_CONFIG_FREERTOS_M3)
+extern void vPortYieldFromISR( void );
+#define portYIELD()					vPortYieldFromISR()
+
+#else
 #define portYIELD()					__asm volatile ( "SWI 0" )
+#endif
 /*-----------------------------------------------------------*/
 
 #if (defined BT_CONFIG_FREERTOS_A9)
@@ -165,7 +173,7 @@ extern void vTaskSwitchContext( void );
 
 #endif
 
-#ifdef BT_CONFIG_FREERTOS_M0
+#if (defined BT_CONFIG_FREERTOS_M0) || (defined BT_CONFIG_FREERTOS_M3)
 
 
 
