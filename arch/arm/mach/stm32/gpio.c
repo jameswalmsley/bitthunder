@@ -11,6 +11,7 @@
  **/
 #include <bitthunder.h>
 #include "gpio.h"
+#include "rcc.h"
 
 BT_DEF_MODULE_NAME				("STM32 GPIO")
 BT_DEF_MODULE_DESCRIPTION		("Provides abstract control of GPIO signals for STM32 platform.")
@@ -40,8 +41,11 @@ static BT_ERROR gpio_set(BT_HANDLE hGPIO, BT_u32 ulGPIO, BT_BOOL bValue) {
 	BT_u32 ulBank 	= ulGPIO / 16;
 	BT_u32 ulBit	= ulGPIO % 16;
 
+	// Enable the peripheral clock!
+	STM32_RCC->APB2EN |= 1 << (ulBank + 2);
+
 	if(bValue) {
-		hGPIO->pRegs->banks[ulBank].BSRR = 1 << ulBit;
+		hGPIO->pRegs->banks[ulBank].BSRR = 1 << (ulBit);
 	} else {
 		hGPIO->pRegs->banks[ulBank].BSRR = 1 << (ulBit+16);
 	}
@@ -57,25 +61,34 @@ static BT_BOOL gpio_get(BT_HANDLE hGPIO, BT_u32 ulGPIO, BT_ERROR *pError) {
 }
 
 static BT_ERROR gpio_set_direction(BT_HANDLE hGPIO, BT_u32 ulGPIO, BT_GPIO_DIRECTION eDirection) {
-	//BT_u32 ulBank 	= ulGPIO / 16;
-	//BT_u32 ulBit	= ulGPIO % 16;
+	BT_u32 ulBank 	= ulGPIO / 16;
+	BT_u32 ulBit	= ulGPIO % 16;
+	BT_u32 ulCfgBank	= ulBit / 8;
+	BT_u32 ulCfg		= ulBit % 8;
 
+	STM32_RCC->APB2EN |= 1 << (ulBank + 2);
 
-	/*switch(eDirection) {
-	case BT_GPIO_DIR_OUTPUT:
-		hGPIO->pRegs->bank[ulBank].DIRM 	|= 1 << ulBit;
-		hGPIO->pRegs->bank[ulBank].OEN  	|= 1 << ulBit;
+	switch(eDirection) {
+	case BT_GPIO_DIR_OPEN_DRAIN:
+	case BT_GPIO_DIR_OUTPUT: {
+		BT_u32 ulMask = 0x0000000F << (4*ulCfg);
+		BT_u32 reg = hGPIO->pRegs->banks[ulBank].CR[ulCfgBank];
+		reg &= ~ulMask;
+		reg |= 3 << (4 *ulCfg);
+		hGPIO->pRegs->banks[ulBank].CR[ulCfgBank] = reg;
 		break;
+	}
+		
 
 	case BT_GPIO_DIR_INPUT:
-		hGPIO->pRegs->bank[ulBank].OEN 		&= ~(1 << ulBit);
-		hGPIO->pRegs->bank[ulBank].DIRM 	&= ~(1 << ulBit);
+		//hGPIO->pRegs->bank[ulBank].OEN 		&= ~(1 << ulBit);
+		//hGPIO->pRegs->bank[ulBank].DIRM 	&= ~(1 << ulBit);
 		break;
 
 	default:
 		return BT_ERR_GENERIC;
 
-		}*/
+	}
 
 	return BT_ERR_NONE;
 }
@@ -167,12 +180,12 @@ BT_HANDLE gpio_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
 		goto err_free_out;
 	}
 
-	Error = BT_RegisterInterrupt(pResource->ulStart, gpio_irq_handler, hGPIO);
+	/*Error = BT_RegisterInterrupt(pResource->ulStart, gpio_irq_handler, hGPIO);
 	if(Error) {
 		goto err_free_out;
-	}
+		}*/
 
-	Error = BT_EnableInterrupt(pResource->ulStart);
+	//Error = BT_EnableInterrupt(pResource->ulStart);
 
 	Error = BT_RegisterGpioController(base, total, hGPIO);
 	if(Error) {

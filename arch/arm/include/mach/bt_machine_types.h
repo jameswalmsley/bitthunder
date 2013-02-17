@@ -10,5 +10,4 @@ typedef enum _BT_MACH_TYPE {
 } BT_MACH_TYPE;
 
 
-
 #endif

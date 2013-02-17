@@ -10,7 +10,7 @@ typedef struct _STM32_GPIO_BANK {
 	BT_u32 BSRR;	///< Bit set/reset register.
 	BT_u32 BRR;		///< Bit reset register.
 	BT_u32 LCKR;	///< Configuration lock register.
-	BT_STRUCT_RESERVED_u32(0, 0x800, 0xC00);
+	BT_STRUCT_RESERVED_u32(0, 0x18, 0x400);
 } STM32_GPIO_BANK;
 
 typedef struct _STM32_GPIO_REGS {
