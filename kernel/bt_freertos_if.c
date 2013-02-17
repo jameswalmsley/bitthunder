@@ -44,3 +44,6 @@ void BT_kTaskDelayUntil(BT_TICK *pulPreviousWakeTime, BT_TICK ulTimeIncrement) {
 	vTaskDelayUntil(pulPreviousWakeTime, ulTimeIncrement);
 }
 
+void BT_kTaskYield() {
+	taskYIELD();
+}

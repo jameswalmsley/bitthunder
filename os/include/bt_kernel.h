@@ -13,7 +13,7 @@ void		BT_kTaskDelete 		(void *pTaskHandle);
 BT_TICK		BT_kTickCount		();
 void		BT_kTaskDelay		(BT_TICK ulTicks);
 void		BT_kTaskDelayUntil 	(BT_TICK *pulPreviousWakeTime, BT_TICK ulTimeIncrement);
-
+void 		BT_kTaskYield();
 
 
 #endif
