@@ -10,6 +10,8 @@
 #include "handles/bt_handle.h"
 #include "machines/bt_machines.h"
 
+#include "collections/bt_linked_list.h"
+
 #ifdef BT_CONFIG_OS
 #include "bt_os.h"
 #endif

@@ -1,4 +1,5 @@
 BT_LIB_OBJECTS += $(BUILD_DIR)lib/src/handles/bt_handles.o
+BT_LIB_OBJECTS += $(BUILD_DIR)lib/src/collections/bt_linked_list.o
 
 
 #
