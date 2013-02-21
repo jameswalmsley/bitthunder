@@ -56,6 +56,13 @@ SECTIONS
 		__bt_arch_drivers_end = .;
 	} > ZYNQ_RAM0
 
+	.bt.module.init : {
+	    __bt_module_init_start = .;
+		KEEP(*(.bt.module.init))
+		KEEP(*(.bt.module.init.*))
+		__bt_module_init_end = .;
+	} > ZYNQ_RAM0
+
 	.bt.module.entries : {
 	    __bt_module_entries_start = .;
 		KEEP(*(.bt.module.entries))

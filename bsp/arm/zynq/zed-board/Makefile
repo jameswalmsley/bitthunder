@@ -42,4 +42,4 @@ kernel.elf: LDFLAGS += -L"/opt/Xilinx/14.2/ISE_DS/EDK/gnu/arm/lin64/arm-xilinx-e
 kernel.elf: LDLIBS += -lc -lgcc
 kernel.elf: $(OBJECTS)
 	$(Q)$(PRETTY) --dbuild "LD" $(MODULE_NAME) $@
-	$(Q)$(LD) $(LDFLAGS) -Map kernel.map -o $@ -T $(LINKER_SCRIPT) $(OBJECTS) libxil.a $(LDLIBS) libxil.a
+	$(Q)$(LD) --gc-sections $(LDFLAGS) -Map kernel.map -o $@ -T $(LINKER_SCRIPT) $(OBJECTS) libxil.a $(LDLIBS) libxil.a
