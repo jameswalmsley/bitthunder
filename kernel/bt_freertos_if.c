@@ -1,6 +1,8 @@
 #include <bitthunder.h>
 #include <FreeRTOS.h>
 #include <task.h>
+#include <queue.h>
+#include <semphr.h>
 #include <bt_kernel.h>
 
 BT_ERROR BT_kStartScheduler() {
@@ -46,4 +48,47 @@ void BT_kTaskDelayUntil(BT_TICK *pulPreviousWakeTime, BT_TICK ulTimeIncrement) {
 
 void BT_kTaskYield() {
 	taskYIELD();
+}
+
+void *BT_kGetThreadTag(void *pThreadID) {
+	return xTaskGetApplicationTaskTag((xTaskHandle) pThreadID);
+}
+
+void BT_kSetThreadTag(void *pThreadID, void *pTagData) {
+	vTaskSetApplicationTaskTag((xTaskHandle) pThreadID, pTagData);
+}
+
+void *BT_kMutexCreate() {
+	xSemaphoreHandle m;
+	vSemaphoreCreateBinary(m);
+	return m;
+}
+
+void BT_kMutexDestroy(void *pMutex) {
+	vSemaphoreDelete(pMutex);
+}
+
+BT_BOOL BT_kMutexPend(void *pMutex, BT_TICK oTimeoutTicks) {
+	if(xSemaphoreTake(pMutex, oTimeoutTicks) == pdTRUE) {
+		return BT_TRUE;
+	}
+	return BT_FALSE;
+}
+
+BT_BOOL  BT_kMutexRelease(void *pMutex) {
+	if(xSemaphoreGive(pMutex) == pdTRUE) {
+		return BT_TRUE;
+	}
+	return BT_FALSE;
+}
+
+BT_BOOL BT_kMutexReleaseFromISR(void *pMutex, BT_BOOL *pbHigherPriorityTaskWoken) {
+	portBASE_TYPE val;
+
+	BT_BOOL bReturn =  xSemaphoreGiveFromISR(pMutex, &val);
+	if(pbHigherPriorityTaskWoken) {
+		*pbHigherPriorityTaskWoken = (BT_BOOL) val;
+	}
+
+	return bReturn;
 }
