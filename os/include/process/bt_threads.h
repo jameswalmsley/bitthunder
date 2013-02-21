@@ -12,7 +12,7 @@ typedef struct _BT_THREAD_CONFIG {
 } BT_THREAD_CONFIG;
 
 
-
+typedef BT_ERROR (*BT_FN_THREAD_ENTRY)	(BT_HANDLE hThread, void *pParam);
 
 
 #endif

@@ -14,6 +14,13 @@ BT_TICK		BT_kTickCount		();
 void		BT_kTaskDelay		(BT_TICK ulTicks);
 void		BT_kTaskDelayUntil 	(BT_TICK *pulPreviousWakeTime, BT_TICK ulTimeIncrement);
 void 		BT_kTaskYield();
+void 	   *BT_kGetThreadTag(void *pThreadID);
+void		BT_kSetThreadTag(void *pThreadID, void *pTagData);
 
+void 	   *BT_kMutexCreate();
+void	    BT_kMutexDestroy(void *pMutex);
+BT_BOOL		BT_kMutexPend(void *pMutex, BT_u32 ulTimeout);
+BT_BOOL		BT_kMutexRelease(void *pMutex);
+BT_BOOL		BT_kMutexReleaseFromISR(void *pMutex, BT_BOOL *pbHigherPriorityTaskWoken);
 
 #endif
