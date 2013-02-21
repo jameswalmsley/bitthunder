@@ -1,6 +1,21 @@
 #ifndef _BT_STRUCT_H_
 #define _BT_STRUCT_H_
 
+#include <stddef.h>
+
+/**
+ *	@brief		A special macro to cast a member of a structure out to the containing structure
+ *
+ *	@ptr:       the pointer to the member.
+ * 	@type:   	the type of the container struct this is embedded in.
+ * 	@member:    the name of the member within the struct.
+ *	@t_member:	the type of the member -- linux uses typeof() but most compilers dont have this.
+ *
+ *	@citation:	Linux kernel source-code.
+ */
+#define bt_container_of(ptr, type, member, t_member) ((type *) (((char *) ((t_member *) (ptr))) - offsetof(type,member)))
+
+
 /**
  *	Calculates the number of items within an array!
  *
