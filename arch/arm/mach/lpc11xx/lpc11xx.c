@@ -14,20 +14,20 @@
 #include "uart.h"
 #include "gpio.h"
 
-static const BT_RESOURCE oZynq_gpio_resources[] = {
+static const BT_RESOURCE oLPC11xx_gpio_resources[] = {
 	{
-		.ulStart 			= ZYNQ_GPIO_BASE,
-		.ulEnd 				= ZYNQ_GPIO_BASE + BT_SIZE_4K - 1,
+		.ulStart 			= BT_CONFIG_MACH_LPC11xx_GPIO_BASE,
+		.ulEnd 				= BT_CONFIG_MACH_LPC11xx_GPIO_BASE + BT_SIZE_4K - 1,
 		.ulFlags 			= BT_RESOURCE_MEM,
 	},
 	{
 		.ulStart			= 0,
-		.ulEnd				= 53,
+		.ulEnd				= BT_CONFIG_MACH_LPC11xx_TOTAL_GPIOS-1,
 		.ulFlags			= BT_RESOURCE_IO,
 	},
 	{
-		.ulStart			= 52,
-		.ulEnd				= 52,
+		.ulStart			= 28,
+		.ulEnd				= 31,
 		.ulFlags			= BT_RESOURCE_IRQ,
 	},
 };
@@ -38,10 +38,10 @@ static const BT_RESOURCE oZynq_gpio_resources[] = {
  *
  *	This allows it to be automatically enumerated without "registering" a driver.
  **/
-BT_INTEGRATED_DEVICE_DEF oZynq_gpio_device = {
-	.name 					= "zynq,gpio",
-	.ulTotalResources 		= BT_ARRAY_SIZE(oZynq_gpio_resources),
-	.pResources 			= oZynq_gpio_resources,
+BT_INTEGRATED_DEVICE_DEF oLPC11xx_gpio_device = {
+	.name 					= "LPC11xx,gpio",
+	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC11xx_gpio_resources),
+	.pResources 			= oLPC11xx_gpio_resources,
 };
 
 static BT_u32 zynq_get_cpu_clock_frequency() {
