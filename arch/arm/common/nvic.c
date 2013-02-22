@@ -36,7 +36,7 @@ static BT_ERROR nvic_setpriority(BT_HANDLE hNVIC, BT_u32 ulIRQ, BT_u32 ulPriorit
 }
 
 static BT_u32 nvic_getpriority(BT_HANDLE hNVIC, BT_u32 ulIRQ, BT_ERROR *pError) {
-	
+
 	return BT_ERR_NONE;
 }
 
@@ -75,10 +75,7 @@ static const BT_IF_DEVICE oDeviceInterface = {
 };
 
 static const BT_IF_HANDLE oHandleInterface = {
-	BT_MODULE_NAME,
-	BT_MODULE_DESCRIPTION,
-	BT_MODULE_AUTHOR,
-	BT_MODULE_EMAIL,
+	BT_MODULE_DEF_INFO,
 	.pfnCleanup = nvic_cleanup,
 	.oIfs = {
 		.pDevIF = &oDeviceInterface,
@@ -88,7 +85,7 @@ static const BT_IF_HANDLE oHandleInterface = {
 static const BT_INTEGRATED_DRIVER oIntegratedDriver;
 
 static BT_HANDLE nvic_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
-	
+
 	BT_ERROR Error;
 
 	if(g_hActiveHandle) {

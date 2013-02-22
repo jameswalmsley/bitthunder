@@ -722,10 +722,7 @@ const BT_IF_DEVICE BT_ZYNQ_UART_oDeviceInterface = {
 
 
 static const BT_IF_HANDLE oHandleInterface = {
-	BT_MODULE_NAME,												///< Provides the standard module name in ROM.
-	BT_MODULE_DESCRIPTION,
-	BT_MODULE_AUTHOR,
-	BT_MODULE_EMAIL,
+	BT_MODULE_DEF_INFO,
 	.oIfs = {
 		(BT_HANDLE_INTERFACE) &BT_ZYNQ_UART_oDeviceInterface,
 	},

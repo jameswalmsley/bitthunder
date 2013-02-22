@@ -26,10 +26,7 @@ typedef union _BT_IF_INTERFACES {
 } BT_UN_IFS;
 
 typedef struct _BT_IF_HANDLE {
-	const BT_i8		   *szpModuleName;
-	const BT_i8		   *szpDescription;
-	const BT_i8		   *szpAuthor;
-	const BT_i8		   *szpEmail;
+	BT_MODULE_INFO	   oInfo;
 
 	const BT_UN_IFS	   	oIfs;
 

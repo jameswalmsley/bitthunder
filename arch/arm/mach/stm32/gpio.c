@@ -78,7 +78,7 @@ static BT_ERROR gpio_set_direction(BT_HANDLE hGPIO, BT_u32 ulGPIO, BT_GPIO_DIREC
 		hGPIO->pRegs->banks[ulBank].CR[ulCfgBank] = reg;
 		break;
 	}
-		
+
 
 	case BT_GPIO_DIR_INPUT:
 		//hGPIO->pRegs->bank[ulBank].OEN 		&= ~(1 << ulBit);
@@ -135,10 +135,7 @@ static const BT_IF_DEVICE oDeviceInterface = {
 };
 
 static const BT_IF_HANDLE oHandleInterface = {
-	BT_MODULE_NAME,
-	BT_MODULE_DESCRIPTION,
-	BT_MODULE_AUTHOR,
-	BT_MODULE_EMAIL,
+	BT_MODULE_DEF_INFO,
 	.pfnCleanup = gpio_cleanup,
 	.oIfs = {
 		.pDevIF = &oDeviceInterface,

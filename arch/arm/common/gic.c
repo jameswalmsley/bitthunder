@@ -159,10 +159,7 @@ static const BT_IF_DEVICE oDeviceInterface = {
 };
 
 static const BT_IF_HANDLE oHandleInterface = {
-	BT_MODULE_NAME,
-	BT_MODULE_DESCRIPTION,
-	BT_MODULE_AUTHOR,
-	BT_MODULE_EMAIL,
+	BT_MODULE_DEF_INFO,
 	.pfnCleanup = gic_cleanup,
 	.oIfs = {
 		.pDevIF = &oDeviceInterface,

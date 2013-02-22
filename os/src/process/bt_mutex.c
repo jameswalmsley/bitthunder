@@ -48,10 +48,7 @@ BT_ERROR BT_ReleaseMutexFromISR(BT_HANDLE hMutex, BT_BOOL *pbHigherPriorityThrea
 }
 
 static const BT_IF_HANDLE oHandleInterface = {
-	BT_MODULE_NAME,
-	BT_MODULE_DESCRIPTION,
-	BT_MODULE_AUTHOR,
-	BT_MODULE_EMAIL,
+	BT_MODULE_DEF_INFO,
 	{NULL},
 	BT_HANDLE_T_SYSTEM,
 	mutex_cleanup,
