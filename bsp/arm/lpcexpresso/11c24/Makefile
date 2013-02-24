@@ -14,14 +14,13 @@ TARGET_DEPS=kernel.elf
 
 BUILD_DIR=$(shell pwd)/build/
 
-#TOOLCHAIN=C:/yagarto-20121222/bin/arm-none-eabi-
-TOOLCHAIN=/opt/Xilinx/14.2/ISE_DS/EDK/gnu/arm/lin64/bin/arm-xilinx-eabi-
+TOOLCHAIN=C:/yagarto-20121222/bin/arm-none-eabi-
+#TOOLCHAIN=/opt/Xilinx/14.2/ISE_DS/EDK/gnu/arm/lin64/bin/arm-xilinx-eabi-
 
 include $(BASE).dbuild/dbuild.mk
 
 test:
-	@echo $(SUBARCH)
-	@echo $(SUB_OBJDIRS)
+	@echo $(PATH)
 
 all: kernel.elf kernel.list kernel.img kernel.syms
 	$(Q)$(SIZE) kernel.elf
@@ -41,12 +40,12 @@ kernel.syms: kernel.elf
 
 
 
-#kernel.elf: LDFLAGS += -L"c:/yagarto-20121222/lib/gcc/arm-none-eabi/4.7.2/"
-#kernel.elf: LDFLAGS += -L"c:/yagarto-20121222/arm-none-eabi/lib/"
-kernel.elf: LDFLAGS += -L"/opt/Xilinx/14.2/ISE_DS/EDK/gnu/arm/lin64/lib/gcc/arm-xilinx-eabi/4.6.1/"
-kernel.elf: LDFLAGS += -L"/opt/Xilinx/14.2/ISE_DS/EDK/gnu/arm/lin64/arm-xilinx-eabi/lib/"
+kernel.elf: LDFLAGS += -L"c:/yagarto-20121222/lib/gcc/arm-none-eabi/4.7.2/thumb/v6m/"
+kernel.elf: LDFLAGS += -L"c:/yagarto-20121222/arm-none-eabi/lib//thumb/v6m/"
+#kernel.elf: LDFLAGS += -L"/opt/Xilinx/14.2/ISE_DS/EDK/gnu/arm/lin64/lib/gcc/arm-xilinx-eabi/4.6.1/"
+#kernel.elf: LDFLAGS += -L"/opt/Xilinx/14.2/ISE_DS/EDK/gnu/arm/lin64/arm-xilinx-eabi/lib/"
 kernel.elf: LDLIBS += -lc -lgcc
 kernel.elf: $(OBJECTS)
 	$(Q)$(PRETTY) --dbuild "LD" $(MODULE_NAME) $@
-	$(Q)$(LD) $(LDFLAGS) -Map kernel.map -o $@ -T $(LINKER_SCRIPT) $(OBJECTS) $(LDLIBS)
+	$(Q)$(LD) $(LDFLAGS) --gc-sections -Map kernel.map -o $@ -T $(LINKER_SCRIPT) $(OBJECTS) $(LDLIBS)
 

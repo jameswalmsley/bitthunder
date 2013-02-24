@@ -16,7 +16,7 @@ BT_CONFIG_KERNEL=FreeRTOS
 #	Define the maximum number of IRQs allowed in the system.
 #	This should cover all interrupts controllers.
 #
-BT_CONFIG_MAX_IRQ=95
+BT_CONFIG_MAX_IRQ=32
 
 ARCH=arm
 SUBARCH=lpc11xx
@@ -31,10 +31,13 @@ SUBARCH=lpc11xx
 BT_CONFIG_MAX_INTERRUPT_CONTROLLERS=1
 BT_CONFIG_MAX_GPIO_CONTROLLERS=1
 
-
 #
 #	Driver Configurations
 #
+BT_CONFIG_MACH_LPC11xx_TOTAL_GPIOS=36
+BT_CONFIG_MACH_LPC11xx_GPIO_BASE=0x50000000
+
+
 
 include $(BASE).config.mk
 
