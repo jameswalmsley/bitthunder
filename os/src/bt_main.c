@@ -57,10 +57,17 @@ int bt_main(int argc, char **argv) {
 		Error = 0;
 	}
 
-	BT_HANDLE hUart = pMachine->pBootLogger->pfnOpen(pMachine->ulBootUartID, &Error);
-	if(!hUart) {
-		// Well, we're completely out of luck! We cannot report this to anything.
-		return -1;
+	if (pMachine->pfnMachineInit) pMachine->pfnMachineInit(pMachine);
+
+	BT_HANDLE hUart = NULL;
+
+	if (pMachine->pBootLogger)
+	{
+		hUart = pMachine->pBootLogger->pfnOpen(pMachine->ulBootUartID, &Error);
+		if(!hUart) {
+			// Well, we're completely out of luck! We cannot report this to anything.
+			return -1;
+		}
 	}
 
 	BT_UART_CONFIG oConfig;
@@ -100,7 +107,10 @@ int bt_main(int argc, char **argv) {
 	string = "Relinquish control of the boot UART device...(Goodbye)\r\n";
 	BT_CharDeviceWrite(hUart, 0, strlen(string), (BT_u8 *)string);
 
-	BT_CloseHandle(hUart);
+	if (hUart)
+	{
+		BT_CloseHandle(hUart);
+	}
 
 	//int retval = main(argc, argv);
 
