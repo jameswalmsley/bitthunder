@@ -135,14 +135,14 @@ BT_ERROR BT_DisableInterrupt(BT_u32 ulIRQ) {
 	return pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnDisable(pIntc->hIRQ, ulIRQ-pIntc->ulBaseIRQ);
 }
 
-BT_ERROR BT_SetInterruptAffinity(BT_u32 ulIRQ, BT_u32 ulCPU) {
+BT_ERROR BT_SetInterruptAffinity(BT_u32 ulIRQ, BT_u32 ulCPU, BT_BOOL bReceive) {
 	const BT_INTERRUPT_CONTROLLER *pIntc = getInterruptController(ulIRQ);
 	if(!pIntc) {
 		return -1;
 	}
 
 	if(pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnSetAffinity) {
-		return pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnSetAffinity(pIntc->hIRQ, ulIRQ, ulCPU);
+		return pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnSetAffinity(pIntc->hIRQ, ulIRQ, ulCPU, bReceive);
 	}
 
 	return -1;

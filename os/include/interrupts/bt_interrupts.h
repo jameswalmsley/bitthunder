@@ -21,6 +21,16 @@ BT_ERROR 	BT_SetInterruptPriority			(BT_u32 ulIRQ, BT_u32 ulPriority);
 BT_u32 		BT_GetInterruptPriority			(BT_u32 ulIRQ, BT_ERROR *pError);
 BT_ERROR	BT_EnableInterrupt				(BT_u32 ulIRQ);
 BT_ERROR	BT_DisableInterrupt				(BT_u32 ulIRQ);
-BT_ERROR 	BT_SetInterruptAffinity			(BT_u32 ulIRQ, BT_u32 ulCPU);
+
+/**
+ *	@brief		Controls CPU Interrupt Affinity.
+ *
+ *	@ulIRQ		Interrupt Number
+ *	@ulCPU		CPU Id to set the affinity for. (in range(0..nCPUs)).
+ *	@bReceive	BT_TRUE if this CPU should receive the interrupt, BT_FALSE if not.
+ *
+ *	@return 	BT_ERR_NONE on success.
+ **/
+BT_ERROR 	BT_SetInterruptAffinity			(BT_u32 ulIRQ, BT_u32 ulCPU, BT_BOOL bReceive);
 
 #endif

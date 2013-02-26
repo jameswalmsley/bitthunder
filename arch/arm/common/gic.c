@@ -141,6 +141,25 @@ static BT_ERROR gic_disable(BT_HANDLE hGic, BT_u32 ulIRQ) {
 	return BT_ERR_NONE;
 }
 
+static BT_ERROR gic_setaffinity(BT_HANDLE hGic, BT_u32 ulIRQ, BT_u32 ulCPU, BT_BOOL bReceive) {
+
+	BT_u32 ulBank = ulIRQ / 4;
+	BT_u32 ulLine = ulIRQ % 4;
+
+	if(ulCPU > 7) {
+		return BT_ERR_GENERIC;	// Only accept CPU ID's in range(0..7).
+	}
+
+	if(bReceive) {
+		bReceive = 1;
+	}
+
+	hGic->pGICD->ITARGETSR[ulBank] &= ~(1 << ulCPU) << (8 * ulLine);
+	hGic->pGICD->ITARGETSR[ulBank] |= (bReceive << ulCPU) << (8 * ulLine);
+
+	return BT_ERR_NONE;
+}
+
 static const BT_DEV_IF_IRQ oDeviceOps = {
 	.pfnRegister		= gic_register,
 	.pfnUnregister		= gic_unregister,
@@ -148,7 +167,7 @@ static const BT_DEV_IF_IRQ oDeviceOps = {
 	.pfnGetPriority		= gic_getpriority,
 	.pfnEnable			= gic_enable,
 	.pfnDisable			= gic_disable,
-	.pfnSetAffinity		= NULL,						///< An option interface, GIC could implement this.
+	.pfnSetAffinity		= gic_setaffinity,						///< An option interface, GIC could implement this.
 };
 
 static const BT_IF_DEVICE oDeviceInterface = {
