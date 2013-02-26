@@ -21,7 +21,6 @@ struct _BT_OPAQUE_HANDLE {
 
 static const BT_IF_HANDLE oHandleInterface;
 
-
 static BT_ERROR sdhci_irq_handler(BT_u32 ulIRQ, void *pParam) {
 
 	BT_HANDLE hSDHCI = (BT_HANDLE) pParam;
@@ -101,10 +100,6 @@ static BT_HANDLE sdhci_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErr
 		goto err_free_out;
 	}
 
-	// Enable the Card detection IRQs.
-	hSDIO->pRegs->NORMAL_ERROR_INTSTAT_EN |= NORMAL_INT_CARD_INSERTED | NORMAL_INT_CARD_REMOVED;
-	hSDIO->pRegs->NORMAL_ERROR_INTSIG_EN |= NORMAL_INT_CARD_INSERTED | NORMAL_INT_CARD_REMOVED;
-
 	BT_u32 ulIRQ = pResource->ulStart;
 
 	Error = BT_RegisterInterrupt(ulIRQ, sdhci_irq_handler, hSDIO);
@@ -112,11 +107,25 @@ static BT_HANDLE sdhci_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErr
 		goto err_free_out;
 	}
 
+	// This enables the interrupt at with the interrupt controller.
 	Error = BT_EnableInterrupt(ulIRQ);
 	if(Error) {
 		goto err_free_irq;
 	}
 
+	// Enable the Card detection IRQs.
+	hSDIO->pRegs->NORMAL_ERROR_INTSTAT_EN 	|= NORMAL_INT_CARD_INSERTED | NORMAL_INT_CARD_REMOVED;
+
+	// Ensure we don't have any card-detection interrupts on init,
+	// For some reason this can send the interrupt controller wild, even though
+	// we have already registered our IRQ!
+
+	hSDIO->pRegs->NORMAL_ERROR_INTSTAT 		|= NORMAL_INT_CARD_INSERTED | NORMAL_INT_CARD_REMOVED;
+
+	// Enable the interrupts to be signalled to the CPU.
+	hSDIO->pRegs->NORMAL_ERROR_INTSIG_EN 	|= NORMAL_INT_CARD_INSERTED | NORMAL_INT_CARD_REMOVED;
+
+	// Register with the SD Host controller.
 	Error = BT_RegisterSDHostController(hSDIO, &sdhci_mmc_ops);
 	if(Error) {
 		goto err_free_irq;
