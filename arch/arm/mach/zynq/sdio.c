@@ -5,6 +5,7 @@
 #include <bitthunder.h>
 
 #include "slcr.h"
+//#include "sdio.h"
 
 static const BT_RESOURCE oZynq_sdio_resources_0[] = {
 	{
