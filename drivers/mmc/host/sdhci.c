@@ -66,6 +66,14 @@ static BT_ERROR sdhci_event_subscribe(BT_HANDLE hSDIO, BT_MMC_CARD_EVENTRECEIVER
 	hSDIO->pfnEventReceiver = pfnReceiver;
 	hSDIO->pHost 			= pHost;
 
+	// Test for card presence, and generate detection signal.
+
+	if(hSDIO->pRegs->PRESENT_STATE & STATE_CARD_INSERTED) {
+		if(hSDIO->pfnEventReceiver) {
+			hSDIO->pfnEventReceiver(hSDIO->pHost, BT_MMC_CARD_DETECTED);
+		}
+	}
+
 	return BT_ERR_NONE;
 }
 
