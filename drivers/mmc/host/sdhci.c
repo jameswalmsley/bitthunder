@@ -6,10 +6,10 @@
 #include "sdhci.h"
 #include "../core.h"
 
-BT_DEF_MODULE_NAME			("Generic SDHCI Controller Driver")
-BT_DEF_MODULE_DESCRIPTION	("Implements a driver for SDCARD abstraction for SDHCI controllers")
-BT_DEF_MODULE_AUTHOR		("James Walmsley")
-BT_DEF_MODULE_EMAIL			("james@fullfat-fs.co.uk")
+BT_DEF_MODULE_NAME				("Generic SDHCI Controller Driver")
+BT_DEF_MODULE_DESCRIPTION		("Implements a driver for SDCARD abstraction for SDHCI controllers")
+BT_DEF_MODULE_AUTHOR			("James Walmsley")
+BT_DEF_MODULE_EMAIL				("james@fullfat-fs.co.uk")
 
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER 			h;
@@ -32,12 +32,24 @@ static BT_ERROR sdhci_irq_handler(BT_u32 ulIRQ, void *pParam) {
 		// Signal to SDCARD driver that we have inserted a card,
 		// and the card can be initialised.
 		hSDHCI->pRegs->NORMAL_ERROR_INTSTAT |= NORMAL_INT_CARD_INSERTED;
+
+		if(hSDHCI->pRegs->PRESENT_STATE & STATE_CARD_INSERTED) {
+			if(hSDHCI->pfnEventReceiver) {
+				hSDHCI->pfnEventReceiver(hSDHCI->pHost, BT_MMC_CARD_DETECTED);
+			}
+		}
 	}
 
 	if(hSDHCI->pRegs->NORMAL_ERROR_INTSTAT & NORMAL_INT_CARD_REMOVED) {
 		// Signal to SDCARD driver that we have removed a card.
 		// and all data can be flagged for cleanup.
 		hSDHCI->pRegs->NORMAL_ERROR_INTSTAT |= NORMAL_INT_CARD_REMOVED;
+
+		if(!(hSDHCI->pRegs->PRESENT_STATE & STATE_CARD_INSERTED)) {
+			if(hSDHCI->pfnEventReceiver) {
+				hSDHCI->pfnEventReceiver(hSDHCI->pHost, BT_MMC_CARD_REMOVED);
+			}
+		}
 	}
 
 	return BT_ERR_NONE;
