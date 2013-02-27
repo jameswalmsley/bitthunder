@@ -99,6 +99,11 @@ int bt_main(int argc, char **argv) {
 	string = "Enumerate integrated devices\r\n";
 	BT_CharDeviceWrite(hUart, 0, strlen(string), (BT_u8 *)string);
 
+
+	// Go through the module initialisation routines!
+	Error = BT_InitialiseKernelModules(hUart);
+
+
 	Error = BT_ProbeIntegratedDevices(hUart);
 
 	string = "Enter user-mode, and start user-space application...\r\n";
