@@ -15,11 +15,12 @@ typedef struct _BT_RESOURCE {
 } BT_RESOURCE;
 
 
-#define BT_RESOURCE_TYPE_BITS	0x00000F00
+#define BT_RESOURCE_TYPE_BITS	0x00001F00
 #define BT_RESOURCE_IO			0x00000100
 #define BT_RESOURCE_MEM			0x00000200
 #define BT_RESOURCE_IRQ			0x00000400
 #define BT_RESOURCE_DMA			0x00000800
+#define BT_RESOURCE_ENUM 		0x00001000		///< Resource descriptor used for numbering devices easily.
 
 #define BT_RESOURCE_TYPE(x)		(x & BT_RESOURCE_TYPE_BITS)
 
