@@ -8,8 +8,9 @@
 #include "bt_dev_if_systimer.h"
 #include "bt_dev_if_timer.h"
 #include "bt_if_power.h"
-#include "bt_dev_if_can.h"
+#include "bt_if_block.h"
 #include "bt_dev_if_uart.h"
+#include "bt_dev_if_can.h"
 #include "bt_dev_if_sdio.h"
 
 typedef enum _BT_DEV_IF_TYPE {
@@ -70,8 +71,7 @@ typedef struct _BT_IF_DEVICE {
 	BT_DEV_IF_TYPE 			eConfigType;
 	const BT_DEV_IFS 	    unConfigIfs;
 	const BT_IF_CHARDEV	   *pCharDevIf;
-//	const BT_IF_BLOCKDEV   *pBlockDevIf;
-
+	const BT_IF_BLOCK	   *pBlockIf;
 } BT_IF_DEVICE;
 
 
