@@ -39,6 +39,8 @@ BT_ERROR BT_ListAddItem(BT_LIST *pL, BT_LIST_ITEM *p) {
 		pItem->pNext = p;
 	}
 
+	pL->ulItems += 1;
+
 	return BT_ERR_NONE;
 }
 
