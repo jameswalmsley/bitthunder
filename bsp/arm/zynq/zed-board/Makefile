@@ -15,7 +15,7 @@ TARGET_DEPS=kernel.elf
 
 BUILD_DIR=$(shell pwd)/build/
 
-TOOLCHAIN=/opt/Xilinx/14.2/ISE_DS/EDK/gnu/arm/lin64/bin/arm-xilinx-eabi-
+TOOLCHAIN=/opt/Xilinx/14.4/ISE_DS/EDK/gnu/arm/lin64/bin/arm-xilinx-eabi-
 
 include $(BASE).dbuild/dbuild.mk
 
@@ -37,8 +37,8 @@ kernel.syms: kernel.elf
 #	$(Q)$(PRETTY) SYMS $(MODULE_NAME) $@
 #	$(Q)$(OBJDUMP) -t kernel.elf > $@
 
-kernel.elf: LDFLAGS += -L"/opt/Xilinx/14.2/ISE_DS/EDK/gnu/arm/lin64/lib/gcc/arm-xilinx-eabi/4.6.1/"
-kernel.elf: LDFLAGS += -L"/opt/Xilinx/14.2/ISE_DS/EDK/gnu/arm/lin64/arm-xilinx-eabi/lib/"
+kernel.elf: LDFLAGS += -L"/opt/Xilinx/14.4/ISE_DS/EDK/gnu/arm/lin64/lib/gcc/arm-xilinx-eabi/4.6.3/"
+kernel.elf: LDFLAGS += -L"/opt/Xilinx/14.4/ISE_DS/EDK/gnu/arm/lin64/arm-xilinx-eabi/lib/"
 kernel.elf: LDLIBS += -lc -lgcc
 kernel.elf: $(OBJECTS)
 	$(Q)$(PRETTY) --dbuild "LD" $(MODULE_NAME) $@
