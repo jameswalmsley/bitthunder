@@ -122,7 +122,8 @@ static BT_HANDLE timer_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErr
 		goto err_out;
 	}
 
-	const BT_RESOURCE *pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_MEM, 0);
+	const BT_RESOURCE *pResource;
+	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_MEM, 0);
 	if(!pResource) {
 		Error = BT_ERR_GENERIC;
 		goto err_free_out;

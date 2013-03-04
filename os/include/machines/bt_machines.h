@@ -54,6 +54,6 @@ BT_ATTRIBUTE_SECTION(".bt.arch.init") = {				\
 };
 
 
-BT_u32 BT_GetCpuClockFrequency();
+BT_u32 BT_GetCpuClockFrequency(void);
 
 #endif

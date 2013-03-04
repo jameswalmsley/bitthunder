@@ -154,14 +154,17 @@ BT_HANDLE gpio_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
 		goto err_out;
 	}
 
-	const BT_RESOURCE *pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_IO, 0);
+	const BT_RESOURCE *pResource;
+	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_IO, 0);
 	if(!pResource) {
 		Error = BT_ERR_GENERIC;
 		goto err_free_out;
 	}
 
-	BT_u32 base 	= pResource->ulStart;
-	BT_u32 total 	= (pResource->ulEnd - pResource->ulStart) + 1;
+	BT_u32 base, total;
+
+	base 	= pResource->ulStart;
+	total 	= (pResource->ulEnd - pResource->ulStart) + 1;
 
 	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_MEM, 0);
 	if(!pResource) {

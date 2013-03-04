@@ -100,7 +100,8 @@ static BT_HANDLE nvic_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErro
 		goto err_out;
 	}
 
-	const BT_RESOURCE *pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_MEM, 0);
+	const BT_RESOURCE *pResource;
+	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_MEM, 0);
 	if(!pResource) {
 		Error = BT_ERR_NO_MEMORY;
 		goto  err_free_chip;
@@ -114,8 +115,9 @@ static BT_HANDLE nvic_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErro
 		goto err_free_chip;
 	}
 
-	BT_u32 base 	= pResource->ulStart;
-	BT_u32 total 	= (pResource->ulEnd - pResource->ulStart) + 1;
+	BT_u32 base, total;
+ 	base = pResource->ulStart;
+	total = (pResource->ulEnd - pResource->ulStart) + 1;
 
 	Error = BT_RegisterInterruptController(base, total, hNVIC);
 	if(Error) {
