@@ -7,6 +7,7 @@
 #include "slcr.h"
 //#include "sdio.h"
 
+#ifdef BT_CONFIG_MACH_ZYNQ_USE_SDIO_0
 static const BT_RESOURCE oZynq_sdio_resources_0[] = {
 	{
 		.ulStart 			= 0xE0100000,
@@ -20,6 +21,14 @@ static const BT_RESOURCE oZynq_sdio_resources_0[] = {
 	},
 };
 
+BT_INTEGRATED_DEVICE_DEF oZynq_sdio_device_0 = {
+	.name				= "mmc,sdhci",
+	.ulTotalResources	= BT_ARRAY_SIZE(oZynq_sdio_resources_0),
+	.pResources			= oZynq_sdio_resources_0,
+};
+#endif
+
+#ifdef BT_CONFIG_MACH_ZYNQ_USE_SDIO_1
 static const BT_RESOURCE oZynq_sdio_resources_1[] = {
 	{
 		.ulStart 			= 0xE0101000,
@@ -33,15 +42,6 @@ static const BT_RESOURCE oZynq_sdio_resources_1[] = {
 	},
 };
 
-#ifdef BT_CONFIG_MACH_ZYNQ_USE_SDIO_0
-BT_INTEGRATED_DEVICE_DEF oZynq_sdio_device_0 = {
-	.name				= "mmc,sdhci",
-	.ulTotalResources	= BT_ARRAY_SIZE(oZynq_sdio_resources_0),
-	.pResources			= oZynq_sdio_resources_0,
-};
-#endif
-
-#ifdef BT_CONFIG_MACH_ZYNQ_USE_SDIO_1
 BT_INTEGRATED_DEVICE_DEF oZynq_sdio_device_1 = {
 	.name				= "mmc,sdhci",
 	.ulTotalResources	= BT_ARRAY_SIZE(oZynq_sdio_resources_1),
