@@ -6,11 +6,13 @@
  *
  **/
 
-#include <bt_types.h>
-#include <intterupts/bt_softirq.h>
+#include <bitthunder.h>
+#include <interrupts/bt_softirq.h>
+
+BT_DEF_MODULE_NAME	("SoftIRQ")
 
 static BT_SOFTIRQ 	g_SoftIRQ[BT_CONFIG_SOFTIRQ_MAX];
-static BT_u32 		ulIRQPending;
+static BT_u32 		g_ulPending;
 static BT_HANDLE	g_hMutex;
 
 BT_ERROR BT_OpenSoftIRQ(BT_u32 ulSoftIRQ, BT_SOFTIRQ_HANDLER pfnHandler, void *pData) {
@@ -33,20 +35,38 @@ BT_ERROR BT_RaiseSoftIRQ(BT_u32 ulSoftIRQ) {
 
 BT_ERROR BT_RaiseSoftIRQFromISR(BT_u32 ulSoftIRQ) {
 	if(ulSoftIRQ < BT_CONFIG_SOFTIRQ_MAX) {
-		ulIRQPending |= (1 << ulSoftIRQ);
+		g_ulPending |= (1 << ulSoftIRQ);
 		return BT_ERR_NONE;
 	}
 
-	BT_ReleaseMutexFromISR(g_hMutex);
+	BT_ReleaseMutexFromISR(g_hMutex, NULL);
 
 	return BT_ERR_GENERIC;
 }
 
 
 static void softirq_dispatcher(void *pParam) {
+
+	BT_u32 ulPending;
+	BT_SOFTIRQ *p;
+
 	while(1) {
 		BT_PendMutex(g_hMutex, 0);
 
+		ulPending = g_ulPending;
+		if(ulPending) {
+			g_ulPending = 0;
+
+			do {
+				if(ulPending & 1) {
+					p->pfnHandler(p->pData);
+				}
+
+				p++;
+
+				ulPending >>= 1;
+			} while(ulPending);
+		}
 	}
 }
 
