@@ -36,10 +36,9 @@ BT_ERROR BT_RaiseSoftIRQ(BT_u32 ulSoftIRQ) {
 BT_ERROR BT_RaiseSoftIRQFromISR(BT_u32 ulSoftIRQ) {
 	if(ulSoftIRQ < BT_CONFIG_SOFTIRQ_MAX) {
 		g_ulPending |= (1 << ulSoftIRQ);
+		BT_ReleaseMutexFromISR(g_hMutex, NULL);
 		return BT_ERR_NONE;
 	}
-
-	BT_ReleaseMutexFromISR(g_hMutex, NULL);
 
 	return BT_ERR_GENERIC;
 }
@@ -56,7 +55,7 @@ static void softirq_dispatcher(void *pParam) {
 		ulPending = g_ulPending;
 		if(ulPending) {
 			g_ulPending = 0;
-
+			p = g_SoftIRQ;
 			do {
 				if(ulPending & 1) {
 					p->pfnHandler(p->pData);
