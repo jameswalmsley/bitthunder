@@ -15,6 +15,13 @@
 #define BT_CONFIG_SOFTIRQ_PRIORITY	0
 #endif
 
+/*
+ *	SoftIRQ numbers.
+ */
+
+#define BT_SOFTIRQ_HI		0		///< The highest priority soft IRQ.
+#define BT_SOFTIRQ_TASKLET	1		///< The default soft IRQ where a tasklet will run.
+
 struct _BT_SOFTIRQ;
 
 typedef void (*BT_SOFTIRQ_HANDLER)(struct _BT_SOFTIRQ *pSoftIRQ);
