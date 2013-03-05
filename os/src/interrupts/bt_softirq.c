@@ -45,7 +45,7 @@ BT_ERROR BT_RaiseSoftIRQFromISR(BT_u32 ulSoftIRQ) {
 
 static void softirq_dispatcher(void *pParam) {
 	while(1) {
-
+		BT_PendMutex(g_hMutex, 0);
 
 	}
 }
