@@ -6,7 +6,6 @@
 #include "module/bt_module_init.h"
 #include "mm/bt_heap.h"
 #include "devman/bt_devman.h"
-#include "module/bt_module_init.h"
 #include "gpio/bt_gpio.h"
 #include "timers/bt_timers.h"
 #include "process/bt_mutex.h"
