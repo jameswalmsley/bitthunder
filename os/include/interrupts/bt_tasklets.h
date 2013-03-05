@@ -18,5 +18,11 @@ typedef struct _BT_TASKLET {
 } BT_TASKLET;
 
 
+/**
+ *
+ *
+ **/
+BT_ERROR BT_TaskletSchedule		(BT_TASKLET *pTasklet);
+BT_ERROR BT_TaskletHighSchedule	(BT_TASKLET *pTasklet);
 
 #endif
