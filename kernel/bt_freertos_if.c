@@ -92,3 +92,11 @@ BT_BOOL BT_kMutexReleaseFromISR(void *pMutex, BT_BOOL *pbHigherPriorityTaskWoken
 
 	return bReturn;
 }
+
+void BT_kEnterCritical() {
+	taskENTER_CRITICAL();
+}
+
+void BT_kExitCritical() {
+	taskEXIT_CRITICAL();
+}

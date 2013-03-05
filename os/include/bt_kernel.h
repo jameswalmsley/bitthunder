@@ -23,4 +23,7 @@ BT_BOOL		BT_kMutexPend		(void *pMutex, BT_u32 ulTimeout);
 BT_BOOL		BT_kMutexRelease	(void *pMutex);
 BT_BOOL		BT_kMutexReleaseFromISR(void *pMutex, BT_BOOL *pbHigherPriorityTaskWoken);
 
+void 		BT_kEnterCritical	();
+void 		BT_kExitCritical	();
+
 #endif
