@@ -58,8 +58,8 @@ SECTIONS
 
 	.bt.module.init : {
 	    __bt_module_init_start = .;
-		KEEP(*(.bt.module.init))
 		KEEP(*(.bt.module.init.*))
+		KEEP(*(.bt.module.init))
 		__bt_module_init_end = .;
 	} > ZYNQ_RAM0
 
