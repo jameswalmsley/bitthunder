@@ -10,9 +10,15 @@
 
 typedef void (*BT_TASKLET_HANDLER)(void *pData);
 
+typedef enum _BT_TASKLET_STATE {
+	BT_TASKLET_IDLE=0,
+	BT_TASKLET_SCHEDULED,
+	BT_TASKLET_RUNNING,
+} BT_TASKLET_STATE;
+
 typedef struct _BT_TASKLET {
 	struct _BT_TASKLET *pNext;
-	BT_u32 				ulState;
+	BT_TASKLET_STATE	eState;
 	BT_TASKLET_HANDLER	pfnHandler;
 	void 			   *pData;
 } BT_TASKLET;
