@@ -11,6 +11,10 @@
 #define BT_CONFIG_SOFTIRQ_MAX	32
 #endif
 
+#ifndef BT_CONFIG_SOFTIRQ_PRIORITY
+#define BT_CONFIG_SOFTIRQ_PRIORITY	0
+#endif
+
 struct _BT_SOFTIRQ;
 
 typedef void (*BT_SOFTIRQ_HANDLER)(struct _BT_SOFTIRQ *pSoftIRQ);
