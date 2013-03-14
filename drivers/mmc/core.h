@@ -8,6 +8,8 @@ typedef struct _MMC_COMMAND {
 	BT_u32		opcode;
 	BT_u32		arg;
 	BT_u32		response[4];
+	BT_BOOL		bCRC;
+	BT_u32		ulResponseType;
 } MMC_COMMAND;
 
 typedef enum _BT_MMC_CARD_EVENT {
