@@ -29,11 +29,11 @@ static void idle_task(void *pParam) {
 	while(1) {
 		ticks_a = BT_kTickCount();
 		BT_GpioSet(7, BT_TRUE);
-		BT_kTaskDelayUntil(&ticks_a, 25);
+		BT_kTaskDelayUntil(&ticks_a, 10);
 		BT_GpioSet(7, BT_FALSE);
-		BT_kTaskDelayUntil(&ticks_a, 150);
+		BT_kTaskDelayUntil(&ticks_a, 50);
 		BT_GpioSet(7, BT_TRUE);
-		BT_kTaskDelayUntil(&ticks_a, 25);
+		BT_kTaskDelayUntil(&ticks_a, 10);
 		BT_GpioSet(7, BT_FALSE);
 
 		BT_kTaskDelayUntil(&ticks, 1000);
