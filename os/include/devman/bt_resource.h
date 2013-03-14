@@ -6,14 +6,22 @@
 #ifndef _BT_RESOURCE_H_
 #define _BT_RESOURCE_H_
 
+/**
+ *	Here we define a structure that can describe device resources or parameters.
+ *	A union and struct is used to remove redundancy from the in-memory or in-rom objects.
+ **/
 typedef struct _BT_RESOURCE {
-	BT_u32			ulStart;
-	BT_u32			ulEnd;
-	const char 	   *szpName;
+	union {
+		struct {
+			BT_u32	ulStart;
+			BT_u32	ulEnd;
+		};
+		const char 	*szpName;
+		void		*pParam;
+	};
 	BT_u32			ulFlags;
-	struct _BT_RESOURCE *parent, *sibling, *child;
+	//struct _BT_RESOURCE *parent, *sibling, *child;
 } BT_RESOURCE;
-
 
 #define BT_RESOURCE_TYPE_BITS	0x00001F00
 #define BT_RESOURCE_IO			0x00000100
@@ -21,6 +29,8 @@ typedef struct _BT_RESOURCE {
 #define BT_RESOURCE_IRQ			0x00000400
 #define BT_RESOURCE_DMA			0x00000800
 #define BT_RESOURCE_ENUM 		0x00001000		///< Resource descriptor used for numbering devices easily.
+#define BT_RESOURCE_STRING		0x00002000		///< A string resource, e.g. a sub-driver.
+#define BT_RESOURCE_PARAM		0x00004000		///< Void * pParam resource, e.g. some operations.
 
 #define BT_RESOURCE_TYPE(x)		(x & BT_RESOURCE_TYPE_BITS)
 
