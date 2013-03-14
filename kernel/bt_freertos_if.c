@@ -69,7 +69,12 @@ void BT_kMutexDestroy(void *pMutex) {
 }
 
 BT_BOOL BT_kMutexPend(void *pMutex, BT_TICK oTimeoutTicks) {
-	if(xSemaphoreTake(pMutex, oTimeoutTicks) == pdTRUE) {
+
+	if(!oTimeoutTicks) {
+		oTimeoutTicks = portMAX_DELAY;
+	}
+
+	if(xSemaphoreTake(pMutex, oTimeoutTicks) == pdPASS) {
 		return BT_TRUE;
 	}
 	return BT_FALSE;
