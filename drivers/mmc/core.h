@@ -17,12 +17,16 @@ typedef enum _BT_MMC_CARD_EVENT {
 	BT_MMC_CARD_REMOVED,
 } BT_MMC_CARD_EVENT;
 
-typedef void (*BT_MMC_CARD_EVENTRECEIVER)(MMC_HOST *pHost, BT_MMC_CARD_EVENT eEvent);
+typedef void (*BT_MMC_CARD_EVENTRECEIVER)(MMC_HOST *pHost, BT_MMC_CARD_EVENT eEvent, BT_BOOL bInterruptContext);
 
 typedef struct _BT_MMC_OPS {
-	BT_u32 ulCapabilites1;		///< Primary Capability flags.
-	BT_ERROR (*pfnEventSubscribe)(BT_HANDLE hSDIO, BT_MMC_CARD_EVENTRECEIVER pfnReceiver, MMC_HOST *pHost);
-	BT_ERROR (*pfnRequest)(BT_HANDLE hSDIO, MMC_COMMAND *pCommand);
+	BT_u32 		ulCapabilites1;			///< Primary Capability flags.
+
+	BT_ERROR 	(*pfnEventSubscribe)	(BT_HANDLE hSDIO, BT_MMC_CARD_EVENTRECEIVER pfnReceiver, MMC_HOST *pHost);
+	BT_BOOL	 	(*pfnIsCardPresent)		(BT_HANDLE hSDIO, BT_ERROR *pError);
+	BT_ERROR	(*pfnInitialise)		(BT_HANDLE hSDIO);
+
+	BT_ERROR 	(*pfnRequest)			(BT_HANDLE hSDIO, MMC_COMMAND *pCommand);
 } BT_MMC_OPS;
 
 BT_ERROR BT_RegisterSDHostController(BT_HANDLE hHost, const BT_MMC_OPS *pOps);
