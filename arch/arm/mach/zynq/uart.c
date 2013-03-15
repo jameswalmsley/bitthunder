@@ -43,111 +43,28 @@ typedef struct {
  **/
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER 		h;			///< All handles must include a handle header.
-	BT_u32					ulUartID;	///< UART device ID.
+	ZYNQ_UART_REGS		   *pRegs;
+	const BT_INTEGRATED_DEVICE   *pDevice;
+
+	struct _BT_OPAQUE_HANDLE	*pNext;
+
 	BT_UART_OPERATING_MODE	eMode;		///< Operational mode, i.e. buffered/polling mode.
 	BT_UART_BUFFER		   oRxBuf;		///< RX fifo - ring buffer.
 	BT_UART_BUFFER		   oTxBuf;		///< TX fifo - ring buffer.
 };
 
-/**
- *	Now let's define an array of pointer's to the BASE_ADDRESS of each UART register block:
- *
- *	Such a declaration makes the pointers constant, i.e. in ROM, but allows the de-referenced
- *	values to be modified.
- *
- *	This is important, because we want this table to be placed in ROM by the linker, not our
- *	limited RAM! -- Remember RAM is for the USER application where possible!
- *
- *	The reason for having a table like this, is that its better for code density overall
- *	if we had to do a switch or if..else statement for detecting which base address to use
- *	we would require more code.
- *
- *	Using such a table allows use to quick index using the uartID number,
- *	and requires few instructions to achieve.
- *
- **/
-static volatile ZYNQ_UART_REGS * const g_UARTS[] = {
-	UART0,		// UART_0	-- These register definitions come from uart.h
-	UART1,		// UART_1
-};
-
-static BT_HANDLE g_USART_HANDLES[sizeof(g_UARTS)/sizeof(ZYNQ_UART_REGS *)] = {
-	NULL,
-	NULL,
-};
-
 static const BT_IF_HANDLE oHandleInterface;	// Protoype for the uartOpen function.
-static void disableUartPeripheralClock(BT_u32 nUartID);
 
-/*
-static void usartRxHandler(int id) {
-	volatile ZYNQ_UART_REGS *pRegs = g_UARTS[id];
-	BT_HANDLE hUart = g_USART_HANDLES[id];
+static BT_ERROR uart_irq_handler(BT_u32 ulIRQ, void *pParam) {
 
-	*hUart->oRxBuf.pIn++ = pRegs->FIFO & 0xFF;
-	if(hUart->oRxBuf.pIn >= hUart->oRxBuf.pEnd) {
-		hUart->oRxBuf.pIn = hUart->oRxBuf.pBuf;
-	}
+	return BT_ERR_NONE;
 }
-
-static void usartTxHandler(int id) {
-	volatile ZYNQ_UART_REGS *pRegs = g_UARTS[id];
-	BT_HANDLE hUart = g_USART_HANDLES[id];
-
-	if(hUart->oTxBuf.pOut != hUart->oTxBuf.pIn) {
-		pRegs->FIFO = *hUart->oTxBuf.pOut++;
-		if(hUart->oTxBuf.pOut >= hUart->oTxBuf.pEnd) {
-			hUart->oTxBuf.pOut = hUart->oTxBuf.pBuf;
-		}
-	} else {
-		//pRegs->CR1 &= ~USART_CR1_TXEIE;
-	}
-}
-*/
-BT_ERROR USART1_IRQHandler(void) {
-	/*if(USART1->SR & USART_SR_RXNE) {
-		usartRxHandler(0);
-	}
-	if(USART1->SR & USART_SR_TXE) {
-		usartTxHandler(0);
-	}*/
-	return 0;
-}
-
-void USART2_IRQHandler(void) {
-	/*if(USART1->SR & USART_SR_RXNE) {
-		usartRxHandler(1);
-	}*/
-	/*if(USART1->SR & USART_SR_TXE) {
-		usartTxHandler(1);
-	}*/
-}
-
-void USART3_IRQHandler(void) {
-	/*if(USART1->SR & USART_SR_RXNE) {
-		usartRxHandler(2);
-	}*/
-	/*if(USART1->SR & USART_SR_TXE) {
-		usartTxHandler(2);
-	}*/
-}
-
 /**
  *	All modules MUST provide a FULL cleanup function. This must cleanup all allocations etc
  *	e.g. we will have to populate this when we add circular buffers!
  *
  **/
 static BT_ERROR uartCleanup(BT_HANDLE hUart) {
-	//volatile ZYNQ_UART_REGS *pRegs = g_UARTS[hUart->ulUartID];
-	//BT_u32 ulSize;
-	// Disable interrupts of USART module.
-	//pRegs->CR1 &= ~(USART_CR1_TXEIE | USART_CR1_RXNEIE);
-
-	// Disable the device.
-	//pRegs->CR1 = 0;
-
-	// Disable peripheral clock.
-	disableUartPeripheralClock(hUart->ulUartID);
 
 	// Free any buffers if used.
 	if(hUart->eMode == BT_UART_MODE_BUFFERED) {
@@ -165,58 +82,13 @@ static BT_ERROR uartCleanup(BT_HANDLE hUart) {
 		}
 	}
 
-	g_USART_HANDLES[hUart->ulUartID] = NULL;	// Finally mark the hardware as not used.
+	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hUart->pDevice, BT_RESOURCE_IRQ, 0);
+
+	BT_UnregisterInterrupt(pResource->ulStart, uart_irq_handler, hUart);
 
 	return BT_ERR_NONE;
 }
 
-/**
- *	Open doesn't do much, it simply creates the handle, after ensuring we are allowed
- *	to actually create a handle to the device.
- *
- *	i.e. its not already in use!
- **/
-static BT_HANDLE uartOpen(BT_u32 nDeviceID, BT_ERROR *pError) {
-	BT_HANDLE hUart;
-
-	if(nDeviceID >= oHandleInterface.oIfs.pDevIF->ulTotalDevices) {	// Ensure we're not out of range!
-		// ERR -- Invalid Device ID.							// BT should ensure this doesn't happen anyway!
-		return NULL;
-	}
-
-	//lock();
-	{
-		if(g_USART_HANDLES[nDeviceID]) {							// This needs to be locked!
-			// ERR -- Device In USE.
-			return NULL;
-		}
-
-		hUart = BT_CreateHandle(&oHandleInterface, sizeof(struct _BT_OPAQUE_HANDLE), pError);
-		if(!hUart) {
-			return NULL;
-		}
-
-		g_USART_HANDLES[nDeviceID] = hUart;							// Reserve the hardware in the handle table.
-	}
-	//unlock();
-
-	hUart->ulUartID = nDeviceID;								// Set the device ID for further use in the API.
-
-	// Reset all registers to their defaults!
-	volatile ZYNQ_UART_REGS *pRegs = g_UARTS[hUart->ulUartID];
-	pRegs->CR	= 0x00000128;
-	pRegs->MR 	= 0;
-	pRegs->IER 	= 0;
-	pRegs->IDR 	= 0;
-	//pRegs->IMR 	= 0;
-	//pRegs->ISR  = 0x00000200;
-	pRegs->BAUDGEN	= 0x0000028B;
-	pRegs->RXTOUT   = 0;
-	pRegs->RXTRIG	= 0;
-	pRegs->MODEMCR 	= 0;
-
-	return hUart;
-}
 
 /**
  *	Now we come to the interersting part of the driver!
@@ -236,7 +108,7 @@ static BT_ERROR uartEnable(BT_HANDLE hUart);
 #define MAX_BAUD_ERROR_RATE	3	/* max % error allowed */
 
 static BT_ERROR uartSetBaudrate(BT_HANDLE hUart, BT_u32 ulBaudrate) {
-	volatile ZYNQ_UART_REGS *pRegs = g_UARTS[hUart->ulUartID];
+	volatile ZYNQ_UART_REGS *pRegs = hUart->pRegs;
 
 	BT_u8	IterBAUDDIV;
 	BT_u32	BRGR_Value;
@@ -337,76 +209,6 @@ static BT_ERROR uartSetBaudrate(BT_HANDLE hUart, BT_u32 ulBaudrate) {
 }
 
 /**
- *	This actually allows the UARTS to be clocked!
- **/
-static void enableUartPeripheralClock(BT_u32 nUartID) {
-	switch(nUartID) {
-	case 0: {
-		//RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
-		break;
-	}
-
-	case 1: {
-		//RCC->APB2ENR |= RCC_APB1ENR_USART2EN;
-		break;
-	}
-
-	case 2: {
-	//	RCC->APB2ENR |= RCC_APB1ENR_USART3EN;
-		break;
-	}
-
-	default: {
-		break;
-	}
-	}
-}
-
-/**
- *	If the serial port is not in use, we can make it sleep!
- **/
-static void disableUartPeripheralClock(BT_u32 nUartID) {
-	switch(nUartID) {
-	case 0: {
-		//RCC->APB2ENR &= ~RCC_APB2ENR_USART1EN;
-		break;
-	}
-
-	case 1: {
-		//RCC->APB2ENR &= ~RCC_APB1ENR_USART2EN;
-		break;
-	}
-
-	case 2: {
-//		RCC->APB2ENR &= ~RCC_APB1ENR_USART3EN;
-		break;
-	}
-	default: {
-		break;
-	}
-	}
-}
-
-/**
- *	Function to test the current peripheral clock gate status of the devices.
- **/
-static BT_BOOL isUartPeripheralClockEnabled(BT_u32 nUartID) {
-	switch(nUartID) {
-	case 0: {
-		/*if(RCC->APB2ENR & RCC_APB2ENR_USART1EN) {
-			return BT_TRUE;
-		}*/
-		break;
-	}
-	default: {
-		break;
-	}
-	}
-
-	return BT_FALSE;
-}
-
-/**
  *	This implements the UART power management interface.
  *	It is called from the BT_SetPowerState() API!
  **/
@@ -414,11 +216,11 @@ static BT_ERROR uartSetPowerState(BT_HANDLE hUart, BT_POWER_STATE ePowerState) {
 
 	switch(ePowerState) {
 	case BT_POWER_STATE_ASLEEP: {
-		disableUartPeripheralClock(hUart->ulUartID);
+
 		break;
 	}
 	case BT_POWER_STATE_AWAKE: {
-		enableUartPeripheralClock(hUart->ulUartID);
+
 		break;
 	}
 
@@ -436,18 +238,16 @@ static BT_ERROR uartSetPowerState(BT_HANDLE hUart, BT_POWER_STATE ePowerState) {
  *	It is called from the BT_GetPowerState() API!
  **/
 static BT_ERROR uartGetPowerState(BT_HANDLE hUart, BT_POWER_STATE *pePowerState) {
-	if(isUartPeripheralClockEnabled(hUart->ulUartID)) {
+	/*if(isUartPeripheralClockEnabled(hUart->ulUartID)) {
 		return BT_POWER_STATE_AWAKE;
-	}
-	return BT_POWER_STATE_ASLEEP;
+	}*/
+	return BT_POWER_STATE_AWAKE;
 }
 
 /**
  *	Complete a full configuration of the UART.
  **/
 static BT_ERROR uartSetConfig(BT_HANDLE hUart, BT_UART_CONFIG *pConfig) {
-	//volatile ZYNQ_UART_REGS *pRegs = g_UARTS[hUart->ulUartID];
-//	BT_u32 ulSize;
 
 	uartSetBaudrate(hUart, pConfig->ulBaudrate);
 
@@ -513,7 +313,7 @@ static BT_ERROR uartSetConfig(BT_HANDLE hUart, BT_UART_CONFIG *pConfig) {
  *	Get a full configuration of the UART.
  **/
 static BT_ERROR uartGetConfig(BT_HANDLE hUart, BT_UART_CONFIG *pConfig) {
-	volatile ZYNQ_UART_REGS *pRegs = g_UARTS[hUart->ulUartID];
+	volatile ZYNQ_UART_REGS *pRegs = hUart->pRegs;
 
 	pConfig->eMode 			= hUart->eMode;
 
@@ -555,7 +355,7 @@ static BT_ERROR uartGetConfig(BT_HANDLE hUart, BT_UART_CONFIG *pConfig) {
  *	Make the UART active (Set the Enable bit).
  **/
 static BT_ERROR uartEnable(BT_HANDLE hUart) {
-	volatile ZYNQ_UART_REGS *pRegs = g_UARTS[hUart->ulUartID];
+	volatile ZYNQ_UART_REGS *pRegs = hUart->pRegs;
 
 	pRegs->CR 	= ZYNQ_UART_CR_RXEN  | ZYNQ_UART_CR_TXEN;		// Enable TX and RX lines.
 	pRegs->CR  |= ZYNQ_UART_CR_RXRES | ZYNQ_UART_CR_TXRES;		// Reset TX and RX data paths in uart logic.
@@ -569,7 +369,7 @@ static BT_ERROR uartEnable(BT_HANDLE hUart) {
  *	Make the UART inactive (Clear the Enable bit).
  **/
 static BT_ERROR uartDisable(BT_HANDLE hUart) {
-	volatile ZYNQ_UART_REGS *pRegs = g_UARTS[hUart->ulUartID];
+	volatile ZYNQ_UART_REGS *pRegs = hUart->pRegs;
 
 	pRegs->CR |= ZYNQ_UART_CR_RXDIS | ZYNQ_UART_CR_TXDIS;
 
@@ -586,12 +386,8 @@ static BT_ERROR uartDisable(BT_HANDLE hUart) {
  *	Each I/O interface will be used by different Application Level API's.
  **/
 
-#define XUartPs_IsReceiveData(BaseAddress)			 \
-	!((Xil_In32((BaseAddress) + XUARTPS_SR_OFFSET) & 	\
-	XUARTPS_SR_RXEMPTY) == XUARTPS_SR_RXEMPTY)
-
 static BT_ERROR uartRead(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, BT_u8 *pucDest) {
-	volatile ZYNQ_UART_REGS *pRegs = g_UARTS[hUart->ulUartID];
+	volatile ZYNQ_UART_REGS *pRegs = hUart->pRegs;
 	switch(hUart->eMode) {
 	case BT_UART_MODE_POLLED:
 	{
@@ -636,7 +432,7 @@ static BT_ERROR uartRead(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, BT_u8 *
  *	Note, this doesn't implement ulFlags specific options yet!
  **/
 static BT_ERROR uartWrite(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const BT_u8 *pucSource) {
-	volatile ZYNQ_UART_REGS *pRegs = g_UARTS[hUart->ulUartID];
+	volatile ZYNQ_UART_REGS *pRegs = hUart->pRegs;
 	switch(hUart->eMode) {
 	case BT_UART_MODE_POLLED:
 	{
@@ -709,9 +505,7 @@ static const BT_DEV_IFS oConfigInterface = {
 	(BT_DEV_INTERFACE) &oUartConfigInterface,
 };
 
-const BT_IF_DEVICE BT_ZYNQ_UART_oDeviceInterface = {
-	sizeof(g_UARTS)/sizeof(ZYNQ_UART_REGS *),					///< Allow upto 3 uart instances!
-	uartOpen,													///< Special Open interface.
+static const BT_IF_DEVICE oDeviceInterface = {
 	&oPowerInterface,											///< Device does not support powerstate functionality.
 	BT_DEV_IF_T_UART,											///< Allow configuration through the UART api.
 	.unConfigIfs = {
@@ -720,21 +514,74 @@ const BT_IF_DEVICE BT_ZYNQ_UART_oDeviceInterface = {
 	&oCharDevInterface,											///< Provide a Character device interface implementation.
 };
 
-
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
 	.oIfs = {
-		(BT_HANDLE_INTERFACE) &BT_ZYNQ_UART_oDeviceInterface,
+		(BT_HANDLE_INTERFACE) &oDeviceInterface,
 	},
 	BT_HANDLE_T_DEVICE,											///< Handle Type!
 	uartCleanup,												///< Handle's cleanup routine.
 };
 
+static BT_HANDLE uart_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
 
-static const BT_MODULE_ENTRY_DESCRIPTOR entryDescriptor = {
-	(BT_s8 *) "usart",
-	NULL,					///< No driver init function required!
-	&oHandleInterface,
+	BT_ERROR Error = BT_ERR_NONE;
+	BT_HANDLE hUart;
+
+	hUart = BT_CreateHandle(&oHandleInterface, sizeof(struct _BT_OPAQUE_HANDLE), pError);
+	if(!hUart) {
+		goto err_out;
+	}
+
+	hUart->pDevice = pDevice;
+
+	const BT_RESOURCE *pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_MEM, 0);
+	if(!pResource) {
+		Error = BT_ERR_NO_MEMORY;
+		goto err_free_out;
+	}
+
+	hUart->pRegs = (ZYNQ_UART_REGS *) pResource->ulStart;
+
+	hUart->pRegs->CR	= 0x00000128;
+	hUart->pRegs->MR 	= 0;
+	hUart->pRegs->IER 	= 0;
+	hUart->pRegs->IDR 	= 0;
+
+	hUart->pRegs->BAUDGEN	= 0x0000028B;
+	hUart->pRegs->RXTOUT   = 0;
+	hUart->pRegs->RXTRIG	= 0;
+	hUart->pRegs->MODEMCR 	= 0;
+
+	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_IRQ, 0);
+	if(!pResource) {
+		Error = BT_ERR_GENERIC;
+		goto err_free_out;
+	}
+
+	Error = BT_RegisterInterrupt(pResource->ulStart, uart_irq_handler, hUart);
+	if(Error) {
+		goto err_free_out;
+	}
+
+	Error = BT_EnableInterrupt(pResource->ulStart);
+
+	return hUart;
+
+/*err_free_irq:
+	BT_UnregisterInterrupt(pResource->ulStart, uart_irq_handler, hUart);*/
+
+err_free_out:
+	BT_kFree(hUart);
+
+err_out:
+	if(pError) {
+		*pError = Error;
+	}
+	return NULL;
+}
+
+BT_INTEGRATED_DRIVER_DEF gpio_driver = {
+	.name 		= "zynq,uart",
+	.pfnProbe	= uart_probe,
 };
-
-BT_MODULE_ENTRY(entryDescriptor);
