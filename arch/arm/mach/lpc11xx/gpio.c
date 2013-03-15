@@ -117,10 +117,7 @@ static const BT_IF_DEVICE oDeviceInterface = {
 };
 
 static const BT_IF_HANDLE oHandleInterface = {
-	BT_MODULE_NAME,
-	BT_MODULE_DESCRIPTION,
-	BT_MODULE_AUTHOR,
-	BT_MODULE_EMAIL,
+	BT_MODULE_DEF_INFO,
 	.pfnCleanup = gpio_cleanup,
 	.oIfs = {
 		.pDevIF = &oDeviceInterface,
@@ -162,22 +159,14 @@ BT_HANDLE gpio_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
 		goto err_free_out;
 	}
 
-	/*Error = BT_RegisterInterrupt(pResource->ulStart, gpio_irq_handler, hGPIO);
-	if(Error) {
-		goto err_free_out;
-		}*/
-
 	//Error = BT_EnableInterrupt(pResource->ulStart);
 
 	Error = BT_RegisterGpioController(base, total, hGPIO);
 	if(Error) {
-		goto err_free_irq;
+		goto err_free_out;
 	}
 
 	return hGPIO;
-
-err_free_irq:
-	BT_UnregisterInterrupt(pResource->ulStart, gpio_irq_handler, hGPIO);
 
 err_free_out:
 	BT_kFree(hGPIO);
