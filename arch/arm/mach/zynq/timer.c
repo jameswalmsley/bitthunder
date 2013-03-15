@@ -10,10 +10,6 @@ BT_DEF_MODULE_DESCRIPTION	("ZYNQ Timers kernel driver, also providing kernel tic
 BT_DEF_MODULE_AUTHOR		("James Walmsley")
 BT_DEF_MODULE_EMAIL			("james@fullfat-fs.co.uk")
 
-static BT_HANDLE timer_open(BT_u32 nDeviceID, BT_ERROR *pError) {
-	return NULL;
-}
-
 static BT_ERROR timer_cleanup(BT_HANDLE hTimer) {
 	return BT_ERR_UNIMPLEMENTED;
 }
@@ -109,8 +105,6 @@ static const BT_DEV_IFS oDeviceInterface = {
 };
 
 const BT_IF_DEVICE BT_ZYNQ_TIMER_oDeviceInterface = {
-	1,
-	timer_open,
 	NULL,					/// No power interface for system timer.
 	BT_DEV_IF_T_TIMER,
 	.unConfigIfs = {
@@ -143,4 +137,3 @@ static const BT_MODULE_ENTRY_DESCRIPTOR entryDescriptor = {
 	&oHandleInterface,
 };
 
-BT_MODULE_ENTRY(entryDescriptor);
