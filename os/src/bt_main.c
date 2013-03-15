@@ -59,6 +59,12 @@ int bt_main(int argc, char **argv) {
 
 	if (pMachine->pfnMachineInit) pMachine->pfnMachineInit(pMachine);
 
+
+	const BT_INTEGRATED_DRIVER *pDriver = BT_GetIntegratedDriverByName(pMachine->pInterruptController->name);
+	if(pDriver) {
+		pDriver->pfnProbe(pMachine->pInterruptController, &Error);
+	}
+
 	BT_HANDLE hUart = NULL;
 
 	if (pMachine->pBootLogger)
@@ -85,15 +91,6 @@ int bt_main(int argc, char **argv) {
 
 	string = "Start Loading kernel modules...\r\n";
 	BT_CharDeviceWrite(hUart, 0, strlen(string), (BT_u8 *)string);
-
-	string = "Initialise interrupt controller...\r\n";
-	BT_CharDeviceWrite(hUart, 0, strlen(string), (BT_u8 *)string);
-
-
-	BT_INTEGRATED_DRIVER *pDriver = BT_GetIntegratedDriverByName(pMachine->pInterruptController->name);
-	if(pDriver) {
-		pDriver->pfnProbe(pMachine->pInterruptController, &Error);
-	}
 
 	string = "Enumerate integrated devices\r\n";
 	BT_CharDeviceWrite(hUart, 0, strlen(string), (BT_u8 *)string);
