@@ -17,7 +17,7 @@ BT_CONFIG_ARCH_ARM_NVIC_BASE ?= 0xE000E100
 
 ## Configure the NVIC CFLAGS
 $(BUILD_DIR)arch/arm/common/nvic.o: CFLAGS += -DBT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS=$(BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS)
-$(BUILD_DIR)arch/arm/common/nvic.o: CFLAGS += -DBT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS=$(BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS)
+$(BUILD_DIR)arch/arm/common/nvic_vectors.o: CFLAGS += -DBT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS=$(BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS)
 
 ## Include the NVIC default vector table with weak symbols
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_USE_NVIC)	+= $(BUILD_DIR)arch/arm/common/nvic_vectors.o
