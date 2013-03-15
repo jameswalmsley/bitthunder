@@ -62,16 +62,10 @@ typedef union {
 #define BT_IF_UART_OPS(handle)		BT_IF_DEV_CONFIG(handle).pUartIF
 #define BT_IF_SDIO_OPS(handle)		BT_IF_DEV_CONFIG(handle).pSdioIF
 
-typedef BT_HANDLE	(*BT_DEVICE_HANDLE_OPEN)	(BT_u32 nDeviceID, BT_ERROR *pError);
-
 typedef struct _BT_IF_DEVICE {
-	BT_u32					ulTotalDevices;
-	BT_DEVICE_HANDLE_OPEN	pfnOpen;
-
 	const BT_IF_POWER	   *pPowerIF;
 	BT_DEV_IF_TYPE 			eConfigType;
 	const BT_DEV_IFS 	    unConfigIfs;
-
 	const BT_IF_CHARDEV	   *pCharDevIf;
 //	const BT_IF_BLOCKDEV   *pBlockDevIf;
 
