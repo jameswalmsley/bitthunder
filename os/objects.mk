@@ -22,6 +22,7 @@ BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/devman/bt_resources.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/machines/bt_machines.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/timers/bt_timers.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/process/bt_mutex.o
+BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/fs/bt_devfs.o
 
 
 

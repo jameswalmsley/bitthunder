@@ -11,6 +11,7 @@
 #include "process/bt_mutex.h"
 #include "process/bt_process.h"
 #include "process/bt_threads.h"
+#include "fs/bt_devfs.h"
 
 
 #endif

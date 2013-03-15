@@ -23,11 +23,10 @@ typedef struct {
 } BT_MODULE_ENTRY_DESCRIPTOR;
 
 
-#define BT_MODULE_ENTRY(entry) 		   BT_ATTRIBUTE_SECTION(".bt.module.entries") 	\
-  static const BT_MODULE_ENTRY_DESCRIPTOR *pModuleEntry = &entry;
+/*#define BT_MODULE_ENTRY(entry) 		   BT_ATTRIBUTE_SECTION(".bt.module.entries") 	\
+  static const BT_MODULE_ENTRY_DESCRIPTOR *pModuleEntry = &entry;*/
 
 
-BT_HANDLE BT_DeviceOpen(BT_u32 ulId, const BT_s8 *szpDevicePath, BT_ERROR *pError);
 BT_MACHINE_DESCRIPTION *BT_GetMachineDescription(BT_ERROR *pError);
 BT_INTEGRATED_DEVICE *BT_GetIntergratedDeviceByName(const BT_i8 *szpName);
 BT_INTEGRATED_DRIVER *BT_GetIntegratedDriverByName(const BT_i8 *szpName);
