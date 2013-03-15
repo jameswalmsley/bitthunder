@@ -16,28 +16,31 @@ extern BT_u32 BT_ZYNQ_GetArmPLLFrequency();
 
 int main(int argc, char **argv) {
 
-	BT_GpioSetDirection(0, BT_GPIO_DIR_OUTPUT);
+	BT_ERROR Error;
+	BT_HANDLE hUART = BT_DeviceOpen("uart1", &Error);
+
+	BT_UART_CONFIG oConfig;
+	//BT_SetPowerState(hUart, BT_POWER_STATE_AWAKE);
+
+	oConfig.eMode 		= BT_UART_MODE_POLLED;
+	oConfig.ucDataBits 	= 8;
+	oConfig.ulBaudrate 	= 115200;
+
+	BT_UartSetConfiguration(hUART, &oConfig);
+
+	BT_UartEnable(hUART);
+
 	BT_GpioSetDirection(7, BT_GPIO_DIR_OUTPUT);
 
+	BT_u32 i = 0;
+
 	while(1) {
-		BT_GpioSet(0, BT_TRUE);
-		BT_GpioSet(0, BT_FALSE);
-		BT_GpioSet(0, BT_TRUE);
-		BT_GpioSet(0, BT_FALSE);
-		BT_GpioSet(0, BT_TRUE);
-		BT_GpioSet(0, BT_FALSE);
-		BT_GpioSet(0, BT_TRUE);
-		BT_GpioSet(0, BT_FALSE);
-		BT_GpioSet(0, BT_TRUE);
-		BT_GpioSet(0, BT_FALSE);
-		BT_GpioSet(0, BT_TRUE);
-		BT_GpioSet(0, BT_FALSE);
-		BT_GpioSet(0, BT_TRUE);
-		BT_GpioSet(0, BT_FALSE);
-		BT_GpioSet(0, BT_TRUE);
-		BT_GpioSet(0, BT_FALSE);
-		BT_GpioSet(0, BT_TRUE);
-		BT_GpioSet(0, BT_FALSE);
+		BT_CharDeviceWrite(hUART, 0, 1, (BT_u8 *) ".");
+		BT_ThreadSleep(1000);
+		i++;
+		if(i % 10 == 0) {
+			BT_CharDeviceWrite(hUART, 0, 1, (BT_u8 *) "\n");
+		}
 	}
 
 	return 0;
