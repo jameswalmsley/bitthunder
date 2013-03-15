@@ -128,7 +128,7 @@ static const BT_IF_HANDLE oHandleInterface = {
 	},
 };
 
-BT_HANDLE gpio_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
+static BT_HANDLE gpio_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
 
 	BT_u32 i;
 
