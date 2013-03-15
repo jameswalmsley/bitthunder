@@ -1,16 +1,17 @@
 /**
- *	Zynq Platform Machine Description.
+ *	LPC11xx Platform Machine Description.
  *
- *	@author		James Walmsley
+ *	@author		Robert Steinbauer
  *
- *	@copyright	(c)2012 Riegl Laser Measurement Systems GmBH
- *	@copyright	(c)2012 James Walmsley <james@fullfat-fs.co.uk>
+ *	@copyright	(c)2013 Riegl Laser Measurement Systems GmBH
+ *	@copyright	(c)2013 Robert Steinbauer <rsteinbauer@riegl.com>
  *
  **/
 
 
 #include <bitthunder.h>
 
+#include "rcc.h"
 #include "uart.h"
 #include "gpio.h"
 
@@ -32,6 +33,24 @@ static const BT_RESOURCE oLPC11xx_gpio_resources[] = {
 	},
 };
 
+static const BT_RESOURCE oLPC11xx_uart0_resources[] = {
+	{
+		.ulStart 			= BT_CONFIG_MACH_LPC11xx_UART0_BASE,
+		.ulEnd 				= BT_CONFIG_MACH_LPC11xx_UART0_BASE + BT_SIZE_4K - 1,
+		.ulFlags 			= BT_RESOURCE_MEM,
+	},
+	{
+		.ulStart			= BT_CONFIG_MACH_LPC11xx_UART0_RX,
+		.ulEnd				= BT_CONFIG_MACH_LPC11xx_UART0_TX,
+		.ulFlags			= BT_RESOURCE_IO
+	},
+	{
+		.ulStart			= 21,
+		.ulEnd				= 21,
+		.ulFlags			= BT_RESOURCE_IRQ,
+	},
+};
+
 /**
  *	By using the BT_INTEGRATED_DEVICE_DEF macro, we ensure that this structure is
  *	placed into the device manager's integrated device table.
@@ -42,6 +61,12 @@ BT_INTEGRATED_DEVICE_DEF oLPC11xx_gpio_device = {
 	.name 					= "LPC11xx,gpio",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC11xx_gpio_resources),
 	.pResources 			= oLPC11xx_gpio_resources,
+};
+
+BT_INTEGRATED_DEVICE_DEF oLPC11xx_uart0_device = {
+	.name 					= "LPC11xx,usart",
+	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC11xx_uart0_resources),
+	.pResources 			= oLPC11xx_uart0_resources,
 };
 
 static const BT_RESOURCE oLPC11xx_nvic_resources[] = {
@@ -83,11 +108,11 @@ static const BT_INTEGRATED_DEVICE oLPC11xx_systick_device = {
 };
 
 static BT_u32 lpc11xx_get_cpu_clock_frequency() {
-	return 12000000;
+	return BT_LPC11xx_GetSystemFrequency();
 }
 
 BT_MACHINE_START(ARM, CORTEX_M0, "LPC Microcontroller Platform")
-    .ulSystemClockHz 			= 12000000,
+    .ulSystemClockHz 			= BT_CONFIG_MACH_LPC11xx_SYSCLOCK_FREQ,
 	.pfnGetCpuClockFrequency 	= lpc11xx_get_cpu_clock_frequency,
 
 	.pInterruptController		= &oLPC11xx_nvic_device,
