@@ -80,7 +80,7 @@ static const BT_INTEGRATED_DEVICE oZynq_intc_device = {
 static const BT_RESOURCE oZynq_cpu_timer_resources[] = {
 	{
 		.ulStart			= 0xF8F00600,
-		.ulEnd				= 0xF8F006FF,
+		.ulEnd				= 0xF8F006FF + BT_SIZE_4K - 1,
 		.ulFlags			= BT_RESOURCE_MEM,
 	},
 	{
@@ -102,9 +102,58 @@ static const BT_INTEGRATED_DEVICE oZynq_watchdog_device = {
 	.pResources				= oZynq_cpu_timer_resources,
 };
 
+static const BT_RESOURCE oZynq_uart0_resources[] = {
+	{
+		.ulStart			= 0xE0000000,
+		.ulEnd				= 0xE0000000 + BT_SIZE_4K - 1,
+		.ulFlags			= BT_RESOURCE_MEM,
+	},
+	{
+		.ulStart			= 59,									///< Start provides the IRQ of the private timer.
+		.ulEnd				= 59,									///< End provides the IRQ of the watchdog timer.
+		.ulFlags			= BT_RESOURCE_IRQ,
+	},
+};
+
+static const BT_RESOURCE oZynq_uart1_resources[] = {
+	{
+		.ulStart			= 0xE0001000,
+		.ulEnd				= 0xE0001000 + BT_SIZE_4K - 1,
+		.ulFlags			= BT_RESOURCE_MEM,
+	},
+	{
+		.ulStart			= 82,									///< Start provides the IRQ of the private timer.
+		.ulEnd				= 82,									///< End provides the IRQ of the watchdog timer.
+		.ulFlags			= BT_RESOURCE_IRQ,
+	},
+};
+
+static const BT_INTEGRATED_DEVICE oZynq_uart0_device = {
+	.name					= "zynq,uart",
+	.ulTotalResources		= BT_ARRAY_SIZE(oZynq_uart0_resources),
+	.pResources				= oZynq_uart0_resources,
+};
+
+static const BT_INTEGRATED_DEVICE oZynq_uart1_device = {
+	.name					= "zynq,uart",
+	.ulTotalResources		= BT_ARRAY_SIZE(oZynq_uart1_resources),
+	.pResources				= oZynq_uart1_resources,
+};
+
+BT_DEVFS_INODE_DEF oZynq_uart0_inode = {
+	.szpName = "uart0",
+	.pDevice = &oZynq_uart0_device,
+};
+
+BT_DEVFS_INODE_DEF oZynq_uart1_inode = {
+	.szpName = "uart1",
+	.pDevice = &oZynq_uart1_device,
+};
+
 static BT_u32 zynq_get_cpu_clock_frequency() {
 	return BT_ZYNQ_GetCpuFrequency();
 }
+
 
 BT_MACHINE_START(ARM, ZYNQ, "Xilinx Embedded Zynq Platform")
     .ulSystemClockHz 			= BT_CONFIG_MACH_ZYNQ_SYSCLOCK_FREQ,
@@ -114,6 +163,6 @@ BT_MACHINE_START(ARM, ZYNQ, "Xilinx Embedded Zynq Platform")
 
 	.pSystemTimer 				= &oZynq_cpu_timer_device,
 
-	.pBootLogger				= &BT_ZYNQ_UART_oDeviceInterface,
+	.pBootLogger				= &oZynq_uart1_device,
 	.ulBootUartID				= BT_CONFIG_MACH_ZYNQ_BOOT_UART_ID,
 BT_MACHINE_END
