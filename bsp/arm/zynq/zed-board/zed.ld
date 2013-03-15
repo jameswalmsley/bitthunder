@@ -63,11 +63,11 @@ SECTIONS
 		__bt_module_init_end = .;
 	} > ZYNQ_RAM0
 
-	.bt.module.entries : {
-	    __bt_module_entries_start = .;
-		KEEP(*(.bt.module.entries))
-		KEEP(*(.bt.module.entries.*))
-		__bt_module_entries_end = .;
+	.bt.devfs.entries : {
+	    __bt_devfs_entries_start = .;
+		KEEP(*(.bt.devfs.entries))
+		KEEP(*(.bt.devfs.entries.*))
+		__bt_devfs_entries_end = .;
 	} > ZYNQ_RAM0
 
     .text : {
