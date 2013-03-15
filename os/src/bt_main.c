@@ -63,10 +63,9 @@ int bt_main(int argc, char **argv) {
 
 	if (pMachine->pBootLogger)
 	{
-		hUart = pMachine->pBootLogger->pfnOpen(pMachine->ulBootUartID, &Error);
-		if(!hUart) {
-			// Well, we're completely out of luck! We cannot report this to anything.
-			return -1;
+		pDriver = BT_GetIntegratedDriverByName(pMachine->pBootLogger->name);
+		if(pDriver) {
+			hUart = pDriver->pfnProbe(pMachine->pBootLogger, &Error);
 		}
 	}
 

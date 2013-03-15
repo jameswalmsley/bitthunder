@@ -35,11 +35,9 @@ typedef struct _BT_MACHINE_DESCRIPTION {
 	const BT_INTEGRATED_DEVICE	   *pSystemTimer;
 	const BT_INTEGRATED_DEVICE	   *pWatchdogTimer;
 
-	const BT_IF_DEVICE		   	   *pBootLogger;				/// Pointer to device supporting chardev if.
+	const BT_INTEGRATED_DEVICE 	   *pBootLogger;			/// Pointer to device supporting chardev if.
 	BT_u32							ulBootUartID;			/// Which instance number to use.
 } BT_MACHINE_DESCRIPTION;
-
-
 
 #define BT_MACHINE_START(_arch,_type,_name)				\
 static const BT_MACHINE_DESCRIPTION __bt_mach_desc_##_type	\
