@@ -31,23 +31,18 @@ BT_u32 BT_GetSystemTimerOffset() {
 	BT_ERROR Error;
 
 	if(g_hTimer) {
-		return g_Ops->pfnGetOffset(g_hTimer, &Error);
+		BT_u32 rate = g_Ops->pfnGetClockRate(g_hTimer, &Error);
+		return g_Ops->pfnGetOffset(g_hTimer, &Error) / (rate / 1000000);
 	}
 	return 0;
 }
 
 
 BT_u32 BT_GetKernelTime() {
-	BT_ERROR Error;
 	BT_u32 us = 0;
 	us += (1000 * BT_kTickCount());
 
-	BT_u32 rate 	= g_Ops->pfnGetClockRate(g_hTimer, &Error);
-	rate /= 1000000;
-
-	BT_u32 offsetus = g_Ops->pfnGetOffset(g_hTimer, &Error) / rate;
-
-	return us + offsetus;
+	return us + BT_GetSystemTimerOffset();
 }
 
 BT_u32 BT_GetKernelTick() {
