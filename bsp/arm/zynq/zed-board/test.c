@@ -1,5 +1,6 @@
 #include <bitthunder.h>
 #include <string.h>
+#include <lib/putc.h>
 
 extern BT_u32 BT_ZYNQ_GetArmPLLFrequency();
 
@@ -30,17 +31,25 @@ int main(int argc, char **argv) {
 
 	BT_UartEnable(hUART);
 
+	BT_SetStandardHandle(hUART);
+
 	BT_GpioSetDirection(7, BT_GPIO_DIR_OUTPUT);
 
-	BT_u32 i = 0;
+	bt_printf("\r\n");
+
+	BT_TICK time = BT_GetKernelTick();
 
 	while(1) {
-		BT_CharDeviceWrite(hUART, 0, 1, (BT_u8 *) ".");
-		BT_ThreadSleep(1000);
-		i++;
-		if(i % 10 == 0) {
-			BT_CharDeviceWrite(hUART, 0, 1, (BT_u8 *) "\n");
+		BT_u32 i;
+		BT_u32 ticks = BT_GetKernelTime();
+
+		for(i = 0; i < 10000; i++) {
+			;
 		}
+
+		BT_u32 offset = BT_GetSystemTimerOffset();
+		bt_printf("Time: %d.%03d\r", ticks/1000000, ticks%1000000);
+		BT_ThreadSleepUntil(&time, 1000);
 	}
 
 	return 0;
