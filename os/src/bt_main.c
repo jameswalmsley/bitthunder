@@ -11,6 +11,7 @@
 #include <mm/bt_heap.h>
 #include <string.h>
 #include <bt_kernel.h>
+#include <lib/putc.h>
 
 extern int main(int argc, char **argv);
 
@@ -86,14 +87,14 @@ int bt_main(int argc, char **argv) {
 
 	BT_UartEnable(hUart);
 
-	char *string = BT_VERSION_STRING"\r\n";
-	BT_CharDeviceWrite(hUart, 0, strlen(string), (BT_u8 *)string);
+	BT_SetStandardHandle(hUart);
 
-	string = "Start Loading kernel modules...\r\n";
-	BT_CharDeviceWrite(hUart, 0, strlen(string), (BT_u8 *)string);
+	BT_kPrint("%s (%s)\r\n", BT_VERSION_STRING, BT_VERSION_NAME);
 
-	string = "Enumerate integrated devices\r\n";
-	BT_CharDeviceWrite(hUart, 0, strlen(string), (BT_u8 *)string);
+	BT_kPrint("Start Loading kernel modules...\r\n");
+	//BT_CharDeviceWrite(hUart, 0, strlen(string), (BT_u8 *)string);
+
+	BT_kPrint("Enumerate integrated devices\r\n");
 
 
 	// Go through the module initialisation routines!
@@ -102,11 +103,11 @@ int bt_main(int argc, char **argv) {
 
 	Error = BT_ProbeIntegratedDevices(hUart);
 
-	string = "Enter user-mode, and start user-space application...\r\n";
-	BT_CharDeviceWrite(hUart, 0, strlen(string), (BT_u8 *)string);
+	BT_kPrint("Enter user-mode, and start user-space application...\r\n");
 
-	string = "Relinquish control of the boot UART device...(Goodbye)\r\n";
-	BT_CharDeviceWrite(hUart, 0, strlen(string), (BT_u8 *)string);
+	BT_kPrint("Relinquish control of the boot UART device...(Goodbye)\r\n");
+
+	BT_SetStandardHandle(NULL);
 
 	if (hUart)
 	{
