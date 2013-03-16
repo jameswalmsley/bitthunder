@@ -13,5 +13,6 @@
 #include "process/bt_threads.h"
 #include "fs/bt_devfs.h"
 #include "lib/printf.h"
+#include "syslog/bt_printk.h"
 
 #endif

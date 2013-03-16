@@ -25,6 +25,7 @@ BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/process/bt_mutex.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/fs/bt_devfs.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/lib/printf.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/lib/putc.o
+BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/syslog/bt_printk.o
 
 
 include $(BASE)os/src/interfaces/objects.mk
