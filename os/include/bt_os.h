@@ -12,6 +12,6 @@
 #include "process/bt_process.h"
 #include "process/bt_threads.h"
 #include "fs/bt_devfs.h"
-
+#include "lib/printf.h"
 
 #endif
