@@ -18,7 +18,6 @@ struct _BT_OPAQUE_HANDLE {
 
 static BT_ERROR mutex_cleanup(BT_HANDLE hMutex) {
 	BT_kMutexDestroy(hMutex->pMutex);
-	BT_kFree(hMutex);
 	return BT_ERR_NONE;
 }
 
