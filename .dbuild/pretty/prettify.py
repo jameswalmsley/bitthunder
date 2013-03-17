@@ -3,6 +3,7 @@
 import os, sys
 import prettyformat
 import fileinput
+import unicodedata
 
 bCustom = True
 opcode = "??"
@@ -23,11 +24,15 @@ if(len(sys.argv) > 2+offset):
 
 for line in sys.stdin:
     line = line.strip()
+    line = line.rstrip()
+    line = line.lstrip()
+    line = line.decode('utf8')
+    
     if("removed" in line):
-        description = line.split("`")[1]
-        description = description.split("'")[0]
+        description = line.split(" ")[-1][1:][:-1]
         description = description.split(os.getcwd()).pop()
-        #description = os.path.dirname(description)
+        if description[0] == '/':
+            description = description[1:]
     else:
         description = line
 
