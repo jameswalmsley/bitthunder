@@ -17,6 +17,15 @@ typedef enum _BT_MMC_CARD_EVENT {
 	BT_MMC_CARD_REMOVED,
 } BT_MMC_CARD_EVENT;
 
+typedef enum _BT_MMC_HOST_INTERRUPTS {
+	BT_MMC_INTERRUPT_CARD,
+} BT_MMC_INTERRUPTS;
+
+typedef enum _BT_MMC_WIDTH {
+	BT_MMC_WIDTH_1BIT,
+	BT_MMC_WIDTH_4BIT,
+} BT_MMC_WIDTH;
+
 typedef void (*BT_MMC_CARD_EVENTRECEIVER)(MMC_HOST *pHost, BT_MMC_CARD_EVENT eEvent, BT_BOOL bInterruptContext);
 
 typedef struct _BT_MMC_OPS {
@@ -25,6 +34,8 @@ typedef struct _BT_MMC_OPS {
 	BT_ERROR 	(*pfnEventSubscribe)	(BT_HANDLE hSDIO, BT_MMC_CARD_EVENTRECEIVER pfnReceiver, MMC_HOST *pHost);
 	BT_BOOL	 	(*pfnIsCardPresent)		(BT_HANDLE hSDIO, BT_ERROR *pError);
 	BT_ERROR	(*pfnInitialise)		(BT_HANDLE hSDIO);
+	BT_ERROR	(*pfnSetInterruptMask)	(BT_HANDLE hSDIO, BT_MMC_INTERRUPTS eInterrup, BT_BOOL bEnable);
+	BT_ERROR	(*pfnSetDataWidth)		(BT_HANDLE hSDIO, BT_MMC_WIDTH eWdith);
 
 	BT_ERROR 	(*pfnRequest)			(BT_HANDLE hSDIO, MMC_COMMAND *pCommand);
 } BT_MMC_OPS;
