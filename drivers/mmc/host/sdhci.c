@@ -200,7 +200,7 @@ static BT_ERROR sdhci_initialise(BT_HANDLE hSDIO) {
 	// Enable the SDIO clock, and attempt to reset the card if present.
 	BT_u32 reg = hSDIO->pRegs->CLOCK_CONTROL;
 	reg &= 0x00FF;	// Mask out the clock selection freq!
-	reg |= (128 << 8);	// Set SDClk to be base (50mhz / 128 ~400khz).
+	reg |= (1 << 8);	// Set SDClk to be base (50mhz / 128 ~400khz).
 	reg |= 1;			// Enable internal SDHCI clock.
 	hSDIO->pRegs->CLOCK_CONTROL = reg;
 
@@ -249,11 +249,44 @@ static BT_ERROR sdhci_initialise(BT_HANDLE hSDIO) {
 	return BT_ERR_NONE;
 }
 
+static BT_ERROR sdhci_set_interrupt_mask(BT_HANDLE hSDIO, BT_MMC_INTERRUPTS eInterrupt, BT_BOOL bEnable) {
+
+	switch(eInterrupt) {
+	case BT_MMC_INTERRUPT_CARD:
+		if(bEnable) {
+			hSDIO->pRegs->NORMAL_INT_ENABLE |= NORMAL_INT_CARD;
+		} else {
+			hSDIO->pRegs->NORMAL_INT_ENABLE &= ~NORMAL_INT_CARD;
+		}
+		break;
+	}
+
+	return BT_ERR_NONE;
+}
+
+static BT_ERROR sdhci_set_data_width(BT_HANDLE hSDIO, BT_MMC_WIDTH eWidth) {
+	switch(eWidth) {
+	case BT_MMC_WIDTH_1BIT:
+		hSDIO->pRegs->HOST_CONTROL &= ~HOST_TRANSFER_WIDTH;
+		break;
+
+	case BT_MMC_WIDTH_4BIT:
+		hSDIO->pRegs->HOST_CONTROL |= HOST_TRANSFER_WIDTH;
+		break;
+
+	default:
+		break;
+	}
+	return BT_ERR_NONE;
+}
+
 static const BT_MMC_OPS sdhci_mmc_ops = {
 	.ulCapabilites1 	= 0,
 	.pfnRequest			= sdhci_request,
 	.pfnEventSubscribe 	= sdhci_event_subscribe,
 	.pfnIsCardPresent	= sdhci_is_card_present,
+	.pfnSetInterruptMask = sdhci_set_interrupt_mask,
+	.pfnSetDataWidth    = sdhci_set_data_width,
 	.pfnInitialise 		= sdhci_initialise,
 };
 
