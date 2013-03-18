@@ -12,6 +12,7 @@ typedef struct {
 	BT_ERROR	(*pfnWrite)	(BT_HANDLE hDevice, BT_u32 ulFlags, BT_u32 ulSize, const BT_u8 *pucSource);
 	BT_ERROR	(*pfnGetch)	(BT_HANDLE hDevice, BT_u32 ulFlags);
 	BT_ERROR	(*pfnPutch)	(BT_HANDLE hDevice, BT_u32 ulFlags, BT_u8 ucData);
+	BT_ERROR	(*pfnFlush) (BT_HANDLE hDevice);
 } BT_IF_CHARDEV;
 
 BT_ERROR BT_CharDeviceRead	(BT_HANDLE hDevice, BT_u32 ulFlags, BT_u32 ulSize, BT_u8 *pucDest);
