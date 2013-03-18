@@ -7,7 +7,7 @@
 #include <bitthunder.h>
 #include <string.h>
 
-BT_DEF_MODULE_NAME			("BitThunder Threading Model")
+BT_DEF_MODULE_NAME			("Threading Model")
 BT_DEF_MODULE_DESCRIPTION	("Process threads for the BitThunder Kernel")
 BT_DEF_MODULE_AUTHOR		("James Walmsley")
 BT_DEF_MODULE_EMAIL			("james@fullfat-fs.co.uk")

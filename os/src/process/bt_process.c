@@ -6,7 +6,7 @@
 #include <bitthunder.h>
 #include <string.h>
 
-BT_DEF_MODULE_NAME			("BitThunder Process Model")
+BT_DEF_MODULE_NAME			("Process Manager")
 BT_DEF_MODULE_DESCRIPTION	("OS Process abstraction for the BitThunder Kernel")
 BT_DEF_MODULE_AUTHOR		("James Walmsley")
 BT_DEF_MODULE_EMAIL			("james@fullfat-fs.co.uk")
