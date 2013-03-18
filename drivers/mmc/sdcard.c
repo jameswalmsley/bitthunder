@@ -82,6 +82,8 @@ static void sd_manager_sm(void *pData) {
 
 			if(pHost->pOps->pfnIsCardPresent(pHost->hHost, &Error)) {
 
+				BT_kPrint("SDCARD: SDCard was inserted");
+
 				// Attempt basic SDIO initialisation (host-specific).
 				pHost->pOps->pfnInitialise(pHost->hHost);
 
@@ -167,9 +169,29 @@ static void sd_manager_sm(void *pData) {
 
 				BT_kPrint("SDCARD: Selected card with RCA %d", pHost->rca);
 
+
+				// Place SDCard into 4-bit mode. (ACMD6).
+
+				oCommand.arg = pHost->rca << 16;
+				oCommand.opcode = 55;
+				oCommand.bCRC = BT_TRUE;
+				oCommand.ulResponseType = 48;
+
+				pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
+
+				oCommand.arg = 0x2;	// Set argument to be 4-bit mode
+				oCommand.opcode = 6;
+				oCommand.bCRC = BT_TRUE;
+				oCommand.ulResponseType = 48;
+
+				pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
+
+				pHost->pOps->pfnSetDataWidth(pHost->hHost, BT_MMC_WIDTH_4BIT);
+
+				BT_kPrint("SDCARD: Configured card for 4-bit data width. (resp: %08x)", oCommand.response[0]);
+
 				BT_kPrint("SDCARD: sucessfully initialised... registering block device");
 				// Card initialised -- regster block device driver :)
-
 				//BT_RegisterBlockDevice();
 
 				BT_GpioSet(7, BT_TRUE);
@@ -180,6 +202,7 @@ static void sd_manager_sm(void *pData) {
 			pHost->ulFlags &= ~MMC_HOST_FLAGS_INVALIDATE;
 			if(!pHost->pOps->pfnIsCardPresent(pHost->hHost, &Error)) {
 				BT_GpioSet(7, BT_FALSE);
+				BT_kPrint("SDCARD: SDCard was removed");
 			}
 		}
 
