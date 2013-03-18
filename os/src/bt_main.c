@@ -89,12 +89,12 @@ int bt_main(int argc, char **argv) {
 
 	BT_SetStandardHandle(hUart);
 
-	BT_kPrint("%s (%s)\r\n", BT_VERSION_STRING, BT_VERSION_NAME);
+	BT_kPrint("%s (%s)", BT_VERSION_STRING, BT_VERSION_NAME);
 
-	BT_kPrint("Start Loading kernel modules...\r\n");
+	BT_kPrint("Start Loading kernel modules...");
 	//BT_CharDeviceWrite(hUart, 0, strlen(string), (BT_u8 *)string);
 
-	BT_kPrint("Enumerate integrated devices\r\n");
+	BT_kPrint("Enumerate integrated devices");
 
 
 	// Go through the module initialisation routines!
@@ -103,9 +103,9 @@ int bt_main(int argc, char **argv) {
 
 	Error = BT_ProbeIntegratedDevices(hUart);
 
-	BT_kPrint("Enter user-mode, and start user-space application...\r\n");
+	BT_kPrint("Enter user-mode, and start user-space application...");
 
-	BT_kPrint("Relinquish control of the boot UART device...(Goodbye)\r\n");
+	BT_kPrint("Relinquish control of the boot UART device...(Goodbye)");
 
 	BT_SetStandardHandle(NULL);
 
