@@ -28,6 +28,13 @@ typedef struct _SDHCI_REGS {
 	#define STATE_CMD_LINE_SIGNAL_LEVEL 		0x01000000
 
 	BT_u8	HOST_CONTROL;
+	#define HOST_LED_CONTROL					0x01
+	#define HOST_TRANSFER_WIDTH					0x02
+	#define HOST_HIGH_SPEED_ENABLE				0x04
+	#define HOST_DMA_SELECT						0x18
+	#define HOST_CD_TEST						0x40
+	#define HOST_CD_SIGNAL						0x80
+
 	BT_u8	POWER_CONTROL;
     #define POWER_ENABLE						0x01
     #define POWER_ENABLE_GET(x)					((x & POWER_ENABLE) >> 0)
