@@ -21,6 +21,7 @@ typedef struct _MMC_HOST {
 	BT_u32 				ulFlags;
 #define MMC_HOST_FLAGS_INITIALISE_REQUEST 	0x00000001		///< This host has generated an initialisation request.
 #define MMC_HOST_FLAGS_INVALIDATE			0x00000002		///< State-machine should attempt to invalidate resources dependent on this host.
+	BT_u16 				rca;
 } MMC_HOST;
 
 static BT_TASKLET 	sm_tasklet;
@@ -93,6 +94,8 @@ static void sd_manager_sm(void *pData) {
 
 				pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
 
+				BT_kPrint("SDCARD: Sent GO_IDLE");
+
 				// Send CMD8 (SEND_IF_COND -- Helps determine SDHC support).
 				oCommand.arg 			= 0x000001AA;		//	0xAA is the test field, it can be anything, 0x100 is the voltage range, 2.7-3.6V).
 				oCommand.opcode 		= 8;
@@ -104,6 +107,8 @@ static void sd_manager_sm(void *pData) {
 				if((oCommand.response[0] & 0xFFF) != 0x1AA) {
 					oCommand.bCRC = BT_TRUE;
 				}
+
+				BT_kPrint("SDCARD: Sent SEND_IF_COND, response = %08x", oCommand.response[0]);
 
 				while(1) {	/* Loop while the SD-Card initialised itself. */
 
@@ -138,7 +143,7 @@ static void sd_manager_sm(void *pData) {
 				pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
 
 				// We can use the information in the CID register to get things like the CARD S/N etc and manufacturer code.
-
+				BT_kPrint("SDCARD: CID reg %08x:%08x:%08x:%08x", oCommand.response[3], oCommand.response[2], oCommand.response[1], oCommand.response[0]);
 
 				// Place the command into the data stat (CMD3).
 				oCommand.arg = 0;
@@ -148,6 +153,21 @@ static void sd_manager_sm(void *pData) {
 
 				pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
 
+				pHost->rca = oCommand.response[0] >> 16;
+
+				BT_kPrint("SDCARD: Placed SDCARD into data state. (resp: %08x)", oCommand.response[0]);
+				BT_kPrint("SDCARD: Relative Card Address (RCA): %d", pHost->rca);
+
+				oCommand.arg = pHost->rca << 16;
+				oCommand.opcode = 7;
+				oCommand.bCRC = BT_TRUE;
+				oCommand.ulResponseType = 48;
+
+				pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
+
+				BT_kPrint("SDCARD: Selected card with RCA %d", pHost->rca);
+
+				BT_kPrint("SDCARD: sucessfully initialised... registering block device");
 				// Card initialised -- regster block device driver :)
 
 				//BT_RegisterBlockDevice();
