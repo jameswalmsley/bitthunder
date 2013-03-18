@@ -25,6 +25,9 @@ BT_ERROR BT_InitialiseKernelModules(BT_HANDLE hLogger) {
 			Error = pInit->pfnInit();
 			if(Error) {
 				// Here we should try to log a failure!
+				BT_kPrint("Error: Could not load module: %s", pInit->name);
+			} else {
+				BT_kPrint("Module loaded: %s", pInit->name);
 			}
 		}
 	}

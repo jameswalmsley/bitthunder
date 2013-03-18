@@ -81,10 +81,6 @@ BT_ERROR BT_ProbeIntegratedDevices(BT_HANDLE hLogDevice) {
 	BT_u32 size = (BT_u32) ((BT_u32) &__bt_arch_devices_end - (BT_u32) &__bt_arch_devices_start);
 	BT_u32 i;
 
-	//BT_i8 buffer[512];
-
-	BT_i8 *string = "";
-
 	size /= sizeof(BT_INTEGRATED_DEVICE);
 
 	for(i = 0; i < size; i++) {
@@ -95,15 +91,14 @@ BT_ERROR BT_ProbeIntegratedDevices(BT_HANDLE hLogDevice) {
 		if(pDriver) {
 			BT_HANDLE hDevice = pDriver->pfnProbe(pDevice, &Error);
 			if(Error) {
-				string = "Error probing device!\r\n";
-				BT_CharDeviceWrite(hLogDevice, 0, strlen(string),  (BT_u8 *) string);
+				BT_kPrint("Error probing: %s device.", pDevice->name);
 			}
 
 			if(hDevice) {
-				BT_kPrint("Registered %s with %s driver\r\n", pDevice->name, hDevice->h.pIf->oInfo.szpModuleName);
+				BT_kPrint("Registered %s with %s driver", pDevice->name, hDevice->h.pIf->oInfo.szpModuleName);
 			}
-
-
+		} else {
+			BT_kPrint("Error: No driver to match %s device", pDevice->name);
 		}
 	}
 
