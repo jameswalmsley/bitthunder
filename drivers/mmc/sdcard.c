@@ -167,6 +167,34 @@ static void sd_manager_sm(void *pData) {
 	}
 }
 
+static BT_u32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount, void *pBuffer, BT_ERROR *pError) {
+
+	return 0;
+}
+
+static BT_u32 sdcard_blockwrite(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount, void *pBuffer, BT_ERROR *pError) {
+
+	return 0;
+}
+
+static const BT_IF_BLOCK oBlockInterface = {
+		sdcard_blockread,
+	sdcard_blockwrite,
+};
+
+static BT_ERROR sdcard_blockdev_cleanup(BT_HANDLE hHandle) {
+	return BT_ERR_NONE;
+}
+
+static const BT_IF_HANDLE oHandleInterface = {
+	BT_MODULE_DEF_INFO,
+	.pfnCleanup = sdcard_blockdev_cleanup,
+	.eType = BT_HANDLE_T_BLOCK,
+	.oIfs = {
+		.pBlockIF = &oBlockInterface,
+	},
+};
+
 static BT_TASKLET sm_tasklet = {NULL, BT_TASKLET_IDLE, sd_manager_sm, NULL};
 
 static BT_ERROR bt_sdcard_manager_init() {
