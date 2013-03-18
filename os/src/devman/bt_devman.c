@@ -100,9 +100,7 @@ BT_ERROR BT_ProbeIntegratedDevices(BT_HANDLE hLogDevice) {
 			}
 
 			if(hDevice) {
-				/*int len = sprintf(buffer, "Registered %s with %s driver\r\n", pDevice->name, hDevice->h.pIf->oInfo.szpModuleName);
-				string = "Registered device with driver\r\n";
-				BT_CharDeviceWrite(hLogDevice, 0, len,  (BT_u8 *) buffer);*/
+				BT_kPrint("Registered %s with %s driver\r\n", pDevice->name, hDevice->h.pIf->oInfo.szpModuleName);
 			}
 
 
