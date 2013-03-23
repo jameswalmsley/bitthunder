@@ -32,7 +32,7 @@ all: dbuild_entry _all
 #	targets and subdirs as found in objects.mk and subdirs.mk
 #
 -include .config.mk
--include objects.mk
+#-include objects.mk
 -include targets.mk
 -include subdirs.mk
 
