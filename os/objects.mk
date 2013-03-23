@@ -55,6 +55,6 @@ $(BUILD_DIR)os/src/process/bt_process.o: CFLAGS += -DBT_CONFIG_MAX_PROCESS_NAME=
 
 BT_OS_OBJECTS += $(BT_OS_OBJECTS-y)
 $(BT_OS_OBJECTS): MODULE_NAME="BitThunder"
-$(BT_OS_OBJECTS): CFLAGS += -nostdlib -fno-builtin
+$(BT_OS_OBJECTS): CFLAGS += -nostdlib -fno-builtin -fdata-sections -ffunction-sections
 
 OBJECTS += $(BT_OS_OBJECTS)
