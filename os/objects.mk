@@ -15,8 +15,8 @@ BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/mm/bt_heap.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/process/bt_process.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/process/bt_threads.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/interrupts/bt_interrupts.o
-BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/interrupts/bt_softirq.o
-BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/interrupts/bt_tasklets.o
+BT_OS_OBJECTS-$(BT_CONFIG_INTERRUPTS_SOFTIRQ) += $(BUILD_DIR)os/src/interrupts/bt_softirq.o
+BT_OS_OBJECTS-$(BT_CONFIG_TASKLETS) += $(BUILD_DIR)os/src/interrupts/bt_tasklets.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/gpio/bt_gpio.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/module/bt_module_init.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/devman/bt_devman.o
@@ -25,25 +25,23 @@ BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/machines/bt_machines.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/timers/bt_timers.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/process/bt_mutex.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/fs/bt_devfs.o
-BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/lib/printf.o
+BT_OS_OBJECTS-$(BT_CONFIG_LIB_PRINTF) += $(BUILD_DIR)os/src/lib/printf.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/lib/putc.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/syslog/bt_printk.o
 
 
 include $(BASE)os/src/interfaces/objects.mk
 
-
+ifeq ($(BT_CONFIG_OS),y)
 include $(BASE)arch/$(ARCH)/mach/$(SUBARCH)/.config.mk
 include $(BASE)arch/$(ARCH)/mach/$(SUBARCH)/objects.mk
 include $(BASE)arch/$(ARCH)/objects.mk
-#SUB_OBJDIRS += $(BASE)arch/$(ARCH)/mach/$(SUBARCH)/
-#SUB_OBJDIRS += $(BASE)arch/$(ARCH)/
+endif
+
 
 include $(BASE)drivers/objects.mk
 
-test2:
-	echo $(BT_CONFIG_KERNEL)
-ifeq ($(BT_CONFIG_KERNEL), FreeRTOS)
+ifeq ($(BT_CONFIG_KERNEL_FREERTOS),y)
 $(BUILD_DIR)os/src/mm/bt_heap.o: CFLAGS += -DBT_CONFIG_KERNEL_FREERTOS
 $(BUILD_DIR)os/src/mm/bt_mm.o: CFLAGS += -DBT_CONFIG_KERNEL_FREERTOS
 endif
@@ -55,6 +53,6 @@ $(BUILD_DIR)os/src/process/bt_process.o: CFLAGS += -DBT_CONFIG_MAX_PROCESS_NAME=
 
 BT_OS_OBJECTS += $(BT_OS_OBJECTS-y)
 $(BT_OS_OBJECTS): MODULE_NAME="BitThunder"
-$(BT_OS_OBJECTS): CFLAGS += -nostdlib -fno-builtin -fdata-sections -ffunction-sections
 
 OBJECTS += $(BT_OS_OBJECTS)
+

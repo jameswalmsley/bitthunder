@@ -2,10 +2,11 @@
  *	Kernel Module initialisation routines.
  *
  **/
-
+#include <bt_config.h>
 #include <bt_types.h>
 #include <bt_error.h>
 #include <module/bt_module_init.h>
+#include <syslog/bt_printk.h>
 
 extern const BT_MODULE_INIT * __bt_module_init_start;
 extern const BT_MODULE_INIT * __bt_module_init_end;

@@ -164,5 +164,4 @@ BT_MACHINE_START(ARM, ZYNQ, "Xilinx Embedded Zynq Platform")
 	.pSystemTimer 				= &oZynq_cpu_timer_device,
 
 	.pBootLogger				= &oZynq_uart1_device,
-	.ulBootUartID				= BT_CONFIG_MACH_ZYNQ_BOOT_UART_ID,
 BT_MACHINE_END

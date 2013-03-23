@@ -19,7 +19,7 @@ TOOLCHAIN= /opt/codesourcery/bin/arm-none-eabi-
 include $(BASE).dbuild/dbuild.mk
 
 test:
-	@echo $(PATH)
+	@echo $(BSP_DIR)
 
 all: kernel.elf kernel.list kernel.img kernel.syms
 	$(Q)$(SIZE) kernel.elf

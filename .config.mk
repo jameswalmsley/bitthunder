@@ -1,15 +1,24 @@
 #
 #	Automated build configuration switches.
 #
-ifeq ($(BT_CONFIG_OS),y)
-BT_CONFIG_LIB=n
-BT_CONFIG_MAX_INTERRUPT_CONTROLLERS ?=1
-BT_CONFIG_MAX_PROCESS_NAME ?= 10
-else
-BT_CONFIG_LIB=y
-endif
+
+include $(BASE).config
+
+ARCH:=$(shell echo $(BT_CONFIG_ARCH))
+SUBARCH:=$(shell echo $(BT_CONFIG_SUBARCH))
+
+include $(BASE)os/objects.mk
+include $(BASE)lib/objects.mk
+include $(BASE)kernel/objects.mk
+
+BSP_DIR:=$(shell echo $(BT_CONFIG_BSP_DIR))
+
+test_dir:
+	echo $(BT_CONFIG_BSP_NAME)
+	echo $(BT_CONFIG_BSP_DIR)
 
 
-include $(BASE)/os/objects.mk
-include $(BASE)/lib/objects.mk
-include $(BASE)/kernel/objects.mk
+include $(BASE)$(BSP_DIR)/objects.mk
+
+$(OBJECTS): CFLAGS += -nostdlib -fno-builtin -fdata-sections -ffunction-sections
+$(OBJECTS): CFLAGS += -I $(BASE)/${BSP_DIR}/

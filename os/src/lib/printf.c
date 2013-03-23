@@ -325,11 +325,13 @@ reswitch:	switch (ch = (u_char)*fmt++) {
 		case 'u':
 			base = 10;
 			goto handle_nosign;
+#ifdef BT_CONFIG_LIB_PRINTF_SUPPORT_HEX
 		case 'X':
 			upper = 1;
 		case 'x':
 			base = 16;
 			goto handle_nosign;
+#endif
 		case 'y':
 			base = 16;
 			sign = 1;

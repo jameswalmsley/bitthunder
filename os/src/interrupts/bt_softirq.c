@@ -11,7 +11,7 @@
 
 BT_DEF_MODULE_NAME	("SoftIRQ")
 
-static BT_SOFTIRQ 	g_SoftIRQ[BT_CONFIG_SOFTIRQ_MAX];
+static BT_SOFTIRQ 	g_SoftIRQ[BT_CONFIG_INTERRUPTS_SOFTIRQ_MAX];
 static BT_u32 		g_ulPending;
 static BT_HANDLE	g_hMutex;
 
@@ -74,7 +74,7 @@ static BT_ERROR bt_softirq_init() {
 	BT_THREAD_CONFIG oConfig;
 
 	oConfig.ulStackDepth 	= 128;
-	oConfig.ulPriority 		= BT_CONFIG_SOFTIRQ_PRIORITY;
+	oConfig.ulPriority 		= BT_CONFIG_INTERRUPTS_SOFTIRQ_PRIORITY;
 
 	g_hMutex = BT_CreateMutex(&Error);
 	if(!g_hMutex) {

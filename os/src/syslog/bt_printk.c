@@ -2,10 +2,13 @@
  * BitThunder - Syslog Printk.
  **/
 
+#include <bt_config.h>
 #include <bt_error.h>
 #include <lib/printf.h>
 #include <lib/putc.h>
+#include <timers/bt_timers.h>
 
+#ifndef BT_CONFIG_SYSLOG_REMOVE_PRINTK
 BT_ERROR BT_kPrint(const char *format, ... ) {
 	va_list ap;
 
@@ -20,3 +23,4 @@ BT_ERROR BT_kPrint(const char *format, ... ) {
 
 	return BT_ERR_NONE;
 }
+#endif

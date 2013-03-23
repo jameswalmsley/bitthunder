@@ -1,6 +1,8 @@
 #ifndef _PORTMACRO_H_
 #define _PORTMACRO_H_
 
+#include "bt_config.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -52,7 +54,7 @@ extern "C" {
  * are included here for efficiency.  An attempt to call one from
  * THUMB mode code will result in a compile time error.
  */
-#ifdef BT_CONFIG_FREERTOS_A9
+#ifdef BT_CONFIG_ARCH_ARM_CORTEX_A9
 #define portRESTORE_CONTEXT()											\
 {																		\
 extern volatile void * volatile pxCurrentTCB;							\
@@ -145,7 +147,7 @@ extern void vTaskSwitchContext( void );
 
 /*-----------------------------------------------------------*/
 
-#if (defined BT_CONFIG_FREERTOS_A9)
+#if (defined BT_CONFIG_ARCH_ARM_CORTEX_A9)
 /* Critical section management. */
 
 	#define portDISABLE_INTERRUPTS()											\
@@ -166,9 +168,9 @@ extern void vTaskSwitchContext( void );
 
 #endif
 
-#if (defined BT_CONFIG_FREERTOS_M0) || (defined BT_CONFIG_FREERTOS_M3)
+#if (defined BT_CONFIG_ARCH_ARM_CORTEX_M0) || (defined BT_CONFIG_ARCH_ARM_CORTEX_M3)
 
-#ifdef BT_CONFIG_FREERTOS_M0
+#ifdef BT_CONFIG_ARCH_ARM_CORTEX_M0
 	/*
 	 * Set basepri to portMAX_SYSCALL_INTERRUPT_PRIORITY without effecting other
 	 * registers.  r0 is clobbered.
@@ -177,7 +179,7 @@ extern void vTaskSwitchContext( void );
 	#define portCLEAR_INTERRUPT_MASK()						__asm volatile	(  " cpsie i " )
 #endif
 
-#ifdef BT_CONFIG_FREERTOS_M3
+#ifdef BT_CONFIG_ARCH_ARM_CORTEX_M0
 	/*
 	 * Set basepri to portMAX_SYSCALL_INTERRUPT_PRIORITY without effecting other
 	 * registers.  r0 is clobbered.

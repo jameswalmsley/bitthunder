@@ -217,12 +217,12 @@ SECTIONS
    __tbss_end = .;
 } > ZYNQ_RAM0
 
-.mmu_tbl : {
+/*.mmu_tbl : {
    . = ALIGN(0x4000);
-   __mmu_tbl_start = .;
+  __mmu_tbl_start = .;
    *(.mmu_tbl)
    __mmu_tbl_end = .;
-} > ZYNQ_RAM0
+} > ZYNQ_RAM0*/
 
 .bss (NOLOAD) : {
    __bss_start = .;
