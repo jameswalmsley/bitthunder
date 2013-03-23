@@ -1,0 +1,20 @@
+choice
+	prompt		"BSP Selection"
+
+	config BSP_ARM_LPCEXPRESSO_LPC11c24
+	  depends on ARCH_ARM && MACH_LPC11xx
+	  bool "LPC11c24 Expresso Board"
+
+	config BSP_ARM_ZYNQ_ZED_BOARD
+	  depends on ARCH_ARM && MACH_ZYNQ
+	  bool "Zynq ZED_BOARD"
+
+endchoice
+
+if BSP_ARM_LPCEXPRESSO_LPC11c24
+source bsp/arm/lpcexpresso/11c24/Kconfig
+endif
+
+if BSP_ARM_ZYNQ_ZED_BOARD
+source bsp/arm/zynq/zed-board/Kconfig
+endif

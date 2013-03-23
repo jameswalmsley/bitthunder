@@ -1,0 +1,7 @@
+menu "Process Manager"
+config MAX_PROCESS_NAME
+    int "Max Process Name Length"
+	default 10
+
+
+endmenu

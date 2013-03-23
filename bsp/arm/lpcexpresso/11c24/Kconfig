@@ -1,0 +1,10 @@
+comment "LPC11c24 Options"
+
+config BSP_DIR
+	   string
+	   default "bsp/arm/lpcexpresso/11c24/"
+
+config BSP_NAME
+	   string
+	   default "LPC11c24 Expresso board"
+

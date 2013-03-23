@@ -1,0 +1,10 @@
+comment "Zynq Platform Options"
+
+config MACH_ZYNQ_USE_STARTUP
+    bool "Use default Zynq startup code."
+
+config MACH_ZYNQ_SYSCLOCK_FREQ
+	int "System clock frequency"
+	default 33333333
+
+

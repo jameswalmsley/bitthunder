@@ -1,0 +1,32 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+choice
+	prompt "CPU Architecture"
+	default ARCH_ARM
+
+config ARCH_ARM
+	bool "ARM"
+	---help---
+		The ARM architectures
+
+config ARCH_PPC
+    bool "PPC"
+	---help---
+		The PowerPC architecture
+
+endchoice
+
+config ARCH
+	string
+	default "arm"	if ARCH_ARM
+	default "ppc"	if ARCH_PPC
+
+
+if ARCH_ARM
+source arch/arm/Kconfig
+endif
+
+

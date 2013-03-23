@@ -1,0 +1,21 @@
+choice
+	prompt "Kernel/Scheduler selection"
+	default KERNEL_FREERTOS
+
+config KERNEL_FREERTOS
+    bool "FreeRTOS Real-time scheduler"
+
+config KERNEL_BT
+	bool "BT Kernel (experimental)"
+
+endchoice
+
+if KERNEL_FREERTOS
+comment "FreeRTOS Specific options"
+source kernel/FreeRTOS/Kconfig
+endif
+
+config KERNEL_TICK_RATE
+    int "Kernel Tick Frequency (Hz)"
+	default 1000
+

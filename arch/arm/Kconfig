@@ -1,0 +1,95 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+if ARCH_ARM
+comment "ARM Options"
+
+choice
+	prompt "ARM chip selection"
+	default MACH_ZYNQ
+
+config MACH_BCM2835
+	bool "BCM2835 (Raspberryi Pi)"
+
+config MACH_LPC11xx
+	bool "LPC11xx Series"
+	select ARCH_ARM_CORTEX_M0
+
+config MACH_STM32
+	bool "STM32"
+	select ARCH_HAVE_CMNVECTOR
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_I2CRESET
+	---help---
+		STMicro STM32 architectures (ARM Cortex-M3/4).
+
+config MACH_ZYNQ
+	bool "ZYNQ"
+	select ARCH_ARM_CORTEX_A9
+	select ARCH_ARM_ARMv7-A
+	select ARCH_HAVE_FPU
+	---help---
+		Xilinx Zynq Embedded processing platform
+
+endchoice
+
+config ARCH_ARM_CORTEX_M0
+	bool
+	select ARCH_IRQPRIO
+
+config ARCH_ARM_CORTEX_M3
+	bool
+	select ARCH_IRQPRIO
+	select ARCH_HAVE_RAMVECTORS
+
+config ARCH_ARM_CORTEX_M4
+	bool
+	select ARCH_IRQPRIO
+	select ARCH_HAVE_RAMVECTORS
+
+config ARCH_ARM_CORTEX_A9
+    bool
+
+config ARCH_ARM_ARMv7-A
+    bool
+	default n
+
+config ARCH_ARM_FAMILY
+	string
+	default "arm"		if ARCH_ARM_ARM7TDMI || ARCH_ARM_ARM926EJS || ARCH_ARM_ARM920T
+	default "armv6-m"	if ARCH_ARM_CORTEX_M0
+	default "armv7-m"	if ARCH_ARM_CORTEX_M3 || ARCH_ARM_CORTEX_M4
+	default "armv7-a"	if ARCH_ARM_v7-A
+
+config ARCH_ARM_FPU
+	bool "FPU support"
+	default y
+	depends on ARCH_CORTEXM4
+	---help---
+		Build in support for the ARM Cortex-M4 Floating Point Unit (FPU).
+		Check your chip specifications first; not all Cortex-M4 chips support the FPU.
+
+config ARCH_HAVE_MPU
+	bool
+	default n
+
+config ARCH_HAVE_MMU
+	bool
+
+if MACH_LPC11xx
+source arch/arm/mach/lpc11xx/Kconfig
+endif
+
+if MACH_ZYNQ
+source arch/arm/mach/zynq/Kconfig
+endif
+
+config SUBARCH
+    string
+	default "bcm2835" if MACH_BCM2835
+	default "lpc11xx" if MACH_LPC11xx
+	default "stm32"   if MACH_STM32
+	default "zynq"	  if MACH_ZYNQ
+endif

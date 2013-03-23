@@ -1,0 +1,31 @@
+menu "Interrupts"
+config MAX_INTERRUPT_CONTROLLERS
+    int "Total registerable Interrupt controllers."
+	default 1
+	---help---
+	This will require extra SRAM bytes if more are allowed.
+
+config INTERRUPTS_SOFTIRQ
+    bool "Enable SoftIRQ support"
+	default n
+	---help---
+	Enable the use of SoftIRQs, which all run in the specified priority.
+
+config INTERRUPTS_SOFTIRQ_PRIORITY
+    int "SoftIRQ Kernel Priority"
+	default 0
+	depends on INTERRUPTS_SOFTIRQ
+
+config INTERRUPTS_SOFTIRQ_MAX
+	int "Total SoftIRQ numbers"
+	range 1 32
+	default 32
+	depends on INTERRUPTS_SOFTIRQ
+endmenu
+
+menu "Tasklets"
+config TASKLETS
+    bool "Tasklet support"
+	default n
+	select INTERRUPTS_SOFTIRQ
+endmenu

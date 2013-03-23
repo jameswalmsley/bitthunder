@@ -1,0 +1,8 @@
+menu "Syslog"
+
+config SYSLOG_REMOVE_PRINTK
+    bool "Remove all calls to BT_kPrint()"
+	default n	 if LIB_PRINTF
+	default y	 if !LIB_PRINTF
+
+endmenu

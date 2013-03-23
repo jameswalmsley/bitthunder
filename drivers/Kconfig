@@ -1,0 +1,11 @@
+comment "Configure all required driver sub-systems"
+
+config DRIVERS_SDCARD
+    bool "SDCard / MMC Support"
+	default n
+	select TASKLETS
+	select SOFTIRQ
+
+if DRIVERS_SDCARD
+source drivers/mmc/Kconfig
+endif

@@ -1,0 +1,17 @@
+menu "Library Support"
+
+config LIB_PRINTF
+	depends on OS
+    bool "Use simple printf from BT"
+	default y
+
+menu "printf features"
+depends on LIB_PRINTF
+config LIB_PRINTF_SUPPORT_HEX
+    bool "Support %x format specifier"
+	default y
+	depends on LIB_PRINTF
+endmenu
+
+
+endmenu

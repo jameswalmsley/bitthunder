@@ -1,0 +1,7 @@
+menu "SDCard Subsystem"
+
+config DRIVERS_SDCARD_SDHCI
+    bool "SDHCI Support"
+	default n
+
+endmenu

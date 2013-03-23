@@ -1,0 +1,7 @@
+menu "GPIOs"
+config MAX_GPIO_CONTROLLERS
+	int "Maximum registerable GPIO controllers."
+	default 1
+	---help---
+	This will require extra SRAM bytes if more are allowed.
+endmenu
