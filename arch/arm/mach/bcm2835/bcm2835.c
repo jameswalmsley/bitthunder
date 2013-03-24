@@ -2,21 +2,61 @@
 #include "devman/bt_integrated_device.h"
 
 
-
-
-
 static const BT_RESOURCE bcm2835_gpio_resources[] = {
-	{	
-		.ulStart 	= 0x7E200000,
-		.ulEnd	 	= 0x7E2000B0,
+	{
+		.ulStart 	= 0x20200000,
+		.ulEnd	 	= 0x202000B0,
 		.ulFlags	= BT_RESOURCE_MEM,
+	},
+	{
+		.ulStart	= 0,
+		.ulEnd		= 53,
+		.ulFlags	= BT_RESOURCE_IO,
 	},
 };
 
-static const BT_INTEGRATED_DEVICE bcm2835_gpio_device = {
+BT_INTEGRATED_DEVICE_DEF bcm2835_gpio_device = {
 	.name = "bcm2835,gpio",
 	.ulTotalResources = BT_ARRAY_SIZE(bcm2835_gpio_resources),
 	.pResources = bcm2835_gpio_resources,
+};
+
+static const BT_RESOURCE bcm2835_intc_resources[] = {
+	{
+		.ulStart 	= 0x2000B200,
+		.ulEnd		= 0x2000B200 + BT_SIZE_4K - 1,
+		.ulFlags	= BT_RESOURCE_MEM,
+	},
+	{
+		.ulStart = 0,
+		.ulEnd	 = 71,
+		.ulFlags = BT_RESOURCE_IRQ,
+	},
+};
+
+static const BT_INTEGRATED_DEVICE bcm2835_intc_device = {
+	.name 				= "bcm2835,intc",
+	.ulTotalResources 	= BT_ARRAY_SIZE(bcm2835_intc_resources),
+	.pResources			= bcm2835_intc_resources,
+};
+
+static const BT_RESOURCE oTimerResources[] = {
+	{
+		.ulStart = 0x2000B400,
+		.ulEnd	 = 0x2000B400 + BT_SIZE_4K - 1,
+		.ulFlags = BT_RESOURCE_MEM,
+	},
+	{
+		.ulStart = 64,
+		.ulEnd 	 = 64,
+		.ulFlags = BT_RESOURCE_IRQ,
+	},
+};
+
+static const BT_INTEGRATED_DEVICE bcm2835_cpu_timer_device = {
+	.name = "bcm2835,timer",
+	.ulTotalResources = BT_ARRAY_SIZE(oTimerResources),
+	.pResources = oTimerResources,
 };
 
 
@@ -24,8 +64,15 @@ static BT_ERROR bcm2835_init(struct _BT_MACHINE_DESCRIPTION *pMachine) {
 	return BT_ERR_NONE;
 }
 
+static BT_u32 bcm2835_get_cpu_frequency() {
+	return BT_CONFIG_MACH_BCM2835_SYSCLOCK_FREQ;
+}
+
 BT_MACHINE_START(ARM, BCM2835, "Broadcom 2835 System-on-chip")
-    .ulSystemClockHz	= 125000000,
-	.pfnMachineInit		= bcm2835_init,
+.pfnGetCpuClockFrequency 	= bcm2835_get_cpu_frequency,
+    .ulSystemClockHz		= 125000000,
+	.pfnMachineInit			= bcm2835_init,
+	.pInterruptController 	= &bcm2835_intc_device,
+	.pSystemTimer 			= &bcm2835_cpu_timer_device,
 BT_MACHINE_END
 
