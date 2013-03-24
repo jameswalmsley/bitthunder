@@ -1,4 +1,5 @@
+CFLAGS += -march=armv6z -ggdb3 -I $(BASE)/lib/include/ -I $(BASE)/arch/arm/include/ -I $(BASE)/os/include/
 
-export CFLAGS += -march=armv6z -g -O3 -I $(BASE)/lib/include/ -I $(BASE)/arch/arm/include/ -I $(BASE)/os/include/
-export TOOLCHAIN=arm-none-eabi-
-#export TOOLCHAIN=arm-none-eabi-
+TOOLCHAIN:=$(shell echo $(BT_CONFIG_TOOLCHAIN))
+
+#TOOLCHAIN=arm-none-eabi-

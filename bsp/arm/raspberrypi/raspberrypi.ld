@@ -1,9 +1,9 @@
 ENTRY(reset)
 
 _STACK_SIZE = DEFINED(_STACK_SIZE) ? _STACK_SIZE : 0x2000;
-_HEAP_SIZE = DEFINED(_HEAP_SIZE) ? _HEAP_SIZE : 0x2000;
+_HEAP_SIZE = DEFINED(_HEAP_SIZE) ? _HEAP_SIZE : 0x100000;
 
-_ABORT_STACK_SIZE = DEFINED(_ABORT_STACK_SIZE) ? _ABORT_STACK_SIZE : 1024;
+_ABORT_STACK_SIZE = DEFINED(_ABORT_STACK_SIZE) ? _ABORT_STACK_SIZE : 2048;
 _SUPERVISOR_STACK_SIZE = DEFINED(_SUPERVISOR_STACK_SIZE) ? _SUPERVISOR_STACK_SIZE : 2048;
 
 MEMORY
@@ -22,29 +22,45 @@ SECTIONS {
 	 * branch instructions to 0x0000 - 0x001C in order to get the processor to handle interrupts.
 	 *
 	 */
+
 	.init : {
 		KEEP(*(.init))
-	} > INIT_RAM = 0
+		KEEP(*(.init.*))
+	} > INIT_RAM
 
 	.bt.arch.init : {
-		__bt_arch_init_start = .;
+	    __bt_arch_init_start = .;
 		KEEP(*(.bt.arch.init))
 		KEEP(*(.bt.arch.init.*))
 		__bt_arch_init_end = .;
 	} > INIT_RAM
 
 	.bt.arch.devices : {
-		__bt_arch_devices_start = .;
-	  	KEEP(*(.bt.arch.devices))
+	    __bt_arch_devices_start = .;
+		KEEP(*(.bt.arch.devices))
 		KEEP(*(.bt.arch.devices.*))
 		__bt_arch_devices_end = .;
 	} > INIT_RAM
 
-	.bt.module.entries : {
-		__bt_module_entries_start = .;
-	  	KEEP(*(.bt.module.entries))
-		KEEP(*(.bt.module.entries.*))
-		__bt_module_entries_end = .;
+	.bt.arch.drivers : {
+	    __bt_arch_drivers_start = .;
+		KEEP(*(.bt.arch.drivers))
+		KEEP(*(.bt.arch.drivers.*))
+		__bt_arch_drivers_end = .;
+	} > INIT_RAM
+
+	.bt.module.init : {
+	    __bt_module_init_start = .;
+		KEEP(*(.bt.module.init.*))
+		KEEP(*(.bt.module.init))
+		__bt_module_init_end = .;
+	} > INIT_RAM
+
+	.bt.devfs.entries : {
+	    __bt_devfs_entries_start = .;
+		KEEP(*(.bt.devfs.entries))
+		KEEP(*(.bt.devfs.entries.*))
+		__bt_devfs_entries_end = .;
 	} > INIT_RAM
 
 	/**

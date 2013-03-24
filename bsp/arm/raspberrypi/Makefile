@@ -38,8 +38,8 @@ kernel.syms: kernel.elf
 
 #kernel.elf: LDFLAGS += -L "/opt/Xilinx/14.2/ISE_DS/EDK/gnu/arm/lin64/lib/gcc/arm-xilinx-eabi/4.6.1/" -lgcc
 #kernel.elf: LDFLAGS += -L "/opt/Xilinx/14.2/ISE_DS/EDK/gnu/arm/lin64/arm-xilinx-eabi/lib/" -lc
-kernel.elf: LDFLAGS += -L"c:/yagarto/lib/gcc/arm-none-eabi/4.7.1/" -lgcc
-kernel.elf: LDFLAGS += -L"c:/yagarto/arm-none-eabi/lib/" -lc
+kernel.elf: LDFLAGS += -L"/opt/codesourcery/lib/gcc/arm-none-eabi/4.7.2/" -lgcc
+kernel.elf: LDFLAGS += -L"/opt/codesourcery/arm-none-eabi/lib/" -lc
 kernel.elf: LDLIBS += -lc -lgcc
 kernel.elf: $(OBJECTS)
 	$(Q)$(PRETTY) --dbuild "LD" $(MODULE_NAME) $@
