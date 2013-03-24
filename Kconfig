@@ -39,6 +39,10 @@ config HOST_OTHER
 
 endchoice
 
+config TOOLCHAIN
+    string "Toolchain prefix"
+
+
 choice
 	prompt "Windows Build Environment"
 	default WINDOWS_CYGWIN
