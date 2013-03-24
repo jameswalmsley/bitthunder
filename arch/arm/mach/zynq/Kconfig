@@ -1,10 +1,78 @@
 comment "Zynq Platform Options"
 
+choice
+	prompt "Zynq Chip Variant"
+	default MACH_ZYNQ_XC7Z020
+
+config MACH_ZYNQ_XC7Z020
+    bool "XC7Z020"
+
+endchoice
+
+
 config MACH_ZYNQ_USE_STARTUP
     bool "Use default Zynq startup code."
+	default y
 
 config MACH_ZYNQ_SYSCLOCK_FREQ
 	int "System clock frequency"
 	default 33333333
 
 
+menu "Peripheral Selection"
+
+comment "CAN devices"
+config MACH_ZYNQ_CAN_0
+    bool "Use CAN(0) peripheral"
+	default n
+
+config MACH_ZYNQ_CAN_1
+    bool "Use CAN(1) peripheral"
+	default n
+
+comment "SDIO (SDCard Interfaces)"
+config MACH_ZYNQ_SDIO_0
+    bool "Use SDIO(0) peripheral"
+	default n
+
+config MACH_ZYNQ_SDIO_1
+    bool "Use SDIO(1) peripheral"
+	default n
+
+comment "UART devices"
+config MACH_ZYNQ_UART_0
+    bool "Use UART(0) peripheral"
+	default n
+
+config MACH_ZYNQ_UART_0_INODE_NAME
+	string "UART(0) devfs name"
+	default "uart0"
+	depends on MACH_ZYNQ_UART_0
+
+config MACH_ZYNQ_UART_1
+    bool "Use UART(1) peripheral"
+	default n
+
+config MACH_ZYNQ_UART_1_INODE_NAME
+	string "UART(1) devfs name"
+	default "uart1"
+	depends on MACH_ZYNQ_UART_1
+
+endmenu
+
+choice
+	prompt "Boot Logger Device"
+	default MACH_ZYNQ_BOOTLOG_NULL
+
+config MACH_ZYNQ_BOOTLOG_UART_0
+    bool "UART(0)"
+	select MACH_ZYNQ_UART_0
+
+config MACH_ZYNQ_BOOTLOG_UART_1
+    bool "UART(1)"
+	select MACH_ZYNQ_UART_1
+
+config MACH_ZYNQ_BOOTLOG_NULL
+    bool "/dev/null"
+
+endchoice

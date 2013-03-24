@@ -102,6 +102,7 @@ static const BT_INTEGRATED_DEVICE oZynq_watchdog_device = {
 	.pResources				= oZynq_cpu_timer_resources,
 };
 
+#ifdef BT_CONFIG_MACH_ZYNQ_UART_0
 static const BT_RESOURCE oZynq_uart0_resources[] = {
 	{
 		.ulStart			= 0xE0000000,
@@ -115,6 +116,20 @@ static const BT_RESOURCE oZynq_uart0_resources[] = {
 	},
 };
 
+static const BT_INTEGRATED_DEVICE oZynq_uart0_device = {
+	.name					= "zynq,uart",
+	.ulTotalResources		= BT_ARRAY_SIZE(oZynq_uart0_resources),
+	.pResources				= oZynq_uart0_resources,
+};
+
+
+BT_DEVFS_INODE_DEF oZynq_uart0_inode = {
+	.szpName = BT_CONFIG_MACH_ZYNQ_UART_0_INODE_NAME,
+	.pDevice = &oZynq_uart0_device,
+};
+#endif
+
+#ifdef BT_CONFIG_MACH_ZYNQ_UART_1
 static const BT_RESOURCE oZynq_uart1_resources[] = {
 	{
 		.ulStart			= 0xE0001000,
@@ -128,40 +143,34 @@ static const BT_RESOURCE oZynq_uart1_resources[] = {
 	},
 };
 
-static const BT_INTEGRATED_DEVICE oZynq_uart0_device = {
-	.name					= "zynq,uart",
-	.ulTotalResources		= BT_ARRAY_SIZE(oZynq_uart0_resources),
-	.pResources				= oZynq_uart0_resources,
-};
-
 static const BT_INTEGRATED_DEVICE oZynq_uart1_device = {
 	.name					= "zynq,uart",
 	.ulTotalResources		= BT_ARRAY_SIZE(oZynq_uart1_resources),
 	.pResources				= oZynq_uart1_resources,
 };
 
-BT_DEVFS_INODE_DEF oZynq_uart0_inode = {
-	.szpName = "uart0",
-	.pDevice = &oZynq_uart0_device,
-};
-
 BT_DEVFS_INODE_DEF oZynq_uart1_inode = {
-	.szpName = "uart1",
+	.szpName = BT_CONFIG_MACH_ZYNQ_UART_1_INODE_NAME,
 	.pDevice = &oZynq_uart1_device,
 };
+#endif
 
 static BT_u32 zynq_get_cpu_clock_frequency() {
 	return BT_ZYNQ_GetCpuFrequency();
 }
 
-
 BT_MACHINE_START(ARM, ZYNQ, "Xilinx Embedded Zynq Platform")
-    .ulSystemClockHz 			= BT_CONFIG_MACH_ZYNQ_SYSCLOCK_FREQ,
 	.pfnGetCpuClockFrequency 	= zynq_get_cpu_clock_frequency,
-
 	.pInterruptController		= &oZynq_intc_device,
-
 	.pSystemTimer 				= &oZynq_cpu_timer_device,
 
+#ifdef MACH_ZYNQ_BOOTLOG_UART_NULL
+	.pBootLogger				= NULL,
+#endif
+#ifdef MACH_ZYNQ_BOOTLOG_UART_0
+	.pBootLogger				= &oZynq_uart0_device,
+#endif
+#ifdef MACH_ZYNQ_BOOTLOG_UART_1
 	.pBootLogger				= &oZynq_uart1_device,
+#endif
 BT_MACHINE_END
