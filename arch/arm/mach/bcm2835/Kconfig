@@ -1,0 +1,27 @@
+comment "BCM2835 Platform Options"
+
+config MACH_BCM2835_USE_STARTUP
+    bool "Use default BCM2835 startup code."
+	default y
+
+config MACH_BCM2835_SYSCLOCK_FREQ
+	int "System clock frequency"
+	default 250000000
+
+
+menu "Peripheral Selection"
+
+endmenu
+
+choice
+	prompt "Boot Logger Device"
+	default MACH_BCM2835_BOOTLOG_NULL
+
+config MACH_BCM2835_BOOTLOG_NULL
+    bool "/dev/null"
+
+endchoice
+
+config MACH_BCM2835_TOTAL_IRQ
+    int
+	default 72
