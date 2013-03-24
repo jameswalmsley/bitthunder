@@ -54,7 +54,7 @@ extern "C" {
  * are included here for efficiency.  An attempt to call one from
  * THUMB mode code will result in a compile time error.
  */
-#ifdef BT_CONFIG_ARCH_ARM_CORTEX_A9
+#if (defined BT_CONFIG_ARCH_ARM_CORTEX_A9) || defined (BT_CONFIG_ARCH_ARM_ARM11)
 #define portRESTORE_CONTEXT()											\
 {																		\
 extern volatile void * volatile pxCurrentTCB;							\
@@ -147,7 +147,7 @@ extern void vTaskSwitchContext( void );
 
 /*-----------------------------------------------------------*/
 
-#if (defined BT_CONFIG_ARCH_ARM_CORTEX_A9)
+#if (defined BT_CONFIG_ARCH_ARM_CORTEX_A9) || (defined BT_CONFIG_ARCH_ARM_ARM11)
 /* Critical section management. */
 
 	#define portDISABLE_INTERRUPTS()											\
