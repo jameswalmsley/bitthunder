@@ -58,6 +58,14 @@ SECTIONS
 		KEEP(*(.bt.module.entries.*))
 		__bt_module_entries_end = .;
 	} > FLASH
+	
+	.bt.devfs.entries : {
+	    __bt_devfs_entries_start = .;
+		KEEP(*(.bt.devfs.entries))
+		KEEP(*(.bt.devfs.entries.*))
+		__bt_devfs_entries_end = .;
+	} > FLASH
+	
 
     .text : {
 	    *(.vectors)
