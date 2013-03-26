@@ -3,6 +3,7 @@
 #
 MACH_LPC11xx_OBJECTS += $(BUILD_DIR)arch/arm/mach/lpc11xx/lpc11xx.o			# Provides machine description.
 
+MACH_LPC11xx_OBJECTS += $(BUILD_DIR)arch/arm/mach/lpc11xx/ioconfig.o
 MACH_LPC11xx_OBJECTS += $(BUILD_DIR)arch/arm/mach/lpc11xx/rcc.o
 MACH_LPC11xx_OBJECTS += $(BUILD_DIR)arch/arm/mach/lpc11xx/timer.o
 MACH_LPC11xx_OBJECTS += $(BUILD_DIR)arch/arm/mach/lpc11xx/gpio.o
