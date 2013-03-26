@@ -45,6 +45,11 @@ static const BT_RESOURCE oLPC11xx_uart0_resources[] = {
 		.ulFlags			= BT_RESOURCE_IO
 	},
 	{
+		.ulStart			= 0,
+		.ulEnd				= 0,
+		.ulFlags			= BT_RESOURCE_ENUM,
+	},
+	{
 		.ulStart			= 21,
 		.ulEnd				= 21,
 		.ulFlags			= BT_RESOURCE_IRQ,
@@ -63,11 +68,17 @@ BT_INTEGRATED_DEVICE_DEF oLPC11xx_gpio_device = {
 	.pResources 			= oLPC11xx_gpio_resources,
 };
 
-BT_INTEGRATED_DEVICE_DEF oLPC11xx_uart0_device = {
+BT_INTEGRATED_DEVICE oLPC11xx_uart0_device = {
 	.name 					= "LPC11xx,usart",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC11xx_uart0_resources),
 	.pResources 			= oLPC11xx_uart0_resources,
 };
+
+const BT_DEVFS_INODE_DEF oLPC11xx_uart0_inode = {
+	.szpName = "uart0",
+	.pDevice = &oLPC11xx_uart0_device,
+};
+
 
 static const BT_RESOURCE oLPC11xx_nvic_resources[] = {
 	{
