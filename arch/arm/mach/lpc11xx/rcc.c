@@ -37,10 +37,10 @@ BT_u32 BT_LPC11xx_GetMainFrequency(void)
 
 	switch (pRegs->SYSPLLCLKSEL & 0x03)
 	{
-		case LPC11xx_RCC_SYSPLLCLKSEL_IRC_OSC  : PLL_In_Freq = BT_CONFIG_MACH_LPC11xx_SYSCLOCK_IRC_FREQ;
-		case LPC11xx_RCC_SYSPLLCLKSEL_XTAL     : PLL_In_Freq = BT_CONFIG_MACH_LPC11xx_SYSCLOCK_FREQ;
-		case LPC11xx_RCC_SYSPLLCLKSEL_CLKIN    : PLL_In_Freq = BT_LPC11xx_GetWDTFrequency();
-		case LPC11xx_RCC_SYSPLLCLKSEL_RESERVED : PLL_In_Freq = 0;
+		case LPC11xx_RCC_SYSPLLCLKSEL_IRC_OSC  : PLL_In_Freq = BT_CONFIG_MACH_LPC11xx_SYSCLOCK_IRC_FREQ; break;
+		case LPC11xx_RCC_SYSPLLCLKSEL_XTAL     : PLL_In_Freq = BT_CONFIG_MACH_LPC11xx_SYSCLOCK_FREQ; break;
+		case LPC11xx_RCC_SYSPLLCLKSEL_CLKIN    : PLL_In_Freq = BT_LPC11xx_GetWDTFrequency(); break;
+		case LPC11xx_RCC_SYSPLLCLKSEL_RESERVED : PLL_In_Freq = 0; break;
 	}
 
 	switch (pRegs->MAINCLKSEL & 0x00000003)
@@ -60,6 +60,7 @@ BT_u32 BT_LPC11xx_GetMainFrequency(void)
 		}
 
 	}
+	return 0;
 }
 
 BT_u32 BT_LPC11xx_GetSystemFrequency(void) {
