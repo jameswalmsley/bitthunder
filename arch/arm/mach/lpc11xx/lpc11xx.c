@@ -12,6 +12,7 @@
 #include <bitthunder.h>
 
 #include "rcc.h"
+#include "ioconfig.h"
 #include "uart.h"
 #include "gpio.h"
 
@@ -33,28 +34,6 @@ static const BT_RESOURCE oLPC11xx_gpio_resources[] = {
 	},
 };
 
-static const BT_RESOURCE oLPC11xx_uart0_resources[] = {
-	{
-		.ulStart 			= BT_CONFIG_MACH_LPC11xx_UART0_BASE,
-		.ulEnd 				= BT_CONFIG_MACH_LPC11xx_UART0_BASE + BT_SIZE_4K - 1,
-		.ulFlags 			= BT_RESOURCE_MEM,
-	},
-	{
-		.ulStart			= BT_CONFIG_MACH_LPC11xx_UART0_RX,
-		.ulEnd				= BT_CONFIG_MACH_LPC11xx_UART0_TX,
-		.ulFlags			= BT_RESOURCE_IO
-	},
-	{
-		.ulStart			= 0,
-		.ulEnd				= 0,
-		.ulFlags			= BT_RESOURCE_ENUM,
-	},
-	{
-		.ulStart			= 21,
-		.ulEnd				= 21,
-		.ulFlags			= BT_RESOURCE_IRQ,
-	},
-};
 
 /**
  *	By using the BT_INTEGRATED_DEVICE_DEF macro, we ensure that this structure is
@@ -68,7 +47,26 @@ BT_INTEGRATED_DEVICE_DEF oLPC11xx_gpio_device = {
 	.pResources 			= oLPC11xx_gpio_resources,
 };
 
-BT_INTEGRATED_DEVICE oLPC11xx_uart0_device = {
+#ifdef BT_CONFIG_MACH_LPC11xx_UART_0
+static const BT_RESOURCE oLPC11xx_uart0_resources[] = {
+	{
+		.ulStart 			= BT_CONFIG_MACH_LPC11xx_UART0_BASE,
+		.ulEnd 				= BT_CONFIG_MACH_LPC11xx_UART0_BASE + BT_SIZE_4K - 1,
+		.ulFlags 			= BT_RESOURCE_MEM,
+	},
+	{
+		.ulStart			= 0,
+		.ulEnd				= 0,
+		.ulFlags			= BT_RESOURCE_ENUM,
+	},
+	{
+		.ulStart			= 21,
+		.ulEnd				= 21,
+		.ulFlags			= BT_RESOURCE_IRQ,
+	},
+};
+
+static const BT_INTEGRATED_DEVICE oLPC11xx_uart0_device = {
 	.name 					= "LPC11xx,usart",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC11xx_uart0_resources),
 	.pResources 			= oLPC11xx_uart0_resources,
@@ -78,7 +76,7 @@ const BT_DEVFS_INODE_DEF oLPC11xx_uart0_inode = {
 	.szpName = "uart0",
 	.pDevice = &oLPC11xx_uart0_device,
 };
-
+#endif
 
 static const BT_RESOURCE oLPC11xx_nvic_resources[] = {
 	{
@@ -122,14 +120,39 @@ static BT_u32 lpc11xx_get_cpu_clock_frequency() {
 	return BT_LPC11xx_GetSystemFrequency();
 }
 
+
+static BT_u32 lpc11xx_machine_init() {
+
+	BT_LPC11xx_SetSystemFrequency(BT_CONFIG_MAINCLK_SRC,
+								  BT_CONFIG_SYSCLK_CTRL,
+								  BT_CONFIG_PLLCLK_SRC,
+								  BT_CONFIG_PLLCLK_CTRL,
+								  BT_CONFIG_WDTCLK_CTRL,
+								  BT_CONFIG_SYSCLK_DIV);
+
+	BT_LPC11xx_SetIOConfig(LPC11xx_PIO0_4, BT_CONFIG_PIO0_4_FUNCTION);
+	BT_LPC11xx_SetIOConfig(LPC11xx_PIO0_5, BT_CONFIG_PIO0_5_FUNCTION);
+
+	BT_LPC11xx_SetIOConfig(LPC11xx_PIO1_6, BT_CONFIG_PIO1_6_FUNCTION);
+	BT_LPC11xx_SetIOConfig(LPC11xx_PIO1_7, BT_CONFIG_PIO1_7_FUNCTION);
+
+	return BT_ERR_NONE;
+}
+
+
 BT_MACHINE_START(ARM, CORTEX_M0, "LPC Microcontroller Platform")
     .ulSystemClockHz 			= BT_CONFIG_MACH_LPC11xx_SYSCLOCK_FREQ,
 	.pfnGetCpuClockFrequency 	= lpc11xx_get_cpu_clock_frequency,
-
+	.pfnMachineInit				= lpc11xx_machine_init,
 	.pInterruptController		= &oLPC11xx_nvic_device,
 
 	.pSystemTimer 				= &oLPC11xx_systick_device,
 
+
+#ifdef MACH_LPC11xx_BOOTLOG_UART_NULL
 	.pBootLogger				= NULL,
-	.ulBootUartID				= 0,
+#endif
+#ifdef MACH_LPC11xx_BOOTLOG_UART_0
+	.pBootLogger				= &oLPC11xx_uart0_device,
+#endif
 BT_MACHINE_END
