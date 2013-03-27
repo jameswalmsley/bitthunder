@@ -179,7 +179,7 @@ extern void vTaskSwitchContext( void );
 	#define portCLEAR_INTERRUPT_MASK()						__asm volatile	(  " cpsie i " )
 #endif
 
-#ifdef BT_CONFIG_ARCH_ARM_CORTEX_M0
+#ifdef BT_CONFIG_ARCH_ARM_CORTEX_M3
 	/*
 	 * Set basepri to portMAX_SYSCALL_INTERRUPT_PRIORITY without effecting other
 	 * registers.  r0 is clobbered.
