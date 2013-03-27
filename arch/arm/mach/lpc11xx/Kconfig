@@ -1,2 +1,48 @@
 comment "LPC11xx Platform Options"
 
+choice
+	prompt "LPC11xx Chip Variant"
+	default MACH_LPC11xx_LPC11C24
+
+config MACH_LPC11xx_LPC11C24
+    bool "LPC11C24"
+
+endchoice
+
+
+config ARCH_ARM_SYSTICK_SRC0_DIV
+    int
+    default 2
+
+menu "Peripheral Selection"
+
+comment "CAN devices"
+config MACH_LPC11xx_CAN_0
+    bool "Use CAN(0) peripheral"
+	default n
+
+comment "UART devices"
+config MACH_LPC11xx_UART_0
+    bool "Use UART(0) peripheral"
+	default n
+
+config MACH_LPC11xx_UART_0_INODE_NAME
+	string "UART(0) devfs name"
+	default "uart0"
+	depends on MACH_LPC11xx_UART_0
+
+endmenu
+
+choice
+	prompt "Boot Logger Device"
+	default MACH_LPC11xx_BOOTLOG_NULL
+
+config MACH_LPC11xx_BOOTLOG_UART_0
+    bool "UART(0)"
+	select MACH_LPC11xx_UART_0
+
+config MACH_LPC11xx_BOOTLOG_NULL
+    bool "/dev/null"
+
+endchoice
+    
