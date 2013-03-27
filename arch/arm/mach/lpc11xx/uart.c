@@ -677,9 +677,6 @@ static BT_HANDLE uart_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErro
 
 	hUart->pRegs = (LPC11xx_UART_REGS *) pResource->ulStart;
 
-	BT_LPC11xx_SetIOConfig(LPC11xx_PIO1_6, LPC11xx_IOCON_PIO1_6_FUNC_RXD);
-	BT_LPC11xx_SetIOConfig(LPC11xx_PIO1_7, LPC11xx_IOCON_PIO1_7_FUNC_TXD);
-
 	uartSetPowerState(hUart, BT_POWER_STATE_AWAKE);
 
 	// Reset all registers to their defaults!
