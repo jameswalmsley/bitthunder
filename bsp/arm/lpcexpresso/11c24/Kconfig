@@ -8,3 +8,178 @@ config BSP_NAME
 	   string
 	   default "LPC11c24 Expresso board"
 
+comment "CLOCK configuration"
+
+config MACH_LPC11xx_SYSCLOCK_FREQ
+    int "System clock frequency"
+    default 12000000
+
+config MACH_LPC11xx_SYSCLOCK_IRC_FREQ
+	int "internal RC clock frequency"
+	default 12000000
+
+choice
+	prompt "MAINCLK_SRC"	
+	default MAINCLK_SRC_IRC
+
+config MAINCLK_SRC_IRC
+    bool	"IRC"
+    
+config MAINCLK_SRC_PLL_IN
+    bool	"PLL_In"
+    
+config MAINCLK_SRC_WDT
+    bool	"WDT_OSC"
+	
+config MAINCLK_SRC_PLL_OUT
+    bool	"PLL_Out"
+
+endchoice
+
+config MAINCLK_SRC
+    int
+    default 0 if MAINCLK_SRC_IRC
+    default 1 if MAINCLK_SRC_PLL_IN
+    default 2 if MAINCLK_SRC_WDT
+    default 3 if MAINCLK_SRC_PLL_OUT
+
+
+choice
+	prompt "SYSCLK_CTRL"	
+	default SYSCLK_CTRL_0
+
+config SYSCLK_CTRL_0
+    bool	"NO_BYPASS_1_20MHz"
+    
+config SYSCLK_CTRL_1
+    bool	"BYPASS_1_20MHz"
+    
+config SYSCLK_CTRL_2
+    bool	"NO_BYPASS_15_25MHz"
+	
+config SYSCLK_CTRL_3
+    bool	"BYPASS_15_25MHz"
+
+endchoice
+
+config SYSCLK_CTRL
+    int
+    default 0 if SYSCLK_CTRL_0
+    default 1 if SYSCLK_CTRL_1
+    default 2 if SYSCLK_CTRL_2
+    default 3 if SYSCLK_CTRL_3
+
+
+choice
+	prompt "PLLCLK_SRC"	
+	default PLLCLKK_SRC_IRC
+
+config PLLCLKK_SRC_IRC
+    bool	"IRC"
+    
+config PLLCLK_SRC_SYS_OSC
+    bool	"SYS_OSC"
+    
+endchoice
+
+config PLLCLK_SRC
+    int
+    default 0 if PLLCLKK_SRC_IRC
+    default 1 if PLLCLK_SRC_SYS_OSC
+
+config PLLCLK_CTRL
+    hex "PLLClock Control"
+    default 0
+    ---help---
+		bits 0..4 describe the multiplier(Value+1) for the output frequency of the PLL(has to be lower than 100MHz).
+		bits 5..6 describe the multiplier((Value+1)*2) for the CCO frequency of the PLL(has to be between 156MHz and 320MHz).
+    
+config WDTCLK_CTRL
+    hex "Watchdog oscillator"
+    default 20
+
+config SYSCLK_DIV
+    int "System clock divider"
+    default 1
+
+comment "GPIO configuration"
+
+choice
+	prompt "PIO0_4"	
+	default PIO0_4_GPIO
+
+config PIO0_4_GPIO
+    bool	"GPIO_OD"
+    
+config PIO0_4_SCL
+    bool	"SCL"
+
+endchoice
+
+config PIO0_4_FUNCTION
+    int
+    default 0 if PIO0_4_GPIO
+    default 1 if PIO0_4_SCL
+
+    
+choice
+	prompt "PIO0_5"	
+	default PIO0_5_GPIO
+
+config PIO0_5_GPIO
+    bool	"GPIO_OD"
+    
+config PIO0_5_SDA
+    bool	"SDA"
+    
+endchoice
+
+config PIO0_5_FUNCTION
+    int
+    default 0 if PIO0_5_GPIO
+    default 1 if PIO0_5_SDA
+
+choice
+	prompt "PIO1_6"	
+	default PIO1_6_GPIO
+
+config PIO1_6_GPIO
+    bool	"GPIO"
+    
+config PIO1_6_TXD
+    bool	"TXD"
+    
+config PIO1_6_MAT0
+    bool	"MAT0"
+	
+endchoice
+
+config PIO1_6_FUNCTION
+    int
+    default 0 if PIO1_6_GPIO
+    default 1 if PIO1_6_TXD
+    default 2 if PIO1_6_MAT0
+
+    
+choice
+	prompt "PIO1_7"	
+	default PIO1_7_GPIO
+
+config PIO1_7_GPIO
+    bool	"GPIO"
+    
+config PIO1_7_RXD
+    bool	"RXD"
+    
+config PIO1_7_MAT1
+    bool	"MAT1"
+	
+endchoice
+
+config PIO1_7_FUNCTION
+    int
+    default 0 if PIO1_7_GPIO
+    default 1 if PIO1_7_RXD
+    default 2 if PIO1_7_MAT1
+    
+
