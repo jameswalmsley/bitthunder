@@ -1,0 +1,5 @@
+comment "STM32 Platform Options"
+
+config ARCH_ARM_SYSTICK_SRC0_DIV
+    int
+    default 8
