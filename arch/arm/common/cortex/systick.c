@@ -24,7 +24,7 @@ static BT_ERROR timer_cleanup(BT_HANDLE hTimer) {
 static BT_u32 timer_get_clock_rate(BT_HANDLE hTimer, BT_ERROR *pError) {
 	BT_u32 InputClk = BT_GetCpuClockFrequency();
 	if(!(hTimer->pRegs->CTRL & SYSTICK_CTRL_CLKSOURCE)) {
-		return InputClk / 8;
+		return InputClk / BT_CONFIG_ARCH_ARM_SYSTICK_SRC0_DIV;
 	}
 	return InputClk;
 }
