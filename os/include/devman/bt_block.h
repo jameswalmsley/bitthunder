@@ -13,7 +13,7 @@ typedef struct _BT_BLKDEV_DESCRIPTOR {
 	BT_u32 ulTotalBlocks;
 } BT_BLKDEV_DESCRIPTOR;
 
-BT_ERROR BT_RegisterBlockDevice(BT_HANDLE hDevice, BT_BLKDEV_DESCRIPTOR *pDescriptor);
+BT_ERROR BT_RegisterBlockDevice(BT_HANDLE hDevice, const char *szpName, BT_BLKDEV_DESCRIPTOR *pDescriptor);
 
 BT_u32 BT_BlockRead		(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError);
 BT_u32 BT_BlockWrite	(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError);
