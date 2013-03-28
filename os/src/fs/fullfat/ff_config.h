@@ -40,6 +40,10 @@
 #ifndef _FF_CONFIG_H_
 #define _FF_CONFIG_H_
 
+#ifdef FF_BITTHUNDER_CONFIG
+#include <fs/fullfat/ff.config.h>
+#else
+
 #ifdef WIN32
 #define snprintf _snprintf
 #endif
@@ -85,11 +89,11 @@
 #define FF_CACHE_WRITE_THROUGH
 
 //---------- WRITE BOTH FATS
-#define FF_WRITE_BOTH_FATS				// Writes the 2nd FAT (backup) at runtime. Disabling this can improve performance. 
+#define FF_WRITE_BOTH_FATS				// Writes the 2nd FAT (backup) at runtime. Disabling this can improve performance.
 										// However, leaving it enabled guarantees that both FATs will match, and fs checkers
 										// will not complain. (More compliant).
 
-//#define FF_MIRROR_FATS_UMOUNT			// This will cause all FAT tables to be duplicated on unmount. 
+//#define FF_MIRROR_FATS_UMOUNT			// This will cause all FAT tables to be duplicated on unmount.
 										// This is usually expensive in terms of time but will ensure that all FAT copies
 										// are consistent. (If you can guarantee an unmount operation, use this while disabling FF_WRITE_BOTH_FATS).
 
@@ -136,7 +140,7 @@
 //---------- HASH CACHE					// Speed up File-creation with a HASH table. Provides up to 20x performance boost.
 //#define FF_HASH_CACHE					// Enable HASH to speed up file creation.
 #define FF_HASH_CACHE_DEPTH		10		// Number of Directories to be Hashed. (For CRC16 memory is 8KB * DEPTH)
-#define FF_HASH_FUNCTION		CRC16	// Choose a 16-bit hash. 
+#define FF_HASH_FUNCTION		CRC16	// Choose a 16-bit hash.
 //#define FF_HASH_FUNCTION		CRC8	// Choose an 8-bit hash.
 
 
@@ -179,7 +183,7 @@
 										// Further calls to FF_GetErrMessage() are safe, and simply returns a pointer to a NULL string. ("").
 										// This should be disabled to reduce code-size dramatically.
 
-
+#endif
 //---------- AUTOMATIC SETTINGS DO NOT EDIT -- These configure your options from above, and check sanity!
 
 #ifdef FF_LFN_SUPPORT
@@ -248,7 +252,7 @@
 #elif FF_HASH_FUNCTION == CRC8
 #define FF_HASH_TABLE_SIZE 32
 #else
-#error FullFAT Invalid ff_config.h file: Invalid Hashing function selected. CRC16 or CRC8! 
+#error FullFAT Invalid ff_config.h file: Invalid Hashing function selected. CRC16 or CRC8!
 #endif
 
 #endif
