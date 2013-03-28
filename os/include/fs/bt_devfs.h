@@ -21,6 +21,10 @@ typedef struct _BT_DEVFS_INODE {
 	const BT_INTEGRATED_DEVICE 	*pDevice;	///< Integrated device that the entry represents.
 } BT_DEVFS_INODE;
 
+typedef struct _BT_DEVFS_OPS {
+	BT_HANDLE (*pfnOpen) (BT_HANDLE hDevice, BT_ERROR *pError);
+
+} BT_DEVFS_OPS;
 
 #define BT_DEVFS_INODE_DEF 		static const BT_ATTRIBUTE_SECTION(".bt.devfs.entries") BT_DEVFS_INODE
 
