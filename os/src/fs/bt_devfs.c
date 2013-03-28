@@ -68,7 +68,7 @@ BT_HANDLE BT_DeviceOpen(const char *szpFilename, BT_ERROR *pError) {
 
 static const BT_IF_HANDLE oHandleInterface;
 
-BT_HANDLE BT_DeviceRegister(BT_HANDLE hDevice, const char *szpName, BT_ERROR *pError) {
+BT_HANDLE BT_DeviceRegister(BT_HANDLE hDevice, const char *szpName, const BT_DEVFS_OPS *pOps, BT_ERROR *pError) {
 	BT_ERROR Error;
 	BT_HANDLE hInode = BT_CreateHandle(&oHandleInterface, sizeof(struct _BT_OPAQUE_HANDLE), pError);
 	if(!hInode) {
