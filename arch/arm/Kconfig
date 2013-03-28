@@ -52,6 +52,7 @@ config ARCH_ARM_CORTEX_M4
 
 config ARCH_ARM_CORTEX_A9
     bool
+	select BIG_ENDIAN
 
 config ARCH_ARM_ARM11
     bool

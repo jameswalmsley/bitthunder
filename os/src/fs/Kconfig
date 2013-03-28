@@ -1,0 +1,36 @@
+menu "Filesystems"
+
+config FS_DEV_DYNAMIC_REGISTRATION
+	bool "Dynamic DEVFS registration"
+	default n
+
+config FS_FULLFAT
+    bool "FAT filesystem support (FullFAT)"
+	default n
+
+menu "FullFAT Configuration"
+    depends on FS_FULLFAT
+
+config FS_FULLFAT_LFN_SUPPORT
+    bool "LFN (Long filename) Support"
+	default y
+
+choice
+	prompt "Allocation Algorithm"
+	default FS_FULLFAT_ALLOC_DEFAULT
+
+config FS_FULLFAT_ALLOC_DEFAULT
+    bool "Default"
+
+config FS_FULLFAT_ALLOC_DOUBLE
+    bool "Double"
+
+endchoice
+
+config FS_FULLFAT_DRIVER_BUSY_SLEEP
+	int "Driver busy sleep time"
+	default 20
+
+endmenu
+
+endmenu
