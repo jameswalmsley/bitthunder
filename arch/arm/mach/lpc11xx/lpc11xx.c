@@ -13,7 +13,6 @@
 
 #include "rcc.h"
 #include "ioconfig.h"
-#include "uart.h"
 #include "gpio.h"
 
 static const BT_RESOURCE oLPC11xx_gpio_resources[] = {
@@ -47,36 +46,6 @@ BT_INTEGRATED_DEVICE_DEF oLPC11xx_gpio_device = {
 	.pResources 			= oLPC11xx_gpio_resources,
 };
 
-#ifdef BT_CONFIG_MACH_LPC11xx_UART_0
-static const BT_RESOURCE oLPC11xx_uart0_resources[] = {
-	{
-		.ulStart 			= BT_CONFIG_MACH_LPC11xx_UART0_BASE,
-		.ulEnd 				= BT_CONFIG_MACH_LPC11xx_UART0_BASE + BT_SIZE_4K - 1,
-		.ulFlags 			= BT_RESOURCE_MEM,
-	},
-	{
-		.ulStart			= 0,
-		.ulEnd				= 0,
-		.ulFlags			= BT_RESOURCE_ENUM,
-	},
-	{
-		.ulStart			= 21,
-		.ulEnd				= 21,
-		.ulFlags			= BT_RESOURCE_IRQ,
-	},
-};
-
-static const BT_INTEGRATED_DEVICE oLPC11xx_uart0_device = {
-	.name 					= "LPC11xx,usart",
-	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC11xx_uart0_resources),
-	.pResources 			= oLPC11xx_uart0_resources,
-};
-
-const BT_DEVFS_INODE_DEF oLPC11xx_uart0_inode = {
-	.szpName = "uart0",
-	.pDevice = &oLPC11xx_uart0_device,
-};
-#endif
 
 static const BT_RESOURCE oLPC11xx_nvic_resources[] = {
 	{
@@ -130,11 +99,39 @@ static BT_u32 lpc11xx_machine_init() {
 								  BT_CONFIG_WDTCLK_CTRL,
 								  BT_CONFIG_SYSCLK_DIV);
 
+#ifdef BT_CONFIG_PIO0_4_FUNCTION
 	BT_LPC11xx_SetIOConfig(LPC11xx_PIO0_4, BT_CONFIG_PIO0_4_FUNCTION);
+#endif
+#ifdef BT_CONFIG_PIO0_5_FUNCTION
 	BT_LPC11xx_SetIOConfig(LPC11xx_PIO0_5, BT_CONFIG_PIO0_5_FUNCTION);
-
+#endif
+#ifdef BT_CONFIG_PIO0_8_FUNCTION
+	BT_LPC11xx_SetIOConfig(LPC11xx_PIO0_8, BT_CONFIG_PIO0_8_FUNCTION);
+#endif
+#ifdef BT_CONFIG_PIO1_0_FUNCTION
+	BT_LPC11xx_SetIOConfig(LPC11xx_PIO1_0, BT_CONFIG_PIO1_0_FUNCTION);
+#endif
+#ifdef BT_CONFIG_PIO1_1_FUNCTION
+	BT_LPC11xx_SetIOConfig(LPC11xx_PIO1_1, BT_CONFIG_PIO1_1_FUNCTION);
+#endif
+#ifdef BT_CONFIG_PIO1_2_FUNCTION
+	BT_LPC11xx_SetIOConfig(LPC11xx_PIO1_2, BT_CONFIG_PIO1_2_FUNCTION);
+#endif
+#ifdef BT_CONFIG_PIO1_3_FUNCTION
+	BT_LPC11xx_SetIOConfig(LPC11xx_PIO1_3, BT_CONFIG_PIO1_3_FUNCTION);
+#endif
+#ifdef BT_CONFIG_PIO1_4_FUNCTION
+	BT_LPC11xx_SetIOConfig(LPC11xx_PIO1_4, BT_CONFIG_PIO1_4_FUNCTION);
+#endif
+#ifdef BT_CONFIG_PIO1_5_FUNCTION
+	BT_LPC11xx_SetIOConfig(LPC11xx_PIO1_5, BT_CONFIG_PIO1_5_FUNCTION);
+#endif
+#ifdef BT_CONFIG_PIO1_6_FUNCTION
 	BT_LPC11xx_SetIOConfig(LPC11xx_PIO1_6, BT_CONFIG_PIO1_6_FUNCTION);
+#endif
+#ifdef BT_CONFIG_PIO1_7_FUNCTION
 	BT_LPC11xx_SetIOConfig(LPC11xx_PIO1_7, BT_CONFIG_PIO1_7_FUNCTION);
+#endif
 
 	return BT_ERR_NONE;
 }
