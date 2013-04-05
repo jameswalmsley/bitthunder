@@ -31,6 +31,43 @@ config MACH_LPC11xx_UART_0_INODE_NAME
 	default "uart0"
 	depends on MACH_LPC11xx_UART_0
 
+comment "TIMER devices"
+config MACH_LPC11xx_TIMER_0
+    bool "Use TIMER(0) peripheral"
+	default n
+
+config MACH_LPC11xx_TIMER_0_INODE_NAME
+	string "TIMER(0) devfs name"
+	default "timer0"
+	depends on MACH_LPC11xx_TIMER_0
+
+config MACH_LPC11xx_TIMER_1
+    bool "Use TIMER(1) peripheral"
+	default n
+
+config MACH_LPC11xx_TIMER_1_INODE_NAME
+	string "TIMER(1) devfs name"
+	default "timer1"
+	depends on MACH_LPC11xx_TIMER_1
+
+config MACH_LPC11xx_TIMER_2
+    bool "Use TIMER(2) peripheral"
+	default n
+
+config MACH_LPC11xx_TIMER_2_INODE_NAME
+	string "TIMER(2) devfs name"
+	default "timer2"
+	depends on MACH_LPC11xx_TIMER_2
+
+config MACH_LPC11xx_TIMER_3
+    bool "Use TIMER(3) peripheral"
+	default n
+
+config MACH_LPC11xx_TIMER_3_INODE_NAME
+	string "TIMER(3) devfs name"
+	default "timer3"
+	depends on MACH_LPC11xx_TIMER_3
+
 endmenu
 
 choice
