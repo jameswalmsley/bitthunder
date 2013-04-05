@@ -82,7 +82,7 @@ typedef struct _LPC11xx_UART_REGS {
 
 } LPC11xx_UART_REGS;
 
-#define UART0						((LPC11xx_UART_REGS *) 0x40008000)
+#define UART0						((LPC11xx_UART_REGS *) BT_CONFIG_MACH_LPC11xx_UART0_BASE)
 
 
 #endif
