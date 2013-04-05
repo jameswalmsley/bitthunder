@@ -6,8 +6,11 @@
 
 typedef void 	 	(*BT_TIMER_CALLBACK)					(BT_HANDLE hTimer, void *pParam);
 
+
 typedef struct _BT_DEV_IF_TIMER {
 	BT_u32		(*pfnGetInputClock)			(BT_HANDLE hTimer, BT_ERROR *pError);
+	BT_ERROR 	(*pfnSetConfig)				(BT_HANDLE hUart, void *pConfig);
+	BT_ERROR 	(*pfnGetConfig)				(BT_HANDLE hUart, void *pConfig);
 	BT_ERROR 	(*pfnStart)					(BT_HANDLE hTimer);
 	BT_ERROR	(*pfnStop)					(BT_HANDLE hTimer);
 	BT_ERROR	(*pfnEnableInterrupt)		(BT_HANDLE hTimer);
@@ -28,6 +31,9 @@ typedef struct _BT_DEV_IF_TIMER {
 
 BT_ERROR 	BT_TimerStart				(BT_HANDLE hTimer);
 BT_ERROR 	BT_TimerStop				(BT_HANDLE hTimer);
+
+BT_ERROR 	BT_TimerSetConfiguration	(BT_HANDLE hTimer, void *pConfig);
+BT_ERROR 	BT_TimerGetConfiguration	(BT_HANDLE hTimer, void *pConfig);
 
 BT_ERROR	BT_TimerEnableInterrupt		(BT_HANDLE hTimer);
 BT_ERROR	BT_TimerDisableInterrupt	(BT_HANDLE hTimer);
