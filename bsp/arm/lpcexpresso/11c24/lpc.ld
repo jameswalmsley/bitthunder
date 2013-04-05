@@ -72,7 +72,8 @@ SECTIONS
 		*(.text)
 		*(.text.*)
 	} > FLASH
-	_etext =.;
+	. = ALIGN(8);	
+	_etext = .;
 
 
 .data : {
@@ -85,7 +86,7 @@ SECTIONS
    *(.fastrun.*)
    . = ALIGN(4);        /* Align the end of the section */
    __data_end = .;
-} > RAM
+} > RAM AT>FLASH
 _edata = .;
 
 
