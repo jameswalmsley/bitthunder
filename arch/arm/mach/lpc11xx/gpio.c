@@ -48,6 +48,13 @@ static BT_BOOL gpio_get(BT_HANDLE hGPIO, BT_u32 ulGPIO, BT_ERROR *pError) {
 	if(pError) {
 		*pError = BT_ERR_NONE;
 	}
+
+	BT_u32 ulBank 	= ulGPIO / 12;
+	BT_u32 ulBit	= ulGPIO % 12;
+	BT_u32 ulMask	= (1 << ulBit);
+
+	if (hGPIO->pRegs->banks[ulBank].MASK[ulMask] & ulMask) return BT_TRUE;
+
 	return BT_FALSE;
 }
 
