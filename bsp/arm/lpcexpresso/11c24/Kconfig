@@ -139,6 +139,70 @@ config PIO0_5_FUNCTION
     default 0 if PIO0_5_GPIO
     default 1 if PIO0_5_SDA
 
+
+choice
+	prompt "PIO0_8"	
+	default PIO0_8_GPIO
+
+config PIO0_8_GPIO
+    bool	"GPIO"
+    
+config PIO0_8_MISO0
+    bool	"MISO"
+
+config PIO0_8_CT16B0_MAT0
+    bool	"CT16B0_MAT0"
+    
+endchoice
+
+config PIO0_8_FUNCTION
+    int
+    default 0 if PIO0_8_GPIO
+    default 1 if PIO0_8_MISO0
+    default 2 if PIO0_8_CT16B0_MAT0
+
+choice
+	prompt "PIO1_0"	
+	default PIO1_0_GPIO
+
+config PIO1_0_GPIO
+    bool	"GPIO"
+    
+config PIO1_0_AD1
+    bool	"AD1"
+    
+config PIO1_0_CT32B1_CAP0
+    bool	"CT32B1_CAP0"
+	
+endchoice
+
+config PIO1_0_FUNCTION
+    int
+    default 1 if PIO1_0_GPIO
+    default 2 if PIO1_0_AD1
+    default 3 if PIO1_0_CT32B1_CAP0
+
+choice
+	prompt "PIO1_2"	
+	default PIO1_2_GPIO
+
+config PIO1_2_GPIO
+    bool	"GPIO"
+    
+config PIO1_2_AD3
+    bool	"AD3"
+    
+config PIO1_2_CT32B1_MAT1
+    bool	"CT32B1_MAT1"
+	
+endchoice
+
+config PIO1_2_FUNCTION
+    int
+    default 1 if PIO1_2_GPIO
+    default 2 if PIO1_2_AD2
+    default 3 if PIO1_2_CT32B1_MAT1
+
 choice
 	prompt "PIO1_6"	
 	default PIO1_6_GPIO
