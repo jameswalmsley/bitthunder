@@ -7,7 +7,7 @@ _HEAP_SIZE = DEFINED(_HEAP_SIZE) ? _HEAP_SIZE : 0x1400;
 MEMORY
 {
 	FLASH	(rwx)	: ORIGIN = 0x00000000, LENGTH = 32K
-	RAM 	(rwx)	: ORIGIN = 0x10000000, LENGTH = 8K
+	RAM 	(rwx)	: ORIGIN = 0x10000100, LENGTH = 0x1F00
 }
 
 
@@ -72,7 +72,7 @@ SECTIONS
 		*(.text)
 		*(.text.*)
 	} > FLASH
-	. = ALIGN(8);	
+	. = ALIGN(4);	
 	_etext = .;
 
 
