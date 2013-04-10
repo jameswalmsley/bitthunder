@@ -10,7 +10,7 @@ struct _BT_OPAQUE_HANDLE {
 };
 
 
-static BT_BOOL isCANHandle(BT_HANDLE hCAN) {
+static BT_BOOL isCanHandle(BT_HANDLE hCAN) {
 	if(!hCAN || !BT_IF_DEVICE(hCAN) || (BT_IF_DEVICE_TYPE(hCAN) != BT_DEV_IF_T_CAN)) {
 		return BT_FALSE;
 	}
@@ -21,8 +21,8 @@ static BT_BOOL isCANHandle(BT_HANDLE hCAN) {
  *	@brief	Set the Baudrate of the CAN device specified by the provided BT_HANDLE.
  *
  **/
-BT_ERROR BT_CANSetBaudrate(BT_HANDLE hCAN, BT_u32 ulBaudrate) {
-	if(!isCANHandle(hCAN)) {
+BT_ERROR BT_CanSetBaudrate(BT_HANDLE hCAN, BT_u32 ulBaudrate) {
+	if(!isCanHandle(hCAN)) {
 		// ERR_INVALID_HANDLE_TYPE
 		return (BT_ERROR) -1;
 	}
@@ -37,8 +37,8 @@ BT_ERROR BT_CANSetBaudrate(BT_HANDLE hCAN, BT_u32 ulBaudrate) {
  *	@brief	Set a Complete CAN configuration for the CAN device specified by the BT_HANDLE.
  *
  **/
-BT_ERROR BT_CANSetConfiguration(BT_HANDLE hCAN, BT_CAN_CONFIG *pConfig) {
-	if(!isCANHandle(hCAN)) {
+BT_ERROR BT_CanSetConfiguration(BT_HANDLE hCAN, BT_CAN_CONFIG *pConfig) {
+	if(!isCanHandle(hCAN)) {
 		// ERR_INVALID_HANDLE_TYPE
 		return (BT_ERROR) -1;
 	}
@@ -50,24 +50,24 @@ BT_ERROR BT_CANSetConfiguration(BT_HANDLE hCAN, BT_CAN_CONFIG *pConfig) {
  *	@brief	Get a Complete CAN configuration for the CAN device specified by the BT_HANDLE.
  *
  **/
-BT_ERROR BT_CANGetConfiguration(BT_HANDLE hCAN, BT_CAN_CONFIG *pConfig) {
-	if(!isCANHandle(hCAN)) {
+BT_ERROR BT_CanGetConfiguration(BT_HANDLE hCAN, BT_CAN_CONFIG *pConfig) {
+	if(!isCanHandle(hCAN)) {
 		// ERR_INVALID_HANDLE_TYPE
 		return (BT_ERROR) -1;
 	}
 	return BT_IF_CAN_OPS(hCAN)->pfnGetConfig(hCAN, pConfig);
 }
 
-BT_ERROR BT_CANEnable(BT_HANDLE hCAN) {
-	if(!isCANHandle(hCAN)) {
+BT_ERROR BT_CanEnable(BT_HANDLE hCAN) {
+	if(!isCanHandle(hCAN)) {
 		// ERR_INVALID_HANDLE_TYPE
 		return (BT_ERROR) -1;
 	}
 	return BT_IF_CAN_OPS(hCAN)->pfnEnable(hCAN);
 }
 
-BT_ERROR BT_CANDisable(BT_HANDLE hCAN) {
-	if(!isCANHandle(hCAN)) {
+BT_ERROR BT_CanDisable(BT_HANDLE hCAN) {
+	if(!isCanHandle(hCAN)) {
 		// ERR_INVALID_HANDLE_TYPE
 		return (BT_ERROR) -1;
 	}
@@ -75,8 +75,8 @@ BT_ERROR BT_CANDisable(BT_HANDLE hCAN) {
 	return BT_IF_CAN_OPS(hCAN)->pfnDisable(hCAN);
 }
 
-BT_ERROR BT_CanSendMsg(BT_HANDLE hCAN, BT_CAN_MESSAGE *pCanMessage) {
-	if(!isCANHandle(hCAN)) {
+BT_ERROR BT_CanSendMessage(BT_HANDLE hCAN, BT_CAN_MESSAGE *pCanMessage) {
+	if(!isCanHandle(hCAN)) {
 		// ERR_INVALID_HANDLE_TYPE
 		return (BT_ERROR) -1;
 	}
@@ -84,8 +84,8 @@ BT_ERROR BT_CanSendMsg(BT_HANDLE hCAN, BT_CAN_MESSAGE *pCanMessage) {
 	return BT_IF_CAN_OPS(hCAN)->pfnSendMessage(hCAN, pCanMessage);
 }
 
-BT_ERROR BT_CanReadMsg(BT_HANDLE hCAN, BT_CAN_MESSAGE *pCanMessage) {
-	if(!isCANHandle(hCAN)) {
+BT_ERROR BT_CanReadMessage(BT_HANDLE hCAN, BT_CAN_MESSAGE *pCanMessage) {
+	if(!isCanHandle(hCAN)) {
 		// ERR_INVALID_HANDLE_TYPE
 		return (BT_ERROR) -1;
 	}
