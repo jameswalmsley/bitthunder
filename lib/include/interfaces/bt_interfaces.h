@@ -40,5 +40,6 @@ typedef struct _BT_IF_HANDLE {
 	BT_ERROR			(*pfnCleanup)	(BT_HANDLE h);
 } BT_IF_HANDLE;
 
+#define BT_HANDLE_DO_NOT_FREE	0x40000001	///< Cleanup interfaces can return this to mean success, but DO not free the handle!
 
 #endif
