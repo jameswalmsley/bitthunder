@@ -27,7 +27,7 @@ static const BT_IF_HANDLE oHandleInterface;
 static BT_HANDLE devfs_open(BT_HANDLE hDevice, BT_ERROR *pError) {
 	if(!hDevice->ulRefCount) {
 		hDevice->ulRefCount += 1;
-		return hDevice->hBlkDev;
+		return hDevice;
 	}
 
 	return NULL;
@@ -38,13 +38,13 @@ static const BT_DEVFS_OPS oDevfsOps = {
 };
 
 BT_u32 BT_BlockRead(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError) {
-	const BT_IF_BLOCK *pBlock = hBlock->h.pIf->oIfs.pBlockIF;
-	return pBlock->pfnReadBlocks(hBlock, ulAddress, ulBlocks, pBuffer, pError);
+	const BT_IF_BLOCK *pBlock = hBlock->hBlkDev->h.pIf->oIfs.pBlockIF;
+	return pBlock->pfnReadBlocks(hBlock->hBlkDev, ulAddress, ulBlocks, pBuffer, pError);
 }
 
 BT_u32 BT_BlockWrite(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError) {
-	const BT_IF_BLOCK *pBlock = hBlock->h.pIf->oIfs.pBlockIF;
-	return pBlock->pfnWriteBlocks(hBlock, ulAddress, ulBlocks, pBuffer, pError);
+	const BT_IF_BLOCK *pBlock = hBlock->hBlkDev->h.pIf->oIfs.pBlockIF;
+	return pBlock->pfnWriteBlocks(hBlock->hBlkDev, ulAddress, ulBlocks, pBuffer, pError);
 }
 
 BT_ERROR BT_RegisterBlockDevice(BT_HANDLE hDevice, const char *szpName, BT_BLKDEV_DESCRIPTOR *pDescriptor) {
@@ -75,6 +75,12 @@ BT_ERROR BT_UnregisterBlockDevice(BT_HANDLE hDevice) {
 }
 
 static BT_ERROR bt_blockdev_inode_cleanup(BT_HANDLE hBlockdev) {
+	if(hBlockdev->ulRefCount) {
+		hBlockdev->ulRefCount -= 1;
+		return BT_HANDLE_DO_NOT_FREE;	// Ensure handle is not free'd!
+	} else {
+		// Request to destroy the inode!
+	}
 
 	return BT_ERR_NONE;
 }
