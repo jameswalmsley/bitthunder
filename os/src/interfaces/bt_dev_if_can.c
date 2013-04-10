@@ -81,7 +81,7 @@ BT_ERROR BT_CanSendMsg(BT_HANDLE hCAN, BT_CAN_MESSAGE *pCanMessage) {
 		return (BT_ERROR) -1;
 	}
 
-	return BT_IF_CAN_OPS(hCAN)->pfnSendMsg(hCAN, pCanMessage);
+	return BT_IF_CAN_OPS(hCAN)->pfnSendMessage(hCAN, pCanMessage);
 }
 
 BT_ERROR BT_CanReadMsg(BT_HANDLE hCAN, BT_CAN_MESSAGE *pCanMessage) {
@@ -90,5 +90,5 @@ BT_ERROR BT_CanReadMsg(BT_HANDLE hCAN, BT_CAN_MESSAGE *pCanMessage) {
 		return (BT_ERROR) -1;
 	}
 
-	return BT_IF_CAN_OPS(hCAN)->pfnReadMsg(hCAN, pCanMessage);
+	return BT_IF_CAN_OPS(hCAN)->pfnReadMessage(hCAN, pCanMessage);
 }

@@ -26,20 +26,20 @@ typedef struct {
 	BT_ERROR (*pfnGetConfig)	(BT_HANDLE hCAN, BT_CAN_CONFIG *pConfig);
 	BT_ERROR (*pfnEnable)		(BT_HANDLE hCAN);
 	BT_ERROR (*pfnDisable)		(BT_HANDLE hCAN);
-	BT_ERROR (*pfnSendMsg)		(BT_HANDLE hCAN, BT_CAN_MESSAGE *pCanMessage);
-	BT_ERROR (*pfnReadMsg)		(BT_HANDLE hCAN, BT_CAN_MESSAGE *pCanMessage);
+	BT_ERROR (*pfnSendMessage)	(BT_HANDLE hCAN, BT_CAN_MESSAGE *pCanMessage);
+	BT_ERROR (*pfnReadMessage)	(BT_HANDLE hCAN, BT_CAN_MESSAGE *pCanMessage);
 } BT_DEV_IF_CAN;
 
 /*
  *	Define the unified API for CAN devices in BlueThunder
  */
-BT_ERROR BT_CANSetBaudrate			(BT_HANDLE hCAN, BT_u32 ulBaudrate);
-BT_ERROR BT_CANSetConfiguration		(BT_HANDLE hCAN, BT_CAN_CONFIG *pConfig);
-BT_ERROR BT_CANGetConfiguration		(BT_HANDLE hCAN, BT_CAN_CONFIG *pConfig);
-BT_ERROR BT_CANEnable				(BT_HANDLE hCAN);
-BT_ERROR BT_CANDisable				(BT_HANDLE hCAN);
-BT_ERROR BT_CanSendMsg				(BT_HANDLE hCAN, BT_CAN_MESSAGE *pCanMessage);
-BT_ERROR BT_CanReadMsg				(BT_HANDLE hCAN, BT_CAN_MESSAGE *pCanMessage);
+BT_ERROR BT_CanSetBaudrate			(BT_HANDLE hCAN, BT_u32 ulBaudrate);
+BT_ERROR BT_CanSetConfiguration		(BT_HANDLE hCAN, BT_CAN_CONFIG *pConfig);
+BT_ERROR BT_CanGetConfiguration		(BT_HANDLE hCAN, BT_CAN_CONFIG *pConfig);
+BT_ERROR BT_CanEnable				(BT_HANDLE hCAN);
+BT_ERROR BT_CanDisable				(BT_HANDLE hCAN);
+BT_ERROR BT_CanSendMessage			(BT_HANDLE hCAN, BT_CAN_MESSAGE *pCanMessage);
+BT_ERROR BT_CanReadMessage			(BT_HANDLE hCAN, BT_CAN_MESSAGE *pCanMessage);
 
 
 #endif
