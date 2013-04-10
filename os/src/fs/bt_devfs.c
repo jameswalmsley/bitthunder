@@ -5,6 +5,7 @@
  **/
 
 #include <bitthunder.h>
+#include <bt_struct.h>
 #include <string.h>
 
 BT_DEF_MODULE_NAME			("Process Manager")
@@ -17,7 +18,7 @@ extern const BT_DEVFS_INODE __bt_devfs_entries_end;
 
 #ifdef BT_CONFIG_FS_DEV_DYNAMIC_REGISTRATION
 
-static BT_LIST oInodeList;
+static BT_LIST oInodeList = {0};
 
 typedef struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER 	h;
@@ -51,13 +52,14 @@ BT_HANDLE BT_DeviceOpen(const char *szpFilename, BT_ERROR *pError) {
 	}
 
 #ifdef BT_CONFIG_FS_DEV_DYNAMIC_REGISTRATION
-	BT_HANDLE hInode = (BT_HANDLE) oInodeList.pStart;
-	while(hInode) {
+	BT_LIST_ITEM *pItem = oInodeList.pStart;
+	while(pItem) {
+		BT_HANDLE hInode = bt_container_of(pItem, BT_DEVFS_INODE_ITEM, oItem, BT_LIST_ITEM);
 		if(!strcmp(hInode->szpName, szpFilename)) {
 			return hInode->pOps->pfnOpen(hInode->hDevice, pError);
 		}
 
-		hInode = (BT_HANDLE) BT_ListGetNext(&hInode->oItem);
+		pItem = BT_ListGetNext(pItem);
 	}
 #endif
 
@@ -80,6 +82,7 @@ BT_HANDLE BT_DeviceRegister(BT_HANDLE hDevice, const char *szpName, const BT_DEV
 	strcpy(hInode->szpName, szpName);
 
 	hInode->hDevice = hDevice;
+	hInode->pOps = pOps;
 
 	BT_ListAddItem(&oInodeList, &hInode->oItem);
 
