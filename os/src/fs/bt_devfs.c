@@ -10,6 +10,14 @@
 extern const BT_DEVFS_INODE __bt_devfs_entries_start;
 extern const BT_DEVFS_INODE __bt_devfs_entries_end;
 
+
+#ifdef BT_CONFIG_FS_DEV_DYNAMIC_REGISTRATION
+typedef struct _BT_DEVFS_INODE_LIST {
+	BT_LIST_ITEM 	oItem;
+	BT_DEVFS_INODE 	oInode;
+} BT_DEVFS_INODE_LIST;
+#endif
+
 BT_HANDLE BT_DeviceOpen(const char *szpFilename, BT_ERROR *pError) {
 
 	const BT_INTEGRATED_DRIVER *pDriver;
@@ -31,5 +39,17 @@ BT_HANDLE BT_DeviceOpen(const char *szpFilename, BT_ERROR *pError) {
 		pInode++;
 	}
 
+#ifdef BT_CONFIG_FS_DEV_DYNAMIC_REGISTRATION
+
+#endif
+
 	return NULL;
 }
+
+#ifdef BT_CONFIG_FS_DEV_DYNAMIC_REGISTRATION
+
+BT_ERROR BT_DeviceRegister(const BT_INTEGRATED_DEVICE *pDevice, const char *szpName) {
+
+}
+
+#endif
