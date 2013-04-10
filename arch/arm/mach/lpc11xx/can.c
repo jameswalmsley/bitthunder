@@ -462,26 +462,20 @@ static void CanTransmit(BT_HANDLE hCan) {
 }
 
 static const BT_DEV_IF_CAN oCanConfigInterface = {
-	canSetBaudrate,
-	canSetConfig,												///< CAN set config imple.
-	canGetConfig,
-	canEnable,													///< Enable/disable the device.
-	canDisable,
-	canWrite,
-	canRead,
+	.pfnSetBaudrate	= canSetBaudrate,
+	.pfnSetConfig	= canSetConfig,											///< CAN set config imple.
+	.pfnGetConfig	= canGetConfig,
+	.pfnEnable	 	= canEnable,												///< Enable/disable the device.
+	.pfnDisable	 	= canDisable,
+	.pfnSendMessage	= canWrite,
+	.pfnReadMessage	= canRead,
 };
 
 static const BT_IF_POWER oPowerInterface = {
-	canSetPowerState,											///< Pointers to the power state API implementations.
-	canGetPowerState,											///< This gets the current power state.
+	.pfnSetPowerState	= canSetPowerState,											///< Pointers to the power state API implementations.
+	.pfnGetPowerState	= canGetPowerState,											///< This gets the current power state.
 };
 
-static const BT_IF_CHARDEV oCharDevInterface = {
-	NULL,													///< This API wasn't implemented in this driver.
-	NULL,													///< :: Therefore the pointer must be NULL for BT to handle.
-	NULL,													///<
-	NULL,													///<
-};
 
 static const BT_DEV_IFS oConfigInterface = {
 	(BT_DEV_INTERFACE) &oCanConfigInterface,
@@ -493,7 +487,7 @@ const BT_IF_DEVICE BT_LPC11xx_CAN_oDeviceInterface = {
 	.unConfigIfs = {
 		(BT_DEV_INTERFACE) &oCanConfigInterface,
 	},
-	&oCharDevInterface,											///< Provide a Character device interface implementation.
+	NULL,											///< Provide a Character device interface implementation.
 };
 
 
