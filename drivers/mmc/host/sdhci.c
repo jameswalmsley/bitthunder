@@ -109,26 +109,37 @@ static BT_ERROR sdhci_request(BT_HANDLE hSDIO, MMC_COMMAND *pCommand) {
 
 	BT_u16 cmd_reg = pCommand->opcode << 8;
 	if(pCommand->bCRC) {
-		cmd_reg |= 0x8;
+		cmd_reg |= COMMAND_CRC_ENABLE;
 	}
 
-	if(pCommand->ulResponseType == 48) {
-		cmd_reg |= 0x2;
+	if(pCommand->bIsData) {
+		cmd_reg |= COMMAND_DATA_PRESENT;
 	}
 
-	if(pCommand->ulResponseType == 136) {
-		cmd_reg |= 0x1;
+	switch(pCommand->ulResponseType) {
+	case 48: {
+		COMMAND_RESPONSE_SELECT_SET(cmd_reg, 2);
+	}
+
+	case 136: {
+		COMMAND_RESPONSE_SELECT_SET(cmd_reg, 1);
+	}
+
+	default:
+		COMMAND_RESPONSE_SELECT_SET(cmd_reg, 0);
+		break;
 	}
 
 	hSDIO->pRegs->COMMAND = cmd_reg;
 
+	// Wait until the command is complete.
 	while(!(hSDIO->pRegs->NORMAL_INT_STATUS & NORMAL_INT_COMMAND_COMPLETE)) {
 		BT_GpioSet(7, BT_TRUE);
 	}
 
+	// Clear the command complete interrupt status field.
 	hSDIO->pRegs->NORMAL_INT_STATUS |= NORMAL_INT_COMMAND_COMPLETE;
 
-	// Wait until command is complete.
 	pCommand->response[0] = hSDIO->pRegs->RESPONSE[0] | (hSDIO->pRegs->RESPONSE[1] << 16);
 	pCommand->response[1] = hSDIO->pRegs->RESPONSE[2] | (hSDIO->pRegs->RESPONSE[3] << 16);
 	pCommand->response[2] = hSDIO->pRegs->RESPONSE[4] | (hSDIO->pRegs->RESPONSE[5] << 16);
@@ -336,9 +347,9 @@ static BT_HANDLE sdhci_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErr
 
 	sdhci_reset(hSDIO, RESET_ALL);
 
-	BT_u32 hc_version 	= hSDIO->pRegs->SLOT_INT_STAT_HCVERSION;
-	BT_u32 vendor 		= HCVERSION_VENDOR_GET(hc_version);
-	BT_u32 sdversion 	= HCVERSION_SPECV_GET(hc_version);
+	//BT_u32 hc_version 	= hSDIO->pRegs->SLOT_INT_STAT_HCVERSION;
+	//BT_u32 vendor 		= HCVERSION_VENDOR_GET(hc_version);
+	//BT_u32 sdversion 	= HCVERSION_SPECV_GET(hc_version);
 
 	// We could check controller version to ensure compatibility, but
 	// in all likely-hood (clutching at straws) newer versions would remain mostly
