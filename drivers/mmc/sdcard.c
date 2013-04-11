@@ -280,6 +280,47 @@ static void sd_manager_sm(void *pData) {
 
 static BT_u32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount, void *pBuffer, BT_ERROR *pError) {
 
+	BT_kPrint("SDCARD: BlockRead (%d[%d])", ulBlock, ulCount);
+
+	if(!hBlock->pHost->rca) {
+		// Card not initialised!
+		return 0;
+	}
+
+	MMC_COMMAND oCommand;
+	oCommand.opcode = 13;
+	oCommand.arg = hBlock->pHost->rca << 16;
+	oCommand.bCRC = BT_TRUE;
+	oCommand.ulResponseType = 48;
+
+	hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
+
+	BT_u32 ulStatus = oCommand.response[0];
+	BT_u32 ulState = (ulStatus >> 9) & 0xF;
+
+	BT_kPrint("SDCARD: Status (%02x)", ulState);
+
+	switch(ulState) {
+
+	case 4:
+		break;
+
+	default:
+		BT_kPrint("SDCARD: Unknown card state %d", ulState);
+		break;
+	}
+
+	if(!hBlock->pHost->bSDHC) {
+		ulBlock *= 512;
+	}
+
+	// Send the single block command.
+	oCommand.opcode 		= 17;
+	oCommand.bCRC 			= BT_TRUE;
+	oCommand.ulResponseType = 48;
+
+
+
 	return 0;
 }
 
