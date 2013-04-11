@@ -6,8 +6,17 @@
 
 #include "slcr.h"
 //#include "sdio.h"
+#include "mmc/host.h"
 
-#ifdef BT_CONFIG_MACH_ZYNQ_USE_SDIO_0
+static BT_u32 sdio_get_input_clock(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
+	return 50000000;
+}
+
+static BT_MMC_HOST_OPS host_ops = {
+	.pfnGetInputClock = sdio_get_input_clock,
+};
+
+#ifdef BT_CONFIG_MACH_ZYNQ_SDIO_0
 static const BT_RESOURCE oZynq_sdio_resources_0[] = {
 	{
 		.ulStart 			= 0xE0100000,
@@ -24,6 +33,10 @@ static const BT_RESOURCE oZynq_sdio_resources_0[] = {
 		.ulEnd				= 0,
 		.ulFlags			= BT_RESOURCE_ENUM,
 	},
+	{
+		.pParam				= &host_ops,
+		.ulFlags			= BT_RESOURCE_PARAM,
+	},
 };
 
 BT_INTEGRATED_DEVICE_DEF oZynq_sdio_device_0 = {
@@ -33,7 +46,7 @@ BT_INTEGRATED_DEVICE_DEF oZynq_sdio_device_0 = {
 };
 #endif
 
-#ifdef BT_CONFIG_MACH_ZYNQ_USE_SDIO_1
+#ifdef BT_CONFIG_MACH_ZYNQ_SDIO_1
 static const BT_RESOURCE oZynq_sdio_resources_1[] = {
 	{
 		.ulStart 			= 0xE0101000,
@@ -49,6 +62,10 @@ static const BT_RESOURCE oZynq_sdio_resources_1[] = {
 		.ulStart 			= 1,
 		.ulEnd				= 1,
 		.ulFlags			= BT_RESOURCE_ENUM,
+	},
+	{
+		.pParam				= &host_ops,
+		.ulFlags			= BT_RESOURCE_PARAM,
 	},
 };
 
