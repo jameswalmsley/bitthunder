@@ -26,5 +26,10 @@ BT_ERROR BT_CloseHandle(BT_HANDLE hHandle) {
 	if(!Error) {
 		BT_kFree(hHandle);
 	}
+
+	if(Error == BT_HANDLE_DO_NOT_FREE) {
+		Error = BT_ERR_NONE;
+	}
+
 	return Error;
 }
