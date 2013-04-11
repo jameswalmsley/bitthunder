@@ -3,6 +3,7 @@
 
 #include "interfaces/bt_if_device.h"
 #include "interfaces/bt_if_block.h"
+#include "interfaces/bt_if_fs.h"
 #include "interfaces/bt_if_module.h"
 
 #include <bt_module.h>
@@ -18,6 +19,10 @@ typedef enum _BT_HANDLE_TYPE {
 	BT_HANDLE_T_INODE,
 	BT_HANDLE_T_DEVICE,
 	BT_HANDLE_T_BLOCK,
+	BT_HANDLE_T_VOLUME,
+	BT_HANDLE_T_PARTITION,
+	BT_HANDLE_T_FILESYSTEM,
+	BT_HANDLE_T_MOUNTPOINT,
 #endif
 } BT_HANDLE_TYPE;
 
@@ -28,6 +33,7 @@ typedef union _BT_IF_INTERFACES {
 #ifdef BT_CONFIG_OS
 	const BT_IF_DEVICE *pDevIF;
 	const BT_IF_BLOCK  *pBlockIF;
+	const BT_IF_FS	   *pFilesystemIF;
 #endif
 } BT_UN_IFS;
 
