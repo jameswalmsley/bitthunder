@@ -73,7 +73,7 @@ static BT_ERROR bt_softirq_init() {
 	BT_ERROR Error;
 	BT_THREAD_CONFIG oConfig;
 
-	oConfig.ulStackDepth 	= 128;
+	oConfig.ulStackDepth 	= 256;
 	oConfig.ulPriority 		= BT_CONFIG_INTERRUPTS_SOFTIRQ_PRIORITY;
 
 	g_hMutex = BT_CreateMutex(&Error);
