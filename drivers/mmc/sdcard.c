@@ -21,6 +21,7 @@ typedef struct _MMC_HOST {
 	BT_u32 				ulFlags;
 #define MMC_HOST_FLAGS_INITIALISE_REQUEST 	0x00000001		///< This host has generated an initialisation request.
 #define MMC_HOST_FLAGS_INVALIDATE			0x00000002		///< State-machine should attempt to invalidate resources dependent on this host.
+	BT_u32				ulHostID;
 	BT_u16 				rca;
 } MMC_HOST;
 
@@ -62,6 +63,7 @@ BT_ERROR BT_RegisterSDHostController(BT_HANDLE hHost, const BT_MMC_OPS *pOps) {
 		pHost->pOps->pfnEventSubscribe(hHost, card_event_handler, pHost);
 	}
 
+	pHost->ulHostID = g_oSDHosts.ulItems;
 	BT_ListAddItem(&g_oSDHosts, &pHost->oItem);
 
 	return BT_ERR_NONE;
