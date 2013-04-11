@@ -37,6 +37,7 @@ typedef struct _BT_MMC_OPS {
 	BT_ERROR	(*pfnInitialise)		(BT_HANDLE hSDIO);
 	BT_ERROR	(*pfnSetInterruptMask)	(BT_HANDLE hSDIO, BT_MMC_INTERRUPTS eInterrup, BT_BOOL bEnable);
 	BT_ERROR	(*pfnSetDataWidth)		(BT_HANDLE hSDIO, BT_MMC_WIDTH eWdith);
+	BT_ERROR	(*pfnSetBlockSize)		(BT_HANDLE hSDIO, BT_u32 ulBlockSize);
 
 	BT_ERROR 	(*pfnRequest)			(BT_HANDLE hSDIO, MMC_COMMAND *pCommand);
 } BT_MMC_OPS;
