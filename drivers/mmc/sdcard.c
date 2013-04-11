@@ -270,7 +270,7 @@ static void sd_manager_sm(void *pData) {
 			pHost->ulFlags &= ~MMC_HOST_FLAGS_INVALIDATE;
 			if(!pHost->pOps->pfnIsCardPresent(pHost->hHost, &Error)) {
 				BT_GpioSet(7, BT_FALSE);
-				BT_kPrint("SDCARD: SDCard was removed");
+				BT_kPrint("SDCARD: SDCard (mmc%d:%04x) was removed", pHost->ulHostID, pHost->rca);
 			}
 		}
 
