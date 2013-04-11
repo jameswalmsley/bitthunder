@@ -9,7 +9,7 @@
 #include <interrupts/bt_tasklets.h>
 #include "core.h"
 
-BT_DEF_MODULE_NAME			("BitThunder SDCARD Manager")
+BT_DEF_MODULE_NAME			("SD/MMC Manager")
 BT_DEF_MODULE_DESCRIPTION	("SDCARD abstraction layer for BitThunder")
 BT_DEF_MODULE_AUTHOR		("James Walmsley")
 BT_DEF_MODULE_EMAIL			("james@fullfat-fs.co.uk")
