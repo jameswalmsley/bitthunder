@@ -200,8 +200,25 @@ static void sd_manager_sm(void *pData) {
 
 				pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
 
-				BT_kPrint("SDCARD: Selected card with RCA %d", pHost->rca);
+				BT_kPrint("SDCARD: Selected card mmc%d:%04x", pHost->ulHostID, pHost->rca);
 
+				BT_u32 cmd7_response = oCommand.response[0];
+				status = (cmd7_response >> 9) & 0xf;
+
+				if(status != 3 && status !=4) {
+					BT_kPrint("SDCARD: invalid status %i", status);
+				}
+
+				if(!pHost->bSDHC) {
+					oCommand.arg = 512;
+					oCommand.opcode = 16;
+					oCommand.bCRC = BT_TRUE;
+					oCommand.ulResponseType = 48;
+
+					pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
+				}
+
+				pHost->pOps->pfnSetBlockSize(pHost->hHost, 512);
 
 				// Place SDCard into 4-bit mode. (ACMD6).
 
