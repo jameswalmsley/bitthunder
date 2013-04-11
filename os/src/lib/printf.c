@@ -36,6 +36,7 @@
 #include <bt_types.h>
 #include <bt_error.h>
 #include <lib/putc.h>
+#include <bt_config.h>
 
 #define putchar bt_putc
 
