@@ -168,8 +168,30 @@ static void sd_manager_sm(void *pData) {
 
 				pHost->rca = oCommand.response[0] >> 16;
 
+				BT_u32 crcError		 = (oCommand.response[0] >> 15) & 0x1;
+				BT_u32 illegal_cmd	 = (oCommand.response[0] >> 14) & 0x1;
+				BT_u32 error	  	 = (oCommand.response[0] >> 13) & 0x1;
+				BT_u32 status	     = (oCommand.response[0] >> 9) & 0xf;
+				BT_u32 ready		 = (oCommand.response[0] >> 8) & 0x1;
+
+				if(crcError) {
+					BT_kPrint("SDCARD: CRC Error");
+				}
+
+				if(illegal_cmd) {
+					BT_kPrint("SDCARD: Illegal command");
+				}
+
+				if(error) {
+					BT_kPrint("SDCARD: Generic Error");
+				}
+
+				if(!ready) {
+					BT_kPrint("SDCARD: not ready in data state!");
+				}
+
 				BT_kPrint("SDCARD: Placed SDCARD into data state. (resp: %08x)", oCommand.response[0]);
-				BT_kPrint("SDCARD: Relative Card Address (RCA): %d", pHost->rca);
+				BT_kPrint("SDCARD: Relative Card Address (RCA): %04x", pHost->rca);
 
 				oCommand.arg = pHost->rca << 16;
 				oCommand.opcode = 7;
