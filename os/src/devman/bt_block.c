@@ -68,6 +68,11 @@ BT_u32 BT_BlockWrite(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *
 	return pBlock->pfnWriteBlocks(hBlock->hBlkDev, ulAddress, ulBlocks, pBuffer, pError);
 }
 
+BT_ERROR BT_GetBlockGeometry(BT_HANDLE hBlock, BT_BLOCK_GEOMETRY *pGeometry) {
+	memcpy(pGeometry, &hBlock->oDescriptor.oGeometry);
+	return BT_ERR_NONE;
+}
+
 BT_ERROR BT_RegisterBlockDevice(BT_HANDLE hDevice, const char *szpName, BT_BLKDEV_DESCRIPTOR *pDescriptor) {
 
 	BT_ERROR Error;
