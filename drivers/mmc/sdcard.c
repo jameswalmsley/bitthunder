@@ -23,8 +23,17 @@ typedef struct _MMC_HOST {
 #define MMC_HOST_FLAGS_INVALIDATE			0x00000002		///< State-machine should attempt to invalidate resources dependent on this host.
 	BT_u32				ulHostID;
 	BT_u16 				rca;
+	BT_HANDLE			hBlock;								///< Handle to an instantiated block device for this host.
 	BT_BOOL				bSDHC;
 } MMC_HOST;
+
+struct _BT_OPAQUE_HANDLE {
+	BT_HANDLE_HEADER 	h;
+	MMC_HOST 		   *pHost;
+	BT_BLKDEV_DESCRIPTOR	oDescriptor;
+};
+
+static const BT_IF_HANDLE oHandleInterface;
 
 static BT_TASKLET 	sm_tasklet;
 
@@ -242,7 +251,16 @@ static void sd_manager_sm(void *pData) {
 
 				BT_kPrint("SDCARD: sucessfully initialised... registering block device");
 				// Card initialised -- regster block device driver :)
-				//BT_RegisterBlockDevice();
+
+				BT_HANDLE hSD = BT_CreateHandle(&oHandleInterface, sizeof(struct _BT_OPAQUE_HANDLE), &Error);
+				if(!hSD) {
+
+				}
+
+				hSD->pHost = pHost;
+				//hSD->oDescriptor.
+
+				BT_RegisterBlockDevice(hSD, "mmc0", &hSD->oDescriptor);
 
 				BT_GpioSet(7, BT_TRUE);
 			}
@@ -271,11 +289,15 @@ static BT_u32 sdcard_blockwrite(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount
 }
 
 static const BT_IF_BLOCK oBlockInterface = {
-		sdcard_blockread,
+	sdcard_blockread,
 	sdcard_blockwrite,
 };
 
 static BT_ERROR sdcard_blockdev_cleanup(BT_HANDLE hHandle) {
+	// Whenever this is called, its probably just the application layer saying.... i'm done for now!
+
+	// However.... we must only close the device if the actual reference count drops to 0 in the inode handle,
+
 	return BT_ERR_NONE;
 }
 
@@ -296,8 +318,6 @@ static BT_ERROR bt_sdcard_manager_init() {
 
 	return BT_ERR_NONE;
 }
-
-
 
 BT_MODULE_INIT_DEF oModuleEntry = {
 	BT_MODULE_NAME,
