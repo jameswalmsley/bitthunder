@@ -26,11 +26,9 @@ config ARCH
 
 config BIG_ENDIAN
     bool
-	depends on !LITTLE_ENDIAN
 
 config LITTLE_ENDIAN
     bool
-	depends on !BIG_ENDIAN
 
 if ARCH_ARM
 source arch/arm/Kconfig
