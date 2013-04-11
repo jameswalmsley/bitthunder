@@ -164,13 +164,13 @@ BT_MACHINE_START(ARM, ZYNQ, "Xilinx Embedded Zynq Platform")
 	.pInterruptController		= &oZynq_intc_device,
 	.pSystemTimer 				= &oZynq_cpu_timer_device,
 
-#ifdef MACH_ZYNQ_BOOTLOG_UART_NULL
+#ifdef BT_CONFIG_MACH_ZYNQ_BOOTLOG_UART_NULL
 	.pBootLogger				= NULL,
 #endif
-#ifdef MACH_ZYNQ_BOOTLOG_UART_0
+#ifdef BT_CONFIG_MACH_ZYNQ_BOOTLOG_UART_0
 	.pBootLogger				= &oZynq_uart0_device,
 #endif
-#ifdef MACH_ZYNQ_BOOTLOG_UART_1
+#ifdef BT_CONFIG_MACH_ZYNQ_BOOTLOG_UART_1
 	.pBootLogger				= &oZynq_uart1_device,
 #endif
 BT_MACHINE_END
