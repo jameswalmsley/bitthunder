@@ -23,6 +23,7 @@ typedef struct _MMC_HOST {
 #define MMC_HOST_FLAGS_INVALIDATE			0x00000002		///< State-machine should attempt to invalidate resources dependent on this host.
 	BT_u32				ulHostID;
 	BT_u16 				rca;
+	BT_BOOL				bSDHC;
 } MMC_HOST;
 
 static BT_TASKLET 	sm_tasklet;
@@ -136,6 +137,14 @@ static void sd_manager_sm(void *pData) {
 						continue;
 					}
 					break;
+				}
+
+				pHost->bSDHC = (oCommand.response[0] >> 31) & 1;
+
+				if(pHost->bSDHC) {
+					BT_kPrint("SDCARD: SDHC card support detected");
+				} else {
+					BT_kPrint("SDCARD: Non-SDHC card detected");
 				}
 
 				// Read the CID register
