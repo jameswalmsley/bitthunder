@@ -280,6 +280,11 @@ static BT_ERROR sdhci_set_data_width(BT_HANDLE hSDIO, BT_MMC_WIDTH eWidth) {
 	return BT_ERR_NONE;
 }
 
+static BT_ERROR sdhci_set_block_size(BT_HANDLE hSDIO, BT_u32 ulBlockSize) {
+	hSDIO->pRegs->BLOCK_SIZE = ulBlockSize;
+	return BT_ERR_NONE;
+}
+
 static const BT_MMC_OPS sdhci_mmc_ops = {
 	.ulCapabilites1 	= 0,
 	.pfnRequest			= sdhci_request,
@@ -287,6 +292,7 @@ static const BT_MMC_OPS sdhci_mmc_ops = {
 	.pfnIsCardPresent	= sdhci_is_card_present,
 	.pfnSetInterruptMask = sdhci_set_interrupt_mask,
 	.pfnSetDataWidth    = sdhci_set_data_width,
+	.pfnSetBlockSize    = sdhci_set_block_size,
 	.pfnInitialise 		= sdhci_initialise,
 };
 
