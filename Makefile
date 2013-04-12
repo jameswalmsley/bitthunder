@@ -25,7 +25,7 @@ endif
 
 
 menuconfig: scripts/kconfig/mkconfig
-	$(Q)CONFIG_=BT_CONFIG_ kconfig-mconf Kconfig
+	$(Q)CONFIG_=BT_CONFIG_ APP_DIR=$(APP_DIR) kconfig-mconf Kconfig
 	$(Q)scripts/kconfig/mkconfig ./ > $(BT_CONFIG_BSP_DIR)/bt_bsp_config.h
 	$(Q)cp .config $(BT_CONFIG_BSP_DIR)/.config
 

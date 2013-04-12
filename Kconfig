@@ -9,6 +9,16 @@ config CONFIGURED
     bool
 	default y
 
+config APP_CONFIG
+    bool
+	option env="APP_CONFIG"
+	default n
+
+config APP_DIR
+    string
+	default "scripts" if !APP_CONFIG
+    option env="APP_DIR"
+
 choice
 	prompt "Build OS or Library"
 	default OS
@@ -115,6 +125,8 @@ menu "Kernel Options"
 source kernel/Kconfig
 endmenu
 
+if APP_CONFIG
 menu "Application Configuration"
-
+source "$APP_DIR/Kconfig"
 endmenu
+endif
