@@ -58,3 +58,17 @@ $(BT_OS_OBJECTS): MODULE_NAME="BitThunder"
 
 OBJECTS += $(BT_OS_OBJECTS)
 
+APP=$(BUILD_DIR)application/
+-include $(APP_DIR)/objects.mk
+
+objs += $(objs-y)
+
+APP_OBJS := $(objs)
+#$(patsubst %, $(BUILD_DIR)application/%, $(objs))
+#$(APP_OBJS): MODULE_NAME="application"
+
+appobjs:
+	@echo including $(APP_DIR)
+	@echo $(APP_OBJS)
+
+OBJECTS += $(APP_OBJS)
