@@ -122,6 +122,8 @@ int bt_main(int argc, char **argv) {
 	};
 
 	BT_kTaskCreate(idle_task, "BT_IDLE", &oThreadConfig, &Error);
+
+	oThreadConfig.ulStackDepth = 512;
 	BT_kTaskCreate((BT_FN_TASK_ENTRY) main, "MAIN", &oThreadConfig, &Error);
 
 	BT_kStartScheduler();
