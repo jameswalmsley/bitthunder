@@ -162,6 +162,60 @@ static BT_ERROR sdhci_request(BT_HANDLE hSDIO, MMC_COMMAND *pCommand) {
 	return BT_ERR_NONE;
 }
 
+static BT_u32 sdhci_read(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError) {
+	register BT_u8 *p = (BT_u8 *) pBuffer;
+
+	BT_kPrint("SDHCI: Awaiting buffer read ready interrupt:");
+
+
+
+	BT_kPrint("SDHCI: Buffer is now ready...");
+
+	// Clear the buffer ready interrupt.
+
+	while(ulBlocks--) {
+		BT_u32 ulSize = 512;
+
+		while(!(hSDIO->pRegs->NORMAL_INT_STATUS & NORMAL_INT_BUF_READ_READY)) {
+				; // Detect timeout
+		}
+
+		hSDIO->pRegs->NORMAL_INT_STATUS |= NORMAL_INT_BUF_READ_READY;
+
+		while(ulSize) {
+			BT_u32 ulData = hSDIO->pRegs->BUFFER_DATA_PORT;
+			BT_u8 d0 = (BT_u8) (ulData & 0xff);
+			BT_u8 d1 = (BT_u8) ((ulData >> 8) & 0xff);
+			BT_u8 d2 = (BT_u8) ((ulData >> 16) & 0xff);
+			BT_u8 d3 = (BT_u8) ((ulData >> 24) & 0xff);
+
+			*p++ = d0;
+			*p++ = d1;
+			*p++ = d2;
+			*p++ = d3;
+		
+			ulSize -= 4;
+		}
+
+	}
+
+	while(! (hSDIO->pRegs->NORMAL_INT_STATUS & NORMAL_INT_TRANSFER_COMPLETE)) {
+		;
+	}
+
+	hSDIO->pRegs->NORMAL_INT_STATUS |= NORMAL_INT_TRANSFER_COMPLETE;
+
+	BT_kPrint("Block transfer complete");
+
+	//BT_kPrint("SDHCI: Transfer completed");
+
+	return 512;
+}
+
+static BT_u32 sdhci_write(BT_HANDLE hSDIO, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
+
+	return 0;
+}
 
 static BT_ERROR sdhci_event_subscribe(BT_HANDLE hSDIO, BT_MMC_CARD_EVENTRECEIVER pfnReceiver, MMC_HOST *pHost) {
 
@@ -260,7 +314,9 @@ static BT_ERROR sdhci_initialise(BT_HANDLE hSDIO) {
 	// Enable the Card detection IRQs.
 	hSDIO->pRegs->NORMAL_INT_ENABLE 		|=	NORMAL_INT_CARD_INSERTED
 											| 	NORMAL_INT_CARD_REMOVED
-											| 	NORMAL_INT_COMMAND_COMPLETE;
+											| 	NORMAL_INT_COMMAND_COMPLETE
+		                                    |	NORMAL_INT_BUF_READ_READY
+		                                    | 	NORMAL_INT_TRANSFER_COMPLETE;
 
 	// Ensure we don't have any card-detection interrupts on init,
 	// For some reason this can send the interrupt controller wild, even though
@@ -313,6 +369,8 @@ static BT_ERROR sdhci_set_block_size(BT_HANDLE hSDIO, BT_u32 ulBlockSize) {
 static const BT_MMC_OPS sdhci_mmc_ops = {
 	.ulCapabilites1 	= 0,
 	.pfnRequest			= sdhci_request,
+	.pfnRead			= sdhci_read,
+	.pfnWrite			= sdhci_write,
 	.pfnEventSubscribe 	= sdhci_event_subscribe,
 	.pfnIsCardPresent	= sdhci_is_card_present,
 	.pfnSetInterruptMask = sdhci_set_interrupt_mask,
