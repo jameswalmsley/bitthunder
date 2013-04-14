@@ -119,10 +119,12 @@ static BT_ERROR sdhci_request(BT_HANDLE hSDIO, MMC_COMMAND *pCommand) {
 	switch(pCommand->ulResponseType) {
 	case 48: {
 		COMMAND_RESPONSE_SELECT_SET(cmd_reg, 2);
+		break;
 	}
 
 	case 136: {
 		COMMAND_RESPONSE_SELECT_SET(cmd_reg, 1);
+		break;
 	}
 
 	default:
