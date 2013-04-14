@@ -288,9 +288,9 @@ static BT_u32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount,
 	}
 
 	MMC_COMMAND oCommand;
-	oCommand.opcode = 13;
-	oCommand.arg = hBlock->pHost->rca << 16;
-	oCommand.bCRC = BT_TRUE;
+	oCommand.opcode 		= 13;
+	oCommand.arg 			= hBlock->pHost->rca << 16;
+	oCommand.bCRC 			= BT_TRUE;
 	oCommand.ulResponseType = 48;
 
 	hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
@@ -318,7 +318,7 @@ static BT_u32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount,
 	oCommand.opcode 		= 17;
 	oCommand.bCRC 			= BT_TRUE;
 	oCommand.ulResponseType = 48;
-
+	oCommand.bIsData 		= BT_TRUE;
 
 
 	return 0;
