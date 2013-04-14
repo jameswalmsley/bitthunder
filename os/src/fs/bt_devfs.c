@@ -26,7 +26,7 @@ typedef struct _BT_OPAQUE_HANDLE {
 	char 		   	   *szpName;
 	BT_HANDLE			hDevice;
 	BT_u32				ulReferences;
-	BT_DEVFS_OPS	   *pOps;
+	const BT_DEVFS_OPS *pOps;
 } BT_DEVFS_INODE_ITEM;
 #endif
 
