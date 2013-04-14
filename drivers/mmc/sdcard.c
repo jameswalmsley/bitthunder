@@ -292,6 +292,7 @@ static BT_u32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount,
 	oCommand.arg 			= hBlock->pHost->rca << 16;
 	oCommand.bCRC 			= BT_TRUE;
 	oCommand.ulResponseType = 48;
+	oCommand.bIsData		= BT_FALSE;
 
 	hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
 
@@ -315,13 +316,36 @@ static BT_u32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount,
 	}
 
 	// Send the single block command.
-	oCommand.opcode 		= 17;
+	if(ulCount > 1) {
+		oCommand.opcode 		= 18;
+	} else {
+		oCommand.opcode			= 17;
+	}
+
 	oCommand.bCRC 			= BT_TRUE;
 	oCommand.ulResponseType = 48;
 	oCommand.bIsData 		= BT_TRUE;
+	oCommand.arg 			= ulBlock;
+	oCommand.bRead_nWrite	= BT_TRUE;
+	oCommand.ulBlocks		= ulCount;
 
+	hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
 
-	return 0;
+	BT_u32 cmd17_response = oCommand.response[0];
+	if(cmd17_response != 0x900) {	// STATE = transfer, READY_FOR_DATA = set
+		BT_kPrint("SDCARD: Invalid CMD17 response");
+		return 0;
+	}
+
+	BT_kPrint("SDCARD: Read command complete, waiting for data");
+
+	// Read the data.
+
+	hBlock->pHost->pOps->pfnRead(hBlock->pHost->hHost, ulCount, pBuffer, pError);
+
+	//BT_u32 ulRead = hBlock->pHost->pOps->pfnRead(hBlock->pHost->hHost, 512, pBuffer, pError);
+
+	return 0; //ulRead / 512;
 }
 
 static BT_u32 sdcard_blockwrite(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount, void *pBuffer, BT_ERROR *pError) {
@@ -360,7 +384,7 @@ static BT_ERROR bt_sdcard_manager_init() {
 	return BT_ERR_NONE;
 }
 
-BT_MODULE_INIT_DEF oModuleEntry = {
+BT_MODULE_INIT_0_DEF oModuleEntry = {
 	BT_MODULE_NAME,
 	bt_sdcard_manager_init,
 };
