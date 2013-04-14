@@ -48,8 +48,14 @@ int main(int argc, char **argv) {
 		}
 
 		BT_u32 offset = BT_GetSystemTimerOffset();
-		bt_printf("Time: %d.%03d\r", ticks/1000000, ticks%1000000);
+		//bt_printf("Time: %d.%03d\r", ticks/1000000, ticks%1000000);
 		BT_ThreadSleepUntil(&time, 1000);
+
+		BT_HANDLE hBlk = BT_DeviceOpen("mmc0", &Error);
+
+		BT_BlockRead(hBlk, 0, 1, NULL, &Error);
+
+		BT_CloseHandle(hBlk);
 	}
 
 	return 0;
