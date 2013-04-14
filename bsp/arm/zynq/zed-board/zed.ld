@@ -222,7 +222,7 @@ SECTIONS
   __mmu_tbl_start = .;
    *(.mmu_tbl)
    __mmu_tbl_end = .;
-} > ZYNQ_RAM0
+} > ZYNQ_RAM1
 
 .bss (NOLOAD) : {
    __bss_start = .;
