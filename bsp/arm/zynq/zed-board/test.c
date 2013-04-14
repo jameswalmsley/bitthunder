@@ -15,6 +15,8 @@ extern BT_u32 BT_ZYNQ_GetArmPLLFrequency();
  *	However, you can just use it as an already running process.
  **/
 
+char *buffer = 0x00100000;
+
 int main(int argc, char **argv) {
 
 	BT_ERROR Error;
@@ -37,15 +39,13 @@ int main(int argc, char **argv) {
 
 	bt_printf("\r\n");
 
+	BT_ThreadSleep(2000);
+
 	BT_TICK time = BT_GetKernelTick();
 
 	while(1) {
 		BT_u32 i;
 		BT_u32 ticks = BT_GetKernelTime();
-
-		for(i = 0; i < 10000; i++) {
-			;
-		}
 
 		BT_u32 offset = BT_GetSystemTimerOffset();
 		//bt_printf("Time: %d.%03d\r", ticks/1000000, ticks%1000000);
@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
 
 		BT_HANDLE hBlk = BT_DeviceOpen("mmc0", &Error);
 
-		BT_BlockRead(hBlk, 0, 1, NULL, &Error);
+		BT_BlockRead(hBlk, 0, 2048, buffer, &Error);
 
 		BT_CloseHandle(hBlk);
 	}
