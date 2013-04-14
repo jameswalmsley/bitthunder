@@ -121,7 +121,7 @@ static BT_ERROR bt_fs_init() {
 	return BT_ERR_NONE;
 }
 
-BT_MODULE_INIT_DEF oModuleEntry = {
+BT_MODULE_INIT_0_DEF oModuleEntry = {
 	BT_MODULE_NAME,
 	bt_fs_init,
 };
