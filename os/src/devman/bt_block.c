@@ -37,12 +37,33 @@ static const BT_DEVFS_OPS oDevfsOps = {
 	.pfnOpen = devfs_open,
 };
 
+static BT_BOOL isHandleValid(BT_HANDLE hBlock) {
+	if(hBlock && hBlock->h.pIf->eType == BT_HANDLE_T_INODE) {
+		return BT_TRUE;
+	}
+	return BT_FALSE;
+}
+
 BT_u32 BT_BlockRead(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError) {
+
+	if(!isHandleValid(hBlock)) {
+		if(pError) {
+			*pError = BT_ERR_INVALID_HANDLE;
+		}
+		return 0;
+	}
+
 	const BT_IF_BLOCK *pBlock = hBlock->hBlkDev->h.pIf->oIfs.pBlockIF;
 	return pBlock->pfnReadBlocks(hBlock->hBlkDev, ulAddress, ulBlocks, pBuffer, pError);
 }
 
 BT_u32 BT_BlockWrite(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError) {
+	if(!isHandleValid(hBlock)) {
+		if(pError) {
+			*pError = BT_ERR_INVALID_HANDLE;
+		}
+		return 0;
+	}
 	const BT_IF_BLOCK *pBlock = hBlock->hBlkDev->h.pIf->oIfs.pBlockIF;
 	return pBlock->pfnWriteBlocks(hBlock->hBlkDev, ulAddress, ulBlocks, pBuffer, pError);
 }
