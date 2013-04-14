@@ -114,6 +114,18 @@ static BT_ERROR sdhci_request(BT_HANDLE hSDIO, MMC_COMMAND *pCommand) {
 
 	if(pCommand->bIsData) {
 		cmd_reg |= COMMAND_DATA_PRESENT;
+		if(pCommand->bRead_nWrite) {
+			hSDIO->pRegs->TRANSFERMODE |= 1 << 4;
+		}
+
+		if(pCommand->ulBlocks > 1) {
+			hSDIO->pRegs->TRANSFERMODE |= 1 << 5;
+			hSDIO->pRegs->TRANSFERMODE |= 1 << 2;
+			hSDIO->pRegs->TRANSFERMODE |= 1 << 1;
+			hSDIO->pRegs->BLOCK_COUNT = pCommand->ulBlocks;
+		}		
+	} else {
+		hSDIO->pRegs->TRANSFERMODE = 0;
 	}
 
 	switch(pCommand->ulResponseType) {
