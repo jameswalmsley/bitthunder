@@ -11,6 +11,8 @@ typedef struct _MMC_COMMAND {
 	BT_BOOL		bCRC;
 	BT_BOOL		bIsData;
 	BT_u32		ulResponseType;
+	BT_u32		ulBlocks;
+	BT_BOOL		bRead_nWrite;
 } MMC_COMMAND;
 
 typedef enum _BT_MMC_CARD_EVENT {
@@ -40,6 +42,8 @@ typedef struct _BT_MMC_OPS {
 	BT_ERROR	(*pfnSetBlockSize)		(BT_HANDLE hSDIO, BT_u32 ulBlockSize);
 
 	BT_ERROR 	(*pfnRequest)			(BT_HANDLE hSDIO, MMC_COMMAND *pCommand);
+	BT_u32		(*pfnRead)				(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError);
+	BT_u32		(*pfnWrite)				(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError);
 } BT_MMC_OPS;
 
 BT_ERROR BT_RegisterSDHostController(BT_HANDLE hHost, const BT_MMC_OPS *pOps);
