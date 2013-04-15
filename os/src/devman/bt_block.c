@@ -69,11 +69,12 @@ BT_u32 BT_BlockWrite(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *
 }
 
 BT_ERROR BT_GetBlockGeometry(BT_HANDLE hBlock, BT_BLOCK_GEOMETRY *pGeometry) {
-	memcpy(pGeometry, &hBlock->oDescriptor.oGeometry);
+	*pGeometry = hBlock->oDescriptor.oGeometry;
+	pGeometry->ulBlockSize = hBlock->oDescriptor.oGeometry.ulBlockSize;
 	return BT_ERR_NONE;
 }
 
-BT_ERROR BT_RegisterBlockDevice(BT_HANDLE hDevice, const char *szpName, BT_BLKDEV_DESCRIPTOR *pDescriptor) {
+BT_ERROR BT_RegisterBlockDevice(BT_HANDLE hDevice, const BT_i8 *szpName, BT_BLKDEV_DESCRIPTOR *pDescriptor) {
 
 	BT_ERROR Error;
 	BT_HANDLE hBlock = BT_CreateHandle(&oHandleInterface, sizeof(struct _BT_OPAQUE_HANDLE), &Error);
@@ -88,7 +89,17 @@ BT_ERROR BT_RegisterBlockDevice(BT_HANDLE hDevice, const char *szpName, BT_BLKDE
 
 	hBlock->hInode = BT_DeviceRegister(hBlock, szpName, &oDevfsOps, &Error);
 
+	BT_EnumerateVolumes(hBlock);
+
 	return BT_ERR_NONE;
+}
+
+BT_HANDLE BT_BlockGetInode(BT_HANDLE hDevice) {
+	if(!isHandleValid(hDevice)) {
+		return NULL;
+	}
+
+	return hDevice->hInode;
 }
 
 BT_ERROR BT_UnregisterBlockDevice(BT_HANDLE hDevice) {
