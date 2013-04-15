@@ -100,6 +100,10 @@ err_out:
 	return NULL;
 }
 
+BT_i8 *BT_GetInodeName(BT_HANDLE h, BT_ERROR *pError) {
+	return h->szpName;
+}
+
 static BT_ERROR bt_devfs_cleanup(BT_HANDLE hDevfs) {
 
 	return BT_ERR_NONE;

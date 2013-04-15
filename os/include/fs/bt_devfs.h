@@ -31,5 +31,6 @@ typedef struct _BT_DEVFS_OPS {
 BT_HANDLE BT_DeviceOpen(const char *szpDevicePath, BT_ERROR *pError);
 
 BT_HANDLE BT_DeviceRegister(BT_HANDLE hDevice, const char *szpName, const BT_DEVFS_OPS *pOps, BT_ERROR *pError);
+BT_i8 *BT_GetInodeName(BT_HANDLE h, BT_ERROR *pError);
 
 #endif
