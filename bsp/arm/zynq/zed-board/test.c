@@ -1,6 +1,7 @@
 #include <bitthunder.h>
 #include <string.h>
 #include <lib/putc.h>
+#include <fs/bt_fs.h>
 
 extern BT_u32 BT_ZYNQ_GetArmPLLFrequency();
 
@@ -43,6 +44,19 @@ int main(int argc, char **argv) {
 
 	BT_TICK time = BT_GetKernelTick();
 
+	BT_HANDLE hVolume = BT_DeviceOpen("mmc00", &Error);
+
+	BT_Mount(hVolume, "/");
+
+
+	BT_kPrint("Opening zImage");
+
+	BT_HANDLE hFile = BT_Open("/zImage", "rb", &Error);
+
+	BT_kPrint("Reading file...");
+	BT_Read(hFile, 0, 1024*1024*2, buffer, &Error);
+	BT_kPrint("Done");
+
 	while(1) {
 		BT_u32 i;
 		BT_u32 ticks = BT_GetKernelTime();
@@ -51,11 +65,7 @@ int main(int argc, char **argv) {
 		//bt_printf("Time: %d.%03d\r", ticks/1000000, ticks%1000000);
 		BT_ThreadSleepUntil(&time, 1000);
 
-		BT_HANDLE hBlk = BT_DeviceOpen("mmc0", &Error);
 
-		BT_BlockRead(hBlk, 0, 2048, buffer, &Error);
-
-		BT_CloseHandle(hBlk);
 	}
 
 	return 0;
