@@ -80,6 +80,11 @@ void *BT_kMalloc(BT_u32 ulSize) {
 		// For the new block descriptor.
 		p = (void *) (((unsigned char *) pPrevious->pNextBlock) + sizeof(BT_HEAP_BLOCK));
 
+
+		// Remove it from the free block list
+
+		pPrevious->pNextBlock = pBlock->pNextBlock;
+
 		// In case the allocated space is larger than required, we can split it, and
 		// create an extra free area.
 
