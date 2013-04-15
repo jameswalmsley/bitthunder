@@ -23,6 +23,7 @@ typedef enum _BT_HANDLE_TYPE {
 	BT_HANDLE_T_PARTITION,
 	BT_HANDLE_T_FILESYSTEM,
 	BT_HANDLE_T_MOUNTPOINT,
+	BT_HANDLE_T_FILE,
 #endif
 } BT_HANDLE_TYPE;
 
@@ -34,6 +35,7 @@ typedef union _BT_IF_INTERFACES {
 	const BT_IF_DEVICE *pDevIF;
 	const BT_IF_BLOCK  *pBlockIF;
 	const BT_IF_FS	   *pFilesystemIF;
+	const BT_IF_FILE   *pFileIF;
 #endif
 } BT_UN_IFS;
 
