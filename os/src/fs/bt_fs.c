@@ -26,7 +26,7 @@ typedef struct _BT_MOUNTPOINT {
 	BT_LIST_ITEM 	oItem;
 	BT_HANDLE 		hMount;
 	BT_i8 		   *szpPath;
-	BT_HANDLE 		hFS;
+	BT_FILESYSTEM  *pFS;
 } BT_MOUNTPOINT;
 
 BT_ERROR BT_RegisterFilesystem(BT_HANDLE hFS) {
@@ -65,7 +65,8 @@ BT_ERROR BT_Mount(BT_HANDLE hVolume, const BT_i8 *szpPath) {
 
 	if(hVolume->h.pIf->eType != BT_HANDLE_T_VOLUME &&
 	   hVolume->h.pIf->eType != BT_HANDLE_T_PARTITION &&
-	   hVolume->h.pIf->eType != BT_HANDLE_T_BLOCK) {
+	   hVolume->h.pIf->eType != BT_HANDLE_T_BLOCK &&
+	   hVolume->h.pIf->eType != BT_HANDLE_T_INODE) {
 
 		return BT_ERR_GENERIC;
 	}
@@ -102,9 +103,11 @@ BT_ERROR BT_Mount(BT_HANDLE hVolume, const BT_i8 *szpPath) {
 	}
 
 	pMountPoint->hMount 	= hMount;
-	pMountPoint->hFS 		= pFilesystem->hFS;
+	pMountPoint->pFS 		= pFilesystem;
 	pMountPoint->szpPath 	= BT_kMalloc(strlen(szpPath) + 1);
 	strcpy(pMountPoint->szpPath, szpPath);
+
+	BT_ListAddItem(&g_oMountPoints, &pMountPoint->oItem);
 
 	return BT_ERR_NONE;
 
@@ -112,6 +115,16 @@ err_unmount_out:
 	pFilesystem->hFS->h.pIf->oIfs.pFilesystemIF->pfnUnmount(hMount);
 
 	return Error;
+}
+
+BT_HANDLE BT_Open(BT_i8 *szpPath, BT_i8 *mode, BT_ERROR *pError) {
+	BT_MOUNTPOINT *pMount = GetMountPoint(szpPath);
+	if(!pMount) {
+		return NULL;
+	}
+
+	const BT_IF_FS *pFS = pMount->pFS->hFS->h.pIf->oIfs.pFilesystemIF;
+	return pFS->pfnOpen(pMount->hMount, szpPath, 1, pError);
 }
 
 
