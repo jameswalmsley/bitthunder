@@ -129,6 +129,25 @@ BT_HANDLE BT_Open(BT_i8 *szpPath, BT_i8 *mode, BT_ERROR *pError) {
 	return pFS->pfnOpen(pMount->hMount, szpPath+mountlen-1, 1, pError);
 }
 
+BT_HANDLE BT_OpenDir(BT_i8 *szpPath, BT_ERROR *pError) {
+	BT_MOUNTPOINT *pMount = GetMountPoint(szpPath);
+	if(!pMount) {
+		return NULL;
+	}
+
+	const BT_IF_FS *pFS = pMount->pFS->hFS->h.pIf->oIfs.pFilesystemIF;
+	return pFS->pfnOpenDir(pMount->hMount, szpPath, pError);
+}
+
+BT_HANDLE BT_GetInode(BT_i8 *szpPath, BT_ERROR *pError) {
+	BT_MOUNTPOINT *pMount = GetMountPoint(szpPath);
+	if(!pMount) {
+		return NULL;
+	}
+
+	const BT_IF_FS *pFS = pMount->pFS->hFS->h.pIf->oIfs.pFilesystemIF;
+	return pFS->pfnGetInode(pMount->hMount, szpPath, pError);
+}
 
 static BT_ERROR bt_fs_init() {
 	BT_ListInit(&g_oFileSystems);

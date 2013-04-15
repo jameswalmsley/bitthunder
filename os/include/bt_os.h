@@ -15,6 +15,8 @@
 #include "process/bt_threads.h"
 #include "fs/bt_devfs.h"
 #include "fs/bt_file.h"
+#include "fs/bt_dir.h"
+#include "fs/bt_inode.h"
 #include "lib/printf.h"
 #include "syslog/bt_printk.h"
 
