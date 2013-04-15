@@ -1,10 +1,16 @@
 #ifndef _FF_BT_CONFIG_H_
 #define _FF_BT_CONFIG_H_
 
+#include <bt_types.h>
+#include <mm/bt_heap.h>
 #include <bt_bsp_config.h>
 
 #ifdef BT_CONFIG_BIG_ENDIAN
 #define FF_BIG_ENDIAN
+#endif
+
+#ifdef BT_CONFIG_LITTLE_ENDIAN
+#define FF_LITTLE_ENDIAN
 #endif
 
 #define FF_INLINE static inline
@@ -23,8 +29,8 @@
 
 #define FF_DRIVER_BUSY_SLEEP BT_CONFIG_FS_FULLFAT_DRIVER_BUSY_SLEEP
 
-#define FF_MALLOC(aSize)	malloc(aSize)
-#define FF_FREE(aPtr)		free(aPtr)
+#define FF_MALLOC(aSize)	BT_kMalloc(aSize)
+#define FF_FREE(aPtr)		BT_kFree(aPtr)
 
 #define FF_FINDAPI_ALLOW_WILDCARDS
 
