@@ -114,6 +114,7 @@ static BT_ERROR sdhci_request(BT_HANDLE hSDIO, MMC_COMMAND *pCommand) {
 
 	if(pCommand->bIsData) {
 		cmd_reg |= COMMAND_DATA_PRESENT;
+		hSDIO->pRegs->TRANSFERMODE = 0;
 		if(pCommand->bRead_nWrite) {
 			hSDIO->pRegs->TRANSFERMODE |= 1 << 4;
 		}
@@ -165,15 +166,16 @@ static BT_ERROR sdhci_request(BT_HANDLE hSDIO, MMC_COMMAND *pCommand) {
 static BT_u32 sdhci_read(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError) {
 	register BT_u8 *p = (BT_u8 *) pBuffer;
 
-	BT_kPrint("SDHCI: Awaiting buffer read ready interrupt:");
+	//BT_kPrint("SDHCI: Awaiting buffer read ready interrupt:");
 
 
 
-	BT_kPrint("SDHCI: Buffer is now ready...");
+	//BT_kPrint("SDHCI: Buffer is now ready...");
 
 	// Clear the buffer ready interrupt.
+	BT_u32 ulRead = 0;
 
-	while(ulBlocks--) {
+	while(ulRead < ulBlocks) {
 		BT_u32 ulSize = 512;
 
 		while(!(hSDIO->pRegs->NORMAL_INT_STATUS & NORMAL_INT_BUF_READ_READY)) {
@@ -197,6 +199,7 @@ static BT_u32 sdhci_read(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer, BT_ERR
 			ulSize -= 4;
 		}
 
+		ulRead++;
 	}
 
 	while(! (hSDIO->pRegs->NORMAL_INT_STATUS & NORMAL_INT_TRANSFER_COMPLETE)) {
@@ -205,11 +208,9 @@ static BT_u32 sdhci_read(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer, BT_ERR
 
 	hSDIO->pRegs->NORMAL_INT_STATUS |= NORMAL_INT_TRANSFER_COMPLETE;
 
-	BT_kPrint("Block transfer complete");
+	//BT_kPrint("SDHCI: Block transfer complete");
 
-	//BT_kPrint("SDHCI: Transfer completed");
-
-	return 512;
+	return ulRead;
 }
 
 static BT_u32 sdhci_write(BT_HANDLE hSDIO, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {

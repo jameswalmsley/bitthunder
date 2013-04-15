@@ -105,6 +105,7 @@ static void sd_manager_sm(void *pData) {
 				oCommand.opcode 		= 0;
 				oCommand.bCRC			= BT_FALSE;
 				oCommand.ulResponseType = 0;
+				oCommand.bIsData		= 0;
 
 				pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
 
@@ -115,6 +116,7 @@ static void sd_manager_sm(void *pData) {
 				oCommand.opcode 		= 8;
 				oCommand.bCRC 			= BT_TRUE;
 				oCommand.ulResponseType = 48;
+				oCommand.bIsData		= 0;
 
 				pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
 
@@ -130,6 +132,7 @@ static void sd_manager_sm(void *pData) {
 					oCommand.arg 	= 0;
 					oCommand.bCRC 	= BT_TRUE;
 					oCommand.ulResponseType = 48;
+					oCommand.bIsData		= 0;
 
 					pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
 
@@ -137,6 +140,7 @@ static void sd_manager_sm(void *pData) {
 					oCommand.arg 	= 0x40FF8000;		// Tell card  High Capacity mode is supported, and specify valid voltage windows.
 					oCommand.bCRC	= BT_FALSE;
 					oCommand.ulResponseType = 48;
+					oCommand.bIsData		= 0;
 
 					pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
 
@@ -161,6 +165,7 @@ static void sd_manager_sm(void *pData) {
 				oCommand.opcode 		= 2;
 				oCommand.bCRC 			= BT_TRUE;
 				oCommand.ulResponseType = 136;
+				oCommand.bIsData 		= 0;
 
 				pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
 
@@ -168,10 +173,11 @@ static void sd_manager_sm(void *pData) {
 				BT_kPrint("SDCARD: CID reg %08x:%08x:%08x:%08x", oCommand.response[3], oCommand.response[2], oCommand.response[1], oCommand.response[0]);
 
 				// Place the command into the data stat (CMD3).
-				oCommand.arg = 0;
-				oCommand.opcode = 3;
-				oCommand.bCRC = BT_TRUE;
+				oCommand.arg 			= 0;
+				oCommand.opcode 		= 3;
+				oCommand.bCRC 			= BT_TRUE;
 				oCommand.ulResponseType = 48;
+				oCommand.bIsData 		= 0;
 
 				pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
 
@@ -202,14 +208,36 @@ static void sd_manager_sm(void *pData) {
 				BT_kPrint("SDCARD: Placed SDCARD into data state. (resp: %08x)", oCommand.response[0]);
 				BT_kPrint("SDCARD: Relative Card Address (RCA): %04x", pHost->rca);
 
+				// Get CSD
+
+				oCommand.arg 			= pHost->rca << 16;
+				oCommand.opcode 		= 9;
+				oCommand.bCRC 			= BT_TRUE;
+				oCommand.ulResponseType = 136;
+				oCommand.bIsData 		= 0;
+
+				pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
+
+				BT_u32 ulBlocks = 0;
+				BT_u32 csdversion = (oCommand.response[3] >> 22) & 0x3;
+
+				if(csdversion != 1) {
+					BT_kPrint("SDCARD: Unrecognised CSD register structure version.");
+				} else {
+					ulBlocks = ((oCommand.response[1] >> 8) & 0x3FFFFF) + 1;
+					ulBlocks = ulBlocks * 1024;
+				}
+
 				oCommand.arg = pHost->rca << 16;
 				oCommand.opcode = 7;
 				oCommand.bCRC = BT_TRUE;
 				oCommand.ulResponseType = 48;
+				oCommand.bIsData		= 0;
 
 				pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
 
-				BT_kPrint("SDCARD: Selected card mmc%d:%04x", pHost->ulHostID, pHost->rca);
+				BT_kPrint("SDCARD: Selected card mmc%d:%04x", pHost->ulHostID, pHost->rca);				
+
 
 				BT_u32 cmd7_response = oCommand.response[0];
 				status = (cmd7_response >> 9) & 0xf;
@@ -223,11 +251,12 @@ static void sd_manager_sm(void *pData) {
 					oCommand.opcode = 16;
 					oCommand.bCRC = BT_TRUE;
 					oCommand.ulResponseType = 48;
+					oCommand.bIsData		= 0;
 
 					pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
 				}
 
-				pHost->pOps->pfnSetBlockSize(pHost->hHost, 512);
+				pHost->pOps->pfnSetBlockSize(pHost->hHost, 512);		  
 
 				// Place SDCard into 4-bit mode. (ACMD6).
 
@@ -235,6 +264,7 @@ static void sd_manager_sm(void *pData) {
 				oCommand.opcode = 55;
 				oCommand.bCRC = BT_TRUE;
 				oCommand.ulResponseType = 48;
+				oCommand.bIsData		= 0;
 
 				pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
 
@@ -242,6 +272,7 @@ static void sd_manager_sm(void *pData) {
 				oCommand.opcode = 6;
 				oCommand.bCRC = BT_TRUE;
 				oCommand.ulResponseType = 48;
+				oCommand.bIsData		= 0;
 
 				pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
 
@@ -259,6 +290,9 @@ static void sd_manager_sm(void *pData) {
 
 				hSD->pHost = pHost;
 				//hSD->oDescriptor.
+
+				hSD->oDescriptor.oGeometry.ulBlockSize = 512;
+				hSD->oDescriptor.oGeometry.ulTotalBlocks = ulBlocks;
 
 				BT_RegisterBlockDevice(hSD, "mmc0", &hSD->oDescriptor);
 
@@ -280,7 +314,7 @@ static void sd_manager_sm(void *pData) {
 
 static BT_u32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount, void *pBuffer, BT_ERROR *pError) {
 
-	BT_kPrint("SDCARD: BlockRead (%d[%d])", ulBlock, ulCount);
+	//BT_kPrint("SDCARD: BlockRead (%d[%d])", ulBlock, ulCount);
 
 	if(!hBlock->pHost->rca) {
 		// Card not initialised!
@@ -299,7 +333,7 @@ static BT_u32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount,
 	BT_u32 ulStatus = oCommand.response[0];
 	BT_u32 ulState = (ulStatus >> 9) & 0xF;
 
-	BT_kPrint("SDCARD: Status (%02x)", ulState);
+	//BT_kPrint("SDCARD: Status (%02x)", ulState);
 
 	switch(ulState) {
 
@@ -337,15 +371,13 @@ static BT_u32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount,
 		return 0;
 	}
 
-	BT_kPrint("SDCARD: Read command complete, waiting for data");
+	//BT_kPrint("SDCARD: Read command complete, waiting for data");
 
 	// Read the data.
 
-	hBlock->pHost->pOps->pfnRead(hBlock->pHost->hHost, ulCount, pBuffer, pError);
+	BT_u32 ulRead = hBlock->pHost->pOps->pfnRead(hBlock->pHost->hHost, ulCount, pBuffer, pError);
 
-	//BT_u32 ulRead = hBlock->pHost->pOps->pfnRead(hBlock->pHost->hHost, 512, pBuffer, pError);
-
-	return 0; //ulRead / 512;
+	return ulRead;
 }
 
 static BT_u32 sdcard_blockwrite(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount, void *pBuffer, BT_ERROR *pError) {
