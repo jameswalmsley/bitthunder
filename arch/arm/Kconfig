@@ -39,16 +39,19 @@ endchoice
 config ARCH_ARM_CORTEX_M0
 	bool
 	select ARCH_IRQPRIO
+	select LITTLE_ENDIAN
 
 config ARCH_ARM_CORTEX_M3
 	bool
 	select ARCH_IRQPRIO
 	select ARCH_HAVE_RAMVECTORS
+	select LITTLE_ENDIAN
 
 config ARCH_ARM_CORTEX_M4
 	bool
 	select ARCH_IRQPRIO
 	select ARCH_HAVE_RAMVECTORS
+	select LITTLE_ENDIAN
 
 config ARCH_ARM_CORTEX_A9
     bool
@@ -56,11 +59,13 @@ config ARCH_ARM_CORTEX_A9
 
 config ARCH_ARM_ARM11
     bool
+    select LITTLE_ENDIAN
 
 
 config ARCH_ARM_ARMv7-A
     bool
 	default n
+	select LITTLE_ENDIAN
 
 config ARCH_ARM_FAMILY
 	string
