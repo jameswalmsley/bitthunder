@@ -24,14 +24,14 @@ all:
 endif
 
 
-menuconfig: scripts/kconfig/mkconfig
+menuconfig: scripts/mkconfig/mkconfig
 	$(Q)CONFIG_=BT_CONFIG_ APP_DIR=$(APP_DIR) kconfig-mconf Kconfig
-	$(Q)scripts/kconfig/mkconfig ./ > $(BT_CONFIG_BSP_DIR)/bt_bsp_config.h
+	$(Q)scripts/mkconfig/mkconfig ./ > $(BT_CONFIG_BSP_DIR)/bt_bsp_config.h
 	$(Q)cp .config $(BT_CONFIG_BSP_DIR)/.config
 
 
-scripts/kconfig/mkconfig: scripts/kconfig/mkconfig.c
-	$(Q)gcc scripts/kconfig/mkconfig.c scripts/kconfig/cfgparser.c scripts/kconfig/cfgdefine.c -o scripts/kconfig/mkconfig
+scripts/mkconfig/mkconfig: scripts/mkconfig/mkconfig.c
+	$(Q)gcc scripts/mkconfig/mkconfig.c scripts/mkconfig/cfgparser.c scripts/mkconfig/cfgdefine.c -o scripts/mkconfig/mkconfig
 
 ifneq ($(BT_CONFIG_BSP_DIR),)
 clean:
