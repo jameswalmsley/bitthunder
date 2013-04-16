@@ -14,7 +14,7 @@ ifeq ($(BT_CONFIG_CONFIGURED),y)
 ifeq ($(BT_CONFIG_BSP_DIR),)
 	$(Q)echo "BSP has not configured BT_CONFIG_BSP_DIR"
 else
-all: scripts/kconfig/mkconfig
+all: scripts/mkconfig/mkconfig
 	$(Q)echo " Building BitThunder for $(BT_CONFIG_BSP_NAME)"
 	$(Q)$(MAKE) -C $(BT_CONFIG_BSP_DIR)
 endif
