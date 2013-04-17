@@ -18,7 +18,18 @@ config APP_DIR
     string
 	default "scripts" if !APP_CONFIG
     option env="APP_DIR"
+    
+config APP_BSP_CONFIG
+    bool
+	option env="APP_BSP_CONFIG"
+	default n
 
+config APP_BSP_DIR
+    string
+	default "bsp" if !APP_BSP_CONFIG
+    option env="APP_BSP_DIR"
+    
+    
 choice
 	prompt "Build OS or Library"
 	default OS
@@ -91,8 +102,9 @@ source "arch/Kconfig"
 endmenu
 
 menu "BSP Setup"
-source "bsp/Kconfig"
+source "$APP_BSP_DIR/Kconfig"
 endmenu
+
 
 menu "OS Features"
 depends on OS
