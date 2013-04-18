@@ -3,7 +3,7 @@
  *
  **/
 #include <bitthunder.h>
-#include "gpio.h"
+#include "gpio_c.h"
 //#include "rcc.h"
 
 BT_DEF_MODULE_NAME				("LPC11xx GPIO")
@@ -13,7 +13,7 @@ BT_DEF_MODULE_EMAIL				("james@fullfat-fs.co.uk")
 
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER 			h;
-	volatile LPC11xx_GPIO_REGS   *pRegs;
+	volatile LPC11Cxx_GPIO_REGS   *pRegs;
 };
 
 static BT_ERROR gpio_irq_handler(BT_u32 ulIRQ, void *pParam) {
@@ -158,7 +158,7 @@ BT_HANDLE gpio_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
 		goto err_free_out;
 	}
 
-	hGPIO->pRegs = (LPC11xx_GPIO_REGS *) pResource->ulStart;
+	hGPIO->pRegs = (LPC11Cxx_GPIO_REGS *) pResource->ulStart;
 
 	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_IRQ, 0);
 	if(!pResource) {
