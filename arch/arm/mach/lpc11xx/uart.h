@@ -68,17 +68,19 @@ typedef struct _LPC11xx_UART_REGS {
 	BT_u32	MSR;					//      0x18  -- Modem Status register.
 	BT_u32	SCR;					//      0x1C  -- Scratch Pad register.
 	BT_u32	ABCR;					//      0x20  -- Auto-baud control register.
-	BT_STRUCT_RESERVED_u32(0, 0x20, 0x28);
+	BT_u32	ICR;					//		0x24  -- IrDA Control register
 	BT_u32	FDR;					//      0x28  -- Fractional Divider register.
-	BT_STRUCT_RESERVED_u32(1, 0x28, 0x30);
+	BT_u32	OSR;					//		0x2C  -- Oversampling register
 	BT_u32	TER;					//		0x30  -- Transmit Enable register.
 
 #define	LPC11xx_UART_TER_TXEN			0x00000080
 
-	BT_STRUCT_RESERVED_u32(2, 0x30, 0x4C);
+	BT_STRUCT_RESERVED_u32(2, 0x30, 0x48);
+	BT_u32	SCICTRL;				//		0x48  -- Smart Card Interface Control register
 	BT_u32	RS485CR;				//		0x4C  -- RS485 control register.
 	BT_u32	RS485AMR;				//		0x50  -- RS485 address match register.
 	BT_u32	RS485DLY;				//		0x54  -- RS485 Delay value register.
+	BT_u32	SYNCCTRL;				//		0x58  -  Sync mode control register
 
 } LPC11xx_UART_REGS;
 

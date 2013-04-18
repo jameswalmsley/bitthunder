@@ -2,13 +2,13 @@ comment "LPC11xx Platform Options"
 
 choice
 	prompt "LPC11xx Chip Variant"
-	default MACH_LPC11xx_LPC11C24
+	default MACH_LPC11xx_LPC11Cxx
 
-config MACH_LPC11xx_LPC11C24
-    bool "LPC11C24"
+config MACH_LPC11xx_LPC11Cxx
+    bool "LPC11Cxx"
 	
-config MACH_LPC11xx_LPC11C14
-    bool "LPC11C14"
+config MACH_LPC11xx_LPC11Axx
+    bool "LPC11Axx"
 
 endchoice
 
@@ -42,9 +42,9 @@ config MACH_LPC11xx_TIMER3_BASE
 
 config MACH_LPC11xx_TOTAL_GPIOS
 	int
-	default 40 if MACH_LPC11xx_LPC11C24
-	default 40 if MACH_LPC11xx_LPC11C14
-	
+	default 40 if MACH_LPC11xx_LPC11Cxx
+	default 42 if MACH_LPC11xx_LPC11Axx
+
 config MAX_IRQ
 	   int
 	   default 48		   
@@ -65,6 +65,7 @@ config MACH_LPC11xx_CAN_0
     bool "Use CAN(0) peripheral"
 	default n
 	select MACH_LPC11xx_CAN
+	depends on MACH_LPC11xx_LPC11Cxx	
 
 config MACH_LPC11xx_CAN_0_INODE_NAME
 	string "CAN(0) devfs name"

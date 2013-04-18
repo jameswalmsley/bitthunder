@@ -148,7 +148,6 @@ static void ResetUart(BT_HANDLE hUart)
  *
  **/
 static BT_ERROR uartCleanup(BT_HANDLE hUart) {
-	volatile LPC11xx_UART_REGS *pRegs = hUart->pRegs;
 
 	ResetUart(hUart);
 

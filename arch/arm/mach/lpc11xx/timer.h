@@ -47,7 +47,9 @@ typedef struct _LPC11xx_TIMER_REGS {
 	BT_u32 	TMRBMR3;      // 0x024       Match Register 3
 	BT_u32 	TMRBCCR;      // 0x028       Capture Control Register
 	BT_u32 	TMRBCR0;      // 0x02C       Capture Register 0
-	BT_STRUCT_RESERVED_u32(0, 0x2C, 0x3C);
+	BT_u32 	TMRBCR1;      // 0x030       Capture Register 1
+	BT_u32 	TMRBCR2;      // 0x034       Capture Register 2
+	BT_u32 	TMRBCR3;      // 0x038       Capture Register 3
 	BT_u32 	TMRBEMR;      // 0x03C       External Match Register
 	BT_STRUCT_RESERVED_u32(1, 0x3C, 0x70);
 	BT_u32 	TMRBCTCR;     // 0x070       Count Control Register

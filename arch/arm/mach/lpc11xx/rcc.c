@@ -50,9 +50,15 @@ BT_u32 BT_LPC11xx_GetMainFrequency(void)
 		{
 			return PLL_In_Freq;
 		}
+#ifdef BT_CONFIG_MACH_LPC11xx_LPC11Axx
+		case LPC11xx_RCC_MAINCLKSEL_LF_OSC:
+		{
+			return 0;
+#else
 		case LPC11xx_RCC_MAINCLKSEL_WDT_OSC:
 		{
 			return BT_LPC11xx_GetWDTFrequency();
+#endif
 		}
 		case LPC11xx_RCC_MAINCLKSEL_PLL_OUT:
 		{
@@ -97,16 +103,19 @@ void BT_LPC11xx_SetSystemFrequency(BT_u32 MainClkSrc,
 		while (!(pRegs->SYSPLLSTAT & LPC11xx_RCC_SYSPLLSTAT_LOCKED));	      /* Wait Until PLL Locked    */
 	}
 
-	if (WDTClkSrc != LPC11xx_RCC_WDTCLKSEL_NOT_USED)
+
+	if (WDTClkSrc != LPC11xx_RCC_WDTOSC_NOT_USED)
 	{
 		/* Watchdog Oscillator Setup*/
 		pRegs->WDTOSCCTRL    = WDTClkSrc;
 		pRegs->PDRUNCFG     &= ~LPC11xx_RCC_PDRUNCFG_WDTOSC_PD;          /* Power-up WDT Clock       */
 
+#ifdef BT_CONFIG_MACH_LPC11xx_LPC11Cxx
 		pRegs->WDTCLKUEN  = LPC11xx_RCC_WDTCLKUEN_UPDATE;               /* Update Clock Source      */
 		pRegs->WDTCLKUEN  = 0x00;             						    /* Toggle Update Register   */
 		pRegs->WDTCLKUEN  = LPC11xx_RCC_WDTCLKUEN_UPDATE;
 		while (!(pRegs->WDTCLKUEN & LPC11xx_RCC_WDTCLKUEN_UPDATE));     /* Wait Until Updated       */
+#endif
 	}
 
 	pRegs->MAINCLKSEL    = MainClkSrc;     /* Select PLL Clock Output  */
