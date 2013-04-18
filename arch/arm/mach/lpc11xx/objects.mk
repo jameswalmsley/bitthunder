@@ -5,10 +5,10 @@ MACH_LPC11xx_OBJECTS += $(BUILD_DIR)arch/arm/mach/lpc11xx/lpc11xx.o			# Provides
 
 MACH_LPC11xx_OBJECTS += $(BUILD_DIR)arch/arm/mach/lpc11xx/ioconfig.o
 MACH_LPC11xx_OBJECTS += $(BUILD_DIR)arch/arm/mach/lpc11xx/rcc.o
-MACH_LPC11xx_OBJECTS += $(BUILD_DIR)arch/arm/mach/lpc11xx/timer.o
 MACH_LPC11xx_OBJECTS += $(BUILD_DIR)arch/arm/mach/lpc11xx/gpio.o
-MACH_LPC11xx_OBJECTS += $(BUILD_DIR)arch/arm/mach/lpc11xx/uart.o
-MACH_LPC11xx_OBJECTS += $(BUILD_DIR)arch/arm/mach/lpc11xx/can.o
+MACH_LPC11xx_OBJECTS-$(BT_CONFIG_MACH_LPC11xx_TIMER) += $(BUILD_DIR)arch/arm/mach/lpc11xx/timer.o
+MACH_LPC11xx_OBJECTS-$(BT_CONFIG_MACH_LPC11xx_UART)  += $(BUILD_DIR)arch/arm/mach/lpc11xx/uart.o
+MACH_LPC11xx_OBJECTS-$(BT_CONFIG_MACH_LPC11xx_CAN)   += $(BUILD_DIR)arch/arm/mach/lpc11xx/can.o
 
 MACH_LPC11xx_OBJECTS += $(MACH_LPC11xx_OBJECTS-y)
 
