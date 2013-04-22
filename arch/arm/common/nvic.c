@@ -5,6 +5,7 @@
  **/
 #include <bitthunder.h>
 #include <arch/common/nvic.h>
+#include <arch/common/scb.h>
 
 BT_DEF_MODULE_NAME			("ARM NVIC")
 BT_DEF_MODULE_DESCRIPTION	("Driver for ARM NVIC Interrupt Controller")
@@ -31,7 +32,13 @@ static BT_ERROR nvic_unregister(BT_HANDLE hNVIC, BT_u32 ulIRQ, BT_FN_INTERRUPT_H
 }
 
 static BT_ERROR nvic_setpriority(BT_HANDLE hNVIC, BT_u32 ulIRQ, BT_u32 ulPriority) {
+	SCB_REGS * pSCB = SCB;
+	NVIC_REGS * pNVIC = hNVIC->pRegs;
 
+	if(ulIRQ < 16) {
+		pSCB->SHPR[(ulIRQ & 0xF)-4] = ((ulPriority << (8 - 5)) & 0xff); } /* set Priority for Cortex-M3 System Interrupts */
+	  else {
+	    pNVIC->IP[ulIRQ] = ((ulPriority << (8 - 5)) & 0xff);    }        /* set Priority for device specific Interrupts  */
 	return BT_ERR_NONE;
 }
 
@@ -41,8 +48,8 @@ static BT_u32 nvic_getpriority(BT_HANDLE hNVIC, BT_u32 ulIRQ, BT_ERROR *pError) 
 }
 
 static BT_ERROR nvic_enable(BT_HANDLE hNVIC, BT_u32 ulIRQ) {
-	BT_u32 ulBank = ulIRQ / 32;
-	BT_u32 ulBit = ulIRQ % 32;
+	BT_u32 ulBank = (ulIRQ-16) / 32;
+	BT_u32 ulBit = (ulIRQ-16) % 32;
 
 	hNVIC->pRegs->ISE[ulBank] |= 1 << ulBit;
 
@@ -50,8 +57,8 @@ static BT_ERROR nvic_enable(BT_HANDLE hNVIC, BT_u32 ulIRQ) {
 }
 
 static BT_ERROR nvic_disable(BT_HANDLE hNVIC, BT_u32 ulIRQ) {
-	BT_u32 ulBank = ulIRQ / 32;
-	BT_u32 ulBit = ulIRQ % 32;
+	BT_u32 ulBank = (ulIRQ-16) / 32;
+	BT_u32 ulBit = (ulIRQ-16) % 32;
 
 	hNVIC->pRegs->ISE[ulBank] &= ~(1 << ulBit);
 

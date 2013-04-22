@@ -26,8 +26,8 @@ static const BT_RESOURCE oLPC11xx_gpio_resources[] = {
 		.ulFlags			= BT_RESOURCE_IO,
 	},
 	{
-		.ulStart			= 28,
-		.ulEnd				= 31,
+		.ulStart			= 44,
+		.ulEnd				= 47,
 		.ulFlags			= BT_RESOURCE_IRQ,
 	},
 };
@@ -72,8 +72,8 @@ static const BT_RESOURCE oLPC11xx_systick_resources[] = {
 		.ulFlags			= BT_RESOURCE_MEM,
 	},
 	{
-		.ulStart			= 16,
-		.ulEnd				= 16,
+		.ulStart			= 32,
+		.ulEnd				= 32,
 		.ulFlags			= BT_RESOURCE_IRQ,
 	},
 };

@@ -13,7 +13,7 @@ BT_DEF_MODULE_AUTHOR		("Robert Steinbauer")
 BT_DEF_MODULE_EMAIL			("rsteinbauer@riegl.com")
 
 /**
- *	We can define how a handle should look in a UART driver, probably we only need a
+ *	We can define how a handle should look in a Timer driver, probably we only need a
  *	hardware-ID number. (Remember, try to keep HANDLES as low-cost as possible).
  **/
 struct _BT_OPAQUE_HANDLE {
@@ -80,6 +80,11 @@ static void ResetTimer(BT_HANDLE hTimer)
 	pRegs->TMRBMR3	= 0;
 	pRegs->TMRBCCR	= 0;
 	pRegs->TMRBCR0	= 0;
+#ifdef BT_CONFIG_MACH_LPC11xx_LPC11Axx
+	pRegs->TMRBCR1	= 0;
+	pRegs->TMRBCR2	= 0;
+	pRegs->TMRBCR3	= 0;
+#endif
 	pRegs->TMRBEMR	= 0;
 	pRegs->TMRBCTCR	= 0;
 	pRegs->TMRBPWMC	= 0;
@@ -354,7 +359,7 @@ static BT_ERROR TimerSetPowerState(BT_HANDLE hTimer, BT_POWER_STATE ePowerState)
 }
 
 /**
- *	This implements the UART power management interface.
+ *	This implements the Timer power management interface.
  *	It is called from the BT_GetPowerState() API!
  **/
 static BT_ERROR TimerGetPowerState(BT_HANDLE hTimer, BT_POWER_STATE *pePowerState) {
@@ -402,7 +407,7 @@ static const BT_IF_POWER oPowerInterface = {
 
 const BT_IF_DEVICE BT_LPC11xx_TIMER_oDeviceInterface = {
 	&oPowerInterface,											///< Device does support powerstate functionality.
-	BT_DEV_IF_T_TIMER,											///< Allow configuration through the UART api.
+	BT_DEV_IF_T_TIMER,											///< Allow configuration through the Timer api.
 	.unConfigIfs = {
 		(BT_DEV_INTERFACE) &oTimerDeviceInterface,
 	},
@@ -418,7 +423,7 @@ static const BT_IF_HANDLE oHandleInterface = {
 	timer_cleanup,												///< Handle's cleanup routine.
 };
 
-static BT_HANDLE uart_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
+static BT_HANDLE timer_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
 
 	BT_ERROR Error = BT_ERR_NONE;
 	BT_HANDLE hTimer = NULL;
@@ -462,7 +467,7 @@ static BT_HANDLE uart_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErro
 	}
 
 /*	On NVIC we don't need to register interrupts, LINKER has patched vector for us
- * Error = BT_RegisterInterrupt(pResource->ulStart, uart_irq_handler, hUart);
+ * Error = BT_RegisterInterrupt(pResource->ulStart, timer_irq_handler, hTimer);
 	if(Error) {
 		goto err_free_out;
 	}*/
@@ -484,7 +489,7 @@ err_out:
 
 BT_INTEGRATED_DRIVER_DEF timer_driver = {
 	.name 		= "LPC11xx,timer",
-	.pfnProbe	= uart_probe,
+	.pfnProbe	= timer_probe,
 };
 
 

@@ -8,6 +8,7 @@
  **/
 
 #include <bitthunder.h>
+#include "arch/common/scb.h"
 
 extern void _stack(void);
 
@@ -121,7 +122,15 @@ void __attribute__((weak)) BT_NVIC_SysTick_Handler(void);
 #if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 47
 	void __attribute__((weak)) BT_NVIC_IRQ_47(void);
 #endif
-
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 48
+	void __attribute__((weak)) BT_NVIC_IRQ_48(void);
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 49
+	void __attribute__((weak)) BT_NVIC_IRQ_49(void);
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 50
+	void __attribute__((weak)) BT_NVIC_IRQ_50(void);
+#endif
 /**
  *	Here we define the cortex-m3 vector table.
  *	We can use the pre-processor to extend the optional entries.
@@ -241,19 +250,28 @@ void (* const g_pfnVectors[])(void) = {
 #if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 47
 	BT_NVIC_IRQ_47,
 #endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 48
+	BT_NVIC_IRQ_48,
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 49
+	BT_NVIC_IRQ_49,
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 50
+	BT_NVIC_IRQ_50,
+#endif
 };
 
 void BT_NVIC_Default_Handler(void);
 //#pragma weak BT_NVIC_Reset_Handler		= BT_NVIC_Default_Handler 
-#pragma weak BT_NVIC_NMI_Handler		= BT_NVIC_Default_Handler 
-#pragma weak BT_NVIC_HardFault_Handler	= BT_NVIC_Default_Handler 
-#pragma weak BT_NVIC_MemManage_Handler	= BT_NVIC_Default_Handler 
-#pragma weak BT_NVIC_BusFault_Handler	= BT_NVIC_Default_Handler 
-#pragma weak BT_NVIC_UsageFault_Handler	= BT_NVIC_Default_Handler 
-#pragma weak BT_NVIC_SVC_Handler		= BT_NVIC_Default_Handler 
-#pragma weak BT_NVIC_DebugMon_Handler	= BT_NVIC_Default_Handler 
-#pragma weak BT_NVIC_PendSV_Handler		= BT_NVIC_Default_Handler 
-#pragma weak BT_NVIC_SysTick_Handler	= BT_NVIC_Default_Handler 
+#pragma weak BT_NVIC_NMI_Handler		= BT_NVIC_Default_Handler
+#pragma weak BT_NVIC_HardFault_Handler	= BT_NVIC_Default_Handler
+#pragma weak BT_NVIC_MemManage_Handler	= BT_NVIC_Default_Handler
+#pragma weak BT_NVIC_BusFault_Handler	= BT_NVIC_Default_Handler
+#pragma weak BT_NVIC_UsageFault_Handler	= BT_NVIC_Default_Handler
+#pragma weak BT_NVIC_SVC_Handler		= BT_NVIC_Default_Handler
+#pragma weak BT_NVIC_DebugMon_Handler	= BT_NVIC_Default_Handler
+#pragma weak BT_NVIC_PendSV_Handler		= BT_NVIC_Default_Handler
+#pragma weak BT_NVIC_SysTick_Handler	= BT_NVIC_Default_Handler
 #if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 16
 	#pragma weak BT_NVIC_IRQ_16			= BT_NVIC_Default_Handler
 #endif
@@ -350,7 +368,15 @@ void BT_NVIC_Default_Handler(void);
 #if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 47
 	#pragma weak BT_NVIC_IRQ_47			= BT_NVIC_Default_Handler
 #endif
-
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 48
+	#pragma weak BT_NVIC_IRQ_48			= BT_NVIC_Default_Handler
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 49
+	#pragma weak BT_NVIC_IRQ_49			= BT_NVIC_Default_Handler
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 50
+	#pragma weak BT_NVIC_IRQ_50			= BT_NVIC_Default_Handler
+#endif
 
 void BT_NVIC_Default_Handler(void) {
 	return;
@@ -384,9 +410,11 @@ extern unsigned long _bss_end;
 extern unsigned long _estack;
 
 void BT_NVIC_Reset_Handler(void) {
+	SCB_REGS * pSCB = SCB;
+
 	bt_startup_init_hook();
 
-	*((BT_u32*) 0xE000ED08) = (BT_u32) 0x08000000;
+	pSCB->VTOR = (BT_u32) 0x00000000;		// point to flash position 0
 
 	BT_u32 *pSrc;
 	BT_u32 *pDest;
