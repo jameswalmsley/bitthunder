@@ -7,6 +7,7 @@
 typedef void (*BT_FN_TASK_ENTRY)(void *pParam);
 
 BT_ERROR 	BT_kStartScheduler	(void);
+void 		BT_kStopScheduler	(void);
 void 	   *BT_kTaskCreate		(BT_FN_TASK_ENTRY pfnStartRoutine, const BT_i8 *szpName, BT_THREAD_CONFIG *pConfig, BT_ERROR *pError);
 void		BT_kTaskDelete 		(void *pTaskHandle);
 

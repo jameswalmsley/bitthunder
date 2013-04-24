@@ -10,6 +10,10 @@ BT_ERROR BT_kStartScheduler() {
 	return BT_ERR_GENERIC;
 }
 
+void BT_kStopScheduler() {
+	vTaskEndScheduler();
+}
+
 void *BT_kTaskCreate(BT_FN_TASK_ENTRY pfnStartRoutine, const BT_i8 *szpName, BT_THREAD_CONFIG *pConfig, BT_ERROR *pError) {
 	xTaskHandle taskHandle = NULL;
 
@@ -47,7 +51,9 @@ void BT_kTaskDelayUntil(BT_TICK *pulPreviousWakeTime, BT_TICK ulTimeIncrement) {
 }
 
 void BT_kTaskYield() {
-	taskYIELD();
+	if (xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED) {
+		taskYIELD();
+	}
 }
 
 void *BT_kGetThreadTag(void *pThreadID) {
