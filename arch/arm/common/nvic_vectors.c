@@ -261,7 +261,8 @@ void (* const g_pfnVectors[])(void) = {
 #endif
 };
 
-void BT_NVIC_Default_Handler(void);
+void BT_NVIC_Default_Handlr(void);
+void BT_NVIC_Test_Handler(void);
 //#pragma weak BT_NVIC_Reset_Handler		= BT_NVIC_Default_Handler 
 #pragma weak BT_NVIC_NMI_Handler		= BT_NVIC_Default_Handler
 #pragma weak BT_NVIC_HardFault_Handler	= BT_NVIC_Default_Handler
@@ -384,6 +385,10 @@ void BT_NVIC_Default_Handler(void) {
 		;
 }
 
+void BT_NVIC_Test_Handler(void) {
+	while (1);
+}
+
 void bt_startup_default_hook(void) {
 	return;
 }
@@ -404,6 +409,7 @@ void __attribute__((weak)) bt_startup_boot(void);
 extern unsigned long _stext;
 extern unsigned long _etext;
 extern unsigned long __data_start;
+extern BT_u32 __bt_init_start;
 extern unsigned long __data_end;
 extern unsigned long _bss_begin;
 extern unsigned long _bss_end;
@@ -414,7 +420,7 @@ void BT_NVIC_Reset_Handler(void) {
 
 	bt_startup_init_hook();
 
-	pSCB->VTOR = (BT_u32) 0x00000000;		// point to flash position 0
+	pSCB->VTOR = (BT_u32) &__bt_init_start;		// point to flash position 0
 
 	BT_u32 *pSrc;
 	BT_u32 *pDest;

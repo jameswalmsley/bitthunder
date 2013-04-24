@@ -37,8 +37,8 @@ static BT_ERROR nvic_setpriority(BT_HANDLE hNVIC, BT_u32 ulIRQ, BT_u32 ulPriorit
 
 	if(ulIRQ < 16) {
 		pSCB->SHPR[(ulIRQ & 0xF)-4] = ((ulPriority << (8 - 5)) & 0xff); } /* set Priority for Cortex-M3 System Interrupts */
-	  else {
-	    pNVIC->IP[ulIRQ] = ((ulPriority << (8 - 5)) & 0xff);    }        /* set Priority for device specific Interrupts  */
+	else {
+	    pNVIC->IP[ulIRQ-16] = ((ulPriority << (8 - 5)) & 0xff);    }        /* set Priority for device specific Interrupts  */
 	return BT_ERR_NONE;
 }
 
