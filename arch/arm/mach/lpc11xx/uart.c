@@ -711,34 +711,3 @@ BT_INTEGRATED_DRIVER_DEF uart_driver = {
 	.pfnProbe	= uart_probe,
 };
 
-
-#ifdef BT_CONFIG_MACH_LPC11xx_UART_0
-static const BT_RESOURCE oLPC11xx_uart0_resources[] = {
-	{
-		.ulStart 			= BT_CONFIG_MACH_LPC11xx_UART0_BASE,
-		.ulEnd 				= BT_CONFIG_MACH_LPC11xx_UART0_BASE + BT_SIZE_4K - 1,
-		.ulFlags 			= BT_RESOURCE_MEM,
-	},
-	{
-		.ulStart			= 0,
-		.ulEnd				= 0,
-		.ulFlags			= BT_RESOURCE_ENUM,
-	},
-	{
-		.ulStart			= 37,
-		.ulEnd				= 37,
-		.ulFlags			= BT_RESOURCE_IRQ,
-	},
-};
-
-static const BT_INTEGRATED_DEVICE oLPC11xx_uart0_device = {
-	.name 					= "LPC11xx,usart",
-	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC11xx_uart0_resources),
-	.pResources 			= oLPC11xx_uart0_resources,
-};
-
-const BT_DEVFS_INODE_DEF oLPC11xx_uart0_inode = {
-	.szpName = "uart0",
-	.pDevice = &oLPC11xx_uart0_device,
-};
-#endif

@@ -236,6 +236,37 @@ static BT_u32 lpc11xx_machine_init() {
 	return BT_ERR_NONE;
 }
 
+#ifdef BT_CONFIG_MACH_LPC11xx_UART_0
+static const BT_RESOURCE oLPC11xx_uart0_resources[] = {
+	{
+		.ulStart 			= BT_CONFIG_MACH_LPC11xx_UART0_BASE,
+		.ulEnd 				= BT_CONFIG_MACH_LPC11xx_UART0_BASE + BT_SIZE_4K - 1,
+		.ulFlags 			= BT_RESOURCE_MEM,
+	},
+	{
+		.ulStart			= 0,
+		.ulEnd				= 0,
+		.ulFlags			= BT_RESOURCE_ENUM,
+	},
+	{
+		.ulStart			= 37,
+		.ulEnd				= 37,
+		.ulFlags			= BT_RESOURCE_IRQ,
+	},
+};
+
+static const BT_INTEGRATED_DEVICE oLPC11xx_uart0_device = {
+	.name 					= "LPC11xx,usart",
+	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC11xx_uart0_resources),
+	.pResources 			= oLPC11xx_uart0_resources,
+};
+
+const BT_DEVFS_INODE_DEF oLPC11xx_uart0_inode = {
+	.szpName = BT_CONFIG_MACH_LPC11xx_UART_0_INODE_NAME,
+	.pDevice = &oLPC11xx_uart0_device,
+};
+#endif
+
 
 BT_MACHINE_START(ARM, CORTEX_M0, "LPC Microcontroller Platform")
     .ulSystemClockHz 			= BT_CONFIG_MACH_LPC11xx_SYSCLOCK_FREQ,
@@ -246,10 +277,10 @@ BT_MACHINE_START(ARM, CORTEX_M0, "LPC Microcontroller Platform")
 	.pSystemTimer 				= &oLPC11xx_systick_device,
 
 
-#ifdef MACH_LPC11xx_BOOTLOG_UART_NULL
+#ifdef BT_CONFIG_MACH_LPC11xx_BOOTLOG_UART_NULL
 	.pBootLogger				= NULL,
 #endif
-#ifdef MACH_LPC11xx_BOOTLOG_UART_0
+#ifdef BT_CONFIG_MACH_LPC11xx_BOOTLOG_UART_0
 	.pBootLogger				= &oLPC11xx_uart0_device,
 #endif
 BT_MACHINE_END
