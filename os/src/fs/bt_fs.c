@@ -123,8 +123,10 @@ BT_HANDLE BT_Open(BT_i8 *szpPath, BT_i8 *mode, BT_ERROR *pError) {
 		return NULL;
 	}
 
+	BT_u32 mountlen = strlen(pMount->szpPath);
+
 	const BT_IF_FS *pFS = pMount->pFS->hFS->h.pIf->oIfs.pFilesystemIF;
-	return pFS->pfnOpen(pMount->hMount, szpPath, 1, pError);
+	return pFS->pfnOpen(pMount->hMount, szpPath+mountlen-1, 1, pError);
 }
 
 
