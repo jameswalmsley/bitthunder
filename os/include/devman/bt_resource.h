@@ -18,12 +18,13 @@ typedef struct _BT_RESOURCE {
 		};
 		const char 	*szpName;
 		void		*pParam;
+		BT_u32		ulConfigFlags;
 	};
 	BT_u32			ulFlags;
 	//struct _BT_RESOURCE *parent, *sibling, *child;
 } BT_RESOURCE;
 
-#define BT_RESOURCE_TYPE_BITS	0x00001F00
+#define BT_RESOURCE_TYPE_BITS	0x0000FF00
 #define BT_RESOURCE_IO			0x00000100
 #define BT_RESOURCE_MEM			0x00000200
 #define BT_RESOURCE_IRQ			0x00000400
@@ -31,6 +32,7 @@ typedef struct _BT_RESOURCE {
 #define BT_RESOURCE_ENUM 		0x00001000		///< Resource descriptor used for numbering devices easily.
 #define BT_RESOURCE_STRING		0x00002000		///< A string resource, e.g. a sub-driver.
 #define BT_RESOURCE_PARAM		0x00004000		///< Void * pParam resource, e.g. some operations.
+#define BT_RESOURCE_FLAGS		0x00008000		///< A BT_u32 type for passing parameter flags.
 
 #define BT_RESOURCE_TYPE(x)		(x & BT_RESOURCE_TYPE_BITS)
 
