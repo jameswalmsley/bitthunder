@@ -53,6 +53,7 @@ BT_HANDLE BT_CreateProcessThread(BT_HANDLE hProcess, BT_FN_THREAD_ENTRY pfnStart
 
 	hThread->pThreadParam = pConfig->pParam;
 	hThread->oConfig.pParam = hThread;
+	hThread->pfnStartRoutine = pfnStartRoutine;
 
 	hThread->pKThreadID = BT_kTaskCreate(threadStartup, NULL, &hThread->oConfig, pError);
 	if(!hThread->pKThreadID) {
