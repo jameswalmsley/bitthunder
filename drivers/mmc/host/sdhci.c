@@ -26,6 +26,7 @@ struct _BT_OPAQUE_HANDLE {
 	BT_MMC_CARD_EVENTRECEIVER 	pfnEventReceiver;
 	MMC_HOST				   *pHost;
 	BT_MMC_HOST_OPS			   *pHostOps;
+	BT_u32						ulFlags;
 };
 
 static const BT_IF_HANDLE oHandleInterface;
@@ -235,7 +236,7 @@ static BT_ERROR sdhci_event_subscribe(BT_HANDLE hSDIO, BT_MMC_CARD_EVENTRECEIVER
 }
 
 static BT_BOOL sdhci_is_card_present(BT_HANDLE hSDIO, BT_ERROR *pError) {
-	return (hSDIO->pRegs->PRESENT_STATE & STATE_CARD_INSERTED);
+	return ((hSDIO->pRegs->PRESENT_STATE & STATE_CARD_INSERTED) || (hSDIO->ulFlags & SDHCI_FLAGS_ALWAYS_PRESENT));
 }
 
 static BT_ERROR sdhci_reset(BT_HANDLE hSDIO, BT_u8 ucMask) {
@@ -440,6 +441,18 @@ static BT_HANDLE sdhci_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErr
 	Error = BT_RegisterSDHostController(hSDIO, &sdhci_mmc_ops);
 	if(Error) {
 		goto err_free_irq;
+	}
+
+	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_FLAGS, 0);
+	if(!pResource) {
+		Error = BT_ERR_GENERIC;
+		goto err_free_irq;
+	}
+
+	hSDIO->ulFlags = pResource->ulConfigFlags;
+
+	if(hSDIO->ulFlags & SDHCI_FLAGS_ALWAYS_PRESENT) {
+		hSDIO->pfnEventReceiver(hSDIO->pHost, BT_MMC_CARD_DETECTED, BT_TRUE);
 	}
 
 	return hSDIO;

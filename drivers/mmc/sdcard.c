@@ -7,6 +7,7 @@
 
 #include <bitthunder.h>
 #include <interrupts/bt_tasklets.h>
+#include <stdio.h>
 #include "core.h"
 
 BT_DEF_MODULE_NAME			("SD/MMC Manager")
@@ -294,7 +295,10 @@ static void sd_manager_sm(void *pData) {
 				hSD->oDescriptor.oGeometry.ulBlockSize = 512;
 				hSD->oDescriptor.oGeometry.ulTotalBlocks = ulBlocks;
 
-				BT_RegisterBlockDevice(hSD, "mmc0", &hSD->oDescriptor);
+
+				char buffer[10];
+				sprintf(buffer, "mmc%d", pHost->ulHostID);
+				BT_RegisterBlockDevice(hSD, buffer, &hSD->oDescriptor);
 
 				BT_GpioSet(7, BT_TRUE);
 			}

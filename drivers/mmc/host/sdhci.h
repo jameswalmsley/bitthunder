@@ -3,6 +3,9 @@
 
 #include <bitthunder.h>
 
+#define SDHCI_FLAGS_ALWAYS_PRESENT				0x00000001		///< Flag to forcibly assume card presence. (E.g. when card detection line is not connected).
+
+
 typedef struct _SDHCI_REGS {
 	BT_u32	SDMA_Address;
 	BT_u16	BLOCK_SIZE;
