@@ -7,6 +7,7 @@
 #include "slcr.h"
 //#include "sdio.h"
 #include "mmc/host.h"
+#include <mmc/host/sdhci.h>
 
 static BT_u32 sdio_get_input_clock(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
 	return 50000000;
@@ -37,6 +38,14 @@ static const BT_RESOURCE oZynq_sdio_resources_0[] = {
 		.pParam				= &host_ops,
 		.ulFlags			= BT_RESOURCE_PARAM,
 	},
+	{
+#ifdef BT_CONFIG_MACH_ZYNQ_SDIO_0_ALWAYS_PRESENT
+		.ulConfigFlags		= SDHCI_FLAGS_ALWAYS_PRESENT,
+#else
+		.ulConfigFlags		= 0,
+#endif
+		.ulFlags			= BT_RESOURCE_FLAGS,
+	},
 };
 
 BT_INTEGRATED_DEVICE_DEF oZynq_sdio_device_0 = {
@@ -66,6 +75,14 @@ static const BT_RESOURCE oZynq_sdio_resources_1[] = {
 	{
 		.pParam				= &host_ops,
 		.ulFlags			= BT_RESOURCE_PARAM,
+	},
+	{
+#ifdef BT_CONFIG_MACH_ZYNQ_SDIO_1_ALWAYS_PRESENT
+		.ulConfigFlags		= SDHCI_FLAGS_ALWAYS_PRESENT,
+#else
+		.ulConfigFlags		= 0,
+#endif
+		.ulFlags			= BT_RESOURCE_FLAGS,
 	},
 };
 

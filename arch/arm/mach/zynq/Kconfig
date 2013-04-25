@@ -34,10 +34,20 @@ comment "SDIO (SDCard Interfaces)"
 config MACH_ZYNQ_SDIO_0
     bool "Use SDIO(0) peripheral"
 	default n
-
+	
+config MACH_ZYNQ_SDIO_0_ALWAYS_PRESENT
+	bool "Force SDIO(0) card present"
+	default n
+	depends on MACH_ZYNQ_SDIO_0
+	
 config MACH_ZYNQ_SDIO_1
     bool "Use SDIO(1) peripheral"
 	default n
+	
+config MACH_ZYNQ_SDIO_1_ALWAYS_PRESENT
+	bool "Force SDIO(1) card present"
+	default n
+	depends on MACH_ZYNQ_SDIO_1
 
 comment "UART devices"
 config MACH_ZYNQ_UART_0
