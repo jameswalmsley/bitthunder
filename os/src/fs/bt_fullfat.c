@@ -192,6 +192,9 @@ static BT_ERROR fullfat_read_dir(BT_HANDLE hDir, BT_DIRENT *pDirent) {
 
 	if(pDir->ulCurrentEntry) {
 		FF_ERROR ffError = FF_FindNext(pDir->pMount->pIoman, &pDir->oDirent);
+		if(ffError) {
+			return BT_ERR_GENERIC;
+		}
 	}
 
 	pDirent->szpName = pDir->oDirent.FileName;
@@ -207,11 +210,34 @@ static BT_ERROR fullfat_dir_cleanup(BT_HANDLE hDir) {
 }
 
 static BT_HANDLE fullfat_open_inode(BT_HANDLE hMount, BT_i8 *szpPath, BT_ERROR *pError) {
+
+	BT_FF_INODE *pInode = (BT_FF_INODE *) BT_CreateHandle(&oInodeHandleInterface, sizeof(BT_FF_INODE), pError);
+	if(!pInode) {
+		goto err_out;
+	}
+
+	BT_FF_MOUNT *pMount = (BT_FF_MOUNT *) hMount;
+	FF_ERROR ffError = FF_FindFirst(pMount->pIoman, &pInode->oDirent, szpPath);
+	if(ffError) {
+		goto err_free_out;
+	}
+
+	pInode->pMount = pMount;
+
+	return (BT_HANDLE) pInode;
+
+err_free_out:
+	BT_kFree(pInode);
+
+err_out:
 	return NULL;
 }
 
 static BT_ERROR fullfat_read_inode(BT_HANDLE hInode, BT_INODE *pInode) {
-	return BT_ERR_GENERIC;
+
+	BT_FF_INODE *phInode = (BT_FF_INODE *) hInode;
+	pInode->ullFilesize = phInode->oDirent.Filesize;
+	return BT_ERR_NONE;
 }
 
 static BT_ERROR fullfat_inode_cleanup(BT_HANDLE hInode) {
