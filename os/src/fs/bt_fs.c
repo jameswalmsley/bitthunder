@@ -117,16 +117,21 @@ err_unmount_out:
 	return Error;
 }
 
-BT_HANDLE BT_Open(BT_i8 *szpPath, BT_i8 *mode, BT_ERROR *pError) {
+static const BT_i8 *get_relative_path(BT_MOUNTPOINT *pMount, const BT_i8 *szpPath) {
+	BT_u32 mountlen = strlen(pMount->szpPath);
+	return szpPath+mountlen-1;
+}
+
+BT_HANDLE BT_Open(const BT_i8 *szpPath, BT_i8 *mode, BT_ERROR *pError) {
 	BT_MOUNTPOINT *pMount = GetMountPoint(szpPath);
 	if(!pMount) {
 		return NULL;
 	}
 
-	BT_u32 mountlen = strlen(pMount->szpPath);
+	const BT_i8 *path = get_relative_path(pMount, szpPath);
 
 	const BT_IF_FS *pFS = pMount->pFS->hFS->h.pIf->oIfs.pFilesystemIF;
-	return pFS->pfnOpen(pMount->hMount, szpPath+mountlen-1, 1, pError);
+	return pFS->pfnOpen(pMount->hMount, path, 1, pError);
 }
 
 BT_ERROR BT_MkDir(BT_i8 *szpPath) {
@@ -135,8 +140,10 @@ BT_ERROR BT_MkDir(BT_i8 *szpPath) {
 		return BT_ERR_GENERIC;
 	}
 
+	const BT_i8 *path = get_relative_path(pMount, szpPath);
+
 	const BT_IF_FS *pFS = pMount->pFS->hFS->h.pIf->oIfs.pFilesystemIF;
-	return pFS->pfnMkDir(pMount->hMount, szpPath);
+	return pFS->pfnMkDir(pMount->hMount, path);
 }
 
 BT_HANDLE BT_OpenDir(BT_i8 *szpPath, BT_ERROR *pError) {
@@ -145,8 +152,10 @@ BT_HANDLE BT_OpenDir(BT_i8 *szpPath, BT_ERROR *pError) {
 		return NULL;
 	}
 
+	const BT_i8 *path = get_relative_path(pMount, szpPath);
+
 	const BT_IF_FS *pFS = pMount->pFS->hFS->h.pIf->oIfs.pFilesystemIF;
-	return pFS->pfnOpenDir(pMount->hMount, szpPath, pError);
+	return pFS->pfnOpenDir(pMount->hMount, path, pError);
 }
 
 BT_HANDLE BT_GetInode(BT_i8 *szpPath, BT_ERROR *pError) {
@@ -155,8 +164,10 @@ BT_HANDLE BT_GetInode(BT_i8 *szpPath, BT_ERROR *pError) {
 		return NULL;
 	}
 
+	const BT_i8 *path = get_relative_path(pMount, szpPath);
+
 	const BT_IF_FS *pFS = pMount->pFS->hFS->h.pIf->oIfs.pFilesystemIF;
-	return pFS->pfnGetInode(pMount->hMount, szpPath, pError);
+	return pFS->pfnGetInode(pMount->hMount, path, pError);
 }
 
 static BT_ERROR bt_fs_init() {

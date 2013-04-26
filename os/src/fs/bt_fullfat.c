@@ -103,7 +103,7 @@ static BT_ERROR fullfat_unmount(BT_HANDLE hMount) {
 	return BT_ERR_NONE;
 }
 
-static BT_HANDLE fullfat_open(BT_HANDLE hMount, BT_i8 *szpPath, BT_u32 ulModeFlags, BT_ERROR *pError) {
+static BT_HANDLE fullfat_open(BT_HANDLE hMount, const BT_i8 *szpPath, BT_u32 ulModeFlags, BT_ERROR *pError) {
 
 	FF_ERROR ffError;
 
@@ -156,11 +156,11 @@ static BT_u64 fullfat_tell(BT_HANDLE hFile) {
 	return 0;
 }
 
-static BT_ERROR fullfat_mkdir(BT_HANDLE hMount, BT_i8 *szpPath) {
+static BT_ERROR fullfat_mkdir(BT_HANDLE hMount, const BT_i8 *szpPath) {
 	return BT_ERR_GENERIC;
 }
 
-static BT_HANDLE fullfat_opendir(BT_HANDLE hMount, BT_i8 *szpPath, BT_ERROR *pError) {
+static BT_HANDLE fullfat_opendir(BT_HANDLE hMount, const BT_i8 *szpPath, BT_ERROR *pError) {
 
 	BT_FF_DIR *pDir = (BT_FF_DIR *) BT_CreateHandle(&oDirHandleInterface, sizeof(BT_FF_DIR), pError);
 	if(!pDir) {
@@ -209,7 +209,7 @@ static BT_ERROR fullfat_dir_cleanup(BT_HANDLE hDir) {
 	return BT_ERR_NONE;
 }
 
-static BT_HANDLE fullfat_open_inode(BT_HANDLE hMount, BT_i8 *szpPath, BT_ERROR *pError) {
+static BT_HANDLE fullfat_open_inode(BT_HANDLE hMount, const BT_i8 *szpPath, BT_ERROR *pError) {
 
 	BT_FF_INODE *pInode = (BT_FF_INODE *) BT_CreateHandle(&oInodeHandleInterface, sizeof(BT_FF_INODE), pError);
 	if(!pInode) {
