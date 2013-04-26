@@ -30,8 +30,23 @@ typedef struct _BT_FF_FILE {
 	FF_FILE			*pFile;
 } BT_FF_FILE;
 
+typedef struct _BT_FF_DIR {
+	BT_HANDLE_HEADER 	h;
+	BT_FF_MOUNT		   *pMount;
+	FF_DIRENT		    oDirent;
+	BT_u32				ulCurrentEntry;
+} BT_FF_DIR;
+
+typedef struct _BT_FF_INODE {
+	BT_HANDLE_HEADER	h;
+	BT_FF_MOUNT		   *pMount;
+	FF_DIRENT			oDirent;
+} BT_FF_INODE;
+
 static const BT_IF_HANDLE oHandleInterface;
 static const BT_IF_HANDLE oFileHandleInterface;
+static const BT_IF_HANDLE oDirHandleInterface;
+static const BT_IF_HANDLE oInodeHandleInterface;
 
 static BT_ERROR fullfat_cleanup(BT_HANDLE h) {
 	return BT_ERR_NONE;
@@ -141,6 +156,76 @@ static BT_u64 fullfat_tell(BT_HANDLE hFile) {
 	return 0;
 }
 
+static BT_ERROR fullfat_mkdir(BT_HANDLE hMount, BT_i8 *szpPath) {
+	return BT_ERR_GENERIC;
+}
+
+static BT_HANDLE fullfat_opendir(BT_HANDLE hMount, BT_i8 *szpPath, BT_ERROR *pError) {
+
+	BT_FF_DIR *pDir = (BT_FF_DIR *) BT_CreateHandle(&oDirHandleInterface, sizeof(BT_FF_DIR), pError);
+	if(!pDir) {
+		*pError = BT_ERR_NO_MEMORY;
+		goto err_out;
+	}
+
+	BT_FF_MOUNT *pMount = (BT_FF_MOUNT *) hMount;
+	FF_ERROR ffError = FF_FindFirst(pMount->pIoman, &pDir->oDirent, szpPath);
+	if(ffError) {
+		*pError = BT_ERR_GENERIC;
+		goto err_free_out;
+	}
+
+	pDir->pMount = pMount;
+
+	return (BT_HANDLE) pDir;
+
+err_free_out:
+	BT_kFree(pDir);
+
+err_out:
+	return NULL;
+}
+
+static BT_ERROR fullfat_read_dir(BT_HANDLE hDir, BT_DIRENT *pDirent) {
+
+	BT_FF_DIR *pDir = (BT_FF_DIR *) hDir;
+
+	if(pDir->ulCurrentEntry) {
+		FF_ERROR ffError = FF_FindNext(pDir->pMount->pIoman, &pDir->oDirent);
+	}
+
+	pDirent->szpName = pDir->oDirent.FileName;
+	pDirent->ullFileSize = pDir->oDirent.Filesize;
+
+	pDir->ulCurrentEntry += 1;
+
+	return BT_ERR_NONE;
+}
+
+static BT_ERROR fullfat_dir_cleanup(BT_HANDLE hDir) {
+	return BT_ERR_NONE;
+}
+
+static BT_HANDLE fullfat_open_inode(BT_HANDLE hMount, BT_i8 *szpPath, BT_ERROR *pError) {
+	return NULL;
+}
+
+static BT_ERROR fullfat_read_inode(BT_HANDLE hInode, BT_INODE *pInode) {
+	return BT_ERR_GENERIC;
+}
+
+static BT_ERROR fullfat_inode_cleanup(BT_HANDLE hInode) {
+	return BT_ERR_NONE;
+}
+
+static const BT_IF_DIR oDirOperations = {
+	.pfnReadDir = fullfat_read_dir,
+};
+
+static const BT_IF_INODE oInodeOperations = {
+	.pfnReadInode = fullfat_read_inode,
+};
+
 static const BT_IF_FILE oFileOperations = {
 	.pfnRead 	= fullfat_read,
 	.pfnWrite 	= fullfat_write,
@@ -151,9 +236,12 @@ static const BT_IF_FILE oFileOperations = {
 };
 
 static const BT_IF_FS oFilesystemInterface = {
-	.pfnMount 	= fullfat_mount,
-	.pfnUnmount = fullfat_unmount,
-	.pfnOpen	= fullfat_open,
+	.pfnMount 		= fullfat_mount,
+	.pfnUnmount 	= fullfat_unmount,
+	.pfnOpen		= fullfat_open,
+	.pfnMkDir		= fullfat_mkdir,
+	.pfnOpenDir 	= fullfat_opendir,
+	.pfnGetInode 	= fullfat_open_inode,
 };
 
 static const BT_IF_HANDLE oHandleInterface = {
@@ -172,6 +260,24 @@ static const BT_IF_HANDLE oFileHandleInterface = {
 		.pFileIF = &oFileOperations,
 	},
 	.eType = BT_HANDLE_T_FILE,
+};
+
+static const BT_IF_HANDLE oDirHandleInterface = {
+	BT_MODULE_DEF_INFO,
+	.pfnCleanup = fullfat_dir_cleanup,
+	.oIfs = {
+		.pDirIF = &oDirOperations,
+	},
+	.eType = BT_HANDLE_T_DIRECTORY,
+};
+
+static const BT_IF_HANDLE oInodeHandleInterface = {
+	BT_MODULE_DEF_INFO,
+	.pfnCleanup = fullfat_inode_cleanup,
+	.oIfs = {
+		.pInodeIF = &oInodeOperations,
+	},
+	.eType = BT_HANDLE_T_INODE,
 };
 
 static BT_ERROR fullfat_init() {

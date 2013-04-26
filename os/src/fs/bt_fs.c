@@ -129,6 +129,16 @@ BT_HANDLE BT_Open(BT_i8 *szpPath, BT_i8 *mode, BT_ERROR *pError) {
 	return pFS->pfnOpen(pMount->hMount, szpPath+mountlen-1, 1, pError);
 }
 
+BT_ERROR BT_MkDir(BT_i8 *szpPath) {
+	BT_MOUNTPOINT *pMount = GetMountPoint(szpPath);
+	if(!pMount) {
+		return BT_ERR_GENERIC;
+	}
+
+	const BT_IF_FS *pFS = pMount->pFS->hFS->h.pIf->oIfs.pFilesystemIF;
+	return pFS->pfnMkDir(pMount->hMount, szpPath);
+}
+
 BT_HANDLE BT_OpenDir(BT_i8 *szpPath, BT_ERROR *pError) {
 	BT_MOUNTPOINT *pMount = GetMountPoint(szpPath);
 	if(!pMount) {
