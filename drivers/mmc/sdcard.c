@@ -91,7 +91,7 @@ static void sd_manager_sm(void *pData) {
 		if(pHost->ulFlags & MMC_HOST_FLAGS_INITIALISE_REQUEST) {
 			pHost->ulFlags &= ~MMC_HOST_FLAGS_INITIALISE_REQUEST;
 
-			BT_ThreadSleep(100);
+			BT_ThreadSleep(50);
 
 			if(pHost->pOps->pfnIsCardPresent(pHost->hHost, &Error)) {
 
@@ -344,6 +344,29 @@ static BT_u32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount,
 	case 4:
 		break;
 
+	case 5:
+		oCommand.opcode = 12;
+		oCommand.arg = 0;
+		oCommand.bCRC = BT_TRUE;
+		oCommand.ulResponseType = 28;
+		oCommand.bIsData = BT_FALSE;
+
+		hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
+
+		oCommand.opcode 		= 13;
+		oCommand.arg 			= hBlock->pHost->rca << 16;
+		oCommand.bCRC 			= BT_TRUE;
+		oCommand.ulResponseType = 48;
+		oCommand.bIsData		= BT_FALSE;
+
+		hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
+
+		BT_u32 ulStatus = oCommand.response[0];
+		BT_u32 ulState = (ulStatus >> 9) & 0xF;
+
+		break;
+
+
 	default:
 		BT_kPrint("SDCARD: Unknown card state %d", ulState);
 		break;
@@ -354,11 +377,13 @@ static BT_u32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount,
 	}
 
 	// Send the single block command.
-	if(ulCount > 1) {
+	/*if(ulCount > 1) {
 		oCommand.opcode 		= 18;
 	} else {
 		oCommand.opcode			= 17;
-	}
+	}*/
+
+	oCommand.opcode 		= 18;
 
 	oCommand.bCRC 			= BT_TRUE;
 	oCommand.ulResponseType = 48;
