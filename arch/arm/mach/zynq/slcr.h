@@ -241,7 +241,7 @@ typedef struct _ZYNQ_SLCR_REGS {
 
 #define ZYNQ_SLCR_BASE	0xF8000000
 
-#define	ZYNQ_SLCR	((ZYNQ_SLCR_REGS *) ZYNQ_SLCR_BASE)
+#define	ZYNQ_SLCR	((volatile ZYNQ_SLCR_REGS *) ZYNQ_SLCR_BASE)
 
 
 BT_u32 BT_ZYNQ_GetArmPLLFrequency();
