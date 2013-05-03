@@ -22,7 +22,7 @@ BT_DEF_MODULE_EMAIL				("james@fullfat-fs.co.uk")
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER 			h;
 	const BT_INTEGRATED_DEVICE *pDevice;
-	SDHCI_REGS 		   		   *pRegs;
+	volatile SDHCI_REGS 	   *pRegs;
 	BT_MMC_CARD_EVENTRECEIVER 	pfnEventReceiver;
 	MMC_HOST				   *pHost;
 	BT_MMC_HOST_OPS			   *pHostOps;
@@ -102,9 +102,12 @@ static void sdhci_disable_clock(BT_HANDLE hSDIO) {
 static BT_ERROR sdhci_request(BT_HANDLE hSDIO, MMC_COMMAND *pCommand) {
 
 	// Wait until the the command is not inhibited.
-	while(hSDIO->pRegs->PRESENT_STATE & STATE_COMMAND_INHIBIT_CMD) {
-		;
+	while(hSDIO->pRegs->PRESENT_STATE & (STATE_COMMAND_INHIBIT_CMD | STATE_COMMAND_INHIBIT_DAT)) {
+		BT_ThreadYield();
 	}
+
+	hSDIO->pRegs->NORMAL_INT_STATUS = 0xFFFF;
+	hSDIO->pRegs->ERROR_INT_STATUS = 0xFFFF;
 
 	hSDIO->pRegs->ARGUMENT = pCommand->arg;
 
@@ -120,12 +123,12 @@ static BT_ERROR sdhci_request(BT_HANDLE hSDIO, MMC_COMMAND *pCommand) {
 			hSDIO->pRegs->TRANSFERMODE |= 1 << 4;
 		}
 
-		if(pCommand->ulBlocks > 1) {
+		//if(pCommand->ulBlocks > 1) {
 			hSDIO->pRegs->TRANSFERMODE |= 1 << 5;
 			hSDIO->pRegs->TRANSFERMODE |= 1 << 2;
 			hSDIO->pRegs->TRANSFERMODE |= 1 << 1;
 			hSDIO->pRegs->BLOCK_COUNT = pCommand->ulBlocks;
-		}		
+		//}
 	} else {
 		hSDIO->pRegs->TRANSFERMODE = 0;
 	}
@@ -150,7 +153,7 @@ static BT_ERROR sdhci_request(BT_HANDLE hSDIO, MMC_COMMAND *pCommand) {
 
 	// Wait until the command is complete.
 	while(!(hSDIO->pRegs->NORMAL_INT_STATUS & NORMAL_INT_COMMAND_COMPLETE)) {
-		BT_GpioSet(7, BT_TRUE);
+		BT_ThreadYield();
 	}
 
 	// Clear the command complete interrupt status field.
@@ -180,7 +183,7 @@ static BT_u32 sdhci_read(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer, BT_ERR
 		BT_u32 ulSize = 512;
 
 		while(!(hSDIO->pRegs->NORMAL_INT_STATUS & NORMAL_INT_BUF_READ_READY)) {
-				; // Detect timeout
+			BT_ThreadYield();
 		}
 
 		hSDIO->pRegs->NORMAL_INT_STATUS |= NORMAL_INT_BUF_READ_READY;
@@ -204,7 +207,7 @@ static BT_u32 sdhci_read(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer, BT_ERR
 	}
 
 	while(! (hSDIO->pRegs->NORMAL_INT_STATUS & NORMAL_INT_TRANSFER_COMPLETE)) {
-		;
+		BT_ThreadYield();
 	}
 
 	hSDIO->pRegs->NORMAL_INT_STATUS |= NORMAL_INT_TRANSFER_COMPLETE;
@@ -240,20 +243,45 @@ static BT_BOOL sdhci_is_card_present(BT_HANDLE hSDIO, BT_ERROR *pError) {
 }
 
 static BT_ERROR sdhci_reset(BT_HANDLE hSDIO, BT_u8 ucMask) {
-	hSDIO->pRegs->SOFTWARE_RESET = ucMask;
+	//hSDIO->pRegs->SOFTWARE_RESET = ucMask;
 
+	hSDIO->pRegs->POWER_CONTROL = 0;		// Turn Card power off
+	hSDIO->pRegs->CLOCK_CONTROL = 0;
+
+	hSDIO->pRegs->NORMAL_INT_ENABLE = 0;	// Disable Interrupts.
+	hSDIO->pRegs->ERROR_INT_ENABLE = 0;
+
+	hSDIO->pRegs->SOFTWARE_RESET = 1;
 	// Wait for reset to complete
 
-	while(hSDIO->pRegs->SOFTWARE_RESET & ucMask) {
-		BT_ThreadSleep(1);
+	while(hSDIO->pRegs->SOFTWARE_RESET) {
+		BT_ThreadYield();
+	}
+
+	if(hSDIO->pRegs->ERROR_INT_STATUS & 0xF) {
+		hSDIO->pRegs->SOFTWARE_RESET = 2;
+		while(hSDIO->pRegs->SOFTWARE_RESET) {
+			BT_ThreadYield();
+		}
+	}
+
+	if(hSDIO->pRegs->ERROR_INT_STATUS & 0x3) {
+		hSDIO->pRegs->SOFTWARE_RESET = 4;
+		while(hSDIO->pRegs->SOFTWARE_RESET) {
+			BT_ThreadYield();
+		}
 	}
 
 	hSDIO->pRegs->AUTO_CMD12_ERROR = 0;	// Clear Auto CMD12 status.
 
 	// Enable the Card detection IRQs.
-	hSDIO->pRegs->NORMAL_INT_ENABLE 		|=	NORMAL_INT_CARD_INSERTED
+	/*hSDIO->pRegs->NORMAL_INT_ENABLE 		|=	NORMAL_INT_CARD_INSERTED
 												| 	NORMAL_INT_CARD_REMOVED
-												| 	NORMAL_INT_COMMAND_COMPLETE;
+												| 	NORMAL_INT_COMMAND_COMPLETE;*/
+
+	hSDIO->pRegs->NORMAL_INT_ENABLE = 0xFFFF;
+	hSDIO->pRegs->ERROR_INT_ENABLE = 0xFFFF;
+
 
 	// Ensure we don't have any card-detection interrupts on init,
 	// For some reason this can send the interrupt controller wild, even though
@@ -286,7 +314,7 @@ static BT_ERROR sdhci_initialise(BT_HANDLE hSDIO) {
 	hSDIO->pRegs->CLOCK_CONTROL = reg;
 
 	while(!(hSDIO->pRegs->CLOCK_CONTROL & 2)) {	// Spin until the clock is stable.
-		;
+		BT_ThreadYield();
 	}
 
 	hSDIO->pRegs->TIMEOUT_CONTROL = 0x7;	// Timeout at TMCLK 2 ^ 20;
