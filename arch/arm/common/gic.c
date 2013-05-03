@@ -26,8 +26,8 @@ struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER 			h;
 	BT_u32						ulBaseIRQ;
 	BT_u32						ulGicIRQs;
-	GICC_REGS 		   	   	   *pGICC;
-	GICD_REGS 		   	   	   *pGICD;
+	volatile GICC_REGS 	   	   *pGICC;
+	volatile GICD_REGS 	   	   *pGICD;
 };
 
 extern void enable_irq(void);
