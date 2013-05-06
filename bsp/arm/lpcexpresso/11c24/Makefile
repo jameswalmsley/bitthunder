@@ -7,7 +7,7 @@ BUILD_BASE=$(BASE)
 MODULE_NAME="lpc-bsp"
 
 TARGETS=kernel.img
-LINKER_SCRIPT=lpc.ld
+LINKER_SCRIPT=$(BASE)linker/arm/mach/lpc11xx/LPC11C24.ld
 
 TARGET_DEPS=kernel.elf
 
