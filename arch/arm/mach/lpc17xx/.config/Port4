@@ -1,0 +1,49 @@
+choice
+	prompt "LPC17xx_PIO4_28"	
+	default LPC17xx_PIO4_28_GPIO
+
+config LPC17xx_PIO4_28_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO4_28_RX_MCLK
+    bool	"I2S receive master clock"
+
+config LPC17xx_PIO4_28_TMR2_MAT0
+    bool	"TMR2 Match 0"
+    
+config LPC17xx_PIO4_28_TXD3
+    bool	"TXD3"
+
+endchoice
+
+config LPC17xx_PIO4_28_FUNCTION
+    int
+    default 0 if LPC17xx_PIO4_28_GPIO
+    default 1 if LPC17xx_PIO4_28_RX_MCLK
+    default 2 if LPC17xx_PIO4_28_TMR2_MAT0
+    default 3 if LPC17xx_PIO4_28_TXD3	
+    
+choice
+	prompt "LPC17xx_PIO4_29"	
+	default LPC17xx_PIO4_29_GPIO
+
+config LPC17xx_PIO4_29_GPIO
+    bool	"GPIO"
+
+config LPC17xx_PIO4_29_TX_MCLK
+    bool	"I2S transmit master clock"
+
+config LPC17xx_PIO4_29_TMR2_MAT1
+    bool	"TMR2 Match 1"
+    
+config LPC17xx_PIO4_29_RXD3
+    bool	"RXD3"
+    
+endchoice
+
+config LPC17xx_PIO4_29_FUNCTION
+    int
+    default 0 if LPC17xx_PIO4_29_GPIO
+    default 1 if LPC17xx_PIO4_29_TX_MCLK
+	default 2 if LPC17xx_PIO4_29_TMR2_MAT1
+	default 3 if LPC17xx_PIO4_29_RXD3

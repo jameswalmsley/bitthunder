@@ -1,0 +1,661 @@
+choice
+	prompt "LPC17xx_PIO0_0"	
+	default LPC17xx_PIO0_0_GPIO
+
+config LPC17xx_PIO0_0_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO0_0_RD1
+    bool	"RD1(CAN receiver)"
+    
+config LPC17xx_PIO0_0_TXD3
+    bool	"TXD3"
+
+config LPC17xx_PIO0_0_SDA1
+    bool	"SDA1"
+	
+endchoice
+
+config LPC17xx_PIO0_0_FUNCTION
+    int
+    default 0 if LPC17xx_PIO0_0_GPIO
+    default 1 if LPC17xx_PIO0_0_RD1
+    default 2 if LPC17xx_PIO0_0_TXD3
+    default 3 if LPC17xx_PIO0_0_SDA1
+    
+choice
+	prompt "LPC17xx_PIO0_1"	
+	default LPC17xx_PIO0_1_GPIO
+
+config LPC17xx_PIO0_1_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO0_1_TD1
+    bool	"TD1(CAN transmitter)"
+    
+config LPC17xx_PIO0_1_RXD3
+    bool	"RXD3"
+	
+config LPC17xx_PIO0_1_SCL1
+    bool	"SCL1"
+
+endchoice
+
+config LPC17xx_PIO0_1_FUNCTION
+    int
+    default 0 if LPC17xx_PIO0_1_GPIO
+    default 1 if LPC17xx_PIO0_1_TD1
+    default 2 if LPC17xx_PIO0_1_RXD3
+    default 3 if LPC17xx_PIO0_1_SCL1
+
+
+choice
+	prompt "LPC17xx_PIO0_2"	
+	default LPC17xx_PIO0_2_GPIO
+
+config LPC17xx_PIO0_2_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO0_2_TXD
+    bool	"TXD0"
+    
+config LPC17xx_PIO0_2_AD07
+    bool	"AD0.7"
+	
+endchoice
+
+config LPC17xx_PIO0_2_FUNCTION
+    int
+    default 0 if LPC17xx_PIO0_2_GPIO
+    default 1 if LPC17xx_PIO0_2_TXD
+    default 2 if LPC17xx_PIO0_2_AD07
+    
+choice
+	prompt "LPC17xx_PIO0_3"	
+	default LPC17xx_PIO0_3_GPIO
+
+config LPC17xx_PIO0_3_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO0_3_RXD
+    bool	"RXD0"
+    
+config LPC17xx_PIO0_3_AD06
+    bool	"AD0.6"
+	
+endchoice
+
+config LPC17xx_PIO0_3_FUNCTION
+    int
+    default 0 if LPC17xx_PIO0_3_GPIO
+    default 1 if LPC17xx_PIO0_3_RXD
+    default 2 if LPC17xx_PIO0_3_AD06
+
+choice
+	prompt "LPC17xx_PIO0_4"	
+	default LPC17xx_PIO0_4_GPIO
+	depends on HAS_100pin
+
+config LPC17xx_PIO0_4_GPIO
+    bool	"GPIO"
+       
+config LPC17xx_PIO0_4_I2SRX_CLK
+    bool	"I2SRX_CLK"
+	
+config LPC17xx_PIO0_4_RD2
+    bool	"RD2(CAN receiver)"
+
+config LPC17xx_PIO0_4_TMR2_CAP0
+    bool	"TMR2 Capture 0"
+	
+endchoice
+
+config LPC17xx_PIO0_4_FUNCTION
+    int
+    default 0 if LPC17xx_PIO0_4_GPIO
+    default 1 if LPC17xx_PIO0_4_I2SRX_CLK
+    default 2 if LPC17xx_PIO0_4_RD2
+    default 3 if LPC17xx_PIO0_4_TMR2_CAP0
+    
+choice
+	prompt "LPC17xx_PIO0_5"	
+	default LPC17xx_PIO0_5_GPIO
+	depends on HAS_100pin
+
+config LPC17xx_PIO0_5_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO0_5_I2SRX_WS
+    bool	"I2SRX_WS"
+
+config LPC17xx_PIO0_5_TD2
+    bool	"TD2(CAN transmitter)"
+	
+config LPC17xx_PIO0_5_TMR2_CAP1
+    bool	"TMR2 Capture 1"
+
+endchoice
+
+config LPC17xx_PIO0_5_FUNCTION
+    int
+    default 0 if LPC17xx_PIO0_5_GPIO
+    default 1 if LPC17xx_PIO0_5_I2SRX_WS
+    default 2 if LPC17xx_PIO0_5_TD2
+    default 3 if LPC17xx_PIO0_5_TMR2_CAP1
+
+
+choice
+	prompt "LPC17xx_PIO0_6"	
+	default LPC17xx_PIO0_6_GPIO
+
+config LPC17xx_PIO0_6_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO0_6_I2SRX_SDA
+    bool	"I2SRX_SDA"
+    
+config LPC17xx_PIO0_6_SSEL1
+    bool	"SSEL1 for SSP1"
+	
+config LPC17xx_PIO0_6_TMR2_MAT0
+	bool 	"TMR2 Match 0"
+
+endchoice
+
+config LPC17xx_PIO0_6_FUNCTION
+    int
+    default 0 if LPC17xx_PIO0_6_GPIO
+    default 1 if LPC17xx_PIO0_6_I2SRX_SDA
+    default 2 if LPC17xx_PIO0_6_SSEL1
+	default 3 if LPC17xx_PIO0_6_TMR2_MAT0
+    
+choice
+	prompt "LPC17xx_PIO0_7"	
+	default LPC17xx_PIO0_7_GPIO
+
+config LPC17xx_PIO0_7_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO0_7_I2STX_CLK
+    bool	"I2STX_CLK"
+   
+config LPC17xx_PIO0_7_SCK1
+    bool	"SCK1 for SSP1"
+	
+config LPC17xx_PIO0_7_TMR2_MAT1
+	bool 	"TMR2 Match 1"
+	
+endchoice
+
+config LPC17xx_PIO0_7_FUNCTION
+    int
+    default 0 if LPC17xx_PIO0_7_GPIO
+    default 1 if LPC17xx_PIO0_7_I2STX_CLK
+    default 2 if LPC17xx_PIO0_7_SCK1
+	default 3 if LPC17xx_PIO0_7_TMR2_MAT1
+
+choice
+	prompt "LPC17xx_PIO0_8"	
+	default LPC17xx_PIO0_8_GPIO
+
+config LPC17xx_PIO0_8_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO0_8_I2STX_WS
+    bool	"I2STX_WS"
+
+config LPC17xx_PIO0_8_MISO1
+    bool	"MISO1 for SSP1"
+    
+config LPC17xx_PIO0_8_TMR2_MAT2
+    bool	"TMR2 Match 2"
+	
+endchoice
+
+config LPC17xx_PIO0_8_FUNCTION
+    int
+    default 0 if LPC17xx_PIO0_8_GPIO
+    default 1 if LPC17xx_PIO0_8_I2STX_WS
+    default 2 if LPC17xx_PIO0_8_MISO1
+    default 3 if LPC17xx_PIO0_8_TMR2_MAT2
+    
+choice
+	prompt "LPC17xx_PIO0_9"	
+	default LPC17xx_PIO0_9_GPIO
+
+config LPC17xx_PIO0_9_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO0_9_I2STX_SDA
+    bool	"I2STX_SDA"
+    
+config LPC17xx_PIO0_9_MOSI1
+    bool	"MOSI1 for SSP1"
+	
+config LPC17xx_PIO0_9_TMR2_MAT3
+    bool	"TMR2 Match 3"
+
+endchoice
+
+config LPC17xx_PIO0_9_FUNCTION
+    int
+    default 0 if LPC17xx_PIO0_9_GPIO
+    default 1 if LPC17xx_PIO0_9_I2STX_SDA
+    default 2 if LPC17xx_PIO0_9_MOSI1
+    default 3 if LPC17xx_PIO0_9_TMR2_MAT3
+
+choice
+	prompt "LPC17xx_PIO0_10"	
+	default LPC17xx_PIO0_10_GPIO
+
+config LPC17xx_PIO0_10_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO0_10_TXD2
+    bool	"TXD2"
+    
+config LPC17xx_PIO0_10_SDA2
+    bool	"SDA2"
+
+config  LPC17xx_PIO0_10_TMR3_MAT0
+    bool	"TMR3 Match 0"
+	
+endchoice
+
+config LPC17xx_PIO0_10_FUNCTION
+    int
+    default 0 if LPC17xx_PIO0_10_GPIO
+    default 1 if LPC17xx_PIO0_10_TXD2
+    default 2 if LPC17xx_PIO0_10_SDA2
+    default 3 if LPC17xx_PIO0_10_TMR3_MAT0
+    
+choice
+	prompt "LPC17xx_PIO0_11"	
+	default LPC17xx_PIO0_11_GPIO
+
+config LPC17xx_PIO0_11_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO0_11_RXD2
+    bool	"RXD2"
+    
+config LPC17xx_PIO0_11_SCL2
+    bool	"SCL2"
+	
+config  LPC17xx_PIO0_11_TMR3_MAT1
+    bool	"TMR3 Match 1"
+
+endchoice
+
+config LPC17xx_PIO0_11_FUNCTION
+    int
+    default 0 if LPC17xx_PIO0_11_GPIO
+    default 1 if LPC17xx_PIO0_11_RXD2
+    default 2 if LPC17xx_PIO0_11_SCL2
+    default 3 if LPC17xx_PIO0_11_TMR3_MAT1
+
+choice
+	prompt "LPC17xx_PIO0_15"	
+	default LPC17xx_PIO0_15_GPIO
+
+config LPC17xx_PIO0_15_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO0_15_TXD1
+    bool	"TXD1"
+    
+config LPC17xx_PIO0_15_SCK0
+    bool	"SCK0 for SSP0"
+	
+config LPC17xx_PIO0_15_SCK
+    bool	"SCK for SPI"
+
+endchoice
+
+config LPC17xx_PIO0_15_FUNCTION
+    int
+    default 0 if LPC17xx_PIO0_15_GPIO
+    default 1 if LPC17xx_PIO0_15_TXD1
+    default 2 if LPC17xx_PIO0_15_SCK0
+    default 3 if LPC17xx_PIO0_15_SCK
+
+choice
+	prompt "LPC17xx_PIO0_16"	
+	default LPC17xx_PIO0_16_GPIO
+
+config LPC17xx_PIO0_16_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO0_16_RXD1
+    bool	"RXD1"
+    
+config LPC17xx_PIO0_16_SSEL0
+    bool	"SSEL0 for SSP0"
+
+config LPC17xx_PIO0_16_SSEL
+    bool	"SSEL for SPI"
+	
+endchoice
+
+config LPC17xx_PIO0_16_FUNCTION
+    int
+    default 0 if LPC17xx_PIO0_16_GPIO
+    default 1 if LPC17xx_PIO0_16_RXD1
+    default 2 if LPC17xx_PIO0_16_SSEL0
+    default 3 if LPC17xx_PIO0_16_SSEL
+    
+choice
+	prompt "LPC17xx_PIO0_17"	
+	default LPC17xx_PIO0_17_GPIO
+
+config LPC17xx_PIO0_17_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO0_17_CTS1
+    bool	"CTS1"
+   
+config LPC17xx_PIO0_17_MISO0
+    bool	"MISO0 for SSP0"
+
+config LPC17xx_PIO0_17_MISO
+    bool	"MISO for SPI"
+	
+endchoice
+
+config LPC17xx_PIO0_17_FUNCTION
+    int
+    default 0 if LPC17xx_PIO0_17_GPIO
+    default 1 if LPC17xx_PIO0_17_CTS1
+    default 2 if LPC17xx_PIO0_17_MISO0
+	default 3 if LPC17xx_PIO0_17_MISO
+
+choice
+	prompt "LPC17xx_PIO0_18"	
+	default LPC17xx_PIO0_18_GPIO
+
+config LPC17xx_PIO0_18_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO0_18_DCD1
+    bool	"DCD1"
+    
+config LPC17xx_PIO0_18_MOSI0
+    bool	"MOSI0 for SSP0"
+
+config LPC17xx_PIO0_18_MOSI
+    bool	"MOSI for SPI"
+	
+endchoice
+
+config LPC17xx_PIO0_18_FUNCTION
+    int
+    default 0 if LPC17xx_PIO0_18_GPIO
+    default 1 if LPC17xx_PIO0_18_DCD1
+    default 2 if LPC17xx_PIO0_18_MOSI0
+    default 3 if LPC17xx_PIO0_18_MOSI
+    
+choice
+	prompt "LPC17xx_PIO0_19"	
+	default LPC17xx_PIO0_19_GPIO
+	depends on HAS_100pin
+
+config LPC17xx_PIO0_19_GPIO
+    bool	"GPIO"
+       
+config LPC17xx_PIO0_19_DSR1
+    bool	"DSR1"
+	
+config LPC17xx_PIO0_19_SDA1
+    bool	"SDA1"
+
+endchoice
+
+config LPC17xx_PIO0_19_FUNCTION
+    int
+    default 0 if LPC17xx_PIO0_19_GPIO
+    default 1 if LPC17xx_PIO0_19_DSR1
+    default 2 if LPC17xx_PIO0_19_SDA1
+	
+choice
+	prompt "LPC17xx_PIO0_20"	
+	default LPC17xx_PIO0_20_GPIO
+	depends on HAS_100pin
+
+config LPC17xx_PIO0_20_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO0_20_DTR1
+    bool	"DTR1"
+    
+config LPC17xx_PIO0_20_SCL1
+    bool	"SCL1"
+
+endchoice
+
+config LPC17xx_PIO0_20_FUNCTION
+    int
+    default 0 if LPC17xx_PIO0_20_GPIO
+    default 1 if LPC17xx_PIO0_20_DTR1
+    default 2 if LPC17xx_PIO0_20_SCL1
+    
+choice
+	prompt "LPC17xx_PIO0_21"	
+	default LPC17xx_PIO0_21_GPIO
+	depends on HAS_100pin
+
+config LPC17xx_PIO0_21_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO0_21_RI1
+    bool	"RI1"
+    
+config LPC17xx_PIO0_21_RD1
+    bool	"RD1(CAN receiver)"	
+
+endchoice
+
+config LPC17xx_PIO0_21_FUNCTION
+    int
+    default 0 if LPC17xx_PIO0_21_GPIO
+    default 1 if LPC17xx_PIO0_21_RI1
+    default 2 if LPC17xx_PIO0_21_RD1
+
+choice
+	prompt "LPC17xx_PIO0_22"	
+	default LPC17xx_PIO0_22_GPIO
+
+config LPC17xx_PIO0_22_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO0_22_RTS1
+    bool	"RTS1"
+    
+config LPC17xx_PIO0_22_TD1
+    bool	"TD1(CAN transmitter)"
+	
+endchoice
+
+config LPC17xx_PIO0_22_FUNCTION
+    int
+    default 0 if LPC17xx_PIO0_22_GPIO
+    default 1 if LPC17xx_PIO0_22_RTS1
+    default 2 if LPC17xx_PIO0_22_TD1
+    
+choice
+	prompt "LPC17xx_PIO0_23"	
+	default LPC17xx_PIO0_23_GPIO
+
+config LPC17xx_PIO0_23_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO0_23_AD00
+    bool	"AD0.0"
+    
+config LPC17xx_PIO0_23_I2SRX_CLK
+    bool	"I2SRX_CLK"
+	
+config LPC17xx_PIO0_23_TMR3_CAP0
+    bool	"TMR3 CAPTURE 0"
+
+	
+endchoice
+
+config LPC17xx_PIO0_23_FUNCTION
+    int
+    default 0 if LPC17xx_PIO0_23_GPIO
+    default 1 if LPC17xx_PIO0_23_AD00
+    default 2 if LPC17xx_PIO0_23_I2SRX_CLK
+	default 3 if LPC17xx_PIO0_23_TMR3_CAP0
+
+choice
+	prompt "LPC17xx_PIO0_24"	
+	default LPC17xx_PIO0_24_GPIO
+
+config LPC17xx_PIO0_24_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO0_24_AD01
+    bool	"AD0.1"
+    
+config LPC17xx_PIO0_24_I2SRX_WS
+    bool	"I2SRX_WS"
+
+config LPC17xx_PIO0_24_TMR3_CAP1
+    bool	"TMR3 CAPTURE 1"
+	
+endchoice
+
+config LPC17xx_PIO0_24_FUNCTION
+    int
+    default 0 if LPC17xx_PIO0_24_GPIO
+    default 1 if LPC17xx_PIO0_24_AD01
+    default 2 if LPC17xx_PIO0_24_I2SRX_WS
+    default 3 if LPC17xx_PIO0_24_TMR3_CAP1
+    
+choice
+	prompt "LPC17xx_PIO0_25"	
+	default LPC17xx_PIO0_25_GPIO
+
+config LPC17xx_PIO0_25_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO0_25_AD02
+    bool	"AD0.2"
+    
+config LPC17xx_PIO0_25_I2SRX_SDA
+    bool	"I2SRX_SDA"
+	
+config LPC17xx_PIO0_25_TXD3
+    bool	"TXD3"
+
+endchoice
+
+config LPC17xx_PIO0_25_FUNCTION
+    int
+    default 0 if LPC17xx_PIO0_25_GPIO
+    default 1 if LPC17xx_PIO0_25_AD02
+    default 2 if LPC17xx_PIO0_25_I2SRX_SDA
+    default 3 if LPC17xx_PIO0_25_TXD3
+
+
+choice
+	prompt "LPC17xx_PIO0_26"	
+	default LPC17xx_PIO0_26_GPIO
+
+config LPC17xx_PIO0_26_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO0_26_AD03
+    bool	"AD0.3"
+    
+config LPC17xx_PIO0_26_AOUT
+    bool	"AOUT"
+
+config LPC17xx_PIO0_26_RXD3
+    bool	"RXD3"
+	
+endchoice
+
+config LPC17xx_PIO0_26_FUNCTION
+    int
+    default 0 if LPC17xx_PIO0_26_GPIO
+    default 1 if LPC17xx_PIO0_26_AD03
+    default 2 if LPC17xx_PIO0_26_AOUT
+	default 3 if LPC17xx_PIO0_26_RXD3
+    
+choice
+	prompt "LPC17xx_PIO0_27"	
+	default LPC17xx_PIO0_27_GPIO
+
+config LPC17xx_PIO0_27_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO0_27_SDA0
+    bool	"SDA0"
+   
+config LPC17xx_PIO0_27_USB_SDA
+    bool	"USB_SDA"
+	
+endchoice
+
+config LPC17xx_PIO0_27_FUNCTION
+    int
+    default 0 if LPC17xx_PIO0_27_GPIO
+    default 1 if LPC17xx_PIO0_27_SDA0
+    default 2 if LPC17xx_PIO0_27_USB_SDA
+
+choice
+	prompt "LPC17xx_PIO0_28"	
+	default LPC17xx_PIO0_28_GPIO
+
+config LPC17xx_PIO0_28_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO0_28_SCL0
+    bool	"SCL0"
+    
+config LPC17xx_PIO0_28_USB_SCL
+    bool	"USB_SCL"
+
+endchoice
+
+config LPC17xx_PIO0_28_FUNCTION
+    int
+    default 0 if LPC17xx_PIO0_28_GPIO
+    default 1 if LPC17xx_PIO0_28_SCL0
+    default 2 if LPC17xx_PIO0_28_USB_SCL
+    
+choice
+	prompt "LPC17xx_PIO0_29"	
+	default LPC17xx_PIO0_29_GPIO
+
+config LPC17xx_PIO0_29_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO0_29_USB_DP
+    bool	"USB_D+"
+    
+endchoice
+
+config LPC17xx_PIO0_29_FUNCTION
+    int
+    default 0 if LPC17xx_PIO0_29_GPIO
+    default 1 if LPC17xx_PIO0_29_USB_DP
+    
+choice
+	prompt "LPC17xx_PIO0_30"	
+	default LPC17xx_PIO0_30_GPIO
+
+config LPC17xx_PIO0_30_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO0_30_USB_DN
+    bool	"USB_D-"
+	
+endchoice
+
+config LPC17xx_PIO0_30_FUNCTION
+    int
+    default 0 if LPC17xx_PIO0_30_GPIO
+    default 1 if LPC17xx_PIO0_30_USB_DN
+    

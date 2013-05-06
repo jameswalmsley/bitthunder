@@ -1,0 +1,47 @@
+choice
+	prompt "LPC17xx_PIO3_25"	
+	default LPC17xx_PIO3_25_GPIO
+	depends on HAS_100pin
+
+config LPC17xx_PIO3_25_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO3_25_TMR0_MAT0
+    bool	"TMR0 Match 0"
+    
+config LPC17xx_PIO3_25_PWM1_OUT2
+    bool	"PWM1_OUT2"
+
+endchoice
+
+config LPC17xx_PIO3_25_FUNCTION
+    int
+    default 0 if LPC17xx_PIO3_25_GPIO
+    default 1 if LPC17xx_PIO3_25_TMR0_MAT0
+    default 2 if PWM1_OUT2	
+    
+choice
+	prompt "LPC17xx_PIO3_26"	
+	default LPC17xx_PIO3_26_GPIO
+	depends on HAS_100pin
+
+config LPC17xx_PIO3_26_GPIO
+    bool	"GPIO"
+
+config LPC17xx_PIO3_26_STCLK
+    bool	"system timer input clock"
+
+config LPC17xx_PIO3_26_TMR0_MAT1
+    bool	"TMR0 Match 1"
+    
+config LPC17xx_PIO3_26_PWM1_OUT3
+    bool	"PWM1_OUT3"
+    
+endchoice
+
+config LPC17xx_PIO3_26_FUNCTION
+    int
+    default 0 if LPC17xx_PIO3_26_GPIO
+    default 1 if LPC17xx_PIO3_26_STCLK
+	default 2 if LPC17xx_PIO3_26_TMR0_MAT1
+	default 3 if LPC17xx_PIO3_26_PWM1_OUT3

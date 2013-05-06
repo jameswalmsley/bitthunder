@@ -1,0 +1,17 @@
+config MACH_LPC1764
+    bool
+    select HAS_ETHERNET
+    select HAS_USB_DEVICE 
+	select HAS_CAN_0
+	select HAS_CAN_1
+	select HAS_100pin
+		
+config MACH_RAM_SIZE
+	hex
+	default 0x4000 
+
+config MACH_FLASH_SIZE
+	hex
+	default 0x20000 
+
+	

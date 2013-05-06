@@ -1,0 +1,103 @@
+comment "LPC1769 Options"
+
+config BSP_DIR
+	   string
+	   default "bsp/arm/lpcexpresso/1769/"
+
+config BSP_NAME
+	   string
+	   default "LPC1769 Expresso board"
+
+comment "CLOCK configuration"
+
+config MACH_LPC17xx_SYSCLOCK_FREQ
+    int "System clock frequency"
+    default 12000000
+
+choice
+	prompt "Main PLL Clocksource"	
+	default MACH_LPC17xx_MAINPLLCLK_SRC_IRC
+
+config MACH_LPC17xx_MAINPLLCLK_SRC_IRC
+    bool	"IRC"
+    
+config MACH_LPC17xx_MAINPLLCLK_SRC_OSC
+    bool	"Main OSC"
+    
+config MACH_LPC17xx_MAINPLLCLK_SRC_RTC
+    bool	"RTC_OSC"
+       	
+endchoice
+
+config MAINPLLCLK_SRC
+    int
+    default 0 if MACH_LPC17xx_MAINPLLCLK_SRC_IRC
+    default 1 if MACH_LPC17xx_MAINPLLCLK_SRC_OSC
+    default 2 if MACH_LPC17xx_MAINPLLCLK_SRC_RTC
+
+config MAINPLLCLK_CTRL
+	hex "MAIN PLLClock Control"
+	default 0x00010018
+    ---help---
+		bits 0..14 describe the multiplier M(Value = M-1)
+		bits 16..23 describe the divider N (Value = N-1).
+		Output frequency = Fin*M*2/N (has to be in the range of 275MHZ to 550MHz)
+		
+
+choice
+	prompt "SYSCLK_CTRL"	
+	default MACH_LPC17xx_SYSCLK_CTRL_1
+
+config MACH_LPC17xx_SYSCLK_CTRL_0
+    bool	"1_20MHz_XTAL"
+    
+config MACH_LPC17xx_SYSCLK_CTRL_1
+    bool	"1_20MHz_OSC"
+    
+config MACH_LPC17xx_SYSCLK_CTRL_2
+    bool	"15_25MHz_XTAL"
+	
+config MACH_LPC17xx_SYSCLK_CTRL_3
+    bool	"15_25MHz_OSC"
+
+endchoice
+
+config SYSCLK_CTRL
+    int
+    default 0  if MACH_LPC17xx_SYSCLK_CTRL_0
+    default 32 if MACH_LPC17xx_SYSCLK_CTRL_1
+    default 16 if MACH_LPC17xx_SYSCLK_CTRL_2
+    default 48 if MACH_LPC17xx_SYSCLK_CTRL_3
+
+config SYSCLK_DIV
+    int "System clock divider"
+    default 3
+
+choice
+	prompt "USB Clocksource"	
+	default MACH_LPC17xx_USBCLK_SRC_USBPLL
+
+config MACH_LPC17xx_USBCLK_SRC_USBPLL
+    bool	"USB PLL"
+    
+config MACH_LPC17xx_USBCLK_SRC_MAINPLL
+    bool	"Main PLL"
+      
+endchoice
+
+config USBPLLCLK_CTRL
+    hex "USB PLLClock Control"
+    default 0
+    ---help---
+		bits 0..4 describe the multiplier(Value+1) for the output frequency of the PLL(has to be lower than 100MHz).
+		bits 5..6 describe the multiplier((Value+1)*2) for the CCO frequency of the PLL(has to be between 156MHz and 320MHz).
+
+config USBCLK_SRC
+    int
+    default 0 if MACH_LPC17xx_USBCLK_SRC_USBPLL
+    default 1 if MACH_LPC17xx_USBCLK_SRC_MAINPLL
+    default 2 if MACH_LPC17xx_USBPLLCLK_SRC_RTC
+    
+config USBCLK_DIV
+    int "USB clock divider"
+    default 10

@@ -1,0 +1,327 @@
+choice
+	prompt "LPC17xx_PIO2_0"	
+	default LPC17xx_PIO2_0_GPIO
+
+config LPC17xx_PIO2_0_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO2_0_PWM1_OUT1
+    bool	"PWM1_OUT1"
+    
+config LPC17xx_PIO2_0_TXD1
+    bool	"TXD1"
+
+endchoice
+
+config LPC17xx_PIO2_0_FUNCTION
+    int
+    default 0 if LPC17xx_PIO2_0_GPIO
+    default 1 if LPC17xx_PIO2_0_PWM1_OUT1
+    default 2 if LPC17xx_PIO2_0_TXD1
+    
+choice
+	prompt "LPC17xx_PIO2_1"	
+	default LPC17xx_PIO2_1_GPIO
+
+config LPC17xx_PIO2_1_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO2_1_PWM1_OUT2
+    bool	"PWM1_OUT2"
+    
+config LPC17xx_PIO2_1_RXD1
+    bool	"RXD1"
+
+endchoice
+
+config LPC17xx_PIO2_1_FUNCTION
+    int
+    default 0 if LPC17xx_PIO2_1_GPIO
+    default 1 if LPC17xx_PIO2_1_PWM1_OUT2
+    default 2 if LPC17xx_PIO2_1_RXD1
+    
+choice
+	prompt "LPC17xx_PIO2_2"	
+	default LPC17xx_PIO2_2_GPIO
+
+config LPC17xx_PIO2_2_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO2_2_PWM1_OUT3
+    bool	"PWM1_OUT3"
+    
+config LPC17xx_PIO2_2_CTS1
+    bool	"CTS1"
+
+config LPC17xx_PIO2_2_TRACEDATA3
+    bool	"TRACEDATA3"
+	
+endchoice
+
+config LPC17xx_PIO2_2_FUNCTION
+    int
+    default 0 if LPC17xx_PIO2_2_GPIO
+    default 1 if LPC17xx_PIO2_2_PWM1_OUT3
+    default 2 if LPC17xx_PIO2_2_CTS1
+    default 3 if LPC17xx_PIO2_2_TRACEDATA3
+    
+choice
+	prompt "LPC17xx_PIO2_3"	
+	default LPC17xx_PIO2_3_GPIO
+
+config LPC17xx_PIO2_3_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO2_3_PWM1_OUT4
+    bool	"PWM1_OUT4"
+    
+config LPC17xx_PIO2_3_DCD1
+    bool	"DCD1"
+    
+config LPC17xx_PIO2_3_TRACEDATA2
+	bool	"TRACEDATA2"
+	
+endchoice
+
+config LPC17xx_PIO2_3_FUNCTION
+    int
+    default 0 if LPC17xx_PIO2_3_GPIO
+    default 1 if LPC17xx_PIO2_3_PWM1_OUT4
+    default 2 if LPC17xx_PIO2_3_AD06
+    default 3 if LPC17xx_PIO2_3_TRACEDATA2
+
+choice
+	prompt "LPC17xx_PIO2_4"	
+	default LPC17xx_PIO2_4_GPIO
+	depends on HAS_100pin
+
+config LPC17xx_PIO2_4_GPIO
+    bool	"GPIO"
+       
+config LPC17xx_PIO2_4_PWM1_OUT5
+    bool	"PWM1_OUT5"
+	
+config LPC17xx_PIO2_4_DSR1
+    bool	"DSR1"
+
+config LPC17xx_PIO2_4_TRACEDATA1
+    bool	"TRACEDATA1"
+	
+endchoice
+
+config LPC17xx_PIO2_4_FUNCTION
+    int
+    default 0 if LPC17xx_PIO2_4_GPIO
+    default 1 if LPC17xx_PIO2_4_PWM1_OUT5
+    default 2 if LPC17xx_PIO2_4_DSR1
+    default 3 if LPC17xx_PIO2_4_TRACEDATA1
+    
+choice
+	prompt "LPC17xx_PIO2_5"	
+	default LPC17xx_PIO2_5_GPIO
+	depends on HAS_100pin
+
+config LPC17xx_PIO2_5_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO2_5_PWM1_OUT6
+    bool	"PWM1_OUT6"
+
+config LPC17xx_PIO2_5_DTR1
+    bool	"DTR1"
+	
+config LPC17xx_PIO2_5_TRACEDATA0
+    bool	"TRACEDATA0"
+
+endchoice
+
+config LPC17xx_PIO2_5_FUNCTION
+    int
+    default 0 if LPC17xx_PIO2_5_GPIO
+    default 1 if LPC17xx_PIO2_5_PWM1_OUT6
+    default 2 if LPC17xx_PIO2_5_TD2
+    default 3 if LPC17xx_PIO2_5_TRACEDATA0
+
+
+choice
+	prompt "LPC17xx_PIO2_6"	
+	default LPC17xx_PIO2_6_GPIO
+
+config LPC17xx_PIO2_6_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO2_6_PWM1_CAP0
+    bool	"PWM1 Capture 0"
+    
+config LPC17xx_PIO2_6_RI1
+    bool	"RI1"
+	
+config LPC17xx_PIO2_6_TRACECLK
+	bool 	"TRACECLK"
+
+endchoice
+
+config LPC17xx_PIO2_6_FUNCTION
+    int
+    default 0 if LPC17xx_PIO2_6_GPIO
+    default 1 if LPC17xx_PIO2_6_PWM1_CAP0
+    default 2 if LPC17xx_PIO2_6_RI1
+	default 3 if LPC17xx_PIO2_6_TRACECLK
+    
+choice
+	prompt "LPC17xx_PIO2_7"	
+	default LPC17xx_PIO2_7_GPIO
+
+config LPC17xx_PIO2_7_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO2_7_RD2
+    bool	"RD2(can receiver)"
+   
+config LPC17xx_PIO2_7_RTS1
+    bool	"RTS1"
+	
+endchoice
+
+config LPC17xx_PIO2_7_FUNCTION
+    int
+    default 0 if LPC17xx_PIO2_7_GPIO
+    default 1 if LPC17xx_PIO2_7_RD2
+    default 2 if LPC17xx_PIO2_7_RTS1
+
+choice
+	prompt "LPC17xx_PIO2_8"	
+	default LPC17xx_PIO2_8_GPIO
+
+config LPC17xx_PIO2_8_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO2_8_TD2
+    bool	"TD2(can transmitter)"
+
+config LPC17xx_PIO2_8_TXD2
+    bool	"TXD2"
+    
+config LPC17xx_PIO2_8_ENET_MDC
+    bool	"Ethernet MIIM clock"
+	
+endchoice
+
+config LPC17xx_PIO2_8_FUNCTION
+    int
+    default 0 if LPC17xx_PIO2_8_GPIO
+    default 1 if LPC17xx_PIO2_8_TD2
+    default 2 if LPC17xx_PIO2_8_TXD2
+    default 3 if LPC17xx_PIO2_8_ENET_MDC
+    
+choice
+	prompt "LPC17xx_PIO2_9"	
+	default LPC17xx_PIO2_9_GPIO
+
+config LPC17xx_PIO2_9_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO2_9_USB_CONNECT
+    bool	"USB_CONNECT"
+    
+config LPC17xx_PIO2_9_RXD2
+    bool	"RXD2"
+	
+config LPC17xx_PIO2_9_ENET_MDIO
+    bool	"Ethernet MIIM IO"
+
+endchoice
+
+config LPC17xx_PIO2_9_FUNCTION
+    int
+    default 0 if LPC17xx_PIO2_9_GPIO
+    default 1 if LPC17xx_PIO2_9_USB_CONNECT
+    default 2 if LPC17xx_PIO2_9_RXD2
+    default 3 if LPC17xx_PIO2_9_ENET_MDIO
+
+choice
+	prompt "LPC17xx_PIO2_10"	
+	default LPC17xx_PIO2_10_GPIO
+
+config LPC17xx_PIO2_10_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO2_10_EINT0q
+    bool	"External interrupt 0"
+    
+config LPC17xx_PIO2_10_NMI
+    bool	"NMI"
+
+endchoice
+
+config LPC17xx_PIO2_10_FUNCTION
+    int
+    default 0 if LPC17xx_PIO2_10_GPIO
+    default 1 if LPC17xx_PIO2_10_EINT0q
+    default 2 if LPC17xx_PIO2_10_NMI
+    
+choice
+	prompt "LPC17xx_PIO2_11"	
+	default LPC17xx_PIO2_11_GPIO
+	depends on HAS100pin
+
+config LPC17xx_PIO2_11_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO2_11_EINT1q
+    bool	"External interrupt 1"
+    
+config LPC17xx_PIO2_11_I2STX_CLK
+    bool	"I2STX_CLK"
+	
+endchoice
+
+config LPC17xx_PIO2_11_FUNCTION
+    int
+    default 0 if LPC17xx_PIO2_11_GPIO
+    default 1 if LPC17xx_PIO2_11_EINT1q
+    default 2 if LPC17xx_PIO2_11_I2STX_CLK    
+
+choice
+	prompt "LPC17xx_PIO2_12"	
+	default LPC17xx_PIO2_12_GPIO
+	depends on HAS100pin
+
+config LPC17xx_PIO2_12_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO2_12_EINT2q
+    bool	"External interrupt 2"
+    
+config LPC17xx_PIO2_12_I2STX_WS
+    bool	"I2STX_WS"
+	
+endchoice
+
+config LPC17xx_PIO2_12_FUNCTION
+    int
+    default 0 if LPC17xx_PIO2_12_GPIO
+    default 1 if LPC17xx_PIO2_12_EINT2q
+    default 2 if LPC17xx_PIO2_12_I2STX_WS
+
+choice
+	prompt "LPC17xx_PIO2_13"	
+	default LPC17xx_PIO2_13_GPIO
+	depends on HAS100pin
+
+config LPC17xx_PIO2_13_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO2_13_EINT3q
+    bool	"RXD1"
+    
+config LPC17xx_PIO2_13_I2STX_SDA
+    bool	"I2STX_SDA"
+
+endchoice
+
+config LPC17xx_PIO2_13_FUNCTION
+    int
+    default 0 if LPC17xx_PIO2_13_GPIO
+    default 1 if LPC17xx_PIO2_13_EINT3q
+    default 2 if LPC17xx_PIO2_13_I2STX_SDA

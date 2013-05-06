@@ -1,0 +1,512 @@
+choice
+	prompt "LPC17xx_PIO1_0"	
+	default LPC17xx_PIO1_0_GPIO
+
+config LPC17xx_PIO1_0_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO1_0_ENET_TXD0
+    bool	"ENET_TXD0"
+    
+endchoice
+
+config LPC17xx_PIO1_0_FUNCTION
+    int
+    default 0 if LPC17xx_PIO1_0_GPIO
+    default 1 if LPC17xx_PIO1_0_ENET_TXD0
+    
+choice
+	prompt "LPC17xx_PIO1_1"	
+	default LPC17xx_PIO1_1_GPIO
+
+config LPC17xx_PIO1_1_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO1_1_ENET_TXD1
+    bool	"ENET_TXD1"
+    
+endchoice
+
+config LPC17xx_PIO1_1_FUNCTION
+    int
+    default 0 if LPC17xx_PIO1_1_GPIO
+    default 1 if LPC17xx_PIO1_1_ENET_TXD1
+
+choice
+	prompt "LPC17xx_PIO1_4"	
+	default LPC17xx_PIO1_4_GPIO
+
+config LPC17xx_PIO1_4_GPIO
+    bool	"GPIO"
+       
+config LPC17xx_PIO1_4_ENET_EN
+    bool	"ENET_END"
+	
+endchoice
+
+config LPC17xx_PIO1_4_FUNCTION
+    int
+    default 0 if LPC17xx_PIO1_4_GPIO
+    default 1 if LPC17xx_PIO1_4_ENET_EN
+    
+choice
+	prompt "LPC17xx_PIO1_8"	
+	default LPC17xx_PIO1_8_GPIO
+
+config LPC17xx_PIO1_8_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO1_8_ENET_CRS
+    bool	"ENET_CRS"
+	
+endchoice
+
+config LPC17xx_PIO1_8_FUNCTION
+    int
+    default 0 if LPC17xx_PIO1_8_GPIO
+    default 1 if LPC17xx_PIO1_8_ENET_CRS
+    
+choice
+	prompt "LPC17xx_PIO1_9"	
+	default LPC17xx_PIO1_9_GPIO
+
+config LPC17xx_PIO1_9_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO1_9_ENET_RXD0
+    bool	"ENET_RXD0"
+    
+endchoice
+
+config LPC17xx_PIO1_9_FUNCTION
+    int
+    default 0 if LPC17xx_PIO1_9_GPIO
+    default 1 if LPC17xx_PIO1_9_ENET_RXD0
+
+choice
+	prompt "LPC17xx_PIO1_10"	
+	default LPC17xx_PIO1_10_GPIO
+
+config LPC17xx_PIO1_10_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO1_10_ENET_RXD1
+    bool	"ENET_RXD1"
+	
+endchoice
+
+config LPC17xx_PIO1_10_FUNCTION
+    int
+    default 0 if LPC17xx_PIO1_10_GPIO
+    default 1 if LPC17xx_PIO1_10_ENET_RXD1
+    
+choice
+	prompt "LPC17xx_PIO1_14"	
+	default LPC17xx_PIO1_14_GPIO
+
+config LPC17xx_PIO1_14_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO1_14_ENET_RX_ER
+    bool	"ENET_RX_ER"
+    
+endchoice
+
+config LPC17xx_PIO1_14_FUNCTION
+    int
+    default 0 if LPC17xx_PIO1_14_GPIO
+    default 1 if LPC17xx_PIO1_14_ENET_RX_ER
+
+choice
+	prompt "LPC17xx_PIO1_15"	
+	default LPC17xx_PIO1_15_GPIO
+
+config LPC17xx_PIO1_15_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO1_15_ENET_REF_CLK
+    bool	"ENET_REF_CLK"
+    
+endchoice
+
+config LPC17xx_PIO1_15_FUNCTION
+    int
+    default 0 if LPC17xx_PIO1_15_GPIO
+    default 1 if LPC17xx_PIO1_15_ENET_REF_CLK
+
+choice
+	prompt "LPC17xx_PIO1_16"	
+	default LPC17xx_PIO1_16_GPIO
+	depends on HAS_100pin
+
+config LPC17xx_PIO1_16_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO1_16_ENET_MDC
+    bool	"ENET_MDC"
+    
+endchoice
+
+config LPC17xx_PIO1_16_FUNCTION
+    int
+    default 0 if LPC17xx_PIO1_16_GPIO
+    default 1 if LPC17xx_PIO1_16_ENET_MDC
+    
+choice
+	prompt "LPC17xx_PIO1_17"	
+	default LPC17xx_PIO1_17_GPIO
+	depends on HAS_100pin
+
+config LPC17xx_PIO1_17_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO1_17_ENET_MDIO
+    bool	"ENET_MDIO"
+   
+endchoice
+
+config LPC17xx_PIO1_17_FUNCTION
+    int
+    default 0 if LPC17xx_PIO1_17_GPIO
+    default 1 if LPC17xx_PIO1_17_ENET_MDIO
+
+choice
+	prompt "LPC17xx_PIO1_18"	
+	default LPC17xx_PIO1_18_GPIO
+
+config LPC17xx_PIO1_18_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO1_18_USB_UP_LED
+    bool	"USB_UP_LED"
+    
+config LPC17xx_PIO1_18_PWM1_OUT1
+    bool	"PWM1_OUT1"
+
+config LPC17xx_PIO1_18_TMR1_CAP0
+    bool	"TMR1 Capture 0"
+	
+endchoice
+
+config LPC17xx_PIO1_18_FUNCTION
+    int
+    default 0 if LPC17xx_PIO1_18_GPIO
+    default 1 if LPC17xx_PIO1_18_USB_UP_LED
+    default 2 if LPC17xx_PIO1_18_PWM1_OUT1
+    default 3 if LPC17xx_PIO1_18_TMR1_CAP0
+    
+choice
+	prompt "LPC17xx_PIO1_19"	
+	default LPC17xx_PIO1_19_GPIO
+	
+config LPC17xx_PIO1_19_GPIO
+    bool	"GPIO"
+       
+config LPC17xx_PIO1_19_MCOA0
+    bool	"Motor control PWM0 Channel A"
+	
+config LPC17xx_PIO1_19_USB_PPWR
+    bool	"USB Powerport enable"
+
+config LPC17xx_PIO1_19_TMR1_CAP1
+    bool	"TMR1 Capture 0"
+
+endchoice
+
+config LPC17xx_PIO1_19_FUNCTION
+    int
+    default 0 if LPC17xx_PIO1_19_GPIO
+    default 1 if LPC17xx_PIO1_19_MCOA0
+    default 2 if LPC17xx_PIO1_19_USB_PPWR
+    default 3 if LPC17xx_PIO1_19_TMR1_CAP1
+	
+choice
+	prompt "LPC17xx_PIO1_20"	
+	default LPC17xx_PIO1_20_GPIO
+
+config LPC17xx_PIO1_20_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO1_20_MCI0
+    bool	"Motor control PWM input channel 0 or QEI PHA"
+    
+config LPC17xx_PIO1_20_PWM1_OUT2
+    bool	"PWM1_OUT2"
+
+config LPC17xx_PIO1_20_SCK0
+    bool	"SCK0 for SSP0"
+
+endchoice
+
+config LPC17xx_PIO1_20_FUNCTION
+    int
+    default 0 if LPC17xx_PIO1_20_GPIO
+    default 1 if LPC17xx_PIO1_20_MCI0
+    default 2 if LPC17xx_PIO1_20_PWM1_OUT2
+    default 3 if LPC17xx_PIO1_20_SCK0
+    
+choice
+	prompt "LPC17xx_PIO1_21"	
+	default LPC17xx_PIO1_21_GPIO
+	depends on HAS_100pin
+
+config LPC17xx_PIO1_21_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO1_21_MCABORT
+    bool	"Motor control active low fast abort"
+    
+config LPC17xx_PIO1_21_PWM1_OUT3
+    bool	"PWM1_OUT3"	
+
+config LPC17xx_PIO1_21_SSEL0
+    bool	"SSEL0 for SSP0"	
+
+endchoice
+
+config LPC17xx_PIO1_21_FUNCTION
+    int
+    default 0 if LPC17xx_PIO1_21_GPIO
+    default 1 if LPC17xx_PIO1_21_MCABORT
+    default 2 if LPC17xx_PIO1_21_PWM1_OUT3
+    default 3 if LPC17xx_PIO1_21_SSEL0
+
+choice
+	prompt "LPC17xx_PIO1_22"	
+	default LPC17xx_PIO1_22_GPIO
+
+config LPC17xx_PIO1_22_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO1_22_MCOB0
+    bool	"Motor control PWM0 Channel B"
+    
+config LPC17xx_PIO1_22_USB_PWRD
+    bool	"USB power status"
+	
+config LPC17xx_PIO1_22_TMR1_MAT0
+    bool	"TMR1 Macht 0"
+
+endchoice
+
+config LPC17xx_PIO1_22_FUNCTION
+    int
+    default 0 if LPC17xx_PIO1_22_GPIO
+    default 1 if LPC17xx_PIO1_22_MCOB0
+    default 2 if LPC17xx_PIO1_22_USB_PWRD
+    default 3 if LPC17xx_PIO1_22_TMR1_MAT0
+    
+choice
+	prompt "LPC17xx_PIO1_23"	
+	default LPC17xx_PIO1_23_GPIO
+
+config LPC17xx_PIO1_23_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO1_23_MCI1
+	bool	"Motor control PWM input channel 1 or QEI PHB"
+    
+config LPC17xx_PIO1_23_PWM1_OUT4
+    bool	"PWM1_OUT4"
+	
+config LPC17xx_PIO1_23_MISO0
+    bool	"MISO0 for SSP0"
+	
+endchoice
+
+config LPC17xx_PIO1_23_FUNCTION
+    int
+    default 0 if LPC17xx_PIO1_23_GPIO
+    default 1 if LPC17xx_PIO1_23_MCI1
+    default 2 if LPC17xx_PIO1_23_PWM1_OUT4
+	default 3 if LPC17xx_PIO1_23_MISO0
+
+choice
+	prompt "LPC17xx_PIO1_24"	
+	default LPC17xx_PIO1_24_GPIO
+
+config LPC17xx_PIO1_24_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO1_24_MCI2
+    bool	"Motor control PWM input channel 2 or QEI INDEX"
+    
+config LPC17xx_PIO1_24_PWM1_OUT5
+    bool	"PWM1_OUT5"
+
+config LPC17xx_PIO1_24_MOSI0
+    bool	"MOSI0 for SSP0"
+	
+endchoice
+
+config LPC17xx_PIO1_24_FUNCTION
+    int
+    default 0 if LPC17xx_PIO1_24_GPIO
+    default 1 if LPC17xx_PIO1_24_MCI2
+    default 2 if LPC17xx_PIO1_24_PWM1_OUT5
+    default 3 if LPC17xx_PIO1_24_MOSI0
+    
+choice
+	prompt "LPC17xx_PIO1_25"	
+	default LPC17xx_PIO1_25_GPIO
+
+config LPC17xx_PIO1_25_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO1_25_MCOA1
+    bool	"Motor control PWM1 Channel A"
+    
+config LPC17xx_PIO1_25_TMR1_MAT1
+    bool	"TMR1 Match 1"
+	
+endchoice
+
+config LPC17xx_PIO1_25_FUNCTION
+    int
+    default 0 if LPC17xx_PIO1_25_GPIO
+    default 1 if LPC17xx_PIO1_25_MCOA1
+    default 2 if LPC17xx_PIO1_25_TMR1_MAT1
+
+choice
+	prompt "LPC17xx_PIO1_26"	
+	default LPC17xx_PIO1_26_GPIO
+
+config LPC17xx_PIO1_26_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO1_26_MCOB1
+    bool	"Motor control PWM1 Channel B"
+    
+config LPC17xx_PIO1_26_PWM1_OUT6
+    bool	"PWM1_OUT6"
+
+config LPC17xx_PIO1_26_TMR0_CAP0
+    bool	"TMR0 Capture 0"
+	
+endchoice
+
+config LPC17xx_PIO1_26_FUNCTION
+    int
+    default 0 if LPC17xx_PIO1_26_GPIO
+    default 1 if LPC17xx_PIO1_26_MCOB1
+    default 2 if LPC17xx_PIO1_26_PWM1_OUT6
+	default 3 if LPC17xx_PIO1_26_TMR0_CAP0
+    
+choice
+	prompt "LPC17xx_PIO1_27"	
+	default LPC17xx_PIO1_27_GPIO
+	depends on HAS_100pin
+
+config LPC17xx_PIO1_27_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO1_27_CLKOUT
+    bool	"CLKOUT"
+   
+config LPC17xx_PIO1_27_USB_OVRCR
+    bool	"USB_overcurrent status"
+	
+config LPC17xx_PIO1_27_TMR0_CAP1
+    bool	"TMR0 Capture 1"
+
+endchoice
+
+config LPC17xx_PIO1_27_FUNCTION
+    int
+    default 0 if LPC17xx_PIO1_27_GPIO
+    default 1 if LPC17xx_PIO1_27_CLKOUT
+    default 2 if LPC17xx_PIO1_27_USB_OVRCR
+    default 3 if LPC17xx_PIO1_27_TMR0_CAP1
+
+choice
+	prompt "LPC17xx_PIO1_28"	
+	default LPC17xx_PIO1_28_GPIO
+
+config LPC17xx_PIO1_28_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO1_28_MCOA2
+    bool	"Motor control PWM2 Channel A"
+    
+config LPC17xx_PIO1_28_PWM1_CAP0
+    bool	"PWM1 Capture 0"
+
+config LPC17xx_PIO1_28_TMR0_MAT0
+    bool	"TMR0 Match 0"
+
+endchoice
+
+config LPC17xx_PIO1_28_FUNCTION
+    int
+    default 0 if LPC17xx_PIO1_28_GPIO
+    default 1 if LPC17xx_PIO1_28_MCOA2
+    default 2 if LPC17xx_PIO1_28_PWM1_CAP0
+    default 3 if LPC17xx_PIO1_28_TMR0_MAT0
+    
+choice
+	prompt "LPC17xx_PIO1_29"	
+	default LPC17xx_PIO1_29_GPIO
+
+config LPC17xx_PIO1_29_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO1_29_MCOB2
+    bool	"Motor control PWM2 Channel B"
+
+config LPC17xx_PIO1_29_PWM1_CAP1
+    bool	"PWM1 Capture 1"
+
+config LPC17xx_PIO1_29_TMR0_MAT1
+    bool	"TMR0 Match 1"
+    
+endchoice
+
+config LPC17xx_PIO1_29_FUNCTION
+    int
+    default 0 if LPC17xx_PIO1_29_GPIO
+    default 1 if LPC17xx_PIO1_29_MCOB2
+    default 2 if LPC17xx_PIO1_29_PWM1_CAP1
+    default 3 if LPC17xx_PIO1_29_TMR0_MAT1
+    
+choice
+	prompt "LPC17xx_PIO1_30"	
+	default LPC17xx_PIO1_30_GPIO
+
+config LPC17xx_PIO1_30_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO1_30_USB_VBUS
+    bool	"USB VBUS monitor"
+
+config LPC17xx_PIO1_30_AD04
+    bool	"AD0.4"
+
+endchoice
+
+config LPC17xx_PIO1_30_FUNCTION
+    int
+    default 0 if LPC17xx_PIO1_30_GPIO
+    default 1 if LPC17xx_PIO1_30_USB_VBUS
+    default 2 if LPC17xx_PIO1_30_AD04
+    
+choice
+	prompt "LPC17xx_PIO1_31"	
+	default LPC17xx_PIO1_31_GPIO
+
+config LPC17xx_PIO1_31_GPIO
+    bool	"GPIO"
+    
+config LPC17xx_PIO1_31_SCK1
+    bool	"SCK1 for SSP1"
+
+config LPC17xx_PIO1_31_AD05
+    bool	"AD0.5"
+	
+endchoice
+
+config LPC17xx_PIO1_31_FUNCTION
+    int
+    default 0 if LPC17xx_PIO1_31_GPIO
+    default 1 if LPC17xx_PIO1_31_SCK1
+    default 2 if LPC17xx_PIO1_31_AD05    
+    

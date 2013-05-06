@@ -1,0 +1,19 @@
+config MACH_LPC1758
+    bool
+    select HAS_ETHERNET 
+    select HAS_USB_OTG 
+	select HAS_CAN_0
+	select HAS_CAN_1
+	select HAS_I2S
+	select HAS_DAC
+
+    
+config MACH_RAM_SIZE
+	hex
+	default 0x8000 
+
+config MACH_FLASH_SIZE
+	hex
+	default 0x80000 
+
+	

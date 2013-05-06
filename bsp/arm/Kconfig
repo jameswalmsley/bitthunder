@@ -5,6 +5,10 @@ choice
 	  depends on ARCH_ARM && MACH_LPC11xx
 	  bool "LPC11c24 Expresso Board"
 
+	config BSP_ARM_LPCEXPRESSO_LPC1769
+	  depends on ARCH_ARM && MACH_LPC17xx
+	  bool "LPC1169 Expresso Board"
+
 	config BSP_ARM_RASPBERRY_PI
 	  depends on ARCH_ARM && MACH_BCM2835
 	  bool "Raspberry Pi"
@@ -17,6 +21,10 @@ endchoice
 
 if BSP_ARM_LPCEXPRESSO_LPC11c24
 source bsp/arm/lpcexpresso/11c24/Kconfig
+endif
+
+if BSP_ARM_LPCEXPRESSO_LPC1769
+source bsp/arm/lpcexpresso/1769/Kconfig
 endif
 
 if BSP_ARM_RASPBERRY_PI

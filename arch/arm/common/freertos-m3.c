@@ -10,6 +10,7 @@
 #include <FreeRTOS.h>
 #include <task.h>
 #include <portmacro.h>
+#include <nvic.h>
 
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;
@@ -142,11 +143,15 @@ void vPortStartFirstTask( void )
 }
 
 portBASE_TYPE xPortStartScheduler(void) {
+
+	BT_SetInterruptPriority(14, 31);		//PENDSVC
+	BT_SetInterruptPriority(15, 31);		//SysTick
+
 	// Setup Hardware Timer!
 	prvSetupTimerInterrupt();
 	// Start first task
 
-	//uxCriticalNesting = 0;
+	uxCriticalNesting = 0;
 
 	vPortStartFirstTask();
 
@@ -279,7 +284,7 @@ void BT_NVIC_PendSV_Handler( void )
 
 void BT_NVIC_SysTick_Handler(void)
 {
-unsigned long ulDummy;
+	unsigned long ulDummy;
 
 	/* If using preemption, also force a context switch. */
 	#if configUSE_PREEMPTION == 1

@@ -1,0 +1,361 @@
+comment "LPC17xx Platform Options"
+
+
+config MACH_LPC17xx_SYSCLOCK_IRC_FREQ
+	int
+	default 4000000
+
+config HAS_CAN_0
+	bool
+	default n
+	
+config HAS_CAN_1
+	bool
+	default n
+
+choice
+	prompt "LPC17xx Chip Variant"
+	default MACH_LPC17xx_LPC1769
+
+config MACH_LPC17xx_LPC1769
+    bool "LPC1769"
+    select MACH_LPC1769
+
+config MACH_LPC17xx_LPC1768
+    bool "LPC1768"
+    select MACH_LPC1768
+    
+config MACH_LPC17xx_LPC1767
+    bool "LPC1767"
+    select MACH_LPC1767
+    
+config MACH_LPC17xx_LPC1766
+    bool "LPC1766"
+    select MACH_LPC1766
+    
+config MACH_LPC17xx_LPC1765
+    bool "LPC1765"
+    select MACH_LPC1765
+    
+config MACH_LPC17xx_LPC1764
+    bool "LPC1764"
+    select MACH_LPC1764
+
+config MACH_LPC17xx_LPC1763
+    bool "LPC1763"
+    select MACH_LPC1763
+
+config MACH_LPC17xx_LPC1759
+    bool "LPC1759"
+    select MACH_LPC1759
+
+config MACH_LPC17xx_LPC1758
+    bool "LPC1758"
+    select MACH_LPC1758
+    
+config MACH_LPC17xx_LPC1756
+    bool "LPC1756"
+    select MACH_LPC1756
+    
+config MACH_LPC17xx_LPC1754
+    bool "LPC1754"
+    select MACH_LPC1754
+    
+config MACH_LPC17xx_LPC1752
+    bool "LPC1752"
+    select MACH_LPC1752
+    
+config MACH_LPC17xx_LPC1751
+    bool "LPC1751"
+    select MACH_LPC1751
+endchoice
+
+if MACH_LPC17xx_LPC1769
+source arch/arm/mach/lpc17xx/.config/lpc1769
+endif
+
+if MACH_LPC17xx_LPC1768
+source arch/arm/mach/lpc17xx/.config/lpc1768
+endif
+
+if MACH_LPC17xx_LPC1767
+source arch/arm/mach/lpc17xx/.config/lpc1767
+endif
+
+if MACH_LPC17xx_LPC1766
+source arch/arm/mach/lpc17xx/.config/lpc1766
+endif
+
+if MACH_LPC17xx_LPC1765
+source arch/arm/mach/lpc17xx/.config/lpc1765
+endif
+
+if MACH_LPC17xx_LPC1764
+source arch/arm/mach/lpc17xx/.config/lpc1764
+endif
+
+if MACH_LPC17xx_LPC1763
+source arch/arm/mach/lpc17xx/.config/lpc1763
+endif
+
+if MACH_LPC17xx_LPC1759
+source arch/arm/mach/lpc17xx/.config/lpc1759
+endif
+
+if MACH_LPC17xx_LPC1758
+source arch/arm/mach/lpc17xx/.config/lpc1758
+endif
+
+if MACH_LPC17xx_LPC1756
+source arch/arm/mach/lpc17xx/.config/lpc1756
+endif
+
+if MACH_LPC17xx_LPC1754
+source arch/arm/mach/lpc17xx/.config/lpc1754
+endif
+
+if MACH_LPC17xx_LPC1752
+source arch/arm/mach/lpc17xx/.config/lpc1752
+endif
+
+if MACH_LPC17xx_LPC1751
+source arch/arm/mach/lpc17xx/.config/lpc1751
+endif
+
+
+config MACH_LPC17xx_GPIO_BASE  
+	hex
+	default 0x2009C000
+	
+config MACH_LPC17xx_UART0_BASE 
+	hex
+	default 0x4000C000
+
+config MACH_LPC17xx_UART1_BASE 
+	hex
+	default 0x40010000
+
+config MACH_LPC17xx_UART2_BASE 
+	hex
+	default 0x40098000
+
+config MACH_LPC17xx_UART3_BASE 
+	hex
+	default 0x4009C000
+	
+config MACH_LPC17xx_CAN0_BASE  
+	hex
+	default 0x40044000
+	depends on HAS_CAN_0
+
+config MACH_LPC17xx_CAN1_BASE  
+	hex
+	default 0x40048000
+	depends on HAS_CAN_1
+	
+
+config MACH_LPC17xx_TIMER0_BASE
+	hex
+	default 0x40004000
+	
+config MACH_LPC17xx_TIMER1_BASE
+	hex
+	default 0x40008000
+	
+config MACH_LPC17xx_TIMER2_BASE
+	hex
+	default 0x40090000
+	
+config MACH_LPC17xx_TIMER3_BASE
+	hex
+	default 0x40094000
+
+config MACH_LPC17xx_TOTAL_GPIOS
+	int
+	default 128 if MACH_LPC17xx_LPC1769	
+	
+config MAX_IRQ
+	   int
+	   default 50		   
+
+config ARCH_ARM_SYSTICK_SRC0_DIV
+    int
+    default 2
+    
+choice 
+	prompt "systick clock source"
+	default LPC17xx_ARCH_ARM_SYSTICK_PROCESSOR_CLOCK
+	
+config LPC17xx_ARCH_ARM_SYSTICK_PROCESSOR_CLOCK
+	bool "processor clock"
+	
+config LPC17xx_ARCH_ARM_SYSTICK_EXTERNAL_CLOCK
+	bool "external clock"
+
+endchoice
+
+config ARCH_ARM_SYSTICK_CLKSRC
+	hex
+	default 0x00 if LPC17xx_ARCH_ARM_SYSTICK_EXTERNAL_CLOCK
+	default 0x04 if LPC17xx_ARCH_ARM_SYSTICK_PROCESSOR_CLOCK 
+
+comment "device specific configuration"
+
+menu "Peripheral Selection"
+
+comment "CAN devices"
+
+config MACH_LPC17xx_CAN
+	bool
+	default n
+	
+config MACH_LPC17xx_CAN_0
+
+config MACH_LPC17xx_CAN_0
+    bool "Use CAN(0) peripheral"
+	default n
+	select MACH_LPC17xx_CAN
+	depends on HAS_CAN_0	
+
+config MACH_LPC17xx_CAN_0_INODE_NAME
+	string "CAN(0) devfs name"
+	default "can0"
+	depends on HAS_CAN_0
+
+config MACH_LPC17xx_CAN_1
+
+config MACH_LPC17xx_CAN_1
+    bool "Use CAN(1) peripheral"
+	default n
+	select MACH_LPC17xx_CAN
+	depends on HAS_CAN_1	
+
+config MACH_LPC17xx_CAN_1_INODE_NAME
+	string "CAN(1) devfs name"
+	default "can1"
+	depends on HAS_CAN_1
+
+comment "UART devices"
+
+config MACH_LPC17xx_UART
+	bool
+	default n
+
+config MACH_LPC17xx_UART_0
+    bool "Use UART(0) peripheral"
+	default n
+	select MACH_LPC17xx_UART	
+
+config MACH_LPC17xx_UART_0_INODE_NAME
+	string "UART(0) devfs name"
+	default "uart0"
+	depends on MACH_LPC17xx_UART_0
+
+config MACH_LPC17xx_UART_1
+    bool "Use UART(1) peripheral"
+	default n
+	select MACH_LPC17xx_UART	
+
+config MACH_LPC17xx_UART_1_INODE_NAME
+	string "UART(1) devfs name"
+	default "uart1"
+	depends on MACH_LPC17xx_UART_1
+
+config MACH_LPC17xx_UART_2
+    bool "Use UART(2) peripheral"
+	default n
+	select MACH_LPC17xx_UART	
+
+config MACH_LPC17xx_UART_2_INODE_NAME
+	string "UART(2) devfs name"
+	default "uart2"
+	depends on MACH_LPC17xx_UART_2
+
+config MACH_LPC17xx_UART_3
+    bool "Use UART(3) peripheral"
+	default n
+	select MACH_LPC17xx_UART	
+
+config MACH_LPC17xx_UART_3_INODE_NAME
+	string "UART(3) devfs name"
+	default "uart3"
+	depends on MACH_LPC17xx_UART_3
+
+
+comment "TIMER devices"
+
+config MACH_LPC17xx_TIMER
+	bool
+	default n
+
+config MACH_LPC17xx_TIMER_0
+    bool "Use TIMER(0) peripheral"
+	default n
+	select MACH_LPC17xx_TIMER
+
+config MACH_LPC17xx_TIMER_0_INODE_NAME
+	string "TIMER(0) devfs name"
+	default "timer0"
+	depends on MACH_LPC17xx_TIMER_0
+
+config MACH_LPC17xx_TIMER_1
+    bool "Use TIMER(1) peripheral"
+	default n
+	select MACH_LPC17xx_TIMER
+
+config MACH_LPC17xx_TIMER_1_INODE_NAME
+	string "TIMER(1) devfs name"
+	default "timer1"
+	depends on MACH_LPC17xx_TIMER_1
+
+config MACH_LPC17xx_TIMER_2
+    bool "Use TIMER(2) peripheral"
+	default n
+		select MACH_LPC17xx_TIMER
+
+config MACH_LPC17xx_TIMER_2_INODE_NAME
+	string "TIMER(2) devfs name"
+	default "timer2"
+	depends on MACH_LPC17xx_TIMER_2
+
+config MACH_LPC17xx_TIMER_3
+    bool "Use TIMER(3) peripheral"
+	default n
+		select MACH_LPC17xx_TIMER
+
+config MACH_LPC17xx_TIMER_3_INODE_NAME
+	string "TIMER(3) devfs name"
+	default "timer3"
+	depends on MACH_LPC17xx_TIMER_3
+
+endmenu
+
+menu "GPIO configuration"
+source arch/arm/mach/lpc17xx/.config/GPIO
+endmenu
+
+choice
+	prompt "Boot Logger Device"
+	default MACH_LPC17xx_BOOTLOG_NULL
+
+config MACH_LPC17xx_BOOTLOG_UART_0
+    bool "UART(0)"
+	select MACH_LPC17xx_UART_0
+
+config MACH_LPC17xx_BOOTLOG_UART_1
+    bool "UART(1)"
+	select MACH_LPC17xx_UART_1
+
+config MACH_LPC17xx_BOOTLOG_UART_2
+    bool "UART(2)"
+	select MACH_LPC17xx_UART_2
+
+config MACH_LPC17xx_BOOTLOG_UART_3
+    bool "UART(3)"
+	select MACH_LPC17xx_UART_3
+
+config MACH_LPC17xx_BOOTLOG_NULL
+    bool "/dev/null"
+
+endchoice
+    

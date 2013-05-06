@@ -36,6 +36,7 @@ static BT_ERROR timer_register_interrupt(BT_HANDLE hTimer, BT_FN_INTERRUPT_HANDL
 }
 
 static BT_ERROR timer_start(BT_HANDLE hTimer) {
+	hTimer->pRegs->VALUE = 0;
 	hTimer->pRegs->CTRL |= SYSTICK_CTRL_ENABLE;
 	return BT_ERR_NONE;
 }
@@ -130,6 +131,10 @@ static BT_HANDLE timer_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErr
 	}
 
 	hTimer->pRegs = (SYSTICK_REGS *) pResource->ulStart;
+
+	hTimer->pRegs->CTRL &= ~0x04;
+	hTimer->pRegs->CTRL |= BT_CONFIG_ARCH_ARM_SYSTICK_CLKSRC;
+
 	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_IRQ, 0);
 	if(!pResource) {
 		Error = BT_ERR_GENERIC;

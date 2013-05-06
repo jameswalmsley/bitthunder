@@ -1,0 +1,14 @@
+config MACH_LPC1751
+    bool 
+    select HAS_USB_DEVICE 
+	select HAS_CAN_0
+    
+config MACH_RAM_SIZE
+	hex
+	default 0x8000 
+
+config MACH_FLASH_SIZE
+	hex
+	default 0x8000 
+
+	

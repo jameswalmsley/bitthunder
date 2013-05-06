@@ -1,0 +1,16 @@
+config MACH_LPC1767
+    bool
+    select HAS_ETHERNET
+	select HAS_I2S
+	select HAS_DAC
+	select HAS_100pin
+		
+config MACH_RAM_SIZE
+	hex
+	default 0x8000 
+
+config MACH_FLASH_SIZE
+	hex
+	default 0x80000 
+
+	
