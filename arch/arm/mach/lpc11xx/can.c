@@ -17,6 +17,7 @@
 #include "rcc.h"						// Used for getting access to rcc regs, to determine the real Clock Freq.
 #include "ioconfig.h"						// Used for getting access to IOCON regs.
 #include <string.h>
+#include <collections/bt_fifo.h>
 
 /**
  *	All driver modules in the system shall be tagged with some helpful information.
@@ -28,18 +29,6 @@ BT_DEF_MODULE_AUTHOR					("Robert Steinbauer")
 BT_DEF_MODULE_EMAIL						("rsteinbauer@riegl.com")
 
 /**
- *	This is a simple FIFO implementation for the CAN driver.
- *	BT will eventually create optimised implementations of such common structures
- *	making it possible to make even simpler drivers.
- **/
-typedef struct {
-	BT_CAN_MESSAGE	*pBuf;						///< Pointer to the start of the ring-buffer.
-	BT_CAN_MESSAGE	*pIn;						///< Input pointer.
-	BT_CAN_MESSAGE	*pOut;						///< Output pointer.
-	BT_CAN_MESSAGE	*pEnd;						///< Pointer to end of buffer.
-} BT_CAN_BUFFER;
-
-/**
  *	We can define how a handle should look in a CAN driver, probably we only need a
  *	hardware-ID number. (Remember, try to keep HANDLES as low-cost as possible).
  **/
@@ -47,8 +36,8 @@ struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER 		h;			///< All handles must include a handle header.
 	LPC11xx_CAN_REGS	   *pRegs;
 	const BT_INTEGRATED_DEVICE   *pDevice;
-	BT_CAN_BUFFER		   oRxBuf;		///< RX fifo - ring buffer.
-	BT_CAN_BUFFER		   oTxBuf;		///< TX fifo - ring buffer.
+	BT_HANDLE		   		hRxFifo;		///< RX fifo - ring buffer.
+	BT_HANDLE		   		hTxFifo;		///< TX fifo - ring buffer.
 };
 
 static BT_HANDLE g_CAN_HANDLES[1] = {
@@ -138,6 +127,8 @@ void CAN_rx(BT_u8 ucmsg_obj_num) {
 	LPC11xx_CAN_MSG_OBJ omsg_obj;
 	BT_HANDLE hCan = g_CAN_HANDLES[0];
 
+	BT_ERROR Error = BT_ERR_NONE;
+
 	omsg_obj.ucmsgobj = ucmsg_obj_num;
 
 	(*rom)->pCAND->can_receive(&omsg_obj);
@@ -152,11 +143,7 @@ void CAN_rx(BT_u8 ucmsg_obj_num) {
 
 	memcpy(oMessage.ucdata, omsg_obj.ucdata, oMessage.ucLength);
 
-	memcpy(hCan->oRxBuf.pIn++, &oMessage, sizeof(oMessage));
-
-	if(hCan->oRxBuf.pIn >= hCan->oRxBuf.pEnd) {
-		hCan->oRxBuf.pIn = hCan->oRxBuf.pBuf;
-	}
+	BT_FifoWrite(hCan->hRxFifo, 1, &oMessage, &Error);
 }
 
 void CAN_tx(BT_u8 ucmsg_obj_num) {
@@ -192,16 +179,8 @@ static BT_ERROR canCleanup(BT_HANDLE hCan) {
 	disableCanPeripheralClock(hCan);
 
 	// Free any buffers if used.
-	if(hCan->oRxBuf.pBuf) {
-	 	BT_kFree(hCan->oRxBuf.pBuf);
-	 	hCan->oRxBuf.pBuf = NULL;
-	 	hCan->oRxBuf.pEnd = NULL;
-	}
-	if(hCan->oTxBuf.pBuf) {
-		BT_kFree(hCan->oTxBuf.pBuf);
-		hCan->oTxBuf.pBuf = NULL;
-		hCan->oTxBuf.pEnd = NULL;
-	}
+	BT_CloseHandle(hCan->hRxFifo);
+	BT_CloseHandle(hCan->hTxFifo);
 
 	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hCan->pDevice, BT_RESOURCE_IRQ, 0);
 
@@ -331,20 +310,13 @@ static BT_ERROR canSetConfig(BT_HANDLE hCan, BT_CAN_CONFIG *pConfig) {
 	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hCan->pDevice, BT_RESOURCE_IRQ, 0);
 	BT_DisableInterrupt(pResource->ulStart);
 
+	BT_ERROR Error = BT_ERR_NONE;
+
 	canSetBaudrate(hCan, pConfig->ulBaudrate);
 
-	if(!hCan->oRxBuf.pBuf && !hCan->oTxBuf.pBuf) {
-		hCan->oRxBuf.pBuf 	= BT_kMalloc(sizeof(BT_CAN_MESSAGE) * pConfig->usRxBufferSize);
-		// Check malloc succeeded!
-		hCan->oRxBuf.pIn 	= hCan->oRxBuf.pBuf;
-		hCan->oRxBuf.pOut 	= hCan->oRxBuf.pBuf;
-		hCan->oRxBuf.pEnd  = hCan->oRxBuf.pBuf + sizeof(BT_CAN_MESSAGE) * pConfig->usRxBufferSize;
-
-		hCan->oTxBuf.pBuf 	= BT_kMalloc(sizeof(BT_CAN_MESSAGE) * pConfig->usTxBufferSize);
-		// Check malloc succeeded!
-		hCan->oTxBuf.pIn	= hCan->oTxBuf.pBuf;
-		hCan->oTxBuf.pOut	= hCan->oTxBuf.pBuf;
-		hCan->oTxBuf.pEnd 	= hCan->oTxBuf.pBuf + sizeof(BT_CAN_MESSAGE) * pConfig->usTxBufferSize;
+	if(!hCan->hRxFifo && !hCan->hTxFifo) {
+		hCan->hRxFifo = BT_FifoCreate(pConfig->usRxBufferSize, sizeof(BT_CAN_MESSAGE), 0, &Error);
+		hCan->hTxFifo = BT_FifoCreate(pConfig->usTxBufferSize, sizeof(BT_CAN_MESSAGE), 0, &Error);
 	}
 
 	(*rom)->pCAND->config_calb(&callbacks);
@@ -365,7 +337,7 @@ static BT_ERROR canSetConfig(BT_HANDLE hCan, BT_CAN_CONFIG *pConfig) {
 
 	BT_EnableInterrupt(pResource->ulStart);
 
-	return BT_ERR_NONE;
+	return Error;
 }
 
 /**
@@ -400,20 +372,11 @@ static BT_ERROR canDisable(BT_HANDLE hCan) {
 
 static BT_ERROR canRead(BT_HANDLE hCan, BT_CAN_MESSAGE *pCanMessage) {
 	// Get message from RX buffer very quickly.
+	BT_ERROR Error = BT_ERR_NONE;
 
-	while (1) {
-		if(hCan->oRxBuf.pOut != hCan->oRxBuf.pIn) {
-			memcpy(pCanMessage, hCan->oRxBuf.pOut++, sizeof(BT_CAN_MESSAGE));
-			if(hCan->oRxBuf.pOut >= hCan->oRxBuf.pEnd) {
-				hCan->oRxBuf.pOut = hCan->oRxBuf.pBuf;
-			}
-			break;
-		} else {
-			BT_ThreadYield();
-		}
-	}
+	BT_FifoRead(hCan->hRxFifo, 1, pCanMessage, &Error);
 
-	return BT_ERR_NONE;
+	return Error;
 }
 
 /**
@@ -421,26 +384,25 @@ static BT_ERROR canRead(BT_HANDLE hCan, BT_CAN_MESSAGE *pCanMessage) {
  **/
 static BT_ERROR canWrite(BT_HANDLE hCan, BT_CAN_MESSAGE *pCanMessage) {
 
-	memcpy(hCan->oTxBuf.pIn++, pCanMessage, sizeof(BT_CAN_MESSAGE));
+	BT_ERROR Error = BT_ERR_NONE;
 
-	if(hCan->oTxBuf.pIn >= hCan->oTxBuf.pEnd) {
-		hCan->oTxBuf.pIn = hCan->oTxBuf.pBuf;
-	}
+	BT_FifoWrite(hCan->hTxFifo, 1, pCanMessage, &Error);
 
 	if (!g_Msg_Queue[0]) {
 		CanTransmit(hCan);
 	}
 
-	return BT_ERR_NONE;
+	return Error;
 }
 
 static void CanTransmit(BT_HANDLE hCan) {
 	LPC11xx_CAN_MSG_OBJ oMsgObj;
 	BT_CAN_MESSAGE oMessage;
+	BT_ERROR Error = BT_ERR_NONE;
 
-	if (hCan->oTxBuf.pOut != hCan->oTxBuf.pIn) {
+	if (!BT_FifoIsEmpty(hCan->hTxFifo, &Error)) {
 
-		memcpy(&oMessage, hCan->oTxBuf.pOut++, sizeof(BT_CAN_MESSAGE));
+		BT_FifoRead(hCan->hTxFifo, 1, &oMessage, &Error);
 		oMsgObj.ucmsgobj = 2;
 		oMsgObj.uclength = oMessage.ucLength;
 		oMsgObj.ulmask   = 0x0000;
@@ -453,9 +415,6 @@ static void CanTransmit(BT_HANDLE hCan) {
 		memcpy(oMsgObj.ucdata, oMessage.ucdata, oMessage.ucLength);
 		g_Msg_Queue[hCan->pDevice->id] = 1;
 
-		if(hCan->oTxBuf.pOut >= hCan->oTxBuf.pEnd) {
-			hCan->oTxBuf.pOut = hCan->oTxBuf.pBuf;
-		}
 
 		(*rom)->pCAND->can_transmit(&oMsgObj);
 	}
@@ -593,6 +552,7 @@ static const BT_RESOURCE oLPC11xx_can0_resources[] = {
 };
 
 static const BT_INTEGRATED_DEVICE oLPC11xx_can0_device = {
+	.id						= 0,
 	.name 					= "LPC11xx,can",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC11xx_can0_resources),
 	.pResources 			= oLPC11xx_can0_resources,

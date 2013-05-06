@@ -16,6 +16,7 @@
 #include "uart.h"						// Includes a full hardware definition for the integrated uarts.
 #include "rcc.h"						// Used for getting access to rcc regs, to determine the real Clock Freq.
 #include "ioconfig.h"						// Used for getting access to IOCON regs.
+#include <collections/bt_fifo.h>
 
 /**
  *	All driver modules in the system shall be tagged with some helpful information.
@@ -27,18 +28,6 @@ BT_DEF_MODULE_AUTHOR					("Robert Steinbauer")
 BT_DEF_MODULE_EMAIL						("rsteinbauer@riegl.com")
 
 /**
- *	This is a simple FIFO implementation for the UART driver.
- *	BT will eventually create optimised implementations of such common structures
- *	making it possible to make even simpler drivers.
- **/
-typedef struct {
-	BT_u8	*pBuf;						///< Pointer to the start of the ring-buffer.
-	BT_u8	*pIn;						///< Input pointer.
-	BT_u8	*pOut;						///< Output pointer.
-	BT_u8	*pEnd;						///< Pointer to end of buffer.
-} BT_UART_BUFFER;
-
-/**
  *	We can define how a handle should look in a UART driver, probably we only need a
  *	hardware-ID number. (Remember, try to keep HANDLES as low-cost as possible).
  **/
@@ -47,8 +36,8 @@ struct _BT_OPAQUE_HANDLE {
 	LPC11xx_UART_REGS	   *pRegs;
 	const BT_INTEGRATED_DEVICE   *pDevice;
 	BT_UART_OPERATING_MODE	eMode;		///< Operational mode, i.e. buffered/polling mode.
-	BT_UART_BUFFER		   oRxBuf;		///< RX fifo - ring buffer.
-	BT_UART_BUFFER		   oTxBuf;		///< TX fifo - ring buffer.
+	BT_HANDLE		   		hRxFifo;		///< RX fifo - ring buffer.
+	BT_HANDLE		   		hTxFifo;		///< TX fifo - ring buffer.
 };
 
 static BT_HANDLE g_USART_HANDLES[1] = {
@@ -63,6 +52,9 @@ static void disableUartPeripheralClock(BT_HANDLE hUart);
 
 static void usartRxHandler(BT_HANDLE hUart) {
 	volatile LPC11xx_UART_REGS *pRegs = hUart->pRegs;
+	BT_u8 ucData;
+
+	BT_ERROR Error = BT_ERR_NONE;
 
 	/* Receive Line Status */
 	if (pRegs->LSR & (LPC11xx_UART_LSR_OE | LPC11xx_UART_LSR_PE | LPC11xx_UART_LSR_FE | LPC11xx_UART_LSR_RXFE | LPC11xx_UART_LSR_BI))
@@ -76,27 +68,25 @@ static void usartRxHandler(BT_HANDLE hUart) {
 
 	while (pRegs->LSR & LPC11xx_UART_LSR_RDR)
 	{
-		*hUart->oRxBuf.pIn++ = pRegs->FIFO & 0xFF;
-		if(hUart->oRxBuf.pIn >= hUart->oRxBuf.pEnd)
-		{
-			hUart->oRxBuf.pIn = hUart->oRxBuf.pBuf;
-		}
+		ucData = pRegs->FIFO & 0xFF;
+		BT_FifoWrite(hUart->hRxFifo, 1, &ucData, &Error);
 	}
 }
 
 static void usartTxHandler(BT_HANDLE hUart) {
 	volatile LPC11xx_UART_REGS *pRegs = hUart->pRegs;
+	BT_u8 ucData;
+
+	BT_ERROR Error = BT_ERR_NONE;
 
 	TX_FIFO_LVL = 0;
 
-	while ((hUart->oTxBuf.pOut != hUart->oTxBuf.pIn) && (TX_FIFO_LVL < 16)) {
-		pRegs->FIFO = *hUart->oTxBuf.pOut++;
+	while (!BT_FifoIsEmpty(hUart->hTxFifo, &Error) && (TX_FIFO_LVL < 16)) {
+		BT_FifoRead(hUart->hTxFifo, 1, &ucData, &Error);
+		pRegs->FIFO = ucData;
 		TX_FIFO_LVL++;
-		if(hUart->oTxBuf.pOut >= hUart->oTxBuf.pEnd) {
-			hUart->oTxBuf.pOut = hUart->oTxBuf.pBuf;
-		}
 	}
-	if (hUart->oTxBuf.pOut == hUart->oTxBuf.pIn) {
+	if (BT_FifoIsEmpty(hUart->hTxFifo, &Error)) {
 		pRegs->IER &= ~LPC11xx_UART_IER_THREIE;	// Disable the interrupt
 	}
 }
@@ -148,7 +138,6 @@ static void ResetUart(BT_HANDLE hUart)
  *
  **/
 static BT_ERROR uartCleanup(BT_HANDLE hUart) {
-
 	ResetUart(hUart);
 
 	// Disable peripheral clock.
@@ -156,16 +145,8 @@ static BT_ERROR uartCleanup(BT_HANDLE hUart) {
 
 	// Free any buffers if used.
 	if(hUart->eMode == BT_UART_MODE_BUFFERED) {
-		if(hUart->oRxBuf.pBuf) {
-		 	BT_kFree(hUart->oRxBuf.pBuf);
-		 	hUart->oRxBuf.pBuf = NULL;
-		 	hUart->oRxBuf.pEnd = NULL;
-		}
-		if(hUart->oTxBuf.pBuf) {
-		 	BT_kFree(hUart->oTxBuf.pBuf);
-		 	hUart->oTxBuf.pBuf = NULL;
-		 	hUart->oTxBuf.pEnd = NULL;
-		}
+		BT_CloseHandle(hUart->hTxFifo);
+		BT_CloseHandle(hUart->hRxFifo);
 	}
 
 	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hUart->pDevice, BT_RESOURCE_IRQ, 0);
@@ -367,6 +348,7 @@ static BT_ERROR uartGetPowerState(BT_HANDLE hUart, BT_POWER_STATE *pePowerState)
  **/
 static BT_ERROR uartSetConfig(BT_HANDLE hUart, BT_UART_CONFIG *pConfig) {
 	volatile LPC11xx_UART_REGS *pRegs = hUart->pRegs;
+	BT_ERROR Error = BT_ERR_NONE;
 
 	pRegs->LCR = (pConfig->ucDataBits - 5);
 	pRegs->LCR |= (pConfig->ucStopBits) << 2;
@@ -377,15 +359,14 @@ static BT_ERROR uartSetConfig(BT_HANDLE hUart, BT_UART_CONFIG *pConfig) {
 	switch(pConfig->eMode) {
 	case BT_UART_MODE_POLLED: {
 		if(hUart->eMode !=  BT_UART_MODE_POLLED) {
-			if(hUart->oRxBuf.pBuf) {
-				BT_kFree(hUart->oRxBuf.pBuf);
-				hUart->oRxBuf.pBuf = NULL;
-				hUart->oRxBuf.pEnd = NULL;
+
+			if(hUart->hTxFifo) {
+				BT_CloseHandle(hUart->hTxFifo);
+				hUart->hTxFifo = NULL;
 			}
-			if(hUart->oTxBuf.pBuf) {
-				BT_kFree(hUart->oTxBuf.pBuf);
-				hUart->oTxBuf.pBuf = NULL;
-				hUart->oTxBuf.pEnd = NULL;
+			if(hUart->hRxFifo) {
+				BT_CloseHandle(hUart->hRxFifo);
+				hUart->hRxFifo = NULL;
 			}
 
 			// Disable TX and RX interrupts
@@ -399,18 +380,9 @@ static BT_ERROR uartSetConfig(BT_HANDLE hUart, BT_UART_CONFIG *pConfig) {
 	case BT_UART_MODE_BUFFERED:
 	{
 		if(hUart->eMode != BT_UART_MODE_BUFFERED) {
-			if(!hUart->oRxBuf.pBuf && !hUart->oTxBuf.pBuf) {
-				hUart->oRxBuf.pBuf 	= BT_kMalloc(pConfig->ulRxBufferSize);
-				// Check malloc succeeded!
-				hUart->oRxBuf.pIn 	= hUart->oRxBuf.pBuf;
-				hUart->oRxBuf.pOut 	= hUart->oRxBuf.pBuf;
-				hUart->oRxBuf.pEnd  = hUart->oRxBuf.pBuf + pConfig->ulRxBufferSize;
-
-				hUart->oTxBuf.pBuf 	= BT_kMalloc(pConfig->ulTxBufferSize);
-				// Check malloc succeeded!
-				hUart->oTxBuf.pIn	= hUart->oTxBuf.pBuf;
-				hUart->oTxBuf.pOut	= hUart->oTxBuf.pBuf;
-				hUart->oTxBuf.pEnd 	= hUart->oTxBuf.pBuf + pConfig->ulTxBufferSize;
+			if(!hUart->hRxFifo && !hUart->hTxFifo) {
+				hUart->hRxFifo = BT_FifoCreate(pConfig->ulRxBufferSize, 1, 0, &Error);
+				hUart->hTxFifo = BT_FifoCreate(pConfig->ulTxBufferSize, 1, 0, &Error);
 
 				pRegs->IER |= LPC11xx_UART_IER_RBRIE;	// Enable the interrupt
 				hUart->eMode = BT_UART_MODE_BUFFERED;
@@ -435,11 +407,11 @@ static BT_ERROR uartGetConfig(BT_HANDLE hUart, BT_UART_CONFIG *pConfig) {
 
 	pConfig->eMode 			= hUart->eMode;
 
+	BT_ERROR Error = BT_ERR_NONE;
+
 	BT_u32 InputClk;
+
 	LPC11xx_RCC_REGS *pRCC = LPC11xx_RCC;
-	/*
-	 *	Determine the clock source!
-	 */
 
 	InputClk = BT_LPC11xx_GetMainFrequency() / pRCC->UARTCLKDIV;
 
@@ -450,15 +422,15 @@ static BT_ERROR uartGetConfig(BT_HANDLE hUart, BT_UART_CONFIG *pConfig) {
 	BT_u32 MulVal 	 = (pRegs->FDR >> 4);
 	BT_u32 DivAddVal = (pRegs->FDR & 0x0F);
 	pConfig->ulBaudrate 	= ((InputClk * MulVal) / (16 * Divider * (MulVal + DivAddVal)));		// Clk / Divisor == ~Baudrate
-	pConfig->ulTxBufferSize = (BT_u32) (hUart->oTxBuf.pEnd - hUart->oTxBuf.pBuf);
-	pConfig->ulRxBufferSize = (BT_u32) (hUart->oRxBuf.pEnd - hUart->oRxBuf.pBuf);
+	pConfig->ulTxBufferSize = BT_FifoSize(hUart->hTxFifo, &Error);
+	pConfig->ulRxBufferSize = BT_FifoSize(hUart->hRxFifo, &Error);
 	pConfig->ucDataBits 	= (pRegs->LCR & 0x00000003) + 5;
 	pConfig->ucStopBits		= ((pRegs->LCR & 0x00000004) >> 2) + 1;
 	pConfig->ucParity		= (BT_UART_PARITY_MODE)((pRegs->LCR & 0x00000380) >> 3);
 	pConfig->eMode			= hUart->eMode;
 
 
-	return BT_ERR_NONE;
+	return Error;
 }
 
 /**
@@ -496,6 +468,9 @@ static BT_ERROR uartDisable(BT_HANDLE hUart) {
 
 static BT_ERROR uartRead(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, BT_u8 *pucDest) {
 	volatile LPC11xx_UART_REGS *pRegs = hUart->pRegs;
+
+	BT_ERROR Error = BT_ERR_NONE;
+
 	switch(hUart->eMode) {
 	case BT_UART_MODE_POLLED:
 	{
@@ -513,17 +488,7 @@ static BT_ERROR uartRead(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, BT_u8 *
 	case BT_UART_MODE_BUFFERED:
 	{
 		// Get bytes from RX buffer very quickly.
-		while(ulSize) {
-			if(hUart->oRxBuf.pOut != hUart->oRxBuf.pIn) {
-				*pucDest++ = *hUart->oRxBuf.pOut++;
-				if(hUart->oRxBuf.pOut >= hUart->oRxBuf.pEnd) {
-					hUart->oRxBuf.pOut = hUart->oRxBuf.pBuf;
-				}
-				ulSize--;
-			} else {
-				BT_ThreadYield();
-			}
-		}
+		BT_FifoRead(hUart->hRxFifo, ulSize, pucDest, &Error);
 		break;
 	}
 
@@ -541,12 +506,17 @@ static BT_ERROR uartRead(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, BT_u8 *
  **/
 static BT_ERROR uartWrite(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const BT_u8 *pucSource) {
 	volatile LPC11xx_UART_REGS *pRegs = hUart->pRegs;
+
+	BT_ERROR Error = BT_ERR_NONE;
+	BT_u8 ucData;
+	BT_u8 *pSrc = pucSource;
+
 	switch(hUart->eMode) {
 	case BT_UART_MODE_POLLED:
 	{
 		while(ulSize) {
 			while(!(pRegs->LSR & LPC11xx_UART_LSR_THRE)) {
-				//BT_ThreadYield();
+				BT_ThreadYield();
 			}
 			pRegs->FIFO = *pucSource++;
 			ulSize--;
@@ -556,23 +526,14 @@ static BT_ERROR uartWrite(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const 
 
 	case BT_UART_MODE_BUFFERED:
 	{
-		while(ulSize) {
-			// We should prevent overflow, and block!
-			*hUart->oTxBuf.pIn++ = *pucSource++;
-			if(hUart->oTxBuf.pIn >= hUart->oTxBuf.pEnd) {
-				hUart->oTxBuf.pIn = hUart->oTxBuf.pBuf;
-			}
-			ulSize--;
-			pRegs->IER |= LPC11xx_UART_IER_THREIE;	// Enable the interrupt
-		}
-		while ((hUart->oTxBuf.pOut != hUart->oTxBuf.pIn) && (TX_FIFO_LVL < 16)) {
-			pRegs->FIFO = *hUart->oTxBuf.pOut++;
-			TX_FIFO_LVL++;
-			if(hUart->oTxBuf.pOut >= hUart->oTxBuf.pEnd) {
-				hUart->oTxBuf.pOut = hUart->oTxBuf.pBuf;
-			}
-		}
+		BT_FifoWrite(hUart->hTxFifo, ulSize, pSrc, &Error);
+		pRegs->IER |= LPC11xx_UART_IER_THREIE;	// Enable the interrupt
 
+		while (!BT_FifoIsEmpty(hUart->hTxFifo, &Error) && (TX_FIFO_LVL < 16)) {
+			BT_FifoRead(hUart->hTxFifo, 1, &ucData, &Error);
+			pRegs->FIFO = ucData;
+			TX_FIFO_LVL++;
+		}
 		break;
 	}
 
