@@ -120,19 +120,18 @@ BT_u32 BT_FifoRead(BT_HANDLE hFifo, BT_u32 ulElements, void * pData, BT_ERROR *p
 
 	// Get bytes from RX buffer very quickly.
 	for (ulRead = 0; ulRead < ulElements; ulRead++) {
-		if(hFifo->pOut != hFifo->pIn) {
-			memcpy(pDest, pSrc, ulElementWidth);
-			pDest += ulElementWidth;
-			pSrc += ulElementWidth;
-			if(pSrc >= hFifo->pEnd) {
-				pSrc = hFifo->pBuf;
-			}
-			hFifo->pOut = pSrc;
-		} else {
+		if(hFifo->pOut == hFifo->pIn) {
 			if (hFifo->ulFlags & BT_FIFO_NONBLOCKING)
 				return ulRead;
-			BT_ThreadYield();
 		}
+		BT_FifoWaitEmpty(hFifo);
+		memcpy(pDest, pSrc, ulElementWidth);
+		pDest += ulElementWidth;
+		pSrc += ulElementWidth;
+		if(pSrc >= hFifo->pEnd) {
+			pSrc = hFifo->pBuf;
+		}
+		hFifo->pOut = pSrc;
 	}
 	return ulRead;
 }
