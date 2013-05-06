@@ -380,9 +380,8 @@ void BT_NVIC_Test_Handler(void);
 #endif
 
 void BT_NVIC_Default_Handler(void) {
+	while (1);
 	return;
-	while (1)
-		;
 }
 
 void BT_NVIC_Test_Handler(void) {
