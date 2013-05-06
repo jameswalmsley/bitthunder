@@ -77,11 +77,15 @@ int bt_main(int argc, char **argv) {
 	}
 
 	BT_UART_CONFIG oConfig;
-	//BT_SetPowerState(hUart, BT_POWER_STATE_AWAKE);
+	BT_SetPowerState(hUart, BT_POWER_STATE_AWAKE);
 
-	oConfig.eMode 		= BT_UART_MODE_POLLED;
-	oConfig.ucDataBits 	= 8;
-	oConfig.ulBaudrate 	= 115200;
+	oConfig.eMode			= BT_UART_MODE_BUFFERED;
+	oConfig.ucDataBits		= BT_UART_8_DATABITS;
+	oConfig.ucStopBits		= BT_UART_ONE_STOP_BIT;
+	oConfig.ucParity		= BT_UART_PARITY_NONE;
+	oConfig.ulBaudrate		= 115200;
+	oConfig.ulRxBufferSize	= 128;
+	oConfig.ulTxBufferSize	= 128;
 
 	BT_UartSetConfiguration(hUart, &oConfig);
 
