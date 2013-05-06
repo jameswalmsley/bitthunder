@@ -1,0 +1,34 @@
+config MACH_LPC11C14
+    bool 
+	select HAS_CAN_0
+	select HAS_I2C
+	select HAS_SPI_0
+	select HAS_SPI_1
+	select GPIO_12PIN_PER_PORT
+	select HAS_PIO0_3
+	select HAS_PIO0_4
+	select HAS_PIO0_5
+	select HAS_PIO0_6
+	select HAS_PIO0_7
+	select HAS_PIO1_4
+	select HAS_PIO1_5
+	select HAS_PIO1_8
+	select HAS_PIO1_10
+	select HAS_PIO1_11
+	
+	select HAS_PIO3_0
+	select HAS_PIO3_1
+	select HAS_PIO3_2
+	select HAS_PIO3_3
+	
+	
+    
+config MACH_RAM_SIZE
+	hex
+	default 0x2000 
+
+config MACH_FLASH_SIZE
+	hex
+	default 0x8000 
+
+	

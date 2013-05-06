@@ -1,0 +1,149 @@
+config HAS_PIO0_3
+	bool
+	default n
+
+config HAS_PIO0_4
+	bool
+	default n
+
+config HAS_PIO0_5
+	bool
+	default n
+
+config HAS_PIO0_6
+	bool
+	default n
+
+config HAS_PIO0_7
+	bool
+	default n
+
+config HAS_PIO1_4
+	bool
+	default n
+
+config HAS_PIO1_5
+	bool
+	default n
+
+config HAS_PIO1_8
+	bool
+	default n
+
+config HAS_PIO1_9
+	bool
+	default n
+
+config HAS_PIO1_10
+	bool
+	default n
+
+config HAS_PIO1_11
+	bool
+	default n
+
+config HAS_PIO2_0
+	bool
+	default n
+
+config HAS_PIO2_1
+	bool
+	default n
+
+config HAS_PIO2_2
+	bool
+	default n
+
+config HAS_PIO2_3
+	bool
+	default n
+
+config HAS_PIO2_4
+	bool
+	default n
+
+config HAS_PIO2_5
+	bool
+	default n
+
+config HAS_PIO2_6
+	bool
+	default n
+
+config HAS_PIO2_7
+	bool
+	default n
+
+config HAS_PIO2_8
+	bool
+	default n
+
+config HAS_PIO2_9
+	bool
+	default n
+
+config HAS_PIO2_10
+	bool
+	default n
+
+config HAS_PIO2_11
+	bool
+	default n
+
+config HAS_PIO3_0
+	bool
+	default n
+
+config HAS_PIO3_1
+	bool
+	default n
+
+config HAS_PIO3_2
+	bool
+	default n
+
+config HAS_PIO3_3
+	bool
+	default n
+
+config HAS_PIO3_4
+	bool
+	default n
+
+config HAS_PIO3_5
+	bool
+	default n
+
+
+config GPIO_12PIN_PER_PORT
+	bool
+	default n
+
+if !MACH_LPC11Axx
+menu "Port 0 configuration"
+source arch/arm/mach/lpc11xx/.config/Port0   
+endmenu
+
+menu "Port 1 configuration"
+source arch/arm/mach/lpc11xx/.config/Port1    
+endmenu
+
+menu "Port 2 configuration"
+source arch/arm/mach/lpc11xx/.config/Port2    
+endmenu
+
+menu "Port 3 configuration"
+source arch/arm/mach/lpc11xx/.config/Port3    
+endmenu
+endif
+
+if MACH_LPC11Axx
+menu "Port 0 configuration"
+source arch/arm/mach/lpc11xx/.config/Port0_a   
+endmenu
+
+menu "Port 1 configuration"
+source arch/arm/mach/lpc11xx/.config/Port1_a   
+endmenu
+endif
+

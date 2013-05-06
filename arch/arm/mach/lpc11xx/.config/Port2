@@ -1,0 +1,243 @@
+choice
+	prompt "LPC11xx_PIO2_0"	
+	default LPC11xx_PIO2_0_GPIO
+	depends on HAS_LPC11xx_PIO2_0
+
+config LPC11xx_PIO2_0_GPIO
+    bool	"GPIO"   
+    
+config LPC11xx_PIO2_0_DTR
+    bool	"DTR"
+    
+config LPC11xx_PIO2_0_SSEL1
+    bool	"SSEL1"
+
+endchoice
+
+config LPC11xx_PIO2_0_FUNCTION
+    int
+    default 0 if LPC11xx_PIO2_0_GPIO
+    default 1 if LPC11xx_PIO2_0_DTR
+    default 2 if LPC11xx_PIO2_0_SSEL1
+    
+choice
+	prompt "LPC11xx_PIO2_1"	
+	default LPC11xx_PIO2_1_GPIO
+	depends on HAS_LPC11xx_PIO2_1
+
+config LPC11xx_PIO2_1_GPIO
+    bool	"GPIO"
+    
+config LPC11xx_PIO2_1_DSR
+    bool	"DSR"
+    
+config LPC11xx_PIO2_1_SCK1
+    bool	"SCK1"
+
+endchoice
+
+config LPC11xx_PIO2_1_FUNCTION
+    int
+    default 0 if LPC11xx_PIO2_1_GPIO
+    default 1 if LPC11xx_PIO2_1_DSR
+    default 2 if LPC11xx_PIO2_1_SCK1
+    
+choice
+	prompt "LPC11xx_PIO2_2"	
+	default LPC11xx_PIO2_2_GPIO
+	depends on HAS_LPC11xx_PIO2_2
+
+config LPC11xx_PIO2_2_GPIO
+    bool	"GPIO"
+    
+config LPC11xx_PIO2_2_DCD
+    bool	"DCD"
+    
+config LPC11xx_PIO2_2_MISO1
+    bool	"MISO1"
+
+endchoice
+
+config LPC11xx_PIO2_2_FUNCTION
+    int
+    default 0 if LPC11xx_PIO2_2_GPIO
+    default 1 if LPC11xx_PIO2_2_DCD
+    default 2 if LPC11xx_PIO2_2_MISO1
+    
+choice
+	prompt "LPC11xx_PIO2_3"	
+	default LPC11xx_PIO2_3_GPIO
+	depends on HAS_LPC11xx_PIO2_3
+
+config LPC11xx_PIO2_3_GPIO
+    bool	"GPIO"
+    
+config LPC11xx_PIO2_3_RI
+    bool	"RI"
+    
+config LPC11xx_PIO2_3_MOSI1
+    bool	"MOSI1"
+    
+endchoice
+
+config LPC11xx_PIO2_3_FUNCTION
+    int
+    default 0 if LPC11xx_PIO2_3_GPIO
+    default 1 if LPC11xx_PIO2_3_RI
+    default 2 if LPC11xx_PIO2_3_MOSI1
+
+choice
+	prompt "LPC11xx_PIO2_4"	
+	default LPC11xx_PIO2_4_GPIO
+	depends on HAS_LPC11xx_PIO2_4
+
+config LPC11xx_PIO2_4_GPIO
+    bool	"GPIO"
+       
+config LPC11xx_PIO2_4_CT16B1_MAT1
+    bool	"CT16B1_MAT1"
+	
+config LPC11xx_PIO2_4_SSEL1
+    bool	"SSEL1"
+	
+endchoice
+
+config LPC11xx_PIO2_4_FUNCTION
+    int
+    default 0 if LPC11xx_PIO2_4_GPIO
+    default 1 if LPC11xx_PIO2_4_CT16B1_MAT1
+    default 2 if LPC11xx_PIO2_4_SSEL1
+    
+choice
+	prompt "LPC11xx_PIO2_5"	
+	default LPC11xx_PIO2_5_GPIO
+	depends on HAS_LPC11xx_PIO2_5
+
+config LPC11xx_PIO2_5_GPIO
+    bool	"GPIO"
+    
+config LPC11xx_PIO2_5_CT32B0_MAT0
+    bool	"CT32B0_MAT0"
+
+endchoice
+
+config LPC11xx_PIO2_5_FUNCTION
+    int
+    default 0 if LPC11xx_PIO2_5_GPIO
+    default 1 if LPC11xx_PIO2_5_CT32B0_MAT0
+
+choice
+	prompt "LPC11xx_PIO2_6"	
+	default LPC11xx_PIO2_6_GPIO
+	depends on HAS_LPC11xx_PIO2_6
+
+config LPC11xx_PIO2_6_GPIO
+    bool	"GPIO"
+    
+config LPC11xx_PIO2_6_CT32B0_MAT1
+    bool	"CT32B0_MAT1"
+    
+endchoice
+
+config LPC11xx_PIO2_6_FUNCTION
+    int
+    default 0 if LPC11xx_PIO2_6_GPIO
+    default 1 if LPC11xx_PIO2_6_CT32B0_MAT1
+    
+choice
+	prompt "LPC11xx_PIO2_7"	
+	default LPC11xx_PIO2_7_GPIO
+	depends on HAS_LPC11xx_PIO2_7
+
+config LPC11xx_PIO2_7_GPIO
+    bool	"GPIO"
+    
+config LPC11xx_PIO2_7_CT32B0_MAT2
+    bool	"CT32B0_MAT2"
+   
+config LPC11xx_PIO2_7_RXD
+    bool	"RXD"
+	
+endchoice
+
+config LPC11xx_PIO2_7_FUNCTION
+    int
+    default 0 if LPC11xx_PIO2_7_GPIO
+    default 1 if LPC11xx_PIO2_7_CT32B0_MAT2
+    default 2 if LPC11xx_PIO2_7_RXD
+
+choice
+	prompt "LPC11xx_PIO2_8"	
+	default LPC11xx_PIO2_8_GPIO
+	depends on HAS_LPC11xx_PIO2_8
+
+config LPC11xx_PIO2_8_GPIO
+    bool	"GPIO"
+    
+config LPC11xx_PIO2_8_CT32B0_MAT3
+    bool	"CT32B0_MAT3"
+
+config LPC11xx_PIO2_8_TXD
+    bool	"TXD"
+    	
+endchoice
+
+config LPC11xx_PIO2_8_FUNCTION
+    int
+    default 0 if LPC11xx_PIO2_8_GPIO
+    default 1 if LPC11xx_PIO2_8_CT32B0_MAT3
+    default 2 if LPC11xx_PIO2_8_TXD
+    
+choice
+	prompt "LPC11xx_PIO2_9"	
+	default LPC11xx_PIO2_9_GPIO
+	depends on HAS_LPC11xx_PIO2_9
+
+config LPC11xx_PIO2_9_GPIO
+    bool	"GPIO"
+    
+config LPC11xx_PIO2_9_CT32B0_CAP0
+    bool	"CT32B0_CAP0"
+    
+endchoice
+
+config LPC11xx_PIO2_9_FUNCTION
+    int
+    default 0 if LPC11xx_PIO2_9_GPIO
+    default 1 if LPC11xx_PIO2_9_CT32B0_CAP0
+
+choice
+	prompt "LPC11xx_PIO2_10"	
+	default LPC11xx_PIO2_10_GPIO
+	depends on HAS_LPC11xx_PIO2_10
+
+config LPC11xx_PIO2_10_GPIO
+    bool	"GPIO"
+
+endchoice
+
+config LPC11xx_PIO2_10_FUNCTION
+    int
+    default 0 if LPC11xx_PIO2_10_GPIO
+    
+choice
+	prompt "LPC11xx_PIO2_11"	
+	default LPC11xx_PIO2_11_GPIO
+	depends on HAS_LPC11xx_PIO2_11
+
+config LPC11xx_PIO2_11_GPIO
+    bool	"GPIO"
+    
+config LPC11xx_PIO2_11_SCK0
+    bool	"SCK0"
+    
+config LPC11xx_PIO2_11_CT32B0_CAP1
+    bool	"CT32B0_CAP1"
+	
+endchoice
+
+config LPC11xx_PIO2_11_FUNCTION
+    int
+    default 0 if LPC11xx_PIO2_11_GPIO
+    default 1 if LPC11xx_PIO2_11_SCK0
+    default 2 if LPC11xx_PIO2_11_CT32B0_CAP1    
