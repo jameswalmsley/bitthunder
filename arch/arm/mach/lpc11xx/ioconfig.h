@@ -9,7 +9,7 @@
 
 #include <bitthunder.h>
 
-#ifdef BT_CONFIG_MACH_LPC11xx_LPC11Axx
+#ifdef BT_CONFIG_MACH_LPC11Axx
 typedef struct _LPC11xx_IOCON_REGS {
 	BT_u32		LPC11xx_IOCON_RESET_PIO0_0;				// 0x000 Offset
 	BT_u32		LPC11xx_IOCON_PIO0_1;					// 0x004 Offset
@@ -130,7 +130,7 @@ typedef struct _LPC11xx_IOCON_REGS {
 #define LPC11xx_IOCON_BASE	0x40044000
 #define LPC11xx_IOCON 		((LPC11xx_IOCON_REGS *) (LPC11xx_IOCON_BASE))
 
-#ifdef BT_CONFIG_MACH_LPC11xx_LPC11Axx
+#ifdef BT_CONFIG_MACH_LPC11Axx
 	#define LPC11xx_PIO0_0			&LPC11xx_IOCON->LPC11xx_IOCON_RESET_PIO0_0
 	#define LPC11xx_PIO0_1			&LPC11xx_IOCON->LPC11xx_IOCON_PIO0_1
 	#define LPC11xx_PIO0_2			&LPC11xx_IOCON->LPC11xx_IOCON_PIO0_2
