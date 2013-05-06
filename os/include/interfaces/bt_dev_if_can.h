@@ -7,6 +7,12 @@
 #define	BT_CAN_EFF_FLAG		0x80000000			// Extended Frame Format
 #define	BT_CAN_RTR_FLAG		0x40000000			// Remote Transmission Request
 
+typedef enum {
+	BT_CAN_MODE_POLLED = 0,	///< A really simple, pure polling mode, with thread-yielding.
+	BT_CAN_MODE_BUFFERED,		///< A fully buffered interrupt driven mode.
+} BT_CAN_OPERATING_MODE;
+
+
 typedef struct {
 	BT_u32	ulID;
 	BT_u8	ucLength;
@@ -14,6 +20,7 @@ typedef struct {
 } BT_CAN_MESSAGE;
 
 typedef struct {
+	BT_UART_OPERATING_MODE	eMode;
 	BT_u32 					ulBaudrate;
 	BT_u16					usRxBufferSize;		///<
 	BT_u16					usTxBufferSize;		///<
