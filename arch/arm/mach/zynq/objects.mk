@@ -13,6 +13,7 @@ MACH_ZYNQ_OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/uart.o
 MACH_ZYNQ_OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/timer.o
 MACH_ZYNQ_OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/gpio.o
 MACH_ZYNQ_OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/sdio.o
+MACH_ZYNQ_OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/devcfg.o
 
 $(BUILD_DIR)arch/arm/mach/zynq/zynq.o: CFLAGS += -DBT_CONFIG_ARCH_ARM_GIC_BASE=$(BT_CONFIG_ARCH_ARM_GIC_BASE)
 $(BUILD_DIR)arch/arm/mach/zynq/zynq.o: CFLAGS += -DBT_CONFIG_ARCH_ARM_GIC_DIST_BASE=$(BT_CONFIG_ARCH_ARM_GIC_DIST_BASE)

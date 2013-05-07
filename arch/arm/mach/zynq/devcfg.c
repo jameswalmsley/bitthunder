@@ -7,6 +7,7 @@
 
 #include <bitthunder.h>
 #include "devcfg.h"
+#include "slcr.h"
 
 BT_DEF_MODULE_NAME				("Zynq Device Configuration")
 BT_DEF_MODULE_DESCRIPTION		("Provides filesystem access to the devcfg hardware")
@@ -30,8 +31,46 @@ static BT_ERROR devcfg_cleanup(BT_HANDLE h) {
  *	This assumes a single write request will be generated.
  **/
 static BT_u32 devcfg_write(BT_HANDLE hDevcfg, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
+	// Wait for PCFG_INIT bit to be high.
 
-	return 0;
+	// Enable level shifters
+	ZYNQ_SLCR->LVL_SHFTR_EN = 0x0000000A;	// Enable PS to PL level shifting.
+
+	// Reset the PL
+
+	hDevcfg->pRegs->CTRL |= CTRL_PCFG_PROG_B;	// Setting PCFG_PROGB signal to high
+
+	BT_ThreadYield();							// A small delay.
+
+	hDevcfg->pRegs->CTRL &= ~CTRL_PCFG_PROG_B;	// Setting PCFG_PROGB signal to low
+
+	while(hDevcfg->pRegs->STATUS & STATUS_PCFG_INIT) {	// Wait for PL for reset
+		BT_ThreadYield();
+	}
+
+	hDevcfg->pRegs->CTRL |= CTRL_PCFG_PROG_B;
+
+	while(!(hDevcfg->pRegs->STATUS & STATUS_PCFG_INIT)) {	// Wait for PL for status set
+		BT_ThreadYield();
+	}
+
+	hDevcfg->pRegs->INT_STS = 0xFFFFFFFF;
+
+	hDevcfg->pRegs->MCTRL &= ~MCTRL_PCAP_LPBK;
+
+	hDevcfg->pRegs->DMA_SRC_ADDR = (BT_u32 ) pBuffer | 1;
+	hDevcfg->pRegs->DMA_DST_ADDR = 0xFFFFFFFF;
+
+	hDevcfg->pRegs->DMA_SRC_LEN = (ulSize/4);
+	hDevcfg->pRegs->DMA_DST_LEN = (ulSize/4);
+
+	while(!(hDevcfg->pRegs->INT_STS & INT_STS_DMA_DONE_INT)) {
+		BT_ThreadYield();
+	}
+
+	hDevcfg->pRegs->INT_STS = INT_STS_DMA_DONE_INT;	// Clear FPGA_DONE status.
+
+	return ulSize;
 }
 
 
@@ -51,9 +90,11 @@ static BT_IF_HANDLE oHandleInterface = {
 	.oIfs = {
 		.pFileIF = &oFileOperations,
 	},
-}
+};
 
 static BT_HANDLE devcfg_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
+
+	BT_ERROR Error;
 
 	BT_HANDLE hDevcfg = BT_CreateHandle(&oHandleInterface, sizeof(struct _BT_OPAQUE_HANDLE), pError);
 	if(!hDevcfg) {
@@ -67,6 +108,14 @@ static BT_HANDLE devcfg_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pEr
 	}
 
 	hDevcfg->pRegs = (ZYNQ_DEVCFG_REGS *) pResource->ulStart;
+
+	hDevcfg->pRegs->UNLOCK = 0x757BDF0D;				// Unlock the DEVCFG interface.
+
+	hDevcfg->pRegs->INT_STS = 0xFFFFFFFF;				// Clear all interrupt status signals.
+
+	hDevcfg->pRegs->CTRL |= CTRL_PCAP_MODE;				// Enable PCAP transfer mode.
+	hDevcfg->pRegs->CTRL |= CTRL_PCAP_PR;				// Select PCAP for reconfiguration, (disables ICAP).
+	hDevcfg->pRegs->CTRL &= ~CTRL_QUARTER_PCAP_RATE;	// Set full bandwidth PCAP loading rate.
 
 	return hDevcfg;
 

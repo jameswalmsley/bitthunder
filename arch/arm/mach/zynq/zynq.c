@@ -112,7 +112,7 @@ static const BT_RESOURCE oZynq_devcfg_resources[] = {
 };
 
 static const BT_INTEGRATED_DEVICE oZynq_devcfg_device = {
-	.name 					"zynq,devcfg",
+	.name 					= "zynq,devcfg",
 	.ulTotalResources		= BT_ARRAY_SIZE(oZynq_devcfg_resources),
 	.pResources				= oZynq_devcfg_resources,
 };
