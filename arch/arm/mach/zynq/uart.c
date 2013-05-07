@@ -125,7 +125,7 @@ static BT_ERROR uartSetBaudrate(BT_HANDLE hUart, BT_u32 ulBaudrate) {
 	 *	We must determine the input clock frequency to the UART peripheral.
 	 */
 
-	ZYNQ_SLCR_REGS *pSLCR = ZYNQ_SLCR;
+	volatile ZYNQ_SLCR_REGS *pSLCR = ZYNQ_SLCR;
 	/*
 	 *	Determine the clock source!
 	 */
@@ -318,7 +318,7 @@ static BT_ERROR uartGetConfig(BT_HANDLE hUart, BT_UART_CONFIG *pConfig) {
 	pConfig->eMode 			= hUart->eMode;
 
 	BT_u32 InputClk;
-	ZYNQ_SLCR_REGS *pSLCR = ZYNQ_SLCR;
+	volatile ZYNQ_SLCR_REGS *pSLCR = ZYNQ_SLCR;
 	/*
 	 *	Determine the clock source!
 	 */
