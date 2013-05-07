@@ -102,6 +102,27 @@ static const BT_INTEGRATED_DEVICE oZynq_watchdog_device = {
 	.pResources				= oZynq_cpu_timer_resources,
 };
 
+
+static const BT_RESOURCE oZynq_devcfg_resources[] = {
+	{
+		.ulStart			= 0xF8007000,
+		.ulEnd				= 0xF8007000 + BT_SIZE_4K - 1,
+		.ulFlags			= BT_RESOURCE_MEM,
+	},
+};
+
+static const BT_INTEGRATED_DEVICE oZynq_devcfg_device = {
+	.name 					"zynq,devcfg",
+	.ulTotalResources		= BT_ARRAY_SIZE(oZynq_devcfg_resources),
+	.pResources				= oZynq_devcfg_resources,
+};
+
+BT_DEVFS_INODE_DEF oZynq_devcfg_inode = {
+	.szpName = "devcfg",
+	.pDevice = &oZynq_devcfg_device,
+};
+
+
 #ifdef BT_CONFIG_MACH_ZYNQ_UART_0
 static const BT_RESOURCE oZynq_uart0_resources[] = {
 	{
