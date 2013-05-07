@@ -537,7 +537,7 @@ static BT_HANDLE uart_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErro
 
 	const BT_RESOURCE *pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_MEM, 0);
 	if(!pResource) {
-		Error = BT_ERR_NO_MEMORY;
+		Error = BT_ERR_GENERIC;
 		goto err_free_out;
 	}
 
