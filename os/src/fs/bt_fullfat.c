@@ -125,6 +125,10 @@ static BT_HANDLE fullfat_open(BT_HANDLE hMount, const BT_i8 *szpPath, BT_u32 ulM
 }
 
 static BT_ERROR fullfat_file_cleanup(BT_HANDLE hFile) {
+
+	BT_FF_FILE *pFile = (BT_FF_FILE *) hFile;
+	FF_Close(pFile->pFile);
+
 	return BT_ERR_NONE;
 }
 
