@@ -21,9 +21,8 @@ struct _BT_OPAQUE_HANDLE {
 
 static BT_BOOL g_bInUse = BT_FALSE;
 
-
 static BT_ERROR devcfg_cleanup(BT_HANDLE h) {
-
+	g_bInUse = BT_FALSE;
 	return BT_ERR_NONE;
 }
 
@@ -96,6 +95,13 @@ static BT_HANDLE devcfg_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pEr
 
 	BT_ERROR Error;
 
+	if(g_bInUse) {
+		Error = BT_ERR_GENERIC;
+		goto err_set_out;
+	}
+
+	g_bInUse = BT_TRUE;
+
 	BT_HANDLE hDevcfg = BT_CreateHandle(&oHandleInterface, sizeof(struct _BT_OPAQUE_HANDLE), pError);
 	if(!hDevcfg) {
 		goto err_set_out;
@@ -117,12 +123,20 @@ static BT_HANDLE devcfg_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pEr
 	hDevcfg->pRegs->CTRL |= CTRL_PCAP_PR;				// Select PCAP for reconfiguration, (disables ICAP).
 	hDevcfg->pRegs->CTRL &= ~CTRL_QUARTER_PCAP_RATE;	// Set full bandwidth PCAP loading rate.
 
+	if(pError) {
+		*pError = BT_ERR_NONE;
+	}
+
 	return hDevcfg;
 
 err_free_out:
 	BT_kFree(hDevcfg);
 
 err_set_out:
+	if(pError) {
+		*pError = Error;
+	}
+
 	return NULL;
 }
 
