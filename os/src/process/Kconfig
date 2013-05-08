@@ -3,5 +3,23 @@ config MAX_PROCESS_NAME
     int "Max Process Name Length"
 	default 10
 
+config ALIVE_LED
+    bool "Alive! LED"
+	default n
+	
+config ALIVE_LED_GPIO
+    int "GPIO Line to use for Alive! LED"
+	default -1
+	depends on ALIVE_LED
+
+config ALIVE_LED_PERIOD
+    int "Alive! LED Period (Ticks)"
+	default 1000
+	depends on ALIVE_LED
+
+config ALIVE_LED_PRIORITY
+    int "Alive! LED task priority"
+	default 0
+	depends on ALIVE_LED
 
 endmenu

@@ -19,30 +19,6 @@ struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;
 };
 
-static void idle_task(void *pParam) {
-
-	//BT_BOOL bState = BT_TRUE;
-	BT_GpioSetDirection(7, BT_GPIO_DIR_OUTPUT);
-
-	BT_TICK ticks = BT_kTickCount();
-	BT_TICK ticks_a = ticks;
-
-	while(1) {
-		ticks_a = BT_kTickCount();
-		BT_GpioSet(7, BT_TRUE);
-		BT_kTaskDelayUntil(&ticks_a, 10);
-		BT_GpioSet(7, BT_FALSE);
-		BT_kTaskDelayUntil(&ticks_a, 50);
-		BT_GpioSet(7, BT_TRUE);
-		BT_kTaskDelayUntil(&ticks_a, 10);
-		BT_GpioSet(7, BT_FALSE);
-
-		BT_kTaskDelayUntil(&ticks, 1000);
-	}
-
-	BT_kTaskDelete(NULL);
-}
-
 /**
  *	@ Note: argc and argv may be used for kernel booting parameters at a later date.
  *
@@ -121,13 +97,10 @@ int bt_main(int argc, char **argv) {
 	//int retval = main(argc, argv);
 
 	BT_THREAD_CONFIG oThreadConfig = {
-		.ulStackDepth 	= 128,
+		.ulStackDepth 	= 512,
 		.ulPriority		= 0,
 	};
 
-	BT_kTaskCreate(idle_task, "BT_IDLE", &oThreadConfig, &Error);
-
-	oThreadConfig.ulStackDepth = 512;
 	BT_kTaskCreate((BT_FN_TASK_ENTRY) main, "MAIN", &oThreadConfig, &Error);
 
 	BT_kStartScheduler();
