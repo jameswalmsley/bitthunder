@@ -170,7 +170,9 @@ static BT_ERROR fullfat_seek(BT_HANDLE hFile, BT_u64 ulOffset) {
 }
 
 static BT_u64 fullfat_tell(BT_HANDLE hFile) {
-	return 0;
+	BT_FF_FILE *pFile = (BT_FF_FILE *) hFile;
+
+	return (BT_u64) FF_Tell(pFile->pFile);
 }
 
 static BT_ERROR fullfat_mkdir(BT_HANDLE hMount, const BT_i8 *szpPath) {
