@@ -297,7 +297,7 @@ static void sd_manager_sm(void *pData) {
 
 
 				char buffer[10];
-				sprintf(buffer, "mmc%d", pHost->ulHostID);
+				sprintf(buffer, "mmc%d", (int) pHost->ulHostID);
 				BT_RegisterBlockDevice(hSD, buffer, &hSD->oDescriptor);
 
 				BT_GpioSet(7, BT_TRUE);
@@ -362,7 +362,7 @@ static BT_u32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount,
 		hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
 
 		BT_u32 ulStatus = oCommand.response[0];
-		BT_u32 ulState = (ulStatus >> 9) & 0xF;
+		ulState = (ulStatus >> 9) & 0xF;
 
 		break;
 
