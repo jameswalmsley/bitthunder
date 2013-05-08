@@ -16,7 +16,7 @@ extern BT_u32 BT_ZYNQ_GetArmPLLFrequency();
  *	However, you can just use it as an already running process.
  **/
 
-char *buffer = 0x00100000;
+char *buffer = (char *) 0x00100000;
 
 int main(int argc, char **argv) {
 
@@ -58,14 +58,8 @@ int main(int argc, char **argv) {
 	BT_kPrint("Done");
 
 	while(1) {
-		BT_u32 i;
-		BT_u32 ticks = BT_GetKernelTime();
-
-		BT_u32 offset = BT_GetSystemTimerOffset();
-		//bt_printf("Time: %d.%03d\r", ticks/1000000, ticks%1000000);
+		
 		BT_ThreadSleepUntil(&time, 1000);
-
-
 	}
 
 	return 0;
