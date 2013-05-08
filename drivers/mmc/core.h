@@ -44,6 +44,10 @@ typedef struct _BT_MMC_OPS {
 	BT_ERROR 	(*pfnRequest)			(BT_HANDLE hSDIO, MMC_COMMAND *pCommand);
 	BT_u32		(*pfnRead)				(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError);
 	BT_u32		(*pfnWrite)				(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError);
+
+	BT_ERROR	(*pfnEnableClock)		(BT_HANDLE hSDIO);
+	BT_ERROR	(*pfnDisableClock)		(BT_HANDLE hSDIO);
+
 } BT_MMC_OPS;
 
 BT_ERROR BT_RegisterSDHostController(BT_HANDLE hHost, const BT_MMC_OPS *pOps);
