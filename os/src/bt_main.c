@@ -2,7 +2,7 @@
  *	This is the operating system main entry point, from where it will boot and load
  *	kernel modules.
  *
- *	Once all kernel modules are loaded and initialised, we shall look user application
+ *	Once all kernel modules are loaded and initialised, we shall look for user application
  *	processes to be loaded.
  *
  **/
@@ -21,28 +21,25 @@ struct _BT_OPAQUE_HANDLE {
 
 /**
  *	@ Note: argc and argv may be used for kernel booting parameters at a later date.
- *
- *
  **/
 int bt_main(int argc, char **argv) {
 
-	BT_ERROR Error;
+	BT_ERROR 	Error;
+	BT_HANDLE 	hUart = NULL;
 
-	// Get Machine Description.
 	BT_MACHINE_DESCRIPTION *pMachine = BT_GetMachineDescription(&Error);
 	if(pMachine->szpName) {
 		Error = 0;
 	}
 
-	if (pMachine->pfnMachineInit) pMachine->pfnMachineInit(pMachine);
-
+	if (pMachine->pfnMachineInit) {
+		pMachine->pfnMachineInit(pMachine);
+	}
 
 	const BT_INTEGRATED_DRIVER *pDriver = BT_GetIntegratedDriverByName(pMachine->pInterruptController->name);
 	if(pDriver) {
 		pDriver->pfnProbe(pMachine->pInterruptController, &Error);
 	}
-
-	BT_HANDLE hUart = NULL;
 
 	if (pMachine->pBootLogger)
 	{
@@ -60,8 +57,6 @@ int bt_main(int argc, char **argv) {
 	oConfig.ucStopBits		= BT_UART_ONE_STOP_BIT;
 	oConfig.ucParity		= BT_UART_PARITY_NONE;
 	oConfig.ulBaudrate		= 115200;
-	oConfig.ulRxBufferSize	= 128;
-	oConfig.ulTxBufferSize	= 128;
 
 	BT_UartSetConfiguration(hUart, &oConfig);
 
@@ -72,15 +67,9 @@ int bt_main(int argc, char **argv) {
 	BT_kPrint("%s (%s)", BT_VERSION_STRING, BT_VERSION_NAME);
 
 	BT_kPrint("Start Loading kernel modules...");
-	//BT_CharDeviceWrite(hUart, 0, strlen(string), (BT_u8 *)string);
-
-	BT_kPrint("Enumerate integrated devices");
-
-
-	// Go through the module initialisation routines!
 	Error = BT_InitialiseKernelModules(hUart);
 
-
+	BT_kPrint("Enumerate integrated devices");
 	Error = BT_ProbeIntegratedDevices(hUart);
 
 	BT_kPrint("Enter user-mode, and start user-space application...");
@@ -89,25 +78,21 @@ int bt_main(int argc, char **argv) {
 
 	BT_SetStandardHandle(NULL);
 
-	if (hUart)
-	{
+	if (hUart) {
 		BT_CloseHandle(hUart);
 	}
 
-	//int retval = main(argc, argv);
-
 	BT_THREAD_CONFIG oThreadConfig = {
-		.ulStackDepth 	= 512,
-		.ulPriority		= 0,
+		.ulStackDepth 	= BT_CONFIG_MAIN_TASK_STACK_DEPTH,
+		.ulPriority		= BT_CONFIG_MAIN_TASK_PRIORITY,
 	};
 
 	BT_kTaskCreate((BT_FN_TASK_ENTRY) main, "MAIN", &oThreadConfig, &Error);
 
 	BT_kStartScheduler();
-	//vTaskStartScheduler();
 
 	// Write a debug message to the debugger port,
-	//	The main application has quit on us!
+	// It was not possible to start the scheduler.
 
 	return BT_ERR_NONE;
 }

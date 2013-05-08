@@ -5,3 +5,10 @@ source os/src/fs/Kconfig
 source os/src/syslog/Kconfig
 source os/src/lib/Kconfig
 
+config MAIN_TASK_STACK_DEPTH
+    int "Main task stack depth"
+	default 512
+
+config MAIN_TASK_PRIORITY
+    int "Main task stack priority"
+	default 0
