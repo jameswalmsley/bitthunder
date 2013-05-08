@@ -157,7 +157,12 @@ static BT_s32 fullfat_getc(BT_HANDLE hFile, BT_u32 ulFlags, BT_ERROR *pError) {
 }
 
 static BT_ERROR fullfat_putc(BT_HANDLE hFile, BT_u32 ulFlags, BT_i8 cData) {
-	return BT_ERR_NONE;
+
+	BT_FF_FILE *pFile = (BT_FF_FILE *) hFile;
+
+	FF_T_SINT32 ret = FF_PutC(pFile->pFile, (FF_T_UINT8) cData);
+
+	return (BT_ERROR) ret;
 }
 
 static BT_ERROR fullfat_seek(BT_HANDLE hFile, BT_u64 ulOffset) {
