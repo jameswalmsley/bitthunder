@@ -91,12 +91,14 @@ static BT_ERROR sdhci_cleanup(BT_HANDLE hSDIO) {
 	return BT_ERR_NONE;
 }
 
-static void sdhci_enable_clock(BT_HANDLE hSDIO) {
+static BT_ERROR sdhci_enable_clock(BT_HANDLE hSDIO) {
 	hSDIO->pRegs->CLOCK_CONTROL |= 4;
+	return BT_ERR_NONE;
 }
 
-static void sdhci_disable_clock(BT_HANDLE hSDIO) {
+static BT_ERROR sdhci_disable_clock(BT_HANDLE hSDIO) {
 	hSDIO->pRegs->CLOCK_CONTROL &= ~4;
+	return BT_ERR_NONE;
 }
 
 static BT_ERROR sdhci_request(BT_HANDLE hSDIO, MMC_COMMAND *pCommand) {
@@ -407,6 +409,8 @@ static const BT_MMC_OPS sdhci_mmc_ops = {
 	.pfnSetDataWidth    = sdhci_set_data_width,
 	.pfnSetBlockSize    = sdhci_set_block_size,
 	.pfnInitialise 		= sdhci_initialise,
+	.pfnEnableClock		= sdhci_enable_clock,
+	.pfnDisableClock	= sdhci_disable_clock,
 };
 
 static BT_HANDLE sdhci_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
