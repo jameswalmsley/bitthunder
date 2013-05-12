@@ -393,7 +393,7 @@ static BT_ERROR uartRead(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, BT_u8 *
 	{
 		while(ulSize) {
 			while((pRegs->SR & ZYNQ_UART_SR_RXEMPTY)) {
-				//BT_ThreadYield();
+				BT_ThreadYield();
 			}
 
 			*pucDest++ = pRegs->FIFO & 0x000000FF;
@@ -438,7 +438,7 @@ static BT_ERROR uartWrite(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const 
 	{
 		while(ulSize) {
 			while(pRegs->SR & ZYNQ_UART_SR_TXFULL) {
-				//BT_ThreadYield();
+				BT_ThreadYield();
 			}
 			pRegs->FIFO = *pucSource++;
 			ulSize--;
@@ -464,6 +464,16 @@ static BT_ERROR uartWrite(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const 
 	default:
 		break;
 	}
+	return BT_ERR_NONE;
+}
+
+static BT_ERROR uartFlush(BT_HANDLE hUart) {
+	volatile ZYNQ_UART_REGS *pRegs = hUart->pRegs;
+
+	while((pRegs->SR & ZYNQ_UART_SR_TXACTIVE) || !(pRegs->SR & ZYNQ_UART_SR_TXEMPTY)) {
+		BT_ThreadYield();
+	}
+
 	return BT_ERR_NONE;
 }
 
@@ -495,10 +505,9 @@ static const BT_IF_POWER oPowerInterface = {
 };
 
 static const BT_IF_CHARDEV oCharDevInterface = {
-	uartRead,													///< CH device read function.
-	uartWrite,													///< CH device write function.
-	NULL,//uartGetch,											///< This API wasn't implemented in this driver.
-	NULL,//uartPutch,											///< :: Therefore the pointer must be NULL for BT to handle.
+	.pfnRead = uartRead,										///< CH device read function.
+	.pfnWrite = uartWrite,										///< CH device write function.
+	.pfnFlush = uartFlush,
 };
 
 static const BT_DEV_IFS oConfigInterface = {
