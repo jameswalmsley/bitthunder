@@ -13,15 +13,28 @@ static BT_BOOL chardevIfSupported(BT_HANDLE hDevice) {
 
 BT_ERROR BT_CharDeviceRead(BT_HANDLE hDevice, BT_u32 ulFlags, BT_u32 ulSize, BT_u8 *pucDest) {
 	if(!chardevIfSupported(hDevice)) {
-		return (BT_ERROR) -1;
+		return BT_ERR_GENERIC;
 	}
 	return BT_IF_CHARDEV_OPS(hDevice)->pfnRead(hDevice, ulFlags, ulSize, pucDest);
 }
 
 BT_ERROR BT_CharDeviceWrite(BT_HANDLE hDevice, BT_u32 ulFlags, BT_u32 ulSize, const BT_u8 *pucSource) {
 	if(!chardevIfSupported(hDevice)) {
-		return (BT_ERROR) -1;
+		return BT_ERR_GENERIC;
 	}
 
 	return BT_IF_CHARDEV_OPS(hDevice)->pfnWrite(hDevice, ulFlags, ulSize, pucSource);
+}
+
+
+BT_ERROR BT_CharDeviceFlush(BT_HANDLE hDevice) {
+	if(!chardevIfSupported(hDevice)) {
+		return BT_ERR_GENERIC;
+	}
+
+	if(BT_IF_CHARDEV_OPS(hDevice)->pfnFlush) {
+		return BT_IF_CHARDEV_OPS(hDevice)->pfnFlush(hDevice);
+	}
+
+	return BT_ERR_NONE;
 }
