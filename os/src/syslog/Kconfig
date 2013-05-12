@@ -5,4 +5,21 @@ config SYSLOG_REMOVE_PRINTK
 	default n	 if LIB_PRINTF
 	default y	 if !LIB_PRINTF
 
+
+choice SYSLOG_LINE_ENDINGS
+    prompt "kPrint line endings"
+	default SYSLOG_LINE_ENDINGS_LF
+
+config SYSLOG_LINE_ENDINGS_CR
+    bool "Carriage Return (\"\\n\")"
+
+config SYSLOG_LINE_ENDINGS_LF
+    bool "Line Feed (\"\\r\")"
+
+config SYSLOG_LINE_ENDINGS_CRLF
+    bool "CRLF (\"\\n\\r\")"
+
+endchoice
+
+
 endmenu
