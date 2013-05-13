@@ -8,7 +8,12 @@ config HAS_CAN_0
 	bool
 	default n
 	
+
 config MACH_LPC11Axx
+	bool
+	default n
+	
+config MACH_LPC11Cxx
 	bool
 	default n
 
@@ -33,6 +38,14 @@ config MACH_LPC11xx_LPC11A04
     bool "LPC11A04"
     select MACH_LPC11A04
 endchoice
+
+config MACH_LPC11xx_LPC11Cxx
+	bool
+	default n
+
+config MACH_LPC11xx_LPC11Axx
+	bool
+	default n
 
 if MACH_LPC11xx_LPC11C22
 source arch/arm/mach/lpc11xx/.config/lpc11c22

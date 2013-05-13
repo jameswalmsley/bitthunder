@@ -1,5 +1,6 @@
 config MACH_LPC11C24
-    bool 
+    bool
+    select MACH_LPC11Cxx 
 	select HAS_CAN_0
 	select HAS_I2C
 	select HAS_SPI_0
