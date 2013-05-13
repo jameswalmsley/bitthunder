@@ -1,8 +1,9 @@
-choice
-	prompt "LPC17xx_PIO3_25"	
-	default LPC17xx_PIO3_25_GPIO
-	depends on HAS_100pin
+menu "LPC17xx_PIO3_25"
 
+choice
+	prompt "FUNCTION"	
+	default LPC17xx_PIO3_25_GPIO
+	
 config LPC17xx_PIO3_25_GPIO
     bool	"GPIO"
     
@@ -17,13 +18,50 @@ endchoice
 config LPC17xx_PIO3_25_FUNCTION
     int
     default 0 if LPC17xx_PIO3_25_GPIO
-    default 1 if LPC17xx_PIO3_25_TMR0_MAT0
-    default 2 if PWM1_OUT2	
+    default 2 if LPC17xx_PIO3_25_TMR0_MAT0
+    default 3 if PWM1_OUT2
     
 choice
-	prompt "LPC17xx_PIO3_26"	
-	default LPC17xx_PIO3_26_GPIO
-	depends on HAS_100pin
+	prompt "MODE"	
+	default LPC17xx_PIO3_25_PULLUP
+
+config LPC17xx_PIO3_25_PULLUP
+    bool	"PullUp"
+
+config LPC17xx_PIO3_25_REPEATER
+    bool	"Repeater Mode"
+
+config LPC17xx_PIO3_25_NO
+    bool	"Neither PullUp nor PullDown"
+    
+config LPC17xx_PIO3_25_PULLDOWN
+    bool	"PullDown"
+
+endchoice
+
+config LPC17xx_PIO3_25_MODE
+    int
+    default 0 if LPC17xx_PIO3_25_PULLUP
+    default 1 if LPC17xx_PIO3_25_REPEATER
+	default 2 if LPC17xx_PIO3_25_NO
+	default 3 if LPC17xx_PIO3_25_PULLDOWN
+    
+   
+config LPC17xx_PIO3_25_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+    default n 	
+    
+config LPC17xx_PIO3_25_OPENDRAIN
+	int
+	default 0 if !LPC17xx_PIO3_25_OPENDRAIN_ENABLE
+	default 1 if LPC17xx_PIO3_25_OPENDRAIN_ENABLE
+endmenu
+
+menu "LPC17xx_PIO3_26"    
+    
+choice
+	prompt "FUNCTION"	
+	default LPC17xx_PIO3_26_GPIO	
 
 config LPC17xx_PIO3_26_GPIO
     bool	"GPIO"
@@ -45,3 +83,39 @@ config LPC17xx_PIO3_26_FUNCTION
     default 1 if LPC17xx_PIO3_26_STCLK
 	default 2 if LPC17xx_PIO3_26_TMR0_MAT1
 	default 3 if LPC17xx_PIO3_26_PWM1_OUT3
+
+choice
+	prompt "MODE"	
+	default LPC17xx_PIO3_26_PULLUP
+
+config LPC17xx_PIO3_26_PULLUP
+    bool	"PullUp"
+
+config LPC17xx_PIO3_26_REPEATER
+    bool	"Repeater Mode"
+
+config LPC17xx_PIO3_26_NO
+    bool	"Neither PullUp nor PullDown"
+    
+config LPC17xx_PIO3_26_PULLDOWN
+    bool	"PullDown"
+
+endchoice
+
+config LPC17xx_PIO3_26_MODE
+    int
+    default 0 if LPC17xx_PIO3_26_PULLUP
+    default 1 if LPC17xx_PIO3_26_REPEATER
+	default 2 if LPC17xx_PIO3_26_NO
+	default 3 if LPC17xx_PIO3_26_PULLDOWN
+    
+config LPC17xx_PIO3_26_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+    default n
+	
+config LPC17xx_PIO3_26_OPENDRAIN
+	int
+	default 0 if !LPC17xx_PIO3_26_OPENDRAIN_ENABLE
+	default 1 if LPC17xx_PIO3_26_OPENDRAIN_ENABLE
+	
+endmenu

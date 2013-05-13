@@ -1,5 +1,6 @@
 config MACH_LPC1768
     bool
+    select HAS_I2C0
     select HAS_ETHERNET
     select HAS_USB_OTG 
 	select HAS_CAN_0

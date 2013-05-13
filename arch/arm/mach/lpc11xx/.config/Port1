@@ -1,5 +1,7 @@
+menu "LPC11xx_PIO1_0"	
+
 choice
-	prompt "LPC11xx_PIO1_0"	
+	prompt "FUNCTION"
 	default LPC11xx_PIO1_0_GPIO
 
 config LPC11xx_PIO1_0_GPIO
@@ -19,8 +21,58 @@ config LPC11xx_PIO1_0_FUNCTION
     default 2 if LPC11xx_PIO1_0_AD1
     default 3 if LPC11xx_PIO1_0_CT32B1_CAP0
 
+
 choice
-	prompt "LPC11xx_PIO1_1"	
+	prompt "MODE"	
+	default LPC11xx_PIO1_0_PULLUP
+
+config LPC11xx_PIO1_0_PULLUP
+	bool	"PullUp"
+
+config LPC11xx_PIO1_0_REPEATER
+	bool	"Repeater Mode"
+
+config LPC11xx_PIO1_0_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LPC11xx_PIO1_0_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LPC11xx_PIO1_0_MODE
+	int
+	default 0 if LPC11xx_PIO1_0_PULLUP
+	default 8 if LPC11xx_PIO1_0_REPEATER
+	default 16 if LPC11xx_PIO1_0_NO
+	default 24 if LPC11xx_PIO1_0_PULLDOWN
+	
+config LPC11xx_PIO1_0_AD_ENABLE
+    	bool "ADMODE"
+	default n
+    
+config LPC11xx_PIO1_0_AD
+    	int
+	default 128 if !LPC11xx_PIO1_0_AD_ENABLE
+	default 0 if LPC11xx_PIO1_0_AD_ENABLE
+
+
+config LPC11xx_PIO1_0_OPENDRAIN_ENABLE
+    	bool "OPENDRAIN"
+	default n
+    
+config LPC11xx_PIO1_0_OPENDRAIN
+    	int
+	default 0 if !LPC11xx_PIO1_0_OPENDRAIN_ENABLE
+	default 1024 if LPC11xx_PIO1_0_OPENDRAIN_ENABLE
+
+
+endmenu
+
+menu "LPC11xx_PIO1_1"	
+
+choice
+	prompt "FUNCTION"
 	default LPC11xx_PIO1_1_GPIO
 
 config LPC11xx_PIO1_1_GPIO
@@ -40,8 +92,58 @@ config LPC11xx_PIO1_1_FUNCTION
     default 2 if LPC11xx_PIO1_1_AD2
     default 3 if CT32B1_MAT0
 
+
 choice
-	prompt "LPC11xx_PIO1_2"	
+	prompt "MODE"	
+	default LPC11xx_PIO1_1_PULLUP
+
+config LPC11xx_PIO1_1_PULLUP
+	bool	"PullUp"
+
+config LPC11xx_PIO1_1_REPEATER
+	bool	"Repeater Mode"
+
+config LPC11xx_PIO1_1_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LPC11xx_PIO1_1_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LPC11xx_PIO1_1_MODE
+	int
+	default 0 if LPC11xx_PIO1_1_PULLUP
+	default 8 if LPC11xx_PIO1_1_REPEATER
+	default 16 if LPC11xx_PIO1_1_NO
+	default 24 if LPC11xx_PIO1_1_PULLDOWN
+
+config LPC11xx_PIO1_1_AD_ENABLE
+    	bool "ADMODE"
+	default n
+    
+config LPC11xx_PIO1_1_AD
+    	int
+	default 128 if !LPC11xx_PIO1_1_AD_ENABLE
+	default 0 if LPC11xx_PIO1_1_AD_ENABLE
+
+	
+config LPC11xx_PIO1_1_OPENDRAIN_ENABLE
+    	bool "OPENDRAIN"
+	default n
+    
+config LPC11xx_PIO1_1_OPENDRAIN
+    	int
+	default 0 if !LPC11xx_PIO1_1_OPENDRAIN_ENABLE
+	default 1024 if LPC11xx_PIO1_1_OPENDRAIN_ENABLE
+
+
+endmenu
+
+menu "LPC11xx_PIO1_2"	
+
+choice
+	prompt "FUNCTION"
 	default LPC11xx_PIO1_2_GPIO
 
 config LPC11xx_PIO1_2_GPIO
@@ -61,8 +163,57 @@ config LPC11xx_PIO1_2_FUNCTION
     default 2 if LPC11xx_PIO1_2_AD2
     default 3 if LPC11xx_PIO1_2_CT32B1_MAT1
 
+
 choice
-	prompt "LPC11xx_PIO1_3"	
+	prompt "MODE"	
+	default LPC11xx_PIO1_2_PULLUP
+
+config LPC11xx_PIO1_2_PULLUP
+	bool	"PullUp"
+
+config LPC11xx_PIO1_2_REPEATER
+	bool	"Repeater Mode"
+
+config LPC11xx_PIO1_2_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LPC11xx_PIO1_2_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LPC11xx_PIO1_2_MODE
+	int
+	default 0 if LPC11xx_PIO1_2_PULLUP
+	default 8 if LPC11xx_PIO1_2_REPEATER
+	default 16 if LPC11xx_PIO1_2_NO
+	default 24 if LPC11xx_PIO1_2_PULLDOWN
+
+config LPC11xx_PIO1_2_AD_ENABLE
+    	bool "ADMODE"
+	default n
+    
+config LPC11xx_PIO1_2_AD
+    	int
+	default 128 if !LPC11xx_PIO1_2_AD_ENABLE
+	default 0 if LPC11xx_PIO1_2_AD_ENABLE
+
+config LPC11xx_PIO1_2_OPENDRAIN_ENABLE
+    	bool "OPENDRAIN"
+	default n
+    
+config LPC11xx_PIO1_2_OPENDRAIN
+    	int
+	default 0 if !LPC11xx_PIO1_2_OPENDRAIN_ENABLE
+	default 1024 if LPC11xx_PIO1_2_OPENDRAIN_ENABLE
+
+
+endmenu
+
+menu "LPC11xx_PIO1_3"	
+
+choice
+	prompt "FUNCTION"
 	default LPC11xx_PIO1_3_SWDIO
 
 config LPC11xx_PIO1_3_SWDIO
@@ -86,8 +237,57 @@ config LPC11xx_PIO1_3_FUNCTION
     default 2 if LPC11xx_PIO1_3_AD4
     default 3 if LPC11xx_PIO1_3_CT32B1_MAT2
 
+
 choice
-	prompt "LPC11xx_PIO1_4"	
+	prompt "MODE"	
+	default LPC11xx_PIO1_3_PULLUP
+
+config LPC11xx_PIO1_3_PULLUP
+	bool	"PullUp"
+
+config LPC11xx_PIO1_3_REPEATER
+	bool	"Repeater Mode"
+
+config LPC11xx_PIO1_3_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LPC11xx_PIO1_3_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LPC11xx_PIO1_3_MODE
+	int
+	default 0 if LPC11xx_PIO1_3_PULLUP
+	default 8 if LPC11xx_PIO1_3_REPEATER
+	default 16 if LPC11xx_PIO1_3_NO
+	default 24 if LPC11xx_PIO1_3_PULLDOWN
+
+config LPC11xx_PIO1_3_AD_ENABLE
+    	bool "ADMODE"
+	default n
+    
+config LPC11xx_PIO1_3_AD
+    	int
+	default 128 if !LPC11xx_PIO1_3_AD_ENABLE
+	default 0 if LPC11xx_PIO1_3_AD_ENABLE
+
+config LPC11xx_PIO1_3_OPENDRAIN_ENABLE
+    	bool "OPENDRAIN"
+	default n
+    
+config LPC11xx_PIO1_3_OPENDRAIN
+    	int
+	default 0 if !LPC11xx_PIO1_3_OPENDRAIN_ENABLE
+	default 1024 if LPC11xx_PIO1_3_OPENDRAIN_ENABLE
+
+
+endmenu
+
+menu "LPC11xx_PIO1_4"	
+
+choice
+	prompt "FUNCTION"
 	default LPC11xx_PIO1_4_GPIO
 	depends on HAS_LPC11xx_PIO1_4
 
@@ -108,8 +308,57 @@ config LPC11xx_PIO1_4_FUNCTION
     default 1 if LPC11xx_PIO1_4_AD5
     default 2 if LPC11xx_PIO1_4_CT32B1_MAT3
 
+
 choice
-	prompt "LPC11xx_PIO1_5"	
+	prompt "MODE"	
+	default LPC11xx_PIO1_4_PULLUP
+
+config LPC11xx_PIO1_4_PULLUP
+	bool	"PullUp"
+
+config LPC11xx_PIO1_4_REPEATER
+	bool	"Repeater Mode"
+
+config LPC11xx_PIO1_4_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LPC11xx_PIO1_4_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LPC11xx_PIO1_4_MODE
+	int
+	default 0 if LPC11xx_PIO1_4_PULLUP
+	default 8 if LPC11xx_PIO1_4_REPEATER
+	default 16 if LPC11xx_PIO1_4_NO
+	default 24 if LPC11xx_PIO1_4_PULLDOWN
+
+config LPC11xx_PIO1_4_AD_ENABLE
+    	bool "ADMODE"
+	default n
+    
+config LPC11xx_PIO1_4_AD
+    	int
+	default 128 if !LPC11xx_PIO1_4_AD_ENABLE
+	default 0 if LPC11xx_PIO1_4_AD_ENABLE
+
+config LPC11xx_PIO1_4_OPENDRAIN_ENABLE
+    	bool "OPENDRAIN"
+	default n
+    
+config LPC11xx_PIO1_4_OPENDRAIN
+    	int
+	default 0 if !LPC11xx_PIO1_4_OPENDRAIN_ENABLE
+	default 1024 if LPC11xx_PIO1_4_OPENDRAIN_ENABLE
+
+
+endmenu
+
+menu "LPC11xx_PIO1_5"	
+
+choice
+	prompt "FUNCTION"
 	default LPC11xx_PIO1_5_GPIO
 	depends on HAS_LPC11xx_PIO1_5
 
@@ -130,8 +379,48 @@ config LPC11xx_PIO1_5_FUNCTION
     default 1 if LPC11xx_PIO1_5_RTS
     default 2 if LPC11xx_PIO1_5_CT32B0_CAP0
 
+
 choice
-	prompt "LPC11xx_PIO1_6"	
+	prompt "MODE"	
+	default LPC11xx_PIO1_5_PULLUP
+
+config LPC11xx_PIO1_5_PULLUP
+	bool	"PullUp"
+
+config LPC11xx_PIO1_5_REPEATER
+	bool	"Repeater Mode"
+
+config LPC11xx_PIO1_5_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LPC11xx_PIO1_5_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LPC11xx_PIO1_5_MODE
+	int
+	default 0 if LPC11xx_PIO1_5_PULLUP
+	default 8 if LPC11xx_PIO1_5_REPEATER
+	default 16 if LPC11xx_PIO1_5_NO
+	default 24 if LPC11xx_PIO1_5_PULLDOWN
+
+config LPC11xx_PIO1_5_OPENDRAIN_ENABLE
+    	bool "OPENDRAIN"
+	default n
+    
+config LPC11xx_PIO1_5_OPENDRAIN
+    	int
+	default 0 if !LPC11xx_PIO1_5_OPENDRAIN_ENABLE
+	default 1024 if LPC11xx_PIO1_5_OPENDRAIN_ENABLE
+
+
+endmenu
+
+menu "LPC11xx_PIO1_6"	
+
+choice
+	prompt "FUNCTION"
 	default LPC11xx_PIO1_6_GPIO
 
 config LPC11xx_PIO1_6_GPIO
@@ -152,8 +441,48 @@ config LPC11xx_PIO1_6_FUNCTION
     default 2 if LPC11xx_PIO1_6_MAT0
 
     
+
 choice
-	prompt "LPC11xx_PIO1_7"	
+	prompt "MODE"	
+	default LPC11xx_PIO1_6_PULLUP
+
+config LPC11xx_PIO1_6_PULLUP
+	bool	"PullUp"
+
+config LPC11xx_PIO1_6_REPEATER
+	bool	"Repeater Mode"
+
+config LPC11xx_PIO1_6_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LPC11xx_PIO1_6_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LPC11xx_PIO1_6_MODE
+	int
+	default 0 if LPC11xx_PIO1_6_PULLUP
+	default 8 if LPC11xx_PIO1_6_REPEATER
+	default 16 if LPC11xx_PIO1_6_NO
+	default 24 if LPC11xx_PIO1_6_PULLDOWN
+
+config LPC11xx_PIO1_6_OPENDRAIN_ENABLE
+    	bool "OPENDRAIN"
+	default n
+    
+config LPC11xx_PIO1_6_OPENDRAIN
+    	int
+	default 0 if !LPC11xx_PIO1_6_OPENDRAIN_ENABLE
+	default 1024 if LPC11xx_PIO1_6_OPENDRAIN_ENABLE
+
+
+endmenu
+
+menu "LPC11xx_PIO1_7"	
+
+choice
+	prompt "FUNCTION"
 	default LPC11xx_PIO1_7_GPIO
 
 config LPC11xx_PIO1_7_GPIO
@@ -174,8 +503,48 @@ config LPC11xx_PIO1_7_FUNCTION
     default 2 if LPC11xx_PIO1_7_MAT1
 
     
+
 choice
-	prompt "LPC11xx_PIO1_8"	
+	prompt "MODE"	
+	default LPC11xx_PIO1_7_PULLUP
+
+config LPC11xx_PIO1_7_PULLUP
+	bool	"PullUp"
+
+config LPC11xx_PIO1_7_REPEATER
+	bool	"Repeater Mode"
+
+config LPC11xx_PIO1_7_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LPC11xx_PIO1_7_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LPC11xx_PIO1_7_MODE
+	int
+	default 0 if LPC11xx_PIO1_7_PULLUP
+	default 8 if LPC11xx_PIO1_7_REPEATER
+	default 16 if LPC11xx_PIO1_7_NO
+	default 24 if LPC11xx_PIO1_7_PULLDOWN
+
+config LPC11xx_PIO1_7_OPENDRAIN_ENABLE
+    	bool "OPENDRAIN"
+	default n
+    
+config LPC11xx_PIO1_7_OPENDRAIN
+    	int
+	default 0 if !LPC11xx_PIO1_7_OPENDRAIN_ENABLE
+	default 1024 if LPC11xx_PIO1_7_OPENDRAIN_ENABLE
+
+
+endmenu
+
+menu "LPC11xx_PIO1_8"	
+
+choice
+	prompt "FUNCTION"
 	default LPC11xx_PIO1_8_GPIO
 	depends on HAS_LPC11xx_PIO1_8
 
@@ -193,8 +562,48 @@ config LPC11xx_PIO1_8_FUNCTION
     default 1 if LPC11xx_PIO1_8_CT16B1_CAP0
     
     
+
 choice
-	prompt "LPC11xx_PIO1_9"	
+	prompt "MODE"	
+	default LPC11xx_PIO1_8_PULLUP
+
+config LPC11xx_PIO1_8_PULLUP
+	bool	"PullUp"
+
+config LPC11xx_PIO1_8_REPEATER
+	bool	"Repeater Mode"
+
+config LPC11xx_PIO1_8_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LPC11xx_PIO1_8_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LPC11xx_PIO1_8_MODE
+	int
+	default 0 if LPC11xx_PIO1_8_PULLUP
+	default 8 if LPC11xx_PIO1_8_REPEATER
+	default 16 if LPC11xx_PIO1_8_NO
+	default 24 if LPC11xx_PIO1_8_PULLDOWN
+
+config LPC11xx_PIO1_8_OPENDRAIN_ENABLE
+    	bool "OPENDRAIN"
+	default n
+    
+config LPC11xx_PIO1_8_OPENDRAIN
+    	int
+	default 0 if !LPC11xx_PIO1_8_OPENDRAIN_ENABLE
+	default 1024 if LPC11xx_PIO1_8_OPENDRAIN_ENABLE
+
+
+endmenu
+
+menu "LPC11xx_PIO1_9"	
+
+choice
+	prompt "FUNCTION"
 	default LPC11xx_PIO1_9_GPIO
 	depends on HAS_LPC11xx_PIO1_9
 
@@ -215,8 +624,48 @@ config LPC11xx_PIO1_9_FUNCTION
     default 1 if LPC11xx_PIO1_9_CT16B1_MAT0
     default 2 if LPC11xx_PIO1_9_MOSI1
     
+
 choice
-	prompt "LPC11xx_PIO1_10"	
+	prompt "MODE"	
+	default LPC11xx_PIO1_9_PULLUP
+
+config LPC11xx_PIO1_9_PULLUP
+	bool	"PullUp"
+
+config LPC11xx_PIO1_9_REPEATER
+	bool	"Repeater Mode"
+
+config LPC11xx_PIO1_9_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LPC11xx_PIO1_9_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LPC11xx_PIO1_9_MODE
+	int
+	default 0 if LPC11xx_PIO1_9_PULLUP
+	default 8 if LPC11xx_PIO1_9_REPEATER
+	default 16 if LPC11xx_PIO1_9_NO
+	default 24 if LPC11xx_PIO1_9_PULLDOWN
+
+config LPC11xx_PIO1_9_OPENDRAIN_ENABLE
+    	bool "OPENDRAIN"
+	default n
+    
+config LPC11xx_PIO1_9_OPENDRAIN
+    	int
+	default 0 if !LPC11xx_PIO1_9_OPENDRAIN_ENABLE
+	default 1024 if LPC11xx_PIO1_9_OPENDRAIN_ENABLE
+
+
+endmenu
+
+menu "LPC11xx_PIO1_10"	
+
+choice
+	prompt "FUNCTION"
 	default LPC11xx_PIO1_10_GPIO
 	depends on HAS_LPC11xx_PIO1_10
 
@@ -241,8 +690,57 @@ config LPC11xx_PIO1_10_FUNCTION
     default 2 if LPC11xx_PIO1_10_CT16B1_MAT1
     default 3 if LPC11xx_PIO1_10_MISO1
 
+
 choice
-	prompt "LPC11xx_PIO1_11"	
+	prompt "MODE"	
+	default LPC11xx_PIO1_10_PULLUP
+
+config LPC11xx_PIO1_10_PULLUP
+	bool	"PullUp"
+
+config LPC11xx_PIO1_10_REPEATER
+	bool	"Repeater Mode"
+
+config LPC11xx_PIO1_10_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LPC11xx_PIO1_10_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LPC11xx_PIO1_10_MODE
+	int
+	default 0 if LPC11xx_PIO1_10_PULLUP
+	default 8 if LPC11xx_PIO1_10_REPEATER
+	default 16 if LPC11xx_PIO1_10_NO
+	default 24 if LPC11xx_PIO1_10_PULLDOWN
+
+config LPC11xx_PIO1_10_AD_ENABLE
+    	bool "ADMODE"
+	default n
+    
+config LPC11xx_PIO1_10_AD
+    	int
+	default 128 if !LPC11xx_PIO1_10_AD_ENABLE
+	default 0 if LPC11xx_PIO1_10_AD_ENABLE
+
+config LPC11xx_PIO1_10_OPENDRAIN_ENABLE
+    	bool "OPENDRAIN"
+	default n
+    
+config LPC11xx_PIO1_10_OPENDRAIN
+    	int
+	default 0 if !LPC11xx_PIO1_10_OPENDRAIN_ENABLE
+	default 1024 if LPC11xx_PIO1_10_OPENDRAIN_ENABLE
+
+
+endmenu
+
+menu "LPC11xx_PIO1_11"	
+
+choice
+	prompt "FUNCTION"
 	default LPC11xx_PIO1_11_GPIO
 	depends on HAS_LPC11xx_PIO1_11
 
@@ -262,3 +760,49 @@ config LPC11xx_PIO1_11_FUNCTION
     default 0 if LPC11xx_PIO1_11_GPIO
     default 1 if LPC11xx_PIO1_11_AD7
     default 2 if LPC11xx_PIO1_11_CT32B1_CAP1
+
+choice
+	prompt "MODE"	
+	default LPC11xx_PIO1_11_PULLUP
+
+config LPC11xx_PIO1_11_PULLUP
+	bool	"PullUp"
+
+config LPC11xx_PIO1_11_REPEATER
+	bool	"Repeater Mode"
+
+config LPC11xx_PIO1_11_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LPC11xx_PIO1_11_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LPC11xx_PIO1_11_MODE
+	int
+	default 0 if LPC11xx_PIO1_11_PULLUP
+	default 8 if LPC11xx_PIO1_11_REPEATER
+	default 16 if LPC11xx_PIO1_11_NO
+	default 24 if LPC11xx_PIO1_11_PULLDOWN
+
+config LPC11xx_PIO1_11_AD_ENABLE
+    	bool "ADMODE"
+	default n
+    
+config LPC11xx_PIO1_11_AD
+    	int
+	default 128 if !LPC11xx_PIO1_11_AD_ENABLE
+	default 0 if LPC11xx_PIO1_11_AD_ENABLE
+
+config LPC11xx_PIO1_11_OPENDRAIN_ENABLE
+    	bool "OPENDRAIN"
+	default n
+    
+config LPC11xx_PIO1_11_OPENDRAIN
+    	int
+	default 0 if !LPC11xx_PIO1_11_OPENDRAIN_ENABLE
+	default 1024 if LPC11xx_PIO1_11_OPENDRAIN_ENABLE
+
+
+endmenu

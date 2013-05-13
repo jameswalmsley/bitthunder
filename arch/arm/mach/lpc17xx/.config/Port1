@@ -1,5 +1,7 @@
+menu "LPC17xx_PIO1_0"
+
 choice
-	prompt "LPC17xx_PIO1_0"	
+	prompt "FUNCTION"	
 	default LPC17xx_PIO1_0_GPIO
 
 config LPC17xx_PIO1_0_GPIO
@@ -14,9 +16,46 @@ config LPC17xx_PIO1_0_FUNCTION
     int
     default 0 if LPC17xx_PIO1_0_GPIO
     default 1 if LPC17xx_PIO1_0_ENET_TXD0
-    
+
 choice
-	prompt "LPC17xx_PIO1_1"	
+	prompt "MODE"	
+	default LPC17xx_PIO1_0_PULLUP
+
+config LPC17xx_PIO1_0_PULLUP
+    bool	"PullUp"
+
+config LPC17xx_PIO1_0_REPEATER
+    bool	"Repeater Mode"
+
+config LPC17xx_PIO1_0_NO
+    bool	"Neither PullUp nor PullDown"
+    
+config LPC17xx_PIO1_0_PULLDOWN
+    bool	"PullDown"
+
+endchoice
+
+config LPC17xx_PIO1_0_MODE
+    int
+    default 0 if LPC17xx_PIO1_0_PULLUP
+    default 1 if LPC17xx_PIO1_0_REPEATER
+	default 2 if LPC17xx_PIO1_0_NO
+	default 3 if LPC17xx_PIO1_0_PULLDOWN
+    
+config LPC17xx_PIO1_0_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+    default n
+
+config LPC17xx_PIO1_0_OPENDRAIN
+	int
+	default 0 if !LPC17xx_PIO1_0_OPENDRAIN_ENABLE
+	default 1 if LPC17xx_PIO1_0_OPENDRAIN_ENABLE
+endmenu  
+    
+menu "LPC17xx_PIO1_1"
+
+choice
+	prompt "FUNCTION"	
 	default LPC17xx_PIO1_1_GPIO
 
 config LPC17xx_PIO1_1_GPIO
@@ -31,9 +70,47 @@ config LPC17xx_PIO1_1_FUNCTION
     int
     default 0 if LPC17xx_PIO1_1_GPIO
     default 1 if LPC17xx_PIO1_1_ENET_TXD1
+    
+choice
+	prompt "MODE"	
+	default LPC17xx_PIO1_1_PULLUP
+
+config LPC17xx_PIO1_1_PULLUP
+    bool	"PullUp"
+
+config LPC17xx_PIO1_1_REPEATER
+    bool	"Repeater Mode"
+
+config LPC17xx_PIO1_1_NO
+    bool	"Neither PullUp nor PullDown"
+    
+config LPC17xx_PIO1_1_PULLDOWN
+    bool	"PullDown"
+
+endchoice
+
+config LPC17xx_PIO1_1_MODE
+    int
+    default 0 if LPC17xx_PIO1_1_PULLUP
+    default 1 if LPC17xx_PIO1_1_REPEATER
+	default 2 if LPC17xx_PIO1_1_NO
+	default 3 if LPC17xx_PIO1_1_PULLDOWN
+    
+config LPC17xx_PIO1_1_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+    default n
+
+config LPC17xx_PIO1_1_OPENDRAIN
+	int
+	default 0 if !LPC17xx_PIO1_1_OPENDRAIN_ENABLE
+	default 1 if LPC17xx_PIO1_1_OPENDRAIN_ENABLE
+endmenu  
+
+
+menu "LPC17xx_PIO1_4"
 
 choice
-	prompt "LPC17xx_PIO1_4"	
+	prompt "FUNCTION"	
 	default LPC17xx_PIO1_4_GPIO
 
 config LPC17xx_PIO1_4_GPIO
@@ -50,7 +127,45 @@ config LPC17xx_PIO1_4_FUNCTION
     default 1 if LPC17xx_PIO1_4_ENET_EN
     
 choice
-	prompt "LPC17xx_PIO1_8"	
+	prompt "MODE"	
+	default LPC17xx_PIO1_4_PULLUP
+
+config LPC17xx_PIO1_4_PULLUP
+    bool	"PullUp"
+
+config LPC17xx_PIO1_4_REPEATER
+    bool	"Repeater Mode"
+
+config LPC17xx_PIO1_4_NO
+    bool	"Neither PullUp nor PullDown"
+    
+config LPC17xx_PIO1_4_PULLDOWN
+    bool	"PullDown"
+
+endchoice
+
+config LPC17xx_PIO1_4_MODE
+    int
+    default 0 if LPC17xx_PIO1_4_PULLUP
+    default 1 if LPC17xx_PIO1_4_REPEATER
+	default 2 if LPC17xx_PIO1_4_NO
+	default 3 if LPC17xx_PIO1_4_PULLDOWN
+    
+config LPC17xx_PIO1_4_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+    default n
+
+config LPC17xx_PIO1_4_OPENDRAIN
+	int
+	default 0 if !LPC17xx_PIO1_4_OPENDRAIN_ENABLE
+	default 1 if LPC17xx_PIO1_4_OPENDRAIN_ENABLE
+endmenu  
+
+    
+menu "LPC17xx_PIO1_8"
+
+choice
+	prompt "FUNCTION"	
 	default LPC17xx_PIO1_8_GPIO
 
 config LPC17xx_PIO1_8_GPIO
@@ -67,7 +182,45 @@ config LPC17xx_PIO1_8_FUNCTION
     default 1 if LPC17xx_PIO1_8_ENET_CRS
     
 choice
-	prompt "LPC17xx_PIO1_9"	
+	prompt "MODE"	
+	default LPC17xx_PIO1_8_PULLUP
+
+config LPC17xx_PIO1_8_PULLUP
+    bool	"PullUp"
+
+config LPC17xx_PIO1_8_REPEATER
+    bool	"Repeater Mode"
+
+config LPC17xx_PIO1_8_NO
+    bool	"Neither PullUp nor PullDown"
+    
+config LPC17xx_PIO1_8_PULLDOWN
+    bool	"PullDown"
+
+endchoice
+
+config LPC17xx_PIO1_8_MODE
+    int
+    default 0 if LPC17xx_PIO1_8_PULLUP
+    default 1 if LPC17xx_PIO1_8_REPEATER
+	default 2 if LPC17xx_PIO1_8_NO
+	default 3 if LPC17xx_PIO1_8_PULLDOWN
+    
+config LPC17xx_PIO1_8_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+    default n
+
+config LPC17xx_PIO1_8_OPENDRAIN
+	int
+	default 0 if !LPC17xx_PIO1_8_OPENDRAIN_ENABLE
+	default 1 if LPC17xx_PIO1_8_OPENDRAIN_ENABLE
+endmenu  
+
+    
+menu "LPC17xx_PIO1_9"
+
+choice
+	prompt "FUNCTION"	
 	default LPC17xx_PIO1_9_GPIO
 
 config LPC17xx_PIO1_9_GPIO
@@ -84,7 +237,44 @@ config LPC17xx_PIO1_9_FUNCTION
     default 1 if LPC17xx_PIO1_9_ENET_RXD0
 
 choice
-	prompt "LPC17xx_PIO1_10"	
+	prompt "MODE"	
+	default LPC17xx_PIO1_9_PULLUP
+
+config LPC17xx_PIO1_9_PULLUP
+    bool	"PullUp"
+
+config LPC17xx_PIO1_9_REPEATER
+    bool	"Repeater Mode"
+
+config LPC17xx_PIO1_9_NO
+    bool	"Neither PullUp nor PullDown"
+    
+config LPC17xx_PIO1_9_PULLDOWN
+    bool	"PullDown"
+
+endchoice
+
+config LPC17xx_PIO1_9_MODE
+    int
+    default 0 if LPC17xx_PIO1_9_PULLUP
+    default 1 if LPC17xx_PIO1_9_REPEATER
+	default 2 if LPC17xx_PIO1_9_NO
+	default 3 if LPC17xx_PIO1_9_PULLDOWN
+    
+config LPC17xx_PIO1_9_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+    default n
+
+config LPC17xx_PIO1_9_OPENDRAIN
+	int
+	default 0 if !LPC17xx_PIO1_9_OPENDRAIN_ENABLE
+	default 1 if LPC17xx_PIO1_9_OPENDRAIN_ENABLE
+endmenu  
+
+menu "LPC17xx_PIO1_10"
+
+choice
+	prompt "FUNCTION"	
 	default LPC17xx_PIO1_10_GPIO
 
 config LPC17xx_PIO1_10_GPIO
@@ -101,7 +291,45 @@ config LPC17xx_PIO1_10_FUNCTION
     default 1 if LPC17xx_PIO1_10_ENET_RXD1
     
 choice
-	prompt "LPC17xx_PIO1_14"	
+	prompt "MODE"	
+	default LPC17xx_PIO1_10_PULLUP
+
+config LPC17xx_PIO1_10_PULLUP
+    bool	"PullUp"
+
+config LPC17xx_PIO1_10_REPEATER
+    bool	"Repeater Mode"
+
+config LPC17xx_PIO1_10_NO
+    bool	"Neither PullUp nor PullDown"
+    
+config LPC17xx_PIO1_10_PULLDOWN
+    bool	"PullDown"
+
+endchoice
+
+config LPC17xx_PIO1_10_MODE
+    int
+    default 0 if LPC17xx_PIO1_10_PULLUP
+    default 1 if LPC17xx_PIO1_10_REPEATER
+	default 2 if LPC17xx_PIO1_10_NO
+	default 3 if LPC17xx_PIO1_10_PULLDOWN
+    
+config LPC17xx_PIO1_10_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+    default n
+
+config LPC17xx_PIO1_10_OPENDRAIN
+	int
+	default 0 if !LPC17xx_PIO1_10_OPENDRAIN_ENABLE
+	default 1 if LPC17xx_PIO1_10_OPENDRAIN_ENABLE
+endmenu  
+
+    
+menu "LPC17xx_PIO1_14"
+
+choice
+	prompt "FUNCTION"	
 	default LPC17xx_PIO1_14_GPIO
 
 config LPC17xx_PIO1_14_GPIO
@@ -116,9 +344,47 @@ config LPC17xx_PIO1_14_FUNCTION
     int
     default 0 if LPC17xx_PIO1_14_GPIO
     default 1 if LPC17xx_PIO1_14_ENET_RX_ER
+    
+choice
+	prompt "MODE"	
+	default LPC17xx_PIO1_14_PULLUP
+
+config LPC17xx_PIO1_14_PULLUP
+    bool	"PullUp"
+
+config LPC17xx_PIO1_14_REPEATER
+    bool	"Repeater Mode"
+
+config LPC17xx_PIO1_14_NO
+    bool	"Neither PullUp nor PullDown"
+    
+config LPC17xx_PIO1_14_PULLDOWN
+    bool	"PullDown"
+
+endchoice
+
+config LPC17xx_PIO1_14_MODE
+    int
+    default 0 if LPC17xx_PIO1_14_PULLUP
+    default 1 if LPC17xx_PIO1_14_REPEATER
+	default 2 if LPC17xx_PIO1_14_NO
+	default 3 if LPC17xx_PIO1_14_PULLDOWN
+    
+config LPC17xx_PIO1_14_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+    default n
+
+config LPC17xx_PIO1_14_OPENDRAIN
+	int
+	default 0 if !LPC17xx_PIO1_14_OPENDRAIN_ENABLE
+	default 1 if LPC17xx_PIO1_14_OPENDRAIN_ENABLE
+endmenu  
+
+
+menu "LPC17xx_PIO1_15"
 
 choice
-	prompt "LPC17xx_PIO1_15"	
+	prompt "FUNCTION"	
 	default LPC17xx_PIO1_15_GPIO
 
 config LPC17xx_PIO1_15_GPIO
@@ -133,11 +399,48 @@ config LPC17xx_PIO1_15_FUNCTION
     int
     default 0 if LPC17xx_PIO1_15_GPIO
     default 1 if LPC17xx_PIO1_15_ENET_REF_CLK
+    
+choice
+	prompt "MODE"	
+	default LPC17xx_PIO1_15_PULLUP
+
+config LPC17xx_PIO1_15_PULLUP
+    bool	"PullUp"
+
+config LPC17xx_PIO1_15_REPEATER
+    bool	"Repeater Mode"
+
+config LPC17xx_PIO1_15_NO
+    bool	"Neither PullUp nor PullDown"
+    
+config LPC17xx_PIO1_15_PULLDOWN
+    bool	"PullDown"
+
+endchoice
+
+config LPC17xx_PIO1_15_MODE
+    int
+    default 0 if LPC17xx_PIO1_15_PULLUP
+    default 1 if LPC17xx_PIO1_15_REPEATER
+	default 2 if LPC17xx_PIO1_15_NO
+	default 3 if LPC17xx_PIO1_15_PULLDOWN
+    
+config LPC17xx_PIO1_15_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+    default n
+
+config LPC17xx_PIO1_15_OPENDRAIN
+	int
+	default 0 if !LPC17xx_PIO1_15_OPENDRAIN_ENABLE
+	default 1 if LPC17xx_PIO1_15_OPENDRAIN_ENABLE
+endmenu  
+
+
+menu "LPC17xx_PIO1_16"
 
 choice
-	prompt "LPC17xx_PIO1_16"	
+	prompt "FUNCTION"	
 	default LPC17xx_PIO1_16_GPIO
-	depends on HAS_100pin
 
 config LPC17xx_PIO1_16_GPIO
     bool	"GPIO"
@@ -153,7 +456,45 @@ config LPC17xx_PIO1_16_FUNCTION
     default 1 if LPC17xx_PIO1_16_ENET_MDC
     
 choice
-	prompt "LPC17xx_PIO1_17"	
+	prompt "MODE"	
+	default LPC17xx_PIO1_16_PULLUP
+
+config LPC17xx_PIO1_16_PULLUP
+    bool	"PullUp"
+
+config LPC17xx_PIO1_16_REPEATER
+    bool	"Repeater Mode"
+
+config LPC17xx_PIO1_16_NO
+    bool	"Neither PullUp nor PullDown"
+    
+config LPC17xx_PIO1_16_PULLDOWN
+    bool	"PullDown"
+
+endchoice
+
+config LPC17xx_PIO1_16_MODE
+    int
+    default 0 if LPC17xx_PIO1_16_PULLUP
+    default 1 if LPC17xx_PIO1_16_REPEATER
+	default 2 if LPC17xx_PIO1_16_NO
+	default 3 if LPC17xx_PIO1_16_PULLDOWN
+    
+config LPC17xx_PIO1_16_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+    default n
+
+config LPC17xx_PIO1_16_OPENDRAIN
+	int
+	default 0 if !LPC17xx_PIO1_16_OPENDRAIN_ENABLE
+	default 1 if LPC17xx_PIO1_16_OPENDRAIN_ENABLE
+endmenu  
+
+    
+menu "LPC17xx_PIO1_17"
+
+choice
+	prompt "FUNCTION"	
 	default LPC17xx_PIO1_17_GPIO
 	depends on HAS_100pin
 
@@ -171,7 +512,45 @@ config LPC17xx_PIO1_17_FUNCTION
     default 1 if LPC17xx_PIO1_17_ENET_MDIO
 
 choice
-	prompt "LPC17xx_PIO1_18"	
+	prompt "MODE"	
+	default LPC17xx_PIO1_17_PULLUP
+
+config LPC17xx_PIO1_17_PULLUP
+    bool	"PullUp"
+
+config LPC17xx_PIO1_17_REPEATER
+    bool	"Repeater Mode"
+
+config LPC17xx_PIO1_17_NO
+    bool	"Neither PullUp nor PullDown"
+    
+config LPC17xx_PIO1_17_PULLDOWN
+    bool	"PullDown"
+
+endchoice
+
+config LPC17xx_PIO1_17_MODE
+    int
+    default 0 if LPC17xx_PIO1_17_PULLUP
+    default 1 if LPC17xx_PIO1_17_REPEATER
+	default 2 if LPC17xx_PIO1_17_NO
+	default 3 if LPC17xx_PIO1_17_PULLDOWN
+    
+config LPC17xx_PIO1_17_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+    default n
+
+config LPC17xx_PIO1_17_OPENDRAIN
+	int
+	default 0 if !LPC17xx_PIO1_17_OPENDRAIN_ENABLE
+	default 1 if LPC17xx_PIO1_17_OPENDRAIN_ENABLE
+endmenu  
+
+
+menu "LPC17xx_PIO1_18"
+
+choice
+	prompt "FUNCTION"	
 	default LPC17xx_PIO1_18_GPIO
 
 config LPC17xx_PIO1_18_GPIO
@@ -196,7 +575,45 @@ config LPC17xx_PIO1_18_FUNCTION
     default 3 if LPC17xx_PIO1_18_TMR1_CAP0
     
 choice
-	prompt "LPC17xx_PIO1_19"	
+	prompt "MODE"	
+	default LPC17xx_PIO1_18_PULLUP
+
+config LPC17xx_PIO1_18_PULLUP
+    bool	"PullUp"
+
+config LPC17xx_PIO1_18_REPEATER
+    bool	"Repeater Mode"
+
+config LPC17xx_PIO1_18_NO
+    bool	"Neither PullUp nor PullDown"
+    
+config LPC17xx_PIO1_18_PULLDOWN
+    bool	"PullDown"
+
+endchoice
+
+config LPC17xx_PIO1_18_MODE
+    int
+    default 0 if LPC17xx_PIO1_18_PULLUP
+    default 1 if LPC17xx_PIO1_18_REPEATER
+	default 2 if LPC17xx_PIO1_18_NO
+	default 3 if LPC17xx_PIO1_18_PULLDOWN
+    
+config LPC17xx_PIO1_18_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+    default n
+
+config LPC17xx_PIO1_18_OPENDRAIN
+	int
+	default 0 if !LPC17xx_PIO1_18_OPENDRAIN_ENABLE
+	default 1 if LPC17xx_PIO1_18_OPENDRAIN_ENABLE
+endmenu  
+
+    
+menu "LPC17xx_PIO1_19"
+
+choice
+	prompt "FUNCTION"	
 	default LPC17xx_PIO1_19_GPIO
 	
 config LPC17xx_PIO1_19_GPIO
@@ -219,9 +636,47 @@ config LPC17xx_PIO1_19_FUNCTION
     default 1 if LPC17xx_PIO1_19_MCOA0
     default 2 if LPC17xx_PIO1_19_USB_PPWR
     default 3 if LPC17xx_PIO1_19_TMR1_CAP1
-	
+    
 choice
-	prompt "LPC17xx_PIO1_20"	
+	prompt "MODE"	
+	default LPC17xx_PIO1_19_PULLUP
+
+config LPC17xx_PIO1_19_PULLUP
+    bool	"PullUp"
+
+config LPC17xx_PIO1_19_REPEATER
+    bool	"Repeater Mode"
+
+config LPC17xx_PIO1_19_NO
+    bool	"Neither PullUp nor PullDown"
+    
+config LPC17xx_PIO1_19_PULLDOWN
+    bool	"PullDown"
+
+endchoice
+
+config LPC17xx_PIO1_19_MODE
+    int
+    default 0 if LPC17xx_PIO1_19_PULLUP
+    default 1 if LPC17xx_PIO1_19_REPEATER
+	default 2 if LPC17xx_PIO1_19_NO
+	default 3 if LPC17xx_PIO1_19_PULLDOWN
+    
+config LPC17xx_PIO1_19_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+    default n
+
+config LPC17xx_PIO1_19_OPENDRAIN
+	int
+	default 0 if !LPC17xx_PIO1_19_OPENDRAIN_ENABLE
+	default 1 if LPC17xx_PIO1_19_OPENDRAIN_ENABLE
+endmenu  
+
+	
+menu "LPC17xx_PIO1_20"
+
+choice
+	prompt "FUNCTION"	
 	default LPC17xx_PIO1_20_GPIO
 
 config LPC17xx_PIO1_20_GPIO
@@ -246,7 +701,45 @@ config LPC17xx_PIO1_20_FUNCTION
     default 3 if LPC17xx_PIO1_20_SCK0
     
 choice
-	prompt "LPC17xx_PIO1_21"	
+	prompt "MODE"	
+	default LPC17xx_PIO1_20_PULLUP
+
+config LPC17xx_PIO1_20_PULLUP
+    bool	"PullUp"
+
+config LPC17xx_PIO1_20_REPEATER
+    bool	"Repeater Mode"
+
+config LPC17xx_PIO1_20_NO
+    bool	"Neither PullUp nor PullDown"
+    
+config LPC17xx_PIO1_20_PULLDOWN
+    bool	"PullDown"
+
+endchoice
+
+config LPC17xx_PIO1_20_MODE
+    int
+    default 0 if LPC17xx_PIO1_20_PULLUP
+    default 1 if LPC17xx_PIO1_20_REPEATER
+	default 2 if LPC17xx_PIO1_20_NO
+	default 3 if LPC17xx_PIO1_20_PULLDOWN
+    
+config LPC17xx_PIO1_20_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+    default n
+
+config LPC17xx_PIO1_20_OPENDRAIN
+	int
+	default 0 if !LPC17xx_PIO1_20_OPENDRAIN_ENABLE
+	default 1 if LPC17xx_PIO1_20_OPENDRAIN_ENABLE
+endmenu  
+
+    
+menu "LPC17xx_PIO1_21"
+
+choice
+	prompt "FUNCTION"	
 	default LPC17xx_PIO1_21_GPIO
 	depends on HAS_100pin
 
@@ -272,7 +765,45 @@ config LPC17xx_PIO1_21_FUNCTION
     default 3 if LPC17xx_PIO1_21_SSEL0
 
 choice
-	prompt "LPC17xx_PIO1_22"	
+	prompt "MODE"	
+	default LPC17xx_PIO1_21_PULLUP
+
+config LPC17xx_PIO1_21_PULLUP
+    bool	"PullUp"
+
+config LPC17xx_PIO1_21_REPEATER
+    bool	"Repeater Mode"
+
+config LPC17xx_PIO1_21_NO
+    bool	"Neither PullUp nor PullDown"
+    
+config LPC17xx_PIO1_21_PULLDOWN
+    bool	"PullDown"
+
+endchoice
+
+config LPC17xx_PIO1_21_MODE
+    int
+    default 0 if LPC17xx_PIO1_21_PULLUP
+    default 1 if LPC17xx_PIO1_21_REPEATER
+	default 2 if LPC17xx_PIO1_21_NO
+	default 3 if LPC17xx_PIO1_21_PULLDOWN
+    
+config LPC17xx_PIO1_21_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+    default n
+
+config LPC17xx_PIO1_21_OPENDRAIN
+	int
+	default 0 if !LPC17xx_PIO1_21_OPENDRAIN_ENABLE
+	default 1 if LPC17xx_PIO1_21_OPENDRAIN_ENABLE
+endmenu  
+
+
+menu "LPC17xx_PIO1_22"
+
+choice
+	prompt "FUNCTION"	
 	default LPC17xx_PIO1_22_GPIO
 
 config LPC17xx_PIO1_22_GPIO
@@ -297,7 +828,45 @@ config LPC17xx_PIO1_22_FUNCTION
     default 3 if LPC17xx_PIO1_22_TMR1_MAT0
     
 choice
-	prompt "LPC17xx_PIO1_23"	
+	prompt "MODE"	
+	default LPC17xx_PIO1_22_PULLUP
+
+config LPC17xx_PIO1_22_PULLUP
+    bool	"PullUp"
+
+config LPC17xx_PIO1_22_REPEATER
+    bool	"Repeater Mode"
+
+config LPC17xx_PIO1_22_NO
+    bool	"Neither PullUp nor PullDown"
+    
+config LPC17xx_PIO1_22_PULLDOWN
+    bool	"PullDown"
+
+endchoice
+
+config LPC17xx_PIO1_22_MODE
+    int
+    default 0 if LPC17xx_PIO1_22_PULLUP
+    default 1 if LPC17xx_PIO1_22_REPEATER
+	default 2 if LPC17xx_PIO1_22_NO
+	default 3 if LPC17xx_PIO1_22_PULLDOWN
+    
+config LPC17xx_PIO1_22_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+    default n
+
+config LPC17xx_PIO1_22_OPENDRAIN
+	int
+	default 0 if !LPC17xx_PIO1_22_OPENDRAIN_ENABLE
+	default 1 if LPC17xx_PIO1_22_OPENDRAIN_ENABLE
+endmenu  
+
+    
+menu "LPC17xx_PIO1_23"
+
+choice
+	prompt "FUNCTION"	
 	default LPC17xx_PIO1_23_GPIO
 
 config LPC17xx_PIO1_23_GPIO
@@ -322,7 +891,45 @@ config LPC17xx_PIO1_23_FUNCTION
 	default 3 if LPC17xx_PIO1_23_MISO0
 
 choice
-	prompt "LPC17xx_PIO1_24"	
+	prompt "MODE"	
+	default LPC17xx_PIO1_23_PULLUP
+
+config LPC17xx_PIO1_23_PULLUP
+    bool	"PullUp"
+
+config LPC17xx_PIO1_23_REPEATER
+    bool	"Repeater Mode"
+
+config LPC17xx_PIO1_23_NO
+    bool	"Neither PullUp nor PullDown"
+    
+config LPC17xx_PIO1_23_PULLDOWN
+    bool	"PullDown"
+
+endchoice
+
+config LPC17xx_PIO1_23_MODE
+    int
+    default 0 if LPC17xx_PIO1_23_PULLUP
+    default 1 if LPC17xx_PIO1_23_REPEATER
+	default 2 if LPC17xx_PIO1_23_NO
+	default 3 if LPC17xx_PIO1_23_PULLDOWN
+    
+config LPC17xx_PIO1_23_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+    default n
+
+config LPC17xx_PIO1_23_OPENDRAIN
+	int
+	default 0 if !LPC17xx_PIO1_23_OPENDRAIN_ENABLE
+	default 1 if LPC17xx_PIO1_23_OPENDRAIN_ENABLE
+endmenu  
+
+
+menu "LPC17xx_PIO1_24"
+
+choice
+	prompt "FUNCTION"	
 	default LPC17xx_PIO1_24_GPIO
 
 config LPC17xx_PIO1_24_GPIO
@@ -347,7 +954,45 @@ config LPC17xx_PIO1_24_FUNCTION
     default 3 if LPC17xx_PIO1_24_MOSI0
     
 choice
-	prompt "LPC17xx_PIO1_25"	
+	prompt "MODE"	
+	default LPC17xx_PIO1_24_PULLUP
+
+config LPC17xx_PIO1_24_PULLUP
+    bool	"PullUp"
+
+config LPC17xx_PIO1_24_REPEATER
+    bool	"Repeater Mode"
+
+config LPC17xx_PIO1_24_NO
+    bool	"Neither PullUp nor PullDown"
+    
+config LPC17xx_PIO1_24_PULLDOWN
+    bool	"PullDown"
+
+endchoice
+
+config LPC17xx_PIO1_24_MODE
+    int
+    default 0 if LPC17xx_PIO1_24_PULLUP
+    default 1 if LPC17xx_PIO1_24_REPEATER
+	default 2 if LPC17xx_PIO1_24_NO
+	default 3 if LPC17xx_PIO1_24_PULLDOWN
+    
+config LPC17xx_PIO1_24_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+    default n
+
+config LPC17xx_PIO1_24_OPENDRAIN
+	int
+	default 0 if !LPC17xx_PIO1_24_OPENDRAIN_ENABLE
+	default 1 if LPC17xx_PIO1_24_OPENDRAIN_ENABLE
+endmenu  
+
+    
+menu "LPC17xx_PIO1_25"
+
+choice
+	prompt "FUNCTION"	
 	default LPC17xx_PIO1_25_GPIO
 
 config LPC17xx_PIO1_25_GPIO
@@ -365,10 +1010,48 @@ config LPC17xx_PIO1_25_FUNCTION
     int
     default 0 if LPC17xx_PIO1_25_GPIO
     default 1 if LPC17xx_PIO1_25_MCOA1
-    default 2 if LPC17xx_PIO1_25_TMR1_MAT1
+    default 3 if LPC17xx_PIO1_25_TMR1_MAT1
 
 choice
-	prompt "LPC17xx_PIO1_26"	
+	prompt "MODE"	
+	default LPC17xx_PIO1_25_PULLUP
+
+config LPC17xx_PIO1_25_PULLUP
+    bool	"PullUp"
+
+config LPC17xx_PIO1_25_REPEATER
+    bool	"Repeater Mode"
+
+config LPC17xx_PIO1_25_NO
+    bool	"Neither PullUp nor PullDown"
+    
+config LPC17xx_PIO1_25_PULLDOWN
+    bool	"PullDown"
+
+endchoice
+
+config LPC17xx_PIO1_25_MODE
+    int
+    default 0 if LPC17xx_PIO1_25_PULLUP
+    default 1 if LPC17xx_PIO1_25_REPEATER
+	default 2 if LPC17xx_PIO1_25_NO
+	default 3 if LPC17xx_PIO1_25_PULLDOWN
+    
+config LPC17xx_PIO1_25_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+    default n
+
+config LPC17xx_PIO1_25_OPENDRAIN
+	int
+	default 0 if !LPC17xx_PIO1_25_OPENDRAIN_ENABLE
+	default 1 if LPC17xx_PIO1_25_OPENDRAIN_ENABLE
+endmenu  
+
+
+menu "LPC17xx_PIO1_26"
+
+choice
+	prompt "FUNCTION"	
 	default LPC17xx_PIO1_26_GPIO
 
 config LPC17xx_PIO1_26_GPIO
@@ -391,9 +1074,47 @@ config LPC17xx_PIO1_26_FUNCTION
     default 1 if LPC17xx_PIO1_26_MCOB1
     default 2 if LPC17xx_PIO1_26_PWM1_OUT6
 	default 3 if LPC17xx_PIO1_26_TMR0_CAP0
-    
+	
 choice
-	prompt "LPC17xx_PIO1_27"	
+	prompt "MODE"	
+	default LPC17xx_PIO1_26_PULLUP
+
+config LPC17xx_PIO1_26_PULLUP
+    bool	"PullUp"
+
+config LPC17xx_PIO1_26_REPEATER
+    bool	"Repeater Mode"
+
+config LPC17xx_PIO1_26_NO
+    bool	"Neither PullUp nor PullDown"
+    
+config LPC17xx_PIO1_26_PULLDOWN
+    bool	"PullDown"
+
+endchoice
+
+config LPC17xx_PIO1_26_MODE
+    int
+    default 0 if LPC17xx_PIO1_26_PULLUP
+    default 1 if LPC17xx_PIO1_26_REPEATER
+	default 2 if LPC17xx_PIO1_26_NO
+	default 3 if LPC17xx_PIO1_26_PULLDOWN
+    
+config LPC17xx_PIO1_26_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+    default n
+
+config LPC17xx_PIO1_26_OPENDRAIN
+	int
+	default 0 if !LPC17xx_PIO1_26_OPENDRAIN_ENABLE
+	default 1 if LPC17xx_PIO1_26_OPENDRAIN_ENABLE
+endmenu  
+
+    
+menu "LPC17xx_PIO1_27"
+
+choice
+	prompt "FUNCTION"	
 	default LPC17xx_PIO1_27_GPIO
 	depends on HAS_100pin
 
@@ -419,7 +1140,45 @@ config LPC17xx_PIO1_27_FUNCTION
     default 3 if LPC17xx_PIO1_27_TMR0_CAP1
 
 choice
-	prompt "LPC17xx_PIO1_28"	
+	prompt "MODE"	
+	default LPC17xx_PIO1_27_PULLUP
+
+config LPC17xx_PIO1_27_PULLUP
+    bool	"PullUp"
+
+config LPC17xx_PIO1_27_REPEATER
+    bool	"Repeater Mode"
+
+config LPC17xx_PIO1_27_NO
+    bool	"Neither PullUp nor PullDown"
+    
+config LPC17xx_PIO1_27_PULLDOWN
+    bool	"PullDown"
+
+endchoice
+
+config LPC17xx_PIO1_27_MODE
+    int
+    default 0 if LPC17xx_PIO1_27_PULLUP
+    default 1 if LPC17xx_PIO1_27_REPEATER
+	default 2 if LPC17xx_PIO1_27_NO
+	default 3 if LPC17xx_PIO1_27_PULLDOWN
+    
+config LPC17xx_PIO1_27_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+    default n
+
+config LPC17xx_PIO1_27_OPENDRAIN
+	int
+	default 0 if !LPC17xx_PIO1_27_OPENDRAIN_ENABLE
+	default 1 if LPC17xx_PIO1_27_OPENDRAIN_ENABLE
+endmenu  
+
+
+menu "LPC17xx_PIO1_28"
+
+choice
+	prompt "FUNCTION"	
 	default LPC17xx_PIO1_28_GPIO
 
 config LPC17xx_PIO1_28_GPIO
@@ -444,7 +1203,45 @@ config LPC17xx_PIO1_28_FUNCTION
     default 3 if LPC17xx_PIO1_28_TMR0_MAT0
     
 choice
-	prompt "LPC17xx_PIO1_29"	
+	prompt "MODE"	
+	default LPC17xx_PIO1_28_PULLUP
+
+config LPC17xx_PIO1_28_PULLUP
+    bool	"PullUp"
+
+config LPC17xx_PIO1_28_REPEATER
+    bool	"Repeater Mode"
+
+config LPC17xx_PIO1_28_NO
+    bool	"Neither PullUp nor PullDown"
+    
+config LPC17xx_PIO1_28_PULLDOWN
+    bool	"PullDown"
+
+endchoice
+
+config LPC17xx_PIO1_28_MODE
+    int
+    default 0 if LPC17xx_PIO1_28_PULLUP
+    default 1 if LPC17xx_PIO1_28_REPEATER
+	default 2 if LPC17xx_PIO1_28_NO
+	default 3 if LPC17xx_PIO1_28_PULLDOWN
+    
+config LPC17xx_PIO1_28_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+    default n
+
+config LPC17xx_PIO1_28_OPENDRAIN
+	int
+	default 0 if !LPC17xx_PIO1_28_OPENDRAIN_ENABLE
+	default 1 if LPC17xx_PIO1_28_OPENDRAIN_ENABLE
+endmenu  
+
+    
+menu "LPC17xx_PIO1_29"
+
+choice
+	prompt "FUNCTION"	
 	default LPC17xx_PIO1_29_GPIO
 
 config LPC17xx_PIO1_29_GPIO
@@ -469,7 +1266,45 @@ config LPC17xx_PIO1_29_FUNCTION
     default 3 if LPC17xx_PIO1_29_TMR0_MAT1
     
 choice
-	prompt "LPC17xx_PIO1_30"	
+	prompt "MODE"	
+	default LPC17xx_PIO1_29_PULLUP
+
+config LPC17xx_PIO1_29_PULLUP
+    bool	"PullUp"
+
+config LPC17xx_PIO1_29_REPEATER
+    bool	"Repeater Mode"
+
+config LPC17xx_PIO1_29_NO
+    bool	"Neither PullUp nor PullDown"
+    
+config LPC17xx_PIO1_29_PULLDOWN
+    bool	"PullDown"
+
+endchoice
+
+config LPC17xx_PIO1_29_MODE
+    int
+    default 0 if LPC17xx_PIO1_29_PULLUP
+    default 1 if LPC17xx_PIO1_29_REPEATER
+	default 2 if LPC17xx_PIO1_29_NO
+	default 3 if LPC17xx_PIO1_29_PULLDOWN
+    
+config LPC17xx_PIO1_29_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+    default n
+
+config LPC17xx_PIO1_29_OPENDRAIN
+	int
+	default 0 if !LPC17xx_PIO1_29_OPENDRAIN_ENABLE
+	default 1 if LPC17xx_PIO1_29_OPENDRAIN_ENABLE
+endmenu  
+
+    
+menu "LPC17xx_PIO1_30"
+
+choice
+	prompt "FUNCTION"	
 	default LPC17xx_PIO1_30_GPIO
 
 config LPC17xx_PIO1_30_GPIO
@@ -486,11 +1321,49 @@ endchoice
 config LPC17xx_PIO1_30_FUNCTION
     int
     default 0 if LPC17xx_PIO1_30_GPIO
-    default 1 if LPC17xx_PIO1_30_USB_VBUS
-    default 2 if LPC17xx_PIO1_30_AD04
+    default 2 if LPC17xx_PIO1_30_USB_VBUS
+    default 3 if LPC17xx_PIO1_30_AD04
     
 choice
-	prompt "LPC17xx_PIO1_31"	
+	prompt "MODE"	
+	default LPC17xx_PIO1_30_PULLUP
+
+config LPC17xx_PIO1_30_PULLUP
+    bool	"PullUp"
+
+config LPC17xx_PIO1_30_REPEATER
+    bool	"Repeater Mode"
+
+config LPC17xx_PIO1_30_NO
+    bool	"Neither PullUp nor PullDown"
+    
+config LPC17xx_PIO1_30_PULLDOWN
+    bool	"PullDown"
+
+endchoice
+
+config LPC17xx_PIO1_30_MODE
+    int
+    default 0 if LPC17xx_PIO1_30_PULLUP
+    default 1 if LPC17xx_PIO1_30_REPEATER
+	default 2 if LPC17xx_PIO1_30_NO
+	default 3 if LPC17xx_PIO1_30_PULLDOWN
+    
+config LPC17xx_PIO1_30_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+    default n
+
+config LPC17xx_PIO1_30_OPENDRAIN
+	int
+	default 0 if !LPC17xx_PIO1_30_OPENDRAIN_ENABLE
+	default 1 if LPC17xx_PIO1_30_OPENDRAIN_ENABLE
+endmenu  
+    
+    
+menu "LPC17xx_PIO1_31"
+
+choice
+	prompt "FUNCTION"	
 	default LPC17xx_PIO1_31_GPIO
 
 config LPC17xx_PIO1_31_GPIO
@@ -507,6 +1380,40 @@ endchoice
 config LPC17xx_PIO1_31_FUNCTION
     int
     default 0 if LPC17xx_PIO1_31_GPIO
-    default 1 if LPC17xx_PIO1_31_SCK1
-    default 2 if LPC17xx_PIO1_31_AD05    
+    default 2 if LPC17xx_PIO1_31_SCK1
+    default 3 if LPC17xx_PIO1_31_AD05    
     
+choice
+	prompt "MODE"	
+	default LPC17xx_PIO1_31_PULLUP
+
+config LPC17xx_PIO1_31_PULLUP
+    bool	"PullUp"
+
+config LPC17xx_PIO1_31_REPEATER
+    bool	"Repeater Mode"
+
+config LPC17xx_PIO1_31_NO
+    bool	"Neither PullUp nor PullDown"
+    
+config LPC17xx_PIO1_31_PULLDOWN
+    bool	"PullDown"
+
+endchoice
+
+config LPC17xx_PIO1_31_MODE
+    int
+    default 0 if LPC17xx_PIO1_31_PULLUP
+    default 1 if LPC17xx_PIO1_31_REPEATER
+	default 2 if LPC17xx_PIO1_31_NO
+	default 3 if LPC17xx_PIO1_31_PULLDOWN
+    
+config LPC17xx_PIO1_31_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+    default n
+
+config LPC17xx_PIO1_31_OPENDRAIN
+	int
+	default 0 if !LPC17xx_PIO1_31_OPENDRAIN_ENABLE
+	default 1 if LPC17xx_PIO1_31_OPENDRAIN_ENABLE
+endmenu  

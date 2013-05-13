@@ -62,6 +62,11 @@ config MACH_LPC11xx_UART0_BASE
 config MACH_LPC11xx_CAN0_BASE  
 	hex
 	default 0x40050000
+	
+config MACH_LPC11xx_I2C0_BASE 
+	hex
+	default 0x40000000
+	
 
 config MACH_LPC11xx_TIMER0_BASE
 	hex
@@ -112,7 +117,7 @@ config ARCH_ARM_SYSTICK_CLKSRC
 
 menu "Peripheral Selection"
 
-comment "CAN devices"
+menu "CAN devices"
 
 config MACH_LPC11xx_CAN
 	bool
@@ -128,8 +133,9 @@ config MACH_LPC11xx_CAN_0_INODE_NAME
 	string "CAN(0) devfs name"
 	default "can0"
 	depends on HAS_CAN_0
+endmenu	
 
-comment "UART devices"
+menu "UART devices"
 
 config MACH_LPC11xx_UART
 	bool
@@ -144,8 +150,27 @@ config MACH_LPC11xx_UART_0_INODE_NAME
 	string "UART(0) devfs name"
 	default "uart0"
 	depends on MACH_LPC11xx_UART_0
+endmenu
 
-comment "TIMER devices"
+menu "I2C devices"
+
+config MACH_LPC11xx_I2C
+	bool
+	default n
+
+config MACH_LPC11xx_I2C_0
+    bool "Use I2C(0) peripheral"
+	default n
+	select MACH_LPC11xx_I2C
+
+config MACH_LPC11xx_I2C_0_INODE_NAME
+	string "I2C(0) devfs name"
+	default "i2c0"
+	depends on MACH_LPC11xx_I2C_0
+
+endmenu
+
+menu "TIMER devices"
 
 config MACH_LPC11xx_TIMER
 	bool
@@ -190,6 +215,7 @@ config MACH_LPC11xx_TIMER_3_INODE_NAME
 	string "TIMER(3) devfs name"
 	default "timer3"
 	depends on MACH_LPC11xx_TIMER_3
+endmenu
 
 endmenu
 

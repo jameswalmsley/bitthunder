@@ -1,5 +1,7 @@
+menu "LPC17xx_PIO4_28"
+ 
 choice
-	prompt "LPC17xx_PIO4_28"	
+	prompt "FUNCTION"	
 	default LPC17xx_PIO4_28_GPIO
 
 config LPC17xx_PIO4_28_GPIO
@@ -21,10 +23,48 @@ config LPC17xx_PIO4_28_FUNCTION
     default 0 if LPC17xx_PIO4_28_GPIO
     default 1 if LPC17xx_PIO4_28_RX_MCLK
     default 2 if LPC17xx_PIO4_28_TMR2_MAT0
-    default 3 if LPC17xx_PIO4_28_TXD3	
+    default 3 if LPC17xx_PIO4_28_TXD3
     
 choice
-	prompt "LPC17xx_PIO4_29"	
+	prompt "MODE"	
+	default LPC17xx_PIO4_28_PULLUP
+
+config LPC17xx_PIO4_28_PULLUP
+    bool	"PullUp"
+
+config LPC17xx_PIO4_28_REPEATER
+    bool	"Repeater Mode"
+
+config LPC17xx_PIO4_28_NO
+    bool	"Neither PullUp nor PullDown"
+    
+config LPC17xx_PIO4_28_PULLDOWN
+    bool	"PullDown"
+
+endchoice
+
+config LPC17xx_PIO4_28_MODE
+    int
+    default 0 if LPC17xx_PIO4_28_PULLUP
+    default 1 if LPC17xx_PIO4_28_REPEATER
+	default 2 if LPC17xx_PIO4_28_NO
+	default 3 if LPC17xx_PIO4_28_PULLDOWN
+    
+config LPC17xx_PIO4_28_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+    default n
+
+config LPC17xx_PIO4_28_OPENDRAIN
+	int
+	default 0 if !LPC17xx_PIO4_28_OPENDRAIN_ENABLE
+	default 1 if LPC17xx_PIO4_28_OPENDRAIN_ENABLE
+endmenu
+
+    
+menu "LPC17xx_PIO4_29"
+
+choice
+	prompt "FUNCTION"	
 	default LPC17xx_PIO4_29_GPIO
 
 config LPC17xx_PIO4_29_GPIO
@@ -45,5 +85,40 @@ config LPC17xx_PIO4_29_FUNCTION
     int
     default 0 if LPC17xx_PIO4_29_GPIO
     default 1 if LPC17xx_PIO4_29_TX_MCLK
-	default 2 if LPC17xx_PIO4_29_TMR2_MAT1
+	default 2 if LPC17xx_PIO4_29_TMR2_MAT1	
 	default 3 if LPC17xx_PIO4_29_RXD3
+
+choice
+	prompt "MODE"	
+	default LPC17xx_PIO4_29_PULLUP
+
+config LPC17xx_PIO4_29_PULLUP
+    bool	"PullUp"
+
+config LPC17xx_PIO4_29_REPEATER
+    bool	"Repeater Mode"
+
+config LPC17xx_PIO4_29_NO
+    bool	"Neither PullUp nor PullDown"
+    
+config LPC17xx_PIO4_29_PULLDOWN
+    bool	"PullDown"
+
+endchoice
+
+config LPC17xx_PIO4_29_MODE
+    int
+    default 0 if LPC17xx_PIO4_29_PULLUP
+    default 1 if LPC17xx_PIO4_29_REPEATER
+	default 2 if LPC17xx_PIO4_29_NO
+	default 3 if LPC17xx_PIO4_29_PULLDOWN
+    
+config LPC17xx_PIO4_29_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+    default n
+		
+config LPC17xx_PIO4_29_OPENDRAIN
+	int
+	default 0 if !LPC17xx_PIO4_29_OPENDRAIN_ENABLE
+	default 1 if LPC17xx_PIO4_29_OPENDRAIN_ENABLE
+endmenu
