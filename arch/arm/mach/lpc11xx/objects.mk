@@ -9,6 +9,7 @@ MACH_LPC11xx_OBJECTS-$(BT_CONFIG_MACH_LPC11xx_LPC11Axx) += $(BUILD_DIR)arch/arm/
 MACH_LPC11xx_OBJECTS-$(BT_CONFIG_MACH_LPC11xx_TIMER)    += $(BUILD_DIR)arch/arm/mach/lpc11xx/timer.o
 MACH_LPC11xx_OBJECTS-$(BT_CONFIG_MACH_LPC11xx_UART)     += $(BUILD_DIR)arch/arm/mach/lpc11xx/uart.o
 MACH_LPC11xx_OBJECTS-$(BT_CONFIG_MACH_LPC11xx_CAN)      += $(BUILD_DIR)arch/arm/mach/lpc11xx/can.o
+MACH_LPC11xx_OBJECTS-$(BT_CONFIG_MACH_LPC11xx_I2C)      += $(BUILD_DIR)arch/arm/mach/lpc11xx/i2c.o
 
 MACH_LPC11xx_OBJECTS += $(MACH_LPC11xx_OBJECTS-y)
 
