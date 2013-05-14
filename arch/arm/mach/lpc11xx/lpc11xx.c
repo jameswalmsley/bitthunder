@@ -293,6 +293,15 @@ static void lpc11xx_gpio_init(void) {
 	#ifdef BT_CONFIG_LPC11xx_PIO3_11_FUNCTION
 		BT_LPC11xx_SetIOConfig(LPC11xx_PIO3_11, BT_CONFIG_LPC11xx_PIO3_11_FUNCTION, BT_CONFIG_LPC11xx_PIO3_11_MODE, BT_FALSE, BT_CONFIG_LPC11xx_PIO3_11_OPENDRAIN);
 	#endif
+
+	#ifdef BT_CONFIG_MACH_LPC11Cxx
+		if (*LPC11xx_PIO0_10 & LPC11xx_PIO0_10_SCK0)
+			*LPC11xx_IOCON_SCK_LOC = 0;
+		else if (*LPC11xx_PIO2_11 & LPC11xx_PIO2_11_SCK0)
+			*LPC11xx_IOCON_SCK_LOC = 1;
+		else if (*LPC11xx_PIO0_6 & LPC11xx_PIO0_6_SCK0)
+			*LPC11xx_IOCON_SCK_LOC = 2;
+	#endif
 }
 
 static BT_u32 lpc11xx_get_cpu_clock_frequency() {
