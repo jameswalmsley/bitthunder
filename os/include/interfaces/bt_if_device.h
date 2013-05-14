@@ -10,6 +10,7 @@
 #include "bt_if_power.h"
 #include "bt_if_block.h"
 #include "bt_dev_if_uart.h"
+#include "bt_dev_if_spi.h"
 #include "bt_dev_if_i2c.h"
 #include "bt_dev_if_can.h"
 #include "bt_dev_if_sdio.h"
@@ -55,6 +56,7 @@ typedef union {
 	const BT_DEV_IF_SYSTIMER   *pSysTimerIF;
 	const BT_DEV_IF_TIMER	   *pTimerIF;
 	const BT_DEV_IF_CAN 	   *pCANIF;
+	const BT_DEV_IF_SPI 	   *pSpiIF;
 	const BT_DEV_IF_I2C 	   *pI2CIF;
 	const BT_DEV_IF_UART 	   *pUartIF;
 	const BT_DEV_IF_SDIO	   *pSdioIF;
@@ -66,6 +68,7 @@ typedef union {
 #define BT_IF_TIMER_OPS(handle)		BT_IF_DEV_CONFIG(handle).pTimerIF
 #define BT_IF_CAN_OPS(handle)		BT_IF_DEV_CONFIG(handle).pCANIF
 #define BT_IF_UART_OPS(handle)		BT_IF_DEV_CONFIG(handle).pUartIF
+#define BT_IF_SPI_OPS(handle)		BT_IF_DEV_CONFIG(handle).pSpiIF
 #define BT_IF_I2C_OPS(handle)		BT_IF_DEV_CONFIG(handle).pI2CIF
 #define BT_IF_SDIO_OPS(handle)		BT_IF_DEV_CONFIG(handle).pSdioIF
 
