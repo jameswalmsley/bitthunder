@@ -147,3 +147,22 @@ BT_ERROR BT_SetInterruptAffinity(BT_u32 ulIRQ, BT_u32 ulCPU, BT_BOOL bReceive) {
 
 	return -1;
 }
+
+
+BT_ERROR BT_EnableInterrupts() {
+	BT_u32 i;
+	for(i = 0; i < BT_CONFIG_MAX_INTERRUPT_CONTROLLERS; i++) {
+		g_oControllers[i].BT_IF_IRQ_OPS(hIRQ)->pfnEnableInterrupts(g_oControllers[i].hIRQ);
+	}
+
+	return BT_ERR_NONE;
+}
+
+BT_ERROR BT_DisableInterrupts() {
+	BT_u32 i;
+	for(i = 0; i < BT_CONFIG_MAX_INTERRUPT_CONTROLLERS; i++) {
+		g_oControllers[i].BT_IF_IRQ_OPS(hIRQ)->pfnDisableInterrupts(g_oControllers[i].hIRQ);
+	}
+
+	return BT_ERR_NONE;
+}

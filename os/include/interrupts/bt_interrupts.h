@@ -21,6 +21,8 @@ BT_ERROR 	BT_SetInterruptPriority			(BT_u32 ulIRQ, BT_u32 ulPriority);
 BT_u32 		BT_GetInterruptPriority			(BT_u32 ulIRQ, BT_ERROR *pError);
 BT_ERROR	BT_EnableInterrupt				(BT_u32 ulIRQ);
 BT_ERROR	BT_DisableInterrupt				(BT_u32 ulIRQ);
+BT_ERROR	BT_EnableInterrupts				();
+BT_ERROR	BT_DisableInterrupts			();
 
 /**
  *	@brief		Controls CPU Interrupt Affinity.
