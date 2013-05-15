@@ -259,16 +259,16 @@ static BT_ERROR spiSetConfig(BT_HANDLE hSpi, BT_SPI_CONFIG *pConfig) {
 	if (hSpi->pDevice->id == 0) {
 		pRegs->CR &= ~(LPC17xx_SPI_CR_DSS_MASK << 8);
 		pRegs->CR |= (pConfig->ucDataBits & LPC17xx_SPI_CR_DSS_MASK) << 8;
-		pRegs->CR &= ~(LPC17xx_SPI_CR_CPOL | BT_SPI_CPHA);
-		if (pConfig->eSPIClockMode & BT_SPI_CPOL)
+		pRegs->CR &= ~(LPC17xx_SPI_CR_CPOL | LPC17xx_SPI_CR_CPHA);
+		if (pConfig->eCPOL)
 			pRegs->CR |= LPC17xx_SPI_CR_CPOL;
-		if (pConfig->eSPIClockMode & BT_SPI_CPHA)
+		if (pConfig->eCPHA)
 			pRegs->CR |= LPC17xx_SPI_CR_CPHA;
 	}
 	else {
 		pRegs->CR0 = (pConfig->ucDataBits - 1) & LPC17xx_SPI_CR0_DSS_MASK;
-		pRegs->CR0 |= pConfig->eFrameFormat << 4;
-		pRegs->CR0 |= pConfig->eSPIClockMode << 6;
+		pRegs->CR0 |= pConfig->eCPOL << 6;
+		pRegs->CR0 |= pConfig->eCPHA << 7;
 	}
 
 	spiSetBaudrate(hSpi, pConfig->ulBaudrate);
@@ -329,17 +329,14 @@ static BT_ERROR spiGetConfig(BT_HANDLE hSpi, BT_SPI_CONFIG *pConfig) {
 	if (hSpi->pDevice->id == 0) {
 		pConfig->ulBaudrate 	= ulInputClk / pRegs->CCR;
 		pConfig->ucDataBits 	= (pRegs->CR >> 8) & LPC17xx_SPI_CR_DSS_MASK;
-		pConfig->eSPIClockMode  = BT_SPI_CLKMODE00;
-		if (pRegs->CR & LPC17xx_SPI_CR_CPOL)
-			pConfig->eSPIClockMode |= BT_SPI_CPOL;
-		if (pRegs->CR & LPC17xx_SPI_CR_CPHA)
-			pConfig->eSPIClockMode |= BT_SPI_CPHA;
+		pConfig->eCPOL			= (pRegs->CR & LPC17xx_SPI_CR_CPOL);
+		pConfig->eCPHA			= (pRegs->CR & LPC17xx_SPI_CR_CPHA);
 	}
 	else {
 		pConfig->ulBaudrate 	= ulInputClk / (pRegs->CPSR * ((pRegs->CR0 & LPC17xx_SPI_CR0_SCR_MASK) >> 8));		// Clk / Divisor == ~Baudrate
 		pConfig->ucDataBits 	= (pRegs->CR0 & LPC17xx_SPI_CR0_DSS_MASK) + 1;
-		pConfig->eSPIClockMode  = (pRegs->CR0 & LPC17xx_SPI_CR0_CLK_MASK) >> 6;
-		pConfig->eFrameFormat   = (pRegs->CR0 & LPC17xx_SPI_CR0_FRF_MASK) >> 4;
+		pConfig->eCPOL			= (pRegs->CR0 & LPC17xx_SPI_CR0_CPOL);
+		pConfig->eCPHA			= (pRegs->CR0 & LPC17xx_SPI_CR0_CPHA);
 	}
 
 	pConfig->ulTxBufferSize = BT_FifoSize(hSpi->hTxFifo, &Error);

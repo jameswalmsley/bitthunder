@@ -12,7 +12,8 @@ typedef struct _LPC11xx_SPI_REGS {
 
 	#define	LPC11xx_SPI_CR0_DSS_MASK				0x0000000F
 	#define	LPC11xx_SPI_CR0_FRF_MASK				0x00000030
-	#define	LPC11xx_SPI_CR0_CLK_MASK				0x000000C0
+	#define	LPC11xx_SPI_CR0_CPOL					0x00000040
+	#define	LPC11xx_SPI_CR0_CPHA					0x00000080
 	#define	LPC11xx_SPI_CR0_SCR_MASK				0x0000FF00
 
 		BT_u32	CR1;					//      0x04  -- control register 1.

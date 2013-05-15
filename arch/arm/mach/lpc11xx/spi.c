@@ -259,8 +259,8 @@ static BT_ERROR spiSetConfig(BT_HANDLE hSpi, BT_SPI_CONFIG *pConfig) {
 	BT_ERROR Error = BT_ERR_NONE;
 
 	pRegs->CR0 = (pConfig->ucDataBits - 1) & LPC11xx_SPI_CR0_DSS_MASK;
-	pRegs->CR0 |= pConfig->eFrameFormat << 4;
-	pRegs->CR0 |= pConfig->eSPIClockMode << 6;
+	pRegs->CR0 |= pConfig->eCPOL << 6;
+	pRegs->CR0 |= pConfig->eCPHA << 7;
 
 	spiSetBaudrate(hSpi, pConfig->ulBaudrate);
 
@@ -343,8 +343,8 @@ static BT_ERROR spiGetConfig(BT_HANDLE hSpi, BT_SPI_CONFIG *pConfig) {
 	pConfig->ulTxBufferSize = BT_FifoSize(hSpi->hTxFifo, &Error);
 	pConfig->ulRxBufferSize = BT_FifoSize(hSpi->hRxFifo, &Error);
 	pConfig->ucDataBits 	= (pRegs->CR0 & LPC11xx_SPI_CR0_DSS_MASK) + 1;
-	pConfig->eSPIClockMode  = (pRegs->CR0 & LPC11xx_SPI_CR0_CLK_MASK) >> 6;
-	pConfig->eFrameFormat   = (pRegs->CR0 & LPC11xx_SPI_CR0_FRF_MASK) >> 4;
+	pConfig->eCPOL			= (pRegs->CR0 & LPC11xx_SPI_CR0_CPOL);
+	pConfig->eCPHA			= (pRegs->CR0 & LPC11xx_SPI_CR0_CPHA);
 
 	pConfig->eMode			= hSpi->eMode;
 
@@ -396,18 +396,14 @@ static BT_ERROR spiRead(BT_HANDLE hSpi, BT_u32 ulFlags, BT_u8 *pucDest, BT_u32 u
 	case BT_SPI_MODE_POLLED:
 	{
 		BT_u32 ulSend = ulSize;
-			while(ulSize) {
-				while((pRegs->SR & LPC11xx_SPI_SR_TNF) && (ulSend)) {
-					pRegs->DR = 0;
-					ulSend--;
-				}
-				while(!(pRegs->SR & LPC11xx_SPI_SR_RNE)) {
-					BT_ThreadYield();
-				}
-				*pucDest++ = pRegs->DR & 0x0000FFFF;
-				ulSize--;			
+		while(ulSize) {
+			while((pRegs->SR & LPC11xx_SPI_SR_TNF) && (ulSend)) {
+				pRegs->DR = 0;
+				ulSend--;
 			}
-
+			while(!(pRegs->SR & LPC11xx_SPI_SR_RNE)) {
+				BT_ThreadYield();
+			}
 			*pucDest++ = pRegs->DR & 0x0000FFFF;
 			ulSize--;
 		}
@@ -433,7 +429,7 @@ static BT_ERROR spiRead(BT_HANDLE hSpi, BT_u32 ulFlags, BT_u8 *pucDest, BT_u32 u
  *
  *	Note, this doesn't implement ulFlags specific options yet!
  **/
-static BT_ERROR spiWrite(BT_HANDLE hSpi, BT_u32 ulFlags, const BT_u8 *pucSource, BT_u32 ulSize) {
+static BT_ERROR spiWrite(BT_HANDLE hSpi, BT_u32 ulFlags, BT_u8 *pucSource, BT_u32 ulSize) {
 	volatile LPC11xx_SPI_REGS *pRegs = hSpi->pRegs;
 
 	BT_ERROR Error = BT_ERR_NONE;
