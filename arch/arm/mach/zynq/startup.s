@@ -51,6 +51,9 @@ reset:
 
 	ldr	sp, =_stack
 
+	ldr     r0, =_vector_table
+ 	mcr     p15, 0, r0, c12, c0, 0  @Set VBAR 
+
 	@ Enable Neon
 
 	MRC	p15,0,r0,c1,c0,2		;
