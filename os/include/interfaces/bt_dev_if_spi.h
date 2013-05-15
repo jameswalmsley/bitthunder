@@ -5,36 +5,28 @@
 
 typedef enum {
 	BT_SPI_MODE_POLLED = 0,	///< A really simple, pure polling mode, with thread-yielding.
-	//BT_SPI_MODE_INTERRUPT,		///< A non-buffered interrupt driven mode.
 	BT_SPI_MODE_BUFFERED,		///< A fully buffered interrupt driven mode.
 } BT_SPI_OPERATING_MODE;
 
 typedef enum {
-	BT_SSP_SPI_FRAME_FORMAT = 0,
-	BT_SSP_TI_FRAME_FORMAT,
-	BT_SSP_MICROWIRE_FRAME_FORMAT,
-} BT_SSP_FRAME_FORMAT;
+	BT_SPI_CPOL_0 = 0,
+	BT_SPI_CPOL_1
+} BT_SPI_CPOL_MODE;
 
 typedef enum {
-	BT_SPI_CLKMODE00 = 0,
-	BT_SPI_CLKMODE01,
-	BT_SPI_CLKMODE10,
-	BT_SPI_CLKMODE11,
-} BT_SPI_CLOCK_MODE;
-
-#define	BT_SPI_CPOL		0x01
-#define	BT_SPI_CPHA		0x10
-
+	BT_SPI_CPHA_0 = 0,
+	BT_SPI_CPHA_1
+} BT_SPI_CPHA_MODE;
 
 
 typedef struct {
 	BT_SPI_OPERATING_MODE	eMode;
-	BT_SSP_FRAME_FORMAT		eFrameFormat;
 
 	BT_u32 					ulBaudrate;
 
 	BT_u8					ucDataBits;
-	BT_SPI_CLOCK_MODE		eSPIClockMode;
+	BT_SPI_CPOL_MODE		eCPOL;
+	BT_SPI_CPHA_MODE		eCPHA;
 
 	BT_u16					ulRxBufferSize;		///<
 	BT_u16					ulTxBufferSize;		///<
