@@ -12,3 +12,15 @@ config MAIN_TASK_STACK_DEPTH
 config MAIN_TASK_PRIORITY
     int "Main task stack priority"
 	default 0
+
+config BLOCK
+    bool "Block device support"
+	default n
+
+config VOLUME
+    bool "Volume / Partition Manager"
+	default n
+
+config FILE
+    bool "File I/O interfaces"
+	default n

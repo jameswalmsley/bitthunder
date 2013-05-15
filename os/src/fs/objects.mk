@@ -1,8 +1,8 @@
-BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/fs/bt_devfs.o
-BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/fs/bt_fs.o
-BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/fs/bt_file.o
-BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/fs/bt_dir.o
-BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/fs/bt_inode.o
+BT_OS_OBJECTS-$(BT_CONFIG_OS) 		+= $(BUILD_DIR)os/src/fs/bt_devfs.o
+BT_OS_OBJECTS-$(BT_CONFIG_FS) 		+= $(BUILD_DIR)os/src/fs/bt_fs.o
+BT_OS_OBJECTS-$(BT_CONFIG_FILE) 	+= $(BUILD_DIR)os/src/fs/bt_file.o
+BT_OS_OBJECTS-$(BT_CONFIG_DIR) 		+= $(BUILD_DIR)os/src/fs/bt_dir.o
+BT_OS_OBJECTS-$(BT_CONFIG_INODE) 	+= $(BUILD_DIR)os/src/fs/bt_inode.o
 
 
 # FullFAT Objects

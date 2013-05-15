@@ -1,11 +1,19 @@
 menu "Filesystems"
 
+config FS
+    bool
+	select VOLUME
+	select BLOCK
+	select FILE
+	default n
+
 config FS_DEV_DYNAMIC_REGISTRATION
 	bool "Dynamic DEVFS registration"
 	default n
 
 config FS_FULLFAT
     bool "FAT filesystem support (FullFAT)"
+	select FS
 	default n
 
 menu "FullFAT Configuration"
