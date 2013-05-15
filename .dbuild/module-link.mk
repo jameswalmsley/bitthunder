@@ -63,5 +63,5 @@ ifeq ($(DBUILD_VERBOSE_CMD), 0)											# Pretty print on successful compile, 
 	$(Q)$(PRETTY) --dbuild "LDS" $(MODULE_NAME) $(subst $(BUILD_DIR),"",$@)
 endif
 	@mkdir -p $(dir $@)
-	$(Q)$(CC) -MD -MP -E -P $(CFLAGS) $< -o $@
+	$(Q)$(CC) -E -P $(CFLAGS) $< -o $@
 	$(POST_CC)

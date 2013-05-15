@@ -81,6 +81,7 @@ $(TARGET_DEPS): $(LINKER_SCRIPTS)
 $(LINKER_SCRIPTS):$(BASE)os/include/btlinker_config.h
 $(LINKER_SCRIPTS):$(BASE)os/include/bitthunder.lds.h
 
+$(LINKER_SCRIPTS): CFLAGS=-I $(BASE)lib/include/ -I $(BASE)arch/$(ARCH)/include/ -I $(BASE)os/include/
 
 linker:
 	@echo $(LINKER_SCRIPTS)
