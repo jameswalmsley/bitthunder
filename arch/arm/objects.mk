@@ -65,3 +65,7 @@ $(BUILD_DIR)os/src/bt_main.o: CFLAGS += -I $(BASE)arch/arm/include/arch/common/
 
 $(BT_ARCH_ARM_OBJECTS): MODULE_NAME="HAL"
 OBJECTS += $(BT_ARCH_ARM_OBJECTS)
+
+$(BUILD_DIR)arch/arm/bitthunder.lds: MODULE_NAME="Linker"
+LINKER_SCRIPTS += $(BUILD_DIR)arch/arm/bitthunder.lds
+

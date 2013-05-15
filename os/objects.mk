@@ -75,3 +75,14 @@ appobjs:
 	@echo $(APP_OBJS)
 
 OBJECTS += $(APP_OBJS)
+
+$(TARGET_DEPS): $(LINKER_SCRIPTS)
+
+$(LINKER_SCRIPTS):$(BASE)os/include/btlinker_config.h
+$(LINKER_SCRIPTS):$(BASE)os/include/bitthunder.lds.h
+
+
+linker:
+	@echo $(LINKER_SCRIPTS)
+
+LINKER_SCRIPT=$(LINKER_SCRIPTS)

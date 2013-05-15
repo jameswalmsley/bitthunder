@@ -119,3 +119,8 @@ config SUBARCH
 	default "stm32"   if MACH_STM32
 	default "zynq"	  if MACH_ZYNQ
 endif
+
+
+menu "Linking"
+    source arch/arm/Kconfig.linker
+endmenu

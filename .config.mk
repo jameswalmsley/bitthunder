@@ -22,3 +22,5 @@ include $(BASE)$(BSP_DIR)/objects.mk
 
 $(OBJECTS): CFLAGS += -nostdlib -fno-builtin -fdata-sections -ffunction-sections
 $(OBJECTS): CFLAGS += -I $(BASE)/${BSP_DIR}/
+
+$(LINKER_SCRIPTS): CFLAGS += -I $(BASE)/${BSP_DIR}/

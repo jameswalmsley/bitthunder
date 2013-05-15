@@ -29,6 +29,10 @@ ifeq ($(strip $(TARGETS)),)
 else
 	$(Q)rm $(PRM_FLAGS) $(TARGETS)			$(PRM_PIPE)
 endif
+ifeq ($(strip $(LINKER_SCRIPTS)),)
+else
+	$(Q)rm $(PRM_FLAGS) $(LINKER_SCRIPTS)			$(PRM_PIPE)
+endif
 ifeq ($(CLEAN_EXTRAS), 1)
 	$(Q)rm $(PRM_FLAGS) $(CLEAN_LIST)		$(PRM_PIPE)
 endif

@@ -54,3 +54,14 @@ ifeq ($(DBUILD_VERBOSE_CMD), 0)
 endif
 	$(Q)$(CC) $(LDFLAGS) $(LDLIBS) $< -o $@
 
+
+#
+#	Auto linker script generation
+#
+$(BUILD_DIR)%.lds: $(BASE)%.lds.S
+ifeq ($(DBUILD_VERBOSE_CMD), 0)											# Pretty print on successful compile, but still display errors when they occur.
+	$(Q)$(PRETTY) --dbuild "LDS" $(MODULE_NAME) $(subst $(BUILD_DIR),"",$@)
+endif
+	@mkdir -p $(dir $@)
+	$(Q)$(CC) -MD -MP -E -P $(CFLAGS) $< -o $@
+	$(POST_CC)

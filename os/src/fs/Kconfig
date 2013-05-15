@@ -7,9 +7,14 @@ config FS
 	select FILE
 	default n
 
+config INODE
+    bool
+	default n
+
 config FS_DEV_DYNAMIC_REGISTRATION
 	bool "Dynamic DEVFS registration"
 	default n
+	select INODE
 
 config FS_FULLFAT
     bool "FAT filesystem support (FullFAT)"

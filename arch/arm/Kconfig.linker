@@ -1,0 +1,60 @@
+config LINKER_SECTION_FLASH
+    bool "Flash / ROM Section"
+	default n
+
+config LINKER_FLASH_START_ADDRESS
+    hex "Flash begin address"
+	default 0x0
+	depends on LINKER_SECTION_FLASH
+
+config LINKER_FLASH_LENGTH
+    hex "Flash length (bytes)
+	default 0x0
+	depends on LINKER_SECTION_FLASH
+
+
+config LINKER_SECTION_SRAM
+    bool "SRAM / On-chip-memory section"
+	default n
+
+config LINKER_SRAM_START_ADDRESS
+    hex "SRAM begin address"
+	default 0x0
+	depends on LINKER_SECTION_SRAM
+
+config LINKER_SRAM_LENGTH
+    hex "SRAM length"
+	default 0x0
+	depends on LINKER_SECTION_SRAM
+
+config LINKER_SECTION_RAM
+    bool "RAM (external DDR) section"
+	default n
+
+config LINKER_RAM_START_ADDRESS
+    hex "RAM start address"
+	default 0x0
+	depends on LINKER_SECTION_RAM
+
+config LINKER_RAM_LENGTH
+    hex "RAM length"
+	default 0x0
+	depends on LINKER_SECTION_RAM
+
+choice LINKER_INIT_SECTION
+    prompt "Init Section"
+
+config LINKER_INIT_SECTION_FLASH
+    bool "Flash"
+	depends on LINKER_SECTION_FLASH
+
+config LINKER_INIT_SECTION_SRAM
+    bool "SRAM"
+	depends on LINKER_SECTION_SRAM
+
+config LINKER_INIT_SECTION_RAM
+    bool "RAM"
+	depends on LINKER_SECTION_RAM
+
+
+endchoice
