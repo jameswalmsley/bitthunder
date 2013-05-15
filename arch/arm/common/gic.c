@@ -30,8 +30,6 @@ struct _BT_OPAQUE_HANDLE {
 	volatile GICD_REGS 	   	   *pGICD;
 };
 
-extern void enable_irq(void);
-
 void BT_ARCH_ARM_GIC_IRQHandler() {
 	BT_HANDLE hGic = g_hActiveHandle;
 
@@ -160,14 +158,43 @@ static BT_ERROR gic_setaffinity(BT_HANDLE hGic, BT_u32 ulIRQ, BT_u32 ulCPU, BT_B
 	return BT_ERR_NONE;
 }
 
+static BT_ERROR gic_enable_interrupts(BT_HANDLE hGic) {
+
+	__asm volatile (
+				"STMDB	SP!, {R0}		\n\t"	/* Push R0.					*/
+				"MRS	R0, CPSR		\n\t"	/* Get CPSR.				*/
+				"BIC	R0, R0, #0xC0	\n\t"	/* Enable IRQ, FIQ.			*/
+				"MSR	CPSR, R0		\n\t"	/* Write back modified value.*/
+				"LDMIA	SP!, {R0}" );			/* Pop R0.					*/
+
+	hGic->pGICC->CTLR |= 1;
+	return BT_ERR_NONE;
+}
+
+
+static BT_ERROR gic_disable_interrupts(BT_HANDLE hGic) {
+	hGic->pGICC->CTLR &= ~1;
+
+	__asm volatile (
+		"STMDB	SP!, {R0}			\n\t"	/* Push R0.						*/
+		"MRS	R0, CPSR			\n\t"	/* Get CPSR.					*/
+		"ORR	R0, R0, #0xC0		\n\t"	/* Disable IRQ, FIQ.			*/
+		"MSR	CPSR, R0			\n\t"	/* Write back modified value.	*/
+		"LDMIA	SP!, {R0}" );				/* Pop R0.						*/
+
+	return BT_ERR_NONE;
+}
+
 static const BT_DEV_IF_IRQ oDeviceOps = {
-	.pfnRegister		= gic_register,
-	.pfnUnregister		= gic_unregister,
-	.pfnSetPriority		= gic_setpriority,
-	.pfnGetPriority		= gic_getpriority,
-	.pfnEnable			= gic_enable,
-	.pfnDisable			= gic_disable,
-	.pfnSetAffinity		= gic_setaffinity,						///< An option interface, GIC could implement this.
+	.pfnRegister			= gic_register,
+	.pfnUnregister			= gic_unregister,
+	.pfnSetPriority			= gic_setpriority,
+	.pfnGetPriority			= gic_getpriority,
+	.pfnEnable				= gic_enable,
+	.pfnDisable				= gic_disable,
+	.pfnSetAffinity			= gic_setaffinity,						///< An option interface, GIC could implement this.
+	.pfnEnableInterrupts	= gic_enable_interrupts,
+	.pfnDisableInterrupts	= gic_disable_interrupts,
 };
 
 static const BT_IF_DEVICE oDeviceInterface = {
