@@ -34,10 +34,11 @@ BT_ERROR BT_ListAddItem(BT_LIST *pL, BT_LIST_ITEM *p) {
 		while(pItem->pNext) {
 			pItem = (BT_LIST_ITEM *) pItem->pNext;
 		}
-		p->pNext = NULL;
-		p->pList = pL;
-		pItem->pNext = p;
 	}
+
+	p->pNext = NULL;
+	p->pList = pL;
+	pItem->pNext = p;
 
 	pL->ulItems += 1;
 
