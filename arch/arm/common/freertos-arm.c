@@ -165,7 +165,9 @@ void vPortISRStartFirstTask( void )
 		:::"r0" \
 	);
 
-	enable_irq();
+	//enable_irq();
+
+	BT_EnableInterrupts();
 
 	/* Simply start the scheduler.  This is included here as it can only be
 	called from ARM mode. */
