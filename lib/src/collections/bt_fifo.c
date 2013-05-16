@@ -51,7 +51,7 @@ BT_HANDLE BT_FifoCreate(BT_u32 ulElements, BT_u32 ulElementWidth, BT_u32 ulFlags
 		goto err_out;
 	}
 
-	hFifo->pBuf 	= BT_kMalloc(ulElements * ulElementWidth);
+	hFifo->pBuf 	= BT_kMalloc((ulElements+1) * ulElementWidth);
 	// Check malloc succeeded!
 	if (!hFifo->pBuf) {
 		Error = BT_ERR_NO_MEMORY;
@@ -59,7 +59,7 @@ BT_HANDLE BT_FifoCreate(BT_u32 ulElements, BT_u32 ulElementWidth, BT_u32 ulFlags
 	}
 	hFifo->pIn 	= hFifo->pBuf;
 	hFifo->pOut = hFifo->pBuf;
-	hFifo->pEnd = hFifo->pBuf + ulElements * ulElementWidth;
+	hFifo->pEnd = hFifo->pBuf + (ulElements+1) * ulElementWidth;
 	hFifo->ulElementWidth = ulElementWidth;
 	hFifo->ulFlags = ulFlags;
 
@@ -80,8 +80,9 @@ BT_u32 BT_FifoWrite(BT_HANDLE hFifo, BT_u32 ulElements, void * pData, BT_ERROR *
 	}
 	if (pError) *pError = BT_ERR_NONE;
 
-	BT_u8 *pSrc = pData;
+	BT_u8 *pSrc  = pData;
 	BT_u8 *pDest = hFifo->pIn;
+	BT_u8 *pOut  = hFifo->pOut;
 	BT_u32 ulElementWidth = hFifo->ulElementWidth;
 	BT_u32 ulWritten;
 
@@ -92,13 +93,20 @@ BT_u32 BT_FifoWrite(BT_HANDLE hFifo, BT_u32 ulElements, void * pData, BT_ERROR *
 		}
 		else
 		{
-			BT_FifoWaitFull(hFifo);
+			if (!(hFifo->ulFlags & BT_FIFO_OVERWRITE))
+				BT_FifoWaitFull(hFifo);
 			memcpy(pDest, pSrc, ulElementWidth);
 			pDest += ulElementWidth;
 			pSrc += ulElementWidth;
-
 			if(pDest >= hFifo->pEnd) {
 				pDest = hFifo->pBuf;
+			}
+			if (pDest == pOut) {
+				pOut += ulElementWidth;
+				if(pOut >= hFifo->pEnd) {
+					pOut = hFifo->pBuf;
+				}
+				hFifo->pOut = pOut;
 			}
 		}
 		hFifo->pIn = pDest;
@@ -125,6 +133,9 @@ BT_u32 BT_FifoRead(BT_HANDLE hFifo, BT_u32 ulElements, void * pData, BT_ERROR *p
 				return ulRead;
 		}
 		BT_FifoWaitEmpty(hFifo);
+		if (hFifo->ulFlags & BT_FIFO_OVERWRITE) {
+			pSrc = hFifo->pOut;
+		}
 		memcpy(pDest, pSrc, ulElementWidth);
 		pDest += ulElementWidth;
 		pSrc += ulElementWidth;
@@ -169,7 +180,7 @@ BT_ERROR BT_FifoWaitFull(BT_HANDLE hFifo) {
 	}
 	BT_ERROR Error = BT_ERR_NONE;
 
-	while (BT_FifoIsFull(hFifo, &Error));
+	while (BT_FifoIsFull(hFifo, &Error))
 		BT_ThreadYield();
 
 	return Error;
