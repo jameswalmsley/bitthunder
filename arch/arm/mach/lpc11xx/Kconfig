@@ -98,6 +98,11 @@ config MACH_LPC11xx_SPI0_BASE
 config MACH_LPC11xx_SPI1_BASE 
 	hex
 	default 0x40058000
+	
+config MACH_LPC11xx_ADC0_BASE  
+	hex
+	default 0x4001C000
+	
 
 config MACH_LPC11xx_TIMER0_BASE
 	hex
@@ -147,6 +152,26 @@ config ARCH_ARM_SYSTICK_CLKSRC
     
 
 menu "Peripheral Selection"
+
+menu "ADC devices"
+
+config MACH_LPC11xx_ADC
+	bool
+	default n
+	
+config MACH_LPC11xx_ADC_0
+
+config MACH_LPC11xx_ADC_0
+    bool "Use ADC(0) peripheral"
+	default n
+	select MACH_LPC11xx_ADC
+
+config MACH_LPC11xx_ADC_0_INODE_NAME
+	string "ADC(0) devfs name"
+	default "adc0"
+	depends on MACH_LPC11xx_ADC_0
+	
+endmenu
 
 menu "CAN devices"
 

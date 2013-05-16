@@ -11,6 +11,7 @@ MACH_LPC11xx_OBJECTS-$(BT_CONFIG_MACH_LPC11xx_UART)  += $(BUILD_DIR)arch/arm/mac
 MACH_LPC11xx_OBJECTS-$(BT_CONFIG_MACH_LPC11xx_CAN)   += $(BUILD_DIR)arch/arm/mach/lpc11xx/can.o
 MACH_LPC11xx_OBJECTS-$(BT_CONFIG_MACH_LPC11xx_I2C)   += $(BUILD_DIR)arch/arm/mach/lpc11xx/i2c.o
 MACH_LPC11xx_OBJECTS-$(BT_CONFIG_MACH_LPC11xx_SPI)   += $(BUILD_DIR)arch/arm/mach/lpc11xx/spi.o
+MACH_LPC11xx_OBJECTS-$(BT_CONFIG_MACH_LPC11xx_ADC)   += $(BUILD_DIR)arch/arm/mach/lpc11xx/adc.o
 
 MACH_LPC11xx_OBJECTS += $(MACH_LPC11xx_OBJECTS-y)
 

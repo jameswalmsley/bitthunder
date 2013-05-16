@@ -10,8 +10,10 @@
 #include "bt_if_power.h"
 #include "bt_if_block.h"
 #include "bt_dev_if_uart.h"
+#include "bt_dev_if_pwm.h"
 #include "bt_dev_if_spi.h"
 #include "bt_dev_if_i2c.h"
+#include "bt_dev_if_adc.h"
 #include "bt_dev_if_can.h"
 #include "bt_dev_if_sdio.h"
 
@@ -21,6 +23,7 @@ typedef enum _BT_DEV_IF_TYPE {
 	BT_DEV_IF_T_INTC,
 	BT_DEV_IF_T_SYSTIMER,
 	BT_DEV_IF_T_TIMER,
+	BT_DEV_IF_T_ADC,
 	BT_DEV_IF_T_GPIO,
 	BT_DEV_IF_T_UART,
 	BT_DEV_IF_T_I2C,
@@ -58,6 +61,7 @@ typedef union {
 	const BT_DEV_IF_CAN 	   *pCANIF;
 	const BT_DEV_IF_SPI 	   *pSpiIF;
 	const BT_DEV_IF_I2C 	   *pI2CIF;
+	const BT_DEV_IF_ADC 	   *pADCIF;
 	const BT_DEV_IF_UART 	   *pUartIF;
 	const BT_DEV_IF_SDIO	   *pSdioIF;
 } BT_DEV_IFS;
@@ -70,6 +74,7 @@ typedef union {
 #define BT_IF_UART_OPS(handle)		BT_IF_DEV_CONFIG(handle).pUartIF
 #define BT_IF_SPI_OPS(handle)		BT_IF_DEV_CONFIG(handle).pSpiIF
 #define BT_IF_I2C_OPS(handle)		BT_IF_DEV_CONFIG(handle).pI2CIF
+#define	BT_IF_ADC_OPS(handle)		BT_IF_DEV_CONFIG(handle).pADCIF
 #define BT_IF_SDIO_OPS(handle)		BT_IF_DEV_CONFIG(handle).pSdioIF
 
 typedef struct _BT_IF_DEVICE {

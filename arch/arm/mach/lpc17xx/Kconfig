@@ -181,6 +181,10 @@ config MACH_LPC17xx_CAN1_BASE
 	hex
 	default 0x40048000
 	depends on HAS_CAN_1
+
+config MACH_LPC17xx_ADC0_BASE  
+	hex
+	default 0x40034000
 	
 
 config MACH_LPC17xx_TIMER0_BASE
@@ -231,6 +235,26 @@ config ARCH_ARM_SYSTICK_CLKSRC
 comment "device specific configuration"
 
 menu "Peripheral Selection"
+
+menu "ADC devices"
+
+config MACH_LPC17xx_ADC
+	bool
+	default n
+	
+config MACH_LPC17xx_ADC_0
+
+config MACH_LPC17xx_ADC_0
+    bool "Use ADC(0) peripheral"
+	default n
+	select MACH_LPC17xx_ADC
+
+config MACH_LPC17xx_ADC_0_INODE_NAME
+	string "ADC(0) devfs name"
+	default "adc0"
+	depends on MACH_LPC17xx_ADC_0
+	
+endmenu
 
 menu "CAN devices"
 
