@@ -10,7 +10,7 @@
 ;@	.globl _btstart
 .extern _boot
 
-.globl reset
+.globl bt_reset
 .globl _fini
 .globl _init
 
@@ -33,7 +33,7 @@ _vector_table:
     ldr pc,fiq_handler			;@ 	Fast interrupt handler.
 
 	;@ Here we create an exception address table! This means that reset/hang/irq can be absolute addresses
-reset_handler:      .word reset
+reset_handler:      .word bt_reset
 undefined_handler:  .word undef
 swi_handler:        .word vPortYieldProcessor
 prefetch_handler:   .word prefetch
@@ -44,7 +44,7 @@ fiq_handler:        .word fiq
 
 	.extern _stack
 	.extern _init_begin
-reset:
+bt_reset:
 	mrs	r0,cpsr			@@ disable IRQs ASAP!
 	orr	r0,r0,#0x80
 	msr	cpsr_c,r0
@@ -52,7 +52,7 @@ reset:
 	ldr	sp, =_stack
 
 	ldr     r0, =_vector_table
- 	mcr     p15, 0, r0, c12, c0, 0  @Set VBAR 
+ 	mcr     p15, 0, r0, c12, c0, 0  @Set VBAR
 
 	@ Enable Neon
 

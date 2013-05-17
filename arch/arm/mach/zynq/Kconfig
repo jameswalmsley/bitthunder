@@ -1,3 +1,8 @@
+config MACH_ZYNQ_PLATFORM
+	bool
+	default y
+	select ARCH_ARM_IRQ_STACK
+
 comment "Zynq Platform Options"
 
 choice
@@ -34,16 +39,16 @@ comment "SDIO (SDCard Interfaces)"
 config MACH_ZYNQ_SDIO_0
     bool "Use SDIO(0) peripheral"
 	default n
-	
+
 config MACH_ZYNQ_SDIO_0_ALWAYS_PRESENT
 	bool "Force SDIO(0) card present"
 	default n
 	depends on MACH_ZYNQ_SDIO_0
-	
+
 config MACH_ZYNQ_SDIO_1
     bool "Use SDIO(1) peripheral"
 	default n
-	
+
 config MACH_ZYNQ_SDIO_1_ALWAYS_PRESENT
 	bool "Force SDIO(1) card present"
 	default n
@@ -86,3 +91,10 @@ config MACH_ZYNQ_BOOTLOG_NULL
     bool "/dev/null"
 
 endchoice
+
+
+
+#
+#	Linker Memory
+#
+

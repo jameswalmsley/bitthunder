@@ -10,7 +10,6 @@
 #include "bt_if_power.h"
 #include "bt_if_block.h"
 #include "bt_dev_if_uart.h"
-#include "bt_dev_if_pwm.h"
 #include "bt_dev_if_spi.h"
 #include "bt_dev_if_i2c.h"
 #include "bt_dev_if_adc.h"

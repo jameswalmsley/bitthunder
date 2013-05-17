@@ -252,7 +252,7 @@ _SDA2_BASE_ = __sdata2_start + ((__sbss2_end - __sdata2_start) / 2 );
 	. = ALIGN(16);
 } > BT_LINKER_BSS_SECTION
 
-__heap_length = BT_CONFIG_LINKER_SRAM_START_ADDRESS + BT_CONFIG_LINKER_SRAM_LENGTH - . - _STACK_SIZE;
+__heap_length = BT_CONFIG_LINKER_SRAM_START_ADDRESS + BT_CONFIG_LINKER_SRAM_LENGTH - . - _STACK_SIZE - _IRQ_STACK_SIZE;
 
 .heap (NOLOAD) : {
 	_heap = .;
@@ -274,7 +274,7 @@ __heap_length = BT_CONFIG_LINKER_SRAM_START_ADDRESS + BT_CONFIG_LINKER_SRAM_LENG
 #ifdef BT_CONFIG_ARCH_ARM_IRQ_STACK
    . = ALIGN(16);
    _irq_stack_end = .;
-   . += _STACK_SIZE;
+   . += _IRQ_STACK_SIZE;
    __irq_stack = .;
 #endif
    _supervisor_stack_end = .;

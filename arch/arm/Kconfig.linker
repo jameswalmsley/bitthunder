@@ -1,19 +1,19 @@
 config LINKER_MEMORY_DEFINED
 	bool
 	default n
-	
+
 config LINKER_MACH_FLASH
 	bool
 	default n
-	
+
 config LINKER_MACH_SRAM
 	bool
 	default n
-	
+
 config LINKER_MACH_RAM
 	bool
 	default n
-	
+
 config LINKER_MACH_INIT_SECTION_IN_FLASH
 	bool
 	default n
@@ -37,7 +37,7 @@ config LINKER_MACH_TEXT_SECTION_IN_SRAM
 config LINKER_MACH_TEXT_SECTION_IN_RAM
 	bool
 	default n
-	
+
 config LINKER_MACH_DATA_SECTION_IN_FLASH
 	bool
 	default n
@@ -49,7 +49,7 @@ config LINKER_MACH_DATA_SECTION_IN_SRAM
 config LINKER_MACH_DATA_SECTION_IN_RAM
 	bool
 	default n
-	
+
 config LINKER_MACH_BSS_SECTION_IN_FLASH
 	bool
 	default n
@@ -61,8 +61,8 @@ config LINKER_MACH_BSS_SECTION_IN_SRAM
 config LINKER_MACH_BSS_SECTION_IN_RAM
 	bool
 	default n
-	
-	
+
+
 
 config LINKER_SECTION_FLASH
     bool "Flash / ROM Section" if !LINKER_MEMORY_DEFINED
@@ -83,7 +83,7 @@ config LINKER_FLASH_LENGTH
 
 
 config LINKER_SECTION_SRAM
-    bool "SRAM / On-chip-memory section" if !LINKER_MEMORY_DEFINED    
+    bool "SRAM / On-chip-memory section" if !LINKER_MEMORY_DEFINED
 	default LINKER_MACH_SRAM if LINKER_MEMORY_DEFINED
 	default n
 
@@ -118,7 +118,7 @@ config LINKER_RAM_LENGTH
 
 choice LINKER_INIT_SECTION
     prompt "Init Section"
-    default LINKER_INIT_SECTION_FLASH if LINKER_MACH_INIT_SECTION_IN_FLASH 
+    default LINKER_INIT_SECTION_FLASH if LINKER_MACH_INIT_SECTION_IN_FLASH
     default LINKER_INIT_SECTION_SRAM  if LINKER_MACH_INIT_SECTION_IN_SRAM
     default LINKER_INIT_SECTION_RAM   if LINKER_MACH_INIT_SECTION_IN_RAM
     default LINKER_INIT_SECTION_FLASH
@@ -138,12 +138,12 @@ config LINKER_INIT_SECTION_RAM
 endchoice
 
 choice LINKER_TEXT_SECTION
-    prompt "Text Section" 
+    prompt "Text Section"
     default LINKER_TEXT_SECTION_FLASH if LINKER_MACH_TEXT_SECTION_IN_FLASH
     default LINKER_TEXT_SECTION_SRAM  if LINKER_MACH_TEXT_SECTION_IN_SRAM
     default LINKER_TEXT_SECTION_RAM   if LINKER_MACH_TEXT_SECTION_IN_RAM
     default LINKER_TEXT_SECTION_FLASH
-    
+
 config LINKER_TEXT_SECTION_FLASH
     bool "Flash"
 	depends on LINKER_SECTION_FLASH
@@ -160,7 +160,7 @@ endchoice
 
 choice LINKER_DATA_SECTION
     prompt "Data Section"
-    default LINKER_DATA_SECTION_FLASH if LINKER_MACH_DATA_SECTION_IN_FLASH 
+    default LINKER_DATA_SECTION_FLASH if LINKER_MACH_DATA_SECTION_IN_FLASH
     default LINKER_DATA_SECTION_SRAM  if LINKER_MACH_DATA_SECTION_IN_SRAM
     default LINKER_DATA_SECTION_RAM   if LINKER_MACH_DATA_SECTION_IN_RAM
     default LINKER_DATA_SECTION_FLASH
@@ -181,11 +181,11 @@ endchoice
 
 choice LINKER_BSS_SECTION
     prompt "BSS Section"
-    default LINKER_BSS_SECTION_FLASH if LINKER_MACH_BSS_SECTION_IN_FLASH 
+    default LINKER_BSS_SECTION_FLASH if LINKER_MACH_BSS_SECTION_IN_FLASH
     default LINKER_BSS_SECTION_SRAM  if LINKER_MACH_BSS_SECTION_IN_SRAM
     default LINKER_BSS_SECTION_RAM   if LINKER_MACH_BSS_SECTION_IN_RAM
     default LINKER_BSS_SECTION_FLASH
-    
+
 config LINKER_BSS_SECTION_FLASH
     bool "Flash"
 	depends on LINKER_SECTION_FLASH
@@ -199,3 +199,18 @@ config LINKER_BSS_SECTION_RAM
 	depends on LINKER_SECTION_RAM
 
 endchoice
+
+config LINKER_STACK_SIZE
+    hex "Inital Stack Size" if !LINKER_MEMORY_DEFINED
+	default 0x100
+
+config ARCH_ARM_IRQ_STACK
+    bool
+	default n
+
+config LINKER_IRQ_STACK_SIZE
+	hex "IRQ Stack Size" if!LINKER_MEMORY_DEFINED
+	default 0x0 if!ARCH_ARM_IRQ_STACK
+	default 0x100
+
+
