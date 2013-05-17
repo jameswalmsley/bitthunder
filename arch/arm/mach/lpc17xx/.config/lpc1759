@@ -6,13 +6,33 @@ config MACH_LPC1759
 	select HAS_I2S
 	select HAS_DAC
 
-    
-config MACH_RAM_SIZE
+    select LINKER_MEMORY_DEFINED
+	select LINKER_MACH_FLASH
+	select LINKER_MACH_SRAM
+	
+	select LINKER_MACH_INIT_SECTION_IN_FLASH
+	select LINKER_MACH_TEXT_SECTION_IN_FLASH
+	select LINKER_MACH_DATA_SECTION_IN_SRAM
+	select LINKER_MACH_BSS_SECTION_IN_SRAM
+		
+
+config MACH_FLASH_START
 	hex
-	default 0x8000 
+	default 0x0 
 
 config MACH_FLASH_SIZE
 	hex
-	default 0x80000 
-
+	default 0x80000
 	
+config MACH_SRAM_START
+	hex
+	default 0x10000000 
+	 
+config MACH_SRAM_SIZE
+	hex
+	default 0x8000
+
+config LINKER_STACK_SIZE
+	hex
+	default 0x100 
+		

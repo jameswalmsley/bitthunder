@@ -22,13 +22,33 @@ config MACH_LPC11C24
 	select HAS_LPC11xx_PIO3_2
 	select HAS_LPC11xx_PIO3_3
 		
-    
-config MACH_RAM_SIZE
+	select LINKER_MEMORY_DEFINED
+	select LINKER_MACH_FLASH
+	select LINKER_MACH_SRAM
+	
+	select LINKER_MACH_INIT_SECTION_IN_FLASH
+	select LINKER_MACH_TEXT_SECTION_IN_FLASH
+	select LINKER_MACH_DATA_SECTION_IN_SRAM
+	select LINKER_MACH_BSS_SECTION_IN_SRAM
+		
+
+config MACH_FLASH_START
 	hex
-	default 0x2000 
+	default 0x0 
 
 config MACH_FLASH_SIZE
 	hex
-	default 0x8000 
-
+	default 0x8000
 	
+config MACH_SRAM_START
+	hex
+	default 0x10000100 
+	 
+config MACH_SRAM_SIZE
+	hex
+	default 0x1F00
+
+config LINKER_STACK_SIZE
+	hex
+	default 0x100 
+		
