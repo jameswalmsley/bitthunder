@@ -5,6 +5,7 @@
 #include "btlinker_config.h"
 
 	.init : {
+		__bt_init_start = .;
 		KEEP(*(.init))
 		KEEP(*(.init.*))
     } > BT_LINKER_INIT_SECTION
@@ -58,7 +59,7 @@
    		*(.vfp11_veneer)
    		*(.ARM.extab)
    		*(.gnu.linkonce.armextab.*)
-	} > BT_LINKER_INIT_SECTION
+	} > BT_LINKER_TEXT_SECTION
 
 	.fini : {
 	   KEEP (*(.fini))
@@ -70,14 +71,18 @@
 		*(.rodata.*)
 		*(.gnu.linkonce.r.*)
 		__rodata_end = .;
-    } > BT_LINKER_INIT_SECTION
+    } > BT_LINKER_TEXT_SECTION
 
 	.rodata1 : {
    	    __rodata1_start = .;
 		*(.rodata1)
 		*(.rodata1.*)
 		__rodata1_end = .;
-	} > BT_LINKER_INIT_SECTION
+	} > BT_LINKER_TEXT_SECTION
+
+	. = ALIGN(4);
+	_etext = .;
+
 
 	.sdata2 : {
 		__sdata2_start = .;
@@ -85,7 +90,7 @@
 		*(.sdata2.*)
 		*(.gnu.linkonce.s2.*)
 		__sdata2_end = .;
-	} > BT_LINKER_INIT_SECTION
+	} > BT_LINKER_DATA_SECTION
 
 	.sbss2 : {
    	    __sbss2_start = .;
@@ -93,7 +98,7 @@
 		*(.sbss2.*)
 		*(.gnu.linkonce.sb2.*)
 		__sbss2_end = .;
-	} > BT_LINKER_INIT_SECTION
+	} > BT_LINKER_BSS_SECTION
 
 .data : {
    __data_start = .;
@@ -104,18 +109,18 @@
    *(.got)
    *(.got.plt)
    __data_end = .;
-} > BT_LINKER_INIT_SECTION
+} > BT_LINKER_DATA_SECTION AT> BT_LINKER_TEXT_SECTION
 
 .data1 : {
    __data1_start = .;
    *(.data1)
    *(.data1.*)
    __data1_end = .;
-} > BT_LINKER_INIT_SECTION
+} > BT_LINKER_DATA_SECTION
 
 .got : {
    *(.got)
-} > BT_LINKER_INIT_SECTION
+} > BT_LINKER_TEXT_SECTION
 
 .ctors : {
    __CTOR_LIST__ = .;
@@ -126,7 +131,7 @@
    KEEP (*(.ctors))
    __CTOR_END__ = .;
    ___CTORS_END___ = .;
-} > BT_LINKER_INIT_SECTION
+} > BT_LINKER_TEXT_SECTION
 
 .dtors : {
    __DTOR_LIST__ = .;
@@ -137,27 +142,27 @@
    KEEP (*(.dtors))
    __DTOR_END__ = .;
    ___DTORS_END___ = .;
-} > BT_LINKER_INIT_SECTION
+} > BT_LINKER_TEXT_SECTION
 
 .fixup : {
    __fixup_start = .;
    *(.fixup)
    __fixup_end = .;
-} > BT_LINKER_INIT_SECTION
+} > BT_LINKER_TEXT_SECTION
 
 .eh_frame : {
    *(.eh_frame)
-} > BT_LINKER_INIT_SECTION
+} > BT_LINKER_TEXT_SECTION
 
 .eh_framehdr : {
    __eh_framehdr_start = .;
    *(.eh_framehdr)
    __eh_framehdr_end = .;
-} > BT_LINKER_INIT_SECTION
+} > BT_LINKER_TEXT_SECTION
 
 .gcc_except_table : {
    *(.gcc_except_table)
-} > BT_LINKER_INIT_SECTION
+} > BT_LINKER_TEXT_SECTION
 
 .sdata : {
    __sdata_start = .;
@@ -165,7 +170,7 @@
    *(.sdata.*)
    *(.gnu.linkonce.s.*)
    __sdata_end = .;
-} > BT_LINKER_INIT_SECTION
+} > BT_LINKER_DATA_SECTION
 
 .sbss (NOLOAD) : {
    __sbss_start = .;
@@ -173,7 +178,7 @@
    *(.sbss.*)
    *(.gnu.linkonce.sb.*)
    __sbss_end = .;
-} > BT_LINKER_INIT_SECTION
+} > BT_LINKER_BSS_SECTION
 
 .tdata : {
    __tdata_start = .;
@@ -181,7 +186,7 @@
    *(.tdata.*)
    *(.gnu.linkonce.td.*)
    __tdata_end = .;
-} > BT_LINKER_INIT_SECTION
+} > BT_LINKER_DATA_SECTION
 
 .tbss : {
    __tbss_start = .;
@@ -189,14 +194,16 @@
    *(.tbss.*)
    *(.gnu.linkonce.tb.*)
    __tbss_end = .;
-} > BT_LINKER_INIT_SECTION
+} > BT_LINKER_BSS_SECTION
 
+#ifdef BT_CONFIG_HAS_MMU
 .mmu_tbl : {
    . = ALIGN(0x4000);
   __mmu_tbl_start = .;
    *(.mmu_tbl)
    __mmu_tbl_end = .;
-} > BT_LINKER_INIT_SECTION
+} > BT_LINKER_TEXT_SECTION
+#endif
 
 .bss (NOLOAD) : {
    __bss_start = .;
@@ -205,57 +212,58 @@
    *(.gnu.linkonce.b.*)
    *(COMMON)
    __bss_end = .;
-} > BT_LINKER_INIT_SECTION
+} > BT_LINKER_BSS_SECTION
 
 .ARM.exidx : {
    __exidx_start = .;
    *(.ARM.exidx*)
    *(.gnu.linkonce.armexidix.*.*)
    __exidx_end = .;
-} > BT_LINKER_INIT_SECTION
+} > BT_LINKER_TEXT_SECTION
 
 .preinit_array : {
    __preinit_array_start = .;
    KEEP (*(SORT(.preinit_array.*)))
    KEEP (*(.preinit_array))
    __preinit_array_end = .;
-} > BT_LINKER_INIT_SECTION
+} > BT_LINKER_TEXT_SECTION
 
 .init_array : {
    __init_array_start = .;
    KEEP (*(SORT(.init_array.*)))
    KEEP (*(.init_array))
    __init_array_end = .;
-} > BT_LINKER_INIT_SECTION
+} > BT_LINKER_TEXT_SECTION
 
 .fini_array : {
    __fini_array_start = .;
    KEEP (*(SORT(.fini_array.*)))
    KEEP (*(.fini_array))
    __fini_array_end = .;
-} > BT_LINKER_INIT_SECTION
+} > BT_LINKER_TEXT_SECTION
 
-.ARM.attributes : {
-   __ARM.attributes_start = .;
-   *(.ARM.attributes)
-   __ARM.attributes_end = .;
-} > BT_LINKER_INIT_SECTION
 
 _SDA_BASE_ = __sdata_start + ((__sbss_end - __sdata_start) / 2 );
 
 _SDA2_BASE_ = __sdata2_start + ((__sbss2_end - __sdata2_start) / 2 );
 
 /* Generate Stack and Heap definitions */
+.heap_align (NOLOAD) : {
+	. = ALIGN(16);
+} > BT_LINKER_BSS_SECTION
+
+__heap_length = BT_CONFIG_LINKER_SRAM_START_ADDRESS + BT_CONFIG_LINKER_SRAM_LENGTH - . - _STACK_SIZE;
 
 .heap (NOLOAD) : {
-   . = ALIGN(16);
-   _heap = .;
+	_heap = .;
+	_HEAP_SIZE = __heap_length;
+
    HeapBase = .;
    _heap_start = .;
    . += _HEAP_SIZE;
    _heap_end = .;
    HeapLimit = .;
-} > BT_LINKER_INIT_SECTION
+} > BT_LINKER_BSS_SECTION
 
 .stack (NOLOAD) : {
    . = ALIGN(16);
@@ -263,10 +271,12 @@ _SDA2_BASE_ = __sdata2_start + ((__sbss2_end - __sdata2_start) / 2 );
    . += _STACK_SIZE;
    _stack = .;
    __stack = _stack;
+#ifdef BT_CONFIG_ARCH_ARM_IRQ_STACK
    . = ALIGN(16);
    _irq_stack_end = .;
    . += _STACK_SIZE;
    __irq_stack = .;
+#endif
    _supervisor_stack_end = .;
    . += _SUPERVISOR_STACK_SIZE;
    . = ALIGN(16);
@@ -275,4 +285,4 @@ _SDA2_BASE_ = __sdata2_start + ((__sbss2_end - __sdata2_start) / 2 );
    . += _ABORT_STACK_SIZE;
    . = ALIGN(16);
    __abort_stack = .;
-} > BT_LINKER_INIT_SECTION
+} > BT_LINKER_BSS_SECTION

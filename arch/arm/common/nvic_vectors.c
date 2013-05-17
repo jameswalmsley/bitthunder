@@ -15,7 +15,7 @@ extern void _stack(void);
 /**
  *	Give all of the symbols weak attributes.
  **/
-void BT_NVIC_Reset_Handler(void);// The reset handler should not be patchable at runtime!
+void bt_reset(void);// The reset handler should not be patchable at runtime!
 void __attribute__((weak)) BT_NVIC_NMI_Handler(void);
 void __attribute__((weak)) BT_NVIC_HardFault_Handler(void);
 void __attribute__((weak)) BT_NVIC_MemManage_Handler(void);
@@ -139,7 +139,7 @@ void __attribute__((weak)) BT_NVIC_SysTick_Handler(void);
 __attribute__((section(".bt.init.vectors")))
 void (* const g_pfnVectors[])(void) = {
 	&_stack,
-	BT_NVIC_Reset_Handler,
+	bt_reset,
 	BT_NVIC_NMI_Handler,
 	BT_NVIC_HardFault_Handler,
 	BT_NVIC_MemManage_Handler,
@@ -410,11 +410,11 @@ extern unsigned long _etext;
 extern unsigned long __data_start;
 extern BT_u32 __bt_init_start;
 extern unsigned long __data_end;
-extern unsigned long _bss_begin;
-extern unsigned long _bss_end;
+extern unsigned long __bss_start;
+extern unsigned long __bss_end;
 extern unsigned long _estack;
 
-void BT_NVIC_Reset_Handler(void) {
+void bt_reset(void) {
 	SCB_REGS * pSCB = SCB;
 
 	bt_startup_init_hook();
@@ -431,8 +431,8 @@ void BT_NVIC_Reset_Handler(void) {
 		*pDest++ = *pSrc++;
 	}
 
-	pDest = &_bss_begin;
-	while (pDest < &_bss_end) {
+	pDest = &__bss_start;
+	while (pDest < &__bss_end) {
 		*pDest++ = 0;
 	}
 
