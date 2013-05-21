@@ -182,6 +182,10 @@ config MACH_LPC17xx_CAN1_BASE
 	default 0x40048000
 	depends on HAS_CAN_1
 
+config MACH_LPC17xx_PWM0_BASE  
+	hex
+	default 0x40018000
+
 config MACH_LPC17xx_ADC0_BASE  
 	hex
 	default 0x40034000
@@ -458,7 +462,25 @@ config MACH_LPC17xx_TIMER_3_INODE_NAME
 	depends on MACH_LPC17xx_TIMER_3
 endmenu
 
+menu "PWM devices"
+
+config MACH_LPC17xx_PWM
+	bool
+	default n
+
+config MACH_LPC17xx_PWM_0
+    bool "Use PWM(0) peripheral"
+	default n
+	select MACH_LPC17xx_PWM
+
+config MACH_LPC17xx_PWM_0_INODE_NAME
+	string "PWM(0) devfs name"
+	default "pwm0"
+	depends on MACH_LPC17xx_PWM_0
 endmenu
+
+endmenu
+
 
 menu "GPIO configuration"
 source arch/arm/mach/lpc17xx/.config/GPIO
