@@ -1,4 +1,4 @@
-config MACH_LPC11C14
+config MACH_LPC11D14
     bool
     select MACH_LPC11Cxx
 	select HAS_CAN_0
@@ -30,11 +30,13 @@ config MACH_LPC11C14
 	select HAS_LPC11xx_PIO2_9
 	select HAS_LPC11xx_PIO2_10
 	select HAS_LPC11xx_PIO2_11
-	
+		
 	select HAS_LPC11xx_PIO3_0
 	select HAS_LPC11xx_PIO3_1
 	select HAS_LPC11xx_PIO3_2
 	select HAS_LPC11xx_PIO3_3
+	select HAS_LPC11xx_PIO3_4
+	select HAS_LPC11xx_PIO3_5
 	
 	
 select LINKER_MEMORY_DEFINED

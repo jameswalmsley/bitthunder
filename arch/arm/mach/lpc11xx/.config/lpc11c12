@@ -1,4 +1,4 @@
-config MACH_LPC11C14
+config MACH_LPC11C12
     bool
     select MACH_LPC11Cxx
 	select HAS_CAN_0

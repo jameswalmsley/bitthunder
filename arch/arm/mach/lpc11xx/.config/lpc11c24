@@ -16,7 +16,17 @@ config MACH_LPC11C24
 	select HAS_LPC11xx_PIO1_8
 	select HAS_LPC11xx_PIO1_10
 	select HAS_LPC11xx_PIO1_11
-	select HAS_LPC11xx_PIO2	
+	
+	select HAS_LPC11xx_PIO2_0
+	select HAS_LPC11xx_PIO2_1
+	select HAS_LPC11xx_PIO2_2
+	select HAS_LPC11xx_PIO2_3	
+	select HAS_LPC11xx_PIO2_6
+	select HAS_LPC11xx_PIO2_7
+	select HAS_LPC11xx_PIO2_8
+	select HAS_LPC11xx_PIO2_10
+	select HAS_LPC11xx_PIO2_11
+	
 	select HAS_LPC11xx_PIO3_0
 	select HAS_LPC11xx_PIO3_1
 	select HAS_LPC11xx_PIO3_2
@@ -50,5 +60,5 @@ config MACH_SRAM_SIZE
 
 config LINKER_STACK_SIZE
 	hex
-	default 0x100 
+	default 0x80 
 		

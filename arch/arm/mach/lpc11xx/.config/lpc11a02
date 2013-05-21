@@ -1,4 +1,4 @@
-config MACH_LPC11A04
+config MACH_LPC11A02
     bool
     select MACH_LPC11Axx 
 	select HAS_CAN_0
@@ -21,7 +21,7 @@ config MACH_FLASH_START
 
 config MACH_FLASH_SIZE
 	hex
-	default 0x8000
+	default 0x4000
 	
 config MACH_SRAM_START
 	hex
@@ -29,7 +29,7 @@ config MACH_SRAM_START
 	 
 config MACH_SRAM_SIZE
 	hex
-	default 0x2000
+	default 0x1000
 
 config LINKER_STACK_SIZE
 	hex

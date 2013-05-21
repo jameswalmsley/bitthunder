@@ -1,8 +1,13 @@
 menu "LPC17xx_PIO2_0"
 
+config LPC17xx_PIO2__DEFAULT
+	bool "default"
+	default y
+
 choice
 	prompt "FUNCTION"	
 	default LPC17xx_PIO2_0_GPIO
+	depends on !LPC17xx_PIO2__DEFAULT
 
 config LPC17xx_PIO2_0_GPIO
     bool	"GPIO"
@@ -24,6 +29,7 @@ config LPC17xx_PIO2_0_FUNCTION
 choice
 	prompt "MODE"	
 	default LPC17xx_PIO2_0_PULLUP
+	depends on !LPC17xx_PIO2__DEFAULT
 
 config LPC17xx_PIO2_0_PULLUP
     bool	"PullUp"
@@ -49,6 +55,7 @@ config LPC17xx_PIO2_0_MODE
 config LPC17xx_PIO2_0_OPENDRAIN_ENABLE
     bool "OPENDRAIN"
     default n
+	depends on !LPC17xx_PIO2__DEFAULT
 
 config LPC17xx_PIO2_0_OPENDRAIN
 	int
@@ -58,9 +65,14 @@ endmenu
     
 menu "LPC17xx_PIO2_1"
 
+config LPC17xx_PIO2__DEFAULT
+	bool "default"
+	default y
+
 choice
 	prompt "FUNCTION"	
 	default LPC17xx_PIO2_1_GPIO
+	depends on !LPC17xx_PIO2__DEFAULT
 
 config LPC17xx_PIO2_1_GPIO
     bool	"GPIO"
@@ -82,6 +94,7 @@ config LPC17xx_PIO2_1_FUNCTION
 choice
 	prompt "MODE"	
 	default LPC17xx_PIO2_1_PULLUP
+	depends on !LPC17xx_PIO2__DEFAULT
 
 config LPC17xx_PIO2_1_PULLUP
     bool	"PullUp"
@@ -107,6 +120,7 @@ config LPC17xx_PIO2_1_MODE
 config LPC17xx_PIO2_1_OPENDRAIN_ENABLE
     bool "OPENDRAIN"
     default n
+	depends on !LPC17xx_PIO2__DEFAULT
 
 config LPC17xx_PIO2_1_OPENDRAIN
 	int
@@ -116,9 +130,14 @@ endmenu
     
 menu "LPC17xx_PIO2_2"
 
+config LPC17xx_PIO2__DEFAULT
+	bool "default"
+	default y
+
 choice
 	prompt "FUNCTION"	
 	default LPC17xx_PIO2_2_GPIO
+	depends on !LPC17xx_PIO2__DEFAULT
 
 config LPC17xx_PIO2_2_GPIO
     bool	"GPIO"
@@ -144,6 +163,7 @@ config LPC17xx_PIO2_2_FUNCTION
 choice
 	prompt "MODE"	
 	default LPC17xx_PIO2_2_PULLUP
+	depends on !LPC17xx_PIO2__DEFAULT
 
 config LPC17xx_PIO2_2_PULLUP
     bool	"PullUp"
@@ -169,6 +189,7 @@ config LPC17xx_PIO2_2_MODE
 config LPC17xx_PIO2_2_OPENDRAIN_ENABLE
     bool "OPENDRAIN"
     default n
+	depends on !LPC17xx_PIO2__DEFAULT
 
 config LPC17xx_PIO2_2_OPENDRAIN
 	int
@@ -178,9 +199,14 @@ endmenu
     
 menu "LPC17xx_PIO2_3"
 
+config LPC17xx_PIO2__DEFAULT
+	bool "default"
+	default y
+
 choice
 	prompt "FUNCTION"	
 	default LPC17xx_PIO2_3_GPIO
+	depends on !LPC17xx_PIO2__DEFAULT
 
 config LPC17xx_PIO2_3_GPIO
     bool	"GPIO"
@@ -206,6 +232,7 @@ config LPC17xx_PIO2_3_FUNCTION
 choice
 	prompt "MODE"	
 	default LPC17xx_PIO2_3_PULLUP
+	depends on !LPC17xx_PIO2__DEFAULT
 
 config LPC17xx_PIO2_3_PULLUP
     bool	"PullUp"
@@ -231,6 +258,7 @@ config LPC17xx_PIO2_3_MODE
 config LPC17xx_PIO2_3_OPENDRAIN_ENABLE
     bool "OPENDRAIN"
     default n
+	depends on !LPC17xx_PIO2__DEFAULT
 
 config LPC17xx_PIO2_3_OPENDRAIN
 	int
@@ -240,9 +268,14 @@ endmenu
 
 menu "LPC17xx_PIO2_4"
 
+config LPC17xx_PIO2__DEFAULT
+	bool "default"
+	default y
+
 choice
 	prompt "FUNCTION"	
 	default LPC17xx_PIO2_4_GPIO
+	depends on !LPC17xx_PIO2__DEFAULT
 	depends on HAS_100pin
 
 config LPC17xx_PIO2_4_GPIO
@@ -269,6 +302,7 @@ config LPC17xx_PIO2_4_FUNCTION
 choice
 	prompt "MODE"	
 	default LPC17xx_PIO2_4_PULLUP
+	depends on !LPC17xx_PIO2__DEFAULT
 
 config LPC17xx_PIO2_4_PULLUP
     bool	"PullUp"
@@ -294,6 +328,7 @@ config LPC17xx_PIO2_4_MODE
 config LPC17xx_PIO2_4_OPENDRAIN_ENABLE
     bool "OPENDRAIN"
     default n
+	depends on !LPC17xx_PIO2__DEFAULT
 
 config LPC17xx_PIO2_4_OPENDRAIN
 	int
@@ -303,9 +338,14 @@ endmenu
     
 menu "LPC17xx_PIO2_5"
 
+config LPC17xx_PIO2__DEFAULT
+	bool "default"
+	default y
+
 choice
 	prompt "FUNCTION"	
 	default LPC17xx_PIO2_5_GPIO
+	depends on !LPC17xx_PIO2__DEFAULT
 	depends on HAS_100pin
 
 config LPC17xx_PIO2_5_GPIO
@@ -332,6 +372,7 @@ config LPC17xx_PIO2_5_FUNCTION
 choice
 	prompt "MODE"	
 	default LPC17xx_PIO2_5_PULLUP
+	depends on !LPC17xx_PIO2__DEFAULT
 
 config LPC17xx_PIO2_5_PULLUP
     bool	"PullUp"
@@ -357,6 +398,7 @@ config LPC17xx_PIO2_5_MODE
 config LPC17xx_PIO2_5_OPENDRAIN_ENABLE
     bool "OPENDRAIN"
     default n
+	depends on !LPC17xx_PIO2__DEFAULT
 
 config LPC17xx_PIO2_5_OPENDRAIN
 	int
@@ -366,9 +408,14 @@ endmenu
 
 menu "LPC17xx_PIO2_6"
 
+config LPC17xx_PIO2__DEFAULT
+	bool "default"
+	default y
+
 choice
 	prompt "FUNCTION"	
 	default LPC17xx_PIO2_6_GPIO
+	depends on !LPC17xx_PIO2__DEFAULT
 
 config LPC17xx_PIO2_6_GPIO
     bool	"GPIO"
@@ -394,6 +441,7 @@ config LPC17xx_PIO2_6_FUNCTION
 choice
 	prompt "MODE"	
 	default LPC17xx_PIO2_6_PULLUP
+	depends on !LPC17xx_PIO2__DEFAULT
 
 config LPC17xx_PIO2_6_PULLUP
     bool	"PullUp"
@@ -419,6 +467,7 @@ config LPC17xx_PIO2_6_MODE
 config LPC17xx_PIO2_6_OPENDRAIN_ENABLE
     bool "OPENDRAIN"
     default n
+	depends on !LPC17xx_PIO2__DEFAULT
 
 config LPC17xx_PIO2_6_OPENDRAIN
 	int
@@ -428,9 +477,14 @@ endmenu
     
 menu "LPC17xx_PIO2_7"
 
+config LPC17xx_PIO2__DEFAULT
+	bool "default"
+	default y
+
 choice
 	prompt "FUNCTION"	
 	default LPC17xx_PIO2_7_GPIO
+	depends on !LPC17xx_PIO2__DEFAULT
 
 config LPC17xx_PIO2_7_GPIO
     bool	"GPIO"
@@ -452,6 +506,7 @@ config LPC17xx_PIO2_7_FUNCTION
 choice
 	prompt "MODE"	
 	default LPC17xx_PIO2_7_PULLUP
+	depends on !LPC17xx_PIO2__DEFAULT
 
 config LPC17xx_PIO2_7_PULLUP
     bool	"PullUp"
@@ -477,6 +532,7 @@ config LPC17xx_PIO2_7_MODE
 config LPC17xx_PIO2_7_OPENDRAIN_ENABLE
     bool "OPENDRAIN"
     default n
+	depends on !LPC17xx_PIO2__DEFAULT
 
 config LPC17xx_PIO2_7_OPENDRAIN
 	int
@@ -486,9 +542,14 @@ endmenu
 
 menu "LPC17xx_PIO2_8"
 
+config LPC17xx_PIO2__DEFAULT
+	bool "default"
+	default y
+
 choice
 	prompt "FUNCTION"	
 	default LPC17xx_PIO2_8_GPIO
+	depends on !LPC17xx_PIO2__DEFAULT
 
 config LPC17xx_PIO2_8_GPIO
     bool	"GPIO"
@@ -514,6 +575,7 @@ config LPC17xx_PIO2_8_FUNCTION
 choice
 	prompt "MODE"	
 	default LPC17xx_PIO2_8_PULLUP
+	depends on !LPC17xx_PIO2__DEFAULT
 
 config LPC17xx_PIO2_8_PULLUP
     bool	"PullUp"
@@ -539,6 +601,7 @@ config LPC17xx_PIO2_8_MODE
 config LPC17xx_PIO2_8_OPENDRAIN_ENABLE
     bool "OPENDRAIN"
     default n
+	depends on !LPC17xx_PIO2__DEFAULT
 
 config LPC17xx_PIO2_8_OPENDRAIN
 	int
@@ -548,9 +611,14 @@ endmenu
     
 menu "LPC17xx_PIO2_9"
 
+config LPC17xx_PIO2__DEFAULT
+	bool "default"
+	default y
+
 choice
 	prompt "FUNCTION"	
 	default LPC17xx_PIO2_9_GPIO
+	depends on !LPC17xx_PIO2__DEFAULT
 
 config LPC17xx_PIO2_9_GPIO
     bool	"GPIO"
@@ -576,6 +644,7 @@ config LPC17xx_PIO2_9_FUNCTION
 choice
 	prompt "MODE"	
 	default LPC17xx_PIO2_9_PULLUP
+	depends on !LPC17xx_PIO2__DEFAULT
 
 config LPC17xx_PIO2_9_PULLUP
     bool	"PullUp"
@@ -601,6 +670,7 @@ config LPC17xx_PIO2_9_MODE
 config LPC17xx_PIO2_9_OPENDRAIN_ENABLE
     bool "OPENDRAIN"
     default n
+	depends on !LPC17xx_PIO2__DEFAULT
 
 config LPC17xx_PIO2_9_OPENDRAIN
 	int
@@ -610,9 +680,14 @@ endmenu
 
 menu "LPC17xx_PIO2_10"
 
+config LPC17xx_PIO2_1_DEFAULT
+	bool "default"
+	default y
+
 choice
 	prompt "FUNCTION"	
 	default LPC17xx_PIO2_10_GPIO
+	depends on !LPC17xx_PIO2_1_DEFAULT
 
 config LPC17xx_PIO2_10_GPIO
     bool	"GPIO"
@@ -634,6 +709,7 @@ config LPC17xx_PIO2_10_FUNCTION
 choice
 	prompt "MODE"	
 	default LPC17xx_PIO2_10_PULLUP
+	depends on !LPC17xx_PIO2_1_DEFAULT
 
 config LPC17xx_PIO2_10_PULLUP
     bool	"PullUp"
@@ -659,6 +735,7 @@ config LPC17xx_PIO2_10_MODE
 config LPC17xx_PIO2_10_OPENDRAIN_ENABLE
     bool "OPENDRAIN"
     default n
+	depends on !LPC17xx_PIO2_1_DEFAULT
 
 config LPC17xx_PIO2_10_OPENDRAIN
 	int
@@ -668,9 +745,14 @@ endmenu
     
 menu "LPC17xx_PIO2_11"
 
+config LPC17xx_PIO2_1_DEFAULT
+	bool "default"
+	default y
+
 choice
 	prompt "FUNCTION"	
 	default LPC17xx_PIO2_11_GPIO
+	depends on !LPC17xx_PIO2_1_DEFAULT
 
 config LPC17xx_PIO2_11_GPIO
     bool	"GPIO"
@@ -692,6 +774,7 @@ config LPC17xx_PIO2_11_FUNCTION
 choice
 	prompt "MODE"	
 	default LPC17xx_PIO2_11_PULLUP
+	depends on !LPC17xx_PIO2_1_DEFAULT
 
 config LPC17xx_PIO2_11_PULLUP
     bool	"PullUp"
@@ -717,6 +800,7 @@ config LPC17xx_PIO2_11_MODE
 config LPC17xx_PIO2_11_OPENDRAIN_ENABLE
     bool "OPENDRAIN"
     default n
+	depends on !LPC17xx_PIO2_1_DEFAULT
 
 config LPC17xx_PIO2_11_OPENDRAIN
 	int
@@ -726,9 +810,14 @@ endmenu
 
 menu "LPC17xx_PIO2_12"
 
+config LPC17xx_PIO2_1_DEFAULT
+	bool "default"
+	default y
+
 choice
 	prompt "FUNCTION"	
 	default LPC17xx_PIO2_12_GPIO
+	depends on !LPC17xx_PIO2_1_DEFAULT
 
 config LPC17xx_PIO2_12_GPIO
     bool	"GPIO"
@@ -750,6 +839,7 @@ config LPC17xx_PIO2_12_FUNCTION
 choice
 	prompt "MODE"	
 	default LPC17xx_PIO2_12_PULLUP
+	depends on !LPC17xx_PIO2_1_DEFAULT
 
 config LPC17xx_PIO2_12_PULLUP
     bool	"PullUp"
@@ -775,6 +865,7 @@ config LPC17xx_PIO2_12_MODE
 config LPC17xx_PIO2_12_OPENDRAIN_ENABLE
     bool "OPENDRAIN"
     default n
+	depends on !LPC17xx_PIO2_1_DEFAULT
 
 config LPC17xx_PIO2_12_OPENDRAIN
 	int
@@ -784,9 +875,14 @@ endmenu
 
 menu "LPC17xx_PIO2_13"
 
+config LPC17xx_PIO2_1_DEFAULT
+	bool "default"
+	default y
+
 choice
 	prompt "FUNCTION"	
 	default LPC17xx_PIO2_13_GPIO
+	depends on !LPC17xx_PIO2_1_DEFAULT
 	
 config LPC17xx_PIO2_13_GPIO
     bool	"GPIO"
@@ -808,6 +904,7 @@ config LPC17xx_PIO2_13_FUNCTION
 choice
 	prompt "MODE"	
 	default LPC17xx_PIO2_13_PULLUP
+	depends on !LPC17xx_PIO2_1_DEFAULT
 
 config LPC17xx_PIO2_13_PULLUP
     bool	"PullUp"
@@ -833,6 +930,7 @@ config LPC17xx_PIO2_13_MODE
 config LPC17xx_PIO2_13_OPENDRAIN_ENABLE
     bool "OPENDRAIN"
     default n
+	depends on !LPC17xx_PIO2_1_DEFAULT
 
 config LPC17xx_PIO2_13_OPENDRAIN
 	int

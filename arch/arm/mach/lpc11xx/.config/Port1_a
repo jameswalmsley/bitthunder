@@ -1,6 +1,7 @@
 choice
 	prompt "LPC11Axx_PIO1_0"	
 	default LPC11Axx_PIO1_0_GPIO
+	depends on HAS_LPC11xx_PIO1
 
 config LPC11Axx_PIO1_0_GPIO
     bool	"GPIO"
@@ -30,6 +31,7 @@ config LPC11xx_PIO1_0_FUNCTION
 choice
 	prompt "LPC11Axx_PIO1_1"	
 	default LPC11Axx_PIO1_1_GPIO
+	depends on HAS_LPC11xx_PIO1
 
 config LPC11Axx_PIO1_1_GPIO
     bool	"GPIO"
@@ -60,6 +62,7 @@ config LPC11xx_PIO1_1_FUNCTION
 choice
 	prompt "LPC11Axx_PIO1_2"	
 	default LPC11Axx_PIO1_2_GPIO
+	depends on HAS_LPC11xx_PIO1
 
 config LPC11Axx_PIO1_2_GPIO
     bool	"GPIO"
@@ -89,6 +92,7 @@ config LPC11xx_PIO1_2_FUNCTION
 choice
 	prompt "LPC11Axx_PIO1_3"	
 	default LPC11Axx_PIO1_3_GPIO
+	depends on HAS_LPC11xx_PIO1
 
 config LPC11Axx_PIO1_3_GPIO
     bool	"GPIO"
@@ -114,6 +118,7 @@ config LPC11xx_PIO1_3_FUNCTION
 choice
 	prompt "LPC11Axx_PIO1_4"	
 	default LPC11Axx_PIO1_4_GPIO
+	depends on HAS_LPC11xx_PIO1
 
 config LPC11Axx_PIO1_4_GPIO
     bool	"GPIO"
@@ -147,6 +152,7 @@ config LPC11xx_PIO1_4_FUNCTION
 choice
 	prompt "LPC11Axx_PIO1_5"	
 	default LPC11Axx_PIO1_5_GPIO
+	depends on HAS_LPC11xx_PIO1
 
 config LPC11Axx_PIO1_5_GPIO
     bool	"GPIO"
@@ -180,6 +186,7 @@ config LPC11xx_PIO1_5_FUNCTION
 choice
 	prompt "LPC11Axx_PIO1_6"	
 	default LPC11Axx_PIO1_6_GPIO
+	depends on HAS_LPC11xx_PIO1
 
 config LPC11Axx_PIO1_6_GPIO
     bool	"GPIO"
@@ -213,6 +220,7 @@ config LPC11xx_PIO1_6_FUNCTION
 choice
 	prompt "LPC11Axx_PIO1_7"	
 	default LPC11Axx_PIO1_7_GPIO
+	depends on HAS_LPC11xx_PIO1
 
 config LPC11Axx_PIO1_7_GPIO
     bool	"GPIO"
@@ -245,6 +253,7 @@ config LPC11xx_PIO1_7_FUNCTION
 choice
 	prompt "LPC11Axx_PIO1_8"	
 	default LPC11Axx_PIO1_8_GPIO
+	depends on HAS_LPC11xx_PIO1
 
 config LPC11Axx_PIO1_8_GPIO
     bool	"GPIO"
@@ -275,6 +284,7 @@ config LPC11xx_PIO1_8_FUNCTION
 choice
 	prompt "LPC11Axx_PIO1_9"	
 	default LPC11Axx_PIO1_9_GPIO
+	depends on HAS_LPC11xx_PIO1
 
 config LPC11Axx_PIO1_9_GPIO
     bool	"GPIO"

@@ -32,6 +32,42 @@ choice
 	prompt "LPC11xx Chip Variant"
 	default MACH_LPC11xx_LPC11C24
 
+config MACH_LPC11xx_LPC11A02
+    bool "LPC11A02"
+    select MACH_LPC11CA02
+
+config MACH_LPC11xx_LPC11A04
+    bool "LPC11A04"
+    select MACH_LPC11A04    
+
+config MACH_LPC11xx_LPC11A11
+    bool "LPC11A11"
+    select MACH_LPC11A11    
+
+config MACH_LPC11xx_LPC11A12FHN33
+    bool "LPC11A12FHN33"
+    select MACH_LPC11A12FHN33    
+
+config MACH_LPC11xx_LPC11A12FBD48
+    bool "LPC11A12FBD48"
+    select MACH_LPC11A12FBD48
+    
+config MACH_LPC11xx_LPC11A11
+    bool "LPC11A11"
+    select MACH_LPC11A11    
+    
+config MACH_LPC11xx_LPC11A14FHN33
+    bool "LPC11A14FHN33"
+    select MACH_LPC11A14FHN33    
+
+config MACH_LPC11xx_LPC11A14FBD48
+    bool "LPC11A14FBD48"
+    select MACH_LPC11A14FBD48    
+    
+
+config MACH_LPC11xx_LPC11C14
+    bool "LPC11C14"
+    select MACH_LPC11C14
 
 config MACH_LPC11xx_LPC11C22
     bool "LPC11C22"
@@ -40,14 +76,12 @@ config MACH_LPC11xx_LPC11C22
 config MACH_LPC11xx_LPC11C24
     bool "LPC11C24"
     select MACH_LPC11C24    
-    
-config MACH_LPC11xx_LPC11C14
-    bool "LPC11C14"
-    select MACH_LPC11C14
 
-config MACH_LPC11xx_LPC11A04
-    bool "LPC11A04"
-    select MACH_LPC11A04
+config MACH_LPC11xx_LPC11D14
+    bool "LPC11D14"
+    select MACH_LPC11D14
+    
+
 endchoice
 
 config MACH_LPC11xx_LPC11Cxx
@@ -58,6 +92,43 @@ config MACH_LPC11xx_LPC11Axx
 	bool
 	default n
 
+
+if MACH_LPC11xx_LPC11A02
+source arch/arm/mach/lpc11xx/.config/lpc11a02
+endif
+
+if MACH_LPC11xx_LPC11A04
+source arch/arm/mach/lpc11xx/.config/lpc11a04
+endif
+
+if MACH_LPC11xx_LPC11A11
+source arch/arm/mach/lpc11xx/.config/lpc11a11
+endif
+
+if MACH_LPC11xx_LPC11A12FHN33
+source arch/arm/mach/lpc11xx/.config/lpc11a12FHN33
+endif
+
+if MACH_LPC11xx_LPC11A12FBD48
+source arch/arm/mach/lpc11xx/.config/lpc11a12FBD48
+endif
+
+if MACH_LPC11xx_LPC11A13
+source arch/arm/mach/lpc11xx/.config/lpc11a13
+endif
+
+if MACH_LPC11xx_LPC11A14FHN33
+source arch/arm/mach/lpc11xx/.config/lpc11a14FHN33
+endif
+
+if MACH_LPC11xx_LPC11A14FBD48
+source arch/arm/mach/lpc11xx/.config/lpc11a14FBD48
+endif
+
+if MACH_LPC11xx_LPC11C14
+source arch/arm/mach/lpc11xx/.config/lpc11c14
+endif
+
 if MACH_LPC11xx_LPC11C22
 source arch/arm/mach/lpc11xx/.config/lpc11c22
 endif
@@ -66,12 +137,8 @@ if MACH_LPC11xx_LPC11C24
 source arch/arm/mach/lpc11xx/.config/lpc11c24
 endif
 
-if MACH_LPC11xx_LPC11C14
-source arch/arm/mach/lpc11xx/.config/lpc11c14
-endif
-
-if MACH_LPC11xx_LPC11A04
-source arch/arm/mach/lpc11xx/.config/lpc11a04
+if MACH_LPC11xx_LPC11D14
+source arch/arm/mach/lpc11xx/.config/lpc11d14
 endif
 
 

@@ -1,8 +1,13 @@
 menu "LPC11xx_PIO0_0"	
 
+config LPC11xx_PIO0_0_DEFAULT
+	bool "default"
+	default y
+
 choice
 	prompt "FUNCTION"
 	default LPC11xx_PIO0_0_RESET
+	depends on !LPC11xx_PIO0_0_DEFAULT
   
 config LPC11xx_PIO0_0_RESET
     bool	"RESET"
@@ -21,6 +26,7 @@ config LPC11xx_PIO0_0_FUNCTION
 choice
 	prompt "MODE"	
 	default LPC11xx_PIO0_0_PULLUP
+	depends on !LPC11xx_PIO0_0_DEFAULT
 
 config LPC11xx_PIO0_0_PULLUP
 	bool	"PullUp"
@@ -44,8 +50,9 @@ config LPC11xx_PIO0_0_MODE
 	default 24 if LPC11xx_PIO0_0_PULLDOWN
 
 config LPC11xx_PIO0_0_OPENDRAIN_ENABLE
-    	bool "OPENDRAIN"
+	bool "OPENDRAIN"
 	default n
+	depends on !LPC11xx_PIO0_0_DEFAULT
     
 config LPC11xx_PIO0_0_OPENDRAIN
     	int
@@ -57,9 +64,14 @@ endmenu
 
 menu "LPC11xx_PIO0_1"	
 
+config LPC11xx_PIO0_1_DEFAULT
+	bool "default"
+	default y
+
 choice
 	prompt "FUNCTION"
 	default LPC11xx_PIO0_1_GPIO
+	depends on !LPC11xx_PIO0_1_DEFAULT
 
 config LPC11xx_PIO0_1_GPIO
     bool	"GPIO"
@@ -82,6 +94,7 @@ config LPC11xx_PIO0_1_FUNCTION
 choice
 	prompt "MODE"	
 	default LPC11xx_PIO0_1_PULLUP
+	depends on !LPC11xx_PIO0_1_DEFAULT
 
 config LPC11xx_PIO0_1_PULLUP
 	bool	"PullUp"
@@ -105,8 +118,9 @@ config LPC11xx_PIO0_1_MODE
 	default 24 if LPC11xx_PIO0_1_PULLDOWN
 
 config LPC11xx_PIO0_1_OPENDRAIN_ENABLE
-    	bool "OPENDRAIN"
+	bool "OPENDRAIN"
 	default n
+	depends on !LPC11xx_PIO0_1_DEFAULT
     
 config LPC11xx_PIO0_1_OPENDRAIN
     	int
@@ -118,9 +132,14 @@ endmenu
 
 menu "LPC11xx_PIO0_2"	
 
+config LPC11xx_PIO0_2_DEFAULT
+	bool "default"
+	default y
+
 choice
 	prompt "FUNCTION"
 	default LPC11xx_PIO0_2_GPIO
+	depends on !LPC11xx_PIO0_2_DEFAULT
 
 config LPC11xx_PIO0_2_GPIO
     bool	"GPIO"
@@ -143,6 +162,7 @@ config LPC11xx_PIO0_2_FUNCTION
 choice
 	prompt "MODE"	
 	default LPC11xx_PIO0_2_PULLUP
+	depends on !LPC11xx_PIO0_2_DEFAULT
 
 config LPC11xx_PIO0_2_PULLUP
 	bool	"PullUp"
@@ -166,8 +186,9 @@ config LPC11xx_PIO0_2_MODE
 	default 24 if LPC11xx_PIO0_2_PULLDOWN
 
 config LPC11xx_PIO0_2_OPENDRAIN_ENABLE
-    	bool "OPENDRAIN"
+	bool "OPENDRAIN"
 	default n
+	depends on !LPC11xx_PIO0_2_DEFAULT
     
 config LPC11xx_PIO0_2_OPENDRAIN
     	int
@@ -177,12 +198,18 @@ config LPC11xx_PIO0_2_OPENDRAIN
 
 endmenu
 
-menu "LPC11xx_PIO0_3"	
+menu "LPC11xx_PIO0_3"
+
+config LPC11xx_PIO0__DEFAULT
+	bool "default"
+	default y
+depends on !HAS_LPC11xx_PIO0_3	
 
 choice
 	prompt "FUNCTION"
 	default LPC11xx_PIO0_3_GPIO
-	depends on HAS_LPC11xx_PIO0_3
+	depends on !LPC11xx_PIO0__DEFAULT
+	
 
 config LPC11xx_PIO0_3_GPIO
     bool	"GPIO"
@@ -197,6 +224,7 @@ config LPC11xx_PIO0_3_FUNCTION
 choice
 	prompt "MODE"	
 	default LPC11xx_PIO0_3_PULLUP
+	depends on !LPC11xx_PIO0__DEFAULT
 
 config LPC11xx_PIO0_3_PULLUP
 	bool	"PullUp"
@@ -220,8 +248,9 @@ config LPC11xx_PIO0_3_MODE
 	default 24 if LPC11xx_PIO0_3_PULLDOWN
 
 config LPC11xx_PIO0_3_OPENDRAIN_ENABLE
-    	bool "OPENDRAIN"
+	bool "OPENDRAIN"
 	default n
+	depends on !LPC11xx_PIO0__DEFAULT
     
 config LPC11xx_PIO0_3_OPENDRAIN
     	int
@@ -231,12 +260,18 @@ config LPC11xx_PIO0_3_OPENDRAIN
 
 endmenu
 
-menu "LPC11xx_PIO0_4"	
+menu "LPC11xx_PIO0_4"
+
+config LPC11xx_PIO0__DEFAULT
+	bool "default"
+	default y
+depends on !HAS_LPC11xx_PIO0_4	
 
 choice
 	prompt "FUNCTION"
 	default LPC11xx_PIO0_4_GPIO
-	depends on HAS_LPC11xx_PIO0_4
+	depends on !LPC11xx_PIO0__DEFAULT
+	
 
 config LPC11xx_PIO0_4_GPIO
     bool	"GPIO_OD"
@@ -256,6 +291,7 @@ config LPC11xx_PIO0_4_FUNCTION
 choice
 	prompt "MODE"	
 	default LPC11xx_PIO0_4_STANDARD_IO
+	depends on !LPC11xx_PIO0__DEFAULT
 
 config LPC11xx_PIO0_4_STANDARD_IO
 	bool	"IO"
@@ -282,12 +318,17 @@ config LPC11xx_PIO0_4_OPENDRAIN
 
 endmenu
 
-menu "LPC11xx_PIO0_5"	
+menu "LPC11xx_PIO0_5"
+
+config LPC11xx_PIO0__DEFAULT
+	bool "default"
+	default y
+depends on !HAS_LPC11xx_PIO0_5	
 
 choice
 	prompt "FUNCTION"
-	default LPC11xx_PIO0_5_GPIO
-	depends on HAS_LPC11xx_PIO0_5
+	default LPC11xx_PIO0_5_GPIO	
+	depends on !LPC11xx_PIO0__DEFAULT
 
 config LPC11xx_PIO0_5_GPIO
     bool	"GPIO_OD"
@@ -306,6 +347,7 @@ config LPC11xx_PIO0_5_FUNCTION
 choice
 	prompt "MODE"	
 	default LPC11xx_PIO0_5_STANDARD_IO
+	depends on !LPC11xx_PIO0__DEFAULT
 
 config LPC11xx_PIO0_5_STANDARD_IO
 	bool	"IO"
@@ -333,12 +375,18 @@ config LPC11xx_PIO0_5_OPENDRAIN
 
 endmenu
 
-menu "LPC11xx_PIO0_6"	
+menu "LPC11xx_PIO0_6"
+
+config LPC11xx_PIO0__DEFAULT
+	bool "default"
+	default y
+depends on !HAS_LPC11xx_PIO0_6	
 
 choice
 	prompt "FUNCTION"
 	default LPC11xx_PIO0_6_GPIO
-	depends on HAS_LPC11xx_PIO0_6
+	depends on !LPC11xx_PIO0__DEFAULT
+	
 
 config LPC11xx_PIO0_6_GPIO
     bool	"GPIO"
@@ -357,6 +405,7 @@ config LPC11xx_PIO0_6_FUNCTION
 choice
 	prompt "MODE"	
 	default LPC11xx_PIO0_6_PULLUP
+	depends on !LPC11xx_PIO0__DEFAULT
 
 config LPC11xx_PIO0_6_PULLUP
 	bool	"PullUp"
@@ -380,8 +429,9 @@ config LPC11xx_PIO0_6_MODE
 	default 24 if LPC11xx_PIO0_6_PULLDOWN
 
 config LPC11xx_PIO0_6_OPENDRAIN_ENABLE
-    	bool "OPENDRAIN"
+	bool "OPENDRAIN"
 	default n
+	depends on !LPC11xx_PIO0__DEFAULT
     
 config LPC11xx_PIO0_6_OPENDRAIN
     	int
@@ -391,12 +441,18 @@ config LPC11xx_PIO0_6_OPENDRAIN
 
 endmenu
 
-menu "LPC11xx_PIO0_7"	
+menu "LPC11xx_PIO0_7"
+
+config LPC11xx_PIO0__DEFAULT
+	bool "default"
+	default y
+depends on !HAS_LPC11xx_PIO0_7	
 
 choice
 	prompt "FUNCTION"
 	default LPC11xx_PIO0_7_GPIO
-	depends on HAS_LPC11xx_PIO0_7
+	depends on !LPC11xx_PIO0__DEFAULT
+	
 
 config LPC11xx_PIO0_7_GPIO
     bool	"GPIO"
@@ -415,6 +471,7 @@ config LPC11xx_PIO0_7_FUNCTION
 choice
 	prompt "MODE"	
 	default LPC11xx_PIO0_7_PULLUP
+	depends on !LPC11xx_PIO0__DEFAULT
 
 config LPC11xx_PIO0_7_PULLUP
 	bool	"PullUp"
@@ -438,8 +495,9 @@ config LPC11xx_PIO0_7_MODE
 	default 24 if LPC11xx_PIO0_7_PULLDOWN
 
 config LPC11xx_PIO0_7_OPENDRAIN_ENABLE
-    	bool "OPENDRAIN"
+	bool "OPENDRAIN"
 	default n
+	depends on !LPC11xx_PIO0__DEFAULT
     
 config LPC11xx_PIO0_7_OPENDRAIN
     	int
@@ -451,9 +509,14 @@ endmenu
 
 menu "LPC11xx_PIO0_8"	
 
+config LPC11xx_PIO0_8_DEFAULT
+	bool "default"
+	default y
+
 choice
 	prompt "FUNCTION"
 	default LPC11xx_PIO0_8_GPIO
+	depends on !LPC11xx_PIO0_8_DEFAULT
 
 config LPC11xx_PIO0_8_GPIO
     bool	"GPIO"
@@ -476,6 +539,7 @@ config LPC11xx_PIO0_8_FUNCTION
 choice
 	prompt "MODE"	
 	default LPC11xx_PIO0_8_PULLUP
+	depends on !LPC11xx_PIO0_8_DEFAULT
 
 config LPC11xx_PIO0_8_PULLUP
 	bool	"PullUp"
@@ -499,8 +563,9 @@ config LPC11xx_PIO0_8_MODE
 	default 24 if LPC11xx_PIO0_8_PULLDOWN
 
 config LPC11xx_PIO0_8_OPENDRAIN_ENABLE
-    	bool "OPENDRAIN"
+	bool "OPENDRAIN"
 	default n
+	depends on !LPC11xx_PIO0_8_DEFAULT
     
 config LPC11xx_PIO0_8_OPENDRAIN
     	int
@@ -512,9 +577,14 @@ endmenu
 
 menu "LPC11xx_PIO0_9"	
 
+config LPC11xx_PIO0_9_DEFAULT
+	bool "default"
+	default y
+
 choice
 	prompt "FUNCTION"
 	default LPC11xx_PIO0_9_GPIO
+	depends on !LPC11xx_PIO0_9_DEFAULT
 
 config LPC11xx_PIO0_9_GPIO
     bool	"GPIO"
@@ -537,6 +607,7 @@ config LPC11xx_PIO0_9_FUNCTION
 choice
 	prompt "MODE"	
 	default LPC11xx_PIO0_9_PULLUP
+	depends on !LPC11xx_PIO0_9_DEFAULT
 
 config LPC11xx_PIO0_9_PULLUP
 	bool	"PullUp"
@@ -560,8 +631,9 @@ config LPC11xx_PIO0_9_MODE
 	default 24 if LPC11xx_PIO0_9_PULLDOWN
 
 config LPC11xx_PIO0_9_OPENDRAIN_ENABLE
-    	bool "OPENDRAIN"
+	bool "OPENDRAIN"
 	default n
+	depends on !LPC11xx_PIO0_9_DEFAULT
     
 config LPC11xx_PIO0_9_OPENDRAIN
     	int
@@ -573,9 +645,14 @@ endmenu
 
 menu "LPC11xx_PIO0_10"	
 
+config LPC11xx_PIO0_10_DEFAULT
+	bool "default"
+	default y
+
 choice
 	prompt "FUNCTION"
 	default LPC11xx_PIO0_10_SWCLK
+	depends on !LPC11xx_PIO0_10_DEFAULT
 
 config LPC11xx_PIO0_10_SWCLK
     bool	"SWCLK"
@@ -602,6 +679,7 @@ config LPC11xx_PIO0_10_FUNCTION
 choice
 	prompt "MODE"	
 	default LPC11xx_PIO0_10_PULLUP
+	depends on !LPC11xx_PIO0_10_DEFAULT
 
 config LPC11xx_PIO0_10_PULLUP
 	bool	"PullUp"
@@ -625,8 +703,9 @@ config LPC11xx_PIO0_10_MODE
 	default 24 if LPC11xx_PIO0_10_PULLDOWN
 
 config LPC11xx_PIO0_10_OPENDRAIN_ENABLE
-    	bool "OPENDRAIN"
+	bool "OPENDRAIN"
 	default n
+	depends on !LPC11xx_PIO0_10_DEFAULT
     
 config LPC11xx_PIO0_10_OPENDRAIN
     	int
@@ -638,9 +717,14 @@ endmenu
 
 menu "LPC11xx_PIO0_11"	
 
+config LPC11xx_PIO0_11_DEFAULT
+	bool "default"
+	default y
+
 choice
 	prompt "FUNCTION"
 	default LPC11xx_PIO0_11_GPIO
+	depends on !LPC11xx_PIO0_11_DEFAULT
 
 config LPC11xx_PIO0_11_GPIO
     bool	"GPIO"
@@ -663,6 +747,7 @@ config LPC11xx_PIO0_11_FUNCTION
 choice
 	prompt "MODE"	
 	default LPC11xx_PIO0_11_PULLUP
+	depends on !LPC11xx_PIO0_11_DEFAULT
 
 config LPC11xx_PIO0_11_PULLUP
 	bool	"PullUp"
@@ -686,8 +771,9 @@ config LPC11xx_PIO0_11_MODE
 	default 24 if LPC11xx_PIO0_11_PULLDOWN
 	
 config LPC11xx_PIO0_11_AD_ENABLE
-    	bool "ADMODE"
+	bool "ADMODE"
 	default n
+	depends on !LPC11xx_PIO0_11_DEFAULT
     
 config LPC11xx_PIO0_11_AD
     	int
@@ -696,8 +782,9 @@ config LPC11xx_PIO0_11_AD
 
 
 config LPC11xx_PIO0_11_OPENDRAIN_ENABLE
-    	bool "OPENDRAIN"
+	bool "OPENDRAIN"
 	default n
+	depends on !LPC11xx_PIO0_11_DEFAULT
     
 config LPC11xx_PIO0_11_OPENDRAIN
     	int
