@@ -1,0 +1,12 @@
+menu "Networking"
+
+config NET
+    bool
+	default n
+
+config NET_LWIP
+    bool "Lightweight IP TCP/IP stack"
+	select NET
+	default n
+
+endmenu

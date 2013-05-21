@@ -34,6 +34,7 @@ BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/syslog/bt_printk.o
 
 
 include $(BASE)os/src/fs/objects.mk
+include $(BASE)os/src/net/objects.mk
 
 include $(BASE)os/src/interfaces/objects.mk
 
