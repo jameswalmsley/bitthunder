@@ -581,7 +581,7 @@ static BT_HANDLE uart_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErro
 	BT_UnregisterInterrupt(pResource->ulStart, uart_irq_handler, hUart);*/
 
 err_free_out:
-	BT_kFree(hUart);
+	BT_DestroyHandle(hUart);
 
 err_out:
 	if(pError) {

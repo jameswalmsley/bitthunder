@@ -130,7 +130,7 @@ static BT_HANDLE devcfg_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pEr
 	return hDevcfg;
 
 err_free_out:
-	BT_kFree(hDevcfg);
+	BT_DestroyHandle(hDevcfg);
 
 err_set_out:
 	if(pError) {

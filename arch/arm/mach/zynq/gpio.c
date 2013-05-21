@@ -188,7 +188,7 @@ err_free_irq:
 	BT_UnregisterInterrupt(pResource->ulStart, gpio_irq_handler, hGPIO);
 
 err_free_out:
-	BT_kFree(hGPIO);
+	BT_DestroyHandle(hGPIO);
 
 	if(pError) {
 		*pError = Error;
