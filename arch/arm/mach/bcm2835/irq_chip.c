@@ -226,7 +226,7 @@ static BT_HANDLE irq_chip_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *p
 	return hIRQ;
 
 err_free_chip:
-	BT_kFree(hIRQ);
+	BT_DestroyHandle(hIRQ);
 
 	if(pError) {
 		*pError = Error;

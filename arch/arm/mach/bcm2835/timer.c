@@ -166,7 +166,7 @@ static BT_HANDLE timer_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErr
 	return hTimer;
 
 err_free_out:
-	BT_kFree(hTimer);
+	BT_DestroyHandle(hTimer);
 
 err_out:
 	if(pError) {

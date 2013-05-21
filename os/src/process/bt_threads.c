@@ -57,7 +57,7 @@ BT_HANDLE BT_CreateProcessThread(BT_HANDLE hProcess, BT_FN_THREAD_ENTRY pfnStart
 
 	hThread->pKThreadID = BT_kTaskCreate(threadStartup, NULL, &hThread->oConfig, pError);
 	if(!hThread->pKThreadID) {
-		BT_kFree(hThread);
+		BT_DestroyHandle(hThread);
 		return NULL;
 	}
 

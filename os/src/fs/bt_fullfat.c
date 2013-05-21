@@ -93,7 +93,7 @@ return (BT_HANDLE) pMount;
 
 err_free_out:
 	BT_kFree(pMount->pBlockCache);
-	BT_kFree(pMount);
+	BT_DestroyHandle((BT_HANDLE)pMount);
 
 	*pError = Error;
 	return NULL;
@@ -142,7 +142,7 @@ static BT_u32 fullfat_read(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void 
 
 static BT_u32 fullfat_write(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
 	BT_FF_FILE *pFile = (BT_FF_FILE *) hFile;
-	
+
 	FF_T_SINT32 sWritten = FF_Write(pFile->pFile, 1, ulSize, (FF_T_UINT8 *) pBuffer);
 	return (BT_u32) sWritten;
 }
@@ -199,7 +199,7 @@ static BT_HANDLE fullfat_opendir(BT_HANDLE hMount, const BT_i8 *szpPath, BT_ERRO
 	return (BT_HANDLE) pDir;
 
 err_free_out:
-	BT_kFree(pDir);
+	BT_DestroyHandle((BT_HANDLE)pDir);
 
 err_out:
 	return NULL;
@@ -246,7 +246,7 @@ static BT_HANDLE fullfat_open_inode(BT_HANDLE hMount, const BT_i8 *szpPath, BT_E
 	return (BT_HANDLE) pInode;
 
 err_free_out:
-	BT_kFree(pInode);
+	BT_DestroyHandle((BT_HANDLE)pInode);
 
 err_out:
 	return NULL;

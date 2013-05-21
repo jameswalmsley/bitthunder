@@ -66,7 +66,7 @@ BT_HANDLE BT_FifoCreate(BT_u32 ulElements, BT_u32 ulElementWidth, BT_u32 ulFlags
 	return hFifo;
 
 	err_free_out:
-		BT_kFree(hFifo);
+		BT_DestroyHandle(hFifo);
 
 	err_out:
 		if (pError) *pError = Error;

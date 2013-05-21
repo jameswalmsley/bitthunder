@@ -134,7 +134,7 @@ static BT_HANDLE nvic_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErro
 	return hNVIC;
 
 err_free_chip:
-	BT_kFree(hNVIC);
+	BT_DestroyHandle(hNVIC);
 
 	if(pError) {
 		*pError = Error;

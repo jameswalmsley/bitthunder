@@ -86,7 +86,7 @@ static BT_ERROR sdhci_cleanup(BT_HANDLE hSDIO) {
 		BT_UnregisterInterrupt(pResource->ulStart, sdhci_irq_handler, hSDIO);
 	}
 
-	BT_kFree(hSDIO);
+	// Dont't forget the handle will itself be cleanup up auto-magically!
 
 	return BT_ERR_NONE;
 }
@@ -201,7 +201,7 @@ static BT_u32 sdhci_read(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer, BT_ERR
 			*p++ = d1;
 			*p++ = d2;
 			*p++ = d3;
-		
+
 			ulSize -= 4;
 		}
 
@@ -493,7 +493,7 @@ err_free_irq:
 	BT_UnregisterInterrupt(ulIRQ, sdhci_irq_handler, hSDIO);
 
 err_free_out:
-	BT_kFree(hSDIO);
+	BT_DestroyHandle(hSDIO);
 
 	if(pError) {
 		*pError = Error;

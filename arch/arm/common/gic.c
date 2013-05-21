@@ -292,7 +292,7 @@ static BT_HANDLE gic_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 	return hGic;
 
 err_free_chip:
-	BT_kFree(hGic);
+	BT_DestroyHandle(hGic);
 
 	if(pError) {
 		*pError = Error;
