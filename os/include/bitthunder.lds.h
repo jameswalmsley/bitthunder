@@ -8,6 +8,8 @@
 		__bt_init_start = .;
 		KEEP(*(.init))
 		KEEP(*(.init.*))
+		KEEP(*(.bt.init.vectors))
+		KEEP(*(.bt.init.vectors.*))
     } > BT_LINKER_INIT_SECTION
 
 	.bt.arch.init : {
@@ -211,6 +213,7 @@
    *(.bss.*)
    *(.gnu.linkonce.b.*)
    *(COMMON)
+   . = ALIGN(16);
    __bss_end = .;
 } > BT_LINKER_BSS_SECTION
 
@@ -248,15 +251,11 @@ _SDA_BASE_ = __sdata_start + ((__sbss_end - __sdata_start) / 2 );
 _SDA2_BASE_ = __sdata2_start + ((__sbss2_end - __sdata2_start) / 2 );
 
 /* Generate Stack and Heap definitions */
-.heap_align (NOLOAD) : {
-	. = ALIGN(16);
-} > BT_LINKER_BSS_SECTION
 
-__heap_length = BT_CONFIG_LINKER_SRAM_START_ADDRESS + BT_CONFIG_LINKER_SRAM_LENGTH - . - _STACK_SIZE - _IRQ_STACK_SIZE;
+_HEAP_SIZE = BT_CONFIG_LINKER_SRAM_START_ADDRESS + BT_CONFIG_LINKER_SRAM_LENGTH - __bss_end - _STACK_SIZE - _IRQ_STACK_SIZE;
 
 .heap (NOLOAD) : {
 	_heap = .;
-	_HEAP_SIZE = __heap_length;
 
    HeapBase = .;
    _heap_start = .;
