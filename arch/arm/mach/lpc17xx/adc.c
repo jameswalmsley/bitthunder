@@ -419,7 +419,7 @@ static BT_HANDLE adc_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 	return hAdc;
 
 err_free_out:
-	BT_kFree(hAdc);
+	BT_DestroyHandle(hAdc);
 
 err_out:
 	if(pError) {

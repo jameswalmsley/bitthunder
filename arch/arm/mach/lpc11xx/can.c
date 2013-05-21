@@ -517,7 +517,7 @@ static BT_HANDLE can_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 	return hCan;
 
 err_free_out:
-	BT_kFree(hCan);
+	BT_DestroyHandle(hCan);
 
 err_out:
 	if(pError) {

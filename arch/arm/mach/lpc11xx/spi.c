@@ -557,7 +557,7 @@ static BT_HANDLE spi_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 	return hSpi;
 
 err_free_out:
-	BT_kFree(hSpi);
+	BT_DestroyHandle(hSpi);
 
 err_out:
 	if(pError) {

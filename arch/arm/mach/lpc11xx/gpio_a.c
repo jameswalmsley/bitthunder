@@ -168,7 +168,7 @@ BT_HANDLE gpio_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
 	return hGPIO;
 
 err_free_out:
-	BT_kFree(hGPIO);
+	BT_DestroyHandle(hGPIO);
 
 	if(pError) {
 		*pError = Error;

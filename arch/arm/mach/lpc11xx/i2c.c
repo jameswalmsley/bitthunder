@@ -652,7 +652,7 @@ static BT_HANDLE i2c_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 	return hI2C;
 
 err_free_out:
-	BT_kFree(hI2C);
+	BT_DestroyHandle(hI2C);
 
 err_out:
 	if(pError) {

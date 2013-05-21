@@ -399,7 +399,7 @@ static BT_HANDLE pwm_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 	return hPwm;
 
 err_free_out:
-	BT_kFree(hPwm);
+	BT_DestroyHandle(hPwm);
 
 err_out:
 	if(pError) {
