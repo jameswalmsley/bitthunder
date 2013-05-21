@@ -2,6 +2,7 @@ config MACH_ZYNQ_PLATFORM
 	bool
 	default y
 	select ARCH_ARM_IRQ_STACK
+	select HAS_MMU
 
 comment "Zynq Platform Options"
 
@@ -97,4 +98,3 @@ endchoice
 #
 #	Linker Memory
 #
-

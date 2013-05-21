@@ -30,8 +30,10 @@ config BIG_ENDIAN
 config LITTLE_ENDIAN
     bool
 
+config HAS_MMU
+	bool
+	default n
+
 if ARCH_ARM
 source arch/arm/Kconfig
 endif
-
-
