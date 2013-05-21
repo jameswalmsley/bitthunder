@@ -20,6 +20,11 @@ BT_HANDLE BT_CreateHandle(const BT_IF_HANDLE *pIf, BT_u32 ulHandleMemory, BT_ERR
 	return hHandle;
 }
 
+BT_ERROR BT_DestroyHandle(BT_HANDLE h) {
+	BT_kFree(h);
+	return BT_ERR_NONE;
+}
+
 static BT_BOOL isHandleValid(BT_HANDLE h) {
 	if(h) {
 		return BT_TRUE;
@@ -34,7 +39,7 @@ BT_ERROR BT_CloseHandle(BT_HANDLE hHandle) {
 	}
 	BT_ERROR Error = hHandle->h.pIf->pfnCleanup(hHandle);
 	if(!Error) {
-		BT_kFree(hHandle);
+		BT_DestroyHandle(hHandle);
 	}
 
 	if(Error == BT_HANDLE_DO_NOT_FREE) {
