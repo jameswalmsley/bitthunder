@@ -207,22 +207,12 @@
 } > BT_LINKER_TEXT_SECTION
 #endif
 
-.bss (NOLOAD) : {
-   __bss_start = .;
-   *(.bss)
-   *(.bss.*)
-   *(.gnu.linkonce.b.*)
-   *(COMMON)
-   . = ALIGN(16);
-   __bss_end = .;
-} > BT_LINKER_BSS_SECTION
-
 .ARM.exidx : {
    __exidx_start = .;
    *(.ARM.exidx*)
    *(.gnu.linkonce.armexidix.*.*)
    __exidx_end = .;
-} > BT_LINKER_TEXT_SECTION
+   } > BT_LINKER_TEXT_SECTION
 
 .preinit_array : {
    __preinit_array_start = .;
@@ -249,6 +239,16 @@
 _SDA_BASE_ = __sdata_start + ((__sbss_end - __sdata_start) / 2 );
 
 _SDA2_BASE_ = __sdata2_start + ((__sbss2_end - __sdata2_start) / 2 );
+
+.bss (NOLOAD) : {
+   __bss_start = .;
+   *(.bss)
+   *(.bss.*)
+   *(.gnu.linkonce.b.*)
+   *(COMMON)
+   . = ALIGN(16);
+   __bss_end = .;
+} > BT_LINKER_BSS_SECTION
 
 /* Generate Stack and Heap definitions */
 
