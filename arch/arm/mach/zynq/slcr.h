@@ -267,5 +267,6 @@ BT_u32 BT_ZYNQ_GetIOPLLFrequency();
 BT_u32 BT_ZYNQ_GetDDRPLLFrequency();
 
 BT_u32 BT_ZYNQ_GetCpuFrequency();
+BT_u32 BT_ZYNQ_GetCpu1xFrequency();
 
 #endif

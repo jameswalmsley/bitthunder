@@ -121,3 +121,13 @@ BT_u32 BT_ZYNQ_GetCpuFrequency() {
 
 	return InputClk;
 }
+
+BT_u32 BT_ZYNQ_GetCpu1xFrequency() {
+	volatile ZYNQ_SLCR_REGS *pRegs = ZYNQ_SLCR;
+	BT_u32 ulCPUClk = BT_ZYNQ_GetCpuFrequency();
+	if(pRegs->CLK_621_TRUE) {
+		return ulCPUClk / 6;
+	}
+
+	return ulCPUClk / 4;
+}
