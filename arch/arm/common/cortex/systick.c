@@ -62,7 +62,7 @@ static BT_u32 timer_get_frequency(BT_HANDLE hTimer, BT_ERROR *pError) {
 	}
 
 	BT_u32 ulTickRate 	= timer_get_clock_rate(hTimer, pError);
-	BT_u32 ulFrequency 	= ulTickRate / hTimer->pRegs->LOAD;
+	BT_u32 ulFrequency 	= ulTickRate / (hTimer->pRegs->LOAD+1);
 
 	return ulFrequency;
 }
@@ -73,7 +73,7 @@ static BT_ERROR timer_set_frequency(BT_HANDLE hTimer, BT_u32 ulFrequencyHz) {
 	BT_u32 ulTickRate 	= timer_get_clock_rate(hTimer, &Error);
 	BT_u32 ulDivisor  	= ulTickRate / ulFrequencyHz;
 
-	hTimer->pRegs->LOAD = ulDivisor;
+	hTimer->pRegs->LOAD = ulDivisor-1;
 
 	return BT_ERR_NONE;
 }
