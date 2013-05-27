@@ -1,0 +1,702 @@
+menu "LM3Sxx_PORTD_0"	
+
+config LM3Sxx_PORTD_0_DEFAULT
+	bool "disabled"
+	default y
+
+choice
+	prompt "FUNCTION"
+	default LM3Sxx_PORTD_0_GPIO
+	depends on !LM3Sxx_PORTD_0_DEFAULT
+
+config LM3Sxx_PORTD_0_GPIO
+    bool	"GPIO"
+    
+config LM3Sxx_PORTD_0_PWM0
+    bool	"PWM0"
+
+config LM3Sxx_PORTD_0_RD0
+    bool	"RD0(can receiver)"
+
+config LM3Sxx_PORTD_0_IDX0
+    bool	"IDX0(QEI)"
+
+config LM3Sxx_PORTD_0_RXD2
+    bool	"RXD2"
+
+config LM3Sxx_PORTD_0_RXD1
+    bool	"RXD1"
+
+config LM3Sxx_PORTD_0_CCP6
+    bool	"CCP6"
+
+config LM3Sxx_PORTD_0_I2S_RX_SCK
+    bool	"I2S0_RX_SCK"
+
+config LM3Sxx_PORTD_0_CTS1
+    bool	"CTS1"
+    
+endchoice
+
+config LM3Sxx_PORTD_0_FUNCTION
+    int
+    default 0 if LM3Sxx_PORTD_0_GPIO
+    default 1 if LM3Sxx_PORTD_0_PWM0
+    default 2 if LM3Sxx_PORTD_0_RD0
+    default 3 if LM3Sxx_PORTD_0_IDX0
+    default 4 if LM3Sxx_PORTD_0_RXD2
+    default 5 if LM3Sxx_PORTD_0_RXD1
+    default 6 if LM3Sxx_PORTD_0_CCP6
+    default 8 if LM3Sxx_PORTD_0_I2S_RX_SCK
+    default 9 if LM3Sxx_PORTD_0_CTS1
+   
+
+choice
+	prompt "MODE"	
+	default LM3Sxx_PORTD_0_PULLUP
+	depends on !LM3Sxx_PORTD_0_DEFAULT
+
+config LM3Sxx_PORTD_0_PULLUP
+	bool	"PullUp"
+
+config LM3Sxx_PORTD_0_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LM3Sxx_PORTD_0_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LM3Sxx_PORTD_0_MODE
+	int
+	default 0 if LM3Sxx_PORTD_0_NO
+	default 1 if LM3Sxx_PORTD_0_PULLUP
+	default 2 if LM3Sxx_PORTD_0_PULLDOWN
+
+config LM3Sxx_PORTD_0_AD_ENABLE
+	bool "AIN15"
+	default n
+	depends on !LM3Sxx_PORTD_0_DEFAULT
+    
+config LM3Sxx_PORTD_0_AD
+    	int
+	default 1 if !LM3Sxx_PORTD_0_AD_ENABLE
+	default 0 if LM3Sxx_PORTD_0_AD_ENABLE
+
+config LM3Sxx_PORTD_0_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+	default n	
+	depends on !LM3Sxx_PORTD_0_DEFAULT
+    
+config LM3Sxx_PORTD_0_OPENDRAIN
+	int
+	default 0 if !LM3Sxx_PORTD_0_OPENDRAIN_ENABLE
+	default 1 if LM3Sxx_PORTD_0_OPENDRAIN_ENABLE
+
+endmenu
+
+menu "LM3Sxx_PORTD_1"	
+
+config LM3Sxx_PORTD_1_DEFAULT
+	bool "disabled"
+	default y
+
+choice
+	prompt "FUNCTION"
+	default LM3Sxx_PORTD_1_GPIO
+	depends on !LM3Sxx_PORTD_1_DEFAULT
+
+config LM3Sxx_PORTD_1_GPIO
+    bool	"GPIO"
+    
+config LM3Sxx_PORTD_1_PWM1
+    bool	"PWM1"
+
+config LM3Sxx_PORTD_1_TD0
+    bool	"TD0(can transmitter)"
+
+config LM3Sxx_PORTD_1_PHA0
+    bool	"PHA0(QEI)"
+
+config LM3Sxx_PORTD_1_TXD2
+    bool	"TXD2"
+
+config LM3Sxx_PORTD_1_TXD1
+    bool	"TXD1"
+
+config LM3Sxx_PORTD_1_CCP7
+    bool	"CCP7"
+
+config LM3Sxx_PORTD_1_I2S_RX_WS
+    bool	"I2S0_RX_WS"
+
+config LM3Sxx_PORTD_1_DCD1
+    bool	"DCD1"
+
+config LM3Sxx_PORTD_1_CCP2
+    bool	"CCP2"
+
+config LM3Sxx_PORTD_1_PHB1
+    bool	"PHB1(QEI)"
+    
+endchoice
+
+config LM3Sxx_PORTD_1_FUNCTION
+    int
+    default 0 if LM3Sxx_PORTD_1_GPIO
+    default 1 if LM3Sxx_PORTD_1_PWM1
+    default 2 if LM3Sxx_PORTD_1_TD0
+    default 3 if LM3Sxx_PORTD_1_PHA0
+    default 4 if LM3Sxx_PORTD_1_TXD2
+    default 5 if LM3Sxx_PORTD_1_TXD1
+    default 6 if LM3Sxx_PORTD_1_CCP7
+    default 8 if LM3Sxx_PORTD_1_I2S_RX_WS
+    default 9 if LM3Sxx_PORTD_1_DCD1
+    default 10 if LM3Sxx_PORTD_1_CCP2
+    default 11 if LM3Sxx_PORTD_1_PHB1
+    
+
+choice
+	prompt "MODE"	
+	default LM3Sxx_PORTD_1_PULLUP
+	depends on !LM3Sxx_PORTD_1_DEFAULT
+
+config LM3Sxx_PORTD_1_PULLUP
+	bool	"PullUp"
+
+config LM3Sxx_PORTD_1_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LM3Sxx_PORTD_1_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LM3Sxx_PORTD_1_MODE
+	int
+	default 0 if LM3Sxx_PORTD_1_NO
+	default 1 if LM3Sxx_PORTD_1_PULLUP
+	default 2 if LM3Sxx_PORTD_1_PULLDOWN
+    
+config LM3Sxx_PORTD_1_AD_ENABLE
+	bool "AIN14"
+	default n
+	depends on !LM3Sxx_PORTD_1_DEFAULT
+    
+config LM3Sxx_PORTD_1_AD
+    	int
+	default 1 if !LM3Sxx_PORTD_1_AD_ENABLE
+	default 0 if LM3Sxx_PORTD_1_AD_ENABLE
+
+config LM3Sxx_PORTD_1_OPENDRAIN_ENABLE
+	bool "OPENDRAIN"
+	default n
+	depends on !LM3Sxx_PORTD_1_DEFAULT
+
+config LM3Sxx_PORTD_1_OPENDRAIN
+	int
+	default 0 if !LM3Sxx_PORTD_1_OPENDRAIN_ENABLE
+	default 1 if LM3Sxx_PORTD_1_OPENDRAIN_ENABLE
+endmenu
+
+menu "LM3Sxx_PORTD_2"	
+
+config LM3Sxx_PORTD_2_DEFAULT
+	bool "disabled"
+	default y
+
+choice
+	prompt "FUNCTION"
+	default LM3Sxx_PORTD_2_GPIO
+	depends on !LM3Sxx_PORTD_2_DEFAULT
+
+config LM3Sxx_PORTD_2_GPIO
+    bool	"GPIO"
+    
+config LM3Sxx_PORTD_2_RXD1
+    bool	"RXD1"
+
+config LM3Sxx_PORTD_2_CCP6
+    bool	"CCP6"
+
+config LM3Sxx_PORTD_2_PWM2
+    bool	"PWM2"
+
+config LM3Sxx_PORTD_2_CCP5
+    bool	"CCP5"
+
+config LM3Sxx_PORTD_2_EPIOS20
+    bool	"EPIOS20"
+    
+endchoice
+
+config LM3Sxx_PORTD_2_FUNCTION
+    int
+    default 0 if LM3Sxx_PORTD_2_GPIO
+    default 1 if LM3Sxx_PORTD_2_RXD1   
+    default 2 if LM3Sxx_PORTD_2_CCP6
+    default 3 if LM3Sxx_PORTD_2_PWM2
+    default 4 if LM3Sxx_PORTD_2_CCP5
+    default 8 if LM3Sxx_PORTD_2_EPIOS20
+
+choice
+	prompt "MODE"	
+	default LM3Sxx_PORTD_2_PULLUP
+	depends on !LM3Sxx_PORTD_2_DEFAULT
+
+config LM3Sxx_PORTD_2_PULLUP
+	bool	"PullUp"
+
+config LM3Sxx_PORTD_2_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LM3Sxx_PORTD_2_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LM3Sxx_PORTD_2_MODE
+	int
+	default 0 if LM3Sxx_PORTD_2_NO
+	default 1 if LM3Sxx_PORTD_2_PULLUP
+	default 2 if LM3Sxx_PORTD_2_PULLDOWN
+    
+config LM3Sxx_PORTD_2_AD_ENABLE
+	bool "AIN13"
+	default n
+	depends on !LM3Sxx_PORTD_2_DEFAULT
+    
+config LM3Sxx_PORTD_2_AD
+    	int
+	default 1 if !LM3Sxx_PORTD_2_AD_ENABLE
+	default 0 if LM3Sxx_PORTD_2_AD_ENABLE
+
+config LM3Sxx_PORTD_2_OPENDRAIN_ENABLE
+    	bool "OPENDRAIN"
+	default n
+	depends on !LM3Sxx_PORTD_2_DEFAULT
+
+config LM3Sxx_PORTD_2_OPENDRAIN
+	int
+	default 0 if !LM3Sxx_PORTD_2_OPENDRAIN_ENABLE
+	default 1 if LM3Sxx_PORTD_2_OPENDRAIN_ENABLE
+endmenu
+
+menu "LM3Sxx_PORTD_3"	
+
+config LM3Sxx_PORTD_3_DEFAULT
+	bool "disabled"
+	default y
+
+choice
+	prompt "FUNCTION"
+	default LM3Sxx_PORTD_3_GPIO
+	depends on !LM3Sxx_PORTD_3_DEFAULT
+
+config LM3Sxx_PORTD_3_GPIO
+    bool	"GPIO"
+    
+config LM3Sxx_PORTD_3_TXD1
+    bool	"TXD1"
+
+config LM3Sxx_PORTD_3_CCP7
+    bool	"CCP7"
+
+config LM3Sxx_PORTD_3_PWM3
+    bool	"PWM3"
+
+config LM3Sxx_PORTD_3_CCP0
+    bool	"CCP0"
+
+config LM3Sxx_PORTD_3_EPIOS21
+    bool	"EPIOS21"
+    
+endchoice
+
+config LM3Sxx_PORTD_3_FUNCTION
+    int
+    default 0 if LM3Sxx_PORTD_3_GPIO
+    default 1 if LM3Sxx_PORTD_3_TXD1
+    default 2 if LM3Sxx_PORTD_3_CCP7
+    default 3 if LM3Sxx_PORTD_3_PWM3
+    default 4 if LM3Sxx_PORTD_3_CCP0
+    default 8 if LM3Sxx_PORTD_3_EPIOS21
+
+choice
+	prompt "MODE"	
+	default LM3Sxx_PORTD_3_PULLUP
+	depends on !LM3Sxx_PORTD_3_DEFAULT
+
+config LM3Sxx_PORTD_3_PULLUP
+	bool	"PullUp"
+
+config LM3Sxx_PORTD_3_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LM3Sxx_PORTD_3_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LM3Sxx_PORTD_3_MODE
+	int
+	default 0 if LM3Sxx_PORTD_3_NO
+	default 1 if LM3Sxx_PORTD_3_PULLUP
+	default 2 if LM3Sxx_PORTD_3_PULLDOWN
+    
+config LM3Sxx_PORTD_3_AD_ENABLE
+	bool "AIN12"
+	default n
+	depends on !LM3Sxx_PORTD_3_DEFAULT
+    
+config LM3Sxx_PORTD_3_AD
+    	int
+	default 1 if !LM3Sxx_PORTD_3_AD_ENABLE
+	default 0 if LM3Sxx_PORTD_3_AD_ENABLE
+
+config LM3Sxx_PORTD_3_OPENDRAIN_ENABLE
+    	bool "OPENDRAIN"
+	default n
+	depends on !LM3Sxx_PORTD_3_DEFAULT
+
+config LM3Sxx_PORTD_3_OPENDRAIN
+	int
+	default 0 if !LM3Sxx_PORTD_3_OPENDRAIN_ENABLE
+	default 1 if LM3Sxx_PORTD_3_OPENDRAIN_ENABLE
+endmenu
+
+menu "LM3Sxx_PORTD_4"	
+
+config LM3Sxx_PORTD_4_DEFAULT
+	bool "disabled"
+	default y
+
+choice
+	prompt "FUNCTION"
+	default LM3Sxx_PORTD_4_GPIO
+	depends on !LM3Sxx_PORTD_4_DEFAULT
+
+config LM3Sxx_PORTD_4_GPIO
+    bool	"GPIO"
+       
+config LM3Sxx_PORTD_4_CCP0
+    bool	"CCP0"
+	
+config LM3Sxx_PORTD_4_CCP3
+    bool	"CCP3"
+
+config LM3Sxx_PORTD_4_I2S_RXD
+    bool	"I2S0_RXD"
+
+config LM3Sxx_PORTD_4_RI1
+    bool	"RI1"
+    
+config LM3Sxx_PORTD_4_EPIOS19
+    bool	"EPIOS19"
+	
+endchoice
+
+config LM3Sxx_PORTD_4_FUNCTION
+    int
+    default 0 if LM3Sxx_PORTD_4_GPIO
+    default 1 if LM3Sxx_PORTD_4_CCP0
+    default 2 if LM3Sxx_PORTD_4_CCP3
+    default 8 if LM3Sxx_PORTD_4_I2S_RXD
+    default 9 if LM3Sxx_PORTD_4_RI1
+    default 10 if LM3Sxx_PORTD_4_EPIOS19
+    
+
+choice
+	prompt "MODE"	
+	default LM3Sxx_PORTD_4_PULLUP
+	depends on !LM3Sxx_PORTD_4_DEFAULT
+
+config LM3Sxx_PORTD_4_PULLUP
+	bool	"PullUp"
+
+config LM3Sxx_PORTD_4_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LM3Sxx_PORTD_4_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LM3Sxx_PORTD_4_MODE
+	int
+	default 0 if LM3Sxx_PORTD_4_NO
+	default 1 if LM3Sxx_PORTD_4_PULLUP
+	default 2 if LM3Sxx_PORTD_4_PULLDOWN
+    
+config LM3Sxx_PORTD_4_AD_ENABLE
+	bool "AIN7"
+	default n
+	depends on !LM3Sxx_PORTD_4_DEFAULT
+    
+config LM3Sxx_PORTD_4_AD
+    	int
+	default 1 if !LM3Sxx_PORTD_4_AD_ENABLE
+	default 0 if LM3Sxx_PORTD_4_AD_ENABLE
+
+config LM3Sxx_PORTD_4_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+	default n
+	depends on !LM3Sxx_PORTD_4_DEFAULT
+
+config LM3Sxx_PORTD_4_OPENDRAIN
+	int
+	default 0 if !LM3Sxx_PORTD_4_OPENDRAIN_ENABLE
+	default 1 if LM3Sxx_PORTD_4_OPENDRAIN_ENABLE
+	
+endmenu
+
+menu "LM3Sxx_PORTD_5"	
+
+config LM3Sxx_PORTD_5_DEFAULT
+	bool "disabled"
+	default y
+
+choice
+	prompt "FUNCTION"
+	default LM3Sxx_PORTD_5_GPIO
+	depends on !LM3Sxx_PORTD_5_DEFAULT
+
+config LM3Sxx_PORTD_5_GPIO
+    bool	"GPIO"
+
+config LM3Sxx_PORTD_5_CCP2
+    bool	"CCP2"
+       
+config LM3Sxx_PORTD_5_CCP4
+    bool	"CCP4"
+
+config LM3Sxx_PORTD_5_I2S_RX_MCLK
+    bool	"I2S0_RX_MCLK"
+	
+config LM3Sxx_PORTD_5_RXD2
+    bool	"RXD2"
+
+config LM3Sxx_PORTD_5_EPIOS28
+    bool	"EPIOS28"
+	
+endchoice
+
+config LM3Sxx_PORTD_5_FUNCTION
+    int
+    default 0 if LM3Sxx_PORTD_5_GPIO
+    default 1 if LM3Sxx_PORTD_5_CCP2
+    default 2 if LM3Sxx_PORTD_5_CCP4
+    default 8 if LM3Sxx_PORTD_5_I2S_RX_MCLK
+    default 9 if LM3Sxx_PORTD_5_RXD2
+    default 10 if LM3Sxx_PORTD_5_EPIOS28
+
+choice
+	prompt "MODE"	
+	default LM3Sxx_PORTD_5_PULLUP
+	depends on !LM3Sxx_PORTD_5_DEFAULT
+
+config LM3Sxx_PORTD_5_PULLUP
+	bool	"PullUp"
+
+config LM3Sxx_PORTD_5_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LM3Sxx_PORTD_5_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LM3Sxx_PORTD_5_MODE
+	int
+	default 0 if LM3Sxx_PORTD_5_NO
+	default 1 if LM3Sxx_PORTD_5_PULLUP
+	default 2 if LM3Sxx_PORTD_5_PULLDOWN
+    
+config LM3Sxx_PORTD_5_AD_ENABLE
+	bool "AIN6"
+	default n
+	depends on !LM3Sxx_PORTD_5_DEFAULT
+    
+config LM3Sxx_PORTD_5_AD
+    	int
+	default 1 if !LM3Sxx_PORTD_5_AD_ENABLE
+	default 0 if LM3Sxx_PORTD_5_AD_ENABLE
+
+config LM3Sxx_PORTD_5_OPENDRAIN_ENABLE
+    	bool "OPENDRAIN"
+	default n
+	depends on !LM3Sxx_PORTD_5_DEFAULT
+
+config LM3Sxx_PORTD_5_OPENDRAIN
+	int
+	default 0 if !LM3Sxx_PORTD_5_OPENDRAIN_ENABLE
+	default 1 if LM3Sxx_PORTD_5_OPENDRAIN_ENABLE
+endmenu
+
+menu "LM3Sxx_PORTD_6"	
+
+config LM3Sxx_PORTD_6_DEFAULT
+	bool "disabled"
+	default y
+
+choice
+	prompt "FUNCTION"
+	default LM3Sxx_PORTD_6_GPIO
+	depends on !LM3Sxx_PORTD_6_DEFAULT
+
+config LM3Sxx_PORTD_6_GPIO
+    bool	"GPIO"
+       
+config LM3Sxx_PORTD_6_FAULT0
+    bool	"FAULT0"
+    
+config LM3Sxx_PORTD_6_I2S_TX_SCK
+    bool	"I2S0_TX_SCK"
+	
+config LM3Sxx_PORTD_6_TXD2
+	bool 	"TXD2"
+
+config LM3Sxx_PORTD_6_EPIOS29
+    bool	"EPIOS29"
+
+endchoice
+
+config LM3Sxx_PORTD_6_FUNCTION
+    int
+    default 0 if LM3Sxx_PORTD_6_GPIO
+    default 1 if LM3Sxx_PORTD_6_FAULT0
+	default 8 if LM3Sxx_PORTD_6_I2S_TX_SCK
+	default 9 if LM3Sxx_PORTD_6_TXD2
+	default 10 if LM3Sxx_PORTD_6_EPIOS29
+    
+
+choice
+	prompt "MODE"	
+	default LM3Sxx_PORTD_6_PULLUP
+	depends on !LM3Sxx_PORTD_6_DEFAULT
+
+config LM3Sxx_PORTD_6_PULLUP
+	bool	"PullUp"
+
+config LM3Sxx_PORTD_6_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LM3Sxx_PORTD_6_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LM3Sxx_PORTD_6_MODE
+	int
+	default 0 if LM3Sxx_PORTD_6_NO
+	default 1 if LM3Sxx_PORTD_6_PULLUP
+	default 2 if LM3Sxx_PORTD_6_PULLDOWN
+    
+config LM3Sxx_PORTD_6_AD_ENABLE
+	bool "AIN5"
+	default n
+	depends on !LM3Sxx_PORTD_6_DEFAULT
+    
+config LM3Sxx_PORTD_6_AD
+    	int
+	default 1 if !LM3Sxx_PORTD_6_AD_ENABLE
+	default 0 if LM3Sxx_PORTD_6_AD_ENABLE
+
+config LM3Sxx_PORTD_6_OPENDRAIN_ENABLE
+    	bool "OPENDRAIN"
+	default n
+	depends on !LM3Sxx_PORTD_6_DEFAULT
+
+config LM3Sxx_PORTD_6_OPENDRAIN
+	int
+	default 0 if !LM3Sxx_PORTD_6_OPENDRAIN_ENABLE
+	default 1 if LM3Sxx_PORTD_6_OPENDRAIN_ENABLE
+endmenu
+
+menu "LM3Sxx_PORTD_7"	
+
+config LM3Sxx_PORTD_7_DEFAULT
+	bool "disabled"
+	default y
+
+choice
+	prompt "FUNCTION"
+	default LM3Sxx_PORTD_7_GPIO
+	depends on !LM3Sxx_PORTD_7_DEFAULT
+
+config LM3Sxx_PORTD_7_GPIO
+    bool	"GPIO"
+    
+config LM3Sxx_PORTD_7_IDX0
+    bool	"IDX0"
+    
+config LM3Sxx_PORTD_7_C0o
+    bool	"C0o"
+	
+config LM3Sxx_PORTD_7_CCP1
+	bool 	"CCP1"
+
+config LM3Sxx_PORTD_7_I2S_TX_WS
+    bool	"I2S0_TX_WS"
+
+config LM3Sxx_PORTD_7_DTR1
+    bool	"DTR1"
+
+config LM3Sxx_PORTD_7_EPIOS30
+    bool	"EPIOS30"
+
+endchoice
+
+config LM3Sxx_PORTD_7_FUNCTION
+    int
+    default 0 if LM3Sxx_PORTD_7_GPIO
+    default 1 if LM3Sxx_PORTD_7_IDX0
+    default 2 if LM3Sxx_PORTD_7_C0o
+	default 3 if LM3Sxx_PORTD_7_CCP1
+	default 8 if LM3Sxx_PORTD_7_I2S_TX_WS
+	default 9 if LM3Sxx_PORTD_7_DTR1
+	default 10 if LM3Sxx_PORTD_7_EPIOS30
+
+choice
+	prompt "MODE"	
+	default LM3Sxx_PORTD_7_PULLUP
+	depends on !LM3Sxx_PORTD_7_DEFAULT
+
+config LM3Sxx_PORTD_7_PULLUP
+	bool	"PullUp"
+
+config LM3Sxx_PORTD_7_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LM3Sxx_PORTD_7_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LM3Sxx_PORTD_7_MODE
+	int
+	default 0 if LM3Sxx_PORTD_7_NO
+	default 1 if LM3Sxx_PORTD_7_PULLUP
+	default 2 if LM3Sxx_PORTD_7_PULLDOWN
+    
+config LM3Sxx_PORTD_7_AD_ENABLE
+	bool "AIN4"
+	default n
+	depends on !LM3Sxx_PORTD_7_DEFAULT
+    
+config LM3Sxx_PORTD_7_AD
+    	int
+	default 1 if !LM3Sxx_PORTD_7_AD_ENABLE
+	default 0 if LM3Sxx_PORTD_7_AD_ENABLE
+
+config LM3Sxx_PORTD_7_OPENDRAIN_ENABLE
+    	bool "OPENDRAIN"
+	default n
+	depends on !LM3Sxx_PORTD_7_DEFAULT
+
+config LM3Sxx_PORTD_7_OPENDRAIN
+	int
+	default 0 if !LM3Sxx_PORTD_7_OPENDRAIN_ENABLE
+	default 1 if LM3Sxx_PORTD_7_OPENDRAIN_ENABLE
+endmenu
+

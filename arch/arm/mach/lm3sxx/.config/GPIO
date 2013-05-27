@@ -1,0 +1,35 @@
+menu "Port A configuration"
+	source arch/arm/mach/lm3sxx/.config/PortA    
+endmenu
+
+menu "Port B configuration"
+	source arch/arm/mach/lm3sxx/.config/PortB    
+endmenu
+
+menu "Port C configuration"
+	source arch/arm/mach/lm3sxx/.config/PortC    
+endmenu
+
+menu "Port D configuration"
+	source arch/arm/mach/lm3sxx/.config/PortD    
+endmenu
+
+menu "Port E configuration"
+	source arch/arm/mach/lm3sxx/.config/PortE    
+endmenu
+
+menu "Port F configuration"
+	source arch/arm/mach/lm3sxx/.config/PortF    
+endmenu
+
+menu "Port G configuration"
+	source arch/arm/mach/lm3sxx/.config/PortG
+endmenu
+
+menu "Port H configuration"
+	source arch/arm/mach/lm3sxx/.config/PortH
+endmenu
+
+menu "Port J configuration"
+	source arch/arm/mach/lm3sxx/.config/PortJ    
+endmenu

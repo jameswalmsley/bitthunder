@@ -1,0 +1,528 @@
+menu "LM3Sxx_PORTJ_0"	
+
+config LM3Sxx_PORTJ_0_DEFAULT
+	bool "disabled"
+	default y
+
+choice
+	prompt "FUNCTION"
+	default LM3Sxx_PORTJ_0_GPIO
+	depends on !LM3Sxx_PORTJ_0_DEFAULT
+
+config LM3Sxx_PORTJ_0_GPIO
+    bool	"GPIO"
+    
+config LM3Sxx_PORTJ_0_EPIOS16
+    bool	"EPIOS16"
+
+config LM3Sxx_PORTJ_0_PWM0
+    bool	"PWM0"
+
+config LM3Sxx_PORTJ_0_SCL1
+    bool	"SCL1"
+    
+endchoice
+
+config LM3Sxx_PORTJ_0_FUNCTION
+    int
+    default 0 if LM3Sxx_PORTJ_0_GPIO
+    default 8 if LM3Sxx_PORTJ_0_EPIOS16
+    default 10 if LM3Sxx_PORTJ_0_PWM0
+    default 11 if LM3Sxx_PORTJ_0_SCL1
+
+choice
+	prompt "MODE"	
+	default LM3Sxx_PORTJ_0_PULLUP
+	depends on !LM3Sxx_PORTJ_0_DEFAULT
+
+config LM3Sxx_PORTJ_0_PULLUP
+	bool	"PullUp"
+
+config LM3Sxx_PORTJ_0_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LM3Sxx_PORTJ_0_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LM3Sxx_PORTJ_0_MODE
+	int
+	default 0 if LM3Sxx_PORTJ_0_NO
+	default 1 if LM3Sxx_PORTJ_0_PULLUP
+	default 2 if LM3Sxx_PORTJ_0_PULLDOWN
+
+
+config LM3Sxx_PORTJ_0_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+	default n	
+	depends on !LM3Sxx_PORTJ_0_DEFAULT
+    
+config LM3Sxx_PORTJ_0_OPENDRAIN
+	int
+	default 0 if !LM3Sxx_PORTJ_0_OPENDRAIN_ENABLE
+	default 1 if LM3Sxx_PORTJ_0_OPENDRAIN_ENABLE
+
+endmenu
+
+menu "LM3Sxx_PORTJ_1"	
+
+config LM3Sxx_PORTJ_1_DEFAULT
+	bool "disabled"
+	default y
+
+choice
+	prompt "FUNCTION"
+	default LM3Sxx_PORTJ_1_GPIO
+	depends on !LM3Sxx_PORTJ_1_DEFAULT
+
+config LM3Sxx_PORTJ_1_GPIO
+    bool	"GPIO"
+    
+config LM3Sxx_PORTJ_1_EPIOS17
+    bool	"EPIOS17"
+
+config LM3Sxx_PORTJ_1_USB0PFLT
+    bool	"USB0PFLT"
+
+config LM3Sxx_PORTJ_1_PWM1
+    bool	"PWM1"
+
+config LM3Sxx_PORTJ_1_SDA1
+    bool	"SDA1"
+    
+endchoice
+
+config LM3Sxx_PORTJ_1_FUNCTION
+    int
+    default 0 if LM3Sxx_PORTJ_1_GPIO
+    default 8 if LM3Sxx_PORTJ_1_EPIOS17
+    default 9 if LM3Sxx_PORTJ_1_USB0PFLT
+    default 10 if LM3Sxx_PORTJ_1_PWM1
+    default 11 if LM3Sxx_PORTJ_1_SDA1
+
+choice
+	prompt "MODE"	
+	default LM3Sxx_PORTJ_1_PULLUP
+	depends on !LM3Sxx_PORTJ_1_DEFAULT
+
+config LM3Sxx_PORTJ_1_PULLUP
+	bool	"PullUp"
+
+config LM3Sxx_PORTJ_1_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LM3Sxx_PORTJ_1_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LM3Sxx_PORTJ_1_MODE
+	int
+	default 0 if LM3Sxx_PORTJ_1_NO
+	default 1 if LM3Sxx_PORTJ_1_PULLUP
+	default 2 if LM3Sxx_PORTJ_1_PULLDOWN
+    
+config LM3Sxx_PORTJ_1_OPENDRAIN_ENABLE
+	bool "OPENDRAIN"
+	default n
+	depends on !LM3Sxx_PORTJ_1_DEFAULT
+
+config LM3Sxx_PORTJ_1_OPENDRAIN
+	int
+	default 0 if !LM3Sxx_PORTJ_1_OPENDRAIN_ENABLE
+	default 1 if LM3Sxx_PORTJ_1_OPENDRAIN_ENABLE
+endmenu
+
+menu "LM3Sxx_PORTJ_2"	
+
+config LM3Sxx_PORTJ_2_DEFAULT
+	bool "disabled"
+	default y
+
+choice
+	prompt "FUNCTION"
+	default LM3Sxx_PORTJ_2_GPIO
+	depends on !LM3Sxx_PORTJ_2_DEFAULT
+
+config LM3Sxx_PORTJ_2_GPIO
+    bool	"GPIO"
+    
+config LM3Sxx_PORTJ_3_EPIOS18
+    bool	"EPIOS18"
+
+config LM3Sxx_PORTJ_2_CCP0
+    bool	"CCP0"
+
+config LM3Sxx_PORTJ_2_FAULT0
+    bool	"FAULT0"
+    
+endchoice
+
+config LM3Sxx_PORTJ_2_FUNCTION
+    int
+    default 0 if LM3Sxx_PORTJ_2_GPIO
+    default 8 if LM3Sxx_PORTJ_2_EPIOS18
+    default 9 if LM3Sxx_PORTJ_2_CCP0
+    default 10 if LM3Sxx_PORTJ_2_FAULT0
+
+choice
+	prompt "MODE"	
+	default LM3Sxx_PORTJ_2_PULLUP
+	depends on !LM3Sxx_PORTJ_2_DEFAULT
+
+config LM3Sxx_PORTJ_2_PULLUP
+	bool	"PullUp"
+
+config LM3Sxx_PORTJ_2_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LM3Sxx_PORTJ_2_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LM3Sxx_PORTJ_2_MODE
+	int
+	default 0 if LM3Sxx_PORTJ_2_NO
+	default 1 if LM3Sxx_PORTJ_2_PULLUP
+	default 2 if LM3Sxx_PORTJ_2_PULLDOWN
+    
+config LM3Sxx_PORTJ_2_OPENDRAIN_ENABLE
+    	bool "OPENDRAIN"
+	default n
+	depends on !LM3Sxx_PORTJ_2_DEFAULT
+
+config LM3Sxx_PORTJ_2_OPENDRAIN
+	int
+	default 0 if !LM3Sxx_PORTJ_2_OPENDRAIN_ENABLE
+	default 1 if LM3Sxx_PORTJ_2_OPENDRAIN_ENABLE
+endmenu
+
+menu "LM3Sxx_PORTJ_3"	
+
+config LM3Sxx_PORTJ_3_DEFAULT
+	bool "disabled"
+	default y
+
+choice
+	prompt "FUNCTION"
+	default LM3Sxx_PORTJ_3_GPIO
+	depends on !LM3Sxx_PORTJ_3_DEFAULT
+
+config LM3Sxx_PORTJ_3_GPIO
+    bool	"GPIO"
+    
+config LM3Sxx_PORTJ_3_EPIOS19
+    bool	"EPIOS19"
+
+config LM3Sxx_PORTJ_3_CTS1
+    bool	"CTS1"
+
+config LM3Sxx_PORTJ_3_CCP6
+    bool	"CCP6"
+    
+endchoice
+
+config LM3Sxx_PORTJ_3_FUNCTION
+    int
+    default 0 if LM3Sxx_PORTJ_3_GPIO
+    default 8 if LM3Sxx_PORTJ_3_EPIOS19
+    default 9 if LM3Sxx_PORTJ_3_CTS1
+    default 10 if LM3Sxx_PORTJ_3_CCP6
+
+choice
+	prompt "MODE"	
+	default LM3Sxx_PORTJ_3_PULLUP
+	depends on !LM3Sxx_PORTJ_3_DEFAULT
+
+config LM3Sxx_PORTJ_3_PULLUP
+	bool	"PullUp"
+
+config LM3Sxx_PORTJ_3_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LM3Sxx_PORTJ_3_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LM3Sxx_PORTJ_3_MODE
+	int
+	default 0 if LM3Sxx_PORTJ_3_NO
+	default 1 if LM3Sxx_PORTJ_3_PULLUP
+	default 2 if LM3Sxx_PORTJ_3_PULLDOWN
+    
+config LM3Sxx_PORTJ_3_OPENDRAIN_ENABLE
+    	bool "OPENDRAIN"
+	default n
+	depends on !LM3Sxx_PORTJ_3_DEFAULT
+
+config LM3Sxx_PORTJ_3_OPENDRAIN
+	int
+	default 0 if !LM3Sxx_PORTJ_3_OPENDRAIN_ENABLE
+	default 1 if LM3Sxx_PORTJ_3_OPENDRAIN_ENABLE
+endmenu
+
+menu "LM3Sxx_PORTJ_4"	
+
+config LM3Sxx_PORTJ_4_DEFAULT
+	bool "disabled"
+	default y
+
+choice
+	prompt "FUNCTION"
+	default LM3Sxx_PORTJ_4_GPIO
+	depends on !LM3Sxx_PORTJ_4_DEFAULT
+
+config LM3Sxx_PORTJ_4_GPIO
+    bool	"GPIO"
+       
+config LM3Sxx_PORTJ_4_EPIOS28
+    bool	"EPIOS28"
+       
+config LM3Sxx_PORTJ_4_DCD1
+    bool	"DCD1"
+	
+config LM3Sxx_PORTJ_4_CCP4
+    bool	"CCP4"
+
+
+endchoice
+
+config LM3Sxx_PORTJ_4_FUNCTION
+    int
+    default 0 if LM3Sxx_PORTJ_4_GPIO
+    default 8 if LM3Sxx_PORTJ_4_EPIOS2
+    default 9 if LM3Sxx_PORTJ_4_DCD1
+    default 10 if LM3Sxx_PORTJ_4_CCP4
+    
+
+choice
+	prompt "MODE"	
+	default LM3Sxx_PORTJ_4_PULLUP
+	depends on !LM3Sxx_PORTJ_4_DEFAULT
+
+config LM3Sxx_PORTJ_4_PULLUP
+	bool	"PullUp"
+
+config LM3Sxx_PORTJ_4_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LM3Sxx_PORTJ_4_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LM3Sxx_PORTJ_4_MODE
+	int
+	default 0 if LM3Sxx_PORTJ_4_NO
+	default 1 if LM3Sxx_PORTJ_4_PULLUP
+	default 2 if LM3Sxx_PORTJ_4_PULLDOWN
+    
+config LM3Sxx_PORTJ_4_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+	default n
+	depends on !LM3Sxx_PORTJ_4_DEFAULT
+
+config LM3Sxx_PORTJ_4_OPENDRAIN
+	int
+	default 0 if !LM3Sxx_PORTJ_4_OPENDRAIN_ENABLE
+	default 1 if LM3Sxx_PORTJ_4_OPENDRAIN_ENABLE
+	
+endmenu
+
+menu "LM3Sxx_PORTJ_5"	
+
+config LM3Sxx_PORTJ_5_DEFAULT
+	bool "disabled"
+	default y
+
+choice
+	prompt "FUNCTION"
+	default LM3Sxx_PORTJ_5_GPIO
+	depends on !LM3Sxx_PORTJ_5_DEFAULT
+
+config LM3Sxx_PORTJ_5_GPIO
+    bool	"GPIO"
+
+config LM3Sxx_PORTJ_5_EPIOS29
+    bool	"EPIOS29"
+
+config LM3Sxx_PORTJ_5_DSR1
+    bool	"DSR1"
+
+config LM3Sxx_PORTJ_5_CCP2
+    bool	"CCP2"
+
+	
+	
+endchoice
+
+config LM3Sxx_PORTJ_5_FUNCTION
+    int
+    default 0 if LM3Sxx_PORTJ_5_GPIO
+    default 8 if LM3Sxx_PORTJ_5_EPIOS29
+    default 9 if LM3Sxx_PORTJ_5_DSR1
+    default 10 if LM3Sxx_PORTJ_5_CCP2
+
+choice
+	prompt "MODE"	
+	default LM3Sxx_PORTJ_5_PULLUP
+	depends on !LM3Sxx_PORTJ_5_DEFAULT
+
+config LM3Sxx_PORTJ_5_PULLUP
+	bool	"PullUp"
+
+config LM3Sxx_PORTJ_5_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LM3Sxx_PORTJ_5_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LM3Sxx_PORTJ_5_MODE
+	int
+	default 0 if LM3Sxx_PORTJ_5_NO
+	default 1 if LM3Sxx_PORTJ_5_PULLUP
+	default 2 if LM3Sxx_PORTJ_5_PULLDOWN
+    
+config LM3Sxx_PORTJ_5_OPENDRAIN_ENABLE
+    	bool "OPENDRAIN"
+	default n
+	depends on !LM3Sxx_PORTJ_5_DEFAULT
+
+config LM3Sxx_PORTJ_5_OPENDRAIN
+	int
+	default 0 if !LM3Sxx_PORTJ_5_OPENDRAIN_ENABLE
+	default 1 if LM3Sxx_PORTJ_5_OPENDRAIN_ENABLE
+endmenu
+
+menu "LM3Sxx_PORTJ_6"	
+
+config LM3Sxx_PORTJ_6_DEFAULT
+	bool "disabled"
+	default y
+
+choice
+	prompt "FUNCTION"
+	default LM3Sxx_PORTJ_6_GPIO
+	depends on !LM3Sxx_PORTJ_6_DEFAULT
+
+config LM3Sxx_PORTJ_6_GPIO
+    bool	"GPIO"
+       
+config LM3Sxx_PORTJ_6_EPIOS30
+    bool	"EPIOS30"
+
+config LM3Sxx_PORTJ_6_RTS1
+    bool	"RTS1"
+
+config LM3Sxx_PORTJ_6_CCP1
+    bool	"CCP1"
+
+endchoice
+
+config LM3Sxx_PORTJ_6_FUNCTION
+    int
+    default 0 if LM3Sxx_PORTJ_6_GPIO
+    default 8 if LM3Sxx_PORTJ_6_EPIOS30
+    default 9 if LM3Sxx_PORTJ_6_RTS1
+    default 10 if LM3Sxx_PORTJ_6_CCP1
+	    
+
+choice
+	prompt "MODE"	
+	default LM3Sxx_PORTJ_6_PULLUP
+	depends on !LM3Sxx_PORTJ_6_DEFAULT
+
+config LM3Sxx_PORTJ_6_PULLUP
+	bool	"PullUp"
+
+config LM3Sxx_PORTJ_6_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LM3Sxx_PORTJ_6_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LM3Sxx_PORTJ_6_MODE
+	int
+	default 0 if LM3Sxx_PORTJ_6_NO
+	default 1 if LM3Sxx_PORTJ_6_PULLUP
+	default 2 if LM3Sxx_PORTJ_6_PULLDOWN
+    
+config LM3Sxx_PORTJ_6_OPENDRAIN_ENABLE
+    	bool "OPENDRAIN"
+	default n
+	depends on !LM3Sxx_PORTJ_6_DEFAULT
+
+config LM3Sxx_PORTJ_6_OPENDRAIN
+	int
+	default 0 if !LM3Sxx_PORTJ_6_OPENDRAIN_ENABLE
+	default 1 if LM3Sxx_PORTJ_6_OPENDRAIN_ENABLE
+endmenu
+
+menu "LM3Sxx_PORTJ_7"	
+
+config LM3Sxx_PORTJ_7_DEFAULT
+	bool "disabled"
+	default y
+
+choice
+	prompt "FUNCTION"
+	default LM3Sxx_PORTJ_7_GPIO
+	depends on !LM3Sxx_PORTJ_7_DEFAULT
+
+config LM3Sxx_PORTJ_7_GPIO
+    bool	"GPIO"
+    
+config LM3Sxx_PORTJ_7_DTR1
+    bool	"DTR1"
+    
+config LM3Sxx_PORTJ_7_CCP0
+	bool 	"CCP0"
+
+endchoice
+
+config LM3Sxx_PORTJ_7_FUNCTION
+    int
+    default 0 if LM3Sxx_PORTJ_7_GPIO
+    default 9 if LM3Sxx_PORTJ_7_DTR1
+    default 10 if LM3Sxx_PORTJ_7_CCP0
+
+choice
+	prompt "MODE"	
+	default LM3Sxx_PORTJ_7_PULLUP
+	depends on !LM3Sxx_PORTJ_7_DEFAULT
+
+config LM3Sxx_PORTJ_7_PULLUP
+	bool	"PullUp"
+
+config LM3Sxx_PORTJ_7_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LM3Sxx_PORTJ_7_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LM3Sxx_PORTJ_7_MODE
+	int
+	default 0 if LM3Sxx_PORTJ_7_NO
+	default 1 if LM3Sxx_PORTJ_7_PULLUP
+	default 2 if LM3Sxx_PORTJ_7_PULLDOWN
+    
+config LM3Sxx_PORTJ_7_OPENDRAIN_ENABLE
+    	bool "OPENDRAIN"
+	default n
+	depends on !LM3Sxx_PORTJ_7_DEFAULT
+
+config LM3Sxx_PORTJ_7_OPENDRAIN
+	int
+	default 0 if !LM3Sxx_PORTJ_7_OPENDRAIN_ENABLE
+	default 1 if LM3Sxx_PORTJ_7_OPENDRAIN_ENABLE
+endmenu
+

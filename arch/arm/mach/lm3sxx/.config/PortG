@@ -1,0 +1,222 @@
+menu "LM3Sxx_PORTG_0"	
+
+config LM3Sxx_PORTG_0_DEFAULT
+	bool "disabled"
+	default y
+
+choice
+	prompt "FUNCTION"
+	default LM3Sxx_PORTG_0_GPIO
+	depends on !LM3Sxx_PORTG_0_DEFAULT
+
+config LM3Sxx_PORTG_0_GPIO
+    bool	"GPIO"
+    
+config LM3Sxx_PORTG_0_RXD2
+    bool	"RXD2"
+
+config LM3Sxx_PORTG_0_PWM0
+    bool	"PWM0"
+
+config LM3Sxx_PORTG_0_SCL1
+    bool	"SCL1"
+
+config LM3Sxx_PORTG_0_PWM4
+    bool	"PWM4"
+
+config LM3Sxx_PORTG_0_USB0EPEN
+    bool	"USB0EPEN"
+
+config LM3Sxx_PORTG_0_EPIOS13
+    bool	"EPIOS13"
+    
+endchoice
+
+config LM3Sxx_PORTG_0_FUNCTION
+    int
+    default 0 if LM3Sxx_PORTG_0_GPIO
+    default 1 if LM3Sxx_PORTG_0_RXD2
+    default 2 if LM3Sxx_PORTG_0_PWM0
+    default 3 if LM3Sxx_PORTG_0_SCL1
+    default 4 if LM3Sxx_PORTG_0_PWM4
+    default 7 if LM3Sxx_PORTG_0_USB0EPEN
+    default 8 if LM3Sxx_PORTG_0_EPIOS13
+    
+
+choice
+	prompt "MODE"	
+	default LM3Sxx_PORTG_0_PULLUP
+	depends on !LM3Sxx_PORTG_0_DEFAULT
+
+config LM3Sxx_PORTG_0_PULLUP
+	bool	"PullUp"
+
+config LM3Sxx_PORTG_0_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LM3Sxx_PORTG_0_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LM3Sxx_PORTG_0_MODE
+	int
+	default 0 if LM3Sxx_PORTG_0_NO
+	default 1 if LM3Sxx_PORTG_0_PULLUP
+	default 2 if LM3Sxx_PORTG_0_PULLDOWN
+
+
+config LM3Sxx_PORTG_0_OPENDRAIN_ENABLE
+    bool "OPENDRAIN"
+	default n	
+	depends on !LM3Sxx_PORTG_0_DEFAULT
+    
+config LM3Sxx_PORTG_0_OPENDRAIN
+	int
+	default 0 if !LM3Sxx_PORTG_0_OPENDRAIN_ENABLE
+	default 1 if LM3Sxx_PORTG_0_OPENDRAIN_ENABLE
+
+endmenu
+
+menu "LM3Sxx_PORTG_1"	
+
+config LM3Sxx_PORTG_1_DEFAULT
+	bool "disabled"
+	default y
+
+choice
+	prompt "FUNCTION"
+	default LM3Sxx_PORTG_1_GPIO
+	depends on !LM3Sxx_PORTG_1_DEFAULT
+
+config LM3Sxx_PORTG_1_GPIO
+    bool	"GPIO"
+    
+config LM3Sxx_PORTG_1_TXD2
+    bool	"TXD2"
+
+config LM3Sxx_PORTG_1_PWM1
+    bool	"PWM1"
+
+config LM3Sxx_PORTG_1_SDA1
+    bool	"SDA1"
+
+config LM3Sxx_PORTG_1_PWM5
+    bool	"PWM5"
+
+config LM3Sxx_PORTG_1_EPIOS14
+    bool	"EPIOS14"
+    
+endchoice
+
+config LM3Sxx_PORTG_1_FUNCTION
+    int
+    default 0 if LM3Sxx_PORTG_1_GPIO
+    default 1 if LM3Sxx_PORTG_1_TXD2
+    default 2 if LM3Sxx_PORTG_1_PWM1
+    default 3 if LM3Sxx_PORTG_1_SDA1
+    default 4 if LM3Sxx_PORTG_1_PWM5
+    default 8 if LM3Sxx_PORTG_1_EPIOS14
+
+choice
+	prompt "MODE"	
+	default LM3Sxx_PORTG_1_PULLUP
+	depends on !LM3Sxx_PORTG_1_DEFAULT
+
+config LM3Sxx_PORTG_1_PULLUP
+	bool	"PullUp"
+
+config LM3Sxx_PORTG_1_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LM3Sxx_PORTG_1_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LM3Sxx_PORTG_1_MODE
+	int
+	default 0 if LM3Sxx_PORTG_1_NO
+	default 1 if LM3Sxx_PORTG_1_PULLUP
+	default 2 if LM3Sxx_PORTG_1_PULLDOWN
+    
+config LM3Sxx_PORTG_1_OPENDRAIN_ENABLE
+	bool "OPENDRAIN"
+	default n
+	depends on !LM3Sxx_PORTG_1_DEFAULT
+
+config LM3Sxx_PORTG_1_OPENDRAIN
+	int
+	default 0 if !LM3Sxx_PORTG_1_OPENDRAIN_ENABLE
+	default 1 if LM3Sxx_PORTG_1_OPENDRAIN_ENABLE
+endmenu
+
+menu "LM3Sxx_PORTG_7"	
+
+config LM3Sxx_PORTG_7_DEFAULT
+	bool "disabled"
+	default y
+
+choice
+	prompt "FUNCTION"
+	default LM3Sxx_PORTG_7_GPIO
+	depends on !LM3Sxx_PORTG_7_DEFAULT
+
+config LM3Sxx_PORTG_7_GPIO
+    bool	"GPIO"
+    
+config LM3Sxx_PORTG_7_PHB1
+    bool	"PHB1(QEI)"
+    
+config LM3Sxx_PORTG_7_PWM7
+    bool	"PWM7"
+	
+config LM3Sxx_PORTG_7_CCP5
+	bool 	"CCP5"
+	
+config LM3Sxx_PORTG_7_EPIOS31
+    bool	"EPIOS31"
+
+endchoice
+
+config LM3Sxx_PORTG_7_FUNCTION
+    int
+    default 0 if LM3Sxx_PORTG_7_GPIO
+    default 1 if LM3Sxx_PORTG_7_PHB1
+    default 4 if LM3Sxx_PORTG_7_PWM7
+	default 8 if LM3Sxx_PORTG_7_CCP5
+	default 9 if LM3Sxx_PORTG_7_EPIOS31
+
+choice
+	prompt "MODE"	
+	default LM3Sxx_PORTG_7_PULLUP
+	depends on !LM3Sxx_PORTG_7_DEFAULT
+
+config LM3Sxx_PORTG_7_PULLUP
+	bool	"PullUp"
+
+config LM3Sxx_PORTG_7_NO
+	bool	"Neither PullUp nor PullDown"
+    
+config LM3Sxx_PORTG_7_PULLDOWN
+	bool	"PullDown"
+
+endchoice
+
+config LM3Sxx_PORTG_7_MODE
+	int
+	default 0 if LM3Sxx_PORTG_7_NO
+	default 1 if LM3Sxx_PORTG_7_PULLUP
+	default 2 if LM3Sxx_PORTG_7_PULLDOWN
+    
+config LM3Sxx_PORTG_7_OPENDRAIN_ENABLE
+    	bool "OPENDRAIN"
+	default n
+	depends on !LM3Sxx_PORTG_7_DEFAULT
+
+config LM3Sxx_PORTG_7_OPENDRAIN
+	int
+	default 0 if !LM3Sxx_PORTG_7_OPENDRAIN_ENABLE
+	default 1 if LM3Sxx_PORTG_7_OPENDRAIN_ENABLE
+endmenu
+

@@ -30,6 +30,12 @@ config MACH_STM32
 	---help---
 		STMicro STM32 architectures (ARM Cortex-M3/4).
 
+config MACH_LM3Sxx
+	bool "LM3Sxx Series"
+	select ARCH_ARM_CORTEX_M3
+	---help---
+		TI Stellaris architectures (ARM Cortex-M3).
+
 config MACH_ZYNQ
 	bool "ZYNQ"
 	select ARCH_ARM_CORTEX_A9
@@ -102,6 +108,10 @@ if MACH_LPC17xx
 source arch/arm/mach/lpc17xx/Kconfig
 endif
 
+if MACH_LM3Sxx
+source arch/arm/mach/lm3sxx/Kconfig
+endif
+
 
 if MACH_BCM2835
 source arch/arm/mach/bcm2835/Kconfig
@@ -116,6 +126,7 @@ config SUBARCH
 	default "bcm2835" if MACH_BCM2835
 	default "lpc11xx" if MACH_LPC11xx
 	default "lpc17xx" if MACH_LPC17xx
+	default "lm3sxx"  if MACH_LM3Sxx
 	default "stm32"   if MACH_STM32
 	default "zynq"	  if MACH_ZYNQ
 endif

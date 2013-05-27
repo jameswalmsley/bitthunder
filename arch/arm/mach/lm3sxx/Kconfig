@@ -1,0 +1,384 @@
+comment "LM3Sxx Platform Options"
+
+config MACH_LM3Sxx_SYSCLOCK_IRC_FREQ
+	int
+	default 16000000
+
+config HAS_CAN_0
+	bool
+	default n
+	
+config HAS_CAN_1
+	bool
+	default n
+
+config HAS_I2C0
+	bool
+	default n
+	
+choice
+	prompt "LM3Sxx Chip Variant"
+	default MACH_LM3Sxx_LM3S9B92
+
+config MACH_LM3Sxx_LM3S9B92
+    bool "LM3S9B92"
+    select MACH_LM3S9B92
+
+endchoice
+
+if MACH_LM3Sxx_LM3S9B92
+source arch/arm/mach/lm3sxx/.config/lm3s9b92
+endif
+
+config MACH_LM3Sxx_GPIO_BASE  
+	hex
+	default 0x40058000
+	
+config MACH_LM3Sxx_UART0_BASE 
+	hex
+	default 0x4000C000
+
+config MACH_LM3Sxx_UART1_BASE 
+	hex
+	default 0x4000D000
+
+config MACH_LM3Sxx_UART2_BASE 
+	hex
+	default 0x4000E000
+
+config MACH_LM3Sxx_SPI0_BASE 
+	hex
+	default 0x40008000
+
+config MACH_LM3Sxx_SPI1_BASE 
+	hex
+	default 0x40009000
+
+config MACH_LM3Sxx_I2C0_BASE 
+	hex
+	default 0x40020000
+
+config MACH_LM3Sxx_I2C1_BASE 
+	hex
+	default 0x40021000
+
+config MACH_LM3Sxx_CAN0_BASE  
+	hex
+	default 0x40040000
+	depends on HAS_CAN_0
+
+config MACH_LM3Sxx_CAN1_BASE  
+	hex
+	default 0x40041000
+	depends on HAS_CAN_1
+
+config MACH_LM3Sxx_PWM0_BASE  
+	hex
+	default 0x40028000
+
+config MACH_LM3Sxx_ADC0_BASE  
+	hex
+	default 0x40038000
+
+config MACH_LM3Sxx_ADC1_BASE  
+	hex
+	default 0x40039000
+	
+
+config MACH_LM3Sxx_TIMER0_BASE
+	hex
+	default 0x40030000
+	
+config MACH_LM3Sxx_TIMER1_BASE
+	hex
+	default 0x40031000
+	
+config MACH_LM3Sxx_TIMER2_BASE
+	hex
+	default 0x40032000
+	
+config MACH_LM3Sxx_TIMER3_BASE
+	hex
+	default 0x40033000
+
+config MACH_LM3Sxx_TOTAL_GPIOS
+	int
+	default 128 if MACH_LM3Sxx_LM3S9B92	
+	
+config MAX_IRQ
+	   int
+	   default 70		   
+
+config ARCH_ARM_SYSTICK_SRC0_DIV
+    int
+    default 2
+    
+choice 
+	prompt "systick clock source"
+	default LM3Sxx_ARCH_ARM_SYSTICK_PROCESSOR_CLOCK
+	
+config LM3Sxx_ARCH_ARM_SYSTICK_PROCESSOR_CLOCK
+	bool "processor clock"
+	
+config LM3Sxx_ARCH_ARM_SYSTICK_EXTERNAL_CLOCK
+	bool "external clock"
+
+endchoice
+
+config ARCH_ARM_SYSTICK_CLKSRC
+	hex
+	default 0x00 if LM3Sxx_ARCH_ARM_SYSTICK_EXTERNAL_CLOCK
+	default 0x04 if LM3Sxx_ARCH_ARM_SYSTICK_PROCESSOR_CLOCK 
+
+comment "device specific configuration"
+
+menu "Peripheral Selection"
+
+menu "ADC devices"
+
+config MACH_LM3Sxx_ADC
+	bool
+	default n
+	
+config MACH_LM3Sxx_ADC_0
+    bool "Use ADC(0) peripheral"
+	default n
+	select MACH_LM3Sxx_ADC
+
+config MACH_LM3Sxx_ADC_0_INODE_NAME
+	string "ADC(0) devfs name"
+	default "adc0"
+	depends on MACH_LM3Sxx_ADC_0
+
+config MACH_LM3Sxx_ADC_1
+    bool "Use ADC(1) peripheral"
+	default n
+	select MACH_LM3Sxx_ADC
+
+config MACH_LM3Sxx_ADC_1_INODE_NAME
+	string "ADC(1) devfs name"
+	default "adc1"
+	depends on MACH_LM3Sxx_ADC_1
+	
+endmenu
+
+menu "CAN devices"
+
+config MACH_LM3Sxx_CAN
+	bool
+	default n
+	
+config MACH_LM3Sxx_CAN_0
+    bool "Use CAN(0) peripheral"
+	default n
+	select MACH_LM3Sxx_CAN
+	depends on HAS_CAN_0	
+
+config MACH_LM3Sxx_CAN_0_INODE_NAME
+	string "CAN(0) devfs name"
+	default "can0"
+	depends on MACH_LM3Sxx_CAN_0
+
+config MACH_LM3Sxx_CAN_1
+    bool "Use CAN(1) peripheral"
+	default n
+	select MACH_LM3Sxx_CAN
+	depends on HAS_CAN_1	
+
+config MACH_LM3Sxx_CAN_1_INODE_NAME
+	string "CAN(1) devfs name"
+	default "can1"
+	depends on MACH_LM3Sxx_CAN_1
+endmenu
+
+menu "UART devices"
+
+config MACH_LM3Sxx_UART
+	bool
+	default n
+
+config MACH_LM3Sxx_UART_0
+    bool "Use UART(0) peripheral"
+	default n
+	select MACH_LM3Sxx_UART	
+
+config MACH_LM3Sxx_UART_0_INODE_NAME
+	string "UART(0) devfs name"
+	default "uart0"
+	depends on MACH_LM3Sxx_UART_0
+
+config MACH_LM3Sxx_UART_1
+    bool "Use UART(1) peripheral"
+	default n
+	select MACH_LM3Sxx_UART	
+
+config MACH_LM3Sxx_UART_1_INODE_NAME
+	string "UART(1) devfs name"
+	default "uart1"
+	depends on MACH_LM3Sxx_UART_1
+
+config MACH_LM3Sxx_UART_2
+    bool "Use UART(2) peripheral"
+	default n
+	select MACH_LM3Sxx_UART	
+
+config MACH_LM3Sxx_UART_2_INODE_NAME
+	string "UART(2) devfs name"
+	default "uart2"
+	depends on MACH_LM3Sxx_UART_2
+
+endmenu
+
+menu "SPI devices"
+
+config MACH_LM3Sxx_SPI
+	bool
+	default n
+
+config MACH_LM3Sxx_SPI_0
+    bool "Use SPI(0) peripheral"
+	default n
+	select MACH_LM3Sxx_SPI
+
+config MACH_LM3Sxx_SPI_0_INODE_NAME
+	string "SPI(0) devfs name"
+	default "spi0"
+	depends on MACH_LM3Sxx_SPI_0
+
+config MACH_LM3Sxx_SPI_1
+    bool "Use SPI(1) peripheral"
+	default n
+	select MACH_LM3Sxx_SPI
+
+config MACH_LM3Sxx_SPI_1_INODE_NAME
+	string "SPI(1) devfs name"
+	default "spi1"
+	depends on MACH_LM3Sxx_SPI_1
+
+endmenu
+
+menu "I2C devices"
+
+config MACH_LM3Sxx_I2C
+	bool
+	default n
+
+config MACH_LM3Sxx_I2C_0
+    bool "Use I2C(0) peripheral"
+	default n
+	select MACH_LM3Sxx_I2C
+	depends on HAS_I2C0
+
+config MACH_LM3Sxx_I2C_0_INODE_NAME
+	string "I2C(0) devfs name"
+	default "i2c0"
+	depends on MACH_LM3Sxx_I2C_0
+
+config MACH_LM3Sxx_I2C_1
+    bool "Use I2C(1) peripheral"
+	default n
+	select MACH_LM3Sxx_I2C
+
+config MACH_LM3Sxx_I2C_1_INODE_NAME
+	string "I2C(1) devfs name"
+	default "i2c1"
+	depends on MACH_LM3Sxx_I2C_1
+
+endmenu
+
+menu "TIMER devices"
+
+config MACH_LM3Sxx_TIMER
+	bool
+	default n
+
+config MACH_LM3Sxx_TIMER_0
+    bool "Use TIMER(0) peripheral"
+	default n
+	select MACH_LM3Sxx_TIMER
+
+config MACH_LM3Sxx_TIMER_0_INODE_NAME
+	string "TIMER(0) devfs name"
+	default "timer0"
+	depends on MACH_LM3Sxx_TIMER_0
+
+config MACH_LM3Sxx_TIMER_1
+    bool "Use TIMER(1) peripheral"
+	default n
+	select MACH_LM3Sxx_TIMER
+
+config MACH_LM3Sxx_TIMER_1_INODE_NAME
+	string "TIMER(1) devfs name"
+	default "timer1"
+	depends on MACH_LM3Sxx_TIMER_1
+
+config MACH_LM3Sxx_TIMER_2
+    bool "Use TIMER(2) peripheral"
+	default n
+		select MACH_LM3Sxx_TIMER
+
+config MACH_LM3Sxx_TIMER_2_INODE_NAME
+	string "TIMER(2) devfs name"
+	default "timer2"
+	depends on MACH_LM3Sxx_TIMER_2
+
+config MACH_LM3Sxx_TIMER_3
+    bool "Use TIMER(3) peripheral"
+	default n
+		select MACH_LM3Sxx_TIMER
+
+config MACH_LM3Sxx_TIMER_3_INODE_NAME
+	string "TIMER(3) devfs name"
+	default "timer3"
+	depends on MACH_LM3Sxx_TIMER_3
+endmenu
+
+menu "PWM devices"
+
+config MACH_LM3Sxx_PWM
+	bool
+	default n
+
+config MACH_LM3Sxx_PWM_0
+    bool "Use PWM(0) peripheral"
+	default n
+	select MACH_LM3Sxx_PWM
+
+config MACH_LM3Sxx_PWM_0_INODE_NAME
+	string "PWM(0) devfs name"
+	default "pwm0"
+	depends on MACH_LM3Sxx_PWM_0
+endmenu
+
+endmenu
+
+
+menu "GPIO configuration"
+source arch/arm/mach/lm3sxx/.config/GPIO
+endmenu
+
+choice
+	prompt "Boot Logger Device"
+	default MACH_LM3Sxx_BOOTLOG_NULL
+
+config MACH_LM3Sxx_BOOTLOG_UART_0
+    bool "UART(0)"
+	select MACH_LM3Sxx_UART_0
+
+config MACH_LM3Sxx_BOOTLOG_UART_1
+    bool "UART(1)"
+	select MACH_LM3Sxx_UART_1
+
+config MACH_LM3Sxx_BOOTLOG_UART_2
+    bool "UART(2)"
+	select MACH_LM3Sxx_UART_2
+
+config MACH_LM3Sxx_BOOTLOG_UART_3
+    bool "UART(3)"
+	select MACH_LM3Sxx_UART_3
+
+config MACH_LM3Sxx_BOOTLOG_NULL
+    bool "/dev/null"
+
+endchoice
+    
