@@ -255,7 +255,7 @@ config MACH_LPC11xx_CAN_0
 config MACH_LPC11xx_CAN_0_INODE_NAME
 	string "CAN(0) devfs name"
 	default "can0"
-	depends on HAS_CAN_0
+	depends on MACH_LPC11xx_CAN_0
 endmenu	
 
 menu "UART devices"
