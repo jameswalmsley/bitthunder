@@ -12,6 +12,7 @@
 #include "gpio/bt_gpio.h"
 #include "timers/bt_timers.h"
 #include "process/bt_mutex.h"
+#include "process/bt_queue.h"
 #include "process/bt_process.h"
 #include "process/bt_threads.h"
 #include "fs/bt_devfs.h"

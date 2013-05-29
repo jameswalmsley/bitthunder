@@ -104,6 +104,60 @@ BT_BOOL BT_kMutexReleaseFromISR(void *pMutex, BT_BOOL *pbHigherPriorityTaskWoken
 	return bReturn;
 }
 
+void *BT_kQueueCreate(BT_u32 ulElements, BT_u32 ulElementWidth) {
+	return xQueueCreate(ulElements, ulElementWidth);
+}
+
+void BT_kQueueDestroy(void *pQueue) {
+	vQueueDelete(pQueue);
+}
+
+BT_ERROR BT_kQueueSend(void *pQueue, const void* pMessage, BT_TICK oTimeoutTicks) {
+	return xQueueSend(pQueue, pMessage, oTimeoutTicks );
+}
+
+BT_ERROR BT_kQueueSendFromISR(void *pQueue, const void* pMessage, BT_BOOL *pbHigherPriorityTaskWoken) {
+	portBASE_TYPE val;
+
+	BT_BOOL bReturn = xQueueSendFromISR(pQueue, pMessage, &val );
+
+	if(pbHigherPriorityTaskWoken) {
+		*pbHigherPriorityTaskWoken = (BT_BOOL) val;
+	}
+
+	return bReturn;
+}
+
+BT_u32 BT_kQueueMessagesWaiting(void *pQueue) {
+	return uxQueueMessagesWaiting(pQueue);
+}
+
+BT_ERROR BT_kQueueSendToFront(void *pQueue, const void* pMessage, BT_TICK oTimeoutTicks) {
+	return xQueueSendToFront(pQueue, pMessage, oTimeoutTicks );
+}
+
+BT_ERROR BT_kQueueSendToBack(void *pQueue, const void* pMessage, BT_TICK oTimeoutTicks) {
+	return xQueueSendToBack(pQueue, pMessage, oTimeoutTicks );
+}
+
+BT_ERROR BT_kQueueReceive(void *pQueue, void* pMessage, BT_TICK oTimeoutTicks) {
+	return xQueueReceive(pQueue, pMessage, oTimeoutTicks);
+}
+BT_ERROR BT_kQueueReceiveFromISR(void *pQueue, void* pMessage, BT_BOOL *pbHigherPriorityTaskWoken) {
+	portBASE_TYPE val;
+
+	BT_BOOL bReturn = xQueueReceiveFromISR(pQueue, pMessage, &val);
+
+	if(pbHigherPriorityTaskWoken) {
+		*pbHigherPriorityTaskWoken = (BT_BOOL) val;
+	}
+
+	return bReturn;
+
+}
+
+
+
 void BT_kEnterCritical() {
 	taskENTER_CRITICAL();
 }
