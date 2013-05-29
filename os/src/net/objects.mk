@@ -1,7 +1,8 @@
-
+LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/bt_net.o
 
 # lwIP Objects
-#LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/bt_lwip.o
+LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/sys_arch.o
+LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/bt_lwip.o
 LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/core/def.o
 LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/core/dhcp.o
 LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/core/dns.o
@@ -36,6 +37,25 @@ LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/core/snmp/
 LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/core/snmp/mib_structs.o
 LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/core/snmp/msg_in.o
 LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/core/snmp/msg_out.o
+
+
+LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/netif/etharp.o
+LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/netif/ethernetif.o
+LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/netif/slipif.o
+
+LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/netif/ppp/auth.o
+LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/netif/ppp/chap.o
+LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/netif/ppp/chpms.o
+LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/netif/ppp/fsm.o
+LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/netif/ppp/ipcp.o
+LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/netif/ppp/lcp.o
+LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/netif/ppp/magic.o
+LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/netif/ppp/md5.o
+LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/netif/ppp/pap.o
+LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/netif/ppp/ppp_oe.o
+LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/netif/ppp/ppp.o
+LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/netif/ppp/randm.o
+LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/netif/ppp/vj.o
 
 LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/api/api_lib.o
 LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/api/api_msg.o

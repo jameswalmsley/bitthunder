@@ -2,11 +2,75 @@ menu "Networking"
 
 config NET
     bool
+    select TASKLETS
+	default n
+	
+config SUPPORTS_UDP
+	bool
+	default n
+
+config SUPPORTS_TCP
+	bool
+	default n
+
+config SUPPORTS_DHCP
+	bool
+	default n
+
+config SUPPORTS_IGMP
+	bool
 	default n
 
 config NET_LWIP
     bool "Lightweight IP TCP/IP stack"
 	select NET
+	select SUPPORTS_UDP
+	select SUPPORTS_TCP
+	select SUPPORTS_DHCP
+	select SUPPORTS_IGMP	
 	default n
+
+config BOOL_USE_TCP
+    bool "use TCP"
+	depends on SUPPORTS_TCP
+	default y
+
+config BOOL_USE_UDP
+    bool "use UDP"
+	depends on SUPPORTS_UDP
+	default n
+
+config BOOL_USE_DHCP
+    bool "use DHCP"
+	depends on SUPPORTS_UDP
+	select BOOL_USE_UDP
+	default n
+
+config BOOL_USE_IGMP
+    bool "use IGMP"
+	depends on SUPPORTS_IGMP
+	select BOOL_USE_UDP
+	default n
+
+config USE_TCP
+    int 
+    default 1 if BOOL_USE_TCP	
+	default 0
+
+config USE_UDP
+    int 
+    default 1 if BOOL_USE_UDP
+	default 0
+
+config USE_DHCP
+    int 
+    default 1 if BOOL_USE_DHCP	
+	default 0
+
+config USE_IGMP
+    int 
+    default 1 if BOOL_USE_IGMP	
+	default 0
+
 
 endmenu
