@@ -91,7 +91,7 @@ static void sd_manager_sm(void *pData) {
 		if(pHost->ulFlags & MMC_HOST_FLAGS_INITIALISE_REQUEST) {
 			pHost->ulFlags &= ~MMC_HOST_FLAGS_INITIALISE_REQUEST;
 
-			BT_ThreadSleep(50);
+			BT_ThreadSleep(10);
 
 			if(pHost->pOps->pfnIsCardPresent(pHost->hHost, &Error)) {
 
@@ -99,6 +99,10 @@ static void sd_manager_sm(void *pData) {
 
 				// Attempt basic SDIO initialisation (host-specific).
 				pHost->pOps->pfnInitialise(pHost->hHost);
+
+				pHost->pOps->pfnEnableClock(pHost->hHost);
+
+				BT_ThreadSleep(10);
 
 				// Send GO-IDLE (CMD0), expecting no response!
 				MMC_COMMAND oCommand;
@@ -237,7 +241,7 @@ static void sd_manager_sm(void *pData) {
 
 				pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
 
-				BT_kPrint("SDCARD: Selected card mmc%d:%04x", pHost->ulHostID, pHost->rca);				
+				BT_kPrint("SDCARD: Selected card mmc%d:%04x", pHost->ulHostID, pHost->rca);
 
 
 				BT_u32 cmd7_response = oCommand.response[0];
@@ -257,7 +261,7 @@ static void sd_manager_sm(void *pData) {
 					pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
 				}
 
-				pHost->pOps->pfnSetBlockSize(pHost->hHost, 512);		  
+				pHost->pOps->pfnSetBlockSize(pHost->hHost, 512);
 
 				// Place SDCard into 4-bit mode. (ACMD6).
 
@@ -298,6 +302,7 @@ static void sd_manager_sm(void *pData) {
 
 				char buffer[10];
 				sprintf(buffer, "mmc%d", (int) pHost->ulHostID);
+
 				BT_RegisterBlockDevice(hSD, buffer, &hSD->oDescriptor);
 
 				BT_GpioSet(7, BT_TRUE);
@@ -348,10 +353,12 @@ static BT_u32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount,
 		oCommand.opcode = 12;
 		oCommand.arg = 0;
 		oCommand.bCRC = BT_TRUE;
-		oCommand.ulResponseType = 28;
+		oCommand.ulResponseType = 48;
 		oCommand.bIsData = BT_FALSE;
 
 		hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
+
+		BT_kPrint("SDCARD: Sent CMD12");
 
 		oCommand.opcode 		= 13;
 		oCommand.arg 			= hBlock->pHost->rca << 16;
@@ -385,7 +392,7 @@ static BT_u32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount,
 
 	oCommand.opcode 		= 18;
 
-	oCommand.bCRC 			= BT_TRUE;
+	oCommand.bCRC 			= BT_FALSE;
 	oCommand.ulResponseType = 48;
 	oCommand.bIsData 		= BT_TRUE;
 	oCommand.arg 			= ulBlock;

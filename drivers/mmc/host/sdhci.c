@@ -41,7 +41,7 @@ static BT_ERROR sdhci_irq_handler(BT_u32 ulIRQ, void *pParam) {
 	if(hSDHCI->pRegs->NORMAL_INT_STATUS & NORMAL_INT_CARD_INSERTED) {
 		// Signal to SDCARD driver that we have inserted a card,
 		// and the card can be initialised.
-		hSDHCI->pRegs->NORMAL_INT_STATUS |= NORMAL_INT_CARD_INSERTED;
+		hSDHCI->pRegs->NORMAL_INT_STATUS = NORMAL_INT_CARD_INSERTED;
 
 		if(hSDHCI->pRegs->PRESENT_STATE & STATE_CARD_INSERTED) {
 
@@ -63,7 +63,7 @@ static BT_ERROR sdhci_irq_handler(BT_u32 ulIRQ, void *pParam) {
 	if(hSDHCI->pRegs->NORMAL_INT_STATUS & NORMAL_INT_CARD_REMOVED) {
 		// Signal to SDCARD driver that we have removed a card.
 		// and all data can be flagged for cleanup.
-		hSDHCI->pRegs->NORMAL_INT_STATUS |= NORMAL_INT_CARD_REMOVED;
+		hSDHCI->pRegs->NORMAL_INT_STATUS = NORMAL_INT_CARD_REMOVED;
 
 		if(!(hSDHCI->pRegs->PRESENT_STATE & STATE_CARD_INSERTED)) {
 
@@ -108,6 +108,11 @@ static BT_ERROR sdhci_request(BT_HANDLE hSDIO, MMC_COMMAND *pCommand) {
 		BT_ThreadYield();
 	}
 
+	if(pCommand->bIsData) {
+		hSDIO->pRegs->BLOCK_SIZE = 512;
+		hSDIO->pRegs->BLOCK_COUNT = pCommand->ulBlocks;
+	}
+
 	hSDIO->pRegs->NORMAL_INT_STATUS = 0xFFFF;
 	hSDIO->pRegs->ERROR_INT_STATUS = 0xFFFF;
 
@@ -120,17 +125,18 @@ static BT_ERROR sdhci_request(BT_HANDLE hSDIO, MMC_COMMAND *pCommand) {
 
 	if(pCommand->bIsData) {
 		cmd_reg |= COMMAND_DATA_PRESENT;
-		hSDIO->pRegs->TRANSFERMODE = 0;
+		BT_u32 tm = 0;
+		//DIO->pRegs->TRANSFERMODE = 0;
 		if(pCommand->bRead_nWrite) {
-			hSDIO->pRegs->TRANSFERMODE |= 1 << 4;
+			tm = 1 << 4;
 		}
 
-		//if(pCommand->ulBlocks > 1) {
-			hSDIO->pRegs->TRANSFERMODE |= 1 << 5;
-			hSDIO->pRegs->TRANSFERMODE |= 1 << 2;
-			hSDIO->pRegs->TRANSFERMODE |= 1 << 1;
-			hSDIO->pRegs->BLOCK_COUNT = pCommand->ulBlocks;
-		//}
+		tm |= 1 << 5;
+		tm |= 1 << 2;
+		tm |= 1 << 1;
+
+		hSDIO->pRegs->TRANSFERMODE = tm;
+
 	} else {
 		hSDIO->pRegs->TRANSFERMODE = 0;
 	}
@@ -159,7 +165,7 @@ static BT_ERROR sdhci_request(BT_HANDLE hSDIO, MMC_COMMAND *pCommand) {
 	}
 
 	// Clear the command complete interrupt status field.
-	hSDIO->pRegs->NORMAL_INT_STATUS |= NORMAL_INT_COMMAND_COMPLETE;
+	hSDIO->pRegs->NORMAL_INT_STATUS = NORMAL_INT_COMMAND_COMPLETE;
 
 	pCommand->response[0] = hSDIO->pRegs->RESPONSE[0] | (hSDIO->pRegs->RESPONSE[1] << 16);
 	pCommand->response[1] = hSDIO->pRegs->RESPONSE[2] | (hSDIO->pRegs->RESPONSE[3] << 16);
@@ -188,7 +194,7 @@ static BT_u32 sdhci_read(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer, BT_ERR
 			BT_ThreadYield();
 		}
 
-		hSDIO->pRegs->NORMAL_INT_STATUS |= NORMAL_INT_BUF_READ_READY;
+		hSDIO->pRegs->NORMAL_INT_STATUS = NORMAL_INT_BUF_READ_READY;
 
 		while(ulSize) {
 			BT_u32 ulData = hSDIO->pRegs->BUFFER_DATA_PORT;
@@ -209,12 +215,19 @@ static BT_u32 sdhci_read(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer, BT_ERR
 	}
 
 	while(! (hSDIO->pRegs->NORMAL_INT_STATUS & NORMAL_INT_TRANSFER_COMPLETE)) {
+		volatile BT_u32 ulData2 = (volatile) hSDIO->pRegs->BUFFER_DATA_PORT;
 		BT_ThreadYield();
 	}
 
-	hSDIO->pRegs->NORMAL_INT_STATUS |= NORMAL_INT_TRANSFER_COMPLETE;
+	hSDIO->pRegs->NORMAL_INT_STATUS = NORMAL_INT_TRANSFER_COMPLETE;
 
 	//BT_kPrint("SDHCI: Block transfer complete");
+
+	/*hSDIO->pRegs->SOFTWARE_RESET = RESET_DATA;
+
+	while(hSDIO->pRegs->SOFTWARE_RESET) {
+		BT_ThreadYield();
+	}*/
 
 	return ulRead;
 }
@@ -253,7 +266,7 @@ static BT_ERROR sdhci_reset(BT_HANDLE hSDIO, BT_u8 ucMask) {
 	hSDIO->pRegs->NORMAL_INT_ENABLE = 0;	// Disable Interrupts.
 	hSDIO->pRegs->ERROR_INT_ENABLE = 0;
 
-	hSDIO->pRegs->SOFTWARE_RESET = 1;
+	hSDIO->pRegs->SOFTWARE_RESET = ucMask;
 	// Wait for reset to complete
 
 	while(hSDIO->pRegs->SOFTWARE_RESET) {
@@ -289,7 +302,7 @@ static BT_ERROR sdhci_reset(BT_HANDLE hSDIO, BT_u8 ucMask) {
 	// For some reason this can send the interrupt controller wild, even though
 	// we have already registered our IRQ!
 
-	hSDIO->pRegs->NORMAL_INT_STATUS		|= NORMAL_INT_CARD_INSERTED | NORMAL_INT_CARD_REMOVED;
+	hSDIO->pRegs->NORMAL_INT_STATUS		= 0xFFFF;
 
 	// Enable the interrupts to be signalled to the CPU.
 	hSDIO->pRegs->NORMAL_INT_SIGNAL_ENABLE 	|= NORMAL_INT_CARD_INSERTED | NORMAL_INT_CARD_REMOVED;
@@ -300,6 +313,7 @@ static BT_ERROR sdhci_reset(BT_HANDLE hSDIO, BT_u8 ucMask) {
 static BT_ERROR sdhci_initialise(BT_HANDLE hSDIO) {
 
 	// Completely reset the SDIO hardware.
+	sdhci_disable_clock(hSDIO);	// Enable the clock to allow the SDCard to initialise.
 	sdhci_reset(hSDIO, RESET_ALL);
 
 	BT_ThreadSleep(25);	// Sometimes card is not really debounced in some hardware.
@@ -337,10 +351,8 @@ static BT_ERROR sdhci_initialise(BT_HANDLE hSDIO) {
 	// Enable bus power!
 	POWER_ENABLE_SET(hSDIO->pRegs->POWER_CONTROL, 1);
 
-	sdhci_enable_clock(hSDIO);	// Enable the clock to allow the SDCard to initialise.
-
-	BT_ThreadSleep(10);			// Need to provide atlease 72 clocks, we'll just delay a really long time.
-
+	//sdhci_reset(hSDIO, RESET_CMD);
+	//sdhci_reset(hSDIO, RESET_DATA);
 
 
 	// Enable the Card detection IRQs.
@@ -354,7 +366,7 @@ static BT_ERROR sdhci_initialise(BT_HANDLE hSDIO) {
 	// For some reason this can send the interrupt controller wild, even though
 	// we have already registered our IRQ!
 
-	hSDIO->pRegs->NORMAL_INT_STATUS		|= NORMAL_INT_CARD_INSERTED | NORMAL_INT_CARD_REMOVED;
+	hSDIO->pRegs->NORMAL_INT_STATUS		= NORMAL_INT_CARD_INSERTED | NORMAL_INT_CARD_REMOVED;
 
 	// Enable the interrupts to be signalled to the CPU.
 	hSDIO->pRegs->NORMAL_INT_SIGNAL_ENABLE 	|= NORMAL_INT_CARD_INSERTED | NORMAL_INT_CARD_REMOVED;
@@ -450,6 +462,12 @@ static BT_HANDLE sdhci_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErr
 	if(Error) {
 		goto err_free_irq;
 	}
+
+	BT_GpioSetDirection(0, BT_GPIO_DIR_OUTPUT);
+	BT_GpioSet(0, 0);
+
+
+	sdhci_set_data_width(hSDIO, BT_MMC_WIDTH_1BIT);
 
 	sdhci_reset(hSDIO, RESET_ALL);
 
