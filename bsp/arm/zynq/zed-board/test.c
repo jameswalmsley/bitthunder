@@ -3,8 +3,6 @@
 #include <lib/putc.h>
 #include <fs/bt_fs.h>
 
-extern BT_u32 BT_ZYNQ_GetArmPLLFrequency();
-
 /**
  *	This will be running within a FreeRTOS Thread, with lowest priority.
  *	It is the boot/startup thread, and you can return from it after starting all your own processes.
@@ -17,6 +15,10 @@ extern BT_u32 BT_ZYNQ_GetArmPLLFrequency();
  **/
 
 char *buffer = (char *) 0x00100000;
+
+extern void Xil_DCacheFlush();
+extern void Xil_ICacheInvalidate();
+extern void Xil_DCacheDisable();
 
 int main(int argc, char **argv) {
 
@@ -38,27 +40,45 @@ int main(int argc, char **argv) {
 
 	BT_GpioSetDirection(7, BT_GPIO_DIR_OUTPUT);
 
-	bt_printf("\r\n");
 
-	BT_ThreadSleep(2000);
+	BT_ThreadSleep(8000);
 
 	BT_TICK time = BT_GetKernelTick();
 
 	BT_HANDLE hVolume = BT_DeviceOpen("mmc00", &Error);
 
+	BT_kPrint("Mounting mmc00");
 	BT_Mount(hVolume, "/");
-
+	BT_kPrint("Done");
 
 	BT_kPrint("Opening zImage");
 
-	BT_HANDLE hFile = BT_Open("/zImage", "rb", &Error);
+	BT_HANDLE hFile = BT_Open("/kernel.img", "rb", &Error);
+	if(!hFile) {
+		BT_kPrint("Could not open /kernel.img");
+	}
 
 	BT_kPrint("Reading file...");
 	BT_Read(hFile, 0, 1024*1024*2, buffer, &Error);
 	BT_kPrint("Done");
 
+	BT_StopSystemTimer();
+	BT_DisableInterrupts();
+
+	Xil_DCacheFlush();
+	Xil_ICacheInvalidate();
+	//Xil_DCacheDisable();
+
+	BT_CharDeviceFlush(hUART);
+
+	/*while(1) {
+		BT_ThreadSleep(1000);
+	}*/
+
+	__asm volatile("b 0x00100000");
+
 	while(1) {
-		
+
 		BT_ThreadSleepUntil(&time, 1000);
 	}
 
