@@ -27,6 +27,10 @@ BT_ERROR BT_SetSystemTimerHandle(BT_HANDLE hTimer) {
 	return BT_ERR_NONE;
 }
 
+BT_ERROR BT_StopSystemTimer() {
+	return g_Ops->pfnStop(g_hTimer);
+}
+
 BT_u32 BT_GetSystemTimerOffset() {
 	BT_ERROR Error;
 
