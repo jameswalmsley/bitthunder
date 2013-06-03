@@ -215,7 +215,7 @@ static BT_u32 sdhci_read(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer, BT_ERR
 	}
 
 	while(! (hSDIO->pRegs->NORMAL_INT_STATUS & NORMAL_INT_TRANSFER_COMPLETE)) {
-		volatile BT_u32 ulData2 = (volatile) hSDIO->pRegs->BUFFER_DATA_PORT;
+		//volatile BT_u32 ulData2 = (volatile) hSDIO->pRegs->BUFFER_DATA_PORT;
 		BT_ThreadYield();
 	}
 
@@ -310,13 +310,21 @@ static BT_ERROR sdhci_reset(BT_HANDLE hSDIO, BT_u8 ucMask) {
 	return BT_ERR_NONE;
 }
 
+static BT_ERROR sdhci_set_data_width(BT_HANDLE hSDIO, BT_MMC_WIDTH eWidth);
+
 static BT_ERROR sdhci_initialise(BT_HANDLE hSDIO) {
+
+	hSDIO->pRegs->POWER_CONTROL = 0;
+	hSDIO->pRegs->NORMAL_INT_SIGNAL_ENABLE = 0;
+	hSDIO->pRegs->ERROR_INT_SIGNAL_ENABLE = 0;
 
 	// Completely reset the SDIO hardware.
 	sdhci_disable_clock(hSDIO);	// Enable the clock to allow the SDCard to initialise.
 	sdhci_reset(hSDIO, RESET_ALL);
 
-	BT_ThreadSleep(25);	// Sometimes card is not really debounced in some hardware.
+	hSDIO->pRegs->POWER_CONTROL = POWER_ENABLE | POWER_SELECT_3_3V;
+
+	sdhci_set_data_width(hSDIO, BT_MMC_WIDTH_1BIT);
 
 	if(!sdhci_is_card_present(hSDIO, NULL)) {
 		return BT_ERR_GENERIC;
@@ -425,6 +433,40 @@ static const BT_MMC_OPS sdhci_mmc_ops = {
 	.pfnDisableClock	= sdhci_disable_clock,
 };
 
+static void sdhci_dump_regs(BT_HANDLE hSDIO) {
+	BT_kPrint("SDMA_ADDRESS  : %08X", hSDIO->pRegs->SDMA_Address);
+	BT_kPrint("BLOCK_SIZE    : %08X", hSDIO->pRegs->BLOCK_SIZE);
+	BT_kPrint("BLOCK_COUNT   : %08X", hSDIO->pRegs->BLOCK_COUNT);
+	BT_kPrint("ARGUMENT      : %08X", hSDIO->pRegs->ARGUMENT);
+	BT_kPrint("TRANSFERMODE  : %08X", hSDIO->pRegs->COMMAND);
+	BT_kPrint("RESPONSE_0    : %08X", hSDIO->pRegs->RESPONSE[0]);
+	BT_kPrint("RESPONSE_1    : %08X", hSDIO->pRegs->RESPONSE[1]);
+	BT_kPrint("RESPONSE_2    : %08X", hSDIO->pRegs->RESPONSE[2]);
+	BT_kPrint("RESPONSE_3    : %08X", hSDIO->pRegs->RESPONSE[3]);
+	BT_kPrint("BUFFER_DATA   : %08X", hSDIO->pRegs->BUFFER_DATA_PORT);
+	BT_kPrint("PRESENT_STATE : %08X", hSDIO->pRegs->PRESENT_STATE);
+	BT_kPrint("HOST_CONTROL  : %08X", hSDIO->pRegs->HOST_CONTROL);
+	BT_kPrint("POWER_CONTROL : %08X", hSDIO->pRegs->POWER_CONTROL);
+	BT_kPrint("BLOCK_GAP_CTL : %08X", hSDIO->pRegs->BLOCK_GAP_CONTROL);
+	BT_kPrint("WAKEUP_CTL    : %08X", hSDIO->pRegs->WAKEUP_CONTROL);
+	BT_kPrint("CLOCK_CONTROL : %08X", hSDIO->pRegs->CLOCK_CONTROL);
+	BT_kPrint("TIMEOUT_CTL   : %08X", hSDIO->pRegs->TIMEOUT_CONTROL);
+	BT_kPrint("SOFTWARE_RST  : %08X", hSDIO->pRegs->SOFTWARE_RESET);
+	BT_kPrint("NORMAL_INT_ST : %08X", hSDIO->pRegs->NORMAL_INT_STATUS);
+	BT_kPrint("ERROR_INT_ST  : %08X", hSDIO->pRegs->ERROR_INT_STATUS);
+	BT_kPrint("NORMAL_INT_EN : %08X", hSDIO->pRegs->NORMAL_INT_ENABLE);
+	BT_kPrint("ERROR_INT_EN  : %08X", hSDIO->pRegs->ERROR_INT_ENABLE);
+	BT_kPrint("NORMAL_INT_SIG: %08X", hSDIO->pRegs->NORMAL_INT_SIGNAL_ENABLE);
+	BT_kPrint("ERROR_INT_SIG : %08X", hSDIO->pRegs->ERROR_INT_SIGNAL_ENABLE);
+	BT_kPrint("AUTO12_ERROR  : %08X", hSDIO->pRegs->AUTO_CMD12_ERROR);
+	BT_kPrint("CAPABILITIES  : %08X", hSDIO->pRegs->CAPABILITIES);
+	BT_kPrint("MAX_CURRENT_C : %08X", hSDIO->pRegs->MAX_CURRENT_CAPS);
+	BT_kPrint("FORCE_EVT_C12 : %08X", hSDIO->pRegs->FORCE_EVENT_AUTO_CMD12);
+	BT_kPrint("ADMA_ERROR_ST : %08X", hSDIO->pRegs->ADMA_ERROR_STATUS);
+	BT_kPrint("ADMA_SYS_ADDR : %08X", hSDIO->pRegs->ADMA_SYS_ADDRESS);
+	BT_kPrint("VERSION       : %08X", hSDIO->pRegs->SLOT_INT_STAT_HCVERSION);
+}
+
 static BT_HANDLE sdhci_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
 
 	BT_ERROR Error;
@@ -443,6 +485,11 @@ static BT_HANDLE sdhci_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErr
 	}
 
 	hSDIO->pRegs = (SDHCI_REGS *) pResource->ulStart;
+
+	sdhci_dump_regs(hSDIO);
+
+	sdhci_initialise(hSDIO);
+	//sdhci_reset(hSDIO, RESET_ALL);
 
 	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_IRQ, 0);
 	if(!pResource) {
