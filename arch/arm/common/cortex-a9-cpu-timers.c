@@ -54,6 +54,7 @@ static BT_ERROR timer_register_interrupt(BT_HANDLE hTimer, BT_FN_INTERRUPT_HANDL
 }
 
 static BT_ERROR timer_start(BT_HANDLE hTimer) {
+	hTimer->pRegs->timers[hTimer->ulTimerID].COUNT = 0;
 	hTimer->pRegs->timers[hTimer->ulTimerID].CONTROL |= 0x1;
 	return BT_ERR_NONE;
 }
