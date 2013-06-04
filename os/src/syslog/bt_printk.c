@@ -26,9 +26,11 @@ BT_ERROR BT_kPrint(const char *format, ... ) {
 	bt_printf("\r");
 #endif
 #ifdef BT_CONFIG_SYSLOG_LINE_ENDINGS_CRLF
-	bt_printf("\r");
+	bt_printf("\n\r");
 #endif
-
+#ifdef BT_CONFIG_SYSLOG_LINE_ENDINGS_LFCR
+	bt_printf("\r\n");
+#endif
 	return BT_ERR_NONE;
 }
 #endif

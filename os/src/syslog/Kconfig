@@ -19,6 +19,9 @@ config SYSLOG_LINE_ENDINGS_LF
 config SYSLOG_LINE_ENDINGS_CRLF
     bool "CRLF (\"\\n\\r\")"
 
+config SYSLOG_LINE_ENDINGS_LFCR
+    bool "LFCR (\"\\r\\n\")"
+
 endchoice
 
 
