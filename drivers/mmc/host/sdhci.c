@@ -433,6 +433,7 @@ static const BT_MMC_OPS sdhci_mmc_ops = {
 	.pfnDisableClock	= sdhci_disable_clock,
 };
 
+#ifdef BT_CONFIG_SDHCI_DUMP_REGS
 static void sdhci_dump_regs(BT_HANDLE hSDIO) {
 	BT_kPrint("SDMA_ADDRESS  : %08X", hSDIO->pRegs->SDMA_Address);
 	BT_kPrint("BLOCK_SIZE    : %08X", hSDIO->pRegs->BLOCK_SIZE);
@@ -466,6 +467,7 @@ static void sdhci_dump_regs(BT_HANDLE hSDIO) {
 	BT_kPrint("ADMA_SYS_ADDR : %08X", hSDIO->pRegs->ADMA_SYS_ADDRESS);
 	BT_kPrint("VERSION       : %08X", hSDIO->pRegs->SLOT_INT_STAT_HCVERSION);
 }
+#endif
 
 static BT_HANDLE sdhci_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
 
@@ -486,7 +488,9 @@ static BT_HANDLE sdhci_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErr
 
 	hSDIO->pRegs = (SDHCI_REGS *) pResource->ulStart;
 
+#ifdef BT_CONFIG_SDHCI_DUMP_REGS
 	sdhci_dump_regs(hSDIO);
+#endif
 
 	sdhci_initialise(hSDIO);
 	//sdhci_reset(hSDIO, RESET_ALL);
