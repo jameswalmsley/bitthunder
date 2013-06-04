@@ -167,7 +167,7 @@ void vPortISRStartFirstTask( void )
 
 	//enable_irq();
 
-	BT_EnableInterrupts();
+	prvSetupTimerInterrupt();
 
 	/* Simply start the scheduler.  This is included here as it can only be
 	called from ARM mode. */
@@ -176,7 +176,6 @@ void vPortISRStartFirstTask( void )
 
 portBASE_TYPE xPortStartScheduler(void) {
 	// Setup Hardware Timer!
-	prvSetupTimerInterrupt();
 	// Start first task
 
 	vPortISRStartFirstTask();
