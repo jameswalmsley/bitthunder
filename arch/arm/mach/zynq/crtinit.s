@@ -1,3 +1,5 @@
+.globl _bt_start
+
 	.text
 .Lsbss_start:
 	.long	__sbss_start
