@@ -30,6 +30,7 @@ typedef struct _BT_MACHINE_DESCRIPTION {
 
 	BT_u32							(*pfnGetCpuClockFrequency) ();
 	BT_ERROR					   	(*pfnMachineInit)				(struct _BT_MACHINE_DESCRIPTION *pMachine);
+	BT_ERROR						(*pfnBootCore)(BT_u32 ulCoreID, void *);
 
 	const BT_INTEGRATED_DEVICE	   *pInterruptController;
 	const BT_INTEGRATED_DEVICE	   *pSystemTimer;
