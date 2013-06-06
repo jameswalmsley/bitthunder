@@ -176,6 +176,16 @@ BT_DEVFS_INODE_DEF oZynq_uart1_inode = {
 };
 #endif
 
+static BT_ERROR zynq_boot_core(BT_u32 ulCoreID, void *p) {
+	volatile BT_u32 *core2 = (BT_u32 *) 0xFFFFFFF0;
+	*core2 = (BT_u32) p;
+	BT_DCacheFlush();
+
+	__asm volatile("sev");
+
+	return BT_ERR_NONE;
+}
+
 static BT_u32 zynq_get_cpu_clock_frequency() {
 	return BT_ZYNQ_GetCpuFrequency();
 }
@@ -184,6 +194,7 @@ BT_MACHINE_START(ARM, ZYNQ, "Xilinx Embedded Zynq Platform")
 	.pfnGetCpuClockFrequency 	= zynq_get_cpu_clock_frequency,
 	.pInterruptController		= &oZynq_intc_device,
 	.pSystemTimer 				= &oZynq_cpu_timer_device,
+	.pfnBootCore				= zynq_boot_core,
 
 #ifdef BT_CONFIG_MACH_ZYNQ_BOOTLOG_UART_NULL
 	.pBootLogger				= NULL,
