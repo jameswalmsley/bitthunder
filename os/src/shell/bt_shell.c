@@ -4,6 +4,7 @@
 
 #include <bitthunder.h>
 #include <string.h>
+#include <ctype.h>
 
 extern const BT_SHELL_COMMAND * __bt_shell_commands_start;
 extern const BT_SHELL_COMMAND * __bt_shell_commands_end;
@@ -26,9 +27,6 @@ static const BT_SHELL_COMMAND *GetShellCommand(const BT_i8 *name) {
 	return NULL;
 }
 
-
-
-
 BT_ERROR BT_ShellCommand(char *input) {
 
 	BT_u32 ulArguments = 0;
@@ -43,7 +41,7 @@ BT_ERROR BT_ShellCommand(char *input) {
 
 	input = copy;
 
-	while(isspace(*input)) {
+	while(isspace((int)*input)) {
 		input++;	// Eat up prefixed whitespace.
 	}
 
@@ -53,12 +51,12 @@ BT_ERROR BT_ShellCommand(char *input) {
 
 	while(*input) {
 		if(bIsArg) {
-			if(isspace(*input)) {
+			if(isspace((int)*input)) {
 				ulArguments += 1;
 				bIsArg = BT_FALSE;
 			}
 		} else {
-			if(!isspace(*input)) {
+			if(!isspace((int)*input)) {
 				bIsArg = BT_TRUE;
 			}
 		}
@@ -83,12 +81,12 @@ BT_ERROR BT_ShellCommand(char *input) {
 
 	while(*input) {
 		if(!bIsArg) {
-			if(!isspace(*input)) {
+			if(!isspace((int)*input)) {
 				bIsArg = BT_TRUE;
 				pargs[i++] = input;
 			}
 		} else {
-			if(isspace(*input)) {
+			if(isspace((int)*input)) {
 				*input = '\0';
 				bIsArg = BT_FALSE;
 			}
@@ -98,10 +96,10 @@ BT_ERROR BT_ShellCommand(char *input) {
 
 	const BT_SHELL_COMMAND *pCommand = GetShellCommand(pargs[0]);
 	if(!pCommand) {
+		BT_kFree(pargs);
+		BT_kFree(copy);
 		return BT_ERR_NONE;
 	}
-
-
 
 	pCommand->pfnCommand(ulArguments, pargs);
 
