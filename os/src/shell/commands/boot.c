@@ -15,7 +15,7 @@ static int bt_boot(int argc, char **argv) {
 	BT_u32 addr;
 
 	if(argc == 4) {
-		if(!strcmp(argv[1], "--core")) {
+		if(strcmp(argv[1], "--core")) {
 			bt_printf("Invalid argument %s\n", argv[1]);
 			return -1;
 		}
@@ -42,6 +42,7 @@ static int bt_boot(int argc, char **argv) {
 
 	} else {
 		// Must use MACH core boot interface.
+		BT_BootCore(coreID, p);
 	}
 
 	return 0;
