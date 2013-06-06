@@ -30,5 +30,6 @@ typedef struct _BT_SHELL_COMMAND {
 #define BT_SHELL_COMMAND_DEF 		static const BT_ATTRIBUTE_SECTION(".bt.shell.commands") BT_SHELL_COMMAND
 
 BT_ERROR BT_ShellCommand(char *input);
+BT_ERROR BT_ShellScript(const BT_i8 *path);
 
 #endif

@@ -108,3 +108,45 @@ BT_ERROR BT_ShellCommand(char *input) {
 
 	return BT_ERR_NONE;
 }
+
+BT_ERROR BT_ShellScript(const BT_i8 *path) {
+
+	BT_ERROR Error;
+
+	BT_HANDLE hFile = BT_Open(path, "rb", &Error);
+	if(!hFile) {
+		BT_kPrint("Could not open shell script %s\n", path);
+		return BT_ERR_GENERIC;
+	}
+
+	BT_i8 *line = BT_kMalloc(256);
+	if(!line) {
+		BT_CloseHandle(hFile);
+		return BT_ERR_NO_MEMORY;
+	}
+
+
+	BT_u32 linelen;
+
+	while((linelen = BT_GetS(hFile, 256, line)) > 0) {
+		BT_i8 *p = line;
+		while(isspace((int) *p)) {
+			p++;
+		}
+
+		if(*p == '#') {
+			continue;	// commented line!
+		}
+
+		if(p == (line + linelen)) {
+			continue;
+		}
+
+		Error = BT_ShellCommand(p);
+	}
+
+	BT_kFree(line);
+	BT_CloseHandle(hFile);
+
+	return BT_ERR_NONE;
+}
