@@ -14,6 +14,7 @@
 #include "process/bt_process.h"
 #include "process/bt_threads.h"
 #include "fs/bt_devfs.h"
+#include "fs/bt_fs.h"
 #include "fs/bt_file.h"
 #include "fs/bt_dir.h"
 #include "fs/bt_inode.h"
