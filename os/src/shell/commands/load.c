@@ -1,4 +1,5 @@
 #include <bitthunder.h>
+#include <stdlib.h>
 
 static int bt_load_command(int argc, char **argv) {
 
