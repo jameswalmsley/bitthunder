@@ -5,6 +5,7 @@
 #include "interfaces/bt_if_block.h"
 #include "interfaces/bt_if_fs.h"
 #include "interfaces/bt_if_module.h"
+#include "interfaces/bt_if_cpu.h"
 
 #include <bt_module.h>
 

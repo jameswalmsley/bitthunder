@@ -29,6 +29,12 @@ BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-A9)	+= $(BUILD_DIR)arch/arm/comm
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-M0)	+= $(BUILD_DIR)arch/arm/common/cortex/systick.o
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-M3)	+= $(BUILD_DIR)arch/arm/common/cortex/systick.o
 
+#
+#	Cache and CPU interfaces.
+#
+BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-A9)	+= $(BUILD_DIR)arch/arm/common/arm11cpu.o
+BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-A9)	+= $(BUILD_DIR)arch/arm/common/arm-cache.o
+
 
 
 #
@@ -68,4 +74,3 @@ OBJECTS += $(BT_ARCH_ARM_OBJECTS)
 
 $(BUILD_DIR)arch/arm/bitthunder.lds: MODULE_NAME="Linker"
 LINKER_SCRIPTS += $(BUILD_DIR)arch/arm/bitthunder.lds
-
