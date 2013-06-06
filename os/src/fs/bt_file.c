@@ -83,3 +83,32 @@ BT_u64 BT_Tell(BT_HANDLE hFile, BT_ERROR *pError) {
 
 	return hFile->h.pIf->oIfs.pFileIF->pfnTell(hFile);
 }
+
+
+
+BT_s32 BT_GetS(BT_HANDLE hFile, BT_u32 ulSize, BT_i8 *s) {
+
+	BT_ERROR Error;
+
+	if(!isHandleValid(hFile, &Error)) {
+		return (BT_s32) Error;
+	}
+
+	BT_i8 *t;
+	BT_s32 c;
+
+    t = s;
+    while (--ulSize>1 && (c=BT_GetC(hFile, 0, &Error)) != -1 && c != '\n') {
+        *s++ = c;
+	}
+
+    if (c == '\n') {
+        *s++ = c;
+	} else if (ulSize == 1) {
+		*s++ = '\n';
+    }
+
+    *s = '\0';
+
+    return s - t;
+}
