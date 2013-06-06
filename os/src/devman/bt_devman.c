@@ -44,13 +44,14 @@ BT_INTEGRATED_DEVICE *BT_GetIntegratedDeviceByName(const BT_i8 *szpName) {
 
 	size /= sizeof(BT_INTEGRATED_DEVICE);
 
-	for(i = 0; i < size; i++) {
-		BT_INTEGRATED_DEVICE *pDevice = (BT_INTEGRATED_DEVICE *) &__bt_arch_devices_start;
-		pDevice += i;
+	BT_INTEGRATED_DEVICE *pDevice = (BT_INTEGRATED_DEVICE *) &__bt_arch_devices_start;
 
+	for(i = 0; i < size; i++) {
 		if(!strcmp(szpName, pDevice->name)) {
 			return pDevice;
 		}
+
+		pDevice++;
 	}
 
 	return NULL;
