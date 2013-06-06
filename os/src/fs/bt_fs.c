@@ -146,7 +146,7 @@ BT_ERROR BT_MkDir(BT_i8 *szpPath) {
 	return pFS->pfnMkDir(pMount->hMount, path);
 }
 
-BT_HANDLE BT_OpenDir(BT_i8 *szpPath, BT_ERROR *pError) {
+BT_HANDLE BT_OpenDir(const BT_i8 *szpPath, BT_ERROR *pError) {
 	BT_MOUNTPOINT *pMount = GetMountPoint(szpPath);
 	if(!pMount) {
 		return NULL;
@@ -158,7 +158,7 @@ BT_HANDLE BT_OpenDir(BT_i8 *szpPath, BT_ERROR *pError) {
 	return pFS->pfnOpenDir(pMount->hMount, path, pError);
 }
 
-BT_HANDLE BT_GetInode(BT_i8 *szpPath, BT_ERROR *pError) {
+BT_HANDLE BT_GetInode(const BT_i8 *szpPath, BT_ERROR *pError) {
 	BT_MOUNTPOINT *pMount = GetMountPoint(szpPath);
 	if(!pMount) {
 		return NULL;
