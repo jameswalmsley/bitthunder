@@ -41,7 +41,7 @@ int main(int argc, char **argv) {
 	BT_GpioSetDirection(7, BT_GPIO_DIR_OUTPUT);
 
 
-	BT_ThreadSleep(8000);
+	BT_ThreadSleep(250);
 
 	BT_TICK time = BT_GetKernelTick();
 
@@ -51,7 +51,10 @@ int main(int argc, char **argv) {
 	BT_Mount(hVolume, "/");
 	BT_kPrint("Done");
 
-	BT_kPrint("Opening zImage");
+	BT_ShellCommand("load 0x00100000 /kernel.img");
+	BT_ShellCommand("load 0x01000000 /zImage");
+
+	/*BT_kPrint("Opening zImage");
 
 	BT_HANDLE hFile = BT_Open("/kernel.img", "rb", &Error);
 	if(!hFile) {
@@ -60,7 +63,12 @@ int main(int argc, char **argv) {
 
 	BT_kPrint("Reading file...");
 	BT_Read(hFile, 0, 1024*1024*2, buffer, &Error);
-	BT_kPrint("Done");
+	BT_kPrint("Done");*/
+
+	/*while(1) {
+			BT_ThreadSleep(1000);
+			BT_ShellCommand("help this is a test");
+		}*/
 
 	BT_StopSystemTimer();
 	BT_DisableInterrupts();
@@ -71,9 +79,7 @@ int main(int argc, char **argv) {
 
 	BT_CharDeviceFlush(hUART);
 
-	/*while(1) {
-		BT_ThreadSleep(1000);
-	}*/
+
 
 	__asm volatile("b 0x00100000");
 
