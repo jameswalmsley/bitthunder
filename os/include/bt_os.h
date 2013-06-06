@@ -20,5 +20,6 @@
 #include "lib/printf.h"
 #include "syslog/bt_printk.h"
 #include "helpers/bt_clkdiv.h"
+#include "shell/bt_shell.h"
 
 #endif

@@ -9,6 +9,12 @@
 static int bt_help_command(int argc, char **argv) {
 
 	bt_printf("BT Shell (help):\n");
+	bt_printf("argc = %d\n", argc);
+
+	BT_u32 i;
+	for(i = 0; i < argc; i++) {
+		bt_printf("arg %d : %s\n", i, argv[i]);
+	}
 
 	return 0;
 }
