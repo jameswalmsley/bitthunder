@@ -47,6 +47,13 @@
 		__bt_devfs_entries_end = .;
 	} > BT_LINKER_INIT_SECTION
 
+	.bt.shell.commands : {
+		__bt_shell_commands_start = .;
+		KEEP(*(.bt.shell.commands))
+		KEEP(*(.bt.shell.commands.*))
+		__bt_shell_commands_end = .;
+	} > BT_LINKER_INIT_SECTION
+
 	.text : {
 	    *(.vectors)
 		*(.boot)
