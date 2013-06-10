@@ -20,10 +20,6 @@ BT_OS_OBJECTS-$(BT_CONFIG_INTERRUPTS_SOFTIRQ) += $(BUILD_DIR)os/src/interrupts/b
 BT_OS_OBJECTS-$(BT_CONFIG_TASKLETS) += $(BUILD_DIR)os/src/interrupts/bt_tasklets.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/gpio/bt_gpio.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/module/bt_module_init.o
-BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/devman/bt_devman.o
-BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/devman/bt_resources.o
-BT_OS_OBJECTS-$(BT_CONFIG_I2C) += $(BUILD_DIR)os/src/devman/bt_i2c.o
-BT_OS_OBJECTS-$(BT_CONFIG_BLOCK) += $(BUILD_DIR)os/src/devman/bt_block.o
 BT_OS_OBJECTS-$(BT_CONFIG_VOLUME) += $(BUILD_DIR)os/src/volumes/bt_volume.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/machines/bt_machines.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/timers/bt_timers.o
@@ -35,7 +31,7 @@ BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/syslog/bt_printk.o
 
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/shell/commands/help.o
 
-
+include $(BASE)os/src/devman/objects.mk
 include $(BASE)os/src/fs/objects.mk
 include $(BASE)os/src/net/objects.mk
 include $(BASE)os/src/shell/objects.mk
