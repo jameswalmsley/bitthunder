@@ -20,6 +20,7 @@ typedef struct _BT_LIST {
 	BT_HANDLE				hListMutex;
 } BT_LIST;
 
+BT_BOOL BT_ListInitialised(BT_LIST *pL);
 BT_ERROR BT_ListInit(BT_LIST *pL);
 BT_ERROR BT_ListDestroy(BT_LIST *pL);
 BT_LIST_ITEM *BT_ListGetHead(BT_LIST *pL);

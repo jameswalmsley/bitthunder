@@ -7,6 +7,10 @@
 #include <collections/bt_linked_list.h>
 
 
+BT_BOOL BT_ListInitialised(BT_LIST *pL) {
+	return (pL->hListMutex != NULL);
+}
+
 BT_ERROR BT_ListInit(BT_LIST *pL) {
 	pL->pStart = NULL;
 	pL->ulItems = 0;
