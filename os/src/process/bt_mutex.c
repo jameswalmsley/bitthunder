@@ -42,6 +42,15 @@ BT_ERROR BT_ReleaseMutex(BT_HANDLE hMutex) {
 	return BT_kMutexRelease(hMutex->pMutex);
 }
 
+BT_ERROR BT_PendMutexRecursive(BT_HANDLE hMutex, BT_TICK oTimeoutTicks) {
+	return BT_kMutexPendRecursive(hMutex->pMutex, oTimeoutTicks);
+}
+
+BT_ERROR BT_ReleaseMutexRecursive(BT_HANDLE hMutex) {
+	return BT_kMutexReleaseRecursive(hMutex->pMutex);
+}
+
+
 BT_ERROR BT_ReleaseMutexFromISR(BT_HANDLE hMutex, BT_BOOL *pbHigherPriorityThreadWoken) {
 	return BT_kMutexReleaseFromISR(hMutex->pMutex, pbHigherPriorityThreadWoken);
 }

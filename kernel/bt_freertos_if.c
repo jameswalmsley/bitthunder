@@ -70,6 +70,10 @@ void *BT_kMutexCreate() {
 	return m;
 }
 
+void *BT_kRecursiveMutexCreate() {
+	return xSemaphoreCreateRecursiveMutex();
+}
+
 void BT_kMutexDestroy(void *pMutex) {
 	vSemaphoreDelete(pMutex);
 }
@@ -88,6 +92,25 @@ BT_BOOL BT_kMutexPend(void *pMutex, BT_TICK oTimeoutTicks) {
 
 BT_BOOL  BT_kMutexRelease(void *pMutex) {
 	if(xSemaphoreGive(pMutex) == pdTRUE) {
+		return BT_TRUE;
+	}
+	return BT_FALSE;
+}
+
+BT_BOOL BT_kMutexPendRecursive(void *pMutex, BT_TICK oTimeoutTicks) {
+
+	if(!oTimeoutTicks) {
+		oTimeoutTicks = portMAX_DELAY;
+	}
+
+	if(xSemaphoreTakeRecursive(pMutex, oTimeoutTicks) == pdPASS) {
+		return BT_TRUE;
+	}
+	return BT_FALSE;
+}
+
+BT_BOOL  BT_kMutexReleaseRecursive(void *pMutex) {
+	if(xSemaphoreGiveRecursive(pMutex) == pdTRUE) {
 		return BT_TRUE;
 	}
 	return BT_FALSE;

@@ -19,10 +19,13 @@ void 	   *BT_kGetThreadTag	(void *pThreadID);
 void		BT_kSetThreadTag	(void *pThreadID, void *pTagData);
 
 void 	   *BT_kMutexCreate		(void);
+void 	   *BT_kRecursiveMutexCreate(void);
 void	    BT_kMutexDestroy	(void *pMutex);
 BT_BOOL		BT_kMutexPend		(void *pMutex, BT_u32 ulTimeout);
 BT_BOOL		BT_kMutexRelease	(void *pMutex);
-BT_BOOL		BT_kMutexReleaseFromISR(void *pMutex, BT_BOOL *pbHigherPriorityTaskWoken);
+BT_BOOL		BT_kMutexPendRecursive		(void *pMutex, BT_u32 ulTimeout);
+BT_BOOL		BT_kMutexReleaseRecursive	(void *pMutex);
+BT_BOOL		BT_kMutexReleaseFromISR		(void *pMutex, BT_BOOL *pbHigherPriorityTaskWoken);
 
 void 	   *BT_kQueueCreate				(BT_u32 ulElements, BT_u32 ulElementWidth);
 void 		BT_kQueueDestroy			(void *pQueue);
