@@ -34,8 +34,8 @@ typedef struct _BT_I2C_MESSAGE {
 	#define BT_I2C_M_IGNORE_NAK					0x1000
 	#define BT_I2C_M_NO_RD_ACK					0x0800
 	#define BT_I2C_M_RECV_LEN					0x0400
-	BT_u16 	len;
 	BT_u8  *buf;
+	BT_u16 	len;
 } BT_I2C_MESSAGE;
 
 BT_ERROR BT_I2C_RegisterBusWithID(BT_HANDLE hBus, BT_u32 ulBusID, BT_I2C_BOARD_INFO *pInfo, BT_u32 ulNum);
