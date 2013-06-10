@@ -12,6 +12,7 @@ MACH_lm3sxx_OBJECTS-$(BT_CONFIG_MACH_LM3Sxx_SPI)      += $(BUILD_DIR)arch/arm/ma
 MACH_lm3sxx_OBJECTS-$(BT_CONFIG_MACH_LM3Sxx_I2C)      += $(BUILD_DIR)arch/arm/mach/lm3sxx/i2c.o
 MACH_lm3sxx_OBJECTS-$(BT_CONFIG_MACH_LM3Sxx_ADC)      += $(BUILD_DIR)arch/arm/mach/lm3sxx/adc.o
 MACH_lm3sxx_OBJECTS-$(BT_CONFIG_MACH_LM3Sxx_PWM)      += $(BUILD_DIR)arch/arm/mach/lm3sxx/pwm.o
+MACH_lm3sxx_OBJECTS-$(BT_CONFIG_MACH_LM3Sxx_MAC)	  += $(BUILD_DIR)arch/arm/mach/lm3sxx/mac.o
 
 MACH_lm3sxx_OBJECTS += $(MACH_lm3sxx_OBJECTS-y)
 

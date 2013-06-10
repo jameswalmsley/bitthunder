@@ -131,6 +131,36 @@ void __attribute__((weak)) BT_NVIC_SysTick_Handler(void);
 #if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 50
 	void __attribute__((weak)) BT_NVIC_IRQ_50(void);
 #endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 51
+	void __attribute__((weak)) BT_NVIC_IRQ_51(void);
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 52
+	void __attribute__((weak)) BT_NVIC_IRQ_52(void);
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 53
+	void __attribute__((weak)) BT_NVIC_IRQ_53(void);
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 54
+	void __attribute__((weak)) BT_NVIC_IRQ_54(void);
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 55
+	void __attribute__((weak)) BT_NVIC_IRQ_55(void);
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 56
+	void __attribute__((weak)) BT_NVIC_IRQ_56(void);
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 57
+	void __attribute__((weak)) BT_NVIC_IRQ_57(void);
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 58
+	void __attribute__((weak)) BT_NVIC_IRQ_58(void);
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 59
+	void __attribute__((weak)) BT_NVIC_IRQ_59(void);
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 60
+	void __attribute__((weak)) BT_NVIC_IRQ_60(void);
+#endif
 /**
  *	Here we define the cortex-m3 vector table.
  *	We can use the pre-processor to extend the optional entries.
@@ -259,13 +289,43 @@ void (* const g_pfnVectors[])(void) = {
 #if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 50
 	BT_NVIC_IRQ_50,
 #endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 51
+	BT_NVIC_IRQ_51,
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 52
+	BT_NVIC_IRQ_52,
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 53
+	BT_NVIC_IRQ_53,
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 54
+	BT_NVIC_IRQ_54,
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 55
+	BT_NVIC_IRQ_55,
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 56
+	BT_NVIC_IRQ_56,
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 57
+	BT_NVIC_IRQ_57,
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 58
+	BT_NVIC_IRQ_58,
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 59
+	BT_NVIC_IRQ_59,
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 60
+	BT_NVIC_IRQ_60,
+#endif
 };
 
 void BT_NVIC_Default_Handlr(void);
 void BT_NVIC_Test_Handler(void);
 //#pragma weak BT_NVIC_Reset_Handler		= BT_NVIC_Default_Handler 
 #pragma weak BT_NVIC_NMI_Handler		= BT_NVIC_Default_Handler
-#pragma weak BT_NVIC_HardFault_Handler	= BT_NVIC_Default_Handler
+#pragma weak BT_NVIC_HardFault_Handler	= BT_NVIC_Test_Handler
 #pragma weak BT_NVIC_MemManage_Handler	= BT_NVIC_Default_Handler
 #pragma weak BT_NVIC_BusFault_Handler	= BT_NVIC_Default_Handler
 #pragma weak BT_NVIC_UsageFault_Handler	= BT_NVIC_Default_Handler
@@ -378,6 +438,36 @@ void BT_NVIC_Test_Handler(void);
 #if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 50
 	#pragma weak BT_NVIC_IRQ_50			= BT_NVIC_Default_Handler
 #endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 51
+	#pragma weak BT_NVIC_IRQ_51			= BT_NVIC_Default_Handler
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 52
+	#pragma weak BT_NVIC_IRQ_52			= BT_NVIC_Default_Handler
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 53
+	#pragma weak BT_NVIC_IRQ_53			= BT_NVIC_Default_Handler
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 54
+	#pragma weak BT_NVIC_IRQ_54			= BT_NVIC_Default_Handler
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 55
+	#pragma weak BT_NVIC_IRQ_55			= BT_NVIC_Default_Handler
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 56
+	#pragma weak BT_NVIC_IRQ_56			= BT_NVIC_Default_Handler
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 57
+	#pragma weak BT_NVIC_IRQ_57			= BT_NVIC_Default_Handler
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 58
+	#pragma weak BT_NVIC_IRQ_58			= BT_NVIC_Default_Handler
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 59
+	#pragma weak BT_NVIC_IRQ_59			= BT_NVIC_Default_Handler
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 60
+	#pragma weak BT_NVIC_IRQ_60			= BT_NVIC_Default_Handler
+#endif
 
 void BT_NVIC_Default_Handler(void) {
 	while (1);
@@ -416,6 +506,12 @@ extern unsigned long _estack;
 
 void bt_reset(void) {
 	SCB_REGS * pSCB = SCB;
+
+	BT_u32 i;
+
+	for (i = 0; i < 1000000; i++) {
+		__asm__ ("");
+	}
 
 	bt_startup_init_hook();
 

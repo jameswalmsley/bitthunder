@@ -16,6 +16,11 @@ config HAS_I2C0
 	bool
 	default n
 	
+config HAS_ETHERNET
+	bool
+	default n
+	
+	
 choice
 	prompt "LM3Sxx Chip Variant"
 	default MACH_LM3Sxx_LM3S9B92
@@ -71,6 +76,12 @@ config MACH_LM3Sxx_CAN1_BASE
 	hex
 	default 0x40041000
 	depends on HAS_CAN_1
+	
+	
+config MACH_LM3Sxx_MAC0_BASE
+	hex
+	default 0x40048000
+	depends on HAS_ETHERNET
 
 config MACH_LM3Sxx_PWM0_BASE  
 	hex
@@ -103,7 +114,7 @@ config MACH_LM3Sxx_TIMER3_BASE
 
 config MACH_LM3Sxx_TOTAL_GPIOS
 	int
-	default 128 if MACH_LM3Sxx_LM3S9B92	
+	default 72 if MACH_LM3Sxx_LM3S9B92	
 	
 config MAX_IRQ
 	   int
@@ -283,6 +294,20 @@ config MACH_LM3Sxx_I2C_1_INODE_NAME
 	string "I2C(1) devfs name"
 	default "i2c1"
 	depends on MACH_LM3Sxx_I2C_1
+
+endmenu
+
+menu "MAC devices"
+
+config MACH_LM3Sxx_MAC
+	bool
+	default n
+
+config MACH_LM3Sxx_MAC_0
+    bool "Use MAC(0) peripheral"
+	default n
+	select MACH_LM3Sxx_MAC
+	depends on HAS_ETHERNET
 
 endmenu
 
