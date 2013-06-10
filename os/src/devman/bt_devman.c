@@ -75,6 +75,9 @@ BT_INTEGRATED_DRIVER *BT_GetIntegratedDriverByName(const BT_i8 *szpName) {
 	return NULL;
 }
 
+const BT_RESOURCE *BT_GetIntegratedResource(const BT_INTEGRATED_DEVICE *pDevice, BT_u32 ulType, BT_u32 ulNum) {
+	return BT_GetResource(pDevice->pResources, pDevice->ulTotalResources, ulType, ulNum);
+}
 
 BT_ERROR BT_ProbeIntegratedDevices(BT_HANDLE hLogDevice) {
 

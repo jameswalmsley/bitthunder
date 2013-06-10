@@ -24,7 +24,7 @@ typedef struct _BT_RESOURCE {
 	//struct _BT_RESOURCE *parent, *sibling, *child;
 } BT_RESOURCE;
 
-#define BT_RESOURCE_TYPE_BITS	0x0000FF00
+#define BT_RESOURCE_TYPE_BITS	0x0001FF00
 #define BT_RESOURCE_IO			0x00000100
 #define BT_RESOURCE_MEM			0x00000200
 #define BT_RESOURCE_IRQ			0x00000400
@@ -33,7 +33,10 @@ typedef struct _BT_RESOURCE {
 #define BT_RESOURCE_STRING		0x00002000		///< A string resource, e.g. a sub-driver.
 #define BT_RESOURCE_PARAM		0x00004000		///< Void * pParam resource, e.g. some operations.
 #define BT_RESOURCE_FLAGS		0x00008000		///< A BT_u32 type for passing parameter flags.
+#define BT_RESOURCE_BUSID		0x00010000		///< A BusID.
 
 #define BT_RESOURCE_TYPE(x)		(x & BT_RESOURCE_TYPE_BITS)
+
+const BT_RESOURCE *BT_GetResource(const BT_RESOURCE *pResources, BT_u32 ulTotalResources, BT_u32 ulType, BT_u32 ulNum);
 
 #endif
