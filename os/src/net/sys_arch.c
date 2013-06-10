@@ -19,7 +19,8 @@
 /* Very crude mechanism used to determine if the critical section handling
 functions are being called from an interrupt context or not.  This relies on
 the interrupt handler setting this variable manually. */
-BT_BOOL bInsideISR = BT_FALSE;
+static void *g_pMutex = NULL;
+
 
 /*---------------------------------------------------------------------------*
  * Routine:  sys_mbox_new
@@ -102,14 +103,8 @@ void sys_mbox_post( sys_mbox_t *pxMailBox, void *pxMessageToPost ) {
  *---------------------------------------------------------------------------*/
 err_t sys_mbox_trypost( sys_mbox_t *pxMailBox, void *pxMessageToPost ) {
 	BT_ERROR xReturn;
-	BT_BOOL bHigherPriorityTaskWoken = BT_FALSE;
 
-	if( bInsideISR != BT_FALSE ) {
-		xReturn = BT_QueueSendFromISR( *pxMailBox, &pxMessageToPost, &bHigherPriorityTaskWoken );
-	}
-	else {
-		xReturn = BT_QueueSend( *pxMailBox, &pxMessageToPost, 0 );
-	}
+	xReturn = BT_QueueSend( *pxMailBox, &pxMessageToPost, 0 );
 
 	if( xReturn == BT_TRUE ) {
 		xReturn = ERR_OK;
@@ -206,18 +201,12 @@ u32_t sys_arch_mbox_tryfetch( sys_mbox_t *pxMailBox, void **ppvBuffer ) {
 	void *pvDummy;
 	unsigned long ulReturn;
 	long lResult;
-	BT_BOOL bHigherPriorityTaskWoken = BT_FALSE;
 
 	if( ppvBuffer== NULL ) {
 		ppvBuffer = &pvDummy;
 	}
 
-	if( bInsideISR != BT_FALSE ) {
-		lResult = BT_QueueReceiveFromISR( *pxMailBox, &( *ppvBuffer ), &bHigherPriorityTaskWoken );
-	}
-	else {
-		lResult = BT_QueueReceive( *pxMailBox, &( *ppvBuffer ), 0UL );
-	}
+	lResult = BT_QueueReceive( *pxMailBox, &( *ppvBuffer ), 0UL );
 
 	if( lResult == BT_TRUE ) {
 		ulReturn = ERR_OK;
@@ -362,14 +351,8 @@ void sys_mutex_free( sys_mutex_t *Mutex ) {
  *      sys_sem_t sem           -- Semaphore to signal
  *---------------------------------------------------------------------------*/
 void sys_sem_signal( sys_sem_t *pxSemaphore ) {
-	BT_BOOL bHigherPriorityTaskWoken = BT_FALSE;
 
-	if( bInsideISR != BT_FALSE ) {
-		BT_ReleaseMutexFromISR( *pxSemaphore, &bHigherPriorityTaskWoken );
-	}
-	else {
-		BT_ReleaseMutex( *pxSemaphore );
-	}
+	BT_ReleaseMutex( *pxSemaphore );
 }
 
 /*---------------------------------------------------------------------------*
@@ -392,6 +375,7 @@ void sys_sem_free( sys_sem_t *pxSemaphore ) {
  *      Initialize sys arch
  *---------------------------------------------------------------------------*/
 void sys_init(void) {
+	g_pMutex = BT_kRecursiveMutexCreate();
 }
 
 u32_t sys_now(void) {
@@ -460,9 +444,8 @@ sys_thread_t sys_thread_new( const char *pcName, void( *pxThread )( void *pvPara
  *      sys_prot_t              -- Previous protection level (not used here)
  *---------------------------------------------------------------------------*/
 sys_prot_t sys_arch_protect( void ) {
-	if( bInsideISR == BT_FALSE ) {
-		BT_kEnterCritical();
-	}
+	BT_kMutexPendRecursive(g_pMutex, 0);
+
 	return ( sys_prot_t ) 1;
 }
 
@@ -479,9 +462,7 @@ sys_prot_t sys_arch_protect( void ) {
  *---------------------------------------------------------------------------*/
 void sys_arch_unprotect( sys_prot_t xValue ) {
 	(void) xValue;
-	if( bInsideISR == BT_FALSE ) {
-		BT_kExitCritical();
-	}
+	BT_kMutexReleaseRecursive(g_pMutex);
 }
 
 /*

@@ -20,6 +20,7 @@
 #include "fs/bt_file.h"
 #include "fs/bt_dir.h"
 #include "fs/bt_inode.h"
+#include "net/bt_net.h"
 #include "lib/printf.h"
 #include "syslog/bt_printk.h"
 #include "helpers/bt_clkdiv.h"

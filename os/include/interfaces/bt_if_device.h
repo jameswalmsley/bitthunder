@@ -66,6 +66,7 @@ typedef union {
 	const BT_DEV_IF_ADC 	   *pADCIF;
 	const BT_DEV_IF_UART 	   *pUartIF;
 	const BT_DEV_IF_SDIO	   *pSdioIF;
+	const BT_DEV_IF_SPI 	   *pEMacIF;
 } BT_DEV_IFS;
 
 #define BT_IF_GPIO_OPS(handle)		BT_IF_DEV_CONFIG(handle).pGpioIF
@@ -76,6 +77,7 @@ typedef union {
 #define BT_IF_CAN_OPS(handle)		BT_IF_DEV_CONFIG(handle).pCANIF
 #define BT_IF_UART_OPS(handle)		BT_IF_DEV_CONFIG(handle).pUartIF
 #define BT_IF_SPI_OPS(handle)		BT_IF_DEV_CONFIG(handle).pSpiIF
+#define BT_IF_EMAC_OPS(handle)		BT_IF_DEV_CONFIG(handle).pEMacIF
 #define BT_IF_I2C_OPS(handle)		BT_IF_DEV_CONFIG(handle).pI2CIF
 #define	BT_IF_ADC_OPS(handle)		BT_IF_DEV_CONFIG(handle).pADCIF
 #define BT_IF_SDIO_OPS(handle)		BT_IF_DEV_CONFIG(handle).pSdioIF

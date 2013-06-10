@@ -3,11 +3,16 @@
 
 #include <bt_config.h>
 
+#define	TCPIP_THREAD_STACKSIZE			256
+
 /* Prevent having to link sys_arch.c (we don't test the API layers in unit tests) */
 #define NO_SYS                          0
-#define LWIP_NETCONN                    0
-#define LWIP_SOCKET                     0
+#define LWIP_NETCONN                    1
+#define	LWIP_COMPAT_SOCKETS				0
+#define LWIP_SOCKET                     1
+#define LWIP_PROVIDE_ERRNO				1
 #define	SYS_LIGHTWEIGHT_PROT			1
+#define LWIP_NETIF_API                  1
 
 #define LWIP_TCP						BT_CONFIG_USE_TCP
 #define LWIP_UDP						BT_CONFIG_USE_UDP

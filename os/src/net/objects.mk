@@ -1,7 +1,9 @@
 LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/bt_net.o
+LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/bt_sockets.o
 
 # lwIP Objects
 LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/sys_arch.o
+LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/perf.o
 LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/bt_lwip.o
 LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/core/def.o
 LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/core/dhcp.o
