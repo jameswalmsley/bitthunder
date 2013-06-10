@@ -8,7 +8,6 @@
 
 typedef struct _BT_INTEGRATED_DEVICE {
 	const BT_i8    	   *name;
-	BT_u32				id;
 	BT_u32				ulTotalResources;
 	const BT_RESOURCE  *pResources;
 } BT_INTEGRATED_DEVICE;
