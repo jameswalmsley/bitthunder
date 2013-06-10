@@ -124,6 +124,11 @@ BT_DEVFS_INODE_DEF oZynq_devcfg_inode = {
 
 static const BT_RESOURCE oZynq_i2c0_resources[] = {
 	{
+		.ulStart			= 0,
+		.ulEnd				= 0,
+		.ulFlags			= BT_RESOURCE_BUSID,
+	},
+	{
 		.ulStart			= 0xE0004000,
 		.ulEnd				= 0xE0004000 + BT_SIZE_4K - 1,
 		.ulFlags			= BT_RESOURCE_MEM,

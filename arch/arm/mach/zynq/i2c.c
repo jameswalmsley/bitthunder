@@ -113,7 +113,9 @@ static BT_HANDLE i2c_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 		goto err_free_out;
 	}
 
-	Error = BT_RegisterInterrupt(pResource->ulStart, i2c_irq_handler, hI2C);
+	BT_u32 ulIRQ = pResource->ulStart;
+
+	Error = BT_RegisterInterrupt(ulIRQ, i2c_irq_handler, hI2C);
 	if(Error) {
 		Error = BT_ERR_GENERIC;	// Device already in use!
 		goto err_free_out;
@@ -123,12 +125,22 @@ static BT_HANDLE i2c_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 
 	i2c_set_clock_rate(hI2C, BT_I2C_CLOCKRATE_400kHz);
 
-	BT_I2C_RegisterBusWithID(hI2C, 0, NULL, 0);
+	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_BUSID, 0);
+	if(!pResource) {
+		goto err_free_int_out;
+	}
+
+	BT_u32 ulBusID = pResource->ulStart;
+
+	BT_I2C_RegisterBusWithID(hI2C, ulBusID);
 	if(pError) {
 		*pError = Error;
 	}
 
 	return hI2C;
+
+err_free_int_out:
+	BT_UnregisterInterrupt(ulIRQ, i2c_irq_handler, hI2C);
 
 err_free_out:
 	BT_DestroyHandle(hI2C);
