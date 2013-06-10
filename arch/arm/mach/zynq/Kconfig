@@ -36,6 +36,17 @@ config MACH_ZYNQ_CAN_1
     bool "Use CAN(1) peripheral"
 	default n
 
+comment "I2C devices"
+config MACH_ZYNQ_I2C_0
+    bool "Use I2C(0) peripheral"
+	select I2C
+	default n
+
+config MACH_ZYNQ_I2C_1
+	bool "Use I2C(1) peripheral"
+	select I2C
+	default n
+
 comment "SDIO (SDCard Interfaces)"
 config MACH_ZYNQ_SDIO_0
     bool "Use SDIO(0) peripheral"

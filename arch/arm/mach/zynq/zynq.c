@@ -122,6 +122,29 @@ BT_DEVFS_INODE_DEF oZynq_devcfg_inode = {
 	.pDevice = &oZynq_devcfg_device,
 };
 
+static const BT_RESOURCE oZynq_i2c0_resources[] = {
+	{
+		.ulStart			= 0xE0004000,
+		.ulEnd				= 0xE0004000 + BT_SIZE_4K - 1,
+		.ulFlags			= BT_RESOURCE_MEM,
+	},
+	{
+		.ulStart 			= 57,
+		.ulEnd				= 57,
+		.ulFlags			= BT_RESOURCE_IRQ,
+	},
+};
+
+BT_INTEGRATED_DEVICE_DEF oZynq_i2c0_device = {
+	.name 					= "zynq,i2c",
+	.ulTotalResources		= BT_ARRAY_SIZE(oZynq_i2c0_resources),
+	.pResources				= oZynq_i2c0_resources,
+};
+
+BT_DEVFS_INODE_DEF oZynq_i2c0_inode = {
+	.szpName				= "i2c0",
+	.pDevice				= &oZynq_i2c0_device,
+};
 
 #ifdef BT_CONFIG_MACH_ZYNQ_UART_0
 static const BT_RESOURCE oZynq_uart0_resources[] = {
