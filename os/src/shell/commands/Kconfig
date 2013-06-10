@@ -1,0 +1,23 @@
+menu "Commands"
+
+config SHELL_CMD_BOOT
+    bool "boot"
+	depends on SHELL
+	default n
+
+config SHELL_CMD_HELP
+    bool "help"
+	depends on SHELL
+	default n
+
+config SHELL_CMD_LOAD
+    bool "load"
+	depends on SHELL
+	default n
+
+config SHELL_CMD_LOAD_FPGA
+    bool "load_fpga"
+	depends on SHELL
+	default n
+
+endmenu

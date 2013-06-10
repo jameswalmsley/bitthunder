@@ -3,6 +3,7 @@ source os/src/gpio/Kconfig
 source os/src/interrupts/Kconfig
 source os/src/fs/Kconfig
 source os/src/net/Kconfig
+source os/src/shell/Kconfig
 source os/src/syslog/Kconfig
 source os/src/lib/Kconfig
 

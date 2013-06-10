@@ -1,5 +1,8 @@
-BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/shell/bt_shell.o
-BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/shell/commands/boot.o
-BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/shell/commands/help.o
-BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/shell/commands/load.o
-BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/shell/commands/load_fpga.o
+BT_OS_OBJECTS-$(BT_CONFIG_SHELL) += $(BUILD_DIR)os/src/shell/bt_shell.o
+
+
+# Commands
+BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_BOOT) 		+= $(BUILD_DIR)os/src/shell/commands/boot.o
+BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_HELP) 		+= $(BUILD_DIR)os/src/shell/commands/help.o
+BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_LOAD) 		+= $(BUILD_DIR)os/src/shell/commands/load.o
+BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_LOAD_FPGA) 	+= $(BUILD_DIR)os/src/shell/commands/load_fpga.o

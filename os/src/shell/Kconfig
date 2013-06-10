@@ -1,0 +1,8 @@
+menu "Kernel Shell"
+config SHELL
+    bool "Enable Kernel Shell"
+	default n
+
+source os/src/shell/commands/Kconfig
+
+endmenu
