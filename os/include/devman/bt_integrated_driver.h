@@ -2,6 +2,7 @@
 #define _BT_INTEGRATED_DRIVER_H_
 
 #include "bt_types.h"
+#include "bt_device.h"
 #include "bt_resource.h"
 #include "bt_i2c.h"
 
