@@ -110,14 +110,6 @@ static BT_ERROR uartEnable(BT_HANDLE hUart);
 static BT_ERROR uartSetBaudrate(BT_HANDLE hUart, BT_u32 ulBaudrate) {
 	volatile ZYNQ_UART_REGS *pRegs = hUart->pRegs;
 
-	BT_u8	IterBAUDDIV;
-	BT_u32	BRGR_Value;
-	BT_u32	CalcBaudRate;
-	BT_u32	BaudError;
-	BT_u32	Best_BRGR = 0;
-	BT_u8	Best_BAUDDIV = 0;
-	BT_u32	Best_Error = 0xFFFFFFFF;
-	BT_u32	PercentError;
 	BT_u32	InputClk;
 	BT_u32	BaudRate = ulBaudrate;
 
@@ -150,59 +142,20 @@ static BT_ERROR uartSetBaudrate(BT_HANDLE hUart, BT_u32 ulBaudrate) {
 
 	InputClk /= ZYNQ_SLCR_CLK_CTRL_DIVISOR_VAL(pSLCR->UART_CLK_CTRL);
 
-	/*
-	 * Determine the Baud divider. It can be 4to 254.
-	 * Loop through all possible combinations
-	 */
-	for (IterBAUDDIV = 4; IterBAUDDIV < 255; IterBAUDDIV++) {
+	BT_DIVIDER_PARAMS oDiv;
+	oDiv.diva_max = 65536;
+	oDiv.diva_min = 1;
+	oDiv.divb_min = 4;
+	oDiv.divb_max = 255;
 
-		/*
-		 * Calculate the value for BRGR register
-		 */
-		BRGR_Value = InputClk / (BaudRate * (IterBAUDDIV + 1));
-
-		/*
-		 * Calculate the baud rate from the BRGR value
-		 */
-		CalcBaudRate = InputClk/ (BRGR_Value * (IterBAUDDIV + 1));
-
-		/*
-		 * Avoid unsigned integer underflow
-		 */
-		if (BaudRate > CalcBaudRate) {
-			BaudError = BaudRate - CalcBaudRate;
-		} else {
-			BaudError = CalcBaudRate - BaudRate;
-		}
-
-		/*
-		 * Find the calculated baud rate closest to requested baud rate.
-		 */
-		if (Best_Error > BaudError) {
-
-			Best_BRGR = BRGR_Value;
-			Best_BAUDDIV = IterBAUDDIV;
-			Best_Error = BaudError;
-		}
-	}
-
-	PercentError = (Best_Error * 100) / BaudRate;
-	if (MAX_BAUD_ERROR_RATE < PercentError) {
-		return -1;
-	}
+	BT_CalculateClockDivider(InputClk, BaudRate, &oDiv);
 
 	uartDisable(hUart);
 
-	pRegs->BAUDGEN = Best_BRGR;
-	pRegs->BAUDDIV = Best_BAUDDIV;
+	pRegs->BAUDGEN = oDiv.diva_val;
+	pRegs->BAUDDIV = oDiv.divb_val;
 
 	pRegs->MR = 0x20;
-
-	// STM32 uarts support fractional baudrate division :D so we do some fixed-point arithmetic
-
-	//pRegs->BAUDGEN
-
-	//pRegs->BAUDDIV = (((UART_FREQ/pRegs->BAUDGEN) << 4) / ulBaudrate / 16) & 0x0000FFFF;
 
 	uartEnable(hUart);
 	return BT_ERR_NONE;
