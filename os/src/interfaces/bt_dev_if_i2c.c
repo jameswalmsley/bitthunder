@@ -88,7 +88,3 @@ BT_u32 BT_I2C_MasterReceive(BT_I2C_CLIENT *pClient, BT_u8 *pucDest, BT_u32 ulLen
 
 	return (RetVal == 1) ? ulLength : RetVal;
 }
-
-BT_I2C_CLIENT *BT_I2C_NewDevice(BT_HANDLE hI2C, BT_I2C_BOARD_INFO *pInfo, BT_ERROR *pError) {
-	return NULL;
-}

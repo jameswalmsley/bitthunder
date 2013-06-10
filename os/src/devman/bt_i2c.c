@@ -13,8 +13,6 @@ typedef struct _BT_I2C_BUS {
 	BT_LIST_ITEM 	oItem;
 	BT_HANDLE 		hBus;
 	BT_u32			ulID;
-	const BT_I2C_BOARD_INFO *pInfo;
-	BT_u32			ulNum;
 	BT_u32			ulStateFlags;
 	#define SM_PROBE_DEVICES 0x00000001
 } BT_I2C_BUS;
@@ -35,7 +33,7 @@ static BT_I2C_BUS *getBusByID(BT_u32 ulID) {
 	return NULL;
 }
 
-BT_ERROR BT_I2C_RegisterBusWithID(BT_HANDLE hBus, BT_u32 ulBusID, BT_I2C_BOARD_INFO *pInfo, BT_u32 ulNum) {
+BT_ERROR BT_I2C_RegisterBusWithID(BT_HANDLE hBus, BT_u32 ulBusID) {
 	BT_I2C_BUS *pBus = getBusByID(ulBusID);
 	if(pBus) {
 		return BT_ERR_GENERIC;	// Computer says no! Bus with same ID already exist!
@@ -48,34 +46,37 @@ BT_ERROR BT_I2C_RegisterBusWithID(BT_HANDLE hBus, BT_u32 ulBusID, BT_I2C_BOARD_I
 
 	pBus->ulID 	= ulBusID;
 	pBus->hBus 	= hBus;
-	pBus->pInfo = pInfo;
-	pBus->ulNum = ulNum;
 	pBus->ulStateFlags = SM_PROBE_DEVICES;
+
+	BT_ListAddItem(&g_oI2CBusses, &pBus->oItem);
 
 	BT_TaskletSchedule(&sm_tasklet);
 
 	return BT_ERR_NONE;
 }
 
-BT_ERROR BT_I2C_RegisterDevices(BT_u32 ulBusID, BT_I2C_BOARD_INFO *pInfo, BT_u32 ulNum) {
-
-
-	return BT_ERR_NONE;
-}
-
-
 static void i2c_probe_devices(BT_I2C_BUS *pBus) {
 	BT_u32 i;
 	BT_ERROR Error;
 
-	for(i = 0; i < pBus->ulNum; i++) {
-		const BT_I2C_BOARD_INFO *pInfo = &pBus->pInfo[i];
-		BT_INTEGRATED_DRIVER *pDriver = BT_GetIntegratedDriverByName(pInfo->name);
+	BT_u32 ulTotalDevices = BT_GetTotalDevicesByType(BT_DEVICE_I2C);
+	for(i = 0; i < ulTotalDevices; i++) {
+		const BT_DEVICE *pDevice = BT_GetDeviceByType(BT_DEVICE_I2C, i);
+		if(!pDevice) {
+			continue;
+		}
+
+		BT_INTEGRATED_DRIVER *pDriver = BT_GetIntegratedDriverByName(pDevice->name);
 		if(!pDriver || pDriver->eType != BT_DRIVER_I2C) {
 			continue;
 		}
 
-		pDriver->pfnI2CProbe(pBus->hBus, pInfo, &Error);
+		const BT_RESOURCE *pResource = BT_GetResource(pDevice->pResources, pDevice->ulTotalResources, BT_RESOURCE_BUSID, 0);
+		if(!pResource || pResource->ulStart != pBus->ulID) {
+			continue;
+		}
+
+		pDriver->pfnI2CProbe(pBus->hBus, pDevice, &Error);
 	}
 }
 
@@ -93,3 +94,14 @@ static void i2c_sm(void *pData) {
 }
 
 static BT_TASKLET sm_tasklet = {NULL, BT_TASKLET_IDLE, i2c_sm, NULL};
+
+
+static BT_ERROR bt_i2c_init() {
+	BT_ListInit(&g_oI2CBusses);
+	return BT_ERR_NONE;
+}
+
+BT_MODULE_INIT_DEF oI2CModuleEntry = {
+	BT_MODULE_NAME,
+	bt_i2c_init,
+};

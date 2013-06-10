@@ -9,13 +9,6 @@
 #include "bt_types.h"
 #include <collections/bt_linked_list.h>
 
-typedef struct _BT_I2C_BOARD_INFO {
-	BT_i8 		   *name;			///< Device/driver matching name.
-	BT_RESOURCE	   *pResources;		///< Pointer to fundamental resource table.
-	BT_u32			ulResources;	///< Total resources.
-	BT_u16			addr;			///< I2C bus address.
-} BT_I2C_BOARD_INFO;
-
 typedef struct _BT_I2C_CLIENT {
 	BT_LIST_ITEM 	oItem;
 	BT_HANDLE	 	hBus;
@@ -38,7 +31,7 @@ typedef struct _BT_I2C_MESSAGE {
 	BT_u16 	len;
 } BT_I2C_MESSAGE;
 
-BT_ERROR BT_I2C_RegisterBusWithID(BT_HANDLE hBus, BT_u32 ulBusID, BT_I2C_BOARD_INFO *pInfo, BT_u32 ulNum);
-BT_ERROR BT_I2C_RegisterDevices(BT_u32 ulBusID, BT_I2C_BOARD_INFO *pInfo, BT_u32 ulNum);
+BT_ERROR BT_I2C_RegisterBusWithID(BT_HANDLE hBus, BT_u32 ulBusID);
+//BT_ERROR BT_I2C_RegisterDevices(BT_u32 ulBusID, BT_I2C_BOARD_INFO *pInfo, BT_u32 ulNum);
 
 #endif
