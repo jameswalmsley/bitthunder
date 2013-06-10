@@ -25,3 +25,7 @@ config VOLUME
 config FILE
     bool "File I/O interfaces"
 	default n
+
+config I2C
+    bool "I2C subsystem"
+	default n

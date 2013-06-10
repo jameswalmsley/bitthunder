@@ -7,6 +7,7 @@
 #include "mm/bt_heap.h"
 #include "devman/bt_devman.h"
 #include "devman/bt_block.h"
+#include "devman/bt_i2c.h"
 #include "volumes/bt_volume.h"
 #include "gpio/bt_gpio.h"
 #include "timers/bt_timers.h"
