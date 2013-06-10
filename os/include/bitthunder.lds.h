@@ -33,6 +33,13 @@
 		__bt_arch_drivers_end = .;
 	} > BT_LINKER_INIT_SECTION
 
+	.bt.devices : {
+		__bt_devices_start = .;
+		KEEP(*(.bt.devices))
+		KEEP(*(.bt.devices.*))
+		__bt_devices_end = .;
+	} > BT_LINKER_INIT_SECTION
+
 	.bt.module.init : {
 	    __bt_module_init_start = .;
 		KEEP(*(.bt.module.init.*))
