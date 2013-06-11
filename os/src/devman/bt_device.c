@@ -53,3 +53,7 @@ const BT_DEVICE *BT_GetDeviceByType(BT_DEVICE_TYPE eType, BT_u32 ulIndex) {
 
 	return NULL;
 }
+
+const BT_RESOURCE *BT_GetDeviceResource(const BT_DEVICE *pDevice, BT_u32 ulType, BT_u32 ulNum) {
+	return BT_GetResource(pDevice->pResources, pDevice->ulTotalResources, ulType, ulNum);
+}
