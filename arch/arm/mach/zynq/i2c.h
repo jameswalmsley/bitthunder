@@ -6,8 +6,8 @@
 typedef struct _ZYNQ_I2C_REGS {
 	BT_u32	CONTROL;
     #define CONTROL_DIV_A				0x0000C000		///< Divisor for Stage A clock divider.
-    #define CONTROL_DIV_A_GET(x)		((x & CONTROL_DIV_A) >> 12)
-    #define CONTROL_DIV_A_SET(x, val)	(x = ((x & ~CONTROL_DIV_A) | ((val & 0x3) << 12)))
+    #define CONTROL_DIV_A_GET(x)		((x & CONTROL_DIV_A) >> 14)
+    #define CONTROL_DIV_A_SET(x, val)	(x = ((x & ~CONTROL_DIV_A) | ((val & 0x3) << 14)))
     #define CONTROL_DIV_B				0x00003F00		///< Divisor for Stage B clock divider.
     #define CONTROL_DIV_B_GET(x)		((x & CONTROL_DIV_B) >> 8)
     #define CONTROL_DIV_B_SET(x, val)	(x = ((x & ~CONTROL_DIV_B) | ((val & 0x3F) << 8)))
@@ -43,8 +43,8 @@ typedef struct _ZYNQ_I2C_REGS {
     #define INT_STATUS_DATA				0x00000002 		///< W2C More data.
     #define INT_STATUS_COMP				0x00000001 		///< W2C Transfer complete.
 
-	BT_u32	TxSIZE;
-    #define TxSIZE_SIZE					0x000000FF		///< Transfer size.
+	BT_u32	TRANSFER_SIZE;
+    #define TRANSFER_SIZE_SIZE			0x000000FF		///< Transfer size.
 
 	BT_u32	SLAVE_PAUSE;
     #define SLAVE_PAUSE_PAUSE			0x0000000F 		///< Pause interval (0 - 7).
@@ -87,6 +87,7 @@ typedef struct _ZYNQ_I2C_REGS {
 
 } ZYNQ_I2C_REGS;
 
+#define I2C_FIFO_LEN	16
 
 
 

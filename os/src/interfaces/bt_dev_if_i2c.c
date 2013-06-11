@@ -45,11 +45,11 @@ BT_u32 BT_I2C_Transfer(BT_HANDLE hI2C, BT_I2C_MESSAGE *pMessages, BT_u32 ulMessa
 
 	BT_u32 RetVal;
 
-	BT_I2C_LockBus(hI2C);
-	{
+	/*BT_I2C_LockBus(hI2C);
+	  {*/
 		RetVal = pOps->pfnMasterTransfer(hI2C, pMessages, ulMessages, pError);
-	}
-	BT_I2C_UnlockBus(hI2C);
+		/*}
+		  BT_I2C_UnlockBus(hI2C);*/
 
 	return RetVal;
 
