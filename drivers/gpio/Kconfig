@@ -1,0 +1,16 @@
+menu "GPIO Devices"
+
+config DRIVERS_GPIO
+    bool
+	default n
+
+menu "I2C GPIO Expanders
+
+config DRIVERS_GPIO_I2C_MAX7312
+    bool "MAX7312"
+	select DRIVERS_GPIO
+	default n
+endmenu
+
+
+endmenu
