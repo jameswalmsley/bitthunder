@@ -5,6 +5,11 @@ config SHELL_CMD_BOOT
 	depends on SHELL
 	default n
 
+config SHELL_CMD_BOOT_JTAG
+    bool "boot_jtag"
+	depends on SHELL
+	default n
+
 config SHELL_CMD_HELP
     bool "help"
 	depends on SHELL
