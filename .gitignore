@@ -1,0 +1,29 @@
+# dbuild
+build
+*.elf
+*.img
+*.list
+*.map
+
+# Kconfig
+.config
+bt_bsp_config.h
+scripts/mkconfig/mkconfig
+
+# TeX Intermediates
+doc/*.aux
+doc/*.log
+doc/*.toc
+doc/*.pdf
+
+# Git
+.gitignore
+
+# Eclipse Projects
+.cproject
+.project
+
+# Emacs
+*~
+\#*\#
+.\#*
