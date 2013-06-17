@@ -15,8 +15,7 @@ BT_DEF_MODULE_EMAIL				("james@fullfat-fs.co.uk")
 
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;
-	BT_HANDLE		 hI2C;
-	BT_u32			 addr;
+	BT_I2C_CLIENT	 oClient;
 	BT_I2C_MESSAGE	 oMessages[2];
 };
 
@@ -25,17 +24,17 @@ static BT_u8 gpio_read_register(BT_HANDLE hGPIO, BT_u8 reg, BT_ERROR *pError) {
 	BT_ERROR Error;
 	BT_u8 val = 0;
 
-	hGPIO->oMessages[0].addr 	= hGPIO->addr;
+	hGPIO->oMessages[0].addr 	= hGPIO->oClient.addr;
 	hGPIO->oMessages[0].len  	= 1;
 	hGPIO->oMessages[0].buf  	= &reg;
 	hGPIO->oMessages[0].flags   = 0;
 
-	hGPIO->oMessages[1].addr 	= hGPIO->addr;
+	hGPIO->oMessages[1].addr 	= hGPIO->oClient.addr;
 	hGPIO->oMessages[1].len		= 1;
 	hGPIO->oMessages[1].buf		= &val;
 	hGPIO->oMessages[1].flags 	= BT_I2C_M_RD;
 
-	BT_I2C_Transfer(hGPIO->hI2C, hGPIO->oMessages, 2, &Error);
+	BT_I2C_Transfer(hGPIO->oClient.pBus, hGPIO->oMessages, 2, &Error);
 
 	return val;
 }
@@ -44,17 +43,17 @@ static BT_ERROR gpio_write_register(BT_HANDLE hGPIO, BT_u8 reg, BT_u8 val) {
 
 	BT_ERROR Error;
 
-	hGPIO->oMessages[0].addr 	= hGPIO->addr;
+	hGPIO->oMessages[0].addr 	= hGPIO->oClient.addr;
 	hGPIO->oMessages[0].len  	= 1;
 	hGPIO->oMessages[0].buf  	= &reg;
 	hGPIO->oMessages[0].flags   = 0;
 
-	hGPIO->oMessages[1].addr 	= hGPIO->addr;
+	hGPIO->oMessages[1].addr 	= hGPIO->oClient.addr;
 	hGPIO->oMessages[1].len		= 1;
 	hGPIO->oMessages[1].buf		= &val;
 	hGPIO->oMessages[1].flags 	= 0;
 
-	BT_I2C_Transfer(hGPIO->hI2C, hGPIO->oMessages, 2, &Error);
+	BT_I2C_Transfer(hGPIO->oClient.pBus, hGPIO->oMessages, 2, &Error);
 
 	return Error;
 }
@@ -68,6 +67,14 @@ static BT_ERROR gpio_cleanup(BT_HANDLE hGPIO) {
 }
 
 static BT_ERROR gpio_set(BT_HANDLE hGPIO, BT_u32 ulGPIO, BT_BOOL bValue) {
+	BT_ERROR Error;
+
+	BT_u8 reg = getreg(ulGPIO);
+	BT_u8 bit = ulGPIO % 8;
+
+
+	BT_u8 val = gpio_write_register(hGPIO, reg, &Error);
+
 	return BT_ERR_NONE;
 }
 
@@ -133,7 +140,7 @@ static const BT_IF_HANDLE oHandleInterface = {
 	},
 };
 
-static BT_HANDLE gpio_probe(BT_HANDLE hI2C, const BT_DEVICE *pDevice, BT_ERROR *pError) {
+static BT_HANDLE gpio_probe(const BT_I2C_BUS *pBus, const BT_DEVICE *pDevice, BT_ERROR *pError) {
 
 	BT_ERROR Error = BT_ERR_NONE;
 
@@ -143,7 +150,7 @@ static BT_HANDLE gpio_probe(BT_HANDLE hI2C, const BT_DEVICE *pDevice, BT_ERROR *
 		goto err_out;
 	}
 
-	hGPIO->hI2C = hI2C;
+	hGPIO->oClient.pBus = pBus;
 
 	const BT_RESOURCE *pResource = BT_GetDeviceResource(pDevice, BT_RESOURCE_BUSID, 1);
 	if(!pResource) {
@@ -151,7 +158,7 @@ static BT_HANDLE gpio_probe(BT_HANDLE hI2C, const BT_DEVICE *pDevice, BT_ERROR *
 		goto err_free_out;
 	}
 
-	hGPIO->addr = pResource->ulStart;
+	hGPIO->oClient.addr = pResource->ulStart;
 
 	pResource = BT_GetDeviceResource(pDevice, BT_RESOURCE_IO, 0);
 	if(!pResource) {
