@@ -9,14 +9,6 @@ BT_DEF_MODULE_EMAIL			("james@fullfat-fs.co.uk")
 static BT_LIST 		g_oI2CBusses = { NULL };
 static BT_TASKLET 	sm_tasklet;
 
-typedef struct _BT_I2C_BUS {
-	BT_LIST_ITEM 	oItem;
-	BT_HANDLE 		hBus;
-	BT_u32			ulID;
-	BT_u32			ulStateFlags;
-	#define SM_PROBE_DEVICES 0x00000001
-} BT_I2C_BUS;
-
 static BT_I2C_BUS *getBusByID(BT_u32 ulID) {
 	if(!BT_ListInitialised(&g_oI2CBusses)) {
 		return NULL;
@@ -46,7 +38,8 @@ BT_ERROR BT_I2C_RegisterBusWithID(BT_HANDLE hBus, BT_u32 ulBusID) {
 
 	pBus->ulID 	= ulBusID;
 	pBus->hBus 	= hBus;
-	pBus->ulStateFlags = SM_PROBE_DEVICES;
+	pBus->ulStateFlags = BT_I2C_SM_PROBE_DEVICES;
+	pBus->pMutex = BT_kMutexCreate();
 
 	BT_ListAddItem(&g_oI2CBusses, &pBus->oItem);
 
@@ -76,7 +69,7 @@ static void i2c_probe_devices(BT_I2C_BUS *pBus) {
 			continue;
 		}
 
-		pDriver->pfnI2CProbe(pBus->hBus, pDevice, &Error);
+		pDriver->pfnI2CProbe(pBus, pDevice, &Error);
 	}
 }
 
@@ -84,9 +77,9 @@ static void i2c_sm(void *pData) {
 	BT_I2C_BUS *pBus = (BT_I2C_BUS *) BT_ListGetHead(&g_oI2CBusses);
 	while(pBus) {
 
-		if(pBus->ulStateFlags & SM_PROBE_DEVICES) {
+		if(pBus->ulStateFlags & BT_I2C_SM_PROBE_DEVICES) {
 			i2c_probe_devices(pBus);
-			pBus->ulStateFlags &= ~SM_PROBE_DEVICES;
+			pBus->ulStateFlags &= ~BT_I2C_SM_PROBE_DEVICES;
 		}
 
 		pBus = (BT_I2C_BUS *) BT_ListGetNext(&pBus->oItem);

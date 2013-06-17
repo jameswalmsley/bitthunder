@@ -9,10 +9,19 @@
 #include "bt_types.h"
 #include <collections/bt_linked_list.h>
 
+typedef struct _BT_I2C_BUS {
+	BT_LIST_ITEM 	oItem;
+	BT_HANDLE 		hBus;
+	BT_u32			ulID;
+	BT_u32			ulStateFlags;
+	#define BT_I2C_SM_PROBE_DEVICES 0x00000001
+	void		   *pMutex;
+} BT_I2C_BUS;
+
 typedef struct _BT_I2C_CLIENT {
-	BT_HANDLE	 	hBus;
-	BT_u32		 	flags;
-	BT_u16		 	addr;
+	const BT_I2C_BUS   *pBus;
+	BT_u32		 		flags;
+	BT_u16		 		addr;
 } BT_I2C_CLIENT;
 
 typedef struct _BT_I2C_MESSAGE {

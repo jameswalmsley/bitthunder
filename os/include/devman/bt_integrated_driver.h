@@ -16,7 +16,7 @@ typedef struct _BT_INTEGRATED_DRIVER {
 	BT_DRIVER_TYPE	eType;
 	union {
 		BT_HANDLE 		(*pfnProbe)		(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError);
-		BT_HANDLE		(*pfnI2CProbe)	(BT_HANDLE hI2C, const BT_DEVICE *pDevice, BT_ERROR *pError);
+		BT_HANDLE		(*pfnI2CProbe)	(const BT_I2C_BUS *pBus, const BT_DEVICE *pDevice, BT_ERROR *pError);
 	};
 } BT_INTEGRATED_DRIVER;
 

@@ -4,11 +4,6 @@
 #include "bt_types.h"
 
 typedef enum {
-	BT_I2C_MODE_POLLED = 0,	///< A really simple, pure polling mode, with thread-yielding.
-	BT_I2C_MODE_BUFFERED,	///< A fully buffered interrupt driven mode.
-} BT_I2C_OPERATING_MODE;
-
-typedef enum {
 	BT_I2C_CLOCKRATE_100kHz = 0,
 	BT_I2C_CLOCKRATE_400kHz,
 	BT_I2C_CLOCKRATE_1000kHz,
@@ -19,14 +14,6 @@ typedef enum {
 	BT_I2C_WRITE_ACCESS = 0,
 	BT_I2C_READ_ACCESS,
 } BT_I2C_ACCESS_MODE;
-
-typedef struct {
-	BT_I2C_OPERATING_MODE						eMode;
-	BT_I2C_CLOCKRATE							ulClockrate;
-	BT_u16										ulRxBufferSize;		///<
-	BT_u16										ulTxBufferSize;		///<
-} BT_I2C_CONFIG;
-
 
 typedef struct {
 	BT_u32    	ulFunctionality;
@@ -75,11 +62,7 @@ typedef struct {
 /*
  *	Define the unified API for I2C devices in BitThunder
  */
-BT_ERROR BT_I2CSetClockrate			(BT_HANDLE hI2C, BT_I2C_CLOCKRATE eClockrate);
-BT_ERROR BT_I2CSetConfiguration		(BT_HANDLE hI2C, BT_I2C_CONFIG *pConfig);
-BT_ERROR BT_I2CGetConfiguration		(BT_HANDLE hI2C, BT_I2C_CONFIG *pConfig);
-
-BT_u32		BT_I2C_Transfer			(BT_HANDLE hI2C, BT_I2C_MESSAGE *pMessages, BT_u32 ulMessages, BT_ERROR *pError);
+BT_u32		BT_I2C_Transfer			(const BT_I2C_BUS *pBus, BT_I2C_MESSAGE *pMessages, BT_u32 ulMessages, BT_ERROR *pError);
 BT_u32		BT_I2C_MasterSend		(BT_I2C_CLIENT *pClient, const BT_u8 *pucSource, BT_u32 ulLength, BT_ERROR *pError);
 BT_u32		BT_I2C_MasterReceive	(BT_I2C_CLIENT *pClient, BT_u8 *pucDest, BT_u32 ulLength, BT_ERROR *pError);
 
