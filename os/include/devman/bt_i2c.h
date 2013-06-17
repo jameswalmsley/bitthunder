@@ -10,7 +10,6 @@
 #include <collections/bt_linked_list.h>
 
 typedef struct _BT_I2C_CLIENT {
-	BT_LIST_ITEM 	oItem;
 	BT_HANDLE	 	hBus;
 	BT_u32		 	flags;
 	BT_u16		 	addr;
