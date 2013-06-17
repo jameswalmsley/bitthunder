@@ -4,7 +4,7 @@ A Reliable Real-Time Operating System & Application Framework
 
 (c) 2012 James Walmsley <james@fullfat-fs.co.uk>
 
-Currently released under GNU GPL version 2.0
+Currently released under a permissive 3-clause BSD license.
 See LICENSE for more information.
 
 ## Directory Tree
