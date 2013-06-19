@@ -46,4 +46,6 @@ typedef BT_u32	BT_TICK;
 #define NULL	((void *) 0)
 #endif
 
+typedef BT_u32 BT_PHYS_ADDR;
+
 #endif

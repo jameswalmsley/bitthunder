@@ -4,10 +4,11 @@
 
 #include "btlinker_config.h"
 
-	.init : {
+    .init : {
 		__bt_init_start = .;
 		KEEP(*(.init))
 		KEEP(*(.init.*))
+		KEEP(*(.bt.init))
 		KEEP(*(.bt.init.vectors))
 		KEEP(*(.bt.init.vectors.*))
     } > BT_LINKER_INIT_SECTION
@@ -213,11 +214,11 @@
 } > BT_LINKER_BSS_SECTION
 
 #ifdef BT_CONFIG_HAS_MMU
-.mmu_tbl : {
-   . = ALIGN(0x4000);
-  __mmu_tbl_start = .;
-   *(.mmu_tbl)
-   __mmu_tbl_end = .;
+.bt.mmu.table : {
+    . = ALIGN(0x4000);
+    __bt_mmu_table_start = .;
+    KEEP(*(.bt.mmu.table))
+	__bt_mmu_table_end = .;
 } > BT_LINKER_TEXT_SECTION
 #endif
 
@@ -271,7 +272,7 @@ _HEAP_SIZE = BT_CONFIG_LINKER_SRAM_START_ADDRESS + BT_CONFIG_LINKER_SRAM_LENGTH 
 #endif
 
 #ifdef BT_CONFIG_LINKER_BSS_SECTION_RAM
-_HEAP_SIZE = BT_CONFIG_LINKER_RAM_START_ADDRESS + BT_CONFIG_LINKER_RAM_LENGTH - __bss_end - _STACK_SIZE - _IRQ_STACK_SIZE;
+_HEAP_SIZE = BT_LINKER_RAM_ADDRESS + BT_CONFIG_LINKER_RAM_LENGTH - __bss_end - _STACK_SIZE - _IRQ_STACK_SIZE;
 #endif
 
 .heap (NOLOAD) : {

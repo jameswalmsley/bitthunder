@@ -13,6 +13,7 @@ BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/lib/bcd.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/bt_main.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/mm/bt_mm.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/mm/bt_heap.o
+BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/mm/bt_map.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/process/bt_process.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/process/bt_threads.o
 BT_OS_OBJECTS-$(BT_CONFIG_ALIVE_LED) += $(BUILD_DIR)os/src/process/bt_alive_led.o
@@ -96,4 +97,3 @@ linker:
 	@echo $(LINKER_SCRIPTS)
 
 LINKER_SCRIPT=$(LINKER_SCRIPTS)
-
