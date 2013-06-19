@@ -110,6 +110,7 @@ static BT_ERROR uartEnable(BT_HANDLE hUart);
 static BT_ERROR uartSetBaudrate(BT_HANDLE hUart, BT_u32 ulBaudrate) {
 	volatile ZYNQ_UART_REGS *pRegs = hUart->pRegs;
 
+	BT_ERROR Error;
 	BT_u32	InputClk;
 	BT_u32	BaudRate = ulBaudrate;
 
@@ -117,7 +118,7 @@ static BT_ERROR uartSetBaudrate(BT_HANDLE hUart, BT_u32 ulBaudrate) {
 	 *	We must determine the input clock frequency to the UART peripheral.
 	 */
 
-	volatile ZYNQ_SLCR_REGS *pSLCR = ZYNQ_SLCR;
+	volatile ZYNQ_SLCR_REGS *pSLCR = bt_ioremap((void *)ZYNQ_SLCR, BT_SIZE_4K, &Error);
 	/*
 	 *	Determine the clock source!
 	 */
@@ -270,8 +271,9 @@ static BT_ERROR uartGetConfig(BT_HANDLE hUart, BT_UART_CONFIG *pConfig) {
 
 	pConfig->eMode 			= hUart->eMode;
 
+	BT_ERROR Error;
 	BT_u32 InputClk;
-	volatile ZYNQ_SLCR_REGS *pSLCR = ZYNQ_SLCR;
+	volatile ZYNQ_SLCR_REGS *pSLCR = bt_ioremap((void *)ZYNQ_SLCR, BT_SIZE_4K, &Error);
 	/*
 	 *	Determine the clock source!
 	 */
@@ -503,7 +505,7 @@ static BT_HANDLE uart_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErro
 		goto err_free_out;
 	}
 
-	hUart->pRegs = (ZYNQ_UART_REGS *) pResource->ulStart;
+	hUart->pRegs = (ZYNQ_UART_REGS *) bt_ioremap((void *)pResource->ulStart, BT_SIZE_4K, &Error);
 
 	hUart->pRegs->CR	= 0x00000128;
 	hUart->pRegs->MR 	= 0;

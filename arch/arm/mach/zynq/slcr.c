@@ -3,7 +3,8 @@
 
 BT_u32 BT_ZYNQ_GetArmPLLFrequency() {
 
-	volatile ZYNQ_SLCR_REGS *pRegs = ZYNQ_SLCR;
+	BT_ERROR Error;
+	volatile ZYNQ_SLCR_REGS *pRegs = bt_ioremap((void *)ZYNQ_SLCR, BT_SIZE_4K, &Error);
 
 	BT_u32 ctl = pRegs->ARM_PLL_CTRL;
 	BT_BOOL	bBypassed = BT_FALSE;
@@ -34,7 +35,8 @@ BT_u32 BT_ZYNQ_GetArmPLLFrequency() {
 
 BT_u32 BT_ZYNQ_GetIOPLLFrequency() {
 
-	volatile ZYNQ_SLCR_REGS *pRegs = ZYNQ_SLCR;
+	BT_ERROR Error;
+	volatile ZYNQ_SLCR_REGS *pRegs = bt_ioremap((void *)ZYNQ_SLCR, BT_SIZE_4K, &Error);
 
 	BT_u32 ctl = pRegs->IO_PLL_CTRL;
 	BT_BOOL bBypassed = BT_FALSE;
@@ -64,7 +66,8 @@ BT_u32 BT_ZYNQ_GetIOPLLFrequency() {
 
 BT_u32 BT_ZYNQ_GetDDRPLLFrequency() {
 
-	volatile ZYNQ_SLCR_REGS *pRegs = ZYNQ_SLCR;
+	BT_ERROR Error;
+	volatile ZYNQ_SLCR_REGS *pRegs = bt_ioremap((void *)ZYNQ_SLCR, BT_SIZE_4K, &Error);
 
 	BT_u32 ctl = pRegs->DDR_PLL_CTRL;
 	BT_BOOL bBypassed = BT_FALSE;
@@ -93,7 +96,8 @@ BT_u32 BT_ZYNQ_GetDDRPLLFrequency() {
 }
 
 BT_u32 BT_ZYNQ_GetCpuFrequency() {
-	volatile ZYNQ_SLCR_REGS *pRegs = ZYNQ_SLCR;
+	BT_ERROR Error;
+	volatile ZYNQ_SLCR_REGS *pRegs = bt_ioremap((void *)ZYNQ_SLCR, BT_SIZE_4K, &Error);
 
 	BT_u32 	ctl 		= pRegs->ARM_CLK_CTRL;
 	BT_u32 	srcsel 		= ZYNQ_SLCR_CLK_CTRL_SRCSEL_VAL(ctl);
@@ -123,7 +127,9 @@ BT_u32 BT_ZYNQ_GetCpuFrequency() {
 }
 
 BT_u32 BT_ZYNQ_GetCpu1xFrequency() {
-	volatile ZYNQ_SLCR_REGS *pRegs = ZYNQ_SLCR;
+	BT_ERROR Error;
+	volatile ZYNQ_SLCR_REGS *pRegs = bt_ioremap((void *)ZYNQ_SLCR, BT_SIZE_4K, &Error);
+
 	BT_u32 ulCPUClk = BT_ZYNQ_GetCpuFrequency();
 	if(pRegs->CLK_621_TRUE) {
 		return ulCPUClk / 6;

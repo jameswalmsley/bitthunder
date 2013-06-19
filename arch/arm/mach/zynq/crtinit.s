@@ -13,8 +13,6 @@
 .Lbss_end:
 	.long	__bss_end
 
-.Lstack:
-	.long	__stack
 
 
 	.globl	_start
@@ -48,7 +46,7 @@ _bt_start:
 .Lenclbss:
 
 	/* set stack pointer */
-	ldr	r13,.Lstack		/* stack address */
+	ldr	r13,=_stack
 
 #ifdef PROFILING			/* defined in Makefile */
 	/* Setup profiling stuff */
