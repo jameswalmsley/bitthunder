@@ -46,6 +46,11 @@ BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-A9)	+= $(BUILD_DIR)arch/arm/comm
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-M0) += $(BUILD_DIR)arch/arm/common/freertos-m0.o
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-M3) += $(BUILD_DIR)arch/arm/common/freertos-m3.o
 
+#
+#	Boot-Up
+#
+BT_ARCH_ARM_OBJECTS									+= $(BUILD_DIR)arch/arm/boot/head.o
+
 BT_ARCH_ARM_OBJECTS += $(BT_ARCH_ARM_OBJECTS-y)
 
 
