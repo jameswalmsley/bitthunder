@@ -47,6 +47,11 @@ BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-M0) += $(BUILD_DIR)arch/arm/comm
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-M3) += $(BUILD_DIR)arch/arm/common/freertos-m3.o
 
 #
+#	MMU
+#
+BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_HAS_MMU)			+= $(BUILD_DIR)arch/arm/mm/v7-mmu.o
+
+#
 #	Boot-Up
 #
 BT_ARCH_ARM_OBJECTS									+= $(BUILD_DIR)arch/arm/boot/head.o
