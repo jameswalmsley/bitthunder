@@ -155,7 +155,7 @@ static BT_HANDLE timer_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErr
 		goto err_free_out;
 	}
 
-	hTimer->pRegs = (CORTEX_A9_TIMER_REGS *) pResource->ulStart;
+	hTimer->pRegs = (CORTEX_A9_TIMER_REGS *) bt_ioremap((void *)pResource->ulStart, BT_SIZE_4K, &Error);
 
 	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_IRQ, 0);
 	if(!pResource) {

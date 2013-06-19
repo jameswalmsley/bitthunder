@@ -236,7 +236,7 @@ static BT_HANDLE gic_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 		goto  err_free_chip;
 	}
 
-	hGic->pGICC = (GICC_REGS *) pResource->ulStart;
+	hGic->pGICC = (GICC_REGS *) bt_ioremap((void *)pResource->ulStart, BT_SIZE_4K, &Error);
 
 	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_MEM, 1);
 	if(!pResource) {
@@ -244,7 +244,7 @@ static BT_HANDLE gic_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 		goto err_free_chip;
 	}
 
-	hGic->pGICD = (GICD_REGS *) pResource->ulStart;
+	hGic->pGICD = (GICD_REGS *) bt_ioremap((void *)pResource->ulStart, BT_SIZE_4K, &Error);
 
 	// Set private members.
 
