@@ -29,6 +29,8 @@ static int bt_boot(int argc, char **argv) {
 	BT_DCacheFlush();
 	BT_ICacheInvalidate();
 
+	BT_DCacheDisable();
+
 	if(!coreID) {
 		BT_StopSystemTimer();
 		BT_DisableInterrupts();
