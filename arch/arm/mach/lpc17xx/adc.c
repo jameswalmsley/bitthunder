@@ -96,7 +96,9 @@ static BT_ERROR adc_setconfig(BT_HANDLE hAdc, BT_ADC_CONFIG *pConfig) {
 	volatile LPC17xx_ADC_REGS *pRegs = hAdc->pRegs;
 	BT_ERROR Error = BT_ERR_NONE;
 
-	BT_u32 ulInputClk = BT_LPC17xx_GetPeripheralClock(g_ADC_PERIPHERAL[hAdc->pDevice->id]);
+	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hAdc->pDevice, BT_RESOURCE_ENUM, 0);
+
+	BT_u32 ulInputClk = BT_LPC17xx_GetPeripheralClock(g_ADC_PERIPHERAL[pResource->ulStart]);
 	BT_u32 ulDivider  = ulInputClk / (pConfig->ulSampleRate * 65);
 
 	if (ulDivider == 0) ulDivider++;
@@ -454,7 +456,6 @@ static const BT_RESOURCE oLPC17xx_adc0_resources[] = {
 };
 
 static const BT_INTEGRATED_DEVICE oLPC17xx_adc0_device = {
-	.id						= 0,
 	.name 					= "LPC17xx,adc",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC17xx_adc0_resources),
 	.pResources 			= oLPC17xx_adc0_resources,

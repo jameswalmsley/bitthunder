@@ -525,7 +525,6 @@ static const BT_RESOURCE oLM3Sxx_mac0_resources[] = {
 };
 
 BT_INTEGRATED_DEVICE_DEF oLM3Sxx_mac0_device = {
-	.id						= 0,
 	.name 					= "LM3Sxx,mac",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLM3Sxx_mac0_resources),
 	.pResources 			= oLM3Sxx_mac0_resources,

@@ -110,15 +110,16 @@ static BT_ERROR canCleanup(BT_HANDLE hCan) {
 		BT_CloseHandle(hCan->hTxFifo);
 	}
 
-	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hCan->pDevice, BT_RESOURCE_IRQ, 0);
-
 	BT_u32 i;
 	BT_BOOL bClose = BT_TRUE;
 	for (i = 0; i < 2; i++) {
-		if ((hCan->pDevice->id != i) && (g_CAN_HANDLES[i] != NULL)) {
+		const BT_RESOURCE *pResource = BT_GetIntegratedResource(hCan->pDevice, BT_RESOURCE_ENUM, 0);
+		if ((pResource->ulStart != i) && (g_CAN_HANDLES[i] != NULL)) {
 			bClose = BT_FALSE;
 		}
 	}
+
+	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hCan->pDevice, BT_RESOURCE_IRQ, 0);
 
 	if (bClose) BT_DisableInterrupt(pResource->ulStart);
 
@@ -240,7 +241,9 @@ static BT_ERROR canGetPowerState(BT_HANDLE hCan, BT_POWER_STATE *pePowerState) {
 static BT_ERROR canSetBaudrate(BT_HANDLE hCan, BT_u32 ulBaudrate) {
 	volatile LPC17xx_CAN_REGS *pRegs = hCan->pRegs;
 
-	BT_u32 ulInputClk = BT_LPC17xx_GetPeripheralClock(g_CAN_PERIPHERAL[hCan->pDevice->id]);
+	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hCan->pDevice, BT_RESOURCE_ENUM, 0);
+
+	BT_u32 ulInputClk = BT_LPC17xx_GetPeripheralClock(g_CAN_PERIPHERAL[pResource->ulStart]);
 
 	BT_u32 ulPrescale = 0;
 	BT_u32 ulCanClock = ulInputClk/(ulPrescale+1);
@@ -601,7 +604,6 @@ static const BT_RESOURCE oLPC17xx_can0_resources[] = {
 };
 
 static const BT_INTEGRATED_DEVICE oLPC17xx_can0_device = {
-	.id						= 0,
 	.name 					= "LPC17xx,can",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC17xx_can0_resources),
 	.pResources 			= oLPC17xx_can0_resources,
@@ -621,8 +623,8 @@ static const BT_RESOURCE oLPC17xx_can1_resources[] = {
 		.ulFlags 			= BT_RESOURCE_MEM,
 	},
 	{
-		.ulStart			= 0,
-		.ulEnd				= 0,
+		.ulStart			= 1,
+		.ulEnd				= 1,
 		.ulFlags			= BT_RESOURCE_ENUM,
 	},
 	{
@@ -633,7 +635,6 @@ static const BT_RESOURCE oLPC17xx_can1_resources[] = {
 };
 
 static const BT_INTEGRATED_DEVICE oLPC17xx_can1_device = {
-	.id						= 1,
 	.name 					= "LPC17xx,can",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC17xx_can1_resources),
 	.pResources 			= oLPC17xx_can1_resources,

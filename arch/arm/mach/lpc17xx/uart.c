@@ -36,6 +36,7 @@ struct _BT_OPAQUE_HANDLE {
 	LPC17xx_UART_REGS	   *pRegs;
 	const BT_INTEGRATED_DEVICE   *pDevice;
 	BT_UART_OPERATING_MODE	eMode;		///< Operational mode, i.e. buffered/polling mode.
+	BT_u32					id;
 	BT_HANDLE		   		hRxFifo;		///< RX fifo - ring buffer.
 	BT_HANDLE		   		hTxFifo;		///< TX fifo - ring buffer.
 };
@@ -66,8 +67,7 @@ static void usartRxHandler(BT_HANDLE hUart) {
     {
 		/* There are errors or break interrupt */
 		/* Read LSR will clear the interrupt */
-		volatile BT_u32 Dummy = pRegs->FIFO;	/* Dummy read on RX to clear
-										interrupt, then bail out */
+		pRegs->FIFO;	/* Dummy read on RX to clear interrupt, then bail out */
       return;
     }
 
@@ -84,12 +84,12 @@ static void usartTxHandler(BT_HANDLE hUart) {
 
 	BT_ERROR Error = BT_ERR_NONE;
 
-	TX_FIFO_LVL[hUart->pDevice->id] = 0;
+	TX_FIFO_LVL[hUart->id] = 0;
 
-	while (!BT_FifoIsEmpty(hUart->hTxFifo, &Error) && (TX_FIFO_LVL[hUart->pDevice->id] < 16)) {
+	while (!BT_FifoIsEmpty(hUart->hTxFifo, &Error) && (TX_FIFO_LVL[hUart->id] < 16)) {
 		BT_FifoRead(hUart->hTxFifo, 1, &ucData, &Error);
 		pRegs->FIFO = ucData;
-		TX_FIFO_LVL[hUart->pDevice->id]++;
+		TX_FIFO_LVL[hUart->id]++;
 	}
 	if (BT_FifoIsEmpty(hUart->hTxFifo, &Error)) {
 		pRegs->IER &= ~LPC17xx_UART_IER_THREIE;	// Disable the interrupt
@@ -169,7 +169,9 @@ static void ResetUart(BT_HANDLE hUart)
 	pRegs->RS485AMR = 0;
 	pRegs->RS485DLY	= 0;
 
-	TX_FIFO_LVL[hUart->pDevice->id] = 0;
+	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hUart->pDevice, BT_RESOURCE_ENUM, 0);
+
+	TX_FIFO_LVL[pResource->ulStart] = 0;
 }
 
 /**
@@ -222,7 +224,9 @@ static BT_ERROR uartSetBaudrate(BT_HANDLE hUart, BT_u32 ulBaudrate) {
 	 *	We must determine the input clock frequency to the UART peripheral.
 	 */
 
-	InputClk = BT_LPC17xx_GetPeripheralClock(g_USART_PERIPHERAL[hUart->pDevice->id]);
+	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hUart->pDevice, BT_RESOURCE_ENUM, 0);
+
+	InputClk = BT_LPC17xx_GetPeripheralClock(g_USART_PERIPHERAL[pResource->ulStart]);
 
 	/*
 	 * Determine the Baud divider. It can be 4to 254.
@@ -486,7 +490,9 @@ static BT_ERROR uartGetConfig(BT_HANDLE hUart, BT_UART_CONFIG *pConfig) {
 
 	BT_u32 InputClk;
 
-	InputClk = BT_LPC17xx_GetPeripheralClock(g_USART_PERIPHERAL[hUart->pDevice->id]);
+	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hUart->pDevice, BT_RESOURCE_ENUM, 0);
+
+	InputClk = BT_LPC17xx_GetPeripheralClock(g_USART_PERIPHERAL[pResource->ulStart]);
 
 	pRegs->LCR |= LPC17xx_UART_LCR_DLAB;
 	BT_u32 Divider = (pRegs->DLM << 8) + pRegs->DLL;
@@ -594,10 +600,10 @@ static BT_ERROR uartWrite(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const 
 		BT_FifoWrite(hUart->hTxFifo, ulSize, pSrc, &Error);
 		pRegs->IER |= LPC17xx_UART_IER_THREIE;	// Enable the interrupt
 
-		while (!BT_FifoIsEmpty(hUart->hTxFifo, &Error) && (TX_FIFO_LVL[hUart->pDevice->id] < 16)) {
+		while (!BT_FifoIsEmpty(hUart->hTxFifo, &Error) && (TX_FIFO_LVL[hUart->id] < 16)) {
 			BT_FifoRead(hUart->hTxFifo, 1, &ucData, &Error);
 			pRegs->FIFO = ucData;
-			TX_FIFO_LVL[hUart->pDevice->id]++;
+			TX_FIFO_LVL[hUart->id]++;
 		}
 		break;
 	}
@@ -686,6 +692,8 @@ static BT_HANDLE uart_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErro
 	if(!hUart) {
 		goto err_out;
 	}
+
+	hUart->id = pResource->ulStart;
 
 	g_USART_HANDLES[pResource->ulStart] = hUart;
 

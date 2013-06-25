@@ -109,7 +109,9 @@ static BT_u32 timer_getinputclock(BT_HANDLE hTimer, BT_ERROR *pError) {
 
 	*pError = BT_ERR_NONE;
 
-	return BT_LPC17xx_GetPeripheralClock(g_TIMER_PERIPHERAL[hTimer->pDevice->id]) / (pRegs->TMRBPR+1);
+	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hTimer->pDevice, BT_RESOURCE_ENUM, 0);
+
+	return BT_LPC17xx_GetPeripheralClock(g_TIMER_PERIPHERAL[pResource->ulStart]) / (pRegs->TMRBPR+1);
 }
 
 static BT_ERROR timer_setconfig(BT_HANDLE hTimer, void *pConfig) {
@@ -508,7 +510,6 @@ static const BT_RESOURCE oLPC17xx_timer0_resources[] = {
 };
 
 static const BT_INTEGRATED_DEVICE oLPC17xx_timer0_device = {
-	.id						= 0,
 	.name 					= "LPC17xx,timer",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC17xx_timer0_resources),
 	.pResources 			= oLPC17xx_timer0_resources,
@@ -540,7 +541,6 @@ static const BT_RESOURCE oLPC17xx_timer1_resources[] = {
 };
 
 static const BT_INTEGRATED_DEVICE oLPC17xx_timer1_device = {
-	.id						= 1,
 	.name 					= "LPC17xx,timer",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC17xx_timer1_resources),
 	.pResources 			= oLPC17xx_timer1_resources,
@@ -572,7 +572,6 @@ static const BT_RESOURCE oLPC17xx_timer2_resources[] = {
 };
 
 static const BT_INTEGRATED_DEVICE oLPC17xx_timer2_device = {
-	.id						= 2,
 	.name 					= "LPC17xx,timer",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC17xx_timer2_resources),
 	.pResources 			= oLPC17xx_timer2_resources,
@@ -604,7 +603,6 @@ static const BT_RESOURCE oLPC17xx_timer3_resources[] = {
 };
 
 static const BT_INTEGRATED_DEVICE oLPC17xx_timer3_device = {
-	.id						= 3,
 	.name 					= "LPC17xx,timer",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC17xx_timer3_resources),
 	.pResources 			= oLPC17xx_timer3_resources,

@@ -20,6 +20,7 @@ struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER 		h;			///< All handles must include a handle header.
 	LPC17xx_PWM_REGS	   *pRegs;
 	const BT_INTEGRATED_DEVICE   *pDevice;
+	BT_u32					id;
 };
 
 static BT_HANDLE g_PWM_HANDLES[1] = {
@@ -108,7 +109,7 @@ static BT_ERROR pwm_set_frequency(BT_HANDLE hPwm, BT_u32 ulValue) {
 	volatile LPC17xx_PWM_REGS *pRegs = hPwm->pRegs;
 
 	BT_ERROR Error = BT_ERR_NONE;
-	BT_u32 ulInputClk = BT_LPC17xx_GetPeripheralClock(g_PWM_PERIPHERAL[hPwm->pDevice->id]);
+	BT_u32 ulInputClk = BT_LPC17xx_GetPeripheralClock(g_PWM_PERIPHERAL[hPwm->id]);
 	BT_u32 ulPeriodCount = ulInputClk / ulValue;
 
 	pRegs->PWMMR0 = ulPeriodCount;
@@ -120,7 +121,7 @@ static BT_ERROR pwm_set_frequency(BT_HANDLE hPwm, BT_u32 ulValue) {
 static BT_u32 pwm_get_frequency(BT_HANDLE hPwm, BT_ERROR *pError) {
 	volatile LPC17xx_PWM_REGS *pRegs = hPwm->pRegs;
 
-	BT_u32 ulInputClk = BT_LPC17xx_GetPeripheralClock(g_PWM_PERIPHERAL[hPwm->pDevice->id]) / (pRegs->PWMPR + 1);
+	BT_u32 ulInputClk = BT_LPC17xx_GetPeripheralClock(g_PWM_PERIPHERAL[hPwm->id]) / (pRegs->PWMPR + 1);
 
 	return ulInputClk / pRegs->PWMMR0;
 }
@@ -365,6 +366,8 @@ static BT_HANDLE pwm_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 		goto err_out;
 	}
 
+	hPwm->id = pResource->ulStart;
+
 	g_PWM_HANDLES[pResource->ulStart] = hPwm;
 
 	hPwm->pDevice = pDevice;
@@ -434,7 +437,6 @@ static const BT_RESOURCE oLPC17xx_pwm0_resources[] = {
 };
 
 static const BT_INTEGRATED_DEVICE oLPC17xx_pwm0_device = {
-	.id						= 0,
 	.name 					= "LPC17xx,pwm",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC17xx_pwm0_resources),
 	.pResources 			= oLPC17xx_pwm0_resources,

@@ -36,6 +36,7 @@ struct _BT_OPAQUE_HANDLE {
 	LPC17xx_SPI_REGS	   *pRegs;
 	const BT_INTEGRATED_DEVICE   *pDevice;
 	BT_SPI_OPERATING_MODE	eMode;		///< Operational mode, i.e. buffered/polling mode.
+	BT_u32					id;
 	BT_HANDLE		   		hRxFifo;		///< RX fifo - ring buffer.
 	BT_HANDLE		   		hTxFifo;		///< TX fifo - ring buffer.
 };
@@ -67,7 +68,9 @@ static BT_ERROR spiEnable(BT_HANDLE hSpi);
 static void ResetSpi(BT_HANDLE hSpi) {
 	volatile LPC17xx_SPI_REGS *pRegs = hSpi->pRegs;
 
-	if (hSpi->pDevice->id == 0) {
+	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hSpi->pDevice, BT_RESOURCE_ENUM, 0);
+
+	if (pResource->ulStart == 0) {
 		pRegs->CR = LPC17xx_SPI_CR_8BITS | LPC17xx_SPI_CR_MASTER_MODE | LPC17xx_SPI_CR_BIT_ENABLE;
 	}
 	return;
@@ -106,9 +109,11 @@ static BT_ERROR spiCleanup(BT_HANDLE hSpi) {
 static BT_ERROR spiSetBaudrate(BT_HANDLE hSpi, BT_u32 ulBaudrate) {
 	volatile LPC17xx_SPI_REGS *pRegs = hSpi->pRegs;
 
-	BT_u32 ulInputClk = BT_LPC17xx_GetPeripheralClock(g_SPI_PERIPHERAL[hSpi->pDevice->id]);
+	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hSpi->pDevice, BT_RESOURCE_ENUM, 0);
 
-	if (hSpi->pDevice->id == 0) {
+	BT_u32 ulInputClk = BT_LPC17xx_GetPeripheralClock(g_SPI_PERIPHERAL[pResource->ulStart]);
+
+	if (pResource->ulStart == 0) {
 		BT_u32 ulDivider = ulInputClk / ulBaudrate;
 		if (ulDivider < 8) ulDivider = 8;
 		if (ulDivider % 2) ulDivider++;
@@ -256,7 +261,9 @@ static BT_ERROR spiSetConfig(BT_HANDLE hSpi, BT_SPI_CONFIG *pConfig) {
 	volatile LPC17xx_SPI_REGS *pRegs = hSpi->pRegs;
 	BT_ERROR Error = BT_ERR_NONE;
 
-	if (hSpi->pDevice->id == 0) {
+	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hSpi->pDevice, BT_RESOURCE_ENUM, 0);
+
+	if (pResource->ulStart == 0) {
 		pRegs->CR &= ~(LPC17xx_SPI_CR_DSS_MASK << 8);
 		pRegs->CR |= (pConfig->ucDataBits & LPC17xx_SPI_CR_DSS_MASK) << 8;
 		pRegs->CR &= ~(LPC17xx_SPI_CR_CPOL | LPC17xx_SPI_CR_CPHA);
@@ -324,9 +331,11 @@ static BT_ERROR spiGetConfig(BT_HANDLE hSpi, BT_SPI_CONFIG *pConfig) {
 
 	BT_ERROR Error = BT_ERR_NONE;
 
-	BT_u32 ulInputClk = BT_LPC17xx_GetPeripheralClock(g_SPI_PERIPHERAL[hSpi->pDevice->id]);
+	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hSpi->pDevice, BT_RESOURCE_ENUM, 0);
 
-	if (hSpi->pDevice->id == 0) {
+	BT_u32 ulInputClk = BT_LPC17xx_GetPeripheralClock(g_SPI_PERIPHERAL[pResource->ulStart]);
+
+	if (pResource->ulStart == 0) {
 		pConfig->ulBaudrate 	= ulInputClk / pRegs->CCR;
 		pConfig->ucDataBits 	= (pRegs->CR >> 8) & LPC17xx_SPI_CR_DSS_MASK;
 		pConfig->eCPOL			= (pRegs->CR & LPC17xx_SPI_CR_CPOL);
@@ -353,7 +362,7 @@ static BT_ERROR spiGetConfig(BT_HANDLE hSpi, BT_SPI_CONFIG *pConfig) {
 static BT_ERROR spiEnable(BT_HANDLE hSpi) {
 	volatile LPC17xx_SPI_REGS *pRegs = hSpi->pRegs;
 
-	if (hSpi->pDevice->id == 0) {
+	if (hSpi->id == 0) {
 	}
 	else {
 		pRegs->CR1 |= LPC17xx_SPI_CR1_SSP_ENABLE;
@@ -368,7 +377,7 @@ static BT_ERROR spiEnable(BT_HANDLE hSpi) {
 static BT_ERROR spiDisable(BT_HANDLE hSpi) {
 	volatile LPC17xx_SPI_REGS *pRegs = hSpi->pRegs;
 
-	if (hSpi->pDevice->id == 0) {
+	if (hSpi->id == 0) {
 
 	}
 	else {
@@ -387,7 +396,7 @@ static BT_ERROR spiRead(BT_HANDLE hSpi, BT_u32 ulFlags, BT_u8 *pucDest, BT_u32 u
 	switch(hSpi->eMode) {
 	case BT_SPI_MODE_POLLED:
 	{
-		if (hSpi->pDevice->id == 0) {
+		if (hSpi->id == 0) {
 			while(ulSize) {
 				pRegs->DR = 0;
 				while(!(pRegs->SPI_SR & LPC17xx_SPI_SPI_SR_SPIF)) {
@@ -442,7 +451,7 @@ static BT_ERROR spiWrite(BT_HANDLE hSpi, BT_u32 ulFlags, BT_u8 *pucSource, BT_u3
 	case BT_SPI_MODE_POLLED:
 	{
 		while(ulSize) {
-			if (hSpi->pDevice->id == 0) {
+			if (hSpi->id == 0) {
 				pRegs->DR = *pucSource++;
 				while(!(pRegs->SPI_SR & LPC17xx_SPI_SPI_SR_SPIF)) {
 					BT_ThreadYield();
@@ -534,6 +543,8 @@ static BT_HANDLE spi_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 		goto err_out;
 	}
 
+	hSpi->id = pResource->ulStart;
+
 	g_SPI_HANDLES[pResource->ulStart] = hSpi;
 
 	hSpi->pDevice = pDevice;
@@ -604,7 +615,6 @@ static const BT_RESOURCE oLPC17xx_spi0_resources[] = {
 };
 
 static const BT_INTEGRATED_DEVICE oLPC17xx_spi0_device = {
-	.id						= 0,
 	.name 					= "LPC17xx,spi",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC17xx_spi0_resources),
 	.pResources 			= oLPC17xx_spi0_resources,
@@ -636,7 +646,6 @@ static const BT_RESOURCE oLPC17xx_spi1_resources[] = {
 };
 
 static const BT_INTEGRATED_DEVICE oLPC17xx_spi1_device = {
-	.id						= 1,
 	.name 					= "LPC17xx,spi",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC17xx_spi1_resources),
 	.pResources 			= oLPC17xx_spi1_resources,
@@ -668,7 +677,6 @@ static const BT_RESOURCE oLPC17xx_spi2_resources[] = {
 };
 
 static const BT_INTEGRATED_DEVICE oLPC17xx_spi2_device = {
-	.id						= 2,
 	.name 					= "LPC17xx,spi",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC17xx_spi2_resources),
 	.pResources 			= oLPC17xx_spi2_resources,

@@ -323,17 +323,50 @@ static BT_u32 lpc11xx_machine_init() {
 	return BT_ERR_NONE;
 }
 
+
+#ifdef BT_CONFIG_MACH_LPC11xx_I2C_0
+static const BT_RESOURCE oLPC11xx_i2c0_resources[] = {
+	{
+		.ulStart 			= BT_CONFIG_MACH_LPC11xx_I2C0_BASE,
+		.ulEnd 				= BT_CONFIG_MACH_LPC11xx_I2C0_BASE + BT_SIZE_4K - 1,
+		.ulFlags 			= BT_RESOURCE_MEM,
+	},
+	{
+		.ulStart			= 31,
+		.ulEnd				= 31,
+		.ulFlags			= BT_RESOURCE_IRQ,
+	},
+	{
+		.ulStart			= BT_CONFIG_MACH_LPC11xx_I2C_0_BUSID,
+		.ulEnd				= BT_CONFIG_MACH_LPC11xx_I2C_0_BUSID,
+		.ulFlags			= BT_RESOURCE_BUSID,
+	},
+	{
+		.ulStart			= BT_CONFIG_MACH_LPC11xx_I2C_0_SPEED,
+		.ulEnd				= BT_CONFIG_MACH_LPC11xx_I2C_0_SPEED,
+		.ulFlags			= BT_RESOURCE_INTEGER,
+	},
+};
+
+BT_INTEGRATED_DEVICE_DEF oLPC11xx_i2c0_device = {
+	.name 					= "LPC11xx,i2c",
+	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC11xx_i2c0_resources),
+	.pResources 			= oLPC11xx_i2c0_resources,
+};
+
+const BT_DEVFS_INODE_DEF oLPC11xx_i2c0_inode = {
+	.szpName = "i2c0",
+	.pDevice = &oLPC11xx_i2c0_device,
+};
+#endif
+
+
 #ifdef BT_CONFIG_MACH_LPC11xx_UART_0
 static const BT_RESOURCE oLPC11xx_uart0_resources[] = {
 	{
 		.ulStart 			= BT_CONFIG_MACH_LPC11xx_UART0_BASE,
 		.ulEnd 				= BT_CONFIG_MACH_LPC11xx_UART0_BASE + BT_SIZE_4K - 1,
 		.ulFlags 			= BT_RESOURCE_MEM,
-	},
-	{
-		.ulStart			= 0,
-		.ulEnd				= 0,
-		.ulFlags			= BT_RESOURCE_ENUM,
 	},
 	{
 		.ulStart			= 37,
@@ -343,7 +376,6 @@ static const BT_RESOURCE oLPC11xx_uart0_resources[] = {
 };
 
 static const BT_INTEGRATED_DEVICE oLPC11xx_uart0_device = {
-	.id						= 0,
 	.name 					= "LPC11xx,usart",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC11xx_uart0_resources),
 	.pResources 			= oLPC11xx_uart0_resources,

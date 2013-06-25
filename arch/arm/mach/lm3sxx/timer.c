@@ -461,7 +461,6 @@ static const BT_RESOURCE oLM3Sxx_timer0_resources[] = {
 };
 
 static const BT_INTEGRATED_DEVICE oLM3Sxx_timer0_device = {
-	.id						= 0,
 	.name 					= "LM3Sxx,timer",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLM3Sxx_timer0_resources),
 	.pResources 			= oLM3Sxx_timer0_resources,
@@ -493,7 +492,6 @@ static const BT_RESOURCE oLM3Sxx_timer1_resources[] = {
 };
 
 static const BT_INTEGRATED_DEVICE oLM3Sxx_timer1_device = {
-	.id						= 1,
 	.name 					= "LM3Sxx,timer",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLM3Sxx_timer1_resources),
 	.pResources 			= oLM3Sxx_timer1_resources,
@@ -525,7 +523,6 @@ static const BT_RESOURCE oLM3Sxx_timer2_resources[] = {
 };
 
 static const BT_INTEGRATED_DEVICE oLM3Sxx_timer2_device = {
-	.id						= 2,
 	.name 					= "LM3Sxx,timer",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLM3Sxx_timer2_resources),
 	.pResources 			= oLM3Sxx_timer2_resources,
@@ -557,7 +554,6 @@ static const BT_RESOURCE oLM3Sxx_timer3_resources[] = {
 };
 
 static const BT_INTEGRATED_DEVICE oLM3Sxx_timer3_device = {
-	.id						= 3,
 	.name 					= "LM3Sxx,timer",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLM3Sxx_timer3_resources),
 	.pResources 			= oLM3Sxx_timer3_resources,

@@ -36,6 +36,7 @@ struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER 		h;			///< All handles must include a handle header.
 	LPC11xx_CAN_REGS	   *pRegs;
 	const BT_INTEGRATED_DEVICE   *pDevice;
+	BT_u32					id;
 	BT_HANDLE		   		hRxFifo;		///< RX fifo - ring buffer.
 	BT_HANDLE		   		hTxFifo;		///< TX fifo - ring buffer.
 };
@@ -413,7 +414,7 @@ static void CanTransmit(BT_HANDLE hCan) {
 		}
 
 		memcpy(oMsgObj.ucdata, oMessage.ucdata, oMessage.ucLength);
-		g_Msg_Queue[hCan->pDevice->id] = 1;
+		g_Msg_Queue[hCan->id] = 1;
 
 
 		(*rom)->pCAND->can_transmit(&oMsgObj);
@@ -480,6 +481,8 @@ static BT_HANDLE can_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 	if(!hCan) {
 		goto err_out;
 	}
+
+	hCan->id = pResource->ulStart;
 
 	g_CAN_HANDLES[pResource->ulStart] = hCan;
 
@@ -552,7 +555,6 @@ static const BT_RESOURCE oLPC11xx_can0_resources[] = {
 };
 
 static const BT_INTEGRATED_DEVICE oLPC11xx_can0_device = {
-	.id						= 0,
 	.name 					= "LPC11xx,can",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC11xx_can0_resources),
 	.pResources 			= oLPC11xx_can0_resources,

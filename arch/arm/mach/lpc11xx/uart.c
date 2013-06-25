@@ -61,8 +61,7 @@ static void usartRxHandler(BT_HANDLE hUart) {
     {
 		/* There are errors or break interrupt */
 		/* Read LSR will clear the interrupt */
-		volatile BT_u32 Dummy = pRegs->FIFO;	/* Dummy read on RX to clear
-										interrupt, then bail out */
+		pRegs->FIFO;	/* Dummy read on RX to clear interrupt, then bail out */
       return;
     }
 

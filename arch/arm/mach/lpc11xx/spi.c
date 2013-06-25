@@ -36,6 +36,7 @@ struct _BT_OPAQUE_HANDLE {
 	LPC11xx_SPI_REGS	   *pRegs;
 	const BT_INTEGRATED_DEVICE   *pDevice;
 	BT_SPI_OPERATING_MODE	eMode;		///< Operational mode, i.e. buffered/polling mode.
+	BT_u32					id;
 	BT_HANDLE		   		hRxFifo;		///< RX fifo - ring buffer.
 	BT_HANDLE		   		hTxFifo;		///< TX fifo - ring buffer.
 };
@@ -65,11 +66,11 @@ static void ResetSpi(BT_HANDLE hSpi)
 {
 	volatile LPC11xx_RCC_REGS *pRCC = LPC11xx_RCC;
 
-	if (hSpi->pDevice->id == 0) {
+	if (hSpi->id == 0) {
 		pRCC->PRESETCTRL &= LPC11xx_RCC_PRESETCTRL_SSP0_DEASSERT;
 		pRCC->PRESETCTRL |= LPC11xx_RCC_PRESETCTRL_SSP0_DEASSERT;
 	}
-	if (hSpi->pDevice->id == 1) {
+	if (hSpi->id == 1) {
 		pRCC->PRESETCTRL &= LPC11xx_RCC_PRESETCTRL_SSP1_DEASSERT;
 		pRCC->PRESETCTRL |= LPC11xx_RCC_PRESETCTRL_SSP1_DEASSERT;
 	}
@@ -112,7 +113,9 @@ static BT_ERROR spiSetBaudrate(BT_HANDLE hSpi, BT_u32 ulBaudrate) {
 
 	BT_u32 ulInputClk = BT_LPC11xx_GetMainFrequency();
 
-	switch (hSpi->pDevice->id) {
+	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hSpi->pDevice, BT_RESOURCE_ENUM, 0);
+
+	switch (pResource->ulStart) {
 	case 0: {
 		if (pRCC->SSP0CLKDIV == 0)
 			pRCC->SSP0CLKDIV = 1;
@@ -319,7 +322,9 @@ static BT_ERROR spiGetConfig(BT_HANDLE hSpi, BT_SPI_CONFIG *pConfig) {
 
 	BT_u32 ulInputClk = BT_LPC11xx_GetMainFrequency();
 
-	switch (hSpi->pDevice->id) {
+	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hSpi->pDevice, BT_RESOURCE_ENUM, 0);
+
+	switch (pResource->ulStart) {
 	case 0: {
 		if (pRCC->SSP0CLKDIV == 0)
 			pRCC->SSP0CLKDIV = 1;
@@ -361,9 +366,9 @@ static BT_ERROR spiEnable(BT_HANDLE hSpi) {
 	pRegs->CR1 |= LPC11xx_SPI_CR1_SSP_ENABLE;		// Enable TX line.
 
 	LPC11xx_RCC_REGS *pRCC = LPC11xx_RCC;
-	if (hSpi->pDevice->id == 0)
+	if (hSpi->id == 0)
 		pRCC->SSP0CLKDIV = 1;
-	else if (hSpi->pDevice->id == 1)
+	else if (hSpi->id == 1)
 		pRCC->SSP1CLKDIV = 1;
 
 	return BT_ERR_NONE;
@@ -378,9 +383,9 @@ static BT_ERROR spiDisable(BT_HANDLE hSpi) {
 	pRegs->CR1 &= ~LPC11xx_SPI_CR1_SSP_ENABLE;		// Enable TX line.
 
 	LPC11xx_RCC_REGS *pRCC = LPC11xx_RCC;
-	if (hSpi->pDevice->id == 0)
+	if (hSpi->id == 0)
 		pRCC->SSP0CLKDIV = 0;
-	else if (hSpi->pDevice->id == 1)
+	else if (hSpi->id == 1)
 		pRCC->SSP1CLKDIV = 0;
 
 	return BT_ERR_NONE;
@@ -521,6 +526,8 @@ static BT_HANDLE spi_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 		goto err_out;
 	}
 
+	hSpi->id = pResource->ulStart;
+
 	g_SPI_HANDLES[pResource->ulStart] = hSpi;
 
 	hSpi->pDevice = pDevice;
@@ -591,7 +598,6 @@ static const BT_RESOURCE oLPC11xx_spi0_resources[] = {
 };
 
 static const BT_INTEGRATED_DEVICE oLPC11xx_spi0_device = {
-	.id						= 0,
 	.name 					= "LPC11xx,spi",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC11xx_spi0_resources),
 	.pResources 			= oLPC11xx_spi0_resources,
@@ -611,8 +617,8 @@ static const BT_RESOURCE oLPC11xx_spi1_resources[] = {
 		.ulFlags 			= BT_RESOURCE_MEM,
 	},
 	{
-		.ulStart			= 0,
-		.ulEnd				= 0,
+		.ulStart			= 1,
+		.ulEnd				= 1,
 		.ulFlags			= BT_RESOURCE_ENUM,
 	},
 	{
@@ -623,7 +629,6 @@ static const BT_RESOURCE oLPC11xx_spi1_resources[] = {
 };
 
 static const BT_INTEGRATED_DEVICE oLPC11xx_spi1_device = {
-	.id						= 1,
 	.name 					= "LPC11xx,spi",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC11xx_spi1_resources),
 	.pResources 			= oLPC11xx_spi1_resources,

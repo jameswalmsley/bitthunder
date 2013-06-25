@@ -468,7 +468,6 @@ static const BT_RESOURCE oLPC11xx_adc0_resources[] = {
 };
 
 static const BT_INTEGRATED_DEVICE oLPC11xx_adc0_device = {
-	.id						= 0,
 	.name 					= "LPC11xx,adc",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC11xx_adc0_resources),
 	.pResources 			= oLPC11xx_adc0_resources,
