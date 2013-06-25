@@ -9,6 +9,7 @@ include $(BASE)os/.config.mk
 
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/lib/string.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/lib/ctype.o
+BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/lib/bcd.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/bt_main.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/mm/bt_mm.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/mm/bt_heap.o
