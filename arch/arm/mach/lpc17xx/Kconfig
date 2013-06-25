@@ -387,32 +387,105 @@ config MACH_LPC17xx_I2C_0
     bool "Use I2C(0) peripheral"
 	default n
 	select MACH_LPC17xx_I2C
+	select I2C
 	depends on HAS_I2C0
-
-config MACH_LPC17xx_I2C_0_INODE_NAME
-	string "I2C(0) devfs name"
-	default "i2c0"
+	
+config MACH_LPC17xx_I2C_0_BUSID
+	int "I2C(0) Bus ID"
+	default 0
 	depends on MACH_LPC17xx_I2C_0
+	
+choice 
+	prompt "Bus Speed"
+	default MACH_LPC17xx_I2C_0_SPEED_100KHZ
+	depends on MACH_LPC17xx_I2C_0
+	
+config MACH_LPC17xx_I2C_0_SPEED_100KHZ
+	bool "100kHz"
+	
+config MACH_LPC17xx_I2C_0_SPEED_400KHZ
+	bool "400kHz"
 
+config MACH_LPC17xx_I2C_0_SPEED_1000KHZ
+	bool "1000kHz"
+
+endchoice
+
+config MACH_LPC17xx_I2C_0_SPEED
+	int
+	default 0 if MACH_LPC17xx_I2C_0_SPEED_100KHZ
+	default 1 if MACH_LPC17xx_I2C_0_SPEED_400KHZ 
+	default 2 if MACH_LPC17xx_I2C_0_SPEED_1000KHZ
+
+	
 config MACH_LPC17xx_I2C_1
     bool "Use I2C(1) peripheral"
 	default n
+	select I2C
 	select MACH_LPC17xx_I2C
 
-config MACH_LPC17xx_I2C_1_INODE_NAME
-	string "I2C(1) devfs name"
-	default "i2c1"
+config MACH_LPC17xx_I2C_1_BUSID
+	int "I2C(1) Bus ID"
+	default 1
 	depends on MACH_LPC17xx_I2C_1
+	
+choice 
+	prompt "Bus Speed"
+	default MACH_LPC17xx_I2C_1_SPEED_100KHZ
+	depends on MACH_LPC17xx_I2C_1
+	
+config MACH_LPC17xx_I2C_1_SPEED_100KHZ
+	bool "100kHz"
+	
+config MACH_LPC17xx_I2C_1_SPEED_400KHZ
+	bool "400kHz"
+
+config MACH_LPC17xx_I2C_1_SPEED_1000KHZ
+	bool "1000kHz"
+
+endchoice
+
+config MACH_LPC17xx_I2C_1_SPEED
+	int
+	default 0 if MACH_LPC17xx_I2C_1_SPEED_100KHZ
+	default 1 if MACH_LPC17xx_I2C_1_SPEED_400KHZ 
+	default 2 if MACH_LPC17xx_I2C_1_SPEED_1000KHZ
+
 
 config MACH_LPC17xx_I2C_2
     bool "Use I2C(2) peripheral"
 	default n
+	select I2C
 	select MACH_LPC17xx_I2C
 
-config MACH_LPC17xx_I2C_2_INODE_NAME
-	string "I2C(2) devfs name"
-	default "i2c2"
+config MACH_LPC17xx_I2C_2_BUSID
+	int "I2C(2) Bus ID"
+	default 2
 	depends on MACH_LPC17xx_I2C_2
+	
+choice 
+	prompt "Bus Speed"
+	default MACH_LPC17xx_I2C_2_SPEED_100KHZ
+	depends on MACH_LPC17xx_I2C_2
+	
+config MACH_LPC17xx_I2C_2_SPEED_100KHZ
+	bool "100kHz"
+	
+config MACH_LPC17xx_I2C_2_SPEED_400KHZ
+	bool "400kHz"
+
+config MACH_LPC17xx_I2C_2_SPEED_1000KHZ
+	bool "1000kHz"
+
+endchoice
+
+config MACH_LPC17xx_I2C_2_SPEED
+	int
+	default 0 if MACH_LPC17xx_I2C_2_SPEED_100KHZ
+	default 1 if MACH_LPC17xx_I2C_2_SPEED_400KHZ 
+	default 2 if MACH_LPC17xx_I2C_2_SPEED_1000KHZ
+
+	
 endmenu
 
 menu "TIMER devices"

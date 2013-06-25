@@ -35,29 +35,13 @@ struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER 		h;			///< All handles must include a handle header.
 	LPC11xx_I2C_REGS	   *pRegs;
 	const BT_INTEGRATED_DEVICE   *pDevice;
-	BT_I2C_OPERATING_MODE	eMode;		///< Operational mode, i.e. buffered/polling mode.
-	BT_HANDLE		   		hRxFifo;		///< RX fifo - ring buffer.
-	BT_HANDLE		   		hTxFifo;		///< TX fifo - ring buffer.
-};
-
-static BT_HANDLE g_I2C_HANDLES[3] = {
-	NULL,
-	NULL,
-	NULL,
 };
 
 static const BT_IF_HANDLE oHandleInterface;	// Prototype for the I2COpen function.
 static void disablei2cPeripheralClock(BT_HANDLE hI2C);
 
 
-BT_ERROR BT_NVIC_IRQ_26(void) {
-	return 0;
-}
-
-BT_ERROR BT_NVIC_IRQ_27(void) {
-	return 0;
-}
-BT_ERROR BT_NVIC_IRQ_28(void) {
+BT_ERROR BT_NVIC_IRQ_31(void) {
 	return 0;
 }
 
@@ -84,26 +68,14 @@ static BT_ERROR i2cCleanup(BT_HANDLE hI2C) {
 	// Disable peripheral clock.
 	disablei2cPeripheralClock(hI2C);
 
-	// Free any buffers if used.
-	if(hI2C->eMode == BT_I2C_MODE_BUFFERED) {
-		BT_CloseHandle(hI2C->hTxFifo);
-		BT_CloseHandle(hI2C->hRxFifo);
-	}
-
 	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hI2C->pDevice, BT_RESOURCE_IRQ, 0);
 
 	BT_DisableInterrupt(pResource->ulStart);
 
-	pResource = BT_GetIntegratedResource(hI2C->pDevice, BT_RESOURCE_ENUM, 0);
-
-	g_I2C_HANDLES[pResource->ulStart] = NULL;	// Finally mark the hardware as not used.
-
 	return BT_ERR_NONE;
 }
 
-#define MAX_BAUD_ERROR_RATE	3	/* max % error allowed */
-
-static BT_ERROR i2cSetClockrate(BT_HANDLE hI2C, BT_I2C_CLOCKRATE eClockrate) {
+static BT_ERROR i2c_set_clock_rate(BT_HANDLE hI2C, BT_I2C_CLOCKRATE eClockrate) {
 	volatile LPC11xx_I2C_REGS *pRegs = hI2C->pRegs;
 
 	BT_u32 ulInputClk;
@@ -240,102 +212,6 @@ static BT_ERROR i2cGetPowerState(BT_HANDLE hI2C, BT_POWER_STATE *pePowerState) {
 		return BT_POWER_STATE_AWAKE;
 	}
 	return BT_POWER_STATE_ASLEEP;
-}
-
-/**
- *	Complete a full configuration of the I2C.
- **/
-static BT_ERROR i2cSetConfig(BT_HANDLE hI2C, BT_I2C_CONFIG *pConfig) {
-	BT_ERROR Error = BT_ERR_NONE;
-
-	i2cEnable(hI2C);
-
-	i2cSetClockrate(hI2C, pConfig->ulClockrate);
-
-	switch(pConfig->eMode) {
-	case BT_I2C_MODE_POLLED: {
-		if(hI2C->eMode !=  BT_I2C_MODE_POLLED) {
-
-			if(hI2C->hTxFifo) {
-				BT_CloseHandle(hI2C->hTxFifo);
-				hI2C->hTxFifo = NULL;
-			}
-			if(hI2C->hRxFifo) {
-				BT_CloseHandle(hI2C->hRxFifo);
-				hI2C->hRxFifo = NULL;
-			}
-
-			// Disable TX and RX interrupts
-			//@@pRegs->IER &= ~LPC11xx_I2C_IER_RBRIE;	// Disable the interrupt
-
-			hI2C->eMode = BT_I2C_MODE_POLLED;
-		}
-		break;
-	}
-
-	case BT_I2C_MODE_BUFFERED:
-	{
-		if(hI2C->eMode != BT_I2C_MODE_BUFFERED) {
-			if(!hI2C->hRxFifo && !hI2C->hTxFifo) {
-				hI2C->hRxFifo = BT_FifoCreate(pConfig->ulRxBufferSize, 1, 0, &Error);
-				hI2C->hTxFifo = BT_FifoCreate(pConfig->ulTxBufferSize, 1, 0, &Error);
-
-				//@@pRegs->IER |= LPC11xx_I2C_IER_RBRIE;	// Enable the interrupt
-				hI2C->eMode = BT_I2C_MODE_BUFFERED;
-			}
-		}
-		break;
-	}
-
-	default:
-		// Unsupported operating mode!
-		break;
-	}
-
-	return BT_ERR_NONE;
-}
-
-/**
- *	Get a full configuration of the I2C.
- **/
-static BT_ERROR i2cGetConfig(BT_HANDLE hI2C, BT_I2C_CONFIG *pConfig) {
-	volatile LPC11xx_I2C_REGS *pRegs = hI2C->pRegs;
-
-	pConfig->eMode 			= hI2C->eMode;
-
-	BT_ERROR Error = BT_ERR_NONE;
-
-	BT_u32 ulInputClk;
-
-	ulInputClk = BT_LPC11xx_GetSystemFrequency();
-
-	BT_u32 ulClkPeriod = ulInputClk / (pRegs->LPC11xx_I2C_SCLH + pRegs->LPC11xx_I2C_SCLL);
-
-	/*switch (ulClkPeriod) {
-	case 99000..101000:{
-		pConfig->ulClockrate 	= BT_I2C_CLOCKRATE_100kHz;
-		break;
-	}
-	case 399000..401000:{
-		pConfig->ulClockrate 	= BT_I2C_CLOCKRATE_400kHz;
-		break;
-	}
-	case 999000..1001000:{
-		pConfig->ulClockrate 	= BT_I2C_CLOCKRATE_1000kHz;
-		break;
-	}
-	case 3399000..3401000:{
-		pConfig->ulClockrate 	= BT_I2C_CLOCKRATE_3400kHz;
-		break;
-	}
-	}*/
-
-	pConfig->ulTxBufferSize = BT_FifoSize(hI2C->hTxFifo, &Error);
-	pConfig->ulRxBufferSize = BT_FifoSize(hI2C->hRxFifo, &Error);
-	pConfig->eMode			= hI2C->eMode;
-
-
-	return Error;
 }
 
 /**
@@ -477,33 +353,17 @@ static BT_ERROR i2cStop(BT_HANDLE hI2C) {
 }
 
 
-static BT_ERROR i2cRead(BT_HANDLE hI2C, BT_u8 ucDevice, BT_u8 *pucDest, BT_u32 ulLength) {
+static BT_ERROR i2cRead(BT_HANDLE hI2C, BT_u16 usDevice, BT_u8 *pucDest, BT_u32 ulLength) {
 
 	BT_ERROR Error = BT_ERR_NONE;
 
-	switch(hI2C->eMode) {
-	case BT_I2C_MODE_POLLED:
-	{
-		i2cStart(hI2C);
-		Error = i2cSendAddress(hI2C, ucDevice, BT_I2C_READ_ACCESS);
-		if (Error) goto err_out;
-		Error = i2cGetData(hI2C, pucDest, ulLength);
-		if (Error) goto err_out;
-		Error = i2cStop(hI2C);
+	i2cStart(hI2C);
+	Error = i2cSendAddress(hI2C, usDevice, BT_I2C_READ_ACCESS);
+	if (Error) goto err_out;
+	Error = i2cGetData(hI2C, pucDest, ulLength);
+	if (Error) goto err_out;
+	Error = i2cStop(hI2C);
 
-		break;
-	}
-
-	case BT_I2C_MODE_BUFFERED:
-	{
-		// Get bytes from RX buffer very quickly.
-		break;
-	}
-
-	default:
-		// ERR, invalid handle configuration.
-		break;
-	}
 	return Error;
 
 err_out:
@@ -516,29 +376,16 @@ err_out:
  *
  *	Note, this doesn't implement ulFlags specific options yet!
  **/
-static BT_ERROR i2cWrite(BT_HANDLE hI2C, BT_u8 ucDevice, BT_u8 *pucSource, BT_u32 ulLength) {
+static BT_ERROR i2cWrite(BT_HANDLE hI2C, BT_u16 usDevice, BT_u8 *pucSource, BT_u32 ulLength) {
 	BT_ERROR Error = BT_ERR_NONE;
 
-	switch(hI2C->eMode) {
-	case BT_I2C_MODE_POLLED:
-	{
-		i2cStart(hI2C);
-		Error = i2cSendAddress(hI2C, ucDevice, BT_I2C_WRITE_ACCESS);
-		if (Error) goto err_out;
-		Error = i2cSendData(hI2C, pucSource, ulLength);
-		if (Error) goto err_out;
-		Error = i2cStop(hI2C);
-		break;
-	}
+	i2cStart(hI2C);
+	Error = i2cSendAddress(hI2C, usDevice, BT_I2C_WRITE_ACCESS);
+	if (Error) goto err_out;
+	Error = i2cSendData(hI2C, pucSource, ulLength);
+	if (Error) goto err_out;
+	Error = i2cStop(hI2C);
 
-	case BT_I2C_MODE_BUFFERED:
-	{
-		break;
-	}
-
-	default:
-		break;
-	}
 	return Error;
 
 err_out:
@@ -546,52 +393,48 @@ err_out:
 	return Error;
 }
 
+static BT_u32 i2c_master_transfer(BT_HANDLE hI2C, BT_I2C_MESSAGE *msgs, BT_u32 num, BT_ERROR *pError) {
+	if (pError) *pError = BT_ERR_NONE;
 
-static const BT_DEV_IF_I2C oI2CConfigInterface = {
-	.pfnSetClockrate	= i2cSetClockrate,											///< I2C setBaudrate implementation.
-	.pfnSetConfig		= i2cSetConfig,												///< I2C set config imple.
-	.pfnGetConfig		= i2cGetConfig,
-	.pfnEnable			= i2cEnable,													///< Enable/disable the device.
-	.pfnDisable			= i2cDisable,
-	.pfnRead			= i2cRead,
-	.pfnWrite			= i2cWrite,
-	.pfnStart 			= i2cStart,
-	.pfnSendAddress		= i2cSendAddress,
-	.pfnGetData			= i2cGetData,
-	.pfnSendData		= i2cSendData,
-	.pfnSendNack		= i2cSendNack,
-	.pfnSendAck			= i2cSendAck,
-	.pfnGetAck			= i2cGetAck,
-	.pfnStop			= i2cStop,
-};
+	BT_u32 count;
+	for(count = 0; count < num; count++, msgs++) {
+		if(msgs->flags & BT_I2C_M_RD) {
+			i2cRead(hI2C, msgs->addr, msgs->buf, msgs->len);
+		}
+		else {
+			i2cWrite(hI2C, msgs->addr, msgs->buf, msgs->len);
+		}
+	}
+
+	return 0;
+}
 
 static const BT_IF_POWER oPowerInterface = {
-	i2cSetPowerState,											///< Pointers to the power state API implementations.
-	i2cGetPowerState,											///< This gets the current power state.
+	.pfnSetPowerState	= i2cSetPowerState,											///< Pointers to the power state API implementations.
+	.pfnGetPowerState	= i2cGetPowerState,											///< This gets the current power state.
 };
 
-
-static const BT_DEV_IFS oConfigInterface = {
-	(BT_DEV_INTERFACE) &oI2CConfigInterface,
+static const BT_DEV_IF_I2C oI2CInterface = {
+	.ulFunctionality	= BT_I2C_FUNC_I2C,
+	.pfnMasterTransfer	= i2c_master_transfer,
 };
 
-const BT_IF_DEVICE BT_LPC11xx_I2C_oDeviceInterface = {
-	&oPowerInterface,											///< Device does not support powerstate functionality.
-	BT_DEV_IF_T_I2C,											///< Allow configuration through the I2C api.
+static const BT_IF_DEVICE oDeviceInterface = {
+	.pPowerIF			= &oPowerInterface,											///< Device does not support powerstate functionality.
+	.eConfigType		= BT_DEV_IF_T_I2C,											///< Allow configuration through the I2C api.
 	.unConfigIfs = {
-		(BT_DEV_INTERFACE) &oI2CConfigInterface,
+		(BT_DEV_INTERFACE) &oI2CInterface,
 	},
-	NULL,														///< Provide a Character device interface implementation.
 };
 
 
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
 	.oIfs = {
-		(BT_HANDLE_INTERFACE) &BT_LPC11xx_I2C_oDeviceInterface,
+		.pDevIF = &oDeviceInterface,
 	},
-	BT_HANDLE_T_DEVICE,											///< Handle Type!
-	i2cCleanup,												///< Handle's cleanup routine.
+	.eType		= BT_HANDLE_T_DEVICE,											///< Handle Type!
+	.pfnCleanup	= i2cCleanup,												///< Handle's cleanup routine.
 };
 
 static BT_HANDLE i2c_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
@@ -599,15 +442,9 @@ static BT_HANDLE i2c_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 	BT_ERROR Error = BT_ERR_NONE;
 	BT_HANDLE hI2C = NULL;
 
-
-	const BT_RESOURCE *pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_ENUM, 0);
+	const BT_RESOURCE *pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_MEM, 0);
 	if(!pResource) {
 		Error = BT_ERR_NO_MEMORY;
-		goto err_free_out;
-	}
-
-	if (g_I2C_HANDLES[pResource->ulStart]){
-		Error = BT_ERR_GENERIC;
 		goto err_free_out;
 	}
 
@@ -616,23 +453,31 @@ static BT_HANDLE i2c_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 		goto err_out;
 	}
 
-	g_I2C_HANDLES[pResource->ulStart] = hI2C;
+	hI2C->pRegs = (LPC11xx_I2C_REGS *) pResource->ulStart;
 
-	hI2C->pDevice = pDevice;
 
-	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_MEM, 0);
+	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_ENUM, 0);
 	if(!pResource) {
 		Error = BT_ERR_NO_MEMORY;
 		goto err_free_out;
 	}
 
-	hI2C->pRegs = (LPC11xx_I2C_REGS *) pResource->ulStart;
+	hI2C->pDevice = pDevice;
+
+	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_INTEGER, 0);
+	if(!pResource) {
+		Error = BT_ERR_GENERIC;
+		goto err_free_out;
+	}
 
 	i2cSetPowerState(hI2C, BT_POWER_STATE_AWAKE);
 
 	// Reset all registers to their defaults!
-
 	ResetI2C(hI2C);
+
+	i2cEnable(hI2C);
+
+	i2c_set_clock_rate(hI2C, pResource->ulStart);
 
 	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_IRQ, 0);
 	if(!pResource) {
@@ -648,6 +493,18 @@ static BT_HANDLE i2c_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 
 
 	//@@Error = BT_EnableInterrupt(pResource->ulStart);
+
+	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_BUSID, 0);
+	if(!pResource) {
+		goto err_free_out;
+	}
+
+	BT_u32 ulBusID = pResource->ulStart;
+
+	BT_I2C_RegisterBusWithID(hI2C, ulBusID);
+	if(pError) {
+		*pError = Error;
+	}
 
 	return hI2C;
 
@@ -667,34 +524,3 @@ BT_INTEGRATED_DRIVER_DEF I2C_driver = {
 };
 
 
-#ifdef BT_CONFIG_MACH_LPC11xx_I2C_0
-static const BT_RESOURCE oLPC11xx_i2c0_resources[] = {
-	{
-		.ulStart 			= BT_CONFIG_MACH_LPC11xx_I2C0_BASE,
-		.ulEnd 				= BT_CONFIG_MACH_LPC11xx_I2C0_BASE + BT_SIZE_4K - 1,
-		.ulFlags 			= BT_RESOURCE_MEM,
-	},
-	{
-		.ulStart			= 0,
-		.ulEnd				= 0,
-		.ulFlags			= BT_RESOURCE_ENUM,
-	},
-	{
-		.ulStart			= 31,
-		.ulEnd				= 31,
-		.ulFlags			= BT_RESOURCE_IRQ,
-	},
-};
-
-static const BT_INTEGRATED_DEVICE oLPC11xx_i2c0_device = {
-	.id						= 0,
-	.name 					= "LPC11xx,i2c",
-	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC11xx_i2c0_resources),
-	.pResources 			= oLPC11xx_i2c0_resources,
-};
-
-const BT_DEVFS_INODE_DEF oLPC11xx_i2c0_inode = {
-	.szpName = "i2c0",
-	.pDevice = &oLPC11xx_i2c0_device,
-};
-#endif

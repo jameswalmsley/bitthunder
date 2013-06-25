@@ -161,6 +161,36 @@ void __attribute__((weak)) BT_NVIC_SysTick_Handler(void);
 #if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 60
 	void __attribute__((weak)) BT_NVIC_IRQ_60(void);
 #endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 61
+	void __attribute__((weak)) BT_NVIC_IRQ_61(void);
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 62
+	void __attribute__((weak)) BT_NVIC_IRQ_62(void);
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 63
+	void __attribute__((weak)) BT_NVIC_IRQ_63(void);
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 64
+	void __attribute__((weak)) BT_NVIC_IRQ_64(void);
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 65
+	void __attribute__((weak)) BT_NVIC_IRQ_65(void);
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 66
+	void __attribute__((weak)) BT_NVIC_IRQ_66(void);
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 67
+	void __attribute__((weak)) BT_NVIC_IRQ_67(void);
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 68
+	void __attribute__((weak)) BT_NVIC_IRQ_68(void);
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 69
+	void __attribute__((weak)) BT_NVIC_IRQ_69(void);
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 70
+	void __attribute__((weak)) BT_NVIC_IRQ_70(void);
+#endif
 /**
  *	Here we define the cortex-m3 vector table.
  *	We can use the pre-processor to extend the optional entries.
@@ -319,6 +349,36 @@ void (* const g_pfnVectors[])(void) = {
 #if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 60
 	BT_NVIC_IRQ_60,
 #endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 61
+	BT_NVIC_IRQ_61,
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 62
+	BT_NVIC_IRQ_62,
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 63
+	BT_NVIC_IRQ_63,
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 64
+	BT_NVIC_IRQ_64,
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 65
+	BT_NVIC_IRQ_65,
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 66
+	BT_NVIC_IRQ_66,
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 67
+	BT_NVIC_IRQ_67,
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 68
+	BT_NVIC_IRQ_68,
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 69
+	BT_NVIC_IRQ_69,
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 70
+	BT_NVIC_IRQ_70,
+#endif
 };
 
 void BT_NVIC_Default_Handlr(void);
@@ -467,6 +527,36 @@ void BT_NVIC_Test_Handler(void);
 #endif
 #if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 60
 	#pragma weak BT_NVIC_IRQ_60			= BT_NVIC_Default_Handler
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 61
+	#pragma weak BT_NVIC_IRQ_61			= BT_NVIC_Default_Handler
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 62
+	#pragma weak BT_NVIC_IRQ_62			= BT_NVIC_Default_Handler
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 63
+	#pragma weak BT_NVIC_IRQ_63			= BT_NVIC_Default_Handler
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 64
+	#pragma weak BT_NVIC_IRQ_64			= BT_NVIC_Default_Handler
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 65
+	#pragma weak BT_NVIC_IRQ_65			= BT_NVIC_Default_Handler
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 66
+	#pragma weak BT_NVIC_IRQ_66			= BT_NVIC_Default_Handler
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 67
+	#pragma weak BT_NVIC_IRQ_67			= BT_NVIC_Default_Handler
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 68
+	#pragma weak BT_NVIC_IRQ_68			= BT_NVIC_Default_Handler
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 69
+	#pragma weak BT_NVIC_IRQ_69			= BT_NVIC_Default_Handler
+#endif
+#if BT_CONFIG_ARCH_ARM_NVIC_TOTAL_IRQS > 70
+	#pragma weak BT_NVIC_IRQ_70			= BT_NVIC_Default_Handler
 #endif
 
 void BT_NVIC_Default_Handler(void) {

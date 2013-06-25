@@ -317,6 +317,129 @@ static BT_u32 lpc17xx_machine_init() {
 	return BT_ERR_NONE;
 }
 
+#ifdef BT_CONFIG_MACH_LPC17xx_I2C_0
+static const BT_RESOURCE oLPC17xx_i2c0_resources[] = {
+	{
+		.ulStart 			= BT_CONFIG_MACH_LPC17xx_I2C0_BASE,
+		.ulEnd 				= BT_CONFIG_MACH_LPC17xx_I2C0_BASE + BT_SIZE_4K - 1,
+		.ulFlags 			= BT_RESOURCE_MEM,
+	},
+	{
+		.ulStart			= 0,
+		.ulEnd				= 0,
+		.ulFlags			= BT_RESOURCE_ENUM,
+	},
+	{
+		.ulStart			= 26,
+		.ulEnd				= 26,
+		.ulFlags			= BT_RESOURCE_IRQ,
+	},
+	{
+		.ulStart			= BT_CONFIG_MACH_LPC17xx_I2C_0_BUSID,
+		.ulEnd				= BT_CONFIG_MACH_LPC17xx_I2C_0_BUSID,
+		.ulFlags			= BT_RESOURCE_BUSID,
+	},
+	{
+		.ulStart			= BT_CONFIG_MACH_LPC17xx_I2C_0_SPEED,
+		.ulEnd				= BT_CONFIG_MACH_LPC17xx_I2C_0_SPEED,
+		.ulFlags			= BT_RESOURCE_INTEGER,
+	},
+};
+
+BT_INTEGRATED_DEVICE_DEF oLPC17xx_i2c0_device = {
+	.name 					= "LPC17xx,i2c",
+	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC17xx_i2c0_resources),
+	.pResources 			= oLPC17xx_i2c0_resources,
+};
+
+const BT_DEVFS_INODE_DEF oLPC17xx_i2c0_inode = {
+	.szpName = "i2c0",
+	.pDevice = &oLPC17xx_i2c0_device,
+};
+#endif
+
+#ifdef BT_CONFIG_MACH_LPC17xx_I2C_1
+static const BT_RESOURCE oLPC17xx_i2c1_resources[] = {
+	{
+		.ulStart 			= BT_CONFIG_MACH_LPC17xx_I2C1_BASE,
+		.ulEnd 				= BT_CONFIG_MACH_LPC17xx_I2C1_BASE + BT_SIZE_4K - 1,
+		.ulFlags 			= BT_RESOURCE_MEM,
+	},
+	{
+		.ulStart			= 1,
+		.ulEnd				= 1,
+		.ulFlags			= BT_RESOURCE_ENUM,
+	},
+	{
+		.ulStart			= 27,
+		.ulEnd				= 27,
+		.ulFlags			= BT_RESOURCE_IRQ,
+	},
+	{
+		.ulStart			= BT_CONFIG_MACH_LPC17xx_I2C_1_BUSID,
+		.ulEnd				= BT_CONFIG_MACH_LPC17xx_I2C_1_BUSID,
+		.ulFlags			= BT_RESOURCE_BUSID,
+	},
+	{
+		.ulStart			= BT_CONFIG_MACH_LPC17xx_I2C_1_SPEED,
+		.ulEnd				= BT_CONFIG_MACH_LPC17xx_I2C_1_SPEED,
+		.ulFlags			= BT_RESOURCE_INTEGER,
+	},
+};
+
+BT_INTEGRATED_DEVICE_DEF oLPC17xx_i2c1_device = {
+	.name 					= "LPC17xx,i2c",
+	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC17xx_i2c1_resources),
+	.pResources 			= oLPC17xx_i2c1_resources,
+};
+
+const BT_DEVFS_INODE_DEF oLPC17xx_i2c1_inode = {
+	.szpName = "i2c1",
+	.pDevice = &oLPC17xx_i2c1_device,
+};
+#endif
+
+#ifdef BT_CONFIG_MACH_LPC17xx_I2C_2
+static const BT_RESOURCE oLPC17xx_i2c2_resources[] = {
+	{
+		.ulStart 			= BT_CONFIG_MACH_LPC17xx_I2C2_BASE,
+		.ulEnd 				= BT_CONFIG_MACH_LPC17xx_I2C2_BASE + BT_SIZE_4K - 1,
+		.ulFlags 			= BT_RESOURCE_MEM,
+	},
+	{
+		.ulStart			= 2,
+		.ulEnd				= 2,
+		.ulFlags			= BT_RESOURCE_ENUM,
+	},
+	{
+		.ulStart			= 28,
+		.ulEnd				= 28,
+		.ulFlags			= BT_RESOURCE_IRQ,
+	},
+	{
+		.ulStart			= BT_CONFIG_MACH_LPC17xx_I2C_2_BUSID,
+		.ulEnd				= BT_CONFIG_MACH_LPC17xx_I2C_2_BUSID,
+		.ulFlags			= BT_RESOURCE_BUSID,
+	},
+	{
+		.ulStart			= BT_CONFIG_MACH_LPC17xx_I2C_2_SPEED,
+		.ulEnd				= BT_CONFIG_MACH_LPC17xx_I2C_2_SPEED,
+		.ulFlags			= BT_RESOURCE_INTEGER,
+	},
+};
+
+BT_INTEGRATED_DEVICE_DEF oLPC17xx_i2c2_device = {
+	.name 					= "LPC17xx,i2c",
+	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC17xx_i2c2_resources),
+	.pResources 			= oLPC17xx_i2c2_resources,
+};
+
+const BT_DEVFS_INODE_DEF oLPC17xx_i2c2_inode = {
+	.szpName = "i2c2",
+	.pDevice = &oLPC17xx_i2c2_device,
+};
+#endif
+
 
 #ifdef BT_CONFIG_MACH_LPC17xx_UART_0
 static const BT_RESOURCE oLPC17xx_uart0_resources[] = {
@@ -338,7 +461,6 @@ static const BT_RESOURCE oLPC17xx_uart0_resources[] = {
 };
 
 static const BT_INTEGRATED_DEVICE oLPC17xx_uart0_device = {
-	.id						= 0,
 	.name 					= "LPC17xx,usart",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC17xx_uart0_resources),
 	.pResources 			= oLPC17xx_uart0_resources,
@@ -358,8 +480,8 @@ static const BT_RESOURCE oLPC17xx_uart1_resources[] = {
 		.ulFlags 			= BT_RESOURCE_MEM,
 	},
 	{
-		.ulStart			= 0,
-		.ulEnd				= 0,
+		.ulStart			= 1,
+		.ulEnd				= 1,
 		.ulFlags			= BT_RESOURCE_ENUM,
 	},
 	{
@@ -370,7 +492,6 @@ static const BT_RESOURCE oLPC17xx_uart1_resources[] = {
 };
 
 static const BT_INTEGRATED_DEVICE oLPC17xx_uart1_device = {
-	.id						= 1,
 	.name 					= "LPC17xx,usart",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC17xx_uart1_resources),
 	.pResources 			= oLPC17xx_uart1_resources,
@@ -390,8 +511,8 @@ static const BT_RESOURCE oLPC17xx_uart2_resources[] = {
 		.ulFlags 			= BT_RESOURCE_MEM,
 	},
 	{
-		.ulStart			= 0,
-		.ulEnd				= 0,
+		.ulStart			= 2,
+		.ulEnd				= 2,
 		.ulFlags			= BT_RESOURCE_ENUM,
 	},
 	{
@@ -402,7 +523,6 @@ static const BT_RESOURCE oLPC17xx_uart2_resources[] = {
 };
 
 static const BT_INTEGRATED_DEVICE oLPC17xx_uart2_device = {
-	.id						= 2,
 	.name 					= "LPC17xx,usart",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC17xx_uart2_resources),
 	.pResources 			= oLPC17xx_uart2_resources,
@@ -422,8 +542,8 @@ static const BT_RESOURCE oLPC17xx_uart3_resources[] = {
 		.ulFlags 			= BT_RESOURCE_MEM,
 	},
 	{
-		.ulStart			= 0,
-		.ulEnd				= 0,
+		.ulStart			= 3,
+		.ulEnd				= 3,
 		.ulFlags			= BT_RESOURCE_ENUM,
 	},
 	{
@@ -434,7 +554,6 @@ static const BT_RESOURCE oLPC17xx_uart3_resources[] = {
 };
 
 static const BT_INTEGRATED_DEVICE oLPC17xx_uart3_device = {
-	.id						= 3,
 	.name 					= "LPC17xx,usart",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLPC17xx_uart3_resources),
 	.pResources 			= oLPC17xx_uart3_resources,

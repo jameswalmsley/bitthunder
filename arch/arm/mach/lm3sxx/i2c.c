@@ -1,5 +1,5 @@
 /**
- *	LPC17xx Hal for BitThunder
+ *	LM3Sxx Hal for BitThunder
  *	I2C Driver Implementation.
  *
  *	This driver serves as robust example as to how implement a fully functional I2C device driver
@@ -22,8 +22,8 @@
  *	All driver modules in the system shall be tagged with some helpful information.
  *	This way we know who to blame when things go wrong!
  **/
-BT_DEF_MODULE_NAME						("LPC17xx-I2C")
-BT_DEF_MODULE_DESCRIPTION				("Simple I2C device for the LPC17xx Embedded Platform")
+BT_DEF_MODULE_NAME						("LM3Sxx-I2C")
+BT_DEF_MODULE_DESCRIPTION				("Simple I2C device for the LM3Sxx Embedded Platform")
 BT_DEF_MODULE_AUTHOR					("Robert Steinbauer")
 BT_DEF_MODULE_EMAIL						("rsteinbauer@riegl.com")
 
@@ -33,7 +33,7 @@ BT_DEF_MODULE_EMAIL						("rsteinbauer@riegl.com")
  **/
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER 		h;			///< All handles must include a handle header.
-	LPC17xx_I2C_REGS	   *pRegs;
+	LM3Sxx_I2C_REGS	   *pRegs;
 	const BT_INTEGRATED_DEVICE   *pDevice;
 };
 
@@ -43,27 +43,20 @@ static const BT_IF_HANDLE oHandleInterface;	// Prototype for the I2COpen functio
 static void disablei2cPeripheralClock(BT_HANDLE hI2C);
 
 
-BT_ERROR BT_NVIC_IRQ_26(void) {
+BT_ERROR BT_NVIC_IRQ_24(void) {
 	return 0;
 }
 
-BT_ERROR BT_NVIC_IRQ_27(void) {
+BT_ERROR BT_NVIC_IRQ_53(void) {
 	return 0;
 }
-
-BT_ERROR BT_NVIC_IRQ_28(void) {
-	return 0;
-}
-
-static BT_ERROR i2cDisable(BT_HANDLE hI2C);
-static BT_ERROR i2cEnable(BT_HANDLE hI2C);
 
 
 static void ResetI2C(BT_HANDLE hI2C)
 {
-	volatile LPC17xx_I2C_REGS *pRegs = hI2C->pRegs;
+	volatile LM3Sxx_I2C_REGS *pRegs = hI2C->pRegs;
 
-	pRegs->LPC17xx_I2C_CONCLR = 0xFFFFFFFF;
+	pRegs->LM3Sxx_I2C_MCR = 0x00000000;
 
 }
 
@@ -86,24 +79,16 @@ static BT_ERROR i2cCleanup(BT_HANDLE hI2C) {
 }
 
 static BT_ERROR i2c_set_clock_rate(BT_HANDLE hI2C, BT_I2C_CLOCKRATE eClockrate) {
-	volatile LPC17xx_I2C_REGS *pRegs = hI2C->pRegs;
+	volatile LM3Sxx_I2C_REGS *pRegs = hI2C->pRegs;
 
 	BT_u32 ulInputClk;
 	BT_u32 ulClock;
-	BT_u32 ulClkPeriod;
 
 	/*
 	 *	We must determine the input clock frequency to the I2C peripheral.
 	 */
 
-	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hI2C->pDevice, BT_RESOURCE_ENUM, 0);
-
-	ulInputClk = BT_LPC17xx_GetPeripheralClock(g_I2C_PERIPHERAL[pResource->ulStart]);
-
-	/*
-	 * Determine the Baud divider. It can be 4to 254.
-	 * Loop through all possible combinations
-	 */
+	ulInputClk = BT_LM3Sxx_GetSystemFrequency();
 
 	switch (eClockrate) {
 	case BT_I2C_CLOCKRATE_100kHz: {
@@ -127,10 +112,7 @@ static BT_ERROR i2c_set_clock_rate(BT_HANDLE hI2C, BT_I2C_CLOCKRATE eClockrate) 
 		break;
 	}
 	}
-	ulClkPeriod = ulInputClk / ulClock;
-
-	pRegs->LPC17xx_I2C_SCLH = ulClkPeriod / 2;
-	pRegs->LPC17xx_I2C_SCLL = ulClkPeriod - pRegs->LPC17xx_I2C_SCLH;
+	pRegs->LM3Sxx_I2C_MTPR = (ulInputClk / (ulClock*20)) - 1;
 
 	return BT_ERR_NONE;
 }
@@ -143,15 +125,11 @@ static void enablei2cPeripheralClock(BT_HANDLE hI2C) {
 
 	switch(pResource->ulStart) {
 	case 0: {
-		LPC17xx_RCC->PCONP |= LPC17xx_RCC_PCONP_I2C0EN;
+		LM3Sxx_RCC->RCGC[1] |= LM3Sxx_RCC_RCGC_I2C0EN;
 		break;
 	}
 	case 1: {
-		LPC17xx_RCC->PCONP |= LPC17xx_RCC_PCONP_I2C1EN;
-		break;
-	}
-	case 2: {
-		LPC17xx_RCC->PCONP |= LPC17xx_RCC_PCONP_I2C2EN;
+		LM3Sxx_RCC->RCGC[1] |= LM3Sxx_RCC_RCGC_I2C1EN;
 		break;
 	}
 	default: {
@@ -168,15 +146,11 @@ static void disablei2cPeripheralClock(BT_HANDLE hI2C) {
 
 	switch(pResource->ulStart) {
 	case 0: {
-		LPC17xx_RCC->PCONP &= ~LPC17xx_RCC_PCONP_I2C0EN;
+		LM3Sxx_RCC->RCGC[1] &= ~LM3Sxx_RCC_RCGC_I2C0EN;
 		break;
 	}
 	case 1: {
-		LPC17xx_RCC->PCONP &= ~LPC17xx_RCC_PCONP_I2C1EN;
-		break;
-	}
-	case 2: {
-		LPC17xx_RCC->PCONP &= ~LPC17xx_RCC_PCONP_I2C2EN;
+		LM3Sxx_RCC->RCGC[1] &= ~LM3Sxx_RCC_RCGC_I2C1EN;
 		break;
 	}
 	default: {
@@ -193,19 +167,13 @@ static BT_BOOL isi2cPeripheralClockEnabled(BT_HANDLE hI2C) {
 
 	switch(pResource->ulStart) {
 	case 0: {
-		if(LPC17xx_RCC->PCONP & LPC17xx_RCC_PCONP_I2C0EN) {
+		if(LM3Sxx_RCC->RCGC[1] & LM3Sxx_RCC_RCGC_I2C0EN) {
 			return BT_TRUE;
 		}
 		break;
 	}
 	case 1: {
-		if(LPC17xx_RCC->PCONP & LPC17xx_RCC_PCONP_I2C1EN) {
-			return BT_TRUE;
-		}
-		break;
-	}
-	case 2: {
-		if(LPC17xx_RCC->PCONP & LPC17xx_RCC_PCONP_I2C2EN) {
+		if(LM3Sxx_RCC->RCGC[1] & LM3Sxx_RCC_RCGC_I2C1EN) {
 			return BT_TRUE;
 		}
 		break;
@@ -254,154 +222,49 @@ static BT_ERROR i2cGetPowerState(BT_HANDLE hI2C, BT_POWER_STATE *pePowerState) {
 	return BT_POWER_STATE_ASLEEP;
 }
 
-/**
- *	Make the I2C active (Set the Enable bit).
- **/
-static BT_ERROR i2cEnable(BT_HANDLE hI2C) {
-	volatile LPC17xx_I2C_REGS *pRegs = hI2C->pRegs;
-
-	pRegs->LPC17xx_I2C_CONSET |= LPC17xx_I2C_CONSET_I2EN;
-
-	return BT_ERR_NONE;
-}
-
-/**
- *	Make the I2C inactive (Clear the Enable bit).
- **/
 static BT_ERROR i2cDisable(BT_HANDLE hI2C) {
-	volatile LPC17xx_I2C_REGS *pRegs = hI2C->pRegs;
-
-	pRegs->LPC17xx_I2C_CONCLR |= LPC17xx_I2C_CONSET_I2EN;
+	hI2C->pRegs->LM3Sxx_I2C_MCR = 0x00000000;
 
 	return BT_ERR_NONE;
 }
 
-static BT_ERROR i2cStart(BT_HANDLE hI2C) {
-	volatile LPC17xx_I2C_REGS *pRegs = hI2C->pRegs;
-	BT_ERROR Error = BT_ERR_NONE;
+static BT_ERROR i2cEnable(BT_HANDLE hI2C) {
+	hI2C->pRegs->LM3Sxx_I2C_MCR = LM3Sxx_I2C_MCR_MASTER_MODE;
 
-	pRegs->LPC17xx_I2C_CONCLR = LPC17xx_I2C_CONCLR_SI;
-
-	pRegs->LPC17xx_I2C_CONSET |= LPC17xx_I2C_CONSET_STA;
-
-	while (!(pRegs->LPC17xx_I2C_CONSET & LPC17xx_I2C_CONSET_SI));
-
-	if ((pRegs->LPC17xx_I2C_STAT != LPC17xx_I2C_STAT_START_TRANSMITTED) &&
-	    (pRegs->LPC17xx_I2C_STAT != LPC17xx_I2C_STAT_REPEAT_START_TRANSMITTED)) Error = -1;
-
-	return Error;
-}
-
-static BT_ERROR i2cSendAddress(BT_HANDLE hI2C, BT_u32 ulAddress, BT_I2C_ACCESS_MODE eAccessMode) {
-	volatile LPC17xx_I2C_REGS *pRegs = hI2C->pRegs;
-	BT_ERROR Error = BT_ERR_NONE;
-
-	pRegs->LPC17xx_I2C_DAT = ulAddress << 1 | eAccessMode;
-
-	pRegs->LPC17xx_I2C_CONCLR = (LPC17xx_I2C_CONCLR_STA | LPC17xx_I2C_CONCLR_SI);
-
-	while (!(pRegs->LPC17xx_I2C_CONSET & LPC17xx_I2C_CONSET_SI));
-
-	if ((pRegs->LPC17xx_I2C_STAT != LPC17xx_I2C_STAT_ADDRESS_W_ACK) &&
-		(pRegs->LPC17xx_I2C_STAT != LPC17xx_I2C_STAT_ADDRESS_R_ACK)) Error = -1;
-
-	return Error;
-}
-
-static BT_ERROR i2cSendNack(BT_HANDLE hI2C) {
-	volatile LPC17xx_I2C_REGS *pRegs = hI2C->pRegs;
-	BT_ERROR Error = BT_ERR_NONE;
-
-	pRegs->LPC17xx_I2C_CONCLR = LPC17xx_I2C_CONCLR_AA;	/* assert ACK after data is received */
-
-	pRegs->LPC17xx_I2C_CONCLR = LPC17xx_I2C_CONCLR_SI;
-
-	return Error;
-}
-
-static BT_ERROR i2cSendAck(BT_HANDLE hI2C) {
-	volatile LPC17xx_I2C_REGS *pRegs = hI2C->pRegs;
-	BT_ERROR Error = BT_ERR_NONE;
-
-	pRegs->LPC17xx_I2C_CONSET = LPC17xx_I2C_CONSET_AA;	/* assert ACK after data is received */
-
-	pRegs->LPC17xx_I2C_CONCLR = LPC17xx_I2C_CONCLR_SI;
-
-	return Error;
-}
-
-static BT_ERROR i2cGetData(BT_HANDLE hI2C, BT_u8 *pDest, BT_u32 ulLength) {
-	volatile LPC17xx_I2C_REGS *pRegs = hI2C->pRegs;
-	BT_ERROR Error = BT_ERR_NONE;
-
-	while (ulLength--) {
-		if (ulLength) i2cSendAck(hI2C);
-		else i2cSendNack(hI2C);
-		while (!(pRegs->LPC17xx_I2C_CONSET & LPC17xx_I2C_CONSET_SI));
-		*pDest++ = pRegs->LPC17xx_I2C_DAT & 0xFF;
-		if (pRegs->LPC17xx_I2C_STAT != LPC17xx_I2C_STAT_DATA_W_ACK) Error = -1;
-	}
-
-	return Error;
-}
-
-static BT_ERROR i2cSendData(BT_HANDLE hI2C, BT_u8 *pSrc, BT_u32 ulLength) {
-	volatile LPC17xx_I2C_REGS *pRegs = hI2C->pRegs;
-	BT_ERROR Error = BT_ERR_NONE;
-
-	while (ulLength--) {
-		pRegs->LPC17xx_I2C_DAT = *pSrc++;
-
-		pRegs->LPC17xx_I2C_CONCLR = LPC17xx_I2C_CONCLR_SI;
-
-		while (!(pRegs->LPC17xx_I2C_CONSET & LPC17xx_I2C_CONSET_SI));
-
-		if (pRegs->LPC17xx_I2C_STAT != LPC17xx_I2C_STAT_DATA_W_ACK) Error = -1;
-	}
-
-	return Error;
-}
-
-
-static BT_BOOL i2cGetAck(BT_HANDLE hI2C, BT_ERROR *pError) {
-	volatile LPC17xx_I2C_REGS *pRegs = hI2C->pRegs;
-	if (pError) *pError = BT_ERR_NONE;
-
-	if ((pRegs->LPC17xx_I2C_STAT != LPC17xx_I2C_STAT_ADDRESS_W_ACK) &&
-		(pRegs->LPC17xx_I2C_STAT != LPC17xx_I2C_STAT_ADDRESS_R_ACK) &&
-		(pRegs->LPC17xx_I2C_STAT != LPC17xx_I2C_STAT_DATA_W_ACK   ) &&
-		(pRegs->LPC17xx_I2C_STAT != LPC17xx_I2C_STAT_DATA_R_ACK   )) return BT_FALSE;
-
-	return BT_TRUE;
-}
-
-static BT_ERROR i2cStop(BT_HANDLE hI2C) {
-	volatile LPC17xx_I2C_REGS *pRegs = hI2C->pRegs;
-	BT_ERROR Error = BT_ERR_NONE;
-
-	pRegs->LPC17xx_I2C_CONSET |= LPC17xx_I2C_CONSET_STO;
-
-	pRegs->LPC17xx_I2C_CONCLR = LPC17xx_I2C_CONCLR_SI;
-
-	return Error;
+	return BT_ERR_NONE;
 }
 
 
 static BT_ERROR i2cRead(BT_HANDLE hI2C, BT_u16 usDevice, BT_u8 *pucDest, BT_u32 ulLength) {
-
+	volatile LM3Sxx_I2C_REGS *pRegs = hI2C->pRegs;
 	BT_ERROR Error = BT_ERR_NONE;
 
-	i2cStart(hI2C);
-	Error = i2cSendAddress(hI2C, usDevice, BT_I2C_READ_ACCESS);
-	if (Error) goto err_out;
-	Error = i2cGetData(hI2C, pucDest, ulLength);
-	if (Error) goto err_out;
-	Error = i2cStop(hI2C);
+	pRegs->LM3Sxx_I2C_MSA = (usDevice<<1) | LM3Sxx_I2C_MASTER_SA_RS;
 
-	return Error;
+    // Send out the number of bytes requested.
+	BT_u32 i;
+	for (i=0; i<ulLength; i++) {
+		pRegs->LM3Sxx_I2C_MICR = LM3Sxx_I2C_MICR_IC;
 
-err_out:
-	i2cStop(hI2C);
+		// Initiate bus cycle
+		BT_u32 ulCondition = LM3Sxx_I2C_MCS_RUN;
+        if (i == 0) ulCondition |= LM3Sxx_I2C_MCS_START;
+        if (i == ulLength-1) ulCondition |= LM3Sxx_I2C_MCS_STOP;
+        else ulCondition |= LM3Sxx_I2C_MCS_DATACK;
+        pRegs->LM3Sxx_I2C_MCS = ulCondition;
+
+        // Wait for transmission to complete.
+        while (!(pRegs->LM3Sxx_I2C_MRIS & LM3Sxx_I2C_MRIS_RIS));
+    	if (pRegs->LM3Sxx_I2C_MCS & LM3Sxx_I2C_MCS_ADRACK) {
+    		Error = -1;		// no address acknowledge
+    		break;
+    	}
+
+        // Receive a byte from the I2C.
+        *pucDest++ = pRegs->LM3Sxx_I2C_MDR;
+    }
+	while (pRegs->LM3Sxx_I2C_MCS & LM3Sxx_I2C_MCS_BUSBSY);
+
 	return Error;
 }
 
@@ -411,19 +274,34 @@ err_out:
  *	Note, this doesn't implement ulFlags specific options yet!
  **/
 static BT_ERROR i2cWrite(BT_HANDLE hI2C, BT_u16 usDevice, BT_u8 *pucSource, BT_u32 ulLength) {
+	volatile LM3Sxx_I2C_REGS *pRegs = hI2C->pRegs;
 	BT_ERROR Error = BT_ERR_NONE;
 
-	i2cStart(hI2C);
-	Error = i2cSendAddress(hI2C, usDevice, BT_I2C_WRITE_ACCESS);
-	if (Error) goto err_out;
-	Error = i2cSendData(hI2C, pucSource, ulLength);
-	if (Error) goto err_out;
-	Error = i2cStop(hI2C);
+	pRegs->LM3Sxx_I2C_MSA = usDevice<<1;
 
-	return Error;
+	BT_u32 i;
 
-err_out:
-	i2cStop(hI2C);
+	for (i=0; i<ulLength; i++) {
+		pRegs->LM3Sxx_I2C_MICR = LM3Sxx_I2C_MICR_IC;
+
+		// Send out the next byte.
+        pRegs->LM3Sxx_I2C_MDR = *pucSource++;
+
+        // Initiate bus cycle
+        BT_u32 ulCondition = LM3Sxx_I2C_MCS_RUN;
+        if (i == 0) ulCondition |= LM3Sxx_I2C_MCS_START;
+        if (i == ulLength-1) ulCondition |= LM3Sxx_I2C_MCS_STOP;
+        pRegs->LM3Sxx_I2C_MCS = ulCondition;
+
+        // Wait for transmission to complete.
+        while (!(pRegs->LM3Sxx_I2C_MRIS & LM3Sxx_I2C_MRIS_RIS));
+
+    	if (pRegs->LM3Sxx_I2C_MCS & (LM3Sxx_I2C_MCS_ADRACK | LM3Sxx_I2C_MCS_DATACK)) {
+    		Error = -1;		// no address acknowledge
+    		break;
+    	}
+	}
+
 	return Error;
 }
 
@@ -440,7 +318,7 @@ static BT_u32 i2c_master_transfer(BT_HANDLE hI2C, BT_I2C_MESSAGE *msgs, BT_u32 n
 		}
 	}
 
-	return 0;
+	return num;
 }
 
 static const BT_IF_POWER oPowerInterface = {
@@ -487,7 +365,7 @@ static BT_HANDLE i2c_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 		goto err_out;
 	}
 
-	hI2C->pRegs = (LPC17xx_I2C_REGS *) pResource->ulStart;
+	hI2C->pRegs = (LM3Sxx_I2C_REGS *) pResource->ulStart;
 
 
 	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_ENUM, 0);
@@ -553,7 +431,7 @@ err_out:
 }
 
 BT_INTEGRATED_DRIVER_DEF I2C_driver = {
-	.name 		= "LPC17xx,i2c",
+	.name 		= "LM3Sxx,i2c",
 	.pfnProbe	= i2c_probe,
 };
 
