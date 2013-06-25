@@ -16,6 +16,7 @@
 #include "bt_dev_if_adc.h"
 #include "bt_dev_if_can.h"
 #include "bt_dev_if_sdio.h"
+#include "bt_dev_if_rtc.h"
 
 typedef enum _BT_DEV_IF_TYPE {
 	BT_DEV_IF_T_NONE=0,
@@ -32,6 +33,7 @@ typedef enum _BT_DEV_IF_TYPE {
 	BT_DEV_IF_T_SPI,
 	BT_DEV_IF_T_SDIO,
 	BT_DEV_IF_T_EMAC,
+	BT_DEV_IF_T_RTC,
 } BT_DEV_IF_TYPE;
 
 /**
@@ -67,6 +69,7 @@ typedef union {
 	const BT_DEV_IF_UART 	   *pUartIF;
 	const BT_DEV_IF_SDIO	   *pSdioIF;
 	const BT_DEV_IF_SPI 	   *pEMacIF;
+	const BT_DEV_IF_RTC		   *pRTCIF;
 } BT_DEV_IFS;
 
 #define BT_IF_GPIO_OPS(handle)		BT_IF_DEV_CONFIG(handle).pGpioIF
@@ -81,6 +84,7 @@ typedef union {
 #define BT_IF_I2C_OPS(handle)		BT_IF_DEV_CONFIG(handle).pI2CIF
 #define	BT_IF_ADC_OPS(handle)		BT_IF_DEV_CONFIG(handle).pADCIF
 #define BT_IF_SDIO_OPS(handle)		BT_IF_DEV_CONFIG(handle).pSdioIF
+#define	BT_IF_RTC_OPS(handle)		BT_IF_DEV_CONFIG(handle).pRTCIF
 
 typedef struct _BT_IF_DEVICE {
 	const BT_IF_POWER	   *pPowerIF;

@@ -1,0 +1,16 @@
+menu "RTC Devices"
+
+config DRIVERS_RTC
+    bool
+	default n
+
+menu "I2C RTC devices
+
+config DRIVERS_RTC_I2C_DS1338
+    bool "DS1338"
+	select DRIVERS_RTC
+	default n
+endmenu
+
+
+endmenu

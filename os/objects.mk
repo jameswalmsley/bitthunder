@@ -20,6 +20,7 @@ BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/interrupts/bt_interrupts.o
 BT_OS_OBJECTS-$(BT_CONFIG_INTERRUPTS_SOFTIRQ) += $(BUILD_DIR)os/src/interrupts/bt_softirq.o
 BT_OS_OBJECTS-$(BT_CONFIG_TASKLETS) += $(BUILD_DIR)os/src/interrupts/bt_tasklets.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/gpio/bt_gpio.o
+BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/rtc/bt_rtc.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/module/bt_module_init.o
 BT_OS_OBJECTS-$(BT_CONFIG_VOLUME) += $(BUILD_DIR)os/src/volumes/bt_volume.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/machines/bt_machines.o

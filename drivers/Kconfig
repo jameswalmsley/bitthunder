@@ -3,6 +3,8 @@ comment "Configure all required driver sub-systems"
 
 source drivers/gpio/Kconfig
 
+source drivers/rtc/Kconfig
+
 config DRIVERS_SDCARD
     bool "SDCard / MMC Support"
 	default n
