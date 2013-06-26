@@ -326,7 +326,7 @@ static BT_HANDLE i2c_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 		goto err_out;
 	}
 
-	hI2C->pRegs = (ZYNQ_I2C_REGS *) bt_ioremap((void *)pResource->ulStart, BT_SIZE_4K, &Error);
+	hI2C->pRegs = (ZYNQ_I2C_REGS *) bt_ioremap((void *)pResource->ulStart, BT_SIZE_4K);
 
 	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_IRQ, 0);
 	if(!pResource) {

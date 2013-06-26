@@ -9,6 +9,7 @@
 #include "mmc/host.h"
 #include <mmc/host/sdhci.h>
 
+#if defined (BT_CONFIG_MACH_ZYNQ_SDIO_0) || defined(BT_CONFIG_MACH_ZYNQ_SDIO_1)
 static BT_u32 sdio_get_input_clock(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
 	return 50000000;
 }
@@ -16,6 +17,7 @@ static BT_u32 sdio_get_input_clock(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR
 static BT_MMC_HOST_OPS host_ops = {
 	.pfnGetInputClock = sdio_get_input_clock,
 };
+#endif
 
 #ifdef BT_CONFIG_MACH_ZYNQ_SDIO_0
 static const BT_RESOURCE oZynq_sdio_resources_0[] = {

@@ -157,7 +157,7 @@ static BT_HANDLE gpio_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErro
 		goto err_free_out;
 	}
 
-	hGPIO->pRegs = (ZYNQ_GPIO_REGS *) pResource->ulStart;
+	hGPIO->pRegs = (ZYNQ_GPIO_REGS *) bt_ioremap((void *) pResource->ulStart, BT_SIZE_4K);
 
 	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_IRQ, 0);
 	if(!pResource) {

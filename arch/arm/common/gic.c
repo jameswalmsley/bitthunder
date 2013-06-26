@@ -55,6 +55,7 @@ static BT_ERROR gic_cleanup(BT_HANDLE hGic) {
 	return BT_ERR_NONE;
 }
 
+#ifdef BT_CONFIG_ARCH_ARM_GIC_INIT_DISTRIBUTOR
 static void gic_dist_init(BT_HANDLE hGic) {
 	BT_u32 i;
 	BT_u32 ulGicIRQs = hGic->ulGicIRQs;
@@ -81,6 +82,7 @@ static void gic_dist_init(BT_HANDLE hGic) {
 
 	hGic->pGICD->CTLR = 1;
 }
+#endif
 
 static void gic_cpu_init(BT_HANDLE hGic) {
 
@@ -236,7 +238,7 @@ static BT_HANDLE gic_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 		goto  err_free_chip;
 	}
 
-	hGic->pGICC = (GICC_REGS *) bt_ioremap((void *)pResource->ulStart, BT_SIZE_4K, &Error);
+	hGic->pGICC = (GICC_REGS *) bt_ioremap((void *)pResource->ulStart, BT_SIZE_4K);
 
 	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_MEM, 1);
 	if(!pResource) {
@@ -244,7 +246,7 @@ static BT_HANDLE gic_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 		goto err_free_chip;
 	}
 
-	hGic->pGICD = (GICD_REGS *) bt_ioremap((void *)pResource->ulStart, BT_SIZE_4K, &Error);
+	hGic->pGICD = (GICD_REGS *) bt_ioremap((void *)pResource->ulStart, BT_SIZE_4K);
 
 	// Set private members.
 
@@ -286,7 +288,9 @@ static BT_HANDLE gic_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 
 	hGic->ulGicIRQs = ulGicIRQs;
 
+#ifdef BT_CONFIG_ARCH_ARM_GIC_INIT_DISTRIBUTOR
 	gic_dist_init(hGic);
+#endif
 	gic_cpu_init(hGic);
 
 	return hGic;
