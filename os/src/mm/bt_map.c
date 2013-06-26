@@ -109,9 +109,7 @@ BT_ERROR bt_iomap_add(void *addr, BT_PHYS_ADDR phys, BT_u32 size, BT_u32 ulType)
 	return BT_ERR_NONE;
 }
 
-void *bt_ioremap(void *phys_addr, BT_u32 size, BT_ERROR *pError) {
-
-	BT_ERROR Error = BT_ERR_NONE;
+void *bt_ioremap(void *phys_addr, BT_u32 size) {
 
 	/*
 	 *	Find an existing mapping! -- The best case!
@@ -134,7 +132,7 @@ void *bt_ioremap(void *phys_addr, BT_u32 size, BT_ERROR *pError) {
 
 
 	BT_PHYS_ADDR phys = (BT_PHYS_ADDR) phys_addr;
-	BT_u32 offset = phys & ~BT_SECTION_MASK;
+	BT_u32 offset = phys & BT_SECTION_MASK;
 
 	BT_u32 mapsize = (size / BT_SECTION_SIZE) * BT_SECTION_SIZE;
 	if(mapsize & (BT_SECTION_SIZE-1)) {
@@ -143,10 +141,10 @@ void *bt_ioremap(void *phys_addr, BT_u32 size, BT_ERROR *pError) {
 
 	pMapping = bt_iomap_kernel_create(mapsize);
 	if(!pMapping) {
-		return BT_ERR_GENERIC;
+		return NULL;
 	}
 
-	pMapping->phys = phys & BT_SECTION_MASK;
+	pMapping->phys = phys & ~BT_SECTION_MASK;
 
 	bt_arch_mmu_setsection(pMapping);
 

@@ -14,6 +14,6 @@ typedef struct _BT_IOMAP {
     #define BT_IOMAP_TYPE_KERNEL_MAP	0x00000002
 } BT_IOMAP;
 
-void *bt_ioremap(void *phys_addr, BT_u32 size, BT_ERROR *pError);
+void *bt_ioremap(void *phys_addr, BT_u32 size);
 
 #endif
