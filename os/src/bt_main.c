@@ -9,11 +9,28 @@
 
 #include <bitthunder.h>
 #include <mm/bt_heap.h>
+#include <mm/bt_page.h>
 #include <string.h>
 #include <bt_kernel.h>
 #include <lib/putc.h>
 
 extern int main(int argc, char **argv);
+
+void bt_do_bug(void *pc) {
+	BT_StopSystemTimer();
+	BT_DisableInterrupts();
+
+	BT_kPrint("Step 1. DO NOT PANIC!");
+	BT_kPrint("Step 2. Take a deep breath");
+	BT_kPrint("Step 3. Read the bad news below:");
+	BT_kPrint("=============================================================");
+	BT_kPrint("Kernel Panic: Segmentation fault! at %p", pc);
+	BT_kPrint("Lookup the address in your kernel.list file.........");
+	BT_kPrint("=============================================================");
+	BT_kPrint("Step 4. Grab a coffee and know that all will be well!");
+
+	while(1);
+}
 
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;
@@ -26,6 +43,8 @@ int bt_main(int argc, char **argv) {
 
 	BT_ERROR 	Error;
 	BT_HANDLE 	hUart = NULL;
+
+	bt_initialise_pages();
 
 	BT_MACHINE_DESCRIPTION *pMachine = BT_GetMachineDescription(&Error);
 	if(pMachine->szpName) {
