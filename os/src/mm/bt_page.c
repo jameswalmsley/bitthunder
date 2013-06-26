@@ -1,8 +1,12 @@
 /**
  *	Page Allocator for BitThunder.
  *
+ *	@author			James Walmsley
+ *	@copyright		2013 James Walmsley
+ *
  **/
 
+#include <bt_error.h>
 #include <mm/bt_page.h>
 #include <string.h>
 
@@ -10,9 +14,18 @@
 
 /**
  *	Global array of page descriptors,
- *	Allows pages to be found based on memory addresses in constant time.
+ *	Allows pages to be found based on memory addresses in O(1) complexity.
  *
- *	Internally the array is broken into 2 linked lists, a free and used list.
+ *	Within the array, a linked list of free blocks is formed,
+ *	all pages making up a free block have the size field set to be the distance from the block HEAD.
+ *
+ *	This means that given any page within a free region, you can find the HEAD in constant O(1).
+ *	(This is important when finding free regions around a block during page_free()).
+ *
+ *	Similarly all pages within an allocated block keep reference to the block HEAD.
+ *	This allows the bt_page_free() api to be called with a pointer from anywhere within an
+ *	allocated block.
+ *
  **/
 
 static BT_u32 	total_size 	= 0;
@@ -121,8 +134,8 @@ void bt_page_free(BT_PHYS_ADDR paddr) {
 	{
 		BT_PAGE *block = &g_oPages[index];
 
-		if(!block->flags & BT_PAGE_USED) {
-			// !!! Double free, or invalid pointer!!
+		if(!block->flags & BT_PAGE_USED || block->flags & BT_PAGE_RESERVED) {
+			// !!! Double free, or invalid pointer!!	// Or trying to free reserved region.
 			UNLOCK_PAGES();
 			return;
 		}
@@ -174,9 +187,78 @@ void bt_page_free(BT_PHYS_ADDR paddr) {
 }
 
 
-BT_ERROR bt_page_reserve(BT_PHYS_ADDR paddr, BT_u32 size) {
+BT_ERROR bt_page_reserve(BT_PHYS_ADDR paddr, BT_u32 psize) {
 
-	return 0;
+	BT_PHYS_ADDR start, end;
+	BT_u32 size;
+
+	if(!psize) {
+		return 0;
+	}
+
+	start = BT_PAGE_TRUNC(paddr);
+	end = BT_PAGE_ALIGN(paddr + psize);
+	size = end - start;
+
+	LOCK_PAGES();
+	{
+		BT_PAGE *block;
+		BT_u32 index_start = PHYS_INDEX(start);
+		BT_u32 index_end = PHYS_INDEX(end);
+		BT_u32 index_len = index_end - index_start;
+
+		/*
+		 *	We must ensure the entire requested range is actually available!
+		 *	Then we can remove it from the allocator permanently.
+		 */
+		BT_u32 i;
+		for(i = 0; i < index_len; i++) {
+			if(g_oPages[index_start + i].flags & BT_PAGE_USED) {
+				UNLOCK_PAGES();
+				return BT_ERR_GENERIC;
+			}
+		}
+
+		// Remove / split the block from within :P
+		block = &g_oPages[index_start];
+
+		if(!(block->flags & BT_PAGE_HEAD)) {
+			block -= block->size;
+			// Skip back to the head of this allocation!
+		}
+
+		bt_list_del(&block->list);
+		BT_u32 index_block_a = BLOCK_INDEX(block);			// Index of the block beginning the reserved section.
+		BT_u32 index_block_b = index_start + index_len;		// Index of the block after the reserved section.
+
+		BT_u32 orig_size = block->size;
+
+		if(index_block_a != index_start) {
+			block->size = (index_block_a - index_start) * BT_PAGE_SIZE;
+			block->flags = 0;
+
+			set_head_distance(block, 0);
+
+			bt_list_add(&block->list, &free_head);
+		}
+
+		block = &g_oPages[index_block_b];
+		block->size = orig_size - (index_len * BT_PAGE_SIZE);
+		block->flags = BT_PAGE_HEAD;
+
+		set_head_distance(block, 0);
+
+		bt_list_add(&block->list, &free_head);
+
+		BT_PAGE *new = &g_oPages[index_start];
+		new->size = index_len * BT_PAGE_SIZE;
+		new->flags = BT_PAGE_RESERVED | BT_PAGE_USED  | BT_PAGE_HEAD;
+		set_head_distance(new, BT_PAGE_RESERVED | BT_PAGE_USED);
+
+	}
+	UNLOCK_PAGES();
+
+	return BT_ERR_NONE;
 }
 
 void bt_initialise_pages(void) {
@@ -194,15 +276,5 @@ void bt_initialise_pages(void) {
 	bt_list_add(&block->list, &free_head);
 
 	// Reserve already used pages!
-
-	void *p1 = bt_page_alloc(1024);
-	void *p2 = bt_page_alloc(4096);
-	void *p3 = bt_page_alloc(8192);
-	void *p4 = bt_page_alloc(1024);
-
-	bt_page_free(p2);
-	bt_page_free(p1);
-	bt_page_free(p3);
-	bt_page_free(p4);
-
+	bt_page_reserve(0x00100000, 1024*1024*2);	// Reserve 2MB for BT Kernel
 }
