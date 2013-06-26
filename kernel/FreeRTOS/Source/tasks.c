@@ -79,12 +79,13 @@ task.h is included from an application file. */
 #include "timers.h"
 #include "StackMacros.h"
 
-#if ( configBLUETHUNDER == 1 )
-#include <bluethunder.h>
+#if ( configBITTHUNDER == 1 )
+#include <bitthunder.h>
+#include <mm/bt_page.h>
 
-BT_TRACE_EVENT *pTraceEvent 	= NULL;
+/*BT_TRACE_EVENT *pTraceEvent 	= NULL;
 BT_TRACE_EVENT *pTraceEventMin  = NULL;
-BT_TRACE_EVENT *pTraceEventMax 	= NULL;
+BT_TRACE_EVENT *pTraceEventMax 	= NULL;*/
 
 #endif
 
@@ -106,6 +107,11 @@ typedef struct tskTaskControlBlock
 	#if ( portUSING_MPU_WRAPPERS == 1 )
 		xMPU_SETTINGS xMPUSettings;				/*< The MPU settings are defined as part of the port layer.  THIS MUST BE THE SECOND MEMBER OF THE STRUCT. */
 	#endif
+
+#if ( configBITTHUNDER == 1 )
+	volatile portSTACK_TYPE	*pxTopOfKernelStack;
+	portSTACK_TYPE			*pxKernelStack;
+#endif
 
 	xListItem				xGenericListItem;	/*< List item used to place the TCB in ready and blocked queues. */
 	xListItem				xEventListItem;		/*< List item used to place the TCB in event lists. */
@@ -424,6 +430,10 @@ tskTCB * pxNewTCB;
 	{
 		portSTACK_TYPE *pxTopOfStack;
 
+#if (configBITTHUNDER == 1)
+		portSTACK_TYPE *pxTopOfKernelStack;
+#endif
+
 		#if( portUSING_MPU_WRAPPERS == 1 )
 			/* Should the task be created in privileged mode? */
 			portBASE_TYPE xRunPrivileged;
@@ -449,6 +459,11 @@ tskTCB * pxNewTCB;
 
 			/* Check the alignment of the calculated top of stack is correct. */
 			configASSERT( ( ( ( unsigned long ) pxTopOfStack & ( unsigned long ) portBYTE_ALIGNMENT_MASK ) == 0UL ) );
+#if (configBITTHUNDER == 1)
+			pxTopOfKernelStack = pxNewTCB->pxKernelStack + ((BT_PAGE_SIZE / sizeof(portSTACK_TYPE)) - 1);
+			pxTopOfKernelStack = (portSTACK_TYPE *) (((portPOINTER_SIZE_TYPE) pxTopOfKernelStack) & ((portPOINTER_SIZE_TYPE) ~portBYTE_ALIGNMENT_MASK));
+			pxNewTCB->pxTopOfKernelStack = pxTopOfKernelStack;
+#endif
 		}
 		#else
 		{
@@ -2177,6 +2192,18 @@ tskTCB *pxNewTCB;
 			/* Just to help debugging. */
 			memset( pxNewTCB->pxStack, ( int ) tskSTACK_FILL_BYTE, ( size_t ) usStackDepth * sizeof( portSTACK_TYPE ) );
 		}
+
+#if (configBITTHUNDER == 1)
+		void *phys_stack = (void *) bt_page_alloc(BT_PAGE_SIZE);	// Allocate a single page for task's kernel stack.
+		pxNewTCB->pxKernelStack = (portSTACK_TYPE *) bt_phys_to_virt(phys_stack);
+		if( pxNewTCB->pxKernelStack == NULL ) {
+			vPortFree(pxNewTCB->pxStack);
+			vPortFree(pxNewTCB);
+		} else {
+			memset( pxNewTCB->pxKernelStack, (int) tskSTACK_FILL_BYTE, (size_t) BT_PAGE_SIZE);
+		}
+#endif
+
 	}
 
 #if (configBLUETHUNDER == 1)
@@ -2504,7 +2531,3 @@ void vTaskExitCritical( void )
 
 #endif
 /*-----------------------------------------------------------*/
-
-
-
-
