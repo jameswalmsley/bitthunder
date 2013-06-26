@@ -48,4 +48,6 @@ typedef BT_u32	BT_TICK;
 
 typedef BT_u32 BT_PHYS_ADDR;
 
+typedef int bt_register_t;
+
 #endif
