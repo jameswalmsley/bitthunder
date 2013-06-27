@@ -5,7 +5,7 @@
 .extern BT_ARCH_ARM_MACH_BCM2835_IRQHandler
 .extern vPortYieldProcessor
 	.section .init
-	.globl reset
+	.globl bt_reset
 ;;
 __reset:
 	;@ All the following instruction should be read as:
@@ -23,7 +23,7 @@ __reset:
     ldr pc,fiq_handler			;@ 	Fast interrupt handler.
 
 	;@ Here we create an exception address table! This means that reset/hang/irq can be absolute addresses
-reset_handler:      .word reset
+reset_handler:      .word bt_reset
 undefined_handler:  .word undefined
 swi_handler:        .word vPortYieldProcessor
 prefetch_handler:   .word prefetch
@@ -32,7 +32,7 @@ unused_handler:     .word unused
 irq_handler:        .word vFreeRTOS_IRQInterrupt
 fiq_handler:        .word fiq
 
-reset:
+bt_reset:
 	;@	In the reset handler, we need to copy our interrupt vector table to 0x0000, its currently at 0x8000
 
 	mov r0,#0x8000								;@ Store the source pointer
