@@ -44,10 +44,10 @@ endchoice
 
 config LPC11xx_PIO0_0_MODE
 	int
-	default 0 if LPC11xx_PIO0_0_PULLUP
-	default 8 if LPC11xx_PIO0_0_REPEATER
-	default 16 if LPC11xx_PIO0_0_NO
-	default 24 if LPC11xx_PIO0_0_PULLDOWN
+	default 16 if LPC11xx_PIO0_0_PULLUP
+	default 24 if LPC11xx_PIO0_0_REPEATER
+	default 0 if LPC11xx_PIO0_0_NO
+	default 8 if LPC11xx_PIO0_0_PULLDOWN
 
 config LPC11xx_PIO0_0_OPENDRAIN_ENABLE
 	bool "OPENDRAIN"
@@ -112,10 +112,10 @@ endchoice
 
 config LPC11xx_PIO0_1_MODE
 	int
-	default 0 if LPC11xx_PIO0_1_PULLUP
-	default 8 if LPC11xx_PIO0_1_REPEATER
-	default 16 if LPC11xx_PIO0_1_NO
-	default 24 if LPC11xx_PIO0_1_PULLDOWN
+	default 16 if LPC11xx_PIO0_1_PULLUP
+	default 24 if LPC11xx_PIO0_1_REPEATER
+	default 0 if LPC11xx_PIO0_1_NO
+	default 8 if LPC11xx_PIO0_1_PULLDOWN
 
 config LPC11xx_PIO0_1_OPENDRAIN_ENABLE
 	bool "OPENDRAIN"
@@ -180,10 +180,10 @@ endchoice
 
 config LPC11xx_PIO0_2_MODE
 	int
-	default 0 if LPC11xx_PIO0_2_PULLUP
-	default 8 if LPC11xx_PIO0_2_REPEATER
-	default 16 if LPC11xx_PIO0_2_NO
-	default 24 if LPC11xx_PIO0_2_PULLDOWN
+	default 16 if LPC11xx_PIO0_2_PULLUP
+	default 24 if LPC11xx_PIO0_2_REPEATER
+	default 0 if LPC11xx_PIO0_2_NO
+	default 8 if LPC11xx_PIO0_2_PULLDOWN
 
 config LPC11xx_PIO0_2_OPENDRAIN_ENABLE
 	bool "OPENDRAIN"
@@ -242,10 +242,10 @@ endchoice
 
 config LPC11xx_PIO0_3_MODE
 	int
-	default 0 if LPC11xx_PIO0_3_PULLUP
-	default 8 if LPC11xx_PIO0_3_REPEATER
-	default 16 if LPC11xx_PIO0_3_NO
-	default 24 if LPC11xx_PIO0_3_PULLDOWN
+	default 16 if LPC11xx_PIO0_3_PULLUP
+	default 24 if LPC11xx_PIO0_3_REPEATER
+	default 0 if LPC11xx_PIO0_3_NO
+	default 8 if LPC11xx_PIO0_3_PULLDOWN
 
 config LPC11xx_PIO0_3_OPENDRAIN_ENABLE
 	bool "OPENDRAIN"
@@ -423,10 +423,10 @@ endchoice
 
 config LPC11xx_PIO0_6_MODE
 	int
-	default 0 if LPC11xx_PIO0_6_PULLUP
-	default 8 if LPC11xx_PIO0_6_REPEATER
-	default 16 if LPC11xx_PIO0_6_NO
-	default 24 if LPC11xx_PIO0_6_PULLDOWN
+	default 16 if LPC11xx_PIO0_6_PULLUP
+	default 24 if LPC11xx_PIO0_6_REPEATER
+	default 0 if LPC11xx_PIO0_6_NO
+	default 8 if LPC11xx_PIO0_6_PULLDOWN
 
 config LPC11xx_PIO0_6_OPENDRAIN_ENABLE
 	bool "OPENDRAIN"
@@ -489,10 +489,10 @@ endchoice
 
 config LPC11xx_PIO0_7_MODE
 	int
-	default 0 if LPC11xx_PIO0_7_PULLUP
-	default 8 if LPC11xx_PIO0_7_REPEATER
-	default 16 if LPC11xx_PIO0_7_NO
-	default 24 if LPC11xx_PIO0_7_PULLDOWN
+	default 16 if LPC11xx_PIO0_7_PULLUP
+	default 24 if LPC11xx_PIO0_7_REPEATER
+	default 0 if LPC11xx_PIO0_7_NO
+	default 8 if LPC11xx_PIO0_7_PULLDOWN
 
 config LPC11xx_PIO0_7_OPENDRAIN_ENABLE
 	bool "OPENDRAIN"
@@ -557,10 +557,10 @@ endchoice
 
 config LPC11xx_PIO0_8_MODE
 	int
-	default 0 if LPC11xx_PIO0_8_PULLUP
-	default 8 if LPC11xx_PIO0_8_REPEATER
-	default 16 if LPC11xx_PIO0_8_NO
-	default 24 if LPC11xx_PIO0_8_PULLDOWN
+	default 16 if LPC11xx_PIO0_8_PULLUP
+	default 24 if LPC11xx_PIO0_8_REPEATER
+	default 0 if LPC11xx_PIO0_8_NO
+	default 8 if LPC11xx_PIO0_8_PULLDOWN
 
 config LPC11xx_PIO0_8_OPENDRAIN_ENABLE
 	bool "OPENDRAIN"
@@ -625,10 +625,10 @@ endchoice
 
 config LPC11xx_PIO0_9_MODE
 	int
-	default 0 if LPC11xx_PIO0_9_PULLUP
-	default 8 if LPC11xx_PIO0_9_REPEATER
-	default 16 if LPC11xx_PIO0_9_NO
-	default 24 if LPC11xx_PIO0_9_PULLDOWN
+	default 16 if LPC11xx_PIO0_9_PULLUP
+	default 24 if LPC11xx_PIO0_9_REPEATER
+	default 0 if LPC11xx_PIO0_9_NO
+	default 8 if LPC11xx_PIO0_9_PULLDOWN
 
 config LPC11xx_PIO0_9_OPENDRAIN_ENABLE
 	bool "OPENDRAIN"
@@ -697,10 +697,10 @@ endchoice
 
 config LPC11xx_PIO0_10_MODE
 	int
-	default 0 if LPC11xx_PIO0_10_PULLUP
-	default 8 if LPC11xx_PIO0_10_REPEATER
-	default 16 if LPC11xx_PIO0_10_NO
-	default 24 if LPC11xx_PIO0_10_PULLDOWN
+	default 16 if LPC11xx_PIO0_10_PULLUP
+	default 24 if LPC11xx_PIO0_10_REPEATER
+	default 0 if LPC11xx_PIO0_10_NO
+	default 8 if LPC11xx_PIO0_10_PULLDOWN
 
 config LPC11xx_PIO0_10_OPENDRAIN_ENABLE
 	bool "OPENDRAIN"
@@ -765,10 +765,10 @@ endchoice
 
 config LPC11xx_PIO0_11_MODE
 	int
-	default 0 if LPC11xx_PIO0_11_PULLUP
-	default 8 if LPC11xx_PIO0_11_REPEATER
-	default 16 if LPC11xx_PIO0_11_NO
-	default 24 if LPC11xx_PIO0_11_PULLDOWN
+	default 16 if LPC11xx_PIO0_11_PULLUP
+	default 24 if LPC11xx_PIO0_11_REPEATER
+	default 0 if LPC11xx_PIO0_11_NO
+	default 8 if LPC11xx_PIO0_11_PULLDOWN
 	
 config LPC11xx_PIO0_11_AD_ENABLE
 	bool "ADMODE"
