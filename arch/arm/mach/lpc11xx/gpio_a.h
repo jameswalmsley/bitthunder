@@ -6,7 +6,7 @@
 typedef struct _LPC11Axx_GPIO_REGS {
 	BT_u8  BYTE[42];
 	BT_u8  padding[2];
-	BT_STRUCT_RESERVED_u32(0, 0x002C, 0x1000);
+	BT_STRUCT_RESERVED_u32(0, 0x0028, 0x1000);
 	BT_u32 WORD[42];
 	BT_STRUCT_RESERVED_u32(1, 0x10A4, 0x2000);
 	BT_u32 DIR[2];		///< Direction register.

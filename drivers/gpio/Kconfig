@@ -4,7 +4,7 @@ config DRIVERS_GPIO
     bool
 	default n
 
-menu "I2C GPIO Expanders
+menu "I2C GPIO Expanders"
 
 config DRIVERS_GPIO_I2C_MAX7312
     bool "MAX7312"

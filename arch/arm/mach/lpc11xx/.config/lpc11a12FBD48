@@ -1,13 +1,12 @@
-config MACH_LPC11A11
+config MACH_LPC11A12FBD48
     bool
     select MACH_LPC11Axx 
 	select HAS_CAN_0
 	select HAS_I2C
 	select HAS_SPI_0
 	select HAS_SPI_1
-	select GPIO_12PIN_PER_PORT
-	select HAS_LPC11xx_PIO0_18_to_27
-	select HAS_LPC11xx_PIO0_28_to_31
+	select HAS_LPC11Axx_PIO0_18_to_27
+	select HAS_LPC11Axx_PIO0_28_to_31
 	select HAS_LPC11xx_PIO1
 	
 	select LINKER_MEMORY_DEFINED
@@ -26,7 +25,7 @@ config MACH_FLASH_START
 
 config MACH_FLASH_SIZE
 	hex
-	default 0x2000
+	default 0x4000
 	
 config MACH_SRAM_START
 	hex
@@ -34,7 +33,7 @@ config MACH_SRAM_START
 	 
 config MACH_SRAM_SIZE
 	hex
-	default 0x800
+	default 0x1000
 
 config LINKER_STACK_SIZE
 	hex

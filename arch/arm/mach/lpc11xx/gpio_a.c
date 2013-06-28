@@ -31,9 +31,7 @@ static BT_ERROR gpio_cleanup(BT_HANDLE hGPIO) {
 }
 
 static BT_ERROR gpio_set(BT_HANDLE hGPIO, BT_u32 ulGPIO, BT_BOOL bValue) {
-	BT_u32 ulBank 	= ulGPIO / 32;
-
-	hGPIO->pRegs->WORD[ulBank] = bValue;
+	hGPIO->pRegs->WORD[ulGPIO] = bValue;
 
 	return BT_ERR_NONE;
 }
@@ -43,9 +41,7 @@ static BT_BOOL gpio_get(BT_HANDLE hGPIO, BT_u32 ulGPIO, BT_ERROR *pError) {
 		*pError = BT_ERR_NONE;
 	}
 
-	BT_u32 ulBank 	= ulGPIO / 32;
-
-	if (hGPIO->pRegs->WORD[ulBank]) return BT_TRUE;
+	if (hGPIO->pRegs->WORD[ulGPIO]) return BT_TRUE;
 
 	return BT_FALSE;
 }

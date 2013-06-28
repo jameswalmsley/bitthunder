@@ -45,6 +45,18 @@ config HAS_LPC11xx_PIO0_24
 config HAS_LPC11xx_PIO0_27
 	bool
 	default n
+	
+config HAS_LPC11Axx_PIO0_18_to_27
+	bool
+	default n
+
+config HAS_LPC11Axx_PIO0_28_to_31
+	bool
+	default n
+
+config HAS_LPC11Axx_PIO1
+	bool
+	default n
 
 config HAS_LPC11xx_PIO1_4
 	bool
