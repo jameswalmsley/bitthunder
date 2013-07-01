@@ -1,0 +1,20 @@
+menu "ATAG Blob Generation"
+
+config SHELL_CMD_ATAG_RAMDISK
+    bool "atag_ramdisk (Ramdisk TAG support)."
+	default n
+
+config SHELL_CMD_ATAG_INITRD2
+    bool "atag_initrd2 (initrd2 TAG support)."
+	default n
+
+config SHELL_CMD_ATAG_MEM
+    bool "atag_mem (Memory region TAG support)."
+	default n
+
+config SHELL_CMD_ATAG_CMDLINE
+    bool "atag_cmdline (Command Line TAG support)."
+	default n
+
+
+endmenu

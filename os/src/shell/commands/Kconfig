@@ -25,4 +25,13 @@ config SHELL_CMD_LOAD_FPGA
 	depends on SHELL
 	default n
 
+
+config SHELL_CMD_ATAGS
+	bool "ATAG Support"
+	default n
+
+if SHELL_CMD_ATAGS
+source os/src/shell/commands/atag/Kconfig
+endif
+
 endmenu

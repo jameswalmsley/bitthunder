@@ -124,6 +124,7 @@ BT_SHELL_COMMAND_DEF oCoreCommand = {
 	.pfnCommand	= bt_atag_core,
 };
 
+#ifdef BT_CONFIG_SHELL_CMD_ATAG_RAMDISK
 static int bt_atag_ramdisk(int argc, char **argv) {
 	if(argc != 2) {
 		bt_printf("Usage: %s [0x{size(bytes)}]\n", argv[0]);
@@ -142,7 +143,9 @@ BT_SHELL_COMMAND_DEF oRamDiskCommand = {
 	.eType 		= BT_SHELL_NORMAL_COMMAND,
 	.pfnCommand	= bt_atag_ramdisk,
 };
+#endif
 
+#ifdef BT_CONFIG_SHELL_CMD_ATAG_INITRD2
 static int bt_atag_initrd2(int argc, char **argv) {
 
 	if(argc != 3) {
@@ -164,7 +167,9 @@ BT_SHELL_COMMAND_DEF oInitrdCommand = {
 	.eType		= BT_SHELL_NORMAL_COMMAND,
 	.pfnCommand	= bt_atag_initrd2,
 };
+#endif
 
+#ifdef BT_CONFIG_SHELL_CMD_ATAG_MEM
 static int bt_atag_mem(int argc, char **argv) {
 	if(argc != 3) {
 		bt_printf("Usage: %s [0x{start_address}] [0x{size(bytes)}]\n", argv[0]);
@@ -185,7 +190,9 @@ BT_SHELL_COMMAND_DEF oMemCommand = {
 	.eType		= BT_SHELL_NORMAL_COMMAND,
 	.pfnCommand	= bt_atag_mem,
 };
+#endif
 
+#ifdef BT_CONFIG_SHELL_CMD_ATAG_CMDLINE
 static int bt_atag_cmdline(int argc, char **argv) {
 	if(argc != 2) {
 		bt_printf("Usage: %s \"[kernel command line]\"\n", argv[0]);
@@ -202,6 +209,7 @@ BT_SHELL_COMMAND_DEF oCmdlineCommand = {
 	.eType		= BT_SHELL_NORMAL_COMMAND,
 	.pfnCommand	= bt_atag_cmdline,
 };
+#endif
 
 static int bt_atag_finish(int argc, char **argv) {
 	setup_end_tag();
