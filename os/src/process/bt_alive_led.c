@@ -9,6 +9,12 @@ BT_DEF_MODULE_DESCRIPTION	("Flashes an LED to indicate kernel is alive")
 BT_DEF_MODULE_AUTHOR		("James Walmsley")
 BT_DEF_MODULE_EMAIL			("james@fullfat-fs.co.uk")
 
+#ifdef BT_CONFIG_ALIVE_LED_INVERTED
+#define INVERT	!
+#else
+#define	INVERT
+#endif
+
 static void led_task(void *pParam) {
 
 	BT_GpioSetDirection(BT_CONFIG_ALIVE_LED_GPIO, BT_GPIO_DIR_OUTPUT);
@@ -18,13 +24,13 @@ static void led_task(void *pParam) {
 
 	while(1) {
 		ticks_a = BT_kTickCount();
-		BT_GpioSet(BT_CONFIG_ALIVE_LED_GPIO, BT_TRUE);
+		BT_GpioSet(BT_CONFIG_ALIVE_LED_GPIO, INVERT(BT_TRUE));
 		BT_kTaskDelayUntil(&ticks_a, 10);
-		BT_GpioSet(BT_CONFIG_ALIVE_LED_GPIO, BT_FALSE);
+		BT_GpioSet(BT_CONFIG_ALIVE_LED_GPIO, INVERT(BT_FALSE));
 		BT_kTaskDelayUntil(&ticks_a, 50);
-		BT_GpioSet(BT_CONFIG_ALIVE_LED_GPIO, BT_TRUE);
+		BT_GpioSet(BT_CONFIG_ALIVE_LED_GPIO, INVERT(BT_TRUE));
 		BT_kTaskDelayUntil(&ticks_a, 10);
-		BT_GpioSet(BT_CONFIG_ALIVE_LED_GPIO, BT_FALSE);
+		BT_GpioSet(BT_CONFIG_ALIVE_LED_GPIO, INVERT(BT_FALSE));
 
 		BT_kTaskDelayUntil(&ticks, BT_CONFIG_ALIVE_LED_PERIOD);
 	}

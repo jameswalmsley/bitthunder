@@ -22,4 +22,9 @@ config ALIVE_LED_PRIORITY
 	default 0
 	depends on ALIVE_LED
 
+config ALIVE_LED_INVERTED
+    bool "Invert GPIO polarity"
+	default n
+	depends on ALIVE_LED
+
 endmenu
