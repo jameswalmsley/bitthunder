@@ -83,7 +83,7 @@ struct atag_videolfb {
 };
 
 struct atag_cmdline {
-	BT_u8	*cmdline;
+	BT_i8	*cmdline;
 };
 
 struct atag {
@@ -101,5 +101,5 @@ struct atag {
 	} u;
 };
 
-#define tag_next(t)		((struct tag *) ((u32 *)(t) + (t)->hdr.size))
-#define tag_size(type)	((sizeof(struct tag_header) + sizeof(struct type)) >> 2)
+#define tag_next(t)		((struct atag *) ((BT_u32 *)(t) + (t)->hdr.size))
+#define tag_size(type)	((sizeof(struct atag_header) + sizeof(struct type)) >> 2)

@@ -24,6 +24,8 @@
  *
  **/
 #include <bitthunder.h>
+#include <stdlib.h>
+#include <string.h>
 #include "atag.h"
 
 static struct atag *params; /* used to point at the current tag */
@@ -31,7 +33,7 @@ static struct atag *params; /* used to point at the current tag */
 static void
 setup_core_tag(void * address,long pagesize)
 {
-    params = (struct tag *)address;         /* Initialise parameters to start at given address */
+    params = (struct atag *) address;         /* Initialise parameters to start at given address */
 
     params->hdr.tag = ATAG_CORE;            /* start with the core tag */
     params->hdr.size = tag_size(atag_core); /* size the tag */
@@ -44,7 +46,7 @@ setup_core_tag(void * address,long pagesize)
 }
 
 static void
-setup_ramdisk_tag(u32_t size)
+setup_ramdisk_tag(BT_u32 size)
 {
     params->hdr.tag = ATAG_RAMDISK;         /* Ramdisk tag */
     params->hdr.size = tag_size(atag_ramdisk);  /* size tag */
@@ -57,7 +59,7 @@ setup_ramdisk_tag(u32_t size)
 }
 
 static void
-setup_initrd2_tag(u32_t start, u32_t size)
+setup_initrd2_tag(BT_u32 start, BT_u32 size)
 {
     params->hdr.tag = ATAG_INITRD2;         /* Initrd2 tag */
     params->hdr.size = tag_size(atag_initrd2);  /* size tag */
@@ -69,7 +71,7 @@ setup_initrd2_tag(u32_t start, u32_t size)
 }
 
 static void
-setup_mem_tag(u32_t start, u32_t len)
+setup_mem_tag(BT_u32 start, BT_u32 len)
 {
     params->hdr.tag = ATAG_MEM;             /* Memory tag */
     params->hdr.size = tag_size(atag_mem);  /* size tag */
@@ -113,7 +115,7 @@ static int bt_atag_core(int argc, char **argv) {
 
 	BT_u32 addr = strtol(argv[1], NULL, 16);
 
-	setup_core_tag((void *) addr, BT_PAGE_SIZE);
+	setup_core_tag((void *) addr, 4096);	// Replace with BT_PAGE_SIZE when MMU config is available.
 
 	return 0;
 }
@@ -157,7 +159,7 @@ static int bt_atag_initrd2(int argc, char **argv) {
 	addr = strtol(argv[1], NULL, 16);
 	size = strtol(argv[1], NULL, 16);
 
-	setup_atag_initrd2_tag(addr, size);
+	setup_initrd2_tag(addr, size);
 
 	return 0;
 }
@@ -180,7 +182,7 @@ static int bt_atag_mem(int argc, char **argv) {
 	addr = strtol(argv[1], NULL, 16);
 	size = strtol(argv[1], NULL, 16);
 
-	setup_atag_mem_tag(addr, size);
+	setup_mem_tag(addr, size);
 
 	return 0;
 }
