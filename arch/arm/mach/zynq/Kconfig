@@ -5,6 +5,11 @@ config MACH_ZYNQ_PLATFORM
 	select ARCH_ARM_IRQ_STACK
 	select HAS_MMU
 
+config CPU_CORES
+	int
+	default 2
+
+
 comment "Zynq Platform Options"
 
 choice
