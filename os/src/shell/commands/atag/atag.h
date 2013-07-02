@@ -83,7 +83,7 @@ struct atag_videolfb {
 };
 
 struct atag_cmdline {
-	BT_i8	*cmdline;
+	BT_i8	cmdline[1];
 };
 
 struct atag {
