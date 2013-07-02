@@ -8,12 +8,9 @@ BUILD_BASE=$(BASE)
 MODULE_NAME="rpi-bsp"
 
 TARGETS=kernel.img
-LINKER_SCRIPT=raspberrypi.ld
 TARGET_DEPS=kernel.elf
 
 BUILD_DIR=$(shell pwd)/build/
-
-TOOLCHAIN=c:/yagarto/bin/arm-none-eabi-
 
 include $(BASE).dbuild/dbuild.mk
 
@@ -30,18 +27,9 @@ kernel.list: kernel.elf
 	$(Q)$(OBJDUMP) -D -S  kernel.elf > $@
 
 kernel.syms: kernel.elf
-#	$(Q)$(PRETTY) SYMS $(MODULE_NAME) $@
-#	$(Q)$(OBJDUMP) -t kernel.elf > $@
+	$(Q)$(PRETTY) SYMS $(MODULE_NAME) $@
+	$(Q)$(OBJDUMP) -t kernel.elf > $@
 
-
-
-
-#kernel.elf: LDFLAGS += -L "/opt/Xilinx/14.2/ISE_DS/EDK/gnu/arm/lin64/lib/gcc/arm-xilinx-eabi/4.6.1/" -lgcc
-#kernel.elf: LDFLAGS += -L "/opt/Xilinx/14.2/ISE_DS/EDK/gnu/arm/lin64/arm-xilinx-eabi/lib/" -lc
-kernel.elf: LDFLAGS += -L"/opt/codesourcery/lib/gcc/arm-none-eabi/4.7.2/" -lgcc
-kernel.elf: LDFLAGS += -L"/opt/codesourcery/arm-none-eabi/lib/" -lc
-kernel.elf: LDLIBS += -lc -lgcc
 kernel.elf: $(OBJECTS)
 	$(Q)$(PRETTY) --dbuild "LD" $(MODULE_NAME) $@
-	$(Q)$(LD) $(LDFLAGS) -Map kernel.map -o $@ -T $(LINKER_SCRIPT) $(OBJECTS) $(LDLIBS)
-
+	$(Q)$(CC) -o $@ -T $(LINKER_SCRIPT) -Wl,-Map=kernel.map -Wl,--gc-sections $(OBJECTS) -nostdlib -lc -lgcc
