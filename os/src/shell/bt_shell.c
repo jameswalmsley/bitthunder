@@ -40,6 +40,7 @@ BT_ERROR BT_ShellCommand(char *input) {
 
 	BT_u32 ulArguments = 0;
 	BT_u32 bIsArg = BT_FALSE;
+	BT_u32 bIgnoreSpace = BT_FALSE;
 
 	char *copy = BT_kMalloc(strlen(input)+1);
 	if(!copy) {
@@ -59,13 +60,25 @@ BT_ERROR BT_ShellCommand(char *input) {
 	char *line = input;
 
 	while(*input) {
+		if(!bIgnoreSpace && *input == '"') {			// Allow arguments with spaces in them, is surrounded by quotes.
+				bIgnoreSpace = BT_TRUE;
+				input++;					// skip the char.
+				continue;
+		} else {
+			if(*input == '"') {
+				bIgnoreSpace = BT_FALSE;
+				input++;
+				continue;
+			}
+		}
+
 		if(bIsArg) {
-			if(isspace((int)*input)) {
+			if(!bIgnoreSpace && isspace((int)*input)) {
 				ulArguments += 1;
 				bIsArg = BT_FALSE;
 			}
 		} else {
-			if(!isspace((int)*input)) {
+			if(bIgnoreSpace || !isspace((int)*input)) {
 				bIsArg = BT_TRUE;
 			}
 		}
@@ -87,8 +100,24 @@ BT_ERROR BT_ShellCommand(char *input) {
 	bIsArg = BT_FALSE;
 
 	BT_u32 i = 0;
+	bIgnoreSpace = BT_FALSE;
 
 	while(*input) {
+		if(!bIgnoreSpace && *input == '"') {
+			bIgnoreSpace = BT_TRUE;
+			input++;
+			continue;
+		} else {
+			if(*input == '"') {
+				bIgnoreSpace = BT_FALSE;
+				if(bIsArg) {
+					*input = '\0';
+				}
+				input++;
+				continue;
+			}
+		}
+
 		if(!bIsArg) {
 			if(!isspace((int)*input)) {
 				bIsArg = BT_TRUE;
@@ -99,7 +128,7 @@ BT_ERROR BT_ShellCommand(char *input) {
 				}
 			}
 		} else {
-			if(isspace((int)*input)) {
+			if(!bIgnoreSpace && isspace((int)*input)) {
 				*input = '\0';
 				bIsArg = BT_FALSE;
 			}
