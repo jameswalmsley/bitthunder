@@ -2,7 +2,37 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef void (*jump) (void);
+typedef void (*jump) 		(void);
+typedef void (*jump_regs)	(BT_u32 a, BT_u32 b, BT_u32 c, BT_u32 d);
+
+typedef struct _BOOT_PARAMS {
+	jump 	jmp;				///< Application entry point.
+#ifdef BT_CONFIG_SHELL_CMD_ATAGS
+	BT_u32	atag_addr;
+#endif
+	BT_u32	flags;
+	#define BOOT_FLAG_MACHID	0x00000001
+	#define	BOOT_FLAG_ATAG		0x00000008
+} BOOT_PARAMS;
+
+static BOOT_PARAMS oBootParams[BT_CONFIG_CPU_CORES];
+
+static void boot_core(BT_u32 coreID) {
+	register BT_u32 a, b, c;
+
+	__asm volatile("ldr sp,=0x30000");
+
+	coreID = BT_GetCoreID();
+
+	BT_kPrint("CoreID: %d", coreID);
+
+	a = 0;
+	b = 0;
+	c = oBootParams[coreID].atag_addr;
+
+	jump_regs jmp = (jump_regs) oBootParams[coreID].jmp;
+	jmp(a, b, c, 0);
+}
 
 static int bt_boot(int argc, char **argv) {
 
@@ -35,8 +65,8 @@ static int bt_boot(int argc, char **argv) {
 		BT_StopSystemTimer();
 		BT_DisableInterrupts();
 
-		jump jmp = p;
-		jmp();
+		oBootParams[0].jmp = (jump) p;
+		boot_core(0);
 
 		while(1) {
 			__asm__ ("");
@@ -44,7 +74,8 @@ static int bt_boot(int argc, char **argv) {
 
 	} else {
 		// Must use MACH core boot interface.
-		BT_BootCore(coreID, p);
+		oBootParams[coreID].jmp	 		= (jump) p;
+		BT_BootCore(coreID, boot_core);
 	}
 
 	return 0;
@@ -55,3 +86,27 @@ BT_SHELL_COMMAND_DEF oCommand = {
 	.eType 		= BT_SHELL_NORMAL_COMMAND,
 	.pfnCommand = bt_boot,
 };
+
+#ifdef BT_CONFIG_SHELL_CMD_ATAGS
+static int bt_boot_atag(int argc, char **argv) {
+
+	if(argc != 3) {
+		bt_printf("%s [coreID] [0x{atag_address}]\n");
+		return -1;
+	}
+
+	BT_u32 coreID 	= strtol(argv[1], NULL, 10);
+	BT_u32 addr		= strtol(argv[2], NULL, 16);
+
+	oBootParams[coreID].flags 		|= BOOT_FLAG_ATAG;
+	oBootParams[coreID].atag_addr 	 = addr;
+
+	return 0;
+}
+
+BT_SHELL_COMMAND_DEF oAtagCommand = {
+	.szpName	= "boot_atag",
+	.eType		= BT_SHELL_NORMAL_COMMAND,
+	.pfnCommand	= bt_boot_atag,
+};
+#endif
