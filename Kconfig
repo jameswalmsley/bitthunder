@@ -81,6 +81,14 @@ config TOOLCHAIN_OPTIMISATION
 	default "-Os" if OPTIMISE_SIZE
 	default "-O0" if OPTIMISE_NONE
 
+config TOOLCHAIN_DEBUG
+    bool "Debug Symbols"
+	default y
+
+config TOOLCHAIN_DEBUG_FLAGS
+	string
+	default "-g" if TOOLCHAIN_DEBUG
+
 
 choice
 	prompt "Windows Build Environment"
