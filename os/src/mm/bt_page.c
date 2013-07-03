@@ -190,7 +190,6 @@ void bt_page_free(BT_PHYS_ADDR paddr) {
 BT_ERROR bt_page_reserve(BT_PHYS_ADDR paddr, BT_u32 psize) {
 
 	BT_PHYS_ADDR start, end;
-	BT_u32 size;
 
 	if(!psize) {
 		return 0;
@@ -198,7 +197,6 @@ BT_ERROR bt_page_reserve(BT_PHYS_ADDR paddr, BT_u32 psize) {
 
 	start = BT_PAGE_TRUNC(paddr);
 	end = BT_PAGE_ALIGN(paddr + psize);
-	size = end - start;
 
 	LOCK_PAGES();
 	{
