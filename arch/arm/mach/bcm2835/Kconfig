@@ -1,5 +1,11 @@
 comment "BCM2835 Platform Options"
 
+config MACH_BCM2835_PLATFORM
+    bool
+	default y
+	select ARCH_ARM_ARM11
+
+
 config MACH_BCM2835_USE_STARTUP
     bool "Use default BCM2835 startup code."
 	default y
