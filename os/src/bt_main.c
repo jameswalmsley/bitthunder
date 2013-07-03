@@ -44,7 +44,12 @@ int bt_main(int argc, char **argv) {
 	BT_ERROR 	Error;
 	BT_HANDLE 	hUart = NULL;
 
+#ifdef BT_CONFIG_MEM_PAGE_ALLOCATOR
 	bt_initialise_pages();
+#endif
+#ifdef BT_CONFIG_MEM_SLAB_ALLOCATOR
+	bt_initialise_slab();
+#endif
 
 	BT_MACHINE_DESCRIPTION *pMachine = BT_GetMachineDescription(&Error);
 	if(pMachine->szpName) {

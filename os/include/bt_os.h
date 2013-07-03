@@ -6,6 +6,8 @@
 #include "module/bt_module_init.h"
 #include "mm/bt_ioremap.h"
 #include "mm/bt_heap.h"
+#include "mm/bt_page.h"
+#include "mm/slab.h"
 #include "devman/bt_devman.h"
 #include "devman/bt_block.h"
 #include "devman/bt_i2c.h"

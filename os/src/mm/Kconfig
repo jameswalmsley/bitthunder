@@ -1,0 +1,33 @@
+menu "Memory Management"
+
+config MEM_PAGE_ALLOCATOR
+	bool "Page Based Allocation"
+	default n
+
+config MEM_KHEAP
+    bool
+	default y if !MEM_PAGE_ALLOCATOR
+	default n if MEM_PAGE_ALLOCATOR
+
+config MEM_SLAB_ALLOCATOR
+	bool
+    depends on MEM_PAGE_ALLOCATOR
+	default y
+
+config USE_VIRTUAL_ADDRESSING
+    depends on HAS_MMU
+	bool "Virtual Memory Support"
+	default n
+	select MEM_PAGE_ALLOCATOR
+
+config RAM_PHYS
+	depends on HAS_MMU
+	hex
+	default (LINKER_RAM_START_ADDRESS)
+
+config RAM_VIRT
+    depends on HAS_MMU
+	hex
+	default 0xC0000000
+
+endmenu

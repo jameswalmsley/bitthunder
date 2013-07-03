@@ -5,6 +5,8 @@
 
 
 
+#define BT_CLZ(x)	__builtin_clz(x)
+
 
 
 
