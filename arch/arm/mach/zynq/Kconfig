@@ -1,6 +1,7 @@
 config MACH_ZYNQ_PLATFORM
 	bool
 	default y
+	select ARCH_ARM_CORTEX_A9
 	select ARCH_ARM_IRQ_STACK
 	select HAS_MMU
 
@@ -14,7 +15,6 @@ config MACH_ZYNQ_XC7Z020
     bool "XC7Z020"
 
 endchoice
-
 
 config MACH_ZYNQ_USE_STARTUP
     bool "Use default Zynq startup code."

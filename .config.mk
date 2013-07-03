@@ -6,6 +6,7 @@ include $(BASE).config
 
 ARCH:=$(shell echo $(BT_CONFIG_ARCH))
 SUBARCH:=$(shell echo $(BT_CONFIG_SUBARCH))
+TOOLCHAIN:=$(shell echo $(BT_CONFIG_TOOLCHAIN))
 
 include $(BASE)os/objects.mk
 include $(BASE)lib/objects.mk
@@ -19,6 +20,10 @@ test_dir:
 
 
 include $(BASE)$(BSP_DIR)/objects.mk
+
+$(OBJECTS): CFLAGS += -Wall -I $(BASE)/lib/include/ -I $(BASE)/arch/arm/include/
+$(OBJECTS): CFLAGS += -mcpu=$(shell echo $(BT_CONFIG_TOOLCHAIN_CPU)) $(shell echo $(BT_CONFIG_TOOLCHAIN_FLAGS)) $(shell echo $(BT_CONFIG_TOOLCHAIN_OPTIMISATION))
+$(OBJECTS): CFLAGS += $(shell echo $(BT_CONFIG_TOOLCHAIN_MACH_FLAGS))
 
 $(OBJECTS): CFLAGS += -nostdlib -fno-builtin -fdata-sections -ffunction-sections
 $(OBJECTS): CFLAGS += -I $(BASE)/${BSP_DIR}/

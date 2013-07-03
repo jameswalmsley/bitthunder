@@ -18,7 +18,7 @@ config APP_DIR
     string
 	default "scripts" if !APP_CONFIG
     option env="APP_DIR"
-    
+
 config APP_BSP_CONFIG
     bool
 	option env="APP_BSP_CONFIG"
@@ -28,8 +28,8 @@ config APP_BSP_DIR
     string
 	default "bsp" if !APP_BSP_CONFIG
     option env="APP_BSP_DIR"
-    
-    
+
+
 choice
 	prompt "Build OS or Library"
 	default OS
@@ -62,6 +62,24 @@ endchoice
 
 config TOOLCHAIN
     string "Toolchain prefix"
+
+choice
+	prompt "Optimisation Level"
+	default OPTIMISE_NONE
+
+config OPTIMISE_NONE
+	bool "No Optimisations"
+
+config OPTIMISE_SIZE
+    bool "Optimise for size"
+
+
+endchoice
+
+config TOOLCHAIN_OPTIMISATION
+    string
+	default "-Os" if OPTIMISE_SIZE
+	default "-O0" if OPTIMISE_NONE
 
 
 choice

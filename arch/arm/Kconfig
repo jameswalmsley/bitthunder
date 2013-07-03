@@ -67,6 +67,14 @@ config ARCH_ARM_CORTEX_A9
     bool
 	select LITTLE_ENDIAN
 
+config TOOLCHAIN_CPU
+    string
+	default "cortex-a9"	if ARCH_ARM_CORTEX_A9
+
+config TOOLCHAIN_MACH_FLAGS
+    string
+	default "-mfpu=vfpv3 -mfloat-abi=softfp" if ARCH_ARM_CORTEX_A9
+
 config ARCH_ARM_ARM11
     bool
     select LITTLE_ENDIAN
