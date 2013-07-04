@@ -68,7 +68,6 @@ bt_reset:
 	orr	r0, r0, #(0x01 << 6)		// set SMP bit
 	orr	r0, r0, #(0x01 )
 	mcr	p15, 0, r0, c1, c0, 1		// Write ACTLR
-#endif
 
 	/*
 	 *	Invalidate all caches, and the TLB, ensure MMU is disabled!
@@ -77,7 +76,8 @@ bt_reset:
 	mcr	p15, 0, r0, c8, c7, 0		// invalidate TLBs
 	mcr	p15, 0, r0, c7, c5, 0		// invalidate icache
 	mcr	p15, 0, r0, c7, c5, 6		// Invalidate branch predictor array
-	bl	invalidate_dcache		/* invalidate dcache */
+	bl	invalidate_dcache			/* invalidate dcache */
+#endif
 
 #ifdef BT_CONFIG_ARCH_ARM_HAS_NEON
 	MRC	p15,0,r0,c1,c0,2			// Enable NEON
@@ -150,6 +150,9 @@ Sync:	ldr	r1, [r0]
 	bic	r0, r0, #0x1			// Clear the enable bit
 	mcr	p15, 0, r0, c1, c0, 0	// Write back to control register
 
+#define CACHED_MEM		0x00015de6
+#define UNCACHED_MEM 	0x00000c02
+	
 #ifndef BT_CONFIG_USE_VIRTUAL_ADDRESSING
 	/*
 	 *	In the case we are using normal memory, we need a reasonable identity mapping.
@@ -158,8 +161,6 @@ Sync:	ldr	r1, [r0]
 	 *
 	 *	In all other cases, it should be accessible BUT NOT cached. i.e. BARE-METAL!
 	 */
-#define CACHED_MEM		0x00015de6
-#define UNCACHED_MEM 	0x00000c02
 	ldr		r3, =0xFFF	// 0 upto 0xFFFF_FFFF in MB sections (<= loop)
 	mov		r2, #0x00000000		// Start at address 0
 	ldr		r0, =__bt_mmu_table_start
@@ -236,8 +237,9 @@ _mmu_init_loop:
 	subs	r3, r3, #1
 	bge		_mmu_init_loop
 
-	ldr		r3,=0xE
-	ldr		r2,	=(0x15de6 + 0x00100000)
+//	ldr		r3,=0xE
+	ldr		r3,=((BT_CONFIG_LINKER_RAM_LENGTH/0x00100000)-1)
+	ldr		r2,	=(0x15de6 + BT_CONFIG_RAM_PHYS)
 _mmu_init_loop2:
 	str		r2,	[r0]
 	add		r0, r0, #0x4
