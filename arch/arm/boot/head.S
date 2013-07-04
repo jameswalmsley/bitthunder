@@ -77,7 +77,7 @@ bt_reset:
 	mcr	p15, 0, r0, c7, c5, 0		// invalidate icache
 	mcr	p15, 0, r0, c7, c5, 6		// Invalidate branch predictor array
 	bl	invalidate_dcache			/* invalidate dcache */
-#endif
+
 
 #ifdef BT_CONFIG_ARCH_ARM_HAS_NEON
 	MRC	p15,0,r0,c1,c0,2			// Enable NEON
@@ -133,6 +133,8 @@ Sync:	ldr	r1, [r0]
 	ldr	r0,=L2CCIntClear
 	str	r1,[r0]
 
+#endif
+	
 	/*
 	 *	Setup the initial kernel boot process stack pointer.
 	 *	This should be the Physical Address!
@@ -281,6 +283,7 @@ _mmu_init_loop3:
 jump_to_virtual:
 #endif
 
+#ifdef BT_CONFIG_ARCH_ARM_FULL_INIT
 	ldr	r0,=L2CCCrtl
 	ldr	r1,[r0]
 	mov	r2, #L2CCControl
@@ -306,7 +309,7 @@ jump_to_virtual:
 	orr	r0, r0, #(0x1 << 2)		/* enable Dside prefetch */
 	orr	r0, r0, #(0x1 << 1)		/* enable L2 Prefetch hint */
 	mcr	p15,0,r0,c1,c0,1		/* write Auxiliary Control Register */
-	
+#endif
 
 .set Abort_stack,	__abort_stack
 .set SPV_stack,		__supervisor_stack
