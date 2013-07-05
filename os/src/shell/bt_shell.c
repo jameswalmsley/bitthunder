@@ -5,6 +5,7 @@
 #include <bitthunder.h>
 #include <string.h>
 #include <ctype.h>
+#include <shell/bt_env.h>
 
 extern const BT_SHELL_COMMAND * __bt_shell_commands_start;
 extern const BT_SHELL_COMMAND * __bt_shell_commands_end;
@@ -25,6 +26,14 @@ static const BT_SHELL_COMMAND *GetShellCommand(const BT_i8 *name) {
 	}
 
 	return NULL;
+}
+
+static char *replace_var(char *input) {
+	BT_ENV_VARIABLE *env = BT_ShellGetEnv(input);
+	if(!env) {
+		return input;
+	}
+	return env->o.string->s;
 }
 
 BT_ERROR BT_ShellCommand(char *input) {
@@ -83,7 +92,11 @@ BT_ERROR BT_ShellCommand(char *input) {
 		if(!bIsArg) {
 			if(!isspace((int)*input)) {
 				bIsArg = BT_TRUE;
-				pargs[i++] = input;
+				if(*input == '$' && *(input+1) == '{') {
+					pargs[i++] = replace_var(input);
+				} else {
+					pargs[i++] = input;
+				}
 			}
 		} else {
 			if(isspace((int)*input)) {
