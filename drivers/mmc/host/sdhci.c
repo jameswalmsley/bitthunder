@@ -27,6 +27,7 @@ struct _BT_OPAQUE_HANDLE {
 	MMC_HOST				   *pHost;
 	BT_MMC_HOST_OPS			   *pHostOps;
 	BT_u32						ulFlags;
+	BT_u32						ulIRQ;
 };
 
 static const BT_IF_HANDLE oHandleInterface;
@@ -303,9 +304,11 @@ static BT_ERROR sdhci_reset(BT_HANDLE hSDIO, BT_u8 ucMask) {
 	// we have already registered our IRQ!
 
 	hSDIO->pRegs->NORMAL_INT_STATUS		= 0xFFFF;
+	__asm volatile("dsb");
 
 	// Enable the interrupts to be signalled to the CPU.
 	hSDIO->pRegs->NORMAL_INT_SIGNAL_ENABLE 	|= NORMAL_INT_CARD_INSERTED | NORMAL_INT_CARD_REMOVED;
+	hSDIO->pRegs->NORMAL_INT_STATUS		= 0xFFFF;
 
 	return BT_ERR_NONE;
 }
@@ -374,10 +377,12 @@ static BT_ERROR sdhci_initialise(BT_HANDLE hSDIO) {
 	// For some reason this can send the interrupt controller wild, even though
 	// we have already registered our IRQ!
 
-	hSDIO->pRegs->NORMAL_INT_STATUS		= NORMAL_INT_CARD_INSERTED | NORMAL_INT_CARD_REMOVED;
-
 	// Enable the interrupts to be signalled to the CPU.
+	hSDIO->pRegs->NORMAL_INT_STATUS		= 0xFFFF;
+
 	hSDIO->pRegs->NORMAL_INT_SIGNAL_ENABLE 	|= NORMAL_INT_CARD_INSERTED | NORMAL_INT_CARD_REMOVED;
+
+	BT_EnableInterrupt(hSDIO->ulIRQ);
 
 	return BT_ERR_NONE;
 }
@@ -501,18 +506,18 @@ static BT_HANDLE sdhci_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErr
 		goto err_free_out;
 	}
 
-	BT_u32 ulIRQ = pResource->ulStart;
+	hSDIO->ulIRQ = pResource->ulStart;
 
-	Error = BT_RegisterInterrupt(ulIRQ, sdhci_irq_handler, hSDIO);
+	Error = BT_RegisterInterrupt(hSDIO->ulIRQ, sdhci_irq_handler, hSDIO);
 	if(Error) {
 		goto err_free_out;
 	}
 
 	// This enables the interrupt at with the interrupt controller.
-	Error = BT_EnableInterrupt(ulIRQ);
+	/*Error = BT_EnableInterrupt(ulIRQ);
 	if(Error) {
 		goto err_free_irq;
-	}
+		}*/
 
 	BT_GpioSetDirection(0, BT_GPIO_DIR_OUTPUT);
 	BT_GpioSet(0, 0);
@@ -552,14 +557,14 @@ static BT_HANDLE sdhci_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErr
 
 	hSDIO->ulFlags = pResource->ulConfigFlags;
 
-	if(hSDIO->ulFlags & SDHCI_FLAGS_ALWAYS_PRESENT) {
-		hSDIO->pfnEventReceiver(hSDIO->pHost, BT_MMC_CARD_DETECTED, BT_TRUE);
-	}
+	//if(hSDIO->ulFlags & SDHCI_FLAGS_ALWAYS_PRESENT) {
+	hSDIO->pfnEventReceiver(hSDIO->pHost, BT_MMC_CARD_DETECTED, BT_TRUE);
+	//}
 
 	return hSDIO;
 
 err_free_irq:
-	BT_UnregisterInterrupt(ulIRQ, sdhci_irq_handler, hSDIO);
+	BT_UnregisterInterrupt(hSDIO->ulIRQ, sdhci_irq_handler, hSDIO);
 
 err_free_out:
 	BT_DestroyHandle(hSDIO);
