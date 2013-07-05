@@ -109,8 +109,10 @@ typedef struct tskTaskControlBlock
 	#endif
 
 #if ( configBITTHUNDER == 1 )
+#ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
 	volatile portSTACK_TYPE	*pxTopOfKernelStack;
 	portSTACK_TYPE			*pxKernelStack;
+#endif
 #endif
 
 	xListItem				xGenericListItem;	/*< List item used to place the TCB in ready and blocked queues. */
@@ -431,7 +433,9 @@ tskTCB * pxNewTCB;
 		portSTACK_TYPE *pxTopOfStack;
 
 #if (configBITTHUNDER == 1)
+#ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
 		portSTACK_TYPE *pxTopOfKernelStack;
+#endif
 #endif
 
 		#if( portUSING_MPU_WRAPPERS == 1 )
@@ -460,9 +464,11 @@ tskTCB * pxNewTCB;
 			/* Check the alignment of the calculated top of stack is correct. */
 			configASSERT( ( ( ( unsigned long ) pxTopOfStack & ( unsigned long ) portBYTE_ALIGNMENT_MASK ) == 0UL ) );
 #if (configBITTHUNDER == 1)
+#ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
 			pxTopOfKernelStack = pxNewTCB->pxKernelStack + ((BT_PAGE_SIZE / sizeof(portSTACK_TYPE)) - 1);
 			pxTopOfKernelStack = (portSTACK_TYPE *) (((portPOINTER_SIZE_TYPE) pxTopOfKernelStack) & ((portPOINTER_SIZE_TYPE) ~portBYTE_ALIGNMENT_MASK));
 			pxNewTCB->pxTopOfKernelStack = pxTopOfKernelStack;
+#endif
 #endif
 		}
 		#else
@@ -2194,6 +2200,7 @@ tskTCB *pxNewTCB;
 		}
 
 #if (configBITTHUNDER == 1)
+#ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
 		void *phys_stack = (void *) bt_page_alloc(BT_PAGE_SIZE);	// Allocate a single page for task's kernel stack.
 		pxNewTCB->pxKernelStack = (portSTACK_TYPE *) bt_phys_to_virt(phys_stack);
 		if( pxNewTCB->pxKernelStack == NULL ) {
@@ -2202,6 +2209,7 @@ tskTCB *pxNewTCB;
 		} else {
 			memset( pxNewTCB->pxKernelStack, (int) tskSTACK_FILL_BYTE, (size_t) BT_PAGE_SIZE);
 		}
+#endif
 #endif
 
 	}
