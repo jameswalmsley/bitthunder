@@ -55,7 +55,7 @@ static BT_ERROR gic_cleanup(BT_HANDLE hGic) {
 	return BT_ERR_NONE;
 }
 
-#ifdef BT_CONFIG_ARCH_ARM_GIC_INIT_DISTRIBUTOR
+//#ifdef BT_CONFIG_ARCH_ARM_GIC_INIT_DISTRIBUTOR
 static void gic_dist_init(BT_HANDLE hGic) {
 	BT_u32 i;
 	BT_u32 ulGicIRQs = hGic->ulGicIRQs;
@@ -67,12 +67,12 @@ static void gic_dist_init(BT_HANDLE hGic) {
 		hGic->pGICD->ICFGR[i/16] = 0;
 	}
 
-	BT_u32 ulCPUMask = 1 	<< 0;
+	BT_u32 ulCPUMask = 		(1 << BT_GetCoreID());
 	ulCPUMask |= ulCPUMask 	<< 8;
 	ulCPUMask |= ulCPUMask 	<< 16;
 
 	for(i = 32; i < ulGicIRQs; i += 4) {
-		hGic->pGICD->ITARGETSR[i/4] = ulCPUMask;
+		hGic->pGICD->ITARGETSR[i/4] |= ulCPUMask;
 		hGic->pGICD->IPRIORITYR[i/4] = 0xA0A0A0A0;
 	}
 
@@ -82,7 +82,7 @@ static void gic_dist_init(BT_HANDLE hGic) {
 
 	hGic->pGICD->CTLR = 1;
 }
-#endif
+//#endif
 
 static void gic_cpu_init(BT_HANDLE hGic) {
 
@@ -169,6 +169,7 @@ static BT_ERROR gic_enable_interrupts(BT_HANDLE hGic) {
 				"MSR	CPSR, R0		\n\t"	/* Write back modified value.*/
 				"LDMIA	SP!, {R0}" );			/* Pop R0.					*/
 
+	hGic->pGICD->CTLR |= 1;
 	hGic->pGICC->CTLR |= 1;
 	return BT_ERR_NONE;
 }
@@ -276,7 +277,7 @@ static BT_HANDLE gic_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 
 	// Enable the Distributor and CPU interfaces.
 
-	BT_u32 ulGicIRQs = hGic->pGICD->TYPER;
+	BT_u32 ulGicIRQs = (hGic->pGICD->TYPER & 0x1F);
 	ulGicIRQs = (ulGicIRQs + 1) * 32;
 
 	/*
@@ -288,9 +289,9 @@ static BT_HANDLE gic_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 
 	hGic->ulGicIRQs = ulGicIRQs;
 
-#ifdef BT_CONFIG_ARCH_ARM_GIC_INIT_DISTRIBUTOR
+//#ifdef BT_CONFIG_ARCH_ARM_GIC_INIT_DISTRIBUTOR
 	gic_dist_init(hGic);
-#endif
+//#endif
 	gic_cpu_init(hGic);
 
 	return hGic;
