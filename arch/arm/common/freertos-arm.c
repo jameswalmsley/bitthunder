@@ -146,6 +146,8 @@ static void prvSetupTimerInterrupt(void) {
 	pTimerOps->pfnRegisterInterrupt(hTimer, tick_isr_handler, NULL);
 	pTimerOps->pfnEnableInterrupt(hTimer);
 	pTimerOps->pfnStart(hTimer);
+
+	BT_EnableInterrupts();
 }
 
 
