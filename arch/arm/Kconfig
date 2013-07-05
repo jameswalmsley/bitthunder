@@ -149,3 +149,7 @@ endif
 menu "Memory"
     source arch/arm/Kconfig.linker
 endmenu
+
+config ARCH_ARM_FULL_INIT
+    bool "Full CPU initialisation"
+	default y

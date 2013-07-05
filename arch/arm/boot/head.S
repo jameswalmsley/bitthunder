@@ -3,6 +3,7 @@
  */
 
 #include <bt_config.h>
+#include <btlinker_config.h>
 
 .section .init
 .globl bt_reset
@@ -13,7 +14,7 @@
 .set MMUCRVAL,	0b01000000000101	/* Enable IDC, and MMU */
 
 _bt_vector_table:
-	ldr pc,=0x00100040
+	ldr pc,=(BT_LINKER_KERNEL_ENTRY + 0x40)
 	ldr	pc,handler_undefined
 	ldr pc,handler_swi
 	ldr pc,handler_prefetch
@@ -24,7 +25,6 @@ _bt_vector_table:
 
 handler_reset:		.word 	bt_reset
 handler_undefined:	.word 	undefined
-//handler_swi:		.word	vPortYieldProcessor
 handler_swi:		.word 	_bt_syscall_entry
 handler_prefetch:	.word	prefetch
 handler_data:		.word	data
@@ -44,98 +44,188 @@ bt_reset:
 	orr	r0,r0,#0x80
 	msr	cpsr_c,r0
 
-	/*set scu enable bit in scu*/
-	/*ldr	r7, =0xf8f00000
+	ldr		r0, =__bt_init_start		// Set-up Initial kernel stack
+	mcr		p15, 0, r0, c12, c0, 0		// Set the VBAR (Vector base address register).
+
+#ifdef BT_CONFIG_ARCH_ARM_FULL_INIT
+	/*
+	 *	Enable the snoop control unit.
+	 */
+	ldr	r7, =0xf8f00000
 	ldr	r0, [r7]
 	orr	r0, r0, #0x1
-	str	r0, [r7]*/
-
-	/*invalidate scu*/
-	/*ldr	r7, =0xf8f0000c
-	ldr	r6, =0xffff
-	str	r6, [r7]*/
-
-	/* Write to ACTLR */
-	//mrc	p15, 0, r0, c1, c0, 1		/* Read ACTLR*/
-	//orr	r0, r0, #(0x01 << 6)		/* set SMP bit */
-	//orr	r0, r0, #(0x01 )		/* */
-	//mcr	p15, 0, r0, c1, c0, 1		/* Write ACTLR*/
-
-	/* Invalidate caches and TLBs */
-	mov	r0,#0				/* r0 = 0  */
-	mcr	p15, 0, r0, c8, c7, 0		/* invalidate TLBs */
-	mcr	p15, 0, r0, c7, c5, 0		/* invalidate icache */
-	mcr	p15, 0, r0, c7, c5, 6		/* Invalidate branch predictor array */
-
-	//MRC	p15,0,r0,c1,c0,2			// Enable NEON
-
-.set PSS_L2CC_BASE_ADDR, 0xF8F02000
-
-.set L2CCWay,		(PSS_L2CC_BASE_ADDR + 0x077C)	/*(PSS_L2CC_BASE_ADDR + PSS_L2CC_CACHE_INVLD_WAY_OFFSET)*/
-.set L2CCSync,		(PSS_L2CC_BASE_ADDR + 0x0730)	/*(PSS_L2CC_BASE_ADDR + PSS_L2CC_CACHE_SYNC_OFFSET)*/
-.set L2CCCrtl,		(PSS_L2CC_BASE_ADDR + 0x0100)	/*(PSS_L2CC_BASE_ADDR + PSS_L2CC_CNTRL_OFFSET)*/
-.set L2CCAuxCrtl,	(PSS_L2CC_BASE_ADDR + 0x0104)	/*(PSS_L2CC_BASE_ADDR + XPSS_L2CC_AUX_CNTRL_OFFSET)*/
-.set L2CCTAGLatReg,	(PSS_L2CC_BASE_ADDR + 0x0108)	/*(PSS_L2CC_BASE_ADDR + XPSS_L2CC_TAG_RAM_CNTRL_OFFSET)*/
-.set L2CCDataLatReg,	(PSS_L2CC_BASE_ADDR + 0x010C)	/*(PSS_L2CC_BASE_ADDR + XPSS_L2CC_DATA_RAM_CNTRL_OFFSET)*/
-.set L2CCIntClear,	(PSS_L2CC_BASE_ADDR + 0x0220)	/*(PSS_L2CC_BASE_ADDR + XPSS_L2CC_IAR_OFFSET)*/
-.set L2CCIntRaw,	(PSS_L2CC_BASE_ADDR + 0x021C)	/*(PSS_L2CC_BASE_ADDR + XPSS_L2CC_ISR_OFFSET)*/
-.set L2CCAuxControl,	0x72360000		/* Enable all prefetching, Cache replacement policy, Parity enable,
-                                        Event monitor bus enable and Way Size (64 KB) */
-.set L2CCControl,	0x01			/* Enable L2CC */
-.set L2CCTAGLatency,	0x0111			/* latency for TAG RAM */
-.set L2CCDataLatency,	0x0121			/* latency for DATA RAM */
-
-	//ldr	r0,=L2CCCrtl			/* Load L2CC base address base + control register */
-	//mov	r1, #0				/* force the disable bit */
-	//str	r1, [r0]			/* disable the L2 Caches */
-	//
-	//ldr	r0,=L2CCAuxCrtl			/* Load L2CC base address base + Aux control register */
-	//ldr	r1,[r0]				/* read the register */
-	//ldr	r2,=L2CCAuxControl		/* set the default bits */
-	//orr	r1,r1,r2
-	//str	r1, [r0]			/* store the Aux Control Register */
-	//
-	//ldr	r0,=L2CCTAGLatReg		/* Load L2CC base address base + TAG Latency address */
-	//ldr	r1,=L2CCTAGLatency		/* set the latencies for the TAG*/
-	//str	r1, [r0]			/* store the TAG Latency register Register */
-	//
-	//ldr	r0,=L2CCDataLatReg		/* Load L2CC base address base + Data Latency address */
-	//ldr	r1,=L2CCDataLatency		/* set the latencies for the Data*/
-	//str	r1, [r0]			/* store the Data Latency register Register */
-	//
-	//ldr	r0,=L2CCWay			/* Load L2CC base address base + way register*/
-	//ldr	r2, =0xFFFF
-	//str	r2, [r0]			/* force invalidate */
-	//
-	//ldr	r0,=L2CCSync			/* need to poll 0x730, PSS_L2CC_CACHE_SYNC_OFFSET */
-	// 					/* Load L2CC base address base + sync register*/
-	///* poll for completion */
-//Sync//:	ldr	r1, [r0]
-	//cmp	r1, #0
-	//bne	Sync
-	//
-	//ldr	r0,=L2CCIntRaw			/* clear pending interrupts */
-	//ldr	r1,[r0]
-	//ldr	r0,=L2CCIntClear
-	//str	r1,[r0]
+	str	r0, [r7]
 
 	/*
-		Setup the initial kernel boot process stack pointer.
-		This should be the Physical Address!
+	 *	Invalidate the snoop control unit.
+	 */
+	ldr	r7, =0xf8f0000c
+	ldr	r6, =0xffff
+	str	r6, [r7]
+
+	/* Write to ACTLR */
+	mrc	p15, 0, r0, c1, c0, 1		// Read ACTLR
+	orr	r0, r0, #(0x01 << 6)		// set SMP bit
+	orr	r0, r0, #(0x01 )
+	mcr	p15, 0, r0, c1, c0, 1		// Write ACTLR
+#endif
+
+	/*
+	 *	Invalidate all caches, and the TLB, ensure MMU is disabled!
+	 */
+	mov	r0,#0
+	mcr	p15, 0, r0, c8, c7, 0		// invalidate TLBs
+	mcr	p15, 0, r0, c7, c5, 0		// invalidate icache
+	mcr	p15, 0, r0, c7, c5, 6		// Invalidate branch predictor array
+	bl	invalidate_dcache		/* invalidate dcache */
+
+#ifdef BT_CONFIG_ARCH_ARM_HAS_NEON
+	MRC	p15,0,r0,c1,c0,2			// Enable NEON
+#endif
+
+.set PSS_L2CC_BASE_ADDR,	 0xF8F02000
+.set L2CCWay,				(PSS_L2CC_BASE_ADDR + 0x077C)
+.set L2CCSync,				(PSS_L2CC_BASE_ADDR + 0x0730)
+.set L2CCCrtl,				(PSS_L2CC_BASE_ADDR + 0x0100)
+.set L2CCAuxCrtl,			(PSS_L2CC_BASE_ADDR + 0x0104)
+.set L2CCTAGLatReg,			(PSS_L2CC_BASE_ADDR + 0x0108)
+.set L2CCDataLatReg,		(PSS_L2CC_BASE_ADDR + 0x010C)
+.set L2CCIntClear,			(PSS_L2CC_BASE_ADDR + 0x0220)
+.set L2CCIntRaw,			(PSS_L2CC_BASE_ADDR + 0x021C)
+.set L2CCAuxControl,		0x72360000						/* Enable all prefetching, Cache replacement policy, Parity enable,
+    														 *	Event monitor bus enable and Way Size (64 KB) */
+
+.set L2CCControl,			0x01							// Enable L2CC
+.set L2CCTAGLatency,		0x0111							// latency for TAG RAM
+.set L2CCDataLatency,		0x0121							// latency for DATA RAM
+
+	ldr	r0,=L2CCCrtl		// Load L2CC base address base + control register
+	mov	r1, #0				// force the disable bit
+	str	r1, [r0]			// disable the L2 Caches
+
+	ldr	r0,=L2CCAuxCrtl		// Load L2CC base address base + Aux control register
+	ldr	r1,[r0]				// read the register
+	ldr	r2,=L2CCAuxControl	// set the default bits
+	orr	r1,r1,r2
+	str	r1, [r0]			// store the Aux Control Register
+
+	ldr	r0,=L2CCTAGLatReg	// Load L2CC base address base + TAG Latency address
+	ldr	r1,=L2CCTAGLatency	// set the latencies for the TAG
+	str	r1, [r0]			// store the TAG Latency register Register
+
+	ldr	r0,=L2CCDataLatReg	// Load L2CC base address base + Data Latency address
+	ldr	r1,=L2CCDataLatency	// set the latencies for the Data
+	str	r1, [r0]			// store the Data Latency register Register
+
+	ldr	r0,=L2CCWay			// Load L2CC base address base + way register
+	ldr	r2, =0xFFFF
+	str	r2, [r0]			// force invalidate
+
+	ldr	r0,=L2CCSync		// need to poll 0x730, PSS_L2CC_CACHE_SYNC_OFFSET
+							// Load L2CC base address base + sync register
+							// poll for completion
+Sync:	ldr	r1, [r0]
+	cmp	r1, #0
+	bne	Sync
+
+	ldr	r0,=L2CCIntRaw		// clear pending interrupts
+	ldr	r1,[r0]
+	ldr	r0,=L2CCIntClear
+	str	r1,[r0]
+
+	/*
+	 *	Setup the initial kernel boot process stack pointer.
+	 *	This should be the Physical Address!
 	 */
 	ldr	sp,=_stack
 
 	/*
-		Initialise the initial MMU table, and jump to kernel startup routine!
-	*/
+	 *	Initialise the initial MMU table, and jump to kernel startup routine!
+	 */
 
 	/*
-		Disable the MMU! - Just to make sure its disabled.
-	*/
+	 *	Disable the MMU! - Just to make sure its disabled.
+	 */
 	mrc	p15, 0, r0, c1, c0, 0	// Read the MMU control register
 	bic	r0, r0, #0x1			// Clear the enable bit
 	mcr	p15, 0, r0, c1, c0, 0	// Write back to control register
 
+#ifndef BT_CONFIG_USE_VIRTUAL_ADDRESSING
+	/*
+	 *	In the case we are using normal memory, we need a reasonable identity mapping.
+	 *	We shall loop over the entire address space, and if the current address falls within
+	 *	any of the defined memory regions, then we shall enable caching.
+	 *
+	 *	In all other cases, it should be accessible BUT NOT cached. i.e. BARE-METAL!
+	 */
+#define CACHED_MEM		0x00015de6
+#define UNCACHED_MEM 	0x00000c02
+	ldr		r3, =0xFFF	// 0 upto 0xFFFF_FFFF in MB sections (<= loop)
+	mov		r2, #0x00000000		// Start at address 0
+	ldr		r0, =__bt_mmu_table_start
+__mmu_init_loop:
+	ldr		r5,	=0x000FFFFF
+	bic		r2, r5
+	ldr		r4,	=UNCACHED_MEM	// Flags to OR with SECTION address
+#ifdef	BT_CONFIG_LINKER_SECTION_FLASH					// Check if in a FLASH section.
+	ldr		r5,	=BT_CONFIG_LINKER_FLASH_START_ADDRESS
+	cmp		r2, r5
+	blt		skip_flash
+	ldrge	r5, =(BT_CONFIG_LINKER_FLASH_START_ADDRESS + BT_CONFIG_LINKER_FLASH_LENGTH)
+	cmpge	r2, r5
+	ldrle	r4, =CACHED_MEM
+skip_flash:
+#endif
+#ifdef	BT_CONFIG_LINKER_SECTION_SRAM					// Check if in a SRAM section.
+	ldr		r5,	=BT_CONFIG_LINKER_SRAM_START_ADDRESS
+	cmp		r2, r5
+	blt		skip_sram
+	ldrge	r5, =(BT_CONFIG_LINKER_SRAM_START_ADDRESS + BT_CONFIG_LINKER_SRAM_LENGTH)
+	cmpge	r2, r5
+	ldrle	r4, =CACHED_MEM
+skip_sram:
+#endif
+#ifdef	BT_CONFIG_LINKER_SECTION_RAM					// Check if in a RAM section.
+	ldr		r5,	=BT_CONFIG_LINKER_RAM_START_ADDRESS
+	cmp		r2, r5
+	blt		skip_ram
+	ldrge	r5, =(BT_CONFIG_LINKER_RAM_START_ADDRESS + BT_CONFIG_LINKER_RAM_LENGTH)
+	cmpge	r2, r5
+	ldrle	r4, =CACHED_MEM
+skip_ram:
+#endif
+
+	orr		r2,	r4
+	str		r2,	[r0]
+	add		r0,	r0, #0x4
+	add		r2,	r2, #0x00100000
+	subs	r3, r3, #1
+	bge		__mmu_init_loop
+
+	mov		r0, #0x3
+	mcr		p15, 0, r0, c3, c0, 0
+
+
+	/*
+		Set the MMU TLB level 1 table base address.
+	*/
+	ldr		r0, =__bt_mmu_table_start
+	orr		r0, r0, #0x5B				// Outer Cacheable, WB
+	mcr 	p15, 0, r0, c2, c0, 0		// TTB0
+
+	mvn		r0,#0
+	mcr		p15,0,r0,c3,c0,0
+
+	ldr		r0,=MMUCRVAL
+	mcr		p15,0,r0,c1,c0,0			// Enable cache and MMU!
+	mcr		p15, 0, r0, c8, c7, 0	// Invalidate the TLBs
+
+	dsb		// Allow MMU to start up
+	isb		// Flush prefetch buffer.
+
+#endif
+
+#ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
 	ldr 	r3, =0xBFF
 	ldr		r2, =0x15de6
 	ldr		r0, =((__bt_mmu_table_start - BT_CONFIG_RAM_VIRT) + BT_CONFIG_RAM_PHYS)
@@ -160,10 +250,8 @@ _mmu_init_loop2:
 _mmu_init_loop3:
 	str		r2,	[r0]
 	add		r0, r0, #0x4
-#	add		r2, r2,	#0x100000
 	subs	r3, r3, #1
 	bge		_mmu_init_loop3
-
 
 	mov		r0, #0x3
 	mcr		p15, 0, r0, c3, c0, 0
@@ -184,18 +272,39 @@ _mmu_init_loop3:
 	dsb		// Allow MMU to start up
 	isb		// Flush prefetch buffer.
 
-	/*
-	ldr		r0, =(BT_CONFIG_RAM_VIRT - BT_CONFIG_RAM_PHYS - 4)
-	add		pc,	pc, r0*/
-
-	// Much simpler to use a label to do the jump into virtual space!
+	// Jump to the virtual address space
 
 	ldr		pc, jump_target
 	jump_target:	.word	jump_to_virtual
 jump_to_virtual:
+#endif
 
-	ldr		r0, =__bt_init_start		// Set-up Initial kernel stack
-	mcr		p15, 0, r0, c12, c0, 0
+	ldr	r0,=L2CCCrtl
+	ldr	r1,[r0]
+	mov	r2, #L2CCControl
+	orr	r1,r1,r2
+	str	r1,[r0]
+
+	mov	r0, r0
+	mrc	p15, 0, r1, c1, c0, 2		/* read cp access control register (CACR) into r1 */
+	orr	r1, r1, #(0xf << 20)		/* enable full access for p10 & p11 */
+	mcr	p15, 0, r1, c1, c0, 2		/* write back into CACR */
+
+.set FPEXC_EN,		0x40000000		/* FPU enable bit, (1 << 30) */
+	/* enable vfp */
+	fmrx	r1, FPEXC			/* read the exception register */
+	orr	r1,r1, #FPEXC_EN		/* set VFP enable bit, leave the others in orig state */
+	fmxr	FPEXC, r1			/* write back the exception register */
+
+	mrc	p15,0,r0,c1,c0,0		/* flow prediction enable */
+	orr	r0, r0, #(0x01 << 11)		/* #0x8000 */
+	mcr	p15,0,r0,c1,c0,0
+
+	mrc	p15,0,r0,c1,c0,1		/* read Auxiliary Control Register */
+	orr	r0, r0, #(0x1 << 2)		/* enable Dside prefetch */
+	orr	r0, r0, #(0x1 << 1)		/* enable L2 Prefetch hint */
+	mcr	p15,0,r0,c1,c0,1		/* write Auxiliary Control Register */
+	
 
 .set Abort_stack,	__abort_stack
 .set SPV_stack,		__supervisor_stack
@@ -234,6 +343,7 @@ jump_to_virtual:
 	 *	Now we are running in virtual space, lets cause any access currently below 0xC000_0000
 	 *	to cause a seg-fault.
 	 */
+#ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
 	ldr 	r3, =0xBFF
 	ldr		r2, =0
 	ldr		r0, =((__bt_mmu_table_start - BT_CONFIG_RAM_VIRT) + BT_CONFIG_RAM_PHYS)
@@ -243,10 +353,9 @@ _mmu_loop:
 	subs	r3, r3, #1
 	bge		_mmu_loop
 
-/*__mmu_loop2:
-	ldr		r3, =0x*/
 	mcr		p15, 0, r0, c8, c7, 0	// Invalidate the TLBs
 	dsb
+#endif
 
 	/*
 	 *	Now we are running in a "safe" environment.
@@ -285,7 +394,8 @@ _bt_startup_init_hook:
 .globl _bt_startup_boot
 .weak _bt_startup_boot
 _bt_startup_boot:
-	bx 	lr
+	ldr	r0,=0xDEADBEEF
+	b 	_bt_start
 
 /**
  *	BitThunder System Call handling -- assuming modified FreeRTOS kernel.
@@ -389,3 +499,58 @@ _bt_syscall_return:
 
 	// Return for SVC handler
 	subs	pc, lr, #0
+
+
+/*
+ *************************************************************************
+ *
+ * invalidate_dcache - invalidate the entire d-cache by set/way
+ *
+ * Note: for Cortex-A9, there is no cp instruction for invalidating
+ * the whole D-cache. Need to invalidate each line.
+ *
+ *************************************************************************
+ */
+invalidate_dcache:
+	mrc	p15, 1, r0, c0, c0, 1		/* read CLIDR */
+	ands	r3, r0, #0x7000000
+	mov	r3, r3, lsr #23			/* cache level value (naturally aligned) */
+	beq	finished
+	mov	r10, #0				/* start with level 0 */
+loop1:
+	add	r2, r10, r10, lsr #1		/* work out 3xcachelevel */
+	mov	r1, r0, lsr r2			/* bottom 3 bits are the Cache type for this level */
+	and	r1, r1, #7			/* get those 3 bits alone */
+	cmp	r1, #2
+	blt	skip				/* no cache or only instruction cache at this level */
+	mcr	p15, 2, r10, c0, c0, 0		/* write the Cache Size selection register */
+	isb					/* isb to sync the change to the CacheSizeID reg */
+	mrc	p15, 1, r1, c0, c0, 0		/* reads current Cache Size ID register */
+	and	r2, r1, #7			/* extract the line length field */
+	add	r2, r2, #4			/* add 4 for the line length offset (log2 16 bytes) */
+	ldr	r4, =0x3ff
+	ands	r4, r4, r1, lsr #3		/* r4 is the max number on the way size (right aligned) */
+	clz	r5, r4				/* r5 is the bit position of the way size increment */
+	ldr	r7, =0x7fff
+	ands	r7, r7, r1, lsr #13		/* r7 is the max number of the index size (right aligned) */
+loop2:
+	mov	r9, r4				/* r9 working copy of the max way size (right aligned) */
+loop3:
+	orr	r11, r10, r9, lsl r5		/* factor in the way number and cache number into r11 */
+	orr	r11, r11, r7, lsl r2		/* factor in the index number */
+	mcr	p15, 0, r11, c7, c14, 2		/* clean & invalidate by set/way */
+	subs	r9, r9, #1			/* decrement the way number */
+	bge	loop3
+	subs	r7, r7, #1			/* decrement the index */
+	bge	loop2
+skip:
+	add	r10, r10, #2			/* increment the cache number */
+	cmp	r3, r10
+	bgt	loop1
+
+finished:
+	mov	r10, #0				/* swith back to cache level 0 */
+	mcr	p15, 2, r10, c0, c0, 0		/* select current cache level in cssr */
+	dsb
+	isb
+	bx	lr
