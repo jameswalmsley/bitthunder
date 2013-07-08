@@ -4,8 +4,8 @@
 #include <collections/bt_list.h>
 
 typedef enum _BT_ENV_TYPE {
-	ENV_T_INTEGER,
-	ENV_T_STRING,
+	BT_ENV_T_INTEGER,
+	BT_ENV_T_STRING,
 } BT_ENV_TYPE;
 
 typedef struct _BT_ENV_INT {

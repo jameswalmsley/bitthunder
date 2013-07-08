@@ -41,7 +41,7 @@ BT_ERROR BT_ShellSetEnv(const char *name, const char *value, BT_ENV_TYPE eType) 
 			return BT_ERR_NO_MEMORY;
 		}
 
-		var->eType = ENV_T_STRING;
+		var->eType = BT_ENV_T_STRING;
 		var->len = namelen;
 		strncpy(var->s, name, namelen-1);
 
@@ -54,13 +54,16 @@ BT_ERROR BT_ShellSetEnv(const char *name, const char *value, BT_ENV_TYPE eType) 
 		var->o.string->length = len;
 		strncpy(var->o.string->s, value, var->o.string->length);
 
+		bt_list_add(&var->list, &vars);
+
 	} else {
-		if(var->eType == ENV_T_STRING && var->o.string->length >= len) {
+		if(var->eType == BT_ENV_T_STRING && var->o.string->length >= len) {
 			strncpy(var->o.string->s, value, var->o.string->length);
 		} else {
 			BT_kFree(var->o.string);
 			var->o.string = (BT_ENV_STRING *) BT_kMalloc(sizeof(BT_ENV_STRING) + len);
 			if(!var->o.string) {
+				bt_list_del(&var->list);
 				BT_kFree(var);
 				return BT_ERR_NO_MEMORY;
 			}
