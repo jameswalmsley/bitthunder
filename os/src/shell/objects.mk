@@ -10,5 +10,5 @@ BT_OS_OBJECTS 									+= $(BUILD_DIR)os/src/shell/commands/gpio.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_HELP) 		+= $(BUILD_DIR)os/src/shell/commands/help.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_LOAD) 		+= $(BUILD_DIR)os/src/shell/commands/load.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_LOAD_FPGA) 	+= $(BUILD_DIR)os/src/shell/commands/load_fpga.o
-
+BT_OS_OBJECTS 									+= $(BUILD_DIR)os/src/shell/commands/setenv.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_ATAGS) 		+= $(BUILD_DIR)os/src/shell/commands/atag/atag.o
