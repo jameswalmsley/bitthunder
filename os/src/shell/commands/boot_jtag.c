@@ -24,7 +24,7 @@ static int bt_boot_jtag(int argc, char **argv) {
 		return -1;
 	}
 
-	coreID = strtol(argv[2], NULL, 10);
+	coreID = strtoul(argv[2], NULL, 10);
 
 	void *p = (void *) wait_jtag;
 

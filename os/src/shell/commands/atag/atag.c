@@ -113,7 +113,7 @@ static int bt_atag_core(int argc, char **argv) {
 		return -1;
 	}
 
-	BT_u32 addr = strtol(argv[1], NULL, 16);
+	BT_u32 addr = strtoul(argv[1], NULL, 16);
 
 	setup_core_tag((void *) addr, 4096);	// Replace with BT_PAGE_SIZE when MMU config is available.
 
@@ -133,7 +133,7 @@ static int bt_atag_ramdisk(int argc, char **argv) {
 		return -1;
 	}
 
-	BT_u32 size = strtol(argv[1], NULL, 16);
+	BT_u32 size = strtoul(argv[1], NULL, 16);
 
 	setup_ramdisk_tag(size);
 
@@ -156,8 +156,8 @@ static int bt_atag_initrd2(int argc, char **argv) {
 	}
 
 	BT_u32 addr, size;
-	addr = strtol(argv[1], NULL, 16);
-	size = strtol(argv[1], NULL, 16);
+	addr = strtoul(argv[1], NULL, 16);
+	size = strtoul(argv[1], NULL, 16);
 
 	setup_initrd2_tag(addr, size);
 
@@ -179,8 +179,8 @@ static int bt_atag_mem(int argc, char **argv) {
 	}
 
 	BT_u32 addr, size;
-	addr = strtol(argv[1], NULL, 16);
-	size = strtol(argv[1], NULL, 16);
+	addr = strtoul(argv[1], NULL, 16);
+	size = strtoul(argv[1], NULL, 16);
 
 	setup_mem_tag(addr, size);
 

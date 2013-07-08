@@ -49,10 +49,10 @@ static int bt_boot(int argc, char **argv) {
 			bt_printf("Invalid argument %s\n", argv[1]);
 			return -1;
 		}
-		coreID = strtol(argv[2], NULL, 10);
-		addr = strtol(argv[3], NULL, 16);
+		coreID = strtoul(argv[2], NULL, 10);
+		addr = strtoul(argv[3], NULL, 16);
 	} else {
-		addr = strtol(argv[1], NULL, 16);
+		addr = strtoul(argv[1], NULL, 16);
 	}
 	void *p = (void *) addr;
 
@@ -95,8 +95,8 @@ static int bt_boot_atag(int argc, char **argv) {
 		return -1;
 	}
 
-	BT_u32 coreID 	= strtol(argv[1], NULL, 10);
-	BT_u32 addr		= strtol(argv[2], NULL, 16);
+	BT_u32 coreID 	= strtoul(argv[1], NULL, 10);
+	BT_u32 addr		= strtoul(argv[2], NULL, 16);
 
 	oBootParams[coreID].flags 		|= BOOT_FLAG_ATAG;
 	oBootParams[coreID].atag_addr 	 = addr;

@@ -11,8 +11,8 @@ static int bt_gpio(int argc, char **argv) {
 		return -1;
 	}
 
-	BT_u32 gpio 	= strtol(argv[1], NULL, 10);
-	BT_u32 state 	= strtol(argv[2], NULL, 10);
+	BT_u32 gpio 	= strtoul(argv[1], NULL, 10);
+	BT_u32 state 	= strtoul(argv[2], NULL, 10);
 
 	if(!state) {
 		state = BT_FALSE;
@@ -38,8 +38,8 @@ static int bt_gpio_dir(int argc, char **argv) {
 		return -1;
 	}
 
-	BT_u32 gpio 	= strtol(argv[1], NULL, 10);
-	BT_u32 state 	= strtol(argv[2], NULL, 10);
+	BT_u32 gpio 	= strtoul(argv[1], NULL, 10);
+	BT_u32 state 	= strtoul(argv[2], NULL, 10);
 
 	if(!state) {
 		state = BT_GPIO_DIR_INPUT;

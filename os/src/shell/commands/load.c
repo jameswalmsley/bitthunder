@@ -23,7 +23,7 @@ static int bt_load_command(int argc, char **argv) {
 
 	BT_ReadInode(hInode, &oInode);
 
-	addr = strtol(argv[1], NULL,  16);
+	addr = strtoul(argv[1], NULL,  16);
 
 	BT_kPrint("Loading %s at %08X (%llu bytes)", argv[2], addr, oInode.ullFilesize);
 

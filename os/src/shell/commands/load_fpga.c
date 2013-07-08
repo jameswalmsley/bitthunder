@@ -26,7 +26,7 @@ static int bt_load_fpga(int argc, char **argv) {
 	BT_INODE oInode;
 	BT_ReadInode(hInode, &oInode);
 
-	BT_u32 addr = strtol(argv[1], NULL, 16);
+	BT_u32 addr = strtoul(argv[1], NULL, 16);
 
 	BT_kPrint("Loading %s at %08X (%llu bytes)", argv[3], addr, oInode.ullFilesize);
 
