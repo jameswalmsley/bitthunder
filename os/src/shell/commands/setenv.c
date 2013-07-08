@@ -1,4 +1,5 @@
 #include <bitthunder.h>
+#include <shell/bt_env.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -18,6 +19,8 @@ static int clear_env(char *name) {
 static int bt_setenv(int argc, char **argv) {
 
 	BT_u32 total_length = 0;
+	BT_u32 i;
+
 	for(i = 2; i < argc; i++) {
 		total_length += strlen(argv[i]) + 1;	// Add a space after each item.
 	}
@@ -27,7 +30,7 @@ static int bt_setenv(int argc, char **argv) {
 		return 0;
 	}
 
-	char *s = BT_kMalloc(total_length);
+	char *s = BT_kMalloc(total_length+1);
 	if(!s) {
 		bt_printf("No memory could not allocated temporary memory to construct string\n");
 		return -1;
@@ -37,6 +40,9 @@ static int bt_setenv(int argc, char **argv) {
 
 	for(i = 2; i < argc; i++) {
 		strcat(s, argv[i]);
+		if(i == argc-1) {
+			break;
+		}
 		strcat(s, " ");
 	}
 
