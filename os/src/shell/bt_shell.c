@@ -40,7 +40,8 @@ static char *replace_var(char *input) {
 	*end = '}';
 
 	if(!env) {
-		return input;
+		const char *ret = "\0";
+		return (char *)ret;
 	}
 	return env->o.string->s;
 }
