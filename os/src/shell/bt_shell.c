@@ -29,7 +29,16 @@ static const BT_SHELL_COMMAND *GetShellCommand(const BT_i8 *name) {
 }
 
 static char *replace_var(char *input) {
-	BT_ENV_VARIABLE *env = BT_ShellGetEnv(input);
+	char *start = input + 2;
+	char *end = strchr(start, '}');
+	if(!end) {
+		return input;
+	}
+
+	*end = '\0';
+	BT_ENV_VARIABLE *env = BT_ShellGetEnv(start);
+	*end = '}';
+
 	if(!env) {
 		return input;
 	}
