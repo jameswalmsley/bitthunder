@@ -54,7 +54,7 @@ BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_HAS_MMU)			+= $(BUILD_DIR)arch/arm/mm/v7-mmu.o
 #
 #	Boot-Up
 #
-BT_ARCH_ARM_OBJECTS									+= $(BUILD_DIR)arch/arm/boot/head.o
+BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_BOOT)		+= $(BUILD_DIR)arch/arm/boot/head.o
 
 BT_ARCH_ARM_OBJECTS += $(BT_ARCH_ARM_OBJECTS-y)
 

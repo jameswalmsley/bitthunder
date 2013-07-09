@@ -88,6 +88,9 @@ config TOOLCHAIN_CPU
 	default "cortex-m4"		if ARCH_ARM_CORTEX_M4
 	default "cortex-a9"		if ARCH_ARM_CORTEX_A9
 	default "arm1176jzf-s"	if ARCH_ARM_ARM11
+	default "cortex-m0"		if ARCH_ARM_CORTEX_M0
+	default "cortex-m3"		if ARCH_ARM_CORTEX_M3 
+	default "cortex-m4"		if ARCH_ARM_CORTEX_M4
 
 config TOOLCHAIN_MACH_FLAGS
     string
@@ -95,6 +98,7 @@ config TOOLCHAIN_MACH_FLAGS
 	default "-mthumb" if ARCH_ARM_CORTEX_M3
 	default "-mthumb" if ARCH_ARM_CORTEX_M4
 	default "-mfpu=vfpv3 -mfloat-abi=softfp" if ARCH_ARM_CORTEX_A9
+	default "-mthumb" if ARCH_ARM_CORTEX_M0 || ARCH_ARM_CORTEX_M3 || ARCH_ARM_CORTEX_M4
 
 config ARCH_ARM_FPU
 	bool "FPU support"
