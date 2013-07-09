@@ -17,8 +17,10 @@ static BT_ENV_VARIABLE *find_var(const char *name, BT_u32 length) {
 	struct bt_list_head *pos;
 	bt_list_for_each(pos, &vars) {
 		BT_ENV_VARIABLE *env = (BT_ENV_VARIABLE *) pos;
-		if(!strncmp(env->s, name, length)) {
-			return env;
+		if(strlen(env->s) == length) {
+			if(!strncmp(env->s, name, length)) {
+				return env;
+			}
 		}
 	}
 
