@@ -1999,7 +1999,9 @@ static void prvInitialiseTCBVariables( tskTCB *pxTCB, const signed char * const 
 	#if configMAX_TASK_NAME_LEN > 1
 	{
 		/* Don't bring strncpy into the build unnecessarily. */
-		strncpy( ( char * ) pxTCB->pcTaskName, ( const char * ) pcName, ( unsigned short ) configMAX_TASK_NAME_LEN );
+		if(pcName) {
+			strncpy( ( char * ) pxTCB->pcTaskName, ( const char * ) pcName, ( unsigned short ) configMAX_TASK_NAME_LEN );
+		}
 	}
 	#endif
 	pxTCB->pcTaskName[ ( unsigned short ) configMAX_TASK_NAME_LEN - ( unsigned short ) 1 ] = ( signed char ) '\0';

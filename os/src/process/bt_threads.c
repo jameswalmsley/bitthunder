@@ -42,6 +42,7 @@ static const BT_IF_HANDLE oHandleInterface;
 
 BT_HANDLE BT_CreateProcessThread(BT_HANDLE hProcess, BT_FN_THREAD_ENTRY pfnStartRoutine, BT_THREAD_CONFIG *pConfig, BT_ERROR *pError) {
 
+	BT_ERROR Error;
 	BT_HANDLE hThread = BT_CreateHandle(&oHandleInterface, sizeof(struct _BT_OPAQUE_HANDLE), pError);
 	if(!hThread) {
 		return NULL;
@@ -55,7 +56,7 @@ BT_HANDLE BT_CreateProcessThread(BT_HANDLE hProcess, BT_FN_THREAD_ENTRY pfnStart
 	hThread->oConfig.pParam = hThread;
 	hThread->pfnStartRoutine = pfnStartRoutine;
 
-	hThread->pKThreadID = BT_kTaskCreate(threadStartup, NULL, &hThread->oConfig, pError);
+	hThread->pKThreadID = BT_kTaskCreate(threadStartup, NULL, &hThread->oConfig, &Error);
 	if(!hThread->pKThreadID) {
 		BT_DestroyHandle(hThread);
 		return NULL;
