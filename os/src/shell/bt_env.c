@@ -45,7 +45,7 @@ BT_ERROR BT_ShellSetEnv(const char *name, const char *value, BT_ENV_TYPE eType) 
 
 		var->eType = BT_ENV_T_STRING;
 		var->len = namelen;
-		strncpy(var->s, name, namelen-1);
+		strncpy(var->s, name, namelen);
 
 		var->o.string = (BT_ENV_STRING *) BT_kMalloc(sizeof(BT_ENV_STRING) + len);
 		if(!var->o.string) {
