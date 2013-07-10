@@ -8,7 +8,10 @@ config MACH_ZYNQ_PLATFORM
 config CPU_CORES
 	int
 	default 2
-
+	
+config ARCH_ARM_HAS_NEON
+	bool
+	default y
 
 comment "Zynq Platform Options"
 

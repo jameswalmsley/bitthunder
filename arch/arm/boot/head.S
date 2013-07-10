@@ -47,7 +47,7 @@ bt_reset:
 	ldr		r0, =__bt_init_start		// Set-up Initial kernel stack
 	mcr		p15, 0, r0, c12, c0, 0		// Set the VBAR (Vector base address register).
 
-#ifdef BT_CONFIG_ARCH_ARM_FULL_INIT
+
 	/*
 	 *	Enable the snoop control unit.
 	 */
@@ -69,6 +69,8 @@ bt_reset:
 	orr	r0, r0, #(0x01 )
 	mcr	p15, 0, r0, c1, c0, 1		// Write ACTLR
 
+#ifdef BT_CONFIG_ARCH_ARM_FULL_INIT
+
 	/*
 	 *	Invalidate all caches, and the TLB, ensure MMU is disabled!
 	 */
@@ -77,11 +79,6 @@ bt_reset:
 	mcr	p15, 0, r0, c7, c5, 0		// invalidate icache
 	mcr	p15, 0, r0, c7, c5, 6		// Invalidate branch predictor array
 	bl	invalidate_dcache			/* invalidate dcache */
-
-
-#ifdef BT_CONFIG_ARCH_ARM_HAS_NEON
-	MRC	p15,0,r0,c1,c0,2			// Enable NEON
-#endif
 
 .set PSS_L2CC_BASE_ADDR,	 0xF8F02000
 .set L2CCWay,				(PSS_L2CC_BASE_ADDR + 0x077C)
@@ -134,6 +131,7 @@ Sync:	ldr	r1, [r0]
 	str	r1,[r0]
 
 #endif
+
 	
 	/*
 	 *	Setup the initial kernel boot process stack pointer.
@@ -294,8 +292,18 @@ jump_to_virtual:
 	mrc	p15, 0, r1, c1, c0, 2		/* read cp access control register (CACR) into r1 */
 	orr	r1, r1, #(0xf << 20)		/* enable full access for p10 & p11 */
 	mcr	p15, 0, r1, c1, c0, 2		/* write back into CACR */
+#endif
 
-.set FPEXC_EN,		0x40000000		/* FPU enable bit, (1 << 30) */
+#ifdef BT_CONFIG_ARCH_ARM_HAS_NEON
+	mrc	p15,0,r0,c1,c0,2			// Enable NEON
+	orr r0, r0, #3<<10
+	bic	r0, r0, #3<<14
+	mcr	p15, 0, r0, c1, c1, 2
+
+	ldr r0, =(0xF << 20)
+	mcr p15, 0, r0, c1, c0, 2
+
+	.set FPEXC_EN,		0x40000000		/* FPU enable bit, (1 << 30) */
 	/* enable vfp */
 	fmrx	r1, FPEXC			/* read the exception register */
 	orr	r1,r1, #FPEXC_EN		/* set VFP enable bit, leave the others in orig state */
