@@ -29,7 +29,11 @@ typedef struct _BT_SHELL_COMMAND {
 
 #define BT_SHELL_COMMAND_DEF 		static const BT_ATTRIBUTE_SECTION(".bt.shell.commands") BT_SHELL_COMMAND
 
-BT_ERROR BT_ShellCommand(char *input);
+BT_ERROR BT_ShellCommand(const char *input);
 BT_ERROR BT_ShellScript(const BT_i8 *path);
+
+#define BT_SHELL_FLAG_ALLOW_EXIT	0x00000001
+
+BT_ERROR BT_Shell(BT_HANDLE hStdin, BT_HANDLE hStdout, const BT_i8 *prompt, BT_u32 ulFlags);
 
 #endif
