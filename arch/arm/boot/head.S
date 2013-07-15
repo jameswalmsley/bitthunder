@@ -72,6 +72,13 @@ bt_reset:
 #ifdef BT_CONFIG_ARCH_ARM_FULL_INIT
 
 	/*
+	 *	Disable the MMU! - Just to make sure its disabled.
+	 */
+	mrc	p15, 0, r0, c1, c0, 0	// Read the MMU control register
+	bic	r0, r0, #0x1			// Clear the enable bit
+	mcr	p15, 0, r0, c1, c0, 0	// Write back to control register
+
+	/*
 	 *	Invalidate all caches, and the TLB, ensure MMU is disabled!
 	 */
 	mov	r0,#0
@@ -132,7 +139,7 @@ Sync:	ldr	r1, [r0]
 
 #endif
 
-	
+
 	/*
 	 *	Setup the initial kernel boot process stack pointer.
 	 *	This should be the Physical Address!
@@ -152,7 +159,7 @@ Sync:	ldr	r1, [r0]
 
 #define CACHED_MEM		0x00015de6
 #define UNCACHED_MEM 	0x00000c02
-	
+
 #ifndef BT_CONFIG_USE_VIRTUAL_ADDRESSING
 	/*
 	 *	In the case we are using normal memory, we need a reasonable identity mapping.
