@@ -61,17 +61,21 @@ config ARCH_ARM_CORTEX_M4
 
 config ARCH_ARM_CORTEX_A9
     bool
+	select ARCH_ARM_ARMv7-A
 	select LITTLE_ENDIAN
+	select ARCH_ARM_BOOT
 
 config ARCH_ARM_ARM11
     bool
     select LITTLE_ENDIAN
+	select ARCH_ARM_BOOT
 
 
 config ARCH_ARM_ARMv7-A
     bool
 	default n
 	select LITTLE_ENDIAN
+	select ARCH_ARM_BOOT
 
 config ARCH_ARM_FAMILY
 	string
@@ -79,7 +83,7 @@ config ARCH_ARM_FAMILY
 	default "armv6"		if ARCH_ARM_ARM11
 	default "armv6-m"	if ARCH_ARM_CORTEX_M0
 	default "armv7-m"	if ARCH_ARM_CORTEX_M3 || ARCH_ARM_CORTEX_M4
-	default "armv7-a"	if ARCH_ARM_v7-A
+	default "armv7-a"	if ARCH_ARM_v7-A || ARCH_ARM_CORTEX_A9
 
 config TOOLCHAIN_CPU
     string
@@ -89,7 +93,7 @@ config TOOLCHAIN_CPU
 	default "cortex-a9"		if ARCH_ARM_CORTEX_A9
 	default "arm1176jzf-s"	if ARCH_ARM_ARM11
 	default "cortex-m0"		if ARCH_ARM_CORTEX_M0
-	default "cortex-m3"		if ARCH_ARM_CORTEX_M3 
+	default "cortex-m3"		if ARCH_ARM_CORTEX_M3
 	default "cortex-m4"		if ARCH_ARM_CORTEX_M4
 
 config TOOLCHAIN_MACH_FLAGS
@@ -100,6 +104,10 @@ config TOOLCHAIN_MACH_FLAGS
 	default "-mfpu=vfpv3 -mfloat-abi=softfp" if ARCH_ARM_CORTEX_A9
 	default "-mthumb -mtune=cortex-m0" if ARCH_ARM_CORTEX_M0
 	default "-mthumb" if ARCH_ARM_CORTEX_M3 || ARCH_ARM_CORTEX_M4
+
+config ARCH_ARM_BOOT
+    bool
+	default n
 
 config ARCH_ARM_FPU
 	bool "FPU support"
