@@ -10,6 +10,16 @@ config SHELL_CMD_BOOT_JTAG
 	depends on SHELL
 	default n
 
+config SHELL_CMD_ECHO
+	bool "echo"
+	depends on SHELL
+	default n
+
+config SHELL_CMD_GPIO
+	bool "gpio"
+	depends on SHELL
+	default n
+
 config SHELL_CMD_HELP
     bool "help"
 	depends on SHELL
@@ -25,6 +35,10 @@ config SHELL_CMD_LOAD_FPGA
 	depends on SHELL
 	default n
 
+config SHELL_CMD_SETENV
+	bool "setenv"
+	depends on SHELL
+	default n
 
 config SHELL_CMD_ATAGS
 	bool "ATAG Support"
