@@ -1,6 +1,7 @@
 comment "STM32 Platform Options"
 
-config MACH_STM32
+config MACH_STM32_PLATFORM
+	bool
 	default y
     select LINKER_MACH_BSS_SECTION_IN_SRAM
 
@@ -10,9 +11,9 @@ config ARCH_ARM_SYSTICK_SRC0_DIV
 
 choice
 	prompt "systick clock source"
-	default LPC11xx_ARCH_ARM_SYSTICK_PROCESSOR_CLOCK
+	default MACH_STM32_SYSTICK_PROCESSOR_CLOCK
 
-config MAC_STM32_SYSTICK_PROCESSOR_CLOCK
+config MACH_STM32_SYSTICK_PROCESSOR_CLOCK
 	bool "processor clock"
 
 config MACH_STM32_SYSTICK_EXTERNAL_CLOCK
