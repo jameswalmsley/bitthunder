@@ -4,13 +4,6 @@
  **/
 #include <bitthunder.h>
 #include "gpio.h"
-
-/**
- *	Zynq GPIO driver.
- *
- **/
-#include <bitthunder.h>
-#include "gpio.h"
 #include "rcc.h"
 
 BT_DEF_MODULE_NAME				("STM32 GPIO")
