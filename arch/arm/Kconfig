@@ -24,11 +24,7 @@ config MACH_LPC17xx
 
 config MACH_STM32
 	bool "STM32"
-	select ARCH_HAVE_CMNVECTOR
-	select ARCH_HAVE_MPU
-	select ARCH_HAVE_I2CRESET
-	---help---
-		STMicro STM32 architectures (ARM Cortex-M3/4).
+	select ARCH_ARM_CORTEX_M3
 
 config MACH_LM3Sxx
 	bool "LM3Sxx Series"
@@ -87,11 +83,17 @@ config ARCH_ARM_FAMILY
 
 config TOOLCHAIN_CPU
     string
+	default "cortex-m0"		if ARCH_ARM_CORTEX_M0
+	default "cortex-m3"		if ARCH_ARM_CORTEX_M3
+	default "cortex-m4"		if ARCH_ARM_CORTEX_M4
 	default "cortex-a9"		if ARCH_ARM_CORTEX_A9
 	default "arm1176jzf-s"	if ARCH_ARM_ARM11
 
 config TOOLCHAIN_MACH_FLAGS
     string
+	default "-mthumb" if ARCH_ARM_CORTEX_M0
+	default "-mthumb" if ARCH_ARM_CORTEX_M3
+	default "-mthumb" if ARCH_ARM_CORTEX_M4
 	default "-mfpu=vfpv3 -mfloat-abi=softfp" if ARCH_ARM_CORTEX_A9
 
 config ARCH_ARM_FPU
@@ -108,6 +110,10 @@ config ARCH_HAVE_MPU
 
 config ARCH_HAVE_MMU
 	bool
+
+if MACH_STM32
+source arch/arm/mach/stm32/Kconfig
+endif
 
 if MACH_LPC11xx
 source arch/arm/mach/lpc11xx/Kconfig
