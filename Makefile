@@ -24,6 +24,10 @@ all:
 endif
 
 
+ifneq ($(APP_BSP_DIR),)
+BT_CONFIG_BSP_DIR = $(APP_BSP_DIR)
+endif
+
 menuconfig: scripts/mkconfig/mkconfig
 	$(Q)CONFIG_=BT_CONFIG_ APP_DIR=$(APP_DIR) kconfig-mconf Kconfig
 	$(Q)scripts/mkconfig/mkconfig ./ > $(BT_CONFIG_BSP_DIR)/bt_bsp_config.h
