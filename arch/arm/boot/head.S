@@ -4,6 +4,7 @@
 
 #include <bt_config.h>
 #include <btlinker_config.h>
+#include <asm/assembly.h>
 
 .section .init
 .globl bt_reset
@@ -228,8 +229,8 @@ skip_ram:
 	mcr		p15,0,r0,c1,c0,0			// Enable cache and MMU!
 	mcr		p15, 0, r0, c8, c7, 0	// Invalidate the TLBs
 
-	dsb		// Allow MMU to start up
-	isb		// Flush prefetch buffer.
+	data_sync
+	instr_sync
 
 #endif
 
@@ -278,8 +279,8 @@ _mmu_init_loop3:
 	ldr		r0,=MMUCRVAL
 	mcr		p15,0,r0,c1,c0,0			// Enable cache and MMU!
 
-	dsb		// Allow MMU to start up
-	isb		// Flush prefetch buffer.
+	data_sync
+	instr_sync
 
 	// Jump to the virtual address space
 
@@ -374,13 +375,12 @@ _mmu_loop:
 	bge		_mmu_loop
 
 	mcr		p15, 0, r0, c8, c7, 0	// Invalidate the TLBs
-	dsb
+	data_sync
 #endif
 
 	/*
 	 *	Now we are running in a "safe" environment.
 	 */
-
 	bl 		_bt_startup_init_hook
 	bl		_bt_startup_boot
 
@@ -544,7 +544,7 @@ loop1:
 	cmp	r1, #2
 	blt	skip				/* no cache or only instruction cache at this level */
 	mcr	p15, 2, r10, c0, c0, 0		/* write the Cache Size selection register */
-	isb					/* isb to sync the change to the CacheSizeID reg */
+	instr_sync
 	mrc	p15, 1, r1, c0, c0, 0		/* reads current Cache Size ID register */
 	and	r2, r1, #7			/* extract the line length field */
 	add	r2, r2, #4			/* add 4 for the line length offset (log2 16 bytes) */
@@ -571,6 +571,6 @@ skip:
 finished:
 	mov	r10, #0				/* swith back to cache level 0 */
 	mcr	p15, 2, r10, c0, c0, 0		/* select current cache level in cssr */
-	dsb
-	isb
+	data_sync
+	instr_sync
 	bx	lr
