@@ -4,6 +4,7 @@
  **/
 
 #include <bitthunder.h>
+#include <asm/barrier.h>
 
 /**
  *	The actual MMU Table.
@@ -22,8 +23,7 @@ void bt_arch_mmu_setsection(BT_IOMAP *pMapping) {
 
 	__asm volatile("mcr	p15, 0, r0, c8, c7, 0");		/* invalidate TLBs */
 
-	__asm volatile("dsb");
-	//__asm volatile("isb");
+	dsb();
 
 	// Flush TLB!
 }
