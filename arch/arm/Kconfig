@@ -35,7 +35,6 @@ config MACH_LM3Sxx
 config MACH_ZYNQ
 	bool "ZYNQ"
 	select ARCH_ARM_CORTEX_A9
-	select ARCH_ARM_ARMv7-A
 	select ARCH_HAVE_FPU
 	---help---
 		Xilinx Zynq Embedded processing platform
@@ -61,7 +60,9 @@ config ARCH_ARM_CORTEX_M4
 
 config ARCH_ARM_CORTEX_A9
     bool
-	select ARCH_ARM_ARMv7-A
+	default n
+	select ARCH_ARM_ARMv7
+	select ARCH_ARM_ARMv7_A
 	select LITTLE_ENDIAN
 	select ARCH_ARM_BOOT
 
@@ -81,12 +82,12 @@ config ARCH_ARM_ARMv7
 	bool
 	default n
 
-config ARCH_ARM_ARMv7-A
+config ARCH_ARM_ARMv7_A
     bool
-	default n
-	select LITTLE_ENDIAN
-	select ARCH_ARM_BOOT
-	select ARCH_ARM_ARMv7
+ 	default n
+ 	select LITTLE_ENDIAN
+ 	select ARCH_ARM_BOOT
+ 	select ARCH_ARM_ARMv7
 
 config ARCH_ARM_FAMILY
 	string
@@ -94,7 +95,7 @@ config ARCH_ARM_FAMILY
 	default "armv6"		if ARCH_ARM_ARM11
 	default "armv6-m"	if ARCH_ARM_CORTEX_M0
 	default "armv7-m"	if ARCH_ARM_CORTEX_M3 || ARCH_ARM_CORTEX_M4
-	default "armv7-a"	if ARCH_ARM_v7-A || ARCH_ARM_CORTEX_A9
+	default "armv7-a"	if ARCH_ARM_ARMv7_A
 
 config TOOLCHAIN_CPU
     string
