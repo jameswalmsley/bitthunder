@@ -4,11 +4,9 @@ config MACH_BCM2835_PLATFORM
     bool
 	default y
 	select ARCH_ARM_ARM11
+	select ARCH_ARM_IRQ_STACK
+	select HAS_MMU
 
-
-config MACH_BCM2835_USE_STARTUP
-    bool "Use default BCM2835 startup code."
-	default y
 
 config MACH_BCM2835_SYSCLOCK_FREQ
 	int "System clock frequency"
