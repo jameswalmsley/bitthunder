@@ -69,13 +69,24 @@ config ARCH_ARM_ARM11
     bool
     select LITTLE_ENDIAN
 	select ARCH_ARM_BOOT
+	select ARCH_ARM_ARMv6
 
+config ARCH_ARM_ARMv6
+	bool
+	default n
+	select LITTLE_ENDIAN
+	select ARCH_ARM_BOOT
+
+config ARCH_ARM_ARMv7
+	bool
+	default n
 
 config ARCH_ARM_ARMv7-A
     bool
 	default n
 	select LITTLE_ENDIAN
 	select ARCH_ARM_BOOT
+	select ARCH_ARM_ARMv7
 
 config ARCH_ARM_FAMILY
 	string
