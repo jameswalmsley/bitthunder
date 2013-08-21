@@ -369,6 +369,11 @@ static const BT_RESOURCE oLPC11xx_uart0_resources[] = {
 		.ulFlags 			= BT_RESOURCE_MEM,
 	},
 	{
+		.ulStart			= 0,
+		.ulEnd				= 0,
+		.ulFlags			= BT_RESOURCE_ENUM,
+	},
+	{
 		.ulStart			= 37,
 		.ulEnd				= 37,
 		.ulFlags			= BT_RESOURCE_IRQ,

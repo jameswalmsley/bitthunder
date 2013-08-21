@@ -107,7 +107,7 @@ config TOOLCHAIN_CPU
 
 config TOOLCHAIN_MACH_FLAGS
     string
-	default "-mthumb" if ARCH_ARM_CORTEX_M0
+	default "-mthumb -mcpu=cortex-m0" if ARCH_ARM_CORTEX_M0
 	default "-mthumb" if ARCH_ARM_CORTEX_M3
 	default "-mthumb" if ARCH_ARM_CORTEX_M4
 	default "-mfpu=vfpv3 -mfloat-abi=softfp" if ARCH_ARM_CORTEX_A9
