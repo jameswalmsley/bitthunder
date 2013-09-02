@@ -82,7 +82,7 @@ BT_u32 BT_FifoWrite(BT_HANDLE hFifo, BT_u32 ulElements, void * pData, BT_ERROR *
 
 	BT_u8 *pSrc  = pData;
 	BT_u8 *pDest = hFifo->pIn;
-	BT_u8 *pOut  = hFifo->pOut;
+//	BT_u8 *pOut  = hFifo->pOut;
 	BT_u32 ulElementWidth = hFifo->ulElementWidth;
 	BT_u32 ulWritten;
 
@@ -101,13 +101,13 @@ BT_u32 BT_FifoWrite(BT_HANDLE hFifo, BT_u32 ulElements, void * pData, BT_ERROR *
 			if(pDest >= hFifo->pEnd) {
 				pDest = hFifo->pBuf;
 			}
-			if (pDest == pOut) {
-				pOut += ulElementWidth;
-				if(pOut >= hFifo->pEnd) {
-					pOut = hFifo->pBuf;
-				}
-				hFifo->pOut = pOut;
-			}
+//			if (pDest == pOut) {
+//				pOut += ulElementWidth;
+//				if(pOut >= hFifo->pEnd) {
+//					pOut = hFifo->pBuf;
+//				}
+//				hFifo->pOut = pOut;
+//			}
 		}
 		hFifo->pIn = pDest;
 	}
@@ -215,7 +215,8 @@ BT_u32 BT_FifoFillLevel(BT_HANDLE hFifo, BT_ERROR *pError) {
 
 	if (pRead <= pWrite)
 		ulLevel = pWrite - pRead;
-	ulLevel = ulSize - (pRead - pWrite);
+	else
+		ulLevel = ulSize - (pRead - pWrite);
 
 	return ulLevel/hFifo->ulElementWidth;
 }
