@@ -85,9 +85,9 @@ static void usartTxHandler(BT_HANDLE hUart) {
 		pRegs->FIFO = ucData;
 		TX_FIFO_LVL++;
 	}
-	if (BT_FifoIsEmpty(hUart->hTxFifo, &Error)) {
-		pRegs->IER &= ~LPC11xx_UART_IER_THREIE;	// Disable the interrupt
-	}
+//	if (BT_FifoIsEmpty(hUart->hTxFifo, &Error)) {
+//		pRegs->IER &= ~LPC11xx_UART_IER_THREIE;	// Disable the interrupt
+//	}
 }
 
 BT_ERROR BT_NVIC_IRQ_37(void) {
@@ -96,7 +96,8 @@ BT_ERROR BT_NVIC_IRQ_37(void) {
 	if(IIRValue & (LPC11xx_UART_IIR_RDA_INT | LPC11xx_UART_IIR_RLS_INT)) {
 		usartRxHandler(g_USART_HANDLES[0]);
 	}
-	if(IIRValue & LPC11xx_UART_IIR_THRE_INT) {
+	if ((IIRValue & LPC11xx_UART_IIR_THRE_INT) &&
+		(UART0->IER & LPC11xx_UART_IER_THREIE)) {
 		usartTxHandler(g_USART_HANDLES[0]);
 	}
 	return 0;
@@ -464,7 +465,6 @@ static BT_ERROR uartDisable(BT_HANDLE hUart) {
 	return BT_ERR_NONE;
 }
 
-
 static BT_ERROR uartRead(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, BT_u8 *pucDest) {
 	volatile LPC11xx_UART_REGS *pRegs = hUart->pRegs;
 
@@ -474,7 +474,7 @@ static BT_ERROR uartRead(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, BT_u8 *
 	case BT_UART_MODE_POLLED:
 	{
 		while(ulSize) {
-			while((pRegs->LSR & LPC11xx_UART_LSR_RDR)) {
+			while((pRegs->LSR & LPC11xx_UART_LSR_RDR)==0) {
 				BT_ThreadYield();
 			}
 
@@ -508,7 +508,7 @@ static BT_ERROR uartWrite(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const 
 
 	BT_ERROR Error = BT_ERR_NONE;
 	BT_u8 ucData;
-	BT_u8 *pSrc = pucSource;
+	BT_u8 *pSrc = (BT_u8*)pucSource;
 
 	switch(hUart->eMode) {
 	case BT_UART_MODE_POLLED:
@@ -526,13 +526,27 @@ static BT_ERROR uartWrite(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const 
 	case BT_UART_MODE_BUFFERED:
 	{
 		BT_FifoWrite(hUart->hTxFifo, ulSize, pSrc, &Error);
-		pRegs->IER |= LPC11xx_UART_IER_THREIE;	// Enable the interrupt
 
-		while (!BT_FifoIsEmpty(hUart->hTxFifo, &Error) && (TX_FIFO_LVL < 16)) {
-			BT_FifoRead(hUart->hTxFifo, 1, &ucData, &Error);
-			pRegs->FIFO = ucData;
-			TX_FIFO_LVL++;
+//		if (pRegs->LSR & LPC11xx_UART_LSR_THRE)
+		{
+			pRegs->IER &= ~LPC11xx_UART_IER_THREIE;	// Disable the interrupt
+			while (!BT_FifoIsEmpty(hUart->hTxFifo, &Error) && (TX_FIFO_LVL < 16))
+			{
+				BT_FifoRead(hUart->hTxFifo, 1, &ucData, &Error);
+				pRegs->FIFO = ucData;
+				TX_FIFO_LVL++;
+			}
+			pRegs->IER |= LPC11xx_UART_IER_THREIE;	// Enable the interrupt
 		}
+
+//		pRegs->IER |= LPC11xx_UART_IER_THREIE;	// Enable the interrupt
+//
+//		while (!BT_FifoIsEmpty(hUart->hTxFifo, &Error) && (TX_FIFO_LVL < 16)) {
+//			BT_FifoRead(hUart->hTxFifo, 1, &ucData, &Error);
+//			pRegs->FIFO = ucData;
+//			TX_FIFO_LVL++;
+//		}
+
 		break;
 	}
 
