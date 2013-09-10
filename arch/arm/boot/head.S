@@ -383,6 +383,7 @@ _mmu_loop:
 	 */
 	bl 		_bt_startup_init_hook
 	bl		_bt_startup_boot
+	b		_bt_start
 
 wait:
 	b wait
