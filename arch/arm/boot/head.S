@@ -48,6 +48,13 @@ bt_reset:
 	ldr		r0, =__bt_init_start		// Set-up Initial kernel stack
 	mcr		p15, 0, r0, c12, c0, 0		// Set the VBAR (Vector base address register).
 
+	/*
+	 *	Setup the initial kernel boot process stack pointer.
+	 *	This should be the Physical Address!
+	 */
+	ldr	sp,=_stack
+	bl	_bt_startup_init_hook
+
 
 	/*
 	 *	Enable the snoop control unit.
@@ -140,12 +147,6 @@ Sync:	ldr	r1, [r0]
 
 #endif
 
-
-	/*
-	 *	Setup the initial kernel boot process stack pointer.
-	 *	This should be the Physical Address!
-	 */
-	ldr	sp,=_stack
 
 	/*
 	 *	Initialise the initial MMU table, and jump to kernel startup routine!
@@ -381,7 +382,6 @@ _mmu_loop:
 	/*
 	 *	Now we are running in a "safe" environment.
 	 */
-	bl 		_bt_startup_init_hook
 	bl		_bt_startup_boot
 	b		_bt_start
 
