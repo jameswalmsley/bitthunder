@@ -131,6 +131,8 @@ endmenu
 choice
 	prompt "Boot Logger Device"
 	default MACH_ZYNQ_BOOTLOG_NULL
+	---help---
+	Selects which device should be used for the boot logger (boot console).
 
 config MACH_ZYNQ_BOOTLOG_UART_0
     bool "UART(0)"
