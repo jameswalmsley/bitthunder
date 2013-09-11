@@ -8,7 +8,7 @@ config MACH_ZYNQ_PLATFORM
 config CPU_CORES
 	int
 	default 2
-	
+
 config ARCH_ARM_HAS_NEON
 	bool
 	default y
@@ -49,12 +49,25 @@ config MACH_ZYNQ_STARTUP_INIT_GT
 	---help---
 	Initialise the Cortex-A9's global timer to 0 at the moment the kernel boots.
 
+config MACH_ZYNQ_STARTUP_DDR_RELOCATE
+    bool "Relocate to DDR."
+	depends on MACH_ZYNQ_USE_STARTUP
+	default n
+	---help---
+	Relocates program from OCM into DDR, and re-configures the PHYSICAL address bus so that
+	the DDR appears at address 0x0000_0000, and not 0x0010_0000 (1MB).
+
+	This option will only work if you are booted directly from the OCM, and wish to be linked at
+	address 0x0.
+
+	NOTE: When using this option you MUST ensure that only 1 single DDR memory is available to the
+	linker. DISABLE the SRAM section from the Memory configuration.
+
 endmenu
 
 config MACH_ZYNQ_SYSCLOCK_FREQ
 	int "System clock frequency"
 	default 33333333
-
 
 menu "Peripheral Selection"
 
