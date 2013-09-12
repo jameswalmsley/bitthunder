@@ -130,8 +130,8 @@ static const BT_IF_HANDLE oHandleInterface = {
 	.oIfs = {
 		(BT_HANDLE_INTERFACE) &BT_ZYNQ_TIMER_oDeviceInterface,
 	},													///< Pointer to a Device interface if its a device.
-	BT_HANDLE_T_DEVICE,											///< Handle Type!
-	timer_cleanup,												///< Handle's cleanup routine.
+	.eType = BT_HANDLE_T_DEVICE,											///< Handle Type!
+	.pfnCleanup = timer_cleanup,												///< Handle's cleanup routine.
 };
 
 static const BT_MODULE_ENTRY_DESCRIPTOR entryDescriptor = {
@@ -139,4 +139,3 @@ static const BT_MODULE_ENTRY_DESCRIPTOR entryDescriptor = {
 	NULL,					///< No driver init function required!
 	&oHandleInterface,
 };
-

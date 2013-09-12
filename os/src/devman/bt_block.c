@@ -124,9 +124,8 @@ static BT_ERROR bt_blockdev_inode_cleanup(BT_HANDLE hBlockdev) {
 
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
-	{NULL},
-	BT_HANDLE_T_INODE,
-	bt_blockdev_inode_cleanup,
+	.eType = BT_HANDLE_T_INODE,
+	.pfnCleanup = bt_blockdev_inode_cleanup,
 };
 
 static BT_ERROR bt_block_device_manager_init() {

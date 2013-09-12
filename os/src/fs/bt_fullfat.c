@@ -301,9 +301,7 @@ static const BT_IF_HANDLE oHandleInterface = {
 static const BT_IF_HANDLE oFileHandleInterface = {
 	BT_MODULE_DEF_INFO,
 	.pfnCleanup = fullfat_file_cleanup,
-	.oIfs = {
-		.pFileIF = &oFileOperations,
-	},
+	.pFileIF = &oFileOperations,
 	.eType = BT_HANDLE_T_FILE,
 };
 

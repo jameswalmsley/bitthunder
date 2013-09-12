@@ -111,7 +111,7 @@ BT_ERROR BT_EnumerateVolumes(BT_HANDLE hBlockDevice) {
 	if(BT_BlockRead(hBlockDevice, 0, 1, pMBR, &Error) != 1) {
 		goto err_free_out;
 	}
-	
+
 	// Create the volume handle.
 	BT_u32 partCount = BT_PartitionCount(pMBR);
 	if(!partCount) {
@@ -128,7 +128,7 @@ BT_ERROR BT_EnumerateVolumes(BT_HANDLE hBlockDevice) {
 
 		BT_i8 *iname = BT_kMalloc(strlen(szpName) + 10);;
 		sprintf(iname, "%s%d", szpName, 0);
-		
+
 		hVolume->hInode = BT_DeviceRegister(hVolume, iname, &oDevfsOps, &Error);
 		BT_kFree(iname);
 
@@ -159,7 +159,7 @@ BT_ERROR BT_EnumerateVolumes(BT_HANDLE hBlockDevice) {
 	}
 
 	BT_kFree(pMBR);
-	
+
 	return BT_ERR_NONE;
 
 err_free_out:
@@ -171,7 +171,7 @@ err_out:
 
 
 BT_u32 BT_VolumeRead(BT_HANDLE hVolume, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError) {
-	
+
 	if(hVolume->eType == BT_VOLUME_NORMAL) {
 		return BT_BlockRead(hVolume->hBlock, ulAddress, ulBlocks, pBuffer, pError);
 	}
@@ -198,9 +198,8 @@ static BT_ERROR bt_volume_inode_cleanup(BT_HANDLE hVolume) {
 
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
-	{NULL},
-	BT_HANDLE_T_INODE,
-	bt_volume_inode_cleanup,
+	.eType = BT_HANDLE_T_INODE,
+	.pfnCleanup = bt_volume_inode_cleanup,
 };
 
 static BT_ERROR bt_volume_manager_init() {

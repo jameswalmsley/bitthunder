@@ -430,6 +430,17 @@ static BT_ERROR uartFlush(BT_HANDLE hUart) {
 	return BT_ERR_NONE;
 }
 
+static BT_u32 file_read(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
+	*pError = uartRead(hUart, ulFlags, ulSize, pBuffer);
+	return ulSize;
+}
+
+static BT_u32 file_write(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
+	*pError = uartWrite(hUart, ulFlags, ulSize, pBuffer);
+	return ulSize;
+}
+
+
 /**
  *	A driver doesn't have to implement all API's all at once, therefore we left the boring
  *	GETCH/PUTCH interfaces.
@@ -476,13 +487,19 @@ static const BT_IF_DEVICE oDeviceInterface = {
 	&oCharDevInterface,											///< Provide a Character device interface implementation.
 };
 
+static const BT_IF_FILE oFileInterface = {
+	.pfnRead = file_read,
+	.pfnWrite = file_write,
+};
+
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
 	.oIfs = {
 		(BT_HANDLE_INTERFACE) &oDeviceInterface,
 	},
-	BT_HANDLE_T_DEVICE,											///< Handle Type!
-	uartCleanup,												///< Handle's cleanup routine.
+	.pFileIF = &oFileInterface,
+	.eType = BT_HANDLE_T_DEVICE,											///< Handle Type!
+	.pfnCleanup = uartCleanup,									///< Handle's cleanup routine.
 };
 
 static BT_HANDLE uart_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {

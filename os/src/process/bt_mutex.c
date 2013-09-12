@@ -1,4 +1,4 @@
-/**
+#/**
  *	Process Mutex Implementation.
  *
  **/
@@ -57,8 +57,6 @@ BT_ERROR BT_ReleaseMutexFromISR(BT_HANDLE hMutex, BT_BOOL *pbHigherPriorityThrea
 
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
-	{NULL},
-	BT_HANDLE_T_SYSTEM,
-	mutex_cleanup,
+	.eType = BT_HANDLE_T_SYSTEM,
+	.pfnCleanup = mutex_cleanup,
 };
-

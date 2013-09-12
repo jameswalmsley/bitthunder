@@ -74,9 +74,8 @@ static BT_ERROR bt_process_cleanup(BT_HANDLE hProcess) {
 
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
-	{NULL},
-	BT_HANDLE_T_PROCESS,
-	bt_process_cleanup,
+	.eType = BT_HANDLE_T_PROCESS,
+	.pfnCleanup = bt_process_cleanup,
 };
 
 static BT_ERROR bt_process_manager_init() {

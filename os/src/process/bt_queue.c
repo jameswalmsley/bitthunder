@@ -65,8 +65,6 @@ BT_ERROR BT_QueueReceiveFromISR(BT_HANDLE hQueue, void *pMessage, BT_BOOL *pbHig
 
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
-	{NULL},
-	BT_HANDLE_T_SYSTEM,
-	queue_cleanup,
+	.eType = BT_HANDLE_T_SYSTEM,
+	.pfnCleanup = queue_cleanup,
 };
-

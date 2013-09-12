@@ -111,9 +111,8 @@ static BT_ERROR bt_devfs_cleanup(BT_HANDLE hDevfs) {
 
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
-	{NULL},
-	BT_HANDLE_T_INODE,
-	bt_devfs_cleanup,
+	.eType = BT_HANDLE_T_INODE,
+	.pfnCleanup = bt_devfs_cleanup,
 };
 
 static BT_ERROR bt_devfs_init() {

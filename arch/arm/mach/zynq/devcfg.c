@@ -86,9 +86,7 @@ static BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
 	.pfnCleanup = devcfg_cleanup,
 	.eType = BT_HANDLE_T_FILE,
-	.oIfs = {
-		.pFileIF = &oFileOperations,
-	},
+	.pFileIF = &oFileOperations,
 };
 
 static BT_HANDLE devcfg_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
