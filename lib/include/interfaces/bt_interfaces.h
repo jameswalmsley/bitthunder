@@ -38,7 +38,6 @@ typedef union _BT_IF_INTERFACES {
 	const BT_IF_DEVICE *pDevIF;
 	const BT_IF_BLOCK  *pBlockIF;
 	const BT_IF_FS	   *pFilesystemIF;
-	const BT_IF_FILE   *pFileIF;
 	const BT_IF_DIR    *pDirIF;
 	const BT_IF_INODE  *pInodeIF;
 #endif
@@ -46,9 +45,10 @@ typedef union _BT_IF_INTERFACES {
 
 typedef struct _BT_IF_HANDLE {
 	BT_MODULE_INFO	   oInfo;
-
 	const BT_UN_IFS	   	oIfs;
-
+#ifdef BT_CONFIG_OS
+	const BT_IF_FILE   *pFileIF;	///< If handle implements a file interface then use this!
+#endif
 	BT_HANDLE_TYPE 		eType;
 	BT_ERROR			(*pfnCleanup)	(BT_HANDLE h);
 } BT_IF_HANDLE;
