@@ -6,7 +6,6 @@
 
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;
-
 };
 
 static BT_BOOL isHandleValid(BT_HANDLE h, BT_ERROR *pError) {
@@ -34,7 +33,7 @@ BT_u32 BT_Read(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT
 		return 0;
 	}
 
-	return hFile->h.pIf->oIfs.pFileIF->pfnRead(hFile, ulFlags, ulSize, pBuffer, pError);
+	return hFile->h.pIf->pFileIF->pfnRead(hFile, ulFlags, ulSize, pBuffer, pError);
 }
 
 BT_u32 BT_Write(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
@@ -42,15 +41,33 @@ BT_u32 BT_Write(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, B
 		return 0;
 	}
 
-	return hFile->h.pIf->oIfs.pFileIF->pfnWrite(hFile, ulFlags, ulSize, pBuffer, pError);
+	return hFile->h.pIf->pFileIF->pfnWrite(hFile, ulFlags, ulSize, pBuffer, pError);
 }
 
 BT_s32 BT_GetC(BT_HANDLE hFile, BT_u32 ulFlags, BT_ERROR *pError) {
+
+	BT_ERROR Error = BT_ERR_NONE;
+
 	if(!isHandleValid(hFile, pError)) {
 		return 0;
 	}
 
-	return hFile->h.pIf->oIfs.pFileIF->pfnGetC(hFile, ulFlags, pError);
+	if(hFile->h.pIf->pFileIF->pfnGetC) {
+		BT_s32 ret = hFile->h.pIf->pFileIF->pfnGetC(hFile, ulFlags, &Error);
+		if(pError) {
+			*pError = Error;
+		}
+		return ret;
+	}
+
+	BT_u8 c;
+	hFile->h.pIf->pFileIF->pfnRead(hFile, ulFlags, 1, &c, &Error);
+
+	if(pError) {
+		*pError = Error;
+	}
+
+	return c;
 }
 
 BT_ERROR BT_PutC(BT_HANDLE hFile, BT_u32 ulFlags, BT_i8 cData) {
@@ -61,7 +78,13 @@ BT_ERROR BT_PutC(BT_HANDLE hFile, BT_u32 ulFlags, BT_i8 cData) {
 		return Error;
 	}
 
-	return hFile->h.pIf->oIfs.pFileIF->pfnPutC(hFile, ulFlags, cData);
+	if(hFile->h.pIf->pFileIF->pfnPutC) {
+		return hFile->h.pIf->pFileIF->pfnPutC(hFile, ulFlags, cData);
+	}
+
+	hFile->h.pIf->pFileIF->pfnWrite(hFile, ulFlags, 1, &cData, &Error);
+
+	return Error;
 }
 
 BT_ERROR BT_Seek(BT_HANDLE hFile, BT_u64 ulOffset) {
@@ -72,7 +95,7 @@ BT_ERROR BT_Seek(BT_HANDLE hFile, BT_u64 ulOffset) {
 		return 0;
 	}
 
-	return hFile->h.pIf->oIfs.pFileIF->pfnSeek(hFile, ulOffset);
+	return hFile->h.pIf->pFileIF->pfnSeek(hFile, ulOffset);
 }
 
 BT_u64 BT_Tell(BT_HANDLE hFile, BT_ERROR *pError) {
@@ -81,7 +104,7 @@ BT_u64 BT_Tell(BT_HANDLE hFile, BT_ERROR *pError) {
 		return 0;
 	}
 
-	return hFile->h.pIf->oIfs.pFileIF->pfnTell(hFile);
+	return hFile->h.pIf->pFileIF->pfnTell(hFile);
 }
 
 
@@ -98,11 +121,11 @@ BT_s32 BT_GetS(BT_HANDLE hFile, BT_u32 ulSize, BT_i8 *s) {
 	BT_s32 c;
 
     t = s;
-    while (--ulSize>1 && (c=BT_GetC(hFile, 0, &Error)) != -1 && c != '\n') {
+    while (--ulSize>1 && (c=BT_GetC(hFile, 0, &Error)) != -1 && (c != '\n' && c != '\r')) {
         *s++ = c;
 	}
 
-    if (c == '\n') {
+    if (c == '\n' || c == '\r') {
         *s++ = c;
 	} else if (ulSize == 1) {
 		*s++ = '\n';
