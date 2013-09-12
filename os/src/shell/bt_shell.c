@@ -319,7 +319,7 @@ BT_ERROR BT_ShellCommand(const char *cmdline) {
 	if(!pCommand) {
 		BT_kFree(pargs);
 		BT_kFree(copy);
-		return BT_ERR_NONE;
+		return -1;
 	}
 
 	pCommand->pfnCommand(ulArguments, pargs);
@@ -348,10 +348,14 @@ BT_ERROR BT_ShellScript(const BT_i8 *path) {
 		return BT_ERR_NO_MEMORY;
 	}
 
+	BT_u32 lineno = 0;
+
 
 	BT_u32 linelen;
 
 	while((linelen = BT_GetS(hFile, 256, line)) > 0) {
+
+		lineno++;
 
 		if(line[linelen-1] == '\n' || line[linelen-1] == '\r') {
 			linelen -= 1;
@@ -395,8 +399,15 @@ BT_ERROR BT_ShellScript(const BT_i8 *path) {
 
 		if(!if_false_depth) {
 			Error = BT_ShellCommand(p);
+			if(Error) {
+				BT_kPrint("Error executing line %d in %s:", lineno, path);
+				BT_kPrint("%d : %s", lineno, p);
+				goto err_out;
+			}
 		}
 	}
+
+err_out:
 
 	BT_kFree(line);
 	BT_CloseHandle(hFile);
