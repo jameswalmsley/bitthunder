@@ -30,6 +30,7 @@ static int bt_boot_jtag(int argc, char **argv) {
 
 	BT_DCacheFlush();
 	BT_ICacheInvalidate();
+	BT_DCacheDisable();
 
 	if(!coreID) {
 		BT_StopSystemTimer();
