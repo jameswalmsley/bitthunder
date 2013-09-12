@@ -12,10 +12,20 @@ _bt_startup_init_hook:
 
 
 #ifdef BT_CONFIG_MACH_ZYNQ_STARTUP_PS7INIT
+
+#ifdef BT_CONFIG_MACH_ZYNQ_STARTUP_DDR_RELOCATE
+	ldr sp,=0x30000
+#endif
+
 	stmdb sp!, {lr}
 	bl	ps7_init			@ Run the clock configurator, as exported from Xilinx HW generator.
 	bl 	ps7_post_config
 	ldmfd sp!, {lr}
+
+#ifdef BT_CONFIG_MACH_ZYNQ_STARTUP_DDR_RELOCATE
+	ldr sp,=_stack
+#endif
+
 #endif
 
 #ifdef BT_CONFIG_MACH_ZYNQ_STARTUP_DDR_RELOCATE
