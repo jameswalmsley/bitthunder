@@ -430,8 +430,8 @@ static const BT_IF_HANDLE oHandleInterface = {
 	.oIfs = {
 		(BT_HANDLE_INTERFACE) &BT_LM3Sxx_mac_oDeviceInterface,
 	},
-	BT_HANDLE_T_DEVICE,											///< Handle Type!
-	mac_cleanup,												///< Handle's cleanup routine.
+	.eType		= BT_HANDLE_T_DEVICE,											///< Handle Type!
+	.pfnCleanup = mac_cleanup,												///< Handle's cleanup routine.
 };
 
 static BT_HANDLE mac_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {

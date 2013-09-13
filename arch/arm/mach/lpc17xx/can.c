@@ -507,8 +507,8 @@ static const BT_IF_HANDLE oHandleInterface = {
 	.oIfs = {
 		(BT_HANDLE_INTERFACE) &BT_LPC17xx_CAN_oDeviceInterface,
 	},
-	BT_HANDLE_T_DEVICE,											///< Handle Type!
-	canCleanup,												///< Handle's cleanup routine.
+	.eType		= BT_HANDLE_T_DEVICE,											///< Handle Type!
+	.pfnCleanup = canCleanup,												///< Handle's cleanup routine.
 };
 
 static BT_HANDLE can_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {

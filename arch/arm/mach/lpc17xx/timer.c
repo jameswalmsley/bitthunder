@@ -416,8 +416,8 @@ static const BT_IF_HANDLE oHandleInterface = {
 	.oIfs = {
 		(BT_HANDLE_INTERFACE) &BT_LPC17xx_TIMER_oDeviceInterface,
 	},
-	BT_HANDLE_T_DEVICE,											///< Handle Type!
-	timer_cleanup,												///< Handle's cleanup routine.
+	.eType		= BT_HANDLE_T_DEVICE,											///< Handle Type!
+	.pfnCleanup = timer_cleanup,												///< Handle's cleanup routine.
 };
 
 static BT_HANDLE timer_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {

@@ -364,8 +364,8 @@ static const BT_IF_HANDLE oHandleInterface = {
 	.oIfs = {
 		(BT_HANDLE_INTERFACE) &BT_LPC17xx_ADC_oDeviceInterface,
 	},
-	BT_HANDLE_T_DEVICE,											///< Handle Type!
-	adc_cleanup,												///< Handle's cleanup routine.
+	.eType		= BT_HANDLE_T_DEVICE,											///< Handle Type!
+	.pfnCleanup = adc_cleanup,												///< Handle's cleanup routine.
 };
 
 static BT_HANDLE adc_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
