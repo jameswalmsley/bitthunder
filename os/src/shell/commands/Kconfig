@@ -48,4 +48,8 @@ if SHELL_CMD_ATAGS
 source os/src/shell/commands/atag/Kconfig
 endif
 
+config SHELL_CMD_SOURCE
+	bool "Source (command to execute other scripts)"
+	default n
+
 endmenu
