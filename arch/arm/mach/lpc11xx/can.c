@@ -57,6 +57,7 @@ static BT_ERROR canEnable(BT_HANDLE hCan);
 static void CanTransmit(BT_HANDLE hCan);
 
 
+#ifdef BT_CONFIG_MACH_USE_CAN_ROMDRIVER
 /*
  * ROM handlers
  */
@@ -158,7 +159,6 @@ void CAN_tx(BT_u8 ucmsg_obj_num) {
 void CAN_error(BT_u32 ulerror_info) {
 	return;
 }
-
 /*
  *
  */
@@ -166,6 +166,82 @@ void CAN_error(BT_u32 ulerror_info) {
 void BT_NVIC_IRQ_29(void) {
 	(*rom)->pCAND->isr();
 }
+#else
+
+void CAN_MessageProcess(BT_HANDLE hCan, BT_u8 ucMsgNo ) {
+	volatile LPC11xx_CAN_REGS *pRegs = hCan->pRegs;
+
+	BT_CAN_MESSAGE oMessage;
+	BT_ERROR Error;
+
+	while ( pRegs->CANIF2_CMDREQ & LPC11xx_CAN_IFCREQ_BUSY );
+	pRegs->CANIF2_CMDMSK = LPC11xx_CAN_IFCMDMSK_RD |
+						   LPC11xx_CAN_IFCMDMSK_MASK |
+						   LPC11xx_CAN_IFCMDMSK_ARB |
+						   LPC11xx_CAN_IFCMDMSK_CTRL |
+						   LPC11xx_CAN_IFCMDMSK_INTPND |
+						   LPC11xx_CAN_IFCMDMSK_TREQ |
+						   LPC11xx_CAN_IFCMDMSK_DATAA |
+						   LPC11xx_CAN_IFCMDMSK_DATAB;
+	pRegs->CANIF2_CMDREQ = ucMsgNo+1;    /* Start message transfer */
+	while ( pRegs->CANIF2_CMDREQ & LPC11xx_CAN_IFCREQ_BUSY );	/* Check new data bit */
+
+	if( pRegs->CANIF2_ARB2 & LPC11xx_CAN_ID_MTD ) {	/* bit 28-0 is 29 bit extended frame */
+		/* mask off MsgVal and Dir */
+		oMessage.ulID = (pRegs->CANIF2_ARB1 | ((pRegs->CANIF2_ARB2 & 0x1FFF) << 16));
+		oMessage.ulID |= BT_CAN_EFF_FLAG;
+	}
+	else {
+		/* bit 28-18 is 11-bit standard frame */
+		oMessage.ulID = (pRegs->CANIF2_ARB2 &0x1FFF) >> 2;
+	}
+
+	oMessage.ucLength = pRegs->CANIF2_MCTRL & 0x000F;	// Get Msg Obj Data length
+
+	BT_u16 usBuffer[4];
+	usBuffer[0] = pRegs->CANIF2_DA1 & 0x0000FFFF;
+	usBuffer[1] = pRegs->CANIF2_DA2 & 0x0000FFFF;
+	usBuffer[2] = pRegs->CANIF2_DB1 & 0x0000FFFF;
+	usBuffer[3] = pRegs->CANIF2_DB2 & 0x0000FFFF;
+
+	memcpy(oMessage.ucdata, usBuffer, 8);
+
+	BT_FifoWrite(hCan->hRxFifo, 1, &oMessage, &Error);
+
+	return;
+}
+
+
+void BT_NVIC_IRQ_29(void) {
+	BT_HANDLE hCan = g_CAN_HANDLES[0];
+
+	volatile LPC11xx_CAN_REGS *pRegs = hCan->pRegs;
+
+	volatile BT_u32 canstat = 0;
+	volatile BT_u32 can_int, msg_no;
+
+
+	while ((can_int = pRegs->CANINT) != 0 ) {
+		canstat = pRegs->CANSTAT;
+		if ( can_int & LPC11xx_CAN_INT_STATUS_INTERRUPT ) {
+			if ( canstat & (LPC11xx_CAN_STAT_EWARN | LPC11xx_CAN_STAT_BOFF) ) {
+				return;
+			}
+		}
+		else {
+			if ( (canstat & LPC11xx_CAN_STAT_LEC) == 0 ) { 	/* NO ERROR */
+				/* deal with RX only for now. */
+				msg_no = can_int & 0x7FFF;
+				if ( (msg_no >= 0x01) && (msg_no <= 0x20) ) {
+					pRegs->CANSTAT &= ~LPC11xx_CAN_STAT_RXOK;
+					CAN_MessageProcess(hCan,  msg_no-1);
+				}
+			}
+		}
+	}
+	return;
+}
+#endif
 
 
 /**
@@ -291,17 +367,93 @@ static BT_ERROR canGetPowerState(BT_HANDLE hCan, BT_POWER_STATE *pePowerState) {
 
 
 static BT_ERROR canSetBaudrate(BT_HANDLE hCan, BT_u32 ulBaudrate) {
-	BT_u32 ulClkInitTable[2] = {0x00000000, 0x00000000};
-
 	BT_u32 ulInputClk = BT_GetCpuClockFrequency();
+
+#ifdef BT_CONFIG_MACH_USE_CAN_ROMDRIVER
+	BT_u32 ulClkInitTable[2] = {0x00000000, 0x00000000};
 
 	ulClkInitTable[0] = (ulInputClk / (8 * ulBaudrate)) - 1;
 	ulClkInitTable[1] = 0x2300;
 
 	(*rom)->pCAND->init_can(&ulClkInitTable[0], 1);
+#else
+
+	volatile LPC11xx_CAN_REGS *pRegs = hCan->pRegs;
+
+	/* Be very careful with this setting because it's related to
+	the input bitclock setting value in CANBitClk. */
+	/* popular CAN clock setting assuming AHB clock is 48Mhz:
+	CLKDIV = 1, CAN clock is 48Mhz/2 = 24Mhz
+	CLKDIV = 2, CAN clock is 48Mhz/3 = 16Mhz
+	CLKDIV = 3, CAN clock is 48Mhz/4 = 12Mhz
+	CLKDIV = 5, CAN clock is 48Mhz/6 = 8Mhz */
+
+	/* AHB clock is 48Mhz, the CAN clock is 1/6 AHB clock = 8Mhz */
+	pRegs->CANCLKDIV = ((ulInputClk / (8 * ulBaudrate)) - 1);			/* Divided by 6 */
+
+	/* Start configuring bit timing */
+	pRegs->CANCNTL |= LPC11xx_CAN_CTRL_CCE;
+	pRegs->CANBT = 0x2300;
+	pRegs->CANBRPE = 0x0000;
+	/* Stop configuring bit timing */
+	pRegs->CANCNTL &= ~LPC11xx_CAN_CTRL_CCE;
+#endif
 
 	return BT_ERR_NONE;
 };
+
+
+void canConfigureMessages(BT_HANDLE hCan) {
+	volatile LPC11xx_CAN_REGS *pRegs = hCan->pRegs;
+
+	BT_u32 i;
+	BT_u32 ext_frame = 0;
+
+	/* It's organized in such a way that:
+	obj(x+0)	standard	transmit
+	obj(x+1)	standard	receive
+	obj(x+2)	extended	transmit	where x is 0 to 3
+	obj(x+3)	extended	receive*/
+
+	for ( i = 0; i < 4; i++ ) {
+		pRegs->CANIF1_CMDMSK = LPC11xx_CAN_IFCMDMSK_WR |
+							   LPC11xx_CAN_IFCMDMSK_MASK |
+							   LPC11xx_CAN_IFCMDMSK_ARB |
+							   LPC11xx_CAN_IFCMDMSK_CTRL |
+							   LPC11xx_CAN_IFCMDMSK_DATAA |
+							   LPC11xx_CAN_IFCMDMSK_DATAB;
+
+		pRegs->CANIF1_MSK1 = 0x0000;
+		pRegs->CANIF1_MSK2 = 0x0000;
+
+		pRegs->CANIF1_ARB1 = 0x0000;
+
+		pRegs->CANIF1_ARB2 = LPC11xx_CAN_IFARB2_ID_MVAL;
+
+		if (i > 1) {
+			pRegs->CANIF1_MSK2 = LPC11xx_CAN_IFCMDMSK_MASK_MXTD;
+			pRegs->CANIF1_ARB2 |= LPC11xx_CAN_IFARB2_ID_MTD;
+		}
+
+		if ( (i % 0x02) == 0 ) {
+			pRegs->CANIF1_MCTRL = LPC11xx_CANIFMCTRL_UMSK | LPC11xx_CANIFMCTRL_TXIE | LPC11xx_CANIFMCTRL_EOB | 0x08;
+			pRegs->CANIF1_MSK2 |= LPC11xx_CAN_IFCMDMSK_MASK_MDIR;
+			pRegs->CANIF1_ARB2 |= LPC11xx_CAN_IFARB2_ID_DIR;
+		}
+		else {
+			pRegs->CANIF1_MCTRL = LPC11xx_CANIFMCTRL_UMSK | LPC11xx_CANIFMCTRL_RXIE | LPC11xx_CANIFMCTRL_EOB | 0x08 ;
+		}
+		pRegs->CANIF1_DA1 = 0x0000;
+		pRegs->CANIF1_DA2 = 0x0000;
+		pRegs->CANIF1_DB1 = 0x0000;
+		pRegs->CANIF1_DB2 = 0x0000;
+
+		/* Transfer data to message RAM */
+		pRegs->CANIF1_CMDREQ = i+1;
+		while (pRegs->CANIF1_CMDREQ & LPC11xx_CAN_IFCREQ_BUSY );
+	}
+	return;
+}
 
 
 /**
@@ -313,12 +465,15 @@ static BT_ERROR canSetConfig(BT_HANDLE hCan, BT_CAN_CONFIG *pConfig) {
 
 	BT_ERROR Error = BT_ERR_NONE;
 
-	canSetBaudrate(hCan, pConfig->ulBaudrate);
 
 	if(!hCan->hRxFifo && !hCan->hTxFifo) {
 		hCan->hRxFifo = BT_FifoCreate(pConfig->usRxBufferSize, sizeof(BT_CAN_MESSAGE), 0, &Error);
 		hCan->hTxFifo = BT_FifoCreate(pConfig->usTxBufferSize, sizeof(BT_CAN_MESSAGE), 0, &Error);
 	}
+
+#ifdef BT_CONFIG_MACH_USE_CAN_ROMDRIVER
+
+	canSetBaudrate(hCan, pConfig->ulBaudrate);
 
 	(*rom)->pCAND->config_calb(&callbacks);
 
@@ -335,6 +490,30 @@ static BT_ERROR canSetConfig(BT_HANDLE hCan, BT_CAN_CONFIG *pConfig) {
 	oMsg_Obj.ulmodeid = 0x20000000;
 	oMsg_Obj.ulmask = 0x00000000;
 	(*rom)->pCAND->config_rxmsgobj(&oMsg_Obj);
+#else
+	volatile LPC11xx_CAN_REGS *pRegs = hCan->pRegs;
+
+	if ( !(pRegs->CANCNTL & LPC11xx_CAN_CTRL_INIT) ) {
+		/* If it's in normal operation already, stop it, reconfigure
+		everything first, then restart. */
+		pRegs->CANCNTL |= LPC11xx_CAN_CTRL_INIT;		/* Default state */
+	}
+
+	canSetBaudrate(hCan, pConfig->ulBaudrate);
+
+
+	/* Initialization finishes, normal operation now. */
+	pRegs->CANCNTL &= ~LPC11xx_CAN_CTRL_INIT;
+	while ( pRegs->CANCNTL & LPC11xx_CAN_CTRL_INIT );
+
+	canConfigureMessages(hCan);
+
+	/* By default, auto TX is enabled, enable all related interrupts */
+	pRegs->CANCNTL |= (LPC11xx_CAN_CTRL_IE |
+					   LPC11xx_CAN_CTRL_SIE |
+					   LPC11xx_CAN_CTRL_EIE);
+
+#endif
 
 	BT_EnableInterrupt(pResource->ulStart);
 
@@ -404,6 +583,7 @@ static void CanTransmit(BT_HANDLE hCan) {
 	if (!BT_FifoIsEmpty(hCan->hTxFifo, &Error)) {
 
 		BT_FifoRead(hCan->hTxFifo, 1, &oMessage, &Error);
+#ifdef BT_CONFIG_MACH_USE_CAN_ROMDRIVER
 		oMsgObj.ucmsgobj = 2;
 		oMsgObj.uclength = oMessage.ucLength;
 		oMsgObj.ulmask   = 0x0000;
@@ -418,7 +598,56 @@ static void CanTransmit(BT_HANDLE hCan) {
 
 
 		(*rom)->pCAND->can_transmit(&oMsgObj);
+#else
+		volatile LPC11xx_CAN_REGS *pRegs = hCan->pRegs;
+		BT_u32 msg_no, tx_id;
+
+		tx_id = oMessage.ulID & ~BT_CAN_EFF_FLAG;
+
+		pRegs->CANIF1_MSK2 = 0;
+		pRegs->CANIF1_MSK1 = 0;
+
+		if (oMessage.ulID & BT_CAN_EFF_FLAG) {
+			msg_no = 2;
+			/* MsgVal: 1, Mtd: 1, Dir: 1, ID = 0x200000 */
+			pRegs->CANIF1_ARB2 = LPC11xx_CAN_ID_MVAL | LPC11xx_CAN_ID_MTD | LPC11xx_CAN_ID_DIR | (tx_id >> 16);
+			pRegs->CANIF1_ARB1 = tx_id & 0x0000FFFF;
+
+		}
+		else {		/* standard frame */
+			msg_no = 0;
+			/* MsgVal: 1, Mtd: 0, Dir: 1, ID = 0x200 */
+			pRegs->CANIF1_ARB2 = LPC11xx_CAN_ID_MVAL | LPC11xx_CAN_ID_DIR | (tx_id << 2);
+			pRegs->CANIF1_ARB1 = 0x0000;
+
+		}
+
+		pRegs->CANIF1_MCTRL = LPC11xx_CANIFMCTRL_UMSK |
+							  LPC11xx_CANIFMCTRL_TXRQ |
+							  LPC11xx_CANIFMCTRL_EOB |
+							  (oMessage.ucLength & 0x0F);
+
+		BT_u16 usBuffer[4];
+
+		memcpy(usBuffer, oMessage.ucdata, 8);
+
+		pRegs->CANIF1_DA1 = usBuffer[0];
+		pRegs->CANIF1_DA2 = usBuffer[1];
+		pRegs->CANIF1_DB1 = usBuffer[2];
+		pRegs->CANIF1_DB2 = usBuffer[3];
+
+		pRegs->CANIF1_CMDMSK = LPC11xx_CAN_IFCMDMSK_WR |
+							   LPC11xx_CAN_IFCMDMSK_MASK |
+							   LPC11xx_CAN_IFCMDMSK_ARB |
+							   LPC11xx_CAN_IFCMDMSK_CTRL |
+							   LPC11xx_CAN_IFCMDMSK_TREQ |
+							   LPC11xx_CAN_IFCMDMSK_DATAA |
+							   LPC11xx_CAN_IFCMDMSK_DATAB;
+		pRegs->CANIF1_CMDREQ = msg_no+1;
+		while( pRegs->CANIF1_CMDREQ & LPC11xx_CAN_IFCREQ_BUSY );   /* Could spin here forever */
+#endif
 	}
+	return;
 }
 
 static const BT_DEV_IF_CAN oCanConfigInterface = {
@@ -548,8 +777,8 @@ static const BT_RESOURCE oLPC11xx_can0_resources[] = {
 		.ulFlags			= BT_RESOURCE_ENUM,
 	},
 	{
-		.ulStart			= 13,
-		.ulEnd				= 13,
+		.ulStart			= 29,
+		.ulEnd				= 29,
 		.ulFlags			= BT_RESOURCE_IRQ,
 	},
 };

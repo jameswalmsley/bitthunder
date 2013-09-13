@@ -6,13 +6,33 @@
 
 const BT_IF_DEVICE BT_LPC11xx_CAN_oDeviceInterface;
 
+#define	LPC11xx_CAN_DLC_MAX						8
 
 typedef struct _LPC11xx_CAN_REGS {
 	BT_u32	CANCNTL;							//R/W 0x000 CAN control 0x0001
+
+#define	LPC11xx_CAN_CTRL_INIT					0x0001
+#define	LPC11xx_CAN_CTRL_IE						0x0002
+#define	LPC11xx_CAN_CTRL_SIE					0x0004
+#define	LPC11xx_CAN_CTRL_EIE					0x0008
+#define	LPC11xx_CAN_CTRL_CCE					0x0040
+#define	LPC11xx_CAN_CTRL_TEST					0x0080
+
 	BT_u32	CANSTAT;							//R/W 0x004 Status register 0x0000
+
+#define LPC11xx_CAN_STAT_LEC					0x0007
+#define LPC11xx_CAN_STAT_TXOK					0x0008
+#define LPC11xx_CAN_STAT_RXOK					0x0010
+#define LPC11xx_CAN_STAT_EPASS					0x0020
+#define LPC11xx_CAN_STAT_EWARN					0x0040
+#define LPC11xx_CAN_STAT_BOFF					0x0080
+
 	BT_u32	CANEC;								//RO  0x008 Error counter 0x0000
 	BT_u32	CANBT;								//R/W 0x00C Bit timing register 0x2301
 	BT_u32	CANINT;								//RO  0x010 Interrupt register 0x0000
+
+#define	LPC11xx_CAN_INT_STATUS_INTERRUPT		0x8000
+
 	BT_u32	CANTEST;							//R/W 0x014 Test register -
 	BT_u32	CANBRPE;							//R/W 0x018 Baud rate prescaler extension register     0x0000
 	BT_STRUCT_RESERVED_u32(0, 0x18, 0x20);		//- - 0x01C Reserved -
@@ -22,6 +42,11 @@ typedef struct _LPC11xx_CAN_REGS {
 	BT_u32	CANIF1_MSK2;						//R/W 0x02C Message interface 1 mask 2 0xFFFF
 	BT_u32	CANIF1_ARB1;						//R/W 0x030 Message interface 1 arbitration 1 0x0000
 	BT_u32	CANIF1_ARB2;						//R/W 0x034 Message interface 1 arbitration 2 0x0000
+
+#define	LPC11xx_CAN_IFARB2_ID_MVAL		(1 << 15)     /* Message valid bit, 1 is valid in the MO handler, 0 is ignored */
+#define	LPC11xx_CAN_IFARB2_ID_MTD		(1 << 14)     /* 1 extended identifier bit is used in the RX filter unit, 0 is not */
+#define	LPC11xx_CAN_IFARB2_ID_DIR		(1 << 13)     /* 1 direction bit is used in the RX filter unit, 0 is not */
+
 	BT_u32	CANIF1_MCTRL;						//R/W 0x038 Message interface 1 message control      0x0000NXP Semiconductors UM10398
 	BT_u32	CANIF1_DA1;							//R/W 0x03C Message interface 1 data A1 0x0000
 	BT_u32	CANIF1_DA2;							//R/W 0x040 Message interface 1 data A2 0x0000
@@ -29,12 +54,51 @@ typedef struct _LPC11xx_CAN_REGS {
 	BT_u32	CANIF1_DB2;							//R/W 0x048 Message interface 1 data B2 0x0000
 	BT_STRUCT_RESERVED_u32(1, 0x48, 0x80);		//- - 0x04C - 0x07C Reserved -
 	BT_u32	CANIF2_CMDREQ;						//R/W 0x080 Message interface 2 command request   0x0001
+
+#define LPC11xx_CAN_IFCREQ_BUSY          	     0x8000
+
 	BT_u32	CANIF2_CMDMSK;						//R/W 0x084 Message interface 2 command mask
+
+	/* bit field of IF command mask register */
+#define	LPC11xx_CAN_IFCMDMSK_DATAB				(1 << 0)   /* 1 is transfer data byte 4-7 to message object, 0 is not */
+#define	LPC11xx_CAN_IFCMDMSK_DATAA				(1 << 1)   /* 1 is transfer data byte 0-3 to message object, 0 is not */
+#define	LPC11xx_CAN_IFCMDMSK_TREQ				(1 << 2)   /* 1 is set the TxRqst bit, 0 is not */
+#define	LPC11xx_CAN_IFCMDMSK_INTPND				(1 << 3)
+#define	LPC11xx_CAN_IFCMDMSK_CTRL				(1 << 4)   /* 1 is transfer the CTRL bit to the message object, 0 is not */
+#define	LPC11xx_CAN_IFCMDMSK_ARB				(1 << 5)   /* 1 is transfer the ARB bits to the message object, 0 is not */
+#define	LPC11xx_CAN_IFCMDMSK_MASK				(1 << 6)   /* 1 is transfer the MASK bit to the message object, 0 is not */
+#define	LPC11xx_CAN_IFCMDMSK_WR					(1 << 7)   /* 0 is READ, 1 is WRITE */
+#define LPC11xx_CAN_IFCMDMSK_RD    				0x0000
+
+#define LPC11xx_CAN_IFCMDMSK_ID_STD_MASK		0x07FF
+#define LPC11xx_CAN_IFCMDMSK_ID_EXT_MASK		0x1FFFFFFF
+#define LPC11xx_CAN_IFCMDMSK_DLC_MASK			0x0F
+
+#define	LPC11xx_CAN_IFCMDMSK_MASK_MXTD			0x8000     /* 1 extended identifier bit is used in the RX filter unit, 0 is not */
+#define	LPC11xx_CAN_IFCMDMSK_MASK_MDIR			0x4000     /* 1 direction bit is used in the RX filter unit, 0 is not */
+
 	BT_u32	CANIF2_MSK1;						//R/W 0x088 Message interface 2 mask 1 0xFFFF
 	BT_u32	CANIF2_MSK2;						//R/W 0x08C Message interface 2 mask 2 0xFFFF
 	BT_u32	CANIF2_ARB1;						//R/W 0x090 Message interface 2 arbitration 1 0x0000
 	BT_u32	CANIF2_ARB2;						//R/W 0x094 Message interface 2 arbitration 2 0x0000
+
+#define	LPC11xx_CAN_ID_MVAL						0x8000     /* Message valid bit, 1 is valid in the MO handler, 0 is ignored */
+#define	LPC11xx_CAN_ID_MTD						0x4000     /* 1 extended identifier bit is used in the RX filter unit, 0 is not */
+#define	LPC11xx_CAN_ID_DIR						0x2000     /* 1 direction bit is used in the RX filter unit, 0 is not */
+
 	BT_u32	CANIF2_MCTRL;						//R/W 0x098 Message interface 2 message control      0x0000
+
+#define	LPC11xx_CANIFMCTRL_NEWD					0x8000     /* 1 indicates new data is in the message buffer.  */
+#define	LPC11xx_CANIFMCTRL_MLST					0x4000     /* 1 indicates a message loss. */
+#define	LPC11xx_CANIFMCTRL_INTP					0x2000     /* 1 indicates message object is an interrupt source */
+#define LPC11xx_CANIFMCTRL_UMSK			    	0x1000     /* 1 is to use the mask for the receive filter mask. */
+#define	LPC11xx_CANIFMCTRL_TXIE					0x0800     /* 1 is TX interrupt enabled */
+#define	LPC11xx_CANIFMCTRL_RXIE					0x0400     /* 1 is RX interrupt enabled */
+#define	LPC11xx_CANIFMCTRL_ROEN					0x0200     /* 1 is remote frame enabled */
+#define LPC11xx_CANIFMCTRL_TXRQ			    	0x0100     /* 1 is TxRqst enabled */
+#define	LPC11xx_CANIFMCTRL_EOB					0x0080     /* End of buffer, always write to 1 */
+#define	LPC11xx_CANIFMCTRL_DLC					0x000F        /* bit mask for DLC */
+
 	BT_u32	CANIF2_DA1;							//R/W 0x09C Message interface 2 data A1 0x0000
 	BT_u32	CANIF2_DA2;							//R/W 0x0A0 Message interface 2 data A2 0x0000
 	BT_u32	CANIF2_DB1;							//R/W 0x0A4 Message interface 2 data B1 0x0000
@@ -56,6 +120,7 @@ typedef struct _LPC11xx_CAN_REGS {
 } LPC11xx_CAN_REGS;
 
 #define CAN0						((LPC11xx_CAN_REGS *) BT_CONFIG_MACH_LPC11xx_CAN0_BASE)
+
 
 /*
  * Implementing ROM CAN driver
