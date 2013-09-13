@@ -97,7 +97,7 @@
 		__rodata1_end = .;
 	} > BT_LINKER_TEXT_SECTION
 
-	. = ALIGN(4);
+	. = ALIGN(8);
 	_etext = .;
 
 
