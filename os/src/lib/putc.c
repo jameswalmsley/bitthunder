@@ -12,7 +12,7 @@ static BT_HANDLE g_hOut = NULL;
 void bt_putc(int c, void *stream) {
 	BT_HANDLE h = (BT_HANDLE) stream;
 	BT_u8 val = (BT_u8) c;
-	BT_CharDeviceWrite(h, 0, 1, &val);
+	BT_Write(h, 0, 1, &val, NULL);
 }
 
 BT_HANDLE BT_GetStandardHandle() {
