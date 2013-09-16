@@ -136,10 +136,7 @@ BT_ERROR BT_PutC(BT_HANDLE hFile, BT_u32 ulFlags, BT_i8 cData) {
 	}
 
 	if(!flagsSupported(hFile, ulFlags)) {
-		if(pError) {
-			*pError = BT_ERR_UNSUPPORTED_FLAG;
-		}
-		return 0;
+		return BT_ERR_UNSUPPORTED_FLAG;
 	}
 
 	if(hFile->h.pIf->pFileIF->pfnPutC) {
