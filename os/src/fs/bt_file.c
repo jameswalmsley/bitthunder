@@ -34,19 +34,41 @@ done:
 }
 
 BT_u32 BT_Read(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
-	if(!isHandleValid(hFile, pError)) {
+
+	BT_ERROR Error;
+
+	if(!isHandleValid(hFile, &Error)) {
+		if(pError) {
+			*pError = Error;
+		}
 		return 0;
 	}
 
-	return hFile->h.pIf->pFileIF->pfnRead(hFile, ulFlags, ulSize, pBuffer, pError);
+	BT_u32 ret = hFile->h.pIf->pFileIF->pfnRead(hFile, ulFlags, ulSize, pBuffer, &Error);
+	if(pError) {
+		*pError = Error;
+	}
+
+	return ret;
 }
 
 BT_u32 BT_Write(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
-	if(!isHandleValid(hFile, pError)) {
+
+	BT_ERROR Error;
+
+	if(!isHandleValid(hFile, &Error)) {
+		if(pError) {
+			*pError = Error;
+		}
 		return 0;
 	}
 
-	return hFile->h.pIf->pFileIF->pfnWrite(hFile, ulFlags, ulSize, pBuffer, pError);
+	BT_u32 ret = hFile->h.pIf->pFileIF->pfnWrite(hFile, ulFlags, ulSize, pBuffer, &Error);
+	if(pError) {
+		*pError = Error;
+	}
+
+	return ret;
 }
 
 BT_s32 BT_GetC(BT_HANDLE hFile, BT_u32 ulFlags, BT_ERROR *pError) {
