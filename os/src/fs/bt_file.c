@@ -33,6 +33,14 @@ done:
 	return result;
 }
 
+static BT_BOOL flagsSupported(BT_HANDLE h, BT_u32 ulFlags) {
+	BT_u32 unsupported = ~h->h.pIf->pFileIF->ulSupported;
+	if(ulFlags & unsupported) {
+		return BT_FALSE;
+	}
+	return BT_TRUE;
+}
+
 BT_u32 BT_Read(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
 
 	BT_ERROR Error;
@@ -40,6 +48,13 @@ BT_u32 BT_Read(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT
 	if(!isHandleValid(hFile, &Error)) {
 		if(pError) {
 			*pError = Error;
+		}
+		return 0;
+	}
+
+	if(!flagsSupported(hFile, ulFlags)) {
+		if(pError) {
+			*pError = BT_ERR_UNSUPPORTED_FLAG;
 		}
 		return 0;
 	}
@@ -63,6 +78,13 @@ BT_u32 BT_Write(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, B
 		return 0;
 	}
 
+	if(!flagsSupported(hFile, ulFlags)) {
+		if(pError) {
+			*pError = BT_ERR_UNSUPPORTED_FLAG;
+		}
+		return 0;
+	}
+
 	BT_u32 ret = hFile->h.pIf->pFileIF->pfnWrite(hFile, ulFlags, ulSize, pBuffer, &Error);
 	if(pError) {
 		*pError = Error;
@@ -79,7 +101,15 @@ BT_s32 BT_GetC(BT_HANDLE hFile, BT_u32 ulFlags, BT_ERROR *pError) {
 		return 0;
 	}
 
+	if(!flagsSupported(hFile, ulFlags)) {
+		if(pError) {
+			*pError = BT_ERR_UNSUPPORTED_FLAG;
+		}
+		return 0;
+	}
+
 	if(hFile->h.pIf->pFileIF->pfnGetC) {
+
 		BT_s32 ret = hFile->h.pIf->pFileIF->pfnGetC(hFile, ulFlags, &Error);
 		if(pError) {
 			*pError = Error;
@@ -103,6 +133,13 @@ BT_ERROR BT_PutC(BT_HANDLE hFile, BT_u32 ulFlags, BT_i8 cData) {
 
 	if(!isHandleValid(hFile, &Error)) {
 		return Error;
+	}
+
+	if(!flagsSupported(hFile, ulFlags)) {
+		if(pError) {
+			*pError = BT_ERR_UNSUPPORTED_FLAG;
+		}
+		return 0;
 	}
 
 	if(hFile->h.pIf->pFileIF->pfnPutC) {

@@ -23,6 +23,8 @@
  *
  *	@pfnFlush	[OPTIONAL]	If possible, any file handle should allow a flush data.
  *
+ *	@ulSupported			A mask of FILE flags supported.
+ *
  **/
 typedef struct _BT_IF_FILE {
 	BT_u32 		(*pfnRead)	(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError);
@@ -32,6 +34,7 @@ typedef struct _BT_IF_FILE {
 	BT_ERROR	(*pfnSeek)	(BT_HANDLE hFile, BT_s64 ulOffset, BT_u32 whence);
 	BT_u64		(*pfnTell)	(BT_HANDLE hFile);
 	BT_ERROR	(*pfnFlush)	(BT_HANDLE hFile);
+	BT_u32		ulSupported;
 } BT_IF_FILE;
 
 
