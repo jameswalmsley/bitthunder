@@ -497,6 +497,7 @@ static const BT_IF_FILE oFileInterface = {
 	.pfnRead = file_read,
 	.pfnWrite = file_write,
 	.pfnFlush = uartFlush,
+	.ulSupported = BT_FILE_NON_BLOCK,
 };
 
 static const BT_IF_HANDLE oHandleInterface = {
