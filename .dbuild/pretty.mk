@@ -1,14 +1,18 @@
-PRETTY 		= $(BASE).dbuild/pretty/pretty.py
-PRETTIFY	= $(BASE).dbuild/pretty/prettify.py
-PCP			= $(BASE).dbuild/pretty/prettycp.py --dbuild "CP"
-PMD			= $(BASE).dbuild/pretty/prettymd.py
-PRM			= $(PRETTIFY) --dbuild "RM"
-PCHMOD		= $(BASE).dbuild/pretty/prettychmod.py
-PRETTYSAMBA	= $(BASE).dbuild/pretty/prettysamba.py
-PRETTYLINUX = $(BASE).dbuild/pretty/prettylinux.py
-PRETTY_SUBKBUILD = $(PRETTYLINUX)
-PRETTY_SUBGENERIC = $(BASE).dbuild/pretty/prettygeneric.py
-PTODO		= $(BASE).dbuild/pretty/todo.py
+ifeq ($(PYTHON),)
+PYTHON := python
+endif
+
+PRETTY 		:= $(PYTHON) $(BASE).dbuild/pretty/pretty.py
+PRETTIFY	:= $(PYTHON) $(BASE).dbuild/pretty/prettify.py
+PCP			:= $(PYTHON) $(BASE).dbuild/pretty/prettycp.py --dbuild "CP"
+PMD			:= $(PYTHON) $(BASE).dbuild/pretty/prettymd.py
+PRM			:= $(PRETTIFY) --dbuild "RM"
+PCHMOD		:= $(PYTHON) $(BASE).dbuild/pretty/prettychmod.py
+PRETTYSAMBA	:= $(PYTHON) $(BASE).dbuild/pretty/prettysamba.py
+PRETTYLINUX := $(PYTHON) $(BASE).dbuild/pretty/prettylinux.py
+PRETTY_SUBKBUILD := $(PRETTYLINUX)
+PRETTY_SUBGENERIC := $(PYTHON) $(BASE).dbuild/pretty/prettygeneric.py
+PTODO		:= $(PYTHON) $(BASE).dbuild/pretty/todo.py
 
 PRETTYPOST	= $(PRETTY) "POST" $(@:%.post=%)
 PRETTYPREP	= $(PRETTY) "PREP" $(@:%.pre=%)

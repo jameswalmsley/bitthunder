@@ -10,15 +10,15 @@
 #	@see		github.com/FullFAT/FullFAT/
 #	@author		James Walmsley	<jwalmsley@riegl.com>
 #
-#	@version	1.3.0 (Archimedes)
+#	@version	1.4.0 (
 #
 
-DBUILD_VERSION_MAJOR=1
-DBUILD_VERSION_MINOR=3
-DBUILD_VERSION_REVISION=1
+DBUILD_VERSION_MAJOR 	:= 1
+DBUILD_VERSION_MINOR 	:= 4
+DBUILD_VERSION_REVISION	:= 0
 
-DBUILD_VERSION_NAME=Archimedes
-DBUILD_VERSION_DATE=November 2012
+DBUILD_VERSION_NAME := Aldrin
+DBUILD_VERSION_DATE := September 2013
 
 #
 #	Let's ensure we have a pure make environment.

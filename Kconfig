@@ -1,6 +1,4 @@
 #
-# For a description of the syntax of this configuration file,
-# see misc/tools/kconfig-language.txt.
 #
 
 mainmenu "BitThunder Configuration"
@@ -44,6 +42,13 @@ endchoice
 
 
 menu "Build System (dbuild)"
+
+config DBUILD_PYTHON
+    string "Python path"
+	default "/usr/bin/python"
+	---help---
+	DBUILD uses Python to form pretty output. Ensure it has a valid python
+	interpreter path here.
 
 choice
 	prompt "Build Host Platform"
