@@ -1,6 +1,7 @@
 #ifndef _BT_THREADS_H_
 #define _BT_THREADS_H_
 
+#include <bt_config.h>
 #include <bt_types.h>
 
 typedef struct _BT_THREAD_CONFIG {
@@ -26,5 +27,11 @@ BT_HANDLE BT_GetThreadProcessHandle(BT_HANDLE hThread);
 BT_ERROR BT_ThreadSleepUntil(BT_TICK *pulPreviousWakeTime, BT_u32 ulTimeMs);
 BT_ERROR BT_ThreadSleep(BT_u32 ulTimeMs);
 BT_ERROR BT_ThreadYield(void);
+
+#ifdef BT_CONFIG_KERNEL_NONE
+#define BT_ThreadYield(x)
+#define BT_ThreadSleep(x)
+#define BT_ThreadSleepUntil(x, y)
+#endif
 
 #endif

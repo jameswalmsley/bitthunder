@@ -2,6 +2,13 @@ choice
 	prompt "Kernel/Scheduler selection"
 	default KERNEL_FREERTOS
 
+config KERNEL_NONE
+    bool "Standalone single-threaded application"
+	---help---
+	This option allows you to use basic drivers that don't rely on the scheduler
+	to create simple single-thread and interrupt driven applications.
+	Selecting this option allows you to create a truly tiny bitthunder application.
+
 config KERNEL_FREERTOS
     bool "FreeRTOS Real-time scheduler"
 
@@ -18,4 +25,3 @@ endif
 config KERNEL_TICK_RATE
     int "Kernel Tick Frequency (Hz)"
 	default 1000
-

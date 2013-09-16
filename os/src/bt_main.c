@@ -17,7 +17,9 @@
 extern int main(int argc, char **argv);
 
 void bt_do_bug(void *pc) {
+#ifndef BT_CONFIG_KERNEL_NONE
 	BT_StopSystemTimer();
+#endif
 	BT_DisableInterrupts();
 
 	BT_kPrint("Step 1. DO NOT PANIC!");
@@ -108,6 +110,7 @@ int bt_main(int argc, char **argv) {
 		BT_CloseHandle(hUart);
 	}
 
+#ifndef BT_CONFIG_KERNEL_NONE
 	BT_THREAD_CONFIG oThreadConfig = {
 		.ulStackDepth 	= BT_CONFIG_MAIN_TASK_STACK_DEPTH,
 		.ulPriority		= BT_CONFIG_MAIN_TASK_PRIORITY,
@@ -116,6 +119,9 @@ int bt_main(int argc, char **argv) {
 	BT_kTaskCreate((BT_FN_TASK_ENTRY) main, "MAIN", &oThreadConfig, &Error);
 
 	BT_kStartScheduler();
+#endif
+
+	main(0, NULL);
 
 	// Write a debug message to the debugger port,
 	// It was not possible to start the scheduler.

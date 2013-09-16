@@ -12,3 +12,5 @@ $(BT_KERNEL_FREERTOS_OBJECTS):CFLAGS += -I $(BASE)arch/$(ARCH)/include/arch/comm
 
 OBJECTS += $(BT_KERNEL_FREERTOS_OBJECTS)
 endif
+
+OBJECTS-$(BT_CONFIG_KERNEL_NONE) += $(BUILD_DIR)kernel/bt_none_if.o

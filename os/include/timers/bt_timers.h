@@ -12,6 +12,10 @@ BT_u32 BT_GetKernelTime(void);
 BT_u32 BT_GetKernelTick(void);
 
 
+#ifdef BT_CONFIG_KERNEL_NONE
+#define BT_GetKernelTime(x)	0
+#define BT_GetKernelTick(x)	0
+#endif
 
 
 #endif
