@@ -346,6 +346,9 @@ static BT_ERROR uartRead(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, BT_u8 *
 	{
 		while(ulSize) {
 			while((pRegs->SR & ZYNQ_UART_SR_RXEMPTY)) {
+				if(ulFlags & BT_FILE_NON_BLOCK) {
+					return BT_ERR_GENERIC;
+				}
 				BT_ThreadYield();
 			}
 
@@ -366,7 +369,10 @@ static BT_ERROR uartRead(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, BT_u8 *
 				}
 				ulSize--;
 			} else {
-				//BT_ThreadYield();
+				if(ulFlags & BT_FILE_NON_BLOCK) {
+					return BT_ERR_GENERIC;
+				}
+				BT_ThreadYield();
 			}
 		}
 		break;
