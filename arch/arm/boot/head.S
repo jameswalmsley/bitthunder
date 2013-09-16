@@ -30,7 +30,11 @@ handler_swi:		.word 	_bt_syscall_entry
 handler_prefetch:	.word	prefetch
 handler_data:		.word	data
 handler_unused:		.word	hang
+#ifndef BT_CONFIG_KERNEL_NONE
 handler_irq:		.word 	vFreeRTOS_IRQInterrupt
+#else
+handler_irq:		.word	BT_ARCH_ARM_GIC_IRQHandler
+#endif
 handler_fiq:		.word	fiq
 
 bt_reset:
@@ -430,7 +434,7 @@ _bt_syscall_entry:
 	/*
 	 *	Handle FreeRTOS Yielding
 	 */
-
+#ifndef BT_CONFIG_KERNEL_NONE
 	stmdb	sp!, {r4,r5,r6}			// Lets not clobber r4-5.
 	ldr		r6, [lr,#-4]			// Instruction behind LR is SWI ($0) instruction.
 	bic		r6, #0xFF000000			// Mask out the opcode, to leave the syscall vector.
@@ -520,7 +524,9 @@ _bt_syscall_return:
 
 	// Return for SVC handler
 	subs	pc, lr, #0
-
+#else
+	subs	pc, lr, #0
+#endif
 
 /*
  *************************************************************************

@@ -40,11 +40,13 @@ BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-A9)	+= $(BUILD_DIR)arch/arm/comm
 #
 #	Kernel Scheduler Ports
 #
+ifeq ($(BT_CONFIG_KERNEL_FREERTOS), y)
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_ARM11)		+= $(BUILD_DIR)arch/arm/common/freertos-arm11.o
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_ARM11)		+= $(BUILD_DIR)arch/arm/common/freertos-arm11-portisr.o
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-A9)	+= $(BUILD_DIR)arch/arm/common/freertos-arm.o
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-M0) += $(BUILD_DIR)arch/arm/common/freertos-m0.o
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-M3) += $(BUILD_DIR)arch/arm/common/freertos-m3.o
+endif
 
 #
 #	MMU
