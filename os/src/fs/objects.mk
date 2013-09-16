@@ -21,8 +21,9 @@ FF_OBJECTS-$(BT_CONFIG_FS_FULLFAT) += $(BUILD_DIR)os/src/fs/fullfat/ff_string.o
 FF_OBJECTS-$(BT_CONFIG_FS_FULLFAT) += $(BUILD_DIR)os/src/fs/fullfat/ff_time.o
 FF_OBJECTS-$(BT_CONFIG_FS_FULLFAT) += $(BUILD_DIR)os/src/fs/fullfat/ff_unicode.o
 
-$(FF_OBJECTS-y): CFLAGS += -D FF_BITTHUNDER_CONFIG $(shell echo $(BT_CONFIG_CFLAGS))
-$(FF_OBJECTS-y): MODULE_NAME="FullFAT"
+BT_CC_CFLAGS := $(shell echo $(BT_CONFIG_CFLAGS))
 
+$(FF_OBJECTS-y): CFLAGS += -D FF_BITTHUNDER_CONFIG $(BT_CC_CFLAGS)
+$(FF_OBJECTS-y): MODULE_NAME="FullFAT"
 
 OBJECTS += $(FF_OBJECTS-y)
