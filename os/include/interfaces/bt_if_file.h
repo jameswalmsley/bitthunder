@@ -21,6 +21,8 @@
  *
  *	@pfnTell	[OPTIONAL]	Gives the absolute current position of the file from the file's origin.
  *
+ *	@pfnFlush	[OPTIONAL]	If possible, any file handle should allow a flush data.
+ *
  **/
 typedef struct _BT_IF_FILE {
 	BT_u32 		(*pfnRead)	(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError);
@@ -29,6 +31,7 @@ typedef struct _BT_IF_FILE {
 	BT_ERROR	(*pfnPutC)	(BT_HANDLE hFile, BT_u32 ulFlags, BT_i8 cData);
 	BT_ERROR	(*pfnSeek)	(BT_HANDLE hFile, BT_s64 ulOffset, BT_u32 whence);
 	BT_u64		(*pfnTell)	(BT_HANDLE hFile);
+	BT_ERROR	(*pfnFlush)	(BT_HANDLE hFile);
 } BT_IF_FILE;
 
 

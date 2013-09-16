@@ -151,3 +151,16 @@ BT_s32 BT_GetS(BT_HANDLE hFile, BT_u32 ulSize, BT_i8 *s) {
 
     return s - t;
 }
+
+BT_ERROR BT_Flush(BT_HANDLE hFile) {
+	BT_ERROR Error;
+	if(!isHandleValid(hFile, &Error)) {
+		return Error;
+	}
+
+	if(!hFile->h.pIf->pFileIF->pfnFlush) {
+		return BT_ERR_UNSUPPORTED_INTERFACE;
+	}
+
+	return hFile->h.pIf->pFileIF->pfnFlush(hFile);
+}
