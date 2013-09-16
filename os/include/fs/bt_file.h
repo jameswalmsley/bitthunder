@@ -1,6 +1,7 @@
 #ifndef _BT_FILE_H_
 #define _BT_FILE_H_
 
+#define 	BT_FILE_NON_BLOCK	0x00000001	///< Don't block on read-call, return immediately.
 
 
 BT_u32 BT_Read(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError);
