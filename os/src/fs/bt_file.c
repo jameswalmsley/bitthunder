@@ -104,7 +104,7 @@ BT_ERROR BT_Seek(BT_HANDLE hFile, BT_s64 ulOffset, BT_u32 whence) {
 		return BT_ERR_UNSUPPORTED_INTERFACE;
 	}
 
-	return hFile->h.pIf->pFileIF->pfnSeek(hFile, ulOffset);
+	return hFile->h.pIf->pFileIF->pfnSeek(hFile, ulOffset, whence);
 }
 
 BT_u64 BT_Tell(BT_HANDLE hFile, BT_ERROR *pError) {
