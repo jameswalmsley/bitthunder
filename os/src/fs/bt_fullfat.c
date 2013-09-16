@@ -165,7 +165,7 @@ static BT_ERROR fullfat_putc(BT_HANDLE hFile, BT_u32 ulFlags, BT_i8 cData) {
 	return (BT_ERROR) ret;
 }
 
-static BT_ERROR fullfat_seek(BT_HANDLE hFile, BT_u64 ulOffset) {
+static BT_ERROR fullfat_seek(BT_HANDLE hFile, BT_s64 ulOffset, BT_u32 whence) {
 	return BT_ERR_NONE;
 }
 
