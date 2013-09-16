@@ -496,6 +496,7 @@ static const BT_IF_DEVICE oDeviceInterface = {
 static const BT_IF_FILE oFileInterface = {
 	.pfnRead = file_read,
 	.pfnWrite = file_write,
+	.pfnFlush = uartFlush,
 };
 
 static const BT_IF_HANDLE oHandleInterface = {
