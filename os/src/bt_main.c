@@ -100,7 +100,7 @@ int bt_main(int argc, char **argv) {
 
 	BT_kPrint("Relinquish control of the boot UART device...(Goodbye)");
 
-	BT_CharDeviceFlush(hUart);
+	BT_Flush(hUart);
 
 	BT_SetStandardHandle(NULL);
 
