@@ -43,3 +43,9 @@ config PROCESS
 	default y
 	depends on !KERNEL_NONE
 	depends on OS
+
+config TIMERS
+	bool
+	default y
+	depends on !KERNEL_NONE
+	depends on OS
