@@ -259,6 +259,9 @@ BT_ERROR bt_page_reserve(BT_PHYS_ADDR paddr, BT_u32 psize) {
 	return BT_ERR_NONE;
 }
 
+extern BT_PHYS_ADDR __bt_init_start;
+extern BT_PHYS_ADDR __bss_end;
+
 void bt_initialise_pages(void) {
 
 	BT_LIST_INIT_HEAD(&free_head);
@@ -273,6 +276,9 @@ void bt_initialise_pages(void) {
 
 	bt_list_add(&block->list, &free_head);
 
+	BT_PHYS_ADDR start = bt_virt_to_phys(&__bt_init_start);
+	BT_PHYS_ADDR len   = bt_virt_to_phys(&__bss_end) - start;
+
 	// Reserve already used pages!
-	bt_page_reserve(0x00100000, 1024*1024*2);	// Reserve 2MB for BT Kernel
+	bt_page_reserve(start, len);	// Reserve 2MB for BT Kernel
 }
