@@ -52,4 +52,8 @@ config SHELL_CMD_SOURCE
 	bool "Source (command to execute other scripts)"
 	default n
 
+config SHELL_CMD_IOMEM
+	bool "IOMEM"
+	default n
+
 endmenu
