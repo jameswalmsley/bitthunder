@@ -225,6 +225,8 @@ static char *replace_expressions(const char *input) {
 
 BT_ERROR BT_ShellCommand(const char *cmdline) {
 
+	BT_ERROR Error = BT_ERR_NONE;
+
 	BT_u32 ulArguments = 0;
 	BT_u32 bIsArg = BT_FALSE;
 	BT_u32 bIgnoreSpace = BT_FALSE;
@@ -317,17 +319,24 @@ BT_ERROR BT_ShellCommand(const char *cmdline) {
 
 	const BT_SHELL_COMMAND *pCommand = GetShellCommand(pargs[0]);
 	if(!pCommand) {
+		BT_ENV_VARIABLE *env = BT_ShellGetStarredEnv(pargs[0]);
+		if(env) {
+			Error = BT_ShellCommand(env->o.string->s);
+			goto executed;
+		}
+
 		BT_kFree(pargs);
 		BT_kFree(copy);
 		return -1;
 	}
 
-	pCommand->pfnCommand(ulArguments, pargs);
+	Error = pCommand->pfnCommand(ulArguments, pargs);
 
+executed:
 	BT_kFree(pargs);
 	BT_kFree(copy);
 
-	return BT_ERR_NONE;
+	return Error;
 }
 
 BT_ERROR BT_ShellScript(const BT_i8 *path) {

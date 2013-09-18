@@ -12,6 +12,24 @@
 
 static BT_LIST_HEAD(vars);
 
+static BT_ENV_VARIABLE *find_starred_var(const char *name, BT_u32 length) {
+	struct bt_list_head *pos;
+	bt_list_for_each(pos, &vars) {
+		BT_ENV_VARIABLE *env = (BT_ENV_VARIABLE *) pos;
+		if(env->s[0] != '*') {
+			continue;
+		}
+
+		if(strlen(env->s) - 1 == length) {
+			if(!strncmp(&env->s[1], name, length)) {
+				return env;
+			}
+		}
+	}
+
+	return NULL;
+}
+
 static BT_ENV_VARIABLE *find_var(const char *name, BT_u32 length) {
 
 	struct bt_list_head *pos;
@@ -88,4 +106,14 @@ BT_ENV_VARIABLE *BT_ShellGetEnv(const char *name) {
 	}
 
 	return find_var(name, len);
+}
+
+BT_ENV_VARIABLE *BT_ShellGetStarredEnv(const char *name) {
+	BT_u32 len = strlen(name);
+
+	if(name[0] == '$' && name[1] == '{') {
+		return find_starred_var(name+2, len-3);
+	}
+
+	return find_starred_var(name, len);
 }
