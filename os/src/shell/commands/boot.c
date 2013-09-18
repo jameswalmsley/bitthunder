@@ -17,14 +17,14 @@ typedef struct _BOOT_PARAMS {
 
 static BOOT_PARAMS oBootParams[BT_CONFIG_CPU_CORES];
 
+static void boot_core(BT_u32 coreID) __attribute__((naked));
 static void boot_core(BT_u32 coreID) {
 	register BT_u32 a, b, c;
 
-	__asm volatile("ldr sp,=0x30000");
+	__asm volatile("ldr sp,=0xFFFFFFFF");
 
-	coreID = BT_GetCoreID();
-
-	BT_kPrint("CoreID: %d", coreID);
+	/*coreID = BT_GetCoreID();
+	BT_kPrint("CoreID: %d", coreID);*/
 
 	a = 0;
 	b = 0;
@@ -59,7 +59,7 @@ static int bt_boot(int argc, char **argv) {
 	BT_DCacheFlush();
 	BT_ICacheInvalidate();
 
-	BT_DCacheDisable();
+	//BT_DCacheDisable();
 
 	if(!coreID) {
 		BT_StopSystemTimer();
@@ -75,7 +75,7 @@ static int bt_boot(int argc, char **argv) {
 	} else {
 		// Must use MACH core boot interface.
 		oBootParams[coreID].jmp	 		= (jump) p;
-		BT_BootCore(coreID, boot_core);
+		BT_BootCore(coreID, p);
 	}
 
 	return 0;
