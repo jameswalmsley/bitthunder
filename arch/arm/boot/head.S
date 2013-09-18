@@ -59,6 +59,7 @@ bt_reset:
 	ldr	sp,=_stack
 	bl	_bt_startup_init_hook
 
+#ifdef BT_CONFIG_ARCH_ARM_FULL_INIT
 
 	/*
 	 *	Enable the snoop control unit.
@@ -81,7 +82,6 @@ bt_reset:
 	orr	r0, r0, #(0x01 )
 	mcr	p15, 0, r0, c1, c0, 1		// Write ACTLR
 
-#ifdef BT_CONFIG_ARCH_ARM_FULL_INIT
 
 	/*
 	 *	Disable the MMU! - Just to make sure its disabled.
