@@ -45,7 +45,7 @@ static int bt_boot_jtag(int argc, char **argv) {
 
 	} else {
 		// Must use MACH core boot interface.
-		BT_BootCore(coreID, p);
+		BT_BootCore(coreID, p, 0, 0, 0, 0);
 	}
 
 	return 0;
