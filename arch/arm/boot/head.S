@@ -85,6 +85,11 @@ bt_reset:
 	ldr	r6, =0xffff
 	str	r6, [r7]
 
+	mrc	p15, 0, r0, c1, c0, 0		// Read SCTLR
+	bic	r0, r0, #(0x1 << 25)		// Ensure EE bit is cleared, reset to LITTLE_ENDIAN data.
+	mcr	p15, 0, r0, c1, c0, 0		// Write SCTLR
+
+
 	/* Write to ACTLR */
 	mrc	p15, 0, r0, c1, c0, 1		// Read ACTLR
 	orr	r0, r0, #(0x01 << 6)		// set SMP bit
