@@ -14,28 +14,37 @@
 
 .set MMUCRVAL,	0b01000000000101	/* Enable IDC, and MMU */
 
+	/*
+	 *	This defines the ARM vector table, it is repeated twice, so that it may be used on initial
+	 *	boot-up from address 0x0, but also a trampoline can be injected within the space of
+     * 	the first copy of the table for starting other processors.
+	 *
+	 */
 _bt_vector_table:
-	ldr pc,=(BT_LINKER_KERNEL_ENTRY + 0x40)
-	ldr	pc,handler_undefined
-	ldr pc,handler_swi
-	ldr pc,handler_prefetch
-	ldr pc,handler_data
-	ldr pc,handler_unused		;@	Historical Handler - Was invalid address from the old 26-bit ARM CPUs
-	ldr pc,handler_irq
-	ldr pc,handler_fiq
+.rept 2
+	ldr pc,=(BT_LINKER_KERNEL_ENTRY + 0x40)	// Reset vector
+	ldr	pc, [pc, #24]						// undefined instruction vector
+	ldr pc, [pc, #24]						// SVC handler
+	ldr pc, [pc, #24]						// Prefetch abort handler
+	ldr pc, [pc, #24]						// Data abort handler
+	ldr pc, [pc, #24]						// Historical Handler - Was invalid address from the old 26-bit ARM CPUs
+	ldr pc, [pc, #24]						// IRQ handler
+	ldr pc, [pc, #24]						// FIQ handler
 
-handler_reset:		.word 	bt_reset
-handler_undefined:	.word 	undefined
-handler_swi:		.word 	_bt_syscall_entry
-handler_prefetch:	.word	prefetch
-handler_data:		.word	data
-handler_unused:		.word	hang
+	.word 	bt_reset
+	.word	undefined
+	.word	_bt_syscall_entry
+	.word	prefetch
+	.word	data
+	.word	hang
 #ifndef BT_CONFIG_KERNEL_NONE
-handler_irq:		.word 	vFreeRTOS_IRQInterrupt
+	.word 	vFreeRTOS_IRQInterrupt
 #else
-handler_irq:		.word	BT_ARCH_ARM_GIC_IRQHandler
+	.word	BT_ARCH_ARM_GIC_IRQHandler
 #endif
-handler_fiq:		.word	fiq
+	.word	fiq
+.endr
+_bt_vector_table_end:
 
 bt_reset:
 	/*
@@ -49,7 +58,7 @@ bt_reset:
 	orr	r0,r0,#0x80
 	msr	cpsr_c,r0
 
-	ldr		r0, =__bt_init_start		// Set-up Initial kernel stack
+	ldr		r0, =__bt_init_start + ((_bt_vector_table_end-_bt_vector_table)/2)		// Set-up Initial kernel stack
 	mcr		p15, 0, r0, c12, c0, 0		// Set the VBAR (Vector base address register).
 
 	/*
