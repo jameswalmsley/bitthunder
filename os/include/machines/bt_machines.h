@@ -13,7 +13,6 @@
 #include "devman/bt_integrated_device.h"
 #include "devman/bt_integrated_driver.h"
 
-
 typedef enum {
 	BT_ARCH_NONE=0,
 	BT_ARCH_ARM,
@@ -30,7 +29,7 @@ typedef struct _BT_MACHINE_DESCRIPTION {
 
 	BT_u32							(*pfnGetCpuClockFrequency) ();
 	BT_ERROR					   	(*pfnMachineInit)				(struct _BT_MACHINE_DESCRIPTION *pMachine);
-	BT_ERROR						(*pfnBootCore)(BT_u32 ulCoreID, void *);
+	BT_ERROR						(*pfnBootCore)(BT_u32 ulCoreID, void *address, bt_register_t a, bt_register_t b, bt_register_t c, bt_register_t d);
 
 	const BT_INTEGRATED_DEVICE	   *pInterruptController;
 	const BT_INTEGRATED_DEVICE	   *pSystemTimer;
