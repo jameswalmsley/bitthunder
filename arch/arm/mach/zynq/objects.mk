@@ -5,6 +5,7 @@ MACH_ZYNQ_OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/zynq.o			# Provides machine 
 
 MACH_ZYNQ_OBJECTS-$(BT_CONFIG_MACH_ZYNQ_USE_STARTUP) += $(BUILD_DIR)arch/arm/mach/zynq/startup.o
 
+MACH_ZYNQ_OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/headsmp.o
 MACH_ZYNQ_OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/slcr.o
 MACH_ZYNQ_OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/uart.o
 MACH_ZYNQ_OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/timer.o
