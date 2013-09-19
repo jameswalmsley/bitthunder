@@ -12,6 +12,7 @@
 #include <bitthunder.h>
 #include <arch/common/gic.h>
 #include <arch/common/cortex-a9-cpu-timers.h>
+#include <string.h>
 
 #include "slcr.h"
 #include "uart.h"
@@ -238,12 +239,29 @@ BT_DEVFS_INODE_DEF oZynq_uart1_inode = {
 };
 #endif
 
-static BT_ERROR zynq_boot_core(BT_u32 ulCoreID, void *p) {
-	volatile BT_u32 *core2 = (BT_u32 *) 0xFFFFFFF0;
-	*core2 = (BT_u32) p;
+extern BT_u32 zynq_trampoline_jump, zynq_trampoline, zynq_trampoline_end;
+
+static BT_ERROR zynq_boot_core(BT_u32 ulCoreID, void *address, bt_register_t a, bt_register_t b, bt_register_t c, bt_register_t d) {
+
+	BT_u32 trampoline_size = &zynq_trampoline_end - &zynq_trampoline;
+	zynq_slcr_cpu_stop(ulCoreID);
+
+	BT_u32 *zero = bt_ioremap(0, trampoline_size);
+	memcpy(zero, &zynq_trampoline, trampoline_size);
+
+	zero += ((&zynq_trampoline_jump - &zynq_trampoline) / 4);
+
+	zero[0] = (BT_u32) address;
+	zero[1] = a;
+	zero[2] = b;
+	zero[3] = c;
+	zero[4] = d;
+
 	BT_DCacheFlush();
 
-	__asm volatile("sev");
+	//bt_iounmap(zero);
+
+	zynq_slcr_cpu_start(ulCoreID);
 
 	return BT_ERR_NONE;
 }
