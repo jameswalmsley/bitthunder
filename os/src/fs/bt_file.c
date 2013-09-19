@@ -190,7 +190,7 @@ BT_s32 BT_GetS(BT_HANDLE hFile, BT_u32 ulSize, BT_i8 *s) {
 	}
 
 	BT_i8 *t;
-	BT_s32 c;
+	BT_s32 c = 0;
 
     t = s;
     while (--ulSize>1 && (c=BT_GetC(hFile, 0, &Error)) != -1 && (c != '\n' && c != '\r')) {
