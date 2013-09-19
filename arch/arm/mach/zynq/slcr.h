@@ -103,6 +103,8 @@ typedef struct _ZYNQ_SLCR_REGS {
 	BT_u32	DEVCI_RST_CTRL;
 	BT_u32	FPGA_RST_CTRL;
 	BT_u32	A9_CPU_RST_CTRL;
+	#define SLCR_A9_CPU_CLKSTOP	0x10
+	#define SLCR_A9_CPU_RST		0x01
 
 	BT_STRUCT_RESERVED_u32(7, 0x244, 0x24C);
 
@@ -268,5 +270,8 @@ BT_u32 BT_ZYNQ_GetDDRPLLFrequency();
 
 BT_u32 BT_ZYNQ_GetCpuFrequency();
 BT_u32 BT_ZYNQ_GetCpu1xFrequency();
+
+void zynq_slcr_cpu_start(BT_u32 ulCoreID);
+void zynq_slcr_cpu_stop(BT_u32 ulCoreID);
 
 #endif

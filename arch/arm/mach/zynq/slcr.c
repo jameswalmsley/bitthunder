@@ -132,3 +132,15 @@ BT_u32 BT_ZYNQ_GetCpu1xFrequency() {
 
 	return ulCPUClk / 4;
 }
+
+
+void zynq_slcr_cpu_start(BT_u32 ulCoreID) {
+	volatile ZYNQ_SLCR_REGS *pRegs = bt_ioremap((void *)ZYNQ_SLCR, BT_SIZE_4K);
+	pRegs->A9_CPU_RST_CTRL &= ~((SLCR_A9_CPU_CLKSTOP | SLCR_A9_CPU_RST) << ulCoreID);
+}
+
+
+void zynq_slcr_cpu_stop(BT_u32 ulCoreID) {
+	volatile ZYNQ_SLCR_REGS *pRegs = bt_ioremap((void *)ZYNQ_SLCR, BT_SIZE_4K);
+	pRegs->A9_CPU_RST_CTRL = (SLCR_A9_CPU_CLKSTOP | SLCR_A9_CPU_RST) << ulCoreID;
+}
