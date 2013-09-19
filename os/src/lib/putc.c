@@ -14,7 +14,7 @@ void bt_putc(int c, void *stream) {
 	BT_u8 val = (BT_u8) c;
 
 	if(c == '\n') {
-		BT_u8 *s = "\r\n";
+		BT_u8 *s = (BT_u8 *) "\r\n";
 		BT_Write(h, 0, 2, s, NULL);
 	} else {
 		BT_Write(h, 0, 1, &val, NULL);
