@@ -352,6 +352,7 @@ jump_to_virtual:
 	and	r2, r1, r0
 	orr	r2, r2, #0x12				/* IRQ mode */
 	msr	cpsr, r2
+	msr	spsr_cfx, r2
 	ldr	r13,=IRQ_stack				/* IRQ stack pointer */
 
 	mrs	r0, cpsr					/* get the current PSR */
