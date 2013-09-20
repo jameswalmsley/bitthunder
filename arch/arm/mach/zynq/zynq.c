@@ -243,13 +243,13 @@ extern BT_u32 zynq_trampoline_jump, zynq_trampoline, zynq_trampoline_end;
 
 static BT_ERROR zynq_boot_core(BT_u32 ulCoreID, void *address, bt_register_t a, bt_register_t b, bt_register_t c, bt_register_t d) {
 
-	BT_u32 trampoline_size = &zynq_trampoline_end - &zynq_trampoline;
+	BT_u32 trampoline_size = (&zynq_trampoline_end - &zynq_trampoline) * 4;
 	zynq_slcr_cpu_stop(ulCoreID);
 
 	BT_u32 *zero = bt_ioremap(0, trampoline_size);
 	memcpy(zero, &zynq_trampoline, trampoline_size);
 
-	zero += ((&zynq_trampoline_jump - &zynq_trampoline) / 4);
+	zero += (&zynq_trampoline_jump - &zynq_trampoline);
 
 	zero[0] = (BT_u32) address;
 	zero[1] = a;
