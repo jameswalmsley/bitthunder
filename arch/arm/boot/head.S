@@ -22,7 +22,7 @@
 	 */
 _bt_vector_table:
 .rept 2
-	ldr pc,=(BT_LINKER_KERNEL_ENTRY + 0x40)	// Reset vector
+	ldr pc, =(BT_LINKER_KERNEL_ENTRY + 0x80)	// Reset vector
 	ldr	pc, [pc, #24]						// undefined instruction vector
 	ldr pc, [pc, #24]						// SVC handler
 	ldr pc, [pc, #24]						// Prefetch abort handler
@@ -50,10 +50,6 @@ bt_reset:
 	/*
 		Disable the IRQs as soon as possible, just in-case the boot-loader was naughty!
 	*/
-
-	mrc	p15,0,r1,c0,c0,5
-	and r1, r1, #0xF		// Get the CPUID
-
 	mrs	r0,cpsr
 	orr	r0,r0,#0x80
 	msr	cpsr_c,r0
@@ -65,8 +61,8 @@ bt_reset:
 	 *	Setup the initial kernel boot process stack pointer.
 	 *	This should be the Physical Address!
 	 */
-	ldr	sp,=_stack
 	bl	_bt_startup_init_hook
+	ldr sp,=_stack
 
 #ifdef BT_CONFIG_ARCH_ARM_FULL_INIT
 
