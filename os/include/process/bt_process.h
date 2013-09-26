@@ -29,10 +29,47 @@ struct bt_process_time {
 
 #define curtask 	curthread->task
 
+/**
+ *	@brief	Create a new process within Kernel-space.
+ *
+ *	There is no specific api to create a user-space process, simply the user-space
+ *	code should be loaded by a start-routine that configures the memory map and loads
+ *	the executable code.
+ *
+ *	Once loaded, the routine switches the cpu into unprivileged mode and jumps to
+ *	the untrusted code's entry point.
+ *
+ *	@pfnStartRoutine	[IN]	Pointer to executable code where this process will start.
+ *	@szpName			[IN]	Name of the process as seen by the kernel.
+ * 	@pConfig			[IN]	Pointer to BT_THREAD_CONFIG parameters for starting this process.
+ *	@pError				[OUT]	A BT_ERROR code in case of errors.
+ *
+ *	@return Handle to process created.
+ **/
 BT_HANDLE BT_CreateProcess(BT_FN_THREAD_ENTRY pfnStartRoutine, const BT_i8 *szpName, BT_THREAD_CONFIG *pConfig, BT_ERROR *pError);
 
+/**
+ *	@brief	Get handle of the currently executing process.
+ *
+ *	@return NULL if not a process context.
+ *	@return	BT_HANDLE of the current process.
+ **/
 BT_HANDLE BT_GetProcessHandle(void);
 struct bt_task *BT_GetProcessTask(BT_HANDLE hProces);
+
+/**
+ *	@private
+ *	@brief	Get processes thread list.
+ *
+ *	This function is really intended for use by the thread manager, and use by kernel applications
+ *	is discouraged. Of course user mode applications cannot call this.
+ *
+ *	@hProcess	[IN] Handle of process to get thread list from.
+ *
+ *	@return Pointer to the BT_LIST containing all thread handles of the provided hProcess.
+ *
+ **/
+BT_LIST *BT_GetProcessThreadList(BT_HANDLE hProcess);
 BT_LIST *BT_GetProcessThreadList(BT_HANDLE hProcess);
 
 BT_ERROR BT_GetProcessTime(struct bt_process_time *time, BT_u32 i);
