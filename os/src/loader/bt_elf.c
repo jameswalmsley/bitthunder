@@ -37,7 +37,7 @@ static BT_BOOL bt_elf_can_decode(void *image_start, BT_u32 len) {
 	return bt_elf_hdr_valid(hdr);
 }
 
-void *bt_elf_image_load(void *elf_start, BT_u32 len, BT_LOADER_SECTION_CB pfnLoad, BT_ERROR *pError) {
+void *bt_elf_image_load(void *elf_start, BT_u32 len, BT_LOADER_SEGMENT_CB pfnLoad, void *pParam, BT_ERROR *pError) {
 	Elf32_Ehdr	*hdr 	= NULL;
 	Elf32_Phdr 	*phdr 	= NULL;
 	Elf32_Shdr  *shdr 	= NULL;
@@ -51,7 +51,6 @@ void *bt_elf_image_load(void *elf_start, BT_u32 len, BT_LOADER_SECTION_CB pfnLoa
 		return NULL;
 	}
 
-
 	/*
 	 *	First iterate the program headers to load text and data sections.
 	 */
@@ -64,10 +63,16 @@ void *bt_elf_image_load(void *elf_start, BT_u32 len, BT_LOADER_SECTION_CB pfnLoa
 		case PT_LOAD: {
 			BT_u32 start = phdr[i].p_vaddr;
 			BT_u32 end = (phdr[i].p_vaddr + phdr[i].p_filesz) - 1;
-			BT_u32 size = phdr[i].p_filesz;
 
-			BT_kPrint("elfload: load : %08x - %08x (%d)", start, end, size);
-			pfnLoad((void *) start, (elf_start + phdr[i].p_offset), phdr[i].p_flags, size);
+			BT_kPrint("elfload: load : %08x - %08x (%d)", start, end, phdr[i].p_filesz);
+			BT_LOADER_SEGMENT oSegment;
+			oSegment.v_addr = (void *) start;
+			oSegment.data = (elf_start + phdr[i].p_offset);
+			oSegment.data_len = phdr[i].p_filesz;
+			oSegment.size = phdr[i].p_memsz;
+			oSegment.flags = phdr[i].p_flags;
+
+			pfnLoad(&oSegment, pParam);
 			break;
 		}
 
@@ -118,8 +123,8 @@ void *bt_elf_image_load(void *elf_start, BT_u32 len, BT_LOADER_SECTION_CB pfnLoa
 	return entry;
 }
 
-static void *bt_elf_decode(void *image_start, BT_u32 len, BT_LOADER_SECTION_CB pfnLoad, BT_ERROR *pError) {
-	return bt_elf_image_load(image_start, len, pfnLoad, pError);
+static void *bt_elf_decode(void *image_start, BT_u32 len, BT_LOADER_SEGMENT_CB pfnLoad, void *pParam, BT_ERROR *pError) {
+	return bt_elf_image_load(image_start, len, pfnLoad, pParam, pError);
 }
 
 BT_LOADER_DEF oElfLoader = {
