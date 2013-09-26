@@ -37,6 +37,7 @@ include $(BASE)os/src/mm/objects.mk
 include $(BASE)os/src/devman/objects.mk
 include $(BASE)os/src/of/objects.mk
 include $(BASE)os/src/fs/objects.mk
+include $(BASE)os/src/loader/objects.mk
 include $(BASE)os/src/net/objects.mk
 include $(BASE)os/src/shell/objects.mk
 
