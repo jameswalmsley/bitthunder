@@ -69,6 +69,13 @@
 		__bt_shell_commands_end = .;
 	} > BT_LINKER_INIT_SECTION
 
+	.bt.loaders : {
+		__bt_loaders_start = .;
+		KEEP(*(.bt.loaders))
+		KEEP(*(.bt.loaders.*))
+		__bt_loaders_end = .;
+	} > BT_LINKER_INIT_SECTION
+
 	.text : {
 	    *(.vectors)
 		*(.boot)
