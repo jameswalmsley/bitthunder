@@ -244,10 +244,9 @@ extern BT_u32 zynq_trampoline_jump, zynq_trampoline, zynq_trampoline_end;
 static BT_ERROR zynq_boot_core(BT_u32 ulCoreID, void *address, bt_register_t a, bt_register_t b, bt_register_t c, bt_register_t d) {
 
 	BT_u32 trampoline_size = (&zynq_trampoline_end - &zynq_trampoline) * 4;
-	zynq_slcr_cpu_stop(ulCoreID);
 
-	BT_u32 *zero = bt_ioremap(0, trampoline_size);
-	memcpy(zero, &zynq_trampoline, trampoline_size);
+	volatile BT_u32 *zero = bt_ioremap(0, trampoline_size);
+	memcpy((void *) zero, &zynq_trampoline, trampoline_size);
 
 	zero += (&zynq_trampoline_jump - &zynq_trampoline);
 
@@ -258,10 +257,18 @@ static BT_ERROR zynq_boot_core(BT_u32 ulCoreID, void *address, bt_register_t a, 
 	zero[4] = d;
 
 	BT_DCacheFlush();
+	BT_DCacheDisable();
 
 	//bt_iounmap(zero);
 
+	zynq_slcr_cpu_stop(ulCoreID);
 	zynq_slcr_cpu_start(ulCoreID);
+
+	while(1) {
+		if(zero[0] != (BT_u32) address) {
+			break;
+		}
+	}
 
 	return BT_ERR_NONE;
 }

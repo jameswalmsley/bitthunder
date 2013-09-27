@@ -20,6 +20,8 @@ zynq_trampoline:
 	ldr	r1, zynq_trampoline_r1			// 	Load the r1 value.
 	ldr	r2, zynq_trampoline_r2			// 	Load the r2 value.
 	ldr	r3, zynq_trampoline_r3			// 	Load the r3 value.
+	mov	r5, #-1
+	str	r5,	zynq_trampoline_jump		// 	Signal that jump has occured.
 	bx	r4								// 	Branch to the jump address (now in r4).
 .globl zynq_trampoline_jump
 zynq_trampoline_jump:		.word 	0	// 	The jump address!	(If 0 is used this will cause an infinite loop until the address is written).
