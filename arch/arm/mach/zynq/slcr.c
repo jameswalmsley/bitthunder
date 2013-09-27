@@ -140,7 +140,7 @@ void zynq_slcr_unlock() {
 
 void zynq_slcr_lock() {
 	volatile ZYNQ_SLCR_REGS *pRegs = bt_ioremap((void *)ZYNQ_SLCR, BT_SIZE_4K);
-
+	pRegs->SLCR_LOCK = 0x767b;
 }
 
 
