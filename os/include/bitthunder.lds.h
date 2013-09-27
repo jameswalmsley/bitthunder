@@ -265,6 +265,14 @@ _SDA2_BASE_ = __sdata2_start + ((__sbss2_end - __sdata2_start) / 2 );
    __bss_end = .;
 } > BT_LINKER_BSS_SECTION
 
+	/*
+	 *	__bss_end, should include all text, data, and zero-initialised variables.
+	 *	IT does not include the HEAP, which typically fills the rest of the memory.
+	 *
+	 *	Note. The heaps should reserve the used sections around this section.
+	 *	I.e. pages / memory occupied should never be touch by the heap implementation.
+	 */
+
 /* Generate Stack and Heap definitions */
 
 #ifdef BT_CONFIG_LINKER_BSS_SECTION_SRAM
@@ -305,4 +313,12 @@ _HEAP_SIZE = BT_LINKER_RAM_ADDRESS + BT_CONFIG_LINKER_RAM_LENGTH - __bss_end - _
    . += _ABORT_STACK_SIZE;
    . = ALIGN(16);
    __abort_stack = .;
+} > BT_LINKER_BSS_SECTION
+
+	/*
+	 *	This symbol should always be defined at the very end of the entire kernel image.
+	 */
+
+.eof (NOLOAD) : {
+	__absolute_end = .;
 } > BT_LINKER_BSS_SECTION

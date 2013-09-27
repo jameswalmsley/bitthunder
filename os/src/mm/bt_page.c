@@ -261,6 +261,9 @@ BT_ERROR bt_page_reserve(BT_PHYS_ADDR paddr, BT_u32 psize) {
 
 extern BT_PHYS_ADDR __bt_init_start;
 extern BT_PHYS_ADDR __bss_end;
+extern BT_PHYS_ADDR _heap_end;
+extern BT_PHYS_ADDR __absolute_end;
+
 
 void bt_initialise_pages(void) {
 
@@ -276,9 +279,14 @@ void bt_initialise_pages(void) {
 
 	bt_list_add(&block->list, &free_head);
 
-	BT_PHYS_ADDR start = bt_virt_to_phys(&__bt_init_start);
-	BT_PHYS_ADDR len   = bt_virt_to_phys(&__bss_end) - start;
+	BT_PHYS_ADDR start = (BT_PHYS_ADDR) bt_virt_to_phys(&__bt_init_start);
+	BT_PHYS_ADDR len   = (BT_PHYS_ADDR) bt_virt_to_phys(&__bss_end) - start;
 
 	// Reserve already used pages!
-	bt_page_reserve(start, len);	// Reserve 2MB for BT Kernel
+	bt_page_reserve(start, len);	// Reserve memory used for kernel text, data and bss.
+
+	start = (BT_PHYS_ADDR) bt_virt_to_phys(&_heap_end);
+	len = &__absolute_end - &_heap_end;
+
+	bt_page_reserve(start, len);	// Reserve the IRQ / SVC and kernel stacks at end of memory.
 }
