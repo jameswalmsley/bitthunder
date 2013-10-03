@@ -2,17 +2,22 @@ ifeq ($(PYTHON),)
 PYTHON := python
 endif
 
-PRETTY 		:= $(PYTHON) $(BASE).dbuild/pretty/pretty.py
-PRETTIFY	:= $(PYTHON) $(BASE).dbuild/pretty/prettify.py
-PCP			:= $(PYTHON) $(BASE).dbuild/pretty/prettycp.py --dbuild "CP"
-PMD			:= $(PYTHON) $(BASE).dbuild/pretty/prettymd.py
+PRETTY 		:= $(PYTHON) $(DBUILD_ROOT).dbuild/pretty/pretty.py
+PRETTIFY	:= $(PYTHON) $(DBUILD_ROOT).dbuild/pretty/prettify.py
+PCP			:= $(PYTHON) $(DBUILD_ROOT).dbuild/pretty/prettycp.py --dbuild "CP"
+PMV			:= $(DBUILD_ROOT).dbuild/pretty/prettymv.py --dbuild "MV"
+PMD			:= $(PYTHON) $(DBUILD_ROOT).dbuild/pretty/prettymd.py
 PRM			:= $(PRETTIFY) --dbuild "RM"
-PCHMOD		:= $(PYTHON) $(BASE).dbuild/pretty/prettychmod.py
-PRETTYSAMBA	:= $(PYTHON) $(BASE).dbuild/pretty/prettysamba.py
-PRETTYLINUX := $(PYTHON) $(BASE).dbuild/pretty/prettylinux.py
-PRETTY_SUBKBUILD := $(PRETTYLINUX)
-PRETTY_SUBGENERIC := $(PYTHON) $(BASE).dbuild/pretty/prettygeneric.py
-PTODO		:= $(PYTHON) $(BASE).dbuild/pretty/todo.py
+PCHMOD		:= $(PYTHON) $(DBUILD_ROOT).dbuild/pretty/prettychmod.py
+PRETTYSAMBA	:= $(PYTHON) $(DBUILD_ROOT).dbuild/pretty/prettysamba.py
+PRETTYLINUX := $(PYTHON) $(DBUILD_ROOT).dbuild/pretty/prettylinux.py
+ifndef PRETTY_SUBKBUILD 
+  PRETTY_SUBKBUILD := $(PRETTYLINUX)
+endif
+ifndef PRETTY_SUBGENERIC
+  PRETTY_SUBGENERIC := $(PYTHON) $(DBUILD_ROOT).dbuild/pretty/prettygeneric.py
+endif
+PTODO		:= $(PYTHON) $(DBUILD_ROOT).dbuild/pretty/todo.py
 
 PRETTYPOST	= $(PRETTY) "POST" $(@:%.post=%)
 PRETTYPREP	= $(PRETTY) "PREP" $(@:%.pre=%)
@@ -41,6 +46,17 @@ PCP_FLAGS=-r
 ifeq ($(DBUILD_VERBOSE_CMD), 0)
 PCP_PIPE=| $(PCP) $(MODULE_NAME)
 PCP_FLAGS=-vr
+endif
+
+#
+#	PMV Flags
+#
+PMV_PIPE=
+PMV_FLAGS=
+
+ifeq ($(DBUILD_VERBOSE_CMD), 0)
+PMV_PIPE=| $(PMV) $(MODULE_NAME)
+PMV_FLAGS=-v
 endif
 
 #

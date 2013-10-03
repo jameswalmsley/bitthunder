@@ -4,7 +4,7 @@ import os, sys
 import prettyformat
 import fileinput
 
-command     = "CP"
+command     = "MV"
 module      = "Unknown"
 description = "Please fix this somebody!"
 bCustom     = True
@@ -29,5 +29,5 @@ for line in sys.stdin:
 
     source = line.split(" ")[0][1:][:-1]
     dest = line.split(" ")[2][1:][:-1]
-    prettyformat.pretty(command, module, source + " -> " + dest, bCustom)
 
+    prettyformat.pretty(command, module, source + " -> " + dest, bCustom)

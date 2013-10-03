@@ -1,4 +1,4 @@
-include $(BASE).dbuild/c-objects.mk
-include $(BASE).dbuild/cpp-objects.mk
-include $(BASE).dbuild/module-link.mk
-include $(BASE).dbuild/clean.mk
+include $(DBUILD_ROOT).dbuild/c-objects.mk
+include $(DBUILD_ROOT).dbuild/cpp-objects.mk
+include $(DBUILD_ROOT).dbuild/module-link.mk
+include $(DBUILD_ROOT).dbuild/clean.mk

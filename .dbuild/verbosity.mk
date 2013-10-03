@@ -32,10 +32,16 @@ endif
 #
 # Then we can control the command printing dynamically using the V (verbosity) variable.
 #
-Q:=@
+
+# This ensures that make exits if piped commands fail.
+# Note that this requires bash command shell!
+SHELL=/bin/bash
+PIPEFAIL = set -e; set -o pipefail; 
+
+Q=@$(PIPEFAIL)
 ifeq ($(V), 2)
-Q:=
+Q=$(PIPEFAIL)
 endif
 ifeq ($(V), 3)
-Q:=
+Q=$(PIPEFAIL)
 endif

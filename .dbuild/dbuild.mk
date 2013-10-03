@@ -10,15 +10,20 @@
 #	@see		github.com/FullFAT/FullFAT/
 #	@author		James Walmsley	<jwalmsley@riegl.com>
 #
-#	@version	1.4.0 (
+#	@version	1.5.0 (Fermat)
 #
 
-DBUILD_VERSION_MAJOR 	:= 1
-DBUILD_VERSION_MINOR 	:= 4
-DBUILD_VERSION_REVISION	:= 0
+DBUILD_VERSION_MAJOR=1
+DBUILD_VERSION_MINOR=5
+DBUILD_VERSION_REVISION=0
 
-DBUILD_VERSION_NAME := Aldrin
-DBUILD_VERSION_DATE := September 2013
+DBUILD_VERSION_NAME=Fermat
+DBUILD_VERSION_DATE=October 2013
+
+#
+#	Get dbuild root directory.
+#
+DBUILD_ROOT:=$(dir $(lastword $(MAKEFILE_LIST)))../
 
 #
 #	Let's ensure we have a pure make environment.
@@ -27,12 +32,23 @@ DBUILD_VERSION_DATE := September 2013
 MAKEFLAGS += -rR --no-print-directory
 
 all: dbuild_entry _all
+
+#
+#	A top-level configureation file can be found in the project root dir.
+#
+-include $(DBUILD_ROOT)dbuild.config.mk
+
+#
+#	A config file can be overidden or extended in any sub-directory
+#
+-include dbuild.config.mk
+
 #
 #	Optional Include directive, blue build attempts to build using lists of objects,
 #	targets and subdirs as found in objects.mk and subdirs.mk
 #
--include $(BASE).config.mk
-#-include objects.mk
+-include $(DBUILD_ROOT).config.mk
+-include objects.mk
 -include targets.mk
 -include subdirs.mk
 
@@ -62,39 +78,45 @@ override SIZE		= $(TOOLCHAIN)size
 
 CFLAGS		+= -c
 
+CFLAGS 		+= $(ADD_CFLAGS)
+CXXFLAGS 	+= $(ADD_CXXFLAGS)
+LDFLAGS 	+= $(ADD_LDFLAGS)
+
 #
-#	Incase the .config.mk file does not exist, create a blank one.
+#	Incase the objects.mk or the .config.mk file does not exist, create a blank one.
 #	We should eventually integrate this with KConfig or something nice.
 #
 .config.mk:
 	@touch .config.mk
 
+objects.mk:
+	@touch objects.mk
+
 $(TARGETS) $(TARGET_DEPS): .config.mk
 
-include $(BASE).dbuild/verbosity.mk
-include $(BASE).dbuild/pretty.mk
-include $(BASE).dbuild/subdirs.mk
-include $(BASE).dbuild/clean.mk
-include $(BASE).dbuild/module-link.mk
-include $(BASE).dbuild/c-objects.mk
-include $(BASE).dbuild/cpp-objects.mk
-include $(BASE).dbuild/asm-objects.mk
-include $(BASE).dbuild/info.mk
-include $(BASE).dbuild/configure.mk
-include $(BASE).dbuild/install.mk
-include $(BASE).dbuild/distclean.mk
+$(TARGETS): objects.mk .config.mk
+
+include $(DBUILD_ROOT).dbuild/verbosity.mk
+include $(DBUILD_ROOT).dbuild/pretty.mk
+include $(DBUILD_ROOT).dbuild/subdirs.mk
+include $(DBUILD_ROOT).dbuild/clean.mk
+include $(DBUILD_ROOT).dbuild/module-link.mk
+include $(DBUILD_ROOT).dbuild/c-objects.mk
+include $(DBUILD_ROOT).dbuild/cpp-objects.mk
+include $(DBUILD_ROOT).dbuild/asm-objects.mk
+include $(DBUILD_ROOT).dbuild/info.mk
 
 
 #
 #	Provide a default target named all,
-#	This is dependent on $(TARGETS) and $(SUBDIRS)
+#	This is dependent on $(TARGETS), $(MODULE_TARGET) and $(SUBDIRS)
 #
 #	All is finally dependent on silent, to keep make silent when it has
 #	nothing to do.
 #
 dbuild_entry: dbuild_splash | _all
 $(TARGETS) $(SUBDIR_LIST) $(MODULE_TARGET) $(OBJECTS) clean: | dbuild_splash
-_all: $(TARGETS) $(SUBDIR_LIST) $(MODULE_TARGET) | silent
+_all: $(TARGETS) $(BASIC_TARGETS) $(MULTI_TARGETS) $(SUBDIR_LIST) $(MODULE_TARGET) | silent
 
 #
 #	DBuild Splash
@@ -106,6 +128,8 @@ else
 	@echo " Dark Builder"
 	@echo " Version ($(DBUILD_VERSION_MAJOR).$(DBUILD_VERSION_MINOR).$(DBUILD_VERSION_REVISION) - $(DBUILD_VERSION_NAME))"
 endif
+
+EXPORTS=CFLAGS
 
 #
 #	Finally provide an implementation of the silent target.

@@ -13,47 +13,119 @@ ifeq ($(DBUILD_VERBOSE_CMD), 0)
 endif
 	$(Q)$(AR) rvs $@ $(OBJECTS) 1> /dev/null 2> /dev/null
 
-#
-# RI Targets are the standard targets with the AR_TARGETS filtered out.
-#
+SO_TARGETS=$(filter %.so, $(TARGETS))
 
-
+#
+# RI Targets are the standard targets with the AR_TARGETS and SO_TARGETS filtered out.
+#
 TEMP_TARGETS=$(filter-out $(AR_TARGETS), $(TARGETS))
-#SO_TARGETS=$(filter %.so, $(TEMP_TARGETS))
+
 KERN_TARGETS=$(filter %.img, $(TEMP_TARGETS))
-
 RI_TARGETS=$(filter-out $(KERN_TARGETS), $(TEMP_TARGETS))
-#RI_TARGETS=$(filter-out $(SO_TARGETS), $(TEMP2_TARGETS))
 
-
-$(SO_TARGETS):
-
-
-$(RI_TARGETS):
+$(RI_TARGETS): $(OBJECTS) 
 ifeq ($(DBUILD_VERBOSE_CMD), 0)
 	$(Q)$(PRETTY) --dbuild "LD" $(MODULE_NAME) $@
 endif
+	@mkdir -p $(dir $@)
 	$(Q)$(CXX) $(OBJECTS) $(ARCHIVES) $(LDFLAGS) $(LDLIBS) -o $@
+
+.SECONDEXPANSION:
+$(MULTI_TARGETS): %: $$(%-OBJECTS)
+ifeq ($(DBUILD_VERBOSE_CMD), 0)
+	$(Q)$(PRETTY) --dbuild "LD" $(MODULE_NAME) $@
+endif
+	@mkdir -p $(dir $@)
+	$(Q)$(CXX) $^ $(ARCHIVES) $(LDFLAGS) $(LDLIBS) -o $@
 
 
 %: %.c
 ifeq ($(DBUILD_VERBOSE_CMD), 0)
 	$(Q)$(PRETTY) --dbuild "CC|LD" $(MODULE_NAME) $@
 endif
-	$(Q)$(CC) $(CFLAGS) $(LDFLAGS) $(LDLIBS) $< -o $@
+	@mkdir -p $(dir $@)
+	$(Q)$(CC) -MD -MP $(CFLAGS) $< -o $@.o
+	$(POST_CC)
+	$(Q)$(CXX) $(LDFLAGS) $(LDLIBS) $@.o -o $@
+	@rm -f $@.o
 
 output/%: source/%.c
 ifeq ($(DBUILD_VERBOSE_CMD), 0)
 	$(Q)$(PRETTY) --dbuild "CC|LD" $(MODULE_NAME) $@
 endif
-	$(Q)$(CC) $(CFLAGS) $(LDFLAGS) $(LDLIBS) $< -o $@
+	@mkdir -p $(dir $@)
+	$(Q)$(CC) -MD -MP $(CFLAGS) $< -o $@.o
+	$(POST_CC)
+	$(Q)$(CXX) $(LDFLAGS) $(LDLIBS) $@.o -o $@
+	@rm -f $@.o
+
+%: %.cpp
+ifeq ($(DBUILD_VERBOSE_CMD), 0)
+	$(Q)$(PRETTY) --dbuild "CPP|LD" $(MODULE_NAME) $@
+endif
+	@mkdir -p $(dir $@)
+	$(Q)$(CXX) -MD -MP $(CXXFLAGS) $< -o $@.o
+	$(POST_CC)
+	$(Q)$(CXX) $(LDFLAGS) $(LDLIBS) $@.o -o $@
+	@rm -f $@.o
+
+output/%: source/%.cpp
+ifeq ($(DBUILD_VERBOSE_CMD), 0)
+	$(Q)$(PRETTY) --dbuild "CPP|LD" $(MODULE_NAME) $@
+endif
+	@mkdir -p $(dir $@)
+	$(Q)$(CXX) -MD -MP $(CXXFLAGS) $< -o $@.o
+	$(POST_CC)
+	$(Q)$(CXX) $(LDFLAGS) $(LDLIBS) $@.o -o $@
+	@rm -f $@.o
+
+%: %.cc
+ifeq ($(DBUILD_VERBOSE_CMD), 0)
+	$(Q)$(PRETTY) --dbuild "CPP|LD" $(MODULE_NAME) $@
+endif
+	@mkdir -p $(dir $@)
+	$(Q)$(CXX) -MD -MP $(CXXFLAGS) $< -o $@.o
+	$(POST_CC)
+	$(Q)$(CXX) $(LDFLAGS) $(LDLIBS) $@.o -o $@
+	@rm -f $@.o
+
+output/%: source/%.cc
+ifeq ($(DBUILD_VERBOSE_CMD), 0)
+	$(Q)$(PRETTY) --dbuild "CPP|LD" $(MODULE_NAME) $@
+endif
+	@mkdir -p $(dir $@)
+	$(Q)$(CXX) -MD -MP $(CXXFLAGS) $< -o $@.o
+	$(POST_CC)
+	$(Q)$(CXX) $(LDFLAGS) $(LDLIBS) $@.o -o $@
+	@rm -f $@.o
+
+%: %.o
+ifeq ($(DBUILD_VERBOSE_CMD), 0)
+	$(Q)$(PRETTY) --dbuild "LD" $(MODULE_NAME) $@
+endif
+	@mkdir -p $(dir $@)
+	$(Q)$(CXX) $(LDFLAGS) $(LDLIBS) $< -o $@
 
 output/%: source/%.o
 ifeq ($(DBUILD_VERBOSE_CMD), 0)
 	$(Q)$(PRETTY) --dbuild "LD" $(MODULE_NAME) $@
 endif
-	$(Q)$(CC) $(LDFLAGS) $(LDLIBS) $< -o $@
+	@mkdir -p $(dir $@)
+	$(Q)$(CXX) $(LDFLAGS) $(LDLIBS) $< -o $@
 
+%.so: %.o
+ifeq ($(DBUILD_VERBOSE_CMD), 0)
+	$(Q)$(PRETTY) --dbuild "LD" $(MODULE_NAME) $@
+endif
+	@mkdir -p $(dir $@)
+	$(Q)$(CXX) $< $(LDFLAGS) $(LDLIBS) -o $@
+
+output/%.so: source/%.o
+ifeq ($(DBUILD_VERBOSE_CMD), 0)
+	$(Q)$(PRETTY) --dbuild "LD" $(MODULE_NAME) $@
+endif
+	@mkdir -p $(dir $@)
+	$(Q)$(CXX) $< $(LDFLAGS) $(LDLIBS) -o $@
 
 #
 #	Auto linker script generation

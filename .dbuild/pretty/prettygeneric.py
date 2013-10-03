@@ -30,7 +30,7 @@ while(line):
     elif("libtool" and "--mode=" in line):
         if("--mode=compile"):
             action = "CC"
-            description = line.split("-o")[1].split(" ")[1].strip()
+			#description = line.split("-o")[1].split(" ")[1].strip()
             valid = True
         else:
             print "LIBTOOL HORROR"
@@ -47,8 +47,10 @@ while(line):
 
         elif(stripped.split(" ")[0].endswith("gcc")):
             action = "CC"
-            description = stripped.split("-o")[1].split(" ")[1].strip()
-            valid = True
+            splits = stripped.split("-o")
+            if(len(splits) > 1):
+                description = splits[1].split(" ")[1].strip()
+                valid = True
         elif(stripped.split(" ")[0].endswith("c++")):
             action = "CXX"
             description = stripped.split("-o")[1].split(" ")[1].strip()
@@ -75,6 +77,10 @@ while(line):
             valid = True
         elif(stripped.startswith("make[") and ("Nothing to be done for" in stripped)):
                  valid = False
+        elif(stripped.split(" ")[0].endswith("moc")):
+            action = "MOC"
+            description = stripped.split("-o")[1].split(" ")[1].strip()
+            valid = True
         else:
             action = "MISC"
             description = line.strip()

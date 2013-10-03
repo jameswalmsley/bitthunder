@@ -20,16 +20,22 @@ qd=@
 endif
 
 
-#$(BUILD_DIR)%.o: $(BUILD_BASE)%.c
-#ifeq ($(DBUILD_VERBOSE_CMD), 0)											# Pretty print on successful compile, but still display errors when they occur.
-# 	$(Q)$(PRETTY) --dbuild "CC" $(MODULE_NAME) $(notdir $@)
-#endif
-# 	@mkdir -p $(dir $@)
-# 	$(Q)$(CC) -MD -MP $(CFLAGS) $< -o $@
-# 	$(POST_CC)
+%.o: %.c
+ifeq ($(DBUILD_VERBOSE_CMD), 0)											# Pretty print on successful compile, but still display errors when they occur.
+	$(Q)$(PRETTY) --dbuild "CC" $(MODULE_NAME) $(subst $(BUILD_DIR),"",$@)
+endif
+	@mkdir -p $(dir $@)
+	$(Q)$(CC) -MD -MP $(CFLAGS) $< -o $@
+	$(POST_CC)
 
+$(BUILD_DIR)%.o: $(BUILD_BASE)%.c
+ifeq ($(DBUILD_VERBOSE_CMD), 0)											# Pretty print on successful compile, but still display errors when they occur.
+	$(Q)$(PRETTY) --dbuild "CC" $(MODULE_NAME) $(subst $(BUILD_DIR),"",$@)
+endif
+	@mkdir -p $(dir $@)
+	$(Q)$(CC) -MD -MP $(CFLAGS) $< -o $@
+	$(POST_CC)
 
-#$(BUILD_DIR)%.o: $(BASE)%.c
 $(BUILD_DIR)%.o: $(BASE)%.c
 ifeq ($(DBUILD_VERBOSE_CMD), 0)											# Pretty print on successful compile, but still display errors when they occur.
 	$(Q)$(PRETTY) --dbuild "CC" $(MODULE_NAME) $(subst $(BUILD_DIR),"",$@)
