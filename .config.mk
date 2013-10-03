@@ -4,6 +4,8 @@
 
 include $(BASE).config
 
+CONFIG_:=BT_CONFIG_
+
 ARCH:=$(shell echo $(BT_CONFIG_ARCH))
 SUBARCH:=$(shell echo $(BT_CONFIG_SUBARCH))
 TOOLCHAIN:=$(shell echo $(BT_CONFIG_TOOLCHAIN))

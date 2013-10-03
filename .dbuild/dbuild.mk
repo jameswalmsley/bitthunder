@@ -48,6 +48,7 @@ all: dbuild_entry _all
 #	targets and subdirs as found in objects.mk and subdirs.mk
 #
 -include $(DBUILD_ROOT).config.mk
+-include $(DBUILD_ROOT).config
 -include objects.mk
 -include targets.mk
 -include subdirs.mk
@@ -63,10 +64,15 @@ OBJECTS += $(OBJECTS-y)
 -include dbuild.config.mk
 -include $(BUILD_ROOT)dbuild.config.mk
 
+CONFIG_ ?= CONFIG_
+CONFIG_PATH ?= $(DBUILD_ROOT)
+CONFIG_HEADER_PATH ?= $(DBUILD_ROOT)
+CONFIG_HEADER_NAME ?= "config.h"
+
 #
 #	Defaults for compile/build toolchain
 #
-override TOOLCHAIN 	?=
+override TOOLCHAIN 	:= $(shell echo $($(CONFIG_)TOOLCHAIN))
 override AR			= $(TOOLCHAIN)ar
 override AS			= $(TOOLCHAIN)as
 override CC		 	= $(TOOLCHAIN)gcc
@@ -75,6 +81,16 @@ override LD			= $(TOOLCHAIN)ld
 override OBJCOPY	= $(TOOLCHAIN)objcopy
 override OBJDUMP	= $(TOOLCHAIN)objdump
 override SIZE		= $(TOOLCHAIN)size
+
+export 	TOOLCHAIN
+export	AR
+export 	AS
+export	CC
+export	CXX
+export	LD
+export	OBJCOPY
+export	OBJDUMP
+export	SIZE
 
 CFLAGS		+= -c
 
@@ -129,7 +145,16 @@ else
 	@echo " Version ($(DBUILD_VERSION_MAJOR).$(DBUILD_VERSION_MINOR).$(DBUILD_VERSION_REVISION) - $(DBUILD_VERSION_NAME))"
 endif
 
-EXPORTS=CFLAGS
+menuconfig: $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig
+	$(Q)CONFIG_=$(CONFIG_) APP_DIR=$(APP_DIR) kconfig-mconf Kconfig
+	$(Q)$(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig ./ > $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME)
+ifneq ($(CONFIG_PATH),$(DBUILD_ROOT))
+	$(Q)cp .config $(CONFIG_PATH)/.config
+endif
+
+$(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig: $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig.c
+	$(Q)gcc $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig.c $(DBUILD_ROOT).dbuild/scripts/mkconfig/cfgparser.c $(DBUILD_ROOT).dbuild/scripts/mkconfig/cfgdefine.c -o $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig
+
 
 #
 #	Finally provide an implementation of the silent target.
