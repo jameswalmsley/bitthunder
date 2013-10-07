@@ -10,7 +10,7 @@ BT_HANDLE BT_GetProcessHandle(void);
 BT_LIST *BT_GetProcessThreadList(BT_HANDLE hProcess);
 
 
-
+struct bt_vm_map *bt_process_getmap(BT_HANDLE hProcess);
 
 
 

@@ -71,6 +71,11 @@ BT_LIST *BT_GetProcessThreadList(BT_HANDLE hProcess) {
 	return &hProcess->oThreads;
 }
 
+
+struct bt_vm_map *bt_process_getmap(BT_HANDLE hProcess) {
+	return hProcess->mmap;
+}
+
 static BT_ERROR bt_process_cleanup(BT_HANDLE hProcess) {
 
 	return BT_ERR_NONE;
