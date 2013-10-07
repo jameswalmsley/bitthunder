@@ -9,7 +9,7 @@
  *
  *	All operations complete in O(1), unless they hit the page-allocator,
  * 	in which case the allocation complexity is inherited from the page-allocator.
- *	
+ *
  **/
 
 #include <bitthunder.h>
@@ -92,10 +92,15 @@ static BT_ERROR init_cache(BT_CACHE *pCache, BT_u32 ulObjectSize) {
 	return BT_ERR_NONE;
 }
 
-/*BT_CACHE *BT_kCreateCache(BT_u32 ulObjectSize, BT_u32 ulFlags) {
-
+BT_ERROR BT_CacheInit(BT_CACHE *pCache, BT_u32 ulObjectSize) {
+	return init_cache(pCache, ulObjectSize);
 }
 
+/*
+BT_CACHE *BT_kCreateCache(BT_u32 ulObjectSize, BT_u32 ulFlags) {
+
+}*/
+/*
 BT_ERROR BT_kDestroyCache(BT_CACHE *pCache) {
 
 }*/
@@ -133,12 +138,12 @@ static struct block_free *pop_free(BT_CACHE *pCache) {
 }
 
 static void push_free(BT_CACHE *pCache, struct block_free *p) {
-	p->next = pCache->free;	
+	p->next = pCache->free;
 	pCache->free = p;
 	pCache->allocated -= 1;
 }
 
-static void *BT_CacheAlloc(BT_CACHE *pCache) {
+void *BT_CacheAlloc(BT_CACHE *pCache) {
 
 	struct block_free *p = pop_free(pCache);
 	if(!p) {
@@ -152,7 +157,7 @@ static void *BT_CacheAlloc(BT_CACHE *pCache) {
 	return (void *) p;
 }
 
-static BT_ERROR BT_CacheFree(BT_CACHE *pCache, void *p) {
+BT_ERROR BT_CacheFree(BT_CACHE *pCache, void *p) {
 	struct block_free *free = (struct block_free *) p;
 	push_free(pCache, free);
 	return BT_ERR_NONE;
