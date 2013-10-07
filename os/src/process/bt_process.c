@@ -5,6 +5,7 @@
 
 #include <bitthunder.h>
 #include <string.h>
+#include <mm/bt_vm.h>
 
 BT_DEF_MODULE_NAME			("Process Manager")
 BT_DEF_MODULE_DESCRIPTION	("OS Process abstraction for the BitThunder Kernel")
@@ -16,6 +17,7 @@ struct _BT_OPAQUE_HANDLE {
 	BT_LIST				oThreads;
 	BT_u16				usPID;			///< ProcessID of this process.
 	BT_THREAD_CONFIG	oConfig;
+	struct bt_vm_map   *mmap;			///< Processes' private memory map.
 
 	BT_BOOL				bIsStarted;		///< Flag process started, prevent dual starting!
 	BT_BOOL				bAutoRestart;	///< Flag allow auto-restarting of process.
@@ -46,6 +48,8 @@ BT_HANDLE BT_CreateProcess(BT_FN_THREAD_ENTRY pfnStartRoutine, const BT_i8 *szpN
 	strncpy(hProcess->szProcessName, szpName, BT_CONFIG_MAX_PROCESS_NAME);
 
 	BT_ListInit(&hProcess->oThreads);
+
+	hProcess->mmap = bt_vm_create();
 
 	BT_CreateProcessThread(hProcess, pfnStartRoutine, &hProcess->oConfig, pError);
 
