@@ -3,6 +3,8 @@
 
 #include <mm/bt_ioremap.h>
 
+#define BT_MM_USERLIMIT		0xC0000000
+
 #define BT_SECTION_SIZE		0x00100000
 #define BT_SECTION_MASK		(BT_SECTION_SIZE-1)
 #define BT_SECTION_ALIGN(x)	(((x) + BT_SECTION_MASK) & ~BT_SECTION_SIZE)
