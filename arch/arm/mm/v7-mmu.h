@@ -1,6 +1,8 @@
 #ifndef _V7_MMU_H_
 #define _V7_MMU_H_
 
+#define MMU_L1TBL_SIZE 		0x4000		//	16 	KB	(Entries cover 1MB ranges, and 4096 * 1MB = 32-bit address space [4GB]).
+#define MMU_L2TBL_SIZE		0x400		// 	 1	KB	(Entries cover 4KB ranges, and 256 * 4K = 1MB)
 
 #define	MMU_FAULT_MASK		0x00000003
 #define MMU_FAULT			0x00000000
@@ -24,20 +26,49 @@
 #define MMU_SECTION_B		0x00000004
 #define MMU_SECTION_PXN		0x00000001
 
+#define MMU_PDE_PRESENT		0x00000001
+#define MMU_PDE_ADDRESS		0xFFFFFC00
+
 /**
- *	Defines the BitMask patterns required to point to a PageTable.
+ *	L2 Entry masks: Defines the BitMask patterns required to point to a PageTable.
  **/
-#define MMU_PT_MASK			0x00000003
-#define MMU_PT				0x00000002
-#define MMU_PT_BASE			0xFFFFFC00	///< Page table must appear at a 1Kb offset.
+#define MMU_PTE_PRESENT		0x00000002
+#define MMU_PTE_WBUF 		0x00000004
+#define MMU_PTE_CACHE		0x00000008
+
+#define MMU_PTE_AP_MASK		0x00000030
+#define MMU_PTE_SYSTEM		0x00000010
+#define MMU_PTE_USER_RO		0x00000020
+#define MMU_PTE_USER_RW 	0x00000030
+#define MMU_PTE_ADDRESS		0xFFFFFC00	///< Page table must appear at a 1Kb offset.
+
 #define MMU_PT_IMP			0x00000200
 #define MMU_PT_DOMAIN		0x000001E0
 #define MMU_PT_SBZ			0x00000010
 #define MMU_PT_NS			0x00000080	///< Non-secure bit.
 #define MMU_PT_PXN			0x00000040	///< Execure Never bit.
 
+/*
+ *	L2 Entry bit masks.
+ */
+#define MMU_PTE_PRESENT		0x0000
 
+/*
+ *	Get index into the PAGE DIRECTORY
+ *	1MB sections, each PGD has upto 4096 entries (0 .. 0xFFF).
+ */
+#define PAGE_DIR(virt)			(BT_u32)((((bt_vaddr_t)(virt)) >> 20) & 0xfff)
 
+/*
+ *	Get index into a PAGE TABLE.
+ *	4KB pages, each PT has up to 256 entries, (0 .. 0xFF).
+ */
+#define PAGE_TABLE(virt)		(BT_u32)((((bt_vaddr_t)(virt)) >> 12) & 0xff)
 
+#define pte_present(pgd, virt)	(pgd[PAGE_DIR(virt)] & PDE_PRESENT)
+#define page_present(pte, virt)	(pte[PAGE_TABLE(virt)] & PTE_PRESENT)
+
+#define virt_to_pte(pgd, virt)	(bt_pte_t) bt_phys_to_virt((pgd)[PAGE_DIR(virt)] & PDE_ADDRESS)
+#define pte_to_phys(pte, virt)	((pte)[PAGE_TABLE(virt)] & PTE_ADDRESS)
 
 #endif
