@@ -18,6 +18,14 @@ static void flush_tlb(void) {
 	dsb();
 }
 
+static void switch_ttb(bt_pgd_t pgd) {
+	// flush I cache?
+	// flush D cache?
+	__asm volatile("mcr p15, 0, r0, c2, c0, 0");
+	__asm volatile("mcr p15, 0, r0, c8, c7, 0");
+	flush_tlb();
+}
+
 /**
  *	The actual MMU Table.
  **/
@@ -238,4 +246,9 @@ void bt_mmu_init() {
 	}
 
 	flush_tlb();
+}
+
+
+bt_pgd_t bt_mmu_get_kernel_pgd(void) {
+	return (bt_pgd_t) g_MMUTable;
 }
