@@ -1,8 +1,6 @@
 #ifndef _BT_MM_H_
 #define _BT_MM_H_
 
-#include <mm/bt_ioremap.h>
-
 #define BT_MM_USERLIMIT		0xC0000000
 
 #define BT_SECTION_SIZE		0x00100000
@@ -16,11 +14,5 @@
 
 #define bt_phys_to_virt(phys_addr)	(void *) ((BT_PHYS_ADDR) (phys_addr) - BT_CONFIG_RAM_PHYS + BT_CONFIG_RAM_VIRT)
 #define bt_virt_to_phys(virt_addr)	(void *) ((BT_PHYS_ADDR) (virt_addr) - BT_CONFIG_RAM_VIRT + BT_CONFIG_RAM_PHYS)
-
-extern void bt_arch_mmu_setsection(BT_IOMAP *pMapping);
-
-
-
-
 
 #endif
