@@ -81,7 +81,7 @@ task.h is included from an application file. */
 
 #if ( configBITTHUNDER == 1 )
 #include <bitthunder.h>
-#include <mm/bt_page.h>
+#include <mm/bt_mm.h>
 
 /*BT_TRACE_EVENT *pTraceEvent 	= NULL;
 BT_TRACE_EVENT *pTraceEventMin  = NULL;
