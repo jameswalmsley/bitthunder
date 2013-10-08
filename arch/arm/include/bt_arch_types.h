@@ -23,7 +23,7 @@ typedef	char				BT_i8;
  */
 typedef BT_u32				bt_paddr_t;		///< Physical address type.
 typedef	BT_u32				bt_vaddr_t;		///< Virtual address type.
-typedef BT_u32				bt_pgd_t;		///< Page Global Directory type. (Opaque pointer).
-typedef BT_u32				bt_pte_t;		///< Page table entry type.
+typedef BT_u32				*bt_pgd_t;		///< Page Global Directory type. (Opaque pointer).
+typedef BT_u32				*bt_pte_t;		///< Page table entry type.
 
 #endif
