@@ -52,6 +52,7 @@ endif
 #	MMU
 #
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_HAS_MMU)			+= $(BUILD_DIR)arch/arm/mm/v7-mmu.o
+BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_HAS_MMU)			+= $(BUILD_DIR)arch/arm/mm/v7-mmu-asm.o
 
 #
 #	Boot-Up
