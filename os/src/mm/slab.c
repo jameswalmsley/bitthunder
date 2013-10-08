@@ -30,14 +30,6 @@ struct block_free {
 	struct	block_free *next;
 };
 
-typedef struct _BT_CACHE {
-	struct bt_list_head		blocks;				///< List of blocks asociated with this cache.
-	BT_u32					ulObjectSize;
-	struct block_free  	   *free;
-	BT_u32					allocated;
-} BT_CACHE;
-
-
 struct block {
 	struct bt_list_head 	list;			///< This is an item in a list of blocks.
 	BT_u32					ulSize;
@@ -171,14 +163,15 @@ void *BT_kMalloc(BT_u32 ulSize) {
 	if(pCache) {
 		p = BT_CacheAlloc(pCache);
 	} else {
-		p = (void *) bt_phys_to_virt(bt_page_alloc(ulSize+sizeof(BT_CACHE *)));
+		p = (void *) bt_phys_to_virt(bt_page_alloc(ulSize+sizeof(struct _PAGE_ALLOC)));
 		if(!p) {
 			return NULL;
 		}
 	}
 
-	BT_CACHE **tag = (BT_CACHE **) p;
-    *tag = pCache;
+	struct _PAGE_ALLOC *tag = (struct _PAGE_ALLOC *) p;
+    tag->null = NULL;
+	tag->size = ulSize;
 
 	/*
 	 *	Before the allocated memory we place a pointer to the pCache.
@@ -196,7 +189,8 @@ void BT_kFree(void *p) {
 	if(pCache) {
 		BT_CacheFree(pCache, tag);
 	} else {
-		bt_page_free((BT_PHYS_ADDR) bt_virt_to_phys(tag));
+		struct _PAGE_ALLOC *alloc = (struct _PAGE_ALLOC *) p;
+		bt_page_free((BT_PHYS_ADDR) bt_virt_to_phys(tag), alloc->size);
 	}
 }
 

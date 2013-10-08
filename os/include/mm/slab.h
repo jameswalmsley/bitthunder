@@ -8,9 +8,14 @@ typedef struct _BT_CACHE {
 	BT_u32					allocated;
 } BT_CACHE;
 
+struct _PAGE_ALLOC {
+	BT_CACHE *null;
+	BT_u32	size;
+};
+
 void bt_initialise_slab();
 
-BT_ERROR BT_CacheInit(BT_CACHE *pCache);
+BT_ERROR BT_CacheInit(BT_CACHE *pCache, BT_u32 ulCacheSize);
 void *BT_CacheAlloc(BT_CACHE *pCache);
 BT_ERROR BT_CacheFree(BT_CACHE *pCache, void *p);
 
