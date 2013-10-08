@@ -49,7 +49,7 @@ all: dbuild_entry _all
 #
 -include $(DBUILD_ROOT).config.mk
 -include $(DBUILD_ROOT).config
--include objects.mk
+-include $(BUILD_BASE)objects.mk
 -include targets.mk
 -include subdirs.mk
 
