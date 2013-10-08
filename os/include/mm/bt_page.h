@@ -4,8 +4,6 @@
 #include <bt_config.h>
 #include <bt_types.h>
 #include <collections/bt_list.h>
-#include <mm/bt_mm.h>
-
 
 typedef struct _BT_PAGE {
 	struct bt_list_head		list;
@@ -17,7 +15,7 @@ typedef struct _BT_PAGE {
 } BT_PAGE;
 
 void bt_initialise_pages(void);
-BT_PHYS_ADDR bt_page_alloc(BT_u32 psize);
-void bt_page_free(BT_PHYS_ADDR paddr);
+bt_paddr_t bt_page_alloc(BT_u32 psize);
+void bt_page_free(bt_paddr_t paddr, BT_u32 size);
 
 #endif
