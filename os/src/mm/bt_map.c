@@ -15,7 +15,7 @@ BT_DEF_MODULE_EMAIL			("james@fullfat-fs.co.uk")
 
 void *bt_ioremap(void *phys, BT_u32 size) {
 	struct bt_vm_map *map = bt_vm_get_kernel_map();
-	return (void *) bt_vm_map_region(map, (bt_paddr_t) phys, NULL, size, BT_PAGE_IOMEM);
+	return (void *) bt_vm_map_region(map, (bt_paddr_t) phys, 0, size, BT_PAGE_IOMEM);
 }
 
 void bt_iounmap(void *iomem) {
