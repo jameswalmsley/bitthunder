@@ -49,11 +49,6 @@
 #define MMU_PT_PXN			0x00000040	///< Execure Never bit.
 
 /*
- *	L2 Entry bit masks.
- */
-#define MMU_PTE_PRESENT		0x0000
-
-/*
  *	Get index into the PAGE DIRECTORY
  *	1MB sections, each PGD has upto 4096 entries (0 .. 0xFFF).
  */
@@ -65,10 +60,10 @@
  */
 #define PAGE_TABLE(virt)		(BT_u32)((((bt_vaddr_t)(virt)) >> 12) & 0xff)
 
-#define pte_present(pgd, virt)	(pgd[PAGE_DIR(virt)] & PDE_PRESENT)
-#define page_present(pte, virt)	(pte[PAGE_TABLE(virt)] & PTE_PRESENT)
+#define pte_present(pgd, virt)	(pgd[PAGE_DIR(virt)] & MMU_PDE_PRESENT)
+#define page_present(pte, virt)	(pte[PAGE_TABLE(virt)] & MMU_PTE_PRESENT)
 
-#define virt_to_pte(pgd, virt)	(bt_pte_t) bt_phys_to_virt((pgd)[PAGE_DIR(virt)] & PDE_ADDRESS)
-#define pte_to_phys(pte, virt)	((pte)[PAGE_TABLE(virt)] & PTE_ADDRESS)
+#define virt_to_pte(pgd, virt)	(bt_pte_t) bt_phys_to_virt((pgd)[PAGE_DIR(virt)] & MMU_PDE_ADDRESS)
+#define pte_to_phys(pte, virt)	((pte)[PAGE_TABLE(virt)] & MMU_PTE_ADDRESS)
 
 #endif

@@ -4,8 +4,11 @@
  **/
 
 #include <bitthunder.h>
+#include <string.h>
 #include <asm/barrier.h>
 #include <mm/slab.h>
+#include <mm/bt_vm.h>
+#include "v7-mmu.h"
 
 #define MMU_L1TBL_MASK	(MMU_L1TBL_SIZE - 1)
 #define PGD_ALIGN(x)	((((bt_paddr_t)(x)) + MMU_L1TBL_MASK) & ~MMU_L1TBL_MASK)
@@ -18,7 +21,7 @@ static void flush_tlb(void) {
 	dsb();
 }
 
-static void switch_ttb(bt_pgd_t pgd) {
+static void switch_ttb(bt_paddr_t pgd) {
 	// flush I cache?
 	// flush D cache?
 	__asm volatile("mcr p15, 0, r0, c2, c0, 0");
@@ -32,9 +35,7 @@ static void switch_ttb(bt_pgd_t pgd) {
 
 BT_ATTRIBUTE_SECTION(".bt.mmu.table") static bt_pte_t g_MMUTable[4096];	///
 
-static bt_pgd_t bt_kernel_pgd = (bt_pgd_t) g_MMUTable;
-
-void bt_arch_mmu_setsection(BT_IOMAP *pMapping) {
+/*void bt_arch_mmu_setsection(BT_IOMAP *pMapping) {
 	BT_u32 section = (BT_u32) pMapping->phys;
 	section |= 0x0c02;
 
@@ -43,12 +44,12 @@ void bt_arch_mmu_setsection(BT_IOMAP *pMapping) {
 
 	//BT_DCacheFlush();
 
-	__asm volatile("mcr	p15, 0, r0, c8, c7, 0");		/* invalidate TLBs */
+	__asm volatile("mcr	p15, 0, r0, c8, c7, 0");	// invalidate TLBs
 
 	dsb();
 
 	// Flush TLB!
-}
+}*/
 
 static bt_paddr_t create_pgd(void) {
 	bt_paddr_t pg, pgd;
@@ -107,17 +108,17 @@ int bt_mmu_map(bt_pgd_t pgd, bt_paddr_t pa, bt_vaddr_t va, BT_u32 size, int type
 		if(pte_present(pgd, va)) {
 			pte = virt_to_pte(pgd, va);		// Get the page table from PGD.
 		} else {
-			pg = BT_CacheAlloc(&g_ptCache);
+			pg = (bt_paddr_t) BT_CacheAlloc(&g_ptCache);
 			if(!pg) {
 				return -1;
 			}
 
-			pgd[PAGE_DIR(va)] = (bt_pte_t) pg | MMU_PDE_PRESENT;
+			pgd[PAGE_DIR(va)] = (BT_u32) pg | MMU_PDE_PRESENT;
 			pte = bt_phys_to_virt(pg);
-			memset(pte, 0, L2TBL_SIZE);
+			memset(pte, 0, MMU_L2TBL_SIZE);
 		}
 
-		pte[PAGE_TABLE(va)] = (bt_pte_t) pa | flag;
+		pte[PAGE_TABLE(va)] = (BT_u32) pa | flag;
 
 		pa += BT_PAGE_SIZE;
 		va += BT_PAGE_SIZE;
@@ -132,7 +133,6 @@ int bt_mmu_map(bt_pgd_t pgd, bt_paddr_t pa, bt_vaddr_t va, BT_u32 size, int type
 bt_pgd_t bt_mmu_newmap(void) {
 	bt_paddr_t pg;
 	bt_pgd_t pgd;
-	BT_u32 i;
 
 	pg = create_pgd();
 	if(!pg) {
@@ -166,15 +166,21 @@ void bt_mmu_terminate(bt_pgd_t pgd) {
 	for(i = 0; i < PAGE_DIR(0xC0000000); i++) {
 		pte = (bt_pte_t) pgd[i];
 		if(pte) {
-			BT_CacheFree(pte & MMU_PTE_ADDRESS);
+			BT_CacheFree(&g_ptCache, (void *) ((BT_u32) pte & MMU_PTE_ADDRESS));
 		}
 	}
 
 	//bt_page_free(bt_virt_to_phys(pgd));	// Page allocator must accept size to do this.
 }
 
+extern bt_paddr_t bt_mmu_get_ttb(void);
+
+static bt_paddr_t current_user_ttb(void) {
+	return bt_mmu_get_ttb();
+}
+
 void bt_mmu_switch_user(bt_pgd_t pgd) {
-	bt_paddr_t phys = bt_virt_to_phys(pgd);
+	bt_paddr_t phys = (bt_paddr_t) bt_virt_to_phys(pgd);
 
 	if(phys != current_user_ttb()) {
 		switch_ttb(phys);
@@ -188,7 +194,7 @@ bt_paddr_t bt_mmu_extract(bt_pgd_t pgd, bt_vaddr_t virt, BT_u32 size) {
 	bt_paddr_t pa;
 
 	start = BT_PAGE_TRUNC(virt);
-	end = BT_PAGE_TRUNT(virt+size-1);
+	end = BT_PAGE_TRUNC(virt+size-1);
 
 	// Check all pages exist.
 	for(pg = start; pg <= end; pg += BT_PAGE_SIZE) {
@@ -208,27 +214,27 @@ bt_paddr_t bt_mmu_extract(bt_pgd_t pgd, bt_vaddr_t virt, BT_u32 size) {
 	return pa + (bt_paddr_t) (virt - start);
 }
 
-void bt_mmu_init() {
+void bt_mmu_init(struct bt_mmumap *mmumap) {
 	BT_CacheInit(&g_ptCache, MMU_L2TBL_SIZE);	// Create a cache of 1K, 1K aligned page tables.
 	// Set-up proper kernel page-tables, so that the super-sections will always be valid and can be copied directly to
 	// The process PGD's on creation.
 
 	bt_pgd_t 	pgd 	= (bt_pgd_t) g_MMUTable;
-	BT_u32 		index 	= 0xC0000000 / 0x00100000;
+	BT_u32 		index;
 
-	for(index; index < 0x1000; index++) {
+	for(index = (0xC0000000 / 0x00100000); index < 0x1000; index++) {
 		bt_pte_t pte;
-		bt_phys_addr_t pg = BT_CacheAlloc(&g_ptCache);
+		bt_paddr_t pg = (bt_paddr_t) BT_CacheAlloc(&g_ptCache);
 		if(!pg) {
 			// do_kernel_panic("bt_mmu");
 			return;
 		}
 
 		pte = bt_phys_to_virt(pg);
-		memset(pte, 0, L2TBL_SIZE);
+		memset(pte, 0, MMU_L2TBL_SIZE);
 
 		// Setup all the pages with an identity mapping for this region.
-		bt_phys_addr_t pa = (index * 0x00100000);
+		bt_paddr_t pa = (index * 0x00100000);
 		BT_u32 i;
 		for(i = 0; i < 0x00100000 / 4096; i++) {
 			BT_u32 section = pgd[index];
@@ -238,7 +244,7 @@ void bt_mmu_init() {
 				//	IOMAPPINGs will be added later during driver probes.
 				flag = MMU_PTE_PRESENT | MMU_PTE_WBUF | MMU_PTE_CACHE | MMU_PTE_SYSTEM;
 			}
-			pte[i] = bt_virt_to_phys(pa+(4096 * i)) | flag;
+			pte[i] = (BT_u32) bt_virt_to_phys(pa+(4096 * i)) | flag;
 		}
 
 		// Page Table is now valid. We can make the pgd point to it for these regions.
