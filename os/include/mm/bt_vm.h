@@ -34,6 +34,21 @@ struct bt_vm_map {
 #define BT_PAGE_SYSTEM	3
 #define BT_PAGE_IOMEM	4
 
+struct bt_mmumap {
+	bt_vaddr_t         	virt;           /* virtual address */
+	bt_paddr_t         	phys;           /* physical address */
+	BT_u32				size;           /* size */
+	BT_u32             	type;           /* mapping type */
+};
+
+/*
+ * type of virtual memory mappings
+ */
+#define BT_VMT_NULL        0
+#define BT_VMT_RAM         1
+#define BT_VMT_ROM         2
+#define BT_VMT_DMA         3
+#define BT_VMT_IO          4
 
 void bt_vm_init(void);
 struct bt_vm_map *bt_vm_create(void);
@@ -49,9 +64,10 @@ BT_ERROR bt_vm_allocate(BT_HANDLE hProcess, void **addr, BT_u32 size, BT_u32 fla
 
 extern bt_pgd_t bt_mmu_newmap(void);
 extern void bt_mmu_switch(bt_pgd_t pgd);
-extern bt_mmu_extract(bt_pgd_t pgd, bt_vaddr_t, BT_u32 size);
+extern bt_paddr_t bt_mmu_extract(bt_pgd_t pgd, bt_vaddr_t, BT_u32 size);
 extern void bt_mmu_init(struct bt_mmumap *mmumap);
-extern void bt_mmu_killmap(bt_pgd_t *pgd);
-extern int bt_mmu_map(bt_pgd_t, bt_paddr_t pa, bt_vaddr_t va, BT_u32 size, int type);
+extern void bt_mmu_killmap(bt_pgd_t pgd);
+extern int bt_mmu_map(bt_pgd_t pgd, bt_paddr_t pa, bt_vaddr_t va, BT_u32 size, int type);
+extern bt_pgd_t bt_mmu_get_kernel_pgd(void);
 
 #endif
