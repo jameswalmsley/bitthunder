@@ -52,6 +52,9 @@ int bt_main(int argc, char **argv) {
 #ifdef BT_CONFIG_MEM_SLAB_ALLOCATOR
 	bt_initialise_slab();
 #endif
+#ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING	
+	bt_vm_init();
+#endif
 
 	BT_MACHINE_DESCRIPTION *pMachine = BT_GetMachineDescription(&Error);
 	if(pMachine->szpName) {
