@@ -15,6 +15,8 @@ typedef struct _BT_PAGE {
 } BT_PAGE;
 
 void bt_initialise_pages(void);
+void bt_initialise_pages_second_stage();
+
 bt_paddr_t bt_page_alloc(BT_u32 psize);
 void bt_page_free(bt_paddr_t paddr, BT_u32 size);
 

@@ -51,6 +51,10 @@ int bt_main(int argc, char **argv) {
 #endif
 #ifdef BT_CONFIG_MEM_SLAB_ALLOCATOR
 	bt_initialise_slab();
+	bt_initialise_slab_second_stage();
+#endif
+#ifdef BT_CONFIG_MEM_PAGE_ALLOCATOR
+	bt_initialise_pages_second_stage();
 #endif
 #ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING	
 	bt_vm_init();

@@ -5,6 +5,7 @@ typedef struct _BT_CACHE {
 	BT_u32					ulObjectSize;
 	struct block_free  	   *free;
 	BT_u32					allocated;
+	void 				   *slab_mutex;
 } BT_CACHE;
 
 struct _PAGE_ALLOC {
@@ -13,6 +14,7 @@ struct _PAGE_ALLOC {
 };
 
 void bt_initialise_slab();
+void bt_initialise_slab_second_stage();
 
 BT_ERROR BT_CacheInit(BT_CACHE *pCache, BT_u32 ulCacheSize);
 void *BT_CacheAlloc(BT_CACHE *pCache);

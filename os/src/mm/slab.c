@@ -18,6 +18,9 @@
 #include <mm/bt_page.h>
 
 
+#define SLAB_LOCK(cache)	if(cache->slab_mutex) BT_kMutexPend(cache->slab_mutex, 0)
+#define SLAB_UNLOCK(cache)	if(cache->slab_mutex) BT_kMutexRelease(cache->slab_mutex)
+
 #define BT_CACHE_FLAGS_OBJECT		0x00000001	///< Unset if standard allocation cache.
 #define BT_CACHE_FLAGS_UNALIGNED	0x00000002
 
@@ -82,6 +85,7 @@ static BT_ERROR init_cache(BT_CACHE *pCache, BT_u32 ulObjectSize) {
 }
 
 BT_ERROR BT_CacheInit(BT_CACHE *pCache, BT_u32 ulObjectSize) {
+	pCache->slab_mutex = BT_kMutexCreate();
 	return init_cache(pCache, ulObjectSize);
 }
 
@@ -134,21 +138,28 @@ static void push_free(BT_CACHE *pCache, struct block_free *p) {
 
 void *BT_CacheAlloc(BT_CACHE *pCache) {
 
+	SLAB_LOCK(pCache);
+
 	struct block_free *p = pop_free(pCache);
 	if(!p) {
 		extend_cache(pCache);
 		p = pop_free(pCache);
 		if(!p) {
+			SLAB_UNLOCK(pCache);
 			return NULL;
 		}
 	}
+
+	SLAB_UNLOCK(pCache);
 
 	return (void *) p;
 }
 
 BT_ERROR BT_CacheFree(BT_CACHE *pCache, void *p) {
+	SLAB_LOCK(pCache);
 	struct block_free *free = (struct block_free *) p;
 	push_free(pCache, free);
+	SLAB_UNLOCK(pCache);
 	return BT_ERR_NONE;
 }
 
@@ -203,6 +214,20 @@ void bt_initialise_slab() {
 			break;
 		}
 		init_cache(pCache, i);
+		pCache->slab_mutex = NULL;
+		i = i << 1;
+	}
+}
+
+void bt_initialise_slab_second_stage() {
+
+	BT_u32 i = BT_CACHE_GENERIC_MIN;
+	while(i <= BT_CACHE_GENERIC_MAX) {
+		BT_CACHE *pCache = BT_GetSuitableCache(i);
+		if(!pCache) {
+			break;
+		}
+		pCache->slab_mutex = BT_kMutexCreate();
 		i = i << 1;
 	}
 }

@@ -1,8 +1,10 @@
 #include <bitthunder.h>
 #include <collections/bt_list.h>
 
-#define BT_PAGE_LOCK()
-#define BT_PAGE_UNLOCK()
+void *g_page_mutex = NULL;
+
+#define BT_PAGE_LOCK()		if(g_page_mutex) BT_kMutexPend(g_page_mutex, 0)
+#define BT_PAGE_UNLOCK()	if(g_page_mutex) BT_kMutexRelease(g_page_mutex)
 
 
 struct bt_page {
@@ -35,6 +37,7 @@ bt_paddr_t bt_page_alloc(BT_u32 psize) {
 	}
 
 	if(!blk) {
+		BT_PAGE_UNLOCK();
 		return 0;	// OOM
 	}
 
@@ -109,6 +112,8 @@ BT_ERROR bt_page_reserve(bt_paddr_t paddr, BT_u32 psize) {
 		return BT_ERR_NONE;
 	}
 
+	BT_PAGE_LOCK();
+
 	start 	= BT_PAGE_TRUNC((bt_vaddr_t) bt_phys_to_virt(paddr));
 	end		= BT_PAGE_ALIGN((bt_vaddr_t) bt_phys_to_virt(paddr + psize));
 	size	= end - start;
@@ -122,6 +127,7 @@ BT_ERROR bt_page_reserve(bt_paddr_t paddr, BT_u32 psize) {
 	}
 
 	if(!blk) {
+		BT_PAGE_UNLOCK();
 		return BT_ERR_NO_MEMORY;
 	}
 
@@ -146,6 +152,8 @@ BT_ERROR bt_page_reserve(bt_paddr_t paddr, BT_u32 psize) {
 
 	used_size += size;
 
+	BT_PAGE_UNLOCK();
+
 	return BT_ERR_NONE;
 }
 
@@ -166,10 +174,13 @@ void bt_initialise_pages(void) {
 
 	// Initialise the free list to total size of ram!
 	bt_page_free(BT_PAGE_ALIGN(start+len), (BT_TOTAL_PAGES * BT_PAGE_SIZE) - len);
-	//bt_page_reserve(start, len);	// Reserve kernel pages.
 
 	start = (bt_paddr_t) bt_virt_to_phys(&_heap_end);
 	len = &__absolute_end - &_heap_end;
 
 	bt_page_reserve(start, len);
+}
+
+void bt_initialise_pages_second_stage() {
+	g_page_mutex = BT_kMutexCreate();
 }
