@@ -148,7 +148,7 @@ struct bt_vm_map *bt_vm_create(void) {
 	seg->size 	= BT_MM_USERLIMIT - BT_PAGE_SIZE;
 	seg->flags 	= BT_SEG_FREE;
 
-	bt_list_add(&map->segments, &seg->list);	// Add the initial segment.
+	bt_list_add(&seg->list, &map->segments);	// Add the initial segment.
 
 	map->pgd = bt_mmu_newmap();
 
