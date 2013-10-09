@@ -7,6 +7,9 @@
 #include <bitthunder.h>
 #include <string.h>
 
+#define MAP_LOCK(map)	BT_kMutexPend(map->map_mutex, 0);
+#define MAP_UNLOCK(map)	BT_kMutexRelease(map->map_mutex);
+
 static struct bt_vm_map kernel_map;	// Kernels VM map.
 
 static struct bt_segment *bt_segment_create(struct bt_segment *prev, bt_vaddr_t addr, BT_u32 size) {
@@ -60,6 +63,7 @@ static struct bt_segment *bt_segment_alloc(struct bt_vm_map *map, BT_u32 size) {
 			if(seg->size != size) {
 				// split the segment.
 				if(!bt_segment_create(seg, seg->addr + size, seg->size - size)) {
+					MAP_UNLOCK(map);
 					return NULL;
 				}
 
@@ -69,6 +73,7 @@ static struct bt_segment *bt_segment_alloc(struct bt_vm_map *map, BT_u32 size) {
 			return seg;
 		}
 	}
+
 
 	return NULL;
 }
@@ -134,6 +139,7 @@ struct bt_vm_map *bt_vm_create(void) {
 
 	map->refcount	= 1;
 	map->size 		= 0;
+	map->map_mutex  = BT_kMutexCreate();
 
 	// Create a new page-directory.
 
@@ -203,9 +209,10 @@ void bt_vm_init(void) {
 		return;
 	}
 
-	kernel_map.pgd 		= pgd;
-	kernel_map.refcount = 1;
-	kernel_map.size 	= 0;
+	kernel_map.pgd 			= pgd;
+	kernel_map.refcount 	= 1;
+	kernel_map.size 		= 0;
+	kernel_map.map_mutex 	= BT_kMutexCreate();
 
 	BT_LIST_INIT_HEAD(&kernel_map.segments);
 
@@ -242,6 +249,8 @@ bt_paddr_t bt_vm_translate(bt_vaddr_t addr, BT_u32 size) {
 
 bt_vaddr_t bt_vm_map_region(struct bt_vm_map *map, bt_paddr_t pa, bt_vaddr_t va, BT_u32 size, BT_u32 type) {
 
+	MAP_LOCK(map);
+
 	static struct bt_segment *seg = NULL;
 	if(!va) {
 		seg = bt_segment_alloc(map, size);
@@ -250,6 +259,7 @@ bt_vaddr_t bt_vm_map_region(struct bt_vm_map *map, bt_paddr_t pa, bt_vaddr_t va,
 	}
 
 	if(!seg) {
+		MAP_UNLOCK(map);
 		return 0;
 	}
 
@@ -258,21 +268,30 @@ bt_vaddr_t bt_vm_map_region(struct bt_vm_map *map, bt_paddr_t pa, bt_vaddr_t va,
 
 	bt_mmu_map(map->pgd, seg->phys, seg->addr, seg->size, type);
 
+	MAP_UNLOCK(map);
+
 	return seg->addr;
 }
 
 void bt_vm_unmap_region(struct bt_vm_map *map, bt_vaddr_t va) {
+
+	MAP_LOCK(map);
+
 	struct bt_segment *seg = bt_segment_lookup(map, va, 0);
 	if(!seg) {
+		MAP_UNLOCK(map);
 		return;
 	}
 
 	if(!(seg->flags & BT_SEG_MAPPED)) {
 		// Bad mapping.
+		MAP_UNLOCK(map);
 		return;
 	}
 
 	bt_mmu_map(map->pgd, seg->phys, seg->addr, seg->size, BT_PAGE_UNMAP);
+
+	MAP_UNLOCK(map);
 }
 
 static BT_ERROR do_allocate(struct bt_vm_map *map, void **addr, BT_u32 size, BT_u32 flags) {
@@ -286,10 +305,13 @@ static BT_ERROR do_allocate(struct bt_vm_map *map, void **addr, BT_u32 size, BT_
 		return BT_ERR_GENERIC;
 	}
 
+	MAP_LOCK(map);
+
 	if(flags & BT_VM_ALLOC_ANYWHERE) {
 		size = BT_PAGE_ALIGN(size);
 		seg = bt_segment_alloc(map, size);
 		if(!seg) {
+			MAP_UNLOCK(map);
 			return BT_ERR_NO_MEMORY;
 		}
 	} else {
@@ -299,6 +321,7 @@ static BT_ERROR do_allocate(struct bt_vm_map *map, void **addr, BT_u32 size, BT_
 
 		seg = bt_segment_reserve(map, start, size);
 		if(!seg) {
+			MAP_UNLOCK(map);
 			return BT_ERR_NO_MEMORY;
 		}
 	}
@@ -324,6 +347,8 @@ static BT_ERROR do_allocate(struct bt_vm_map *map, void **addr, BT_u32 size, BT_
 
 	map->size += size;
 
+	MAP_UNLOCK(map);
+
 	return Error;
 
 err_free_page:
@@ -331,6 +356,8 @@ err_free_page:
 
 err_free_seg:
 	bt_segment_free(map, seg);
+
+	MAP_UNLOCK(map);
 
 	return Error;
 }
@@ -351,8 +378,11 @@ static BT_ERROR do_free(struct bt_vm_map *map, void *addr) {
 
 	va = BT_PAGE_TRUNC((bt_vaddr_t) addr);
 
+	MAP_LOCK(map);
+
 	seg = bt_segment_lookup(map, va, 0);
 	if(!seg || seg->addr != va || (seg->flags & BT_SEG_FREE)) {
+		MAP_UNLOCK(map);
 		return BT_ERR_GENERIC;
 	}
 
@@ -365,6 +395,8 @@ static BT_ERROR do_free(struct bt_vm_map *map, void *addr) {
 	map->size -= seg->size;
 
 	bt_segment_free(map, seg);
+
+	MAP_UNLOCK(map);
 
 	return BT_ERR_NONE;
 }

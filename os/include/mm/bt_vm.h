@@ -22,6 +22,7 @@ struct bt_vm_map {
 	BT_u32				refcount;		///< Map reference count.
 	bt_pgd_t			pgd;			///< Page directory.
 	BT_u32				size;			///< Total size of mapped allocations.
+	void 			   *map_mutex;
 };
 
 
