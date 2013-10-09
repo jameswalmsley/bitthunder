@@ -40,11 +40,11 @@ static BT_CACHE g_oDefault[10];		///< Array of primary caches, starting at 16byt
 
 static void init_attach_block(BT_CACHE *pCache, struct block *pBlock, BT_u32 ulSize) {
 	BT_u32 i;
-	BT_u32 total_objects = (ulSize - sizeof(struct block)) / pCache->ulObjectSize;
+	BT_u32 total_objects = (ulSize) / pCache->ulObjectSize;
 
 	pBlock->ulSize = ulSize;
 
-	struct block_free *free = (struct block_free *) (pBlock+1);
+	struct block_free *free = (struct block_free *) (pBlock);
 	for(i = 0; i < total_objects; i++) {
 		free->next = (struct block_free *) (((BT_u8 *) free) + pCache->ulObjectSize);
 		free = (struct block_free *) (((BT_u8 *) free) + pCache->ulObjectSize);
@@ -52,9 +52,7 @@ static void init_attach_block(BT_CACHE *pCache, struct block *pBlock, BT_u32 ulS
 
 	free = (struct block_free *) (((BT_u8 *) free) - pCache->ulObjectSize);	// Reverse to correct the end of block.
 	free->next = pCache->free;
-	pCache->free = (struct block_free *) (pBlock+1);
-
-	bt_list_add(&pBlock->list, &pCache->blocks);
+	pCache->free = (struct block_free *) (pBlock);
 }
 
 static BT_ERROR extend_cache(BT_CACHE *pCache) {
@@ -74,7 +72,6 @@ static BT_ERROR extend_cache(BT_CACHE *pCache) {
 
 
 static BT_ERROR init_cache(BT_CACHE *pCache, BT_u32 ulObjectSize) {
-	BT_LIST_INIT_HEAD(&pCache->blocks);
 	pCache->ulObjectSize = ulObjectSize;
 	pCache->free = NULL;
 	pCache->allocated = 0;

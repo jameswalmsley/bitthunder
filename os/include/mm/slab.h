@@ -2,7 +2,6 @@
 #define _SLAB_H_
 
 typedef struct _BT_CACHE {
-	struct bt_list_head		blocks;				///< List of blocks asociated with this cache.
 	BT_u32					ulObjectSize;
 	struct block_free  	   *free;
 	BT_u32					allocated;
