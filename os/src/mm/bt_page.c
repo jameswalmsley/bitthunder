@@ -1,8 +1,6 @@
 #include <bitthunder.h>
 #include <collections/bt_list.h>
 
-#define BT_TOTAL_PAGES	(BT_CONFIG_LINKER_RAM_LENGTH/BT_PAGE_SIZE)
-
 #define BT_PAGE_LOCK()
 #define BT_PAGE_UNLOCK()
 
@@ -30,7 +28,7 @@ bt_paddr_t bt_page_alloc(BT_u32 psize) {
 
 	bt_list_for_each(pos, &page_head) {
 		struct bt_page *page = (struct bt_page *) pos;
-		if(blk->size >= size) {
+		if(page->size >= size) {
 			blk = page;
 			break;
 		}
@@ -45,8 +43,8 @@ bt_paddr_t bt_page_alloc(BT_u32 psize) {
 	} else {
 		tmp = (struct bt_page *) ((bt_vaddr_t) blk + size);
 		tmp->size = blk->size - size;
+		bt_list_add(&tmp->list, &blk->list);
 		bt_list_del(&blk->list);
-		bt_list_add(&tmp->list, &page_head);
 	}
 
 	used_size += size;
@@ -63,7 +61,9 @@ void bt_page_free(bt_paddr_t paddr, BT_u32 size) {
 
 	BT_PAGE_LOCK();
 
-	size = BT_PAGE_ALIGN(size);
+	size 	= BT_PAGE_TRUNC(size);
+	paddr 	= BT_PAGE_ALIGN(paddr);
+
 	blk = bt_phys_to_virt(paddr);
 
 
@@ -105,6 +105,9 @@ BT_ERROR bt_page_reserve(bt_paddr_t paddr, BT_u32 psize) {
 	bt_vaddr_t start, end;
 	BT_u32 size;
 
+	if(!psize) {
+		return BT_ERR_NONE;
+	}
 
 	start 	= BT_PAGE_TRUNC((bt_vaddr_t) bt_phys_to_virt(paddr));
 	end		= BT_PAGE_ALIGN((bt_vaddr_t) bt_phys_to_virt(paddr + psize));
@@ -129,18 +132,15 @@ BT_ERROR bt_page_reserve(bt_paddr_t paddr, BT_u32 psize) {
 		if((bt_vaddr_t) blk + blk->size != end) {
 			tmp = (struct bt_page *) end;
 			tmp->size = (bt_vaddr_t) blk + blk->size - end;
-			tmp->list.next = blk->list.next;
-			tmp->list.prev = &blk->list;
-
 			blk->size -= tmp->size;
-			blk->list.next->prev = &tmp->list;
-			blk->list.prev = &tmp->list;
+
+			bt_list_add(&tmp->list, &blk->list);
 		}
 
 		if((bt_vaddr_t) blk == start) {
 			bt_list_del(&blk->list);
 		} else {
-			blk->size -= start - (bt_vaddr_t) blk;
+			blk->size = start - (bt_vaddr_t) blk;
 		}
 	}
 
@@ -161,15 +161,15 @@ void bt_initialise_pages(void) {
 	bt_paddr_t start 	= (bt_paddr_t) bt_virt_to_phys(&__bt_init_start);
 	BT_u32 len  		= (bt_paddr_t) (bt_virt_to_phys(&__bss_end)) - start;
 
-	total_size = len;
+	total_size 	= BT_PAGE_TRUNC((BT_TOTAL_PAGES * BT_PAGE_SIZE) - len);
+	used_size 	= total_size;
 
 	// Initialise the free list to total size of ram!
 	bt_page_free(BT_PAGE_ALIGN(start+len), (BT_TOTAL_PAGES * BT_PAGE_SIZE) - len);
 	//bt_page_reserve(start, len);	// Reserve kernel pages.
 
-
-	start 	= (bt_paddr_t) bt_virt_to_phys(&__bt_init_start);
-	len 	= (bt_paddr_t) bt_virt_to_phys(&__bss_end) - start;
+	start = (bt_paddr_t) bt_virt_to_phys(&_heap_end);
+	len = &__absolute_end - &_heap_end;
 
 	bt_page_reserve(start, len);
 }
