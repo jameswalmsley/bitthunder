@@ -159,6 +159,9 @@ void *BT_kMalloc(BT_u32 ulSize) {
 	BT_CACHE *pCache = BT_GetSuitableCache(ulSize+sizeof(BT_CACHE *));
 	if(pCache) {
 		p = BT_CacheAlloc(pCache);
+		BT_CACHE **tag = (BT_CACHE **) p;
+		*tag = pCache;
+		return ((void *) (tag + 1));
 	} else {
 		p = (void *) bt_phys_to_virt(bt_page_alloc(ulSize+sizeof(struct _PAGE_ALLOC)));
 		if(!p) {
