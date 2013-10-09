@@ -109,14 +109,6 @@ int bt_main(int argc, char **argv) {
 
 	BT_kPrint("Relinquish control of the boot UART device...(Goodbye)");
 
-	BT_Flush(hUart);
-
-	BT_SetStandardHandle(NULL);
-
-	if (hUart) {
-		BT_CloseHandle(hUart);
-	}
-
 #ifndef BT_CONFIG_KERNEL_NONE
 	BT_THREAD_CONFIG oThreadConfig = {
 		.ulStackDepth 	= BT_CONFIG_MAIN_TASK_STACK_DEPTH,
@@ -124,6 +116,13 @@ int bt_main(int argc, char **argv) {
 	};
 
 	BT_CreateProcess((BT_FN_THREAD_ENTRY) main, "MAIN", &oThreadConfig, &Error);
+
+	BT_Flush(hUart);
+
+	BT_SetStandardHandle(NULL);
+	if (hUart) {
+		BT_CloseHandle(hUart);
+	}
 
 	BT_kStartScheduler();
 #endif
