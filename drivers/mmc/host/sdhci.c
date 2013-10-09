@@ -491,7 +491,7 @@ static BT_HANDLE sdhci_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErr
 		goto err_free_out;
 	}
 
-	hSDIO->pRegs = (SDHCI_REGS *) pResource->ulStart;
+	hSDIO->pRegs = (SDHCI_REGS *) bt_ioremap((void*)pResource->ulStart, BT_SIZE_4K); 
 
 #ifdef BT_CONFIG_SDHCI_DUMP_REGS
 	sdhci_dump_regs(hSDIO);

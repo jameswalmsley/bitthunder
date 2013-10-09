@@ -105,8 +105,9 @@ BT_INTEGRATED_DEVICE_DEF oZynq_sdio_device_1 = {
 static BT_HANDLE zynq_sdhci_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
 
 	BT_ERROR Error;
-
 	BT_BOOL bEnabled = BT_FALSE;
+	volatile ZYNQ_SLCR_REGS *pRegs = bt_ioremap((void *)ZYNQ_SLCR, BT_SIZE_4K);
+
 	const BT_RESOURCE *pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_ENUM, 0);
 	if(!pResource) {
 		goto err_out;
@@ -114,22 +115,22 @@ static BT_HANDLE zynq_sdhci_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR 
 
 	switch(pResource->ulStart) {
 	case 0:
-		bEnabled = (ZYNQ_SLCR->SDIO_CLK_CTRL & ZYNQ_SLCR_CLK_CTRL_CLKACT_0);
+		bEnabled = (pRegs->SDIO_CLK_CTRL & ZYNQ_SLCR_CLK_CTRL_CLKACT_0);
 		if(bEnabled) {	// Attempt to reset the device!
-			ZYNQ_SLCR->SLCR_UNLOCK = 0xDF0D;
-			ZYNQ_SLCR->SDIO_RST_CTRL |= 0x11;
-			ZYNQ_SLCR->SDIO_RST_CTRL &= ~0x11;
-			ZYNQ_SLCR->SLCR_LOCK = 0x767B;
+			pRegs->SLCR_UNLOCK = 0xDF0D;
+			pRegs->SDIO_RST_CTRL |= 0x11;
+			pRegs->SDIO_RST_CTRL &= ~0x11;
+			pRegs->SLCR_LOCK = 0x767B;
 		}
 		break;
 
 	case 1:
-		bEnabled = (ZYNQ_SLCR->SDIO_CLK_CTRL & ZYNQ_SLCR_CLK_CTRL_CLKACT_0);
+		bEnabled = (pRegs->SDIO_CLK_CTRL & ZYNQ_SLCR_CLK_CTRL_CLKACT_0);
 		if(bEnabled) {
-			ZYNQ_SLCR->SLCR_UNLOCK = 0xDF0D;
-			ZYNQ_SLCR->SDIO_RST_CTRL |= 0x22;
-			ZYNQ_SLCR->SDIO_RST_CTRL &= ~0x22;
-			ZYNQ_SLCR->SLCR_LOCK = 0x767B;
+			pRegs->SLCR_UNLOCK = 0xDF0D;
+			pRegs->SDIO_RST_CTRL |= 0x22;
+			pRegs->SDIO_RST_CTRL &= ~0x22;
+			pRegs->SLCR_LOCK = 0x767B;
 		}
 		break;
 
