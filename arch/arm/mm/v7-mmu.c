@@ -33,7 +33,8 @@ static void switch_ttb(bt_paddr_t pgd) {
  *	The actual MMU Table.
  **/
 
-BT_ATTRIBUTE_SECTION(".bt.mmu.table") static bt_pte_t g_MMUTable[4096];	///
+BT_ATTRIBUTE_SECTION(".bt.mmu.table") static bt_pgd_t g_MMUTable[4096];
+BT_ATTRIBUTE_SECTION(".bt.mmu.table") static bt_pte_t kernel_pages[1024][256];	// Kernel pages. - 1GB of 1MB regions, with 256 pages per mb.
 
 /*void bt_arch_mmu_setsection(BT_IOMAP *pMapping) {
 	BT_u32 section = (BT_u32) pMapping->phys;
@@ -71,9 +72,9 @@ int bt_mmu_map(bt_pgd_t pgd, bt_paddr_t pa, bt_vaddr_t va, BT_u32 size, int type
 	bt_pte_t pte;
 	bt_paddr_t pg;
 
-	pa = BT_PAGE_ALIGN(pa);		// Ensure correct alignments.
-	va = BT_PAGE_ALIGN(va);
-	size = BT_PAGE_TRUNC(size);
+	pa = BT_PAGE_TRUNC(pa);		// Ensure correct alignments.
+	va = BT_PAGE_TRUNC(va);
+	size = BT_PAGE_ALIGN(size);
 
 	switch(type) {				// Build up the ARM MMU flags from BT page types.
 	case BT_PAGE_UNMAP:
@@ -224,13 +225,7 @@ void bt_mmu_init(struct bt_mmumap *mmumap) {
 
 	for(index = (0xC0000000 / 0x00100000); index < 0x1000; index++) {
 		bt_pte_t pte;
-		bt_paddr_t pg = (bt_paddr_t) BT_CacheAlloc(&g_ptCache);
-		if(!pg) {
-			// do_kernel_panic("bt_mmu");
-			return;
-		}
-
-		pte = bt_phys_to_virt(pg);
+		pte = (bt_pte_t) &kernel_pages[index-0xC00];
 		memset(pte, 0, MMU_L2TBL_SIZE);
 
 		// Setup all the pages with an identity mapping for this region.
@@ -248,7 +243,7 @@ void bt_mmu_init(struct bt_mmumap *mmumap) {
 		}
 
 		// Page Table is now valid. We can make the pgd point to it for these regions.
-		pgd[index] = pg | MMU_PDE_PRESENT;
+		pgd[index] = (bt_paddr_t) bt_virt_to_phys(pte) | MMU_PDE_PRESENT;
 	}
 
 	flush_tlb();
