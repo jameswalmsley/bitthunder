@@ -34,8 +34,11 @@ static struct bt_segment *bt_segment_lookup(struct bt_vm_map *map, bt_vaddr_t ad
 	bt_list_for_each(pos, &map->segments) {
 		seg = (struct bt_segment *) pos;
 
+		BT_u64 seg_end 		= ((BT_u64) seg->addr + (BT_u64)seg->size);
+		BT_u64 lookup_end 	= (addr + size);
+
 		if(seg->addr <= addr &&
-		   seg->addr + seg->size >= addr + size) {
+		   seg_end >= lookup_end) {
 			return seg;
 		}
 	}
@@ -220,17 +223,12 @@ void bt_vm_init(void) {
 	seg->flags 	= BT_SEG_FREE;
 	seg->size 	= 0x100000000 - 0xC0000000;
 
-	bt_list_add(&kernel_map.segments, &seg->list);
+	bt_list_add(&seg->list, &kernel_map.segments);
 
 	bt_vaddr_t start = (bt_vaddr_t) &__bt_init_start;
-	BT_u32 len   = (BT_u32) &__bss_end - start;
+	BT_u32 len   	 = (BT_u32) (BT_TOTAL_PAGES * BT_PAGE_SIZE);
 
-	bt_segment_reserve(&kernel_map, start, len);	// Reserve virtual spaces used for kernel text, data and bss.
-
-	start = (bt_vaddr_t) &_heap_end;
-	len = &__absolute_end - &_heap_end;
-
-	bt_segment_reserve(&kernel_map, start, len);	// Reserve the IRQ / SVC stacks at end of memory.
+	bt_segment_reserve(&kernel_map, start, len);	// Reserve RAM section.
 }
 
 struct bt_vm_map *bt_vm_get_kernel_map(void) {
