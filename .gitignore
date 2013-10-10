@@ -4,6 +4,7 @@ build
 *.img
 *.list
 *.map
+*.bak
 
 # Kconfig
 .config
