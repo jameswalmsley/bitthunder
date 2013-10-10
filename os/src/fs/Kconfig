@@ -5,6 +5,7 @@ config FS
 	select VOLUME
 	select BLOCK
 	select FILE
+	select DIR
 	default n
 
 config INODE

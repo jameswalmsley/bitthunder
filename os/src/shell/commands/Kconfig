@@ -56,4 +56,8 @@ config SHELL_CMD_IOMEM
 	bool "IOMEM"
 	default n
 
+config SHELL_CMD_LS
+	bool "LS"
+	default n
+
 endmenu
