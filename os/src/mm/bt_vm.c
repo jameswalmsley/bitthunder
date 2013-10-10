@@ -414,7 +414,7 @@ static BT_ERROR do_allocate(struct bt_vm_map *map, void **addr, BT_u32 size, BT_
 
 	seg->phys = pa;
 
-	memset(bt_phys_to_virt(pa), 0, seg->size);
+	memset((void *) bt_phys_to_virt(pa), 0, seg->size);
 	*addr = (void *) seg->addr;
 
 	map->size += size;
@@ -434,14 +434,8 @@ err_free_seg:
 	return Error;
 }
 
-BT_ERROR bt_vm_allocate(BT_HANDLE hProcess, void **addr, BT_u32 size, BT_u32 flags) {
-
-	struct bt_vm_map *map = bt_process_getmap(hProcess);
-	if(!map) {
-		return BT_ERR_GENERIC;
-	}
-
-	return do_allocate(map, addr, size, flags);
+BT_ERROR bt_vm_allocate(struct bt_task *task, void **addr, BT_u32 size, BT_u32 flags) {
+	return do_allocate(task->map, addr, size, flags);
 }
 
 static BT_ERROR do_free(struct bt_vm_map *map, void *addr) {
@@ -473,7 +467,6 @@ static BT_ERROR do_free(struct bt_vm_map *map, void *addr) {
 	return BT_ERR_NONE;
 }
 
-BT_ERROR bt_vm_free(BT_HANDLE hProcess, void *addr) {
-	struct bt_vm_map *map = bt_process_getmap(hProcess);
-	return do_free(map, addr);
+BT_ERROR bt_vm_free(struct bt_task *task, void *addr) {
+	return do_free(task->map, addr);
 }

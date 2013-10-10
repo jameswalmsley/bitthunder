@@ -31,11 +31,16 @@ struct bt_vm_map {
 /*
  *	Page Attributes for MMU.
  */
-#define BT_PAGE_UNMAP	0
-#define BT_PAGE_READ	1
-#define BT_PAGE_WRITE	2
-#define BT_PAGE_SYSTEM	3
-#define BT_PAGE_IOMEM	4
+#define BT_PAGE_UNMAP	0				///< Page should be unmapped.
+#define BT_PAGE_READ	1				///< Page should be made read-only.
+#define BT_PAGE_WRITE	2				///< Page should be made read/writable.
+#define BT_PAGE_SYSTEM	3				///< System page with full permissions.
+#define BT_PAGE_IOMEM	4				///< System page with no caching enabled.
+
+#define BT_PROT_NONE	0				///< Pages cannot be accessed
+#define BT_PROT_READ	1				///< Pages can be read
+#define BT_PROT_WRITE	2				///< Pages can be written
+#define BT_PROT_EXEC	4				///< Pages can be executed
 
 struct bt_mmumap {
 	bt_vaddr_t         	virt;           /* virtual address */
@@ -62,10 +67,11 @@ bt_vaddr_t bt_vm_map_region(struct bt_vm_map *map, bt_paddr_t pa, bt_vaddr_t va,
 void bt_vm_unmap_region(struct bt_vm_map *map, bt_vaddr_t va);
 
 #define BT_VM_ALLOC_ANYWHERE	0x01
-BT_ERROR bt_vm_allocate(BT_HANDLE hProcess, void **addr, BT_u32 size, BT_u32 flags);
-
+BT_ERROR bt_vm_allocate(struct bt_task *task, void **addr, BT_u32 size, BT_u32 flags);
+BT_ERROR bt_vm_free(struct bt_task *task, void *addr);
 
 extern bt_pgd_t bt_mmu_newmap(void);
+extern void bt_mmu_terminate(bt_pgd_t pgd);
 extern void bt_mmu_switch(bt_pgd_t pgd);
 extern bt_paddr_t bt_mmu_extract(bt_pgd_t pgd, bt_vaddr_t, BT_u32 size);
 extern void bt_mmu_init(struct bt_mmumap *mmumap);
