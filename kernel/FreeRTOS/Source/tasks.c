@@ -1679,6 +1679,12 @@ void vTaskSwitchContext( void )
 #endif
 
 		listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCB, &( pxReadyTasksLists[ uxTopReadyPriority ] ) );
+#if (configBITTHUNDER == 1)
+		curthread = (struct bt_thread *) pxCurrentTCB->pxTaskTag;
+		#ifdef BT_CONFIG_VIRTUAL_ADDRESSING
+		bt_mmu_switch(curtask->map->pgd);
+		#endif
+#endif
 
 #if (configBLUETHUNDER == 1)
 		pTraceEvent = pxCurrentTCB->pTraceEvent;	// Restore Trace event pointer state to TCB.
