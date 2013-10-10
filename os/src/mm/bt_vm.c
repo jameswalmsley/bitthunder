@@ -283,13 +283,17 @@ void bt_vm_init(void) {
 	bt_segment_reserve(&kernel_map, start, len);	// Reserve RAM section.
 }
 
+BT_ERROR bt_vm_reference(struct bt_vm_map *map) {
+	map->refcount += 1;
+	return BT_ERR_NONE;
+}
+
 struct bt_vm_map *bt_vm_get_kernel_map(void) {
 	return &kernel_map;
 }
 
 bt_paddr_t bt_vm_translate(bt_vaddr_t addr, BT_u32 size) {
-	// Get current pgd, and use the mmu to extract it.
-	return 0;
+	return bt_mmu_extract(curtask->map->pgd, addr, size);
 }
 
 bt_vaddr_t bt_vm_map_region(struct bt_vm_map *map, bt_paddr_t pa, bt_vaddr_t va, BT_u32 size, BT_u32 type) {
