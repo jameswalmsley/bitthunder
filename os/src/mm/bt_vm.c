@@ -596,3 +596,81 @@ BT_ERROR bt_vm_attribute(struct bt_task *task, void *addr, BT_u32 attr) {
 	return do_attribute(task->map, addr, attr);
 }
 
+
+
+
+/**
+ *	Duplicates the specified virtual memory space.
+ *
+ *
+ *
+ **/
+struct bt_vm_map *bt_vm_duplicate(struct bt_vm_map *orig_map) {
+	struct bt_vm_map *new_map;
+	struct bt_segment *src, *dest;
+	struct bt_list_head *pos;
+	BT_u32 map_type;
+
+	new_map = bt_vm_create();
+	if(!new_map) {
+		return NULL;
+	}
+
+	new_map->size = orig_map->size;
+
+	bt_list_for_each(pos, &orig_map->segments) {
+		src = (struct bt_segment *) pos;
+
+		dest = BT_kMalloc(sizeof(*dest));
+		if(!dest) {
+			// Must clean up entire vm till this point.
+			bt_vm_destroy(new_map);
+			return NULL;
+		}
+
+		*dest = *src;	// memcpy the segment.
+		bt_list_add(&dest->list, &new_map->segments);
+
+		if(src->flags != BT_SEG_FREE) {
+			// Active segment to be duplicated, can it be shared?
+			if(!(src->flags & BT_SEG_WRITE) &&
+			   !(src->flags & BT_SEG_MAPPED)) {
+				dest->flags |= BT_SEG_SHARED;
+			}
+
+			if(!(dest->flags & BT_SEG_SHARED) && !(dest->flags & BT_SEG_IOMAPPED)) {
+				// Allocate a new physical page.
+				dest->phys = bt_page_alloc(src->size);
+				if(!dest->phys) {
+					bt_vm_destroy(new_map);
+					return NULL;
+				}
+
+				memcpy((void *) bt_phys_to_virt(dest->phys), (void *) bt_phys_to_virt(src->phys), src->size);
+			}
+
+			// MAP segment to virtual address.
+			map_type = segflags_to_type(dest->flags);
+			if(bt_mmu_map(new_map->pgd, dest->phys, dest->addr, dest->size, map_type)) {
+				bt_vm_destroy(new_map);
+				return NULL;
+			}
+		}
+	}
+
+	// New map was created sucessfully, we must now link the shared mappings.
+
+	SHARED_LOCK();
+	src = (struct bt_segment *) orig_map->segments.next;
+	bt_list_for_each(pos, &new_map->segments) {
+		dest = (struct bt_segment *) pos;
+		if(dest->flags & BT_SEG_SHARED) {
+			src->flags |= BT_SEG_SHARED;
+			bt_list_add(&dest->shared_list, &src->shared_list);
+			src = (struct bt_segment *) src->list.next;
+		}
+	}
+	SHARED_UNLOCK();
+
+	return new_map;
+}
