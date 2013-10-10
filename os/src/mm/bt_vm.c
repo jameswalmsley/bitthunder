@@ -7,8 +7,13 @@
 #include <bitthunder.h>
 #include <string.h>
 
-#define MAP_LOCK(map)	BT_kMutexPend(map->map_mutex, 0);
-#define MAP_UNLOCK(map)	BT_kMutexRelease(map->map_mutex);
+#define MAP_LOCK(map)	BT_kMutexPend(map->map_mutex, 0)
+#define MAP_UNLOCK(map)	BT_kMutexRelease(map->map_mutex)
+
+static void *shared_mutex = NULL;	// Mutex required when modifying shared segment lists.
+
+#define SHARED_LOCK()	BT_kMutexPend(shared_mutex, 0)
+#define SHARED_UNLOCK()	BT_kMutexRelease(shared_mutex)
 
 static struct bt_vm_map kernel_map;	// Kernels VM map.
 
@@ -32,14 +37,15 @@ static struct bt_segment *bt_segment_create(struct bt_segment *prev, bt_vaddr_t 
 
 static void bt_segment_delete(struct bt_vm_map *map, struct bt_segment *seg) {
 
-
-	if(seg->flags & BT_SEG_SHARED) {
+	SHARED_LOCK();
+	if(seg->flags & BT_SEG_SHARED) {		
 		bt_list_del(&seg->shared_list);
 		if(seg->shared_list.next == seg->shared_list.prev) {
 			struct bt_segment *oldseg = bt_container_of(seg->shared_list.prev, struct bt_segment, shared_list, struct bt_list_head);
 			oldseg->flags &= ~BT_SEG_SHARED;
 		}
 	}
+	SHARED_UNLOCK();
 
 	seg->flags = BT_SEG_FREE;
 
@@ -99,6 +105,7 @@ static void bt_segment_free(struct bt_vm_map *map, struct bt_segment *seg) {
 	struct bt_segment *next, *prev;
 
 	// If it was shared, unlink from the shared list.
+	SHARED_LOCK();
 	if(seg->flags & BT_SEG_SHARED) {
 		bt_list_del(&seg->list);
 		if(seg->shared_list.next == seg->shared_list.prev) {
@@ -106,6 +113,7 @@ static void bt_segment_free(struct bt_vm_map *map, struct bt_segment *seg) {
 			oldseg->flags &= ~BT_SEG_SHARED;
 		}
 	}
+	SHARED_UNLOCK();
 
 	seg->flags = BT_SEG_FREE;
 
@@ -245,6 +253,8 @@ extern bt_vaddr_t __absolute_end;
 void bt_vm_init(void) {
 
 	bt_pgd_t pgd;
+
+	shared_mutex = BT_kMutexCreate();
 
 	bt_mmu_init(NULL);
 
@@ -505,23 +515,26 @@ static BT_ERROR do_attribute(struct bt_vm_map *map, void *addr, BT_u32 attr) {
 		new_flags |= BT_SEG_EXEC;
 	}
 
-	if(new_flags == (seg->flags & (BT_SEG_READ | BT_SEG_READ | BT_SEG_EXEC))) {
+	if(new_flags == (seg->flags & (BT_SEG_READ | BT_SEG_WRITE | BT_SEG_EXEC))) {
 		return BT_ERR_NONE;
 	}
 
 	map_type = (new_flags & BT_SEG_WRITE) ? BT_PAGE_WRITE : BT_PAGE_READ;
 
 	// If segment was shared, we must duplicate it!
+	SHARED_LOCK();
 	if(seg->flags & BT_SEG_SHARED) {
 		old_pa = seg->phys;
 		new_pa = bt_page_alloc(seg->size);
 		if(!new_pa) {
+			SHARED_UNLOCK();
 			return BT_ERR_NO_MEMORY;
 		}
 
 		memcpy((void *) bt_phys_to_virt(new_pa), (void *) bt_phys_to_virt(old_pa), seg->size);
 
 		if(bt_mmu_map(map->pgd, new_pa, seg->addr, seg->size, map_type)) {
+			SHARED_UNLOCK();
 			bt_page_free(new_pa, seg->size);
 			return BT_ERR_NO_MEMORY;
 		}
@@ -534,9 +547,12 @@ static BT_ERROR do_attribute(struct bt_vm_map *map, void *addr, BT_u32 attr) {
 			oldseg->flags &= ~BT_SEG_SHARED;
 		}
 
+		SHARED_UNLOCK();
+
 		seg->flags &= ~BT_SEG_SHARED;
 		BT_LIST_INIT_HEAD(&seg->shared_list);
 	} else {
+		SHARED_UNLOCK();
 		if(bt_mmu_map(map->pgd, seg->phys, seg->addr, seg->size, map_type)) {
 			return BT_ERR_NO_MEMORY;
 		}
