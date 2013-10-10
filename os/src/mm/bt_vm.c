@@ -38,7 +38,7 @@ static struct bt_segment *bt_segment_create(struct bt_segment *prev, bt_vaddr_t 
 static void bt_segment_delete(struct bt_vm_map *map, struct bt_segment *seg) {
 
 	SHARED_LOCK();
-	if(seg->flags & BT_SEG_SHARED) {		
+	if(seg->flags & BT_SEG_SHARED) {
 		bt_list_del(&seg->shared_list);
 		if(seg->shared_list.next == seg->shared_list.prev) {
 			struct bt_segment *oldseg = bt_container_of(seg->shared_list.prev, struct bt_segment, shared_list, struct bt_list_head);
@@ -130,7 +130,7 @@ static void bt_segment_free(struct bt_vm_map *map, struct bt_segment *seg) {
 		bt_list_del(&seg->list);
 		prev->size += seg->size;
 		BT_kFree(seg);
-	}	
+	}
 }
 
 static struct bt_segment *bt_segment_reserve(struct bt_vm_map *map, bt_vaddr_t addr, BT_u32 size) {
@@ -225,7 +225,7 @@ void bt_vm_destroy(struct bt_vm_map *map) {
 			// Free underlying pages if not shared and mapped.
 			if(!(seg->flags & BT_SEG_SHARED) && !(seg->flags & BT_SEG_MAPPED)) {
 				bt_page_free(seg->phys, seg->size);
-			}			
+			}
 		}
 
 		tmp = seg;
@@ -306,6 +306,48 @@ bt_paddr_t bt_vm_translate(bt_vaddr_t addr, BT_u32 size) {
 	return bt_mmu_extract(curtask->map->pgd, addr, size);
 }
 
+static BT_u32 type_to_segflags(BT_u32 type) {
+	BT_u32 flags = 0;
+
+	switch(type) {
+	case BT_PAGE_READ:
+		flags = BT_SEG_READ;
+		break;
+
+	case BT_PAGE_WRITE:
+	case BT_PAGE_SYSTEM:
+		flags = BT_SEG_READ | BT_SEG_WRITE;
+		break;
+
+	case BT_PAGE_IOMEM:
+		flags = BT_SEG_READ | BT_SEG_WRITE | BT_SEG_IOMAPPED;
+		break;
+
+	default:
+		break;
+	}
+
+	return flags;
+}
+
+static BT_u32 segflags_to_type(BT_u32 flags) {
+	BT_u32 type = 0;
+
+	if(flags & BT_SEG_READ) {
+		type = BT_PAGE_READ;
+	}
+
+	if(flags & BT_SEG_WRITE) {
+		type = BT_PAGE_WRITE;
+	}
+
+	if(flags & BT_SEG_IOMAPPED) {
+		type = BT_PAGE_IOMEM;
+	}
+
+	return type;
+}
+
 bt_vaddr_t bt_vm_map_region(struct bt_vm_map *map, bt_paddr_t pa, bt_vaddr_t va, BT_u32 size, BT_u32 type) {
 
 	MAP_LOCK(map);
@@ -323,25 +365,12 @@ bt_vaddr_t bt_vm_map_region(struct bt_vm_map *map, bt_paddr_t pa, bt_vaddr_t va,
 	}
 
 	seg->phys 	= pa;
-	switch(type) {
-	case BT_PAGE_READ:
-		seg->flags = BT_SEG_READ;
-		break;
 
-	case BT_PAGE_WRITE:
-	case BT_PAGE_SYSTEM:
-		seg->flags = BT_SEG_READ | BT_SEG_WRITE;
-		break;
-
-	case BT_PAGE_IOMEM:
-		seg->flags = BT_SEG_READ | BT_SEG_WRITE | BT_SEG_IOMAPPED;
-		break;
-
-	default:
+	seg->flags = type_to_segflags(type);
+	if(!seg->flags) {
 		bt_segment_free(map, seg);
 		MAP_UNLOCK(map);
 		return 0;
-		break;
 	}
 
 	seg->flags |= BT_SEG_MAPPED;
