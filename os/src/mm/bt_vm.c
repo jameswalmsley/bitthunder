@@ -30,6 +30,24 @@ static struct bt_segment *bt_segment_create(struct bt_segment *prev, bt_vaddr_t 
 	return seg;
 }
 
+static void bt_segment_delete(struct bt_vm_map *map, struct bt_segment *seg) {
+
+
+	if(seg->flags & BT_SEG_SHARED) {
+		bt_list_del(&seg->shared_list);
+		if(seg->shared_list.next == seg->shared_list.prev) {
+			struct bt_segment *oldseg = bt_container_of(seg->shared_list.prev, struct bt_segment, shared_list, struct bt_list_head);
+			oldseg->flags &= ~BT_SEG_SHARED;
+		}
+	}
+
+	seg->flags = BT_SEG_FREE;
+
+	if(seg != (struct bt_segment *) &map->segments) {
+		BT_kFree(seg);
+	}
+}
+
 static struct bt_segment *bt_segment_lookup(struct bt_vm_map *map, bt_vaddr_t addr, BT_u32 size) {
 	struct bt_segment *seg;
 	struct bt_list_head *pos;
