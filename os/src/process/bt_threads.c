@@ -14,8 +14,8 @@ BT_DEF_MODULE_EMAIL			("james@fullfat-fs.co.uk")
 
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER 	h;
+	struct bt_thread	thread;
 	BT_HANDLE			hProcess;
-	BT_LIST				oHandles;
 	BT_THREAD_CONFIG 	oConfig;
 	BT_FN_THREAD_ENTRY 	pfnStartRoutine;
 	void 			   *pThreadParam;
@@ -23,15 +23,15 @@ struct _BT_OPAQUE_HANDLE {
 	BT_ERROR			lastThreadError;
 };
 
+struct bt_thread idle_thread;
+struct bt_thread *curthread = &idle_thread;
 
 static void threadStartup(void *pParam) {
 
 	BT_HANDLE hThread = (BT_HANDLE) pParam;
 
-	// Set the task tag!
-
 	if(hThread->pfnStartRoutine) {
-		BT_kSetThreadTag(hThread->pKThreadID, hThread);
+		BT_kSetThreadTag(hThread->pKThreadID, &hThread->thread);	// Tag the task structure.
 		hThread->lastThreadError = hThread->pfnStartRoutine(hThread, hThread->pThreadParam);
 	}
 
@@ -49,6 +49,7 @@ BT_HANDLE BT_CreateProcessThread(BT_HANDLE hProcess, BT_FN_THREAD_ENTRY pfnStart
 	}
 
 	hThread->hProcess = hProcess;
+	hThread->thread.task = BT_GetProcessTask(hProcess);
 
 	memcpy(&hThread->oConfig, pConfig, sizeof(BT_THREAD_CONFIG));
 
@@ -62,10 +63,8 @@ BT_HANDLE BT_CreateProcessThread(BT_HANDLE hProcess, BT_FN_THREAD_ENTRY pfnStart
 		return NULL;
 	}
 
-	BT_LIST *pThreadList = BT_GetProcessThreadList(hProcess);
-	if(pThreadList) {
-		BT_ListAddItem(pThreadList, &hThread->h.oItem);
-	}
+	struct bt_task *task = BT_GetProcessTask(hProcess);
+	bt_list_add(&hThread->h.list, &task->threads);
 
 	return hThread;
 }
@@ -82,7 +81,7 @@ BT_HANDLE BT_CreateThread(BT_FN_THREAD_ENTRY pfnStartRoutine, BT_THREAD_CONFIG *
 }
 
 BT_HANDLE BT_GetThreadHandle() {
-	BT_HANDLE hThread = (BT_HANDLE) BT_kGetThreadTag(NULL);
+	BT_HANDLE hThread = bt_container_of(curthread, struct _BT_OPAQUE_HANDLE, thread, struct bt_thread);
 	return hThread;
 }
 

@@ -1,6 +1,5 @@
 /**
  *	Process abstraction API for BitThunder.
- *
  **/
 
 #include <bitthunder.h>
@@ -14,21 +13,19 @@ BT_DEF_MODULE_EMAIL			("james@fullfat-fs.co.uk")
 
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER 	h;
-	BT_LIST				oThreads;
-	BT_u16				usPID;			///< ProcessID of this process.
+	struct bt_task		task;
 	BT_THREAD_CONFIG	oConfig;
-	struct bt_vm_map   *mmap;			///< Processes' private memory map.
-
+	BT_u32				flags;
 	BT_BOOL				bIsStarted;		///< Flag process started, prevent dual starting!
 	BT_BOOL				bAutoRestart;	///< Flag allow auto-restarting of process.
-	BT_i8		   	szProcessName[BT_CONFIG_MAX_PROCESS_NAME+1];
+	BT_u16				usPID;			///< ProcessID of this process.
 };
 
-static BT_LIST oProcessHandles;
+static struct bt_list_head process_handles;
 static BT_u16 usLastPID = 0;
 
-//static BT_HANDLE g_hKernelProcess 	= NULL;
-//static BT_HANDLE g_hProcessHandles 	= NULL;
+struct _BT_OPAQUE_HANDLE kernel_handle;
+struct bt_task *kernel_task = &kernel_handle.task;
 
 static const BT_IF_HANDLE oHandleInterface;
 
@@ -45,35 +42,36 @@ BT_HANDLE BT_CreateProcess(BT_FN_THREAD_ENTRY pfnStartRoutine, const BT_i8 *szpN
 	hProcess->usPID 		= ++usLastPID;
 
 	memcpy(&hProcess->oConfig, pConfig, sizeof(BT_THREAD_CONFIG));
-	strncpy(hProcess->szProcessName, szpName, BT_CONFIG_MAX_PROCESS_NAME);
+	strncpy(hProcess->task.name, szpName, BT_CONFIG_MAX_PROCESS_NAME);
 
-	BT_ListInit(&hProcess->oThreads);
+	BT_LIST_INIT_HEAD(&hProcess->task.threads);
 
-	hProcess->mmap = bt_vm_create();
+#ifdef BT_CONFIG_VIRTUAL_ADDRESSING
+	hProcess->task.map = bt_vm_create();
+#endif
 
 	BT_CreateProcessThread(hProcess, pfnStartRoutine, &hProcess->oConfig, pError);
 
-	BT_ListAddItem(&oProcessHandles, &hProcess->h.oItem);
+	bt_list_add(&hProcess->h.list, &process_handles);
 
 	return hProcess;
 }
 
-BT_HANDLE BT_GetProcessHandle(void) {
-	BT_HANDLE hThread = BT_GetThreadHandle();
-	if(hThread) {
-		return BT_GetThreadProcessHandle(hThread);
-	}
+BT_ERROR BT_DestroyProcess(BT_HANDLE hProcess) {
 
+	return BT_ERR_NONE;
+}
+
+BT_HANDLE BT_GetProcessHandle(void) {
+	if(curthread && curtask) {
+		struct bt_task *task = curtask;
+		return bt_container_of(task, struct _BT_OPAQUE_HANDLE, task, struct bt_task);
+	}
 	return NULL;
 }
 
-BT_LIST *BT_GetProcessThreadList(BT_HANDLE hProcess) {
-	return &hProcess->oThreads;
-}
-
-
-struct bt_vm_map *bt_process_getmap(BT_HANDLE hProcess) {
-	return hProcess->mmap;
+struct bt_task *BT_GetProcessTask(BT_HANDLE hProcess) {
+	return &hProcess->task;
 }
 
 static BT_ERROR bt_process_cleanup(BT_HANDLE hProcess) {
@@ -87,14 +85,20 @@ static const BT_IF_HANDLE oHandleInterface = {
 	.pfnCleanup = bt_process_cleanup,
 };
 
+extern struct bt_thread idle_thread;
+
 static BT_ERROR bt_process_manager_init() {
 
 	// Create the kernel process handle!
+	BT_LIST_INIT_HEAD(&process_handles);
+	strncpy(kernel_handle.task.name, "kernel", BT_CONFIG_MAX_PROCESS_NAME);
+	kernel_handle.task.map = bt_vm_get_kernel_map();
+	idle_thread.task = &kernel_handle.task;
 
-	return BT_ListInit(&oProcessHandles);
+	return BT_ERR_NONE;
 }
 
 BT_MODULE_INIT_DEF oModuleEntry = {
-	BT_MODULE_NAME,
+	.name = BT_MODULE_NAME,
 	bt_process_manager_init,
 };

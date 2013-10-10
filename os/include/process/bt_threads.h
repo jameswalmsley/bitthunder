@@ -4,6 +4,12 @@
 #include <bt_config.h>
 #include <bt_types.h>
 
+struct bt_thread {
+	struct bt_task *task;
+};
+
+extern struct bt_thread *curthread;
+
 typedef struct _BT_THREAD_CONFIG {
 	BT_u32		ulStackDepth;
 	BT_u32		ulPriority;
