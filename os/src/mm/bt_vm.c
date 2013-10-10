@@ -470,3 +470,84 @@ static BT_ERROR do_free(struct bt_vm_map *map, void *addr) {
 BT_ERROR bt_vm_free(struct bt_task *task, void *addr) {
 	return do_free(task->map, addr);
 }
+
+
+static BT_ERROR do_attribute(struct bt_vm_map *map, void *addr, BT_u32 attr) {
+	struct bt_segment *seg;
+	BT_u32 new_flags, map_type;
+
+	bt_paddr_t old_pa, new_pa;
+	bt_vaddr_t va;
+
+	va = BT_PAGE_TRUNC((bt_vaddr_t) addr);
+
+	// Find segment containing this address mapping.
+
+	seg = bt_segment_lookup(map, va, 0);
+	if(!seg || seg->addr != va || (seg->flags & BT_SEG_FREE)) {
+		return BT_ERR_GENERIC;
+	}
+
+	if(seg->flags & BT_SEG_MAPPED) {
+		return BT_ERR_GENERIC;
+	}
+
+	new_flags = 0;
+	if(attr & BT_PROT_READ) {
+		new_flags |= BT_SEG_READ;
+	}
+
+	if(attr & BT_PROT_WRITE) {
+		new_flags |= BT_SEG_WRITE | BT_SEG_READ;
+	}
+
+	if(attr & BT_PROT_EXEC) {
+		new_flags |= BT_SEG_EXEC;
+	}
+
+	if(new_flags == (seg->flags & (BT_SEG_READ | BT_SEG_READ | BT_SEG_EXEC))) {
+		return BT_ERR_NONE;
+	}
+
+	map_type = (new_flags & BT_SEG_WRITE) ? BT_PAGE_WRITE : BT_PAGE_READ;
+
+	// If segment was shared, we must duplicate it!
+	if(seg->flags & BT_SEG_SHARED) {
+		old_pa = seg->phys;
+		new_pa = bt_page_alloc(seg->size);
+		if(!new_pa) {
+			return BT_ERR_NO_MEMORY;
+		}
+
+		memcpy((void *) bt_phys_to_virt(new_pa), (void *) bt_phys_to_virt(old_pa), seg->size);
+
+		if(bt_mmu_map(map->pgd, new_pa, seg->addr, seg->size, map_type)) {
+			bt_page_free(new_pa, seg->size);
+			return BT_ERR_NO_MEMORY;
+		}
+
+		seg->phys = new_pa;
+
+		bt_list_del(&seg->shared_list);
+		if(seg->shared_list.next == seg->shared_list.prev) {
+			struct bt_segment *oldseg = bt_container_of(seg->shared_list.prev, struct bt_segment, shared_list, struct bt_list_head);
+			oldseg->flags &= ~BT_SEG_SHARED;
+		}
+
+		seg->flags &= ~BT_SEG_SHARED;
+		BT_LIST_INIT_HEAD(&seg->shared_list);
+	} else {
+		if(bt_mmu_map(map->pgd, seg->phys, seg->addr, seg->size, map_type)) {
+			return BT_ERR_NO_MEMORY;
+		}
+	}
+
+	seg->flags = new_flags;
+
+	return 0;
+}
+
+BT_ERROR bt_vm_attribute(struct bt_task *task, void *addr, BT_u32 attr) {
+	return do_attribute(task->map, addr, attr);
+}
+
