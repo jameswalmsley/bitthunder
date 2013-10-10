@@ -36,22 +36,6 @@ static void switch_ttb(bt_paddr_t pgd) {
 BT_ATTRIBUTE_SECTION(".bt.mmu.table") static bt_pgd_t g_MMUTable[4096];
 BT_ATTRIBUTE_SECTION(".bt.mmu.table") static bt_pte_t kernel_pages[1024][256];	// Kernel pages. - 1GB of 1MB regions, with 256 pages per mb.
 
-/*void bt_arch_mmu_setsection(BT_IOMAP *pMapping) {
-	BT_u32 section = (BT_u32) pMapping->phys;
-	section |= 0x0c02;
-
-	BT_u32 index = (BT_u32) pMapping->addr / 0x00100000;
-	g_MMUTable[index] = section;
-
-	//BT_DCacheFlush();
-
-	__asm volatile("mcr	p15, 0, r0, c8, c7, 0");	// invalidate TLBs
-
-	dsb();
-
-	// Flush TLB!
-}*/
-
 static bt_paddr_t create_pgd(void) {
 	bt_paddr_t pg, pgd;
 
@@ -63,6 +47,13 @@ static bt_paddr_t create_pgd(void) {
 	pgd = PGD_ALIGN(pg);
 	// Here we should free the uneeded (unaligned part), but this requires
 	// some small changes to the page allocator api.
+
+	BT_u32 gap  = (BT_u32) (pgd - pg);
+	if(gap) {
+		bt_page_free(pg, gap);
+	}
+
+	bt_page_free((pgd + MMU_L1TBL_SIZE), (MMU_L1TBL_SIZE - gap));
 
 	return pgd;
 }
@@ -115,7 +106,7 @@ int bt_mmu_map(bt_pgd_t pgd, bt_paddr_t pa, bt_vaddr_t va, BT_u32 size, int type
 			}
 
 			pgd[PAGE_DIR(va)] = (BT_u32) pg | MMU_PDE_PRESENT;
-			pte = bt_phys_to_virt(pg);
+			pte = (bt_pte_t) bt_phys_to_virt(pg);
 			memset(pte, 0, MMU_L2TBL_SIZE);
 		}
 
@@ -140,7 +131,7 @@ bt_pgd_t bt_mmu_newmap(void) {
 		return 0;
 	}
 
-	pgd = bt_phys_to_virt(pg);
+	pgd = (bt_pgd_t) bt_phys_to_virt(pg);
 	memset(pgd, 0, MMU_L1TBL_SIZE);
 
 	/*
@@ -171,7 +162,7 @@ void bt_mmu_terminate(bt_pgd_t pgd) {
 		}
 	}
 
-	//bt_page_free(bt_virt_to_phys(pgd));	// Page allocator must accept size to do this.
+	bt_page_free(bt_virt_to_phys(pgd), MMU_L1TBL_SIZE);
 }
 
 extern bt_paddr_t bt_mmu_get_ttb(void);
