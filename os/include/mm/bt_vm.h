@@ -5,6 +5,7 @@
 
 struct bt_segment {
 	struct bt_list_head list;
+	struct bt_list_head	shared_list;
 	bt_vaddr_t			addr;
 	bt_paddr_t			phys;
 	BT_u32				size;
