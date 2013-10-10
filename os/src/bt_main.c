@@ -123,7 +123,7 @@ int bt_main(int argc, char **argv) {
 		.ulPriority		= BT_CONFIG_MAIN_TASK_PRIORITY,
 	};
 
-	BT_kTaskCreate((BT_FN_TASK_ENTRY) main, "MAIN", &oThreadConfig, &Error);
+	BT_CreateProcess((BT_FN_THREAD_ENTRY) main, "MAIN", &oThreadConfig, &Error);
 
 	BT_kStartScheduler();
 #endif
