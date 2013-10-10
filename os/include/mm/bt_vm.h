@@ -14,6 +14,7 @@ struct bt_segment {
 	#define				BT_SEG_EXEC		0x00000004
 	#define 			BT_SEG_SHARED	0x00000008
 	#define 			BT_SEG_MAPPED	0x00000010
+	#define 			BT_SEG_IOMAPPED	0x00000020
 	#define				BT_SEG_FREE		0x80000000
 };
 

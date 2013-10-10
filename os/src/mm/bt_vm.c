@@ -313,7 +313,28 @@ bt_vaddr_t bt_vm_map_region(struct bt_vm_map *map, bt_paddr_t pa, bt_vaddr_t va,
 	}
 
 	seg->phys 	= pa;
-	seg->flags 	= BT_SEG_MAPPED | BT_SEG_READ | BT_SEG_WRITE;
+	switch(type) {
+	case BT_PAGE_READ:
+		seg->flags = BT_SEG_READ;
+		break;
+
+	case BT_PAGE_WRITE:
+	case BT_PAGE_SYSTEM:
+		seg->flags = BT_SEG_READ | BT_SEG_WRITE;
+		break;
+
+	case BT_PAGE_IOMEM:
+		seg->flags = BT_SEG_READ | BT_SEG_WRITE | BT_SEG_IOMAPPED;
+		break;
+
+	default:
+		bt_segment_free(map, seg);
+		MAP_UNLOCK(map);
+		return 0;
+		break;
+	}
+
+	seg->flags |= BT_SEG_MAPPED;
 
 	bt_mmu_map(map->pgd, seg->phys, seg->addr, seg->size, type);
 
@@ -339,6 +360,8 @@ void bt_vm_unmap_region(struct bt_vm_map *map, bt_vaddr_t va) {
 	}
 
 	bt_mmu_map(map->pgd, seg->phys, seg->addr, seg->size, BT_PAGE_UNMAP);
+
+	bt_segment_free(map, seg);
 
 	MAP_UNLOCK(map);
 }
