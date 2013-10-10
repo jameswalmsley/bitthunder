@@ -92,23 +92,43 @@ static struct bt_segment *bt_segment_alloc(struct bt_vm_map *map, BT_u32 size) {
 		}
 	}
 
-
 	return NULL;
 }
 
 static void bt_segment_free(struct bt_vm_map *map, struct bt_segment *seg) {
+	struct bt_segment *next, *prev;
+
+	// If it was shared, unlink from the shared list.
+	if(seg->flags & BT_SEG_SHARED) {
+		bt_list_del(&seg->list);
+		if(seg->shared_list.next == seg->shared_list.prev) {
+			struct bt_segment *oldseg = bt_container_of(seg->shared_list.prev, struct bt_segment, shared_list, struct bt_list_head);
+			oldseg->flags &= ~BT_SEG_SHARED;
+		}
+	}
 
 	seg->flags = BT_SEG_FREE;
 
-	/*if(seg->flags & BT_SEG_SHARED) {
-	  }*/
+	// If next segment is free then merge.
+	next = (struct bt_segment *) seg->list.next;
+	if(next != (struct bt_segment *) &map->segments && (next->flags & BT_SEG_FREE)) {
+		bt_list_del(&next->list);
+		seg->size += next->size;
+		BT_kFree(next);
+	}
+
+	prev = (struct bt_segment *) seg->list.prev;
+	if(prev != (struct bt_segment *) &map->segments && (prev->flags & BT_SEG_FREE)) {
+		bt_list_del(&seg->list);
+		prev->size += seg->size;
+		BT_kFree(seg);
+	}	
 }
 
 static struct bt_segment *bt_segment_reserve(struct bt_vm_map *map, bt_vaddr_t addr, BT_u32 size) {
 
-	bt_vaddr_t 	start 	= BT_PAGE_TRUNC(addr);
-
-	size 	= BT_PAGE_ALIGN(size);
+	bt_vaddr_t start = BT_PAGE_TRUNC(addr);
+	size = BT_PAGE_ALIGN(size);
 
 	struct bt_segment *seg = bt_segment_lookup(map, start, size);
 	if(!seg || !(seg->flags & BT_SEG_FREE)) {
@@ -180,7 +200,7 @@ struct bt_vm_map *bt_vm_create(void) {
 }
 
 void bt_vm_destroy(struct bt_vm_map *map) {
-	struct bt_segment *seg; //, *tmp;
+	struct bt_segment *seg, *tmp;
 
 	if(--map->refcount > 0) {
 		return;
@@ -188,27 +208,34 @@ void bt_vm_destroy(struct bt_vm_map *map) {
 
 	// lock process mapper
 
-	struct bt_list_head *pos;
-	bt_list_for_each(pos, &map->segments) {
-		seg = (struct bt_segment *) pos;
+	seg = (struct bt_segment *) map->segments.next;
+	while(seg != (struct bt_segment *) &map->segments) {
 		if(seg->flags != BT_SEG_FREE) {
 			// Unmap this segment
+			bt_mmu_map(map->pgd, seg->phys, seg->addr, seg->size, BT_PAGE_UNMAP);
 
 			// Free underlying pages if not shared and mapped.
+			if(!(seg->flags & BT_SEG_SHARED) && !(seg->flags & BT_SEG_MAPPED)) {
+				bt_page_free(seg->phys, seg->size);
+			}			
 		}
 
-		//tmp = seg;
-		// delete the segment.
+		tmp = seg;
+		seg = (struct bt_segment *) seg->list.next;
+		bt_segment_delete(map, tmp);
+	}
+
+	if(map == BT_GetProcessTask(BT_GetProcessHandle())->map) {
+		bt_mmu_switch(kernel_map.pgd);
 	}
 
 	// Switch to kernel map before deleting the cpd.
 
-	// mmu_terminate(map-pgd)
+	bt_mmu_terminate(map->pgd);
 	BT_kFree(map);
 
 	// unlock process mapper.
 }
-
 
 extern bt_vaddr_t __bt_init_start;
 extern bt_vaddr_t __bss_end;
