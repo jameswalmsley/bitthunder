@@ -24,6 +24,10 @@ bt_paddr_t bt_page_alloc(BT_u32 psize) {
 
 	BT_u32 size;
 
+	if(!psize) {
+		return 0;
+	}
+
 	BT_PAGE_LOCK();
 
 	size = BT_PAGE_ALIGN(psize);
@@ -62,13 +66,16 @@ void bt_page_free(bt_paddr_t paddr, BT_u32 size) {
 	struct bt_page *blk, *prev;
 	struct bt_list_head *pos;
 
+	if(!size) {
+		return;
+	}
+
 	BT_PAGE_LOCK();
 
 	size 	= BT_PAGE_TRUNC(size);
 	paddr 	= BT_PAGE_ALIGN(paddr);
 
-	blk = bt_phys_to_virt(paddr);
-
+	blk = (struct bt_page *) bt_phys_to_virt(paddr);
 
 	bt_list_for_each(pos, &page_head) {
 		prev = (struct bt_page *) pos;
