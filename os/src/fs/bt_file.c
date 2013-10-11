@@ -98,14 +98,14 @@ BT_s32 BT_GetC(BT_HANDLE hFile, BT_u32 ulFlags, BT_ERROR *pError) {
 	BT_ERROR Error = BT_ERR_NONE;
 
 	if(!isHandleValid(hFile, pError)) {
-		return 0;
+		return -1;
 	}
 
 	if(!flagsSupported(hFile, ulFlags)) {
 		if(pError) {
 			*pError = BT_ERR_UNSUPPORTED_FLAG;
 		}
-		return 0;
+		return -1;
 	}
 
 	if(hFile->h.pIf->pFileIF->pfnGetC) {
@@ -122,6 +122,10 @@ BT_s32 BT_GetC(BT_HANDLE hFile, BT_u32 ulFlags, BT_ERROR *pError) {
 
 	if(pError) {
 		*pError = Error;
+	}
+
+	if(Error) {
+		return -1;
 	}
 
 	return c;
