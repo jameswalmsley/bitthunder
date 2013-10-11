@@ -15,20 +15,6 @@
 
 static BT_CACHE g_ptCache;	// Slab cache for page tables.
 
-
-static void flush_tlb(void) {
-	__asm volatile("mcr p15, 0, r0, c8, c7, 0");
-	dsb();
-}
-
-static void switch_ttb(bt_paddr_t pgd) {
-	// flush I cache?
-	// flush D cache?
-	__asm volatile("mcr p15, 0, r0, c2, c0, 0");
-	__asm volatile("mcr p15, 0, r0, c8, c7, 0");
-	flush_tlb();
-}
-
 /**
  *	The actual MMU Table.
  **/
@@ -94,7 +80,7 @@ int bt_mmu_map(bt_pgd_t pgd, bt_paddr_t pa, bt_vaddr_t va, BT_u32 size, int type
 		break;
 	}
 
-	flush_tlb();
+	bt_mmu_flush_tlb();
 
 	while(size > 0) {
 		if(pte_present(pgd, va)) {
@@ -105,9 +91,9 @@ int bt_mmu_map(bt_pgd_t pgd, bt_paddr_t pa, bt_vaddr_t va, BT_u32 size, int type
 				return -1;
 			}
 
-			pgd[PAGE_DIR(va)] = (BT_u32) pg | MMU_PDE_PRESENT;
-			pte = (bt_pte_t) bt_phys_to_virt(pg);
-			memset(pte, 0, MMU_L2TBL_SIZE);
+			memset((void *)pg, 0, MMU_L2TBL_SIZE);
+			pte = (bt_pte_t) pg;
+			pgd[PAGE_DIR(va)] = (BT_u32) bt_virt_to_phys(pte) | MMU_PDE_PRESENT;
 		}
 
 		pte[PAGE_TABLE(va)] = (BT_u32) pa | flag;
@@ -117,7 +103,7 @@ int bt_mmu_map(bt_pgd_t pgd, bt_paddr_t pa, bt_vaddr_t va, BT_u32 size, int type
 		size -= BT_PAGE_SIZE;
 	}
 
-	flush_tlb();
+	bt_mmu_flush_tlb();
 
 	return 0;
 }
@@ -152,7 +138,7 @@ void bt_mmu_terminate(bt_pgd_t pgd) {
 	int i;
 	bt_pte_t pte;
 
-	flush_tlb();
+	bt_mmu_flush_tlb();
 
 	// Release all user page tables.
 	for(i = 0; i < PAGE_DIR(0xC0000000); i++) {
@@ -171,11 +157,11 @@ static bt_paddr_t current_user_ttb(void) {
 	return bt_mmu_get_ttb();
 }
 
-void bt_mmu_switch_user(bt_pgd_t pgd) {
+void bt_mmu_switch(bt_pgd_t pgd) {
 	bt_paddr_t phys = (bt_paddr_t) bt_virt_to_phys(pgd);
 
 	if(phys != current_user_ttb()) {
-		switch_ttb(phys);
+		bt_mmu_switch_ttb(phys);
 	}
 }
 
@@ -237,7 +223,7 @@ void bt_mmu_init(struct bt_mmumap *mmumap) {
 		pgd[index] = (bt_paddr_t) bt_virt_to_phys(pte) | MMU_PDE_PRESENT;
 	}
 
-	flush_tlb();
+	bt_mmu_flush_tlb();
 }
 
 

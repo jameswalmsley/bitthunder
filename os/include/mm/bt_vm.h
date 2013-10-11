@@ -73,6 +73,8 @@ BT_ERROR bt_vm_free(struct bt_task *task, void *addr);
 extern bt_pgd_t bt_mmu_newmap(void);
 extern void bt_mmu_terminate(bt_pgd_t pgd);
 extern void bt_mmu_switch(bt_pgd_t pgd);
+extern void bt_mmu_switch_ttb(bt_paddr_t pgd);
+extern void bt_mmu_flush_tlb(void);
 extern bt_paddr_t bt_mmu_extract(bt_pgd_t pgd, bt_vaddr_t, BT_u32 size);
 extern void bt_mmu_init(struct bt_mmumap *mmumap);
 extern void bt_mmu_killmap(bt_pgd_t pgd);
