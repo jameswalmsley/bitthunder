@@ -34,7 +34,7 @@ static void switch_ttb(bt_paddr_t pgd) {
  **/
 
 BT_ATTRIBUTE_SECTION(".bt.mmu.table") static bt_pgd_t g_MMUTable[4096];
-BT_ATTRIBUTE_SECTION(".bt.mmu.table") static bt_pte_t kernel_pages[1024][256];	// Kernel pages. - 1GB of 1MB regions, with 256 pages per mb.
+BT_ATTRIBUTE_SECTION(".bt.mmu.table.noload") static bt_pte_t kernel_pages[1024][256];	// Kernel pages. - 1GB of 1MB regions, with 256 pages per mb.
 
 static bt_paddr_t create_pgd(void) {
 	bt_paddr_t pg, pgd;

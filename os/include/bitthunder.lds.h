@@ -218,7 +218,8 @@
     . = ALIGN(0x4000);
     __bt_mmu_table_start = .;
     KEEP(*(.bt.mmu.table))
-	__bt_mmu_table_end = .;
+    *(.bt.mmu.table.noload)
+    __bt_mmu_table_end = .;
 } > BT_LINKER_TEXT_SECTION
 #endif
 
