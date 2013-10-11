@@ -33,9 +33,11 @@ static void threadStartup(void *pParam) {
 	if(hThread->pfnStartRoutine) {
 		BT_kSetThreadTag(hThread->pKThreadID, &hThread->thread);	// Tag the task structure.
 		curthread = &hThread->thread;
+#ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
 		if(curtask && curtask->map) {
 			bt_mmu_switch(curtask->map->pgd);
 		}
+#endif
 		hThread->lastThreadError = hThread->pfnStartRoutine(hThread, hThread->pThreadParam);
 	}
 
