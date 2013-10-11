@@ -38,8 +38,6 @@
 #include <lib/putc.h>
 #include <bt_config.h>
 
-#define putchar bt_putc
-
 typedef unsigned long size_t;
 typedef long ssize_t;
 #ifdef __64BIT__
@@ -120,7 +118,7 @@ bt_ksprintn(char *nbuf, uintmax_t num, int base, int *lenp, int upper)
  *		("%*D", len, ptr, " " -> XX XX XX XX ...
  */
 int
-bt_kvprintf(char const *fmt, void (*func)(int, void*), void *arg, int radix, va_list ap)
+bt_kvprintf(char const *fmt, void (*func)(int, void *), void *arg, int radix, va_list ap)
 {
 #define PCHAR(c) {int cc=(c); if (func) (*func)(cc,arg); else *d++ = cc; retval++; }
 	char nbuf[MAXNBUF];
@@ -440,7 +438,7 @@ bt_printf(const char *fmt, ...)
 	va_list ap;
 
 	va_start(ap, fmt);
-	bt_kvprintf(fmt, putchar, (void *) BT_GetStandardHandle(), 10, ap);
+	bt_kvprintf(fmt, bt_putc, NULL, 10, ap);
 	va_end(ap);
 }
 

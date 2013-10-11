@@ -102,8 +102,11 @@ int bt_main(int argc, char **argv) {
 
 	BT_UartEnable(hUart);
 
+#if (BT_CONFIG_LIB_PRINTF_SUPPORT_MULTIPLE_STDOUT)
+	BT_AddStandardHandle(hUart);
+#else
 	BT_SetStandardHandle(hUart);
-
+#endif
 	BT_kPrint("%s (%s)", BT_VERSION_STRING, BT_VERSION_NAME);
 
 	BT_kPrint("Start Loading kernel modules...");
@@ -117,6 +120,18 @@ int bt_main(int argc, char **argv) {
 	BT_kPrint("Enter user-mode, and start user-space application...");
 
 	BT_kPrint("Relinquish control of the boot UART device...(Goodbye)");
+
+	BT_Flush(hUart);
+
+#if (BT_CONFIG_LIB_PRINTF_SUPPORT_MULTIPLE_STDOUT)
+	BT_RemoveStandardHandle(hUart);
+#else
+	BT_SetStandardHandle(NULL);
+#endif
+
+	if (hUart) {
+		BT_CloseHandle(hUart);
+	}
 
 #ifndef BT_CONFIG_KERNEL_NONE
 	BT_THREAD_CONFIG oThreadConfig = {

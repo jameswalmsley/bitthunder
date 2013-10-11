@@ -58,7 +58,7 @@ static BT_MOUNTPOINT *GetMountPoint(const BT_i8 *szpPath) {
 		pMountPoint = (BT_MOUNTPOINT *) BT_ListGetNext(&pMountPoint->oItem);
 	}
 
-	return pMountPoint;
+	return NULL;
 }
 
 BT_ERROR BT_Mount(BT_HANDLE hVolume, const BT_i8 *szpPath) {
