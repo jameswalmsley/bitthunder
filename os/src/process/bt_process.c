@@ -92,7 +92,9 @@ static BT_ERROR bt_process_manager_init() {
 	// Create the kernel process handle!
 	BT_LIST_INIT_HEAD(&process_handles);
 	strncpy(kernel_handle.task.name, "kernel", BT_CONFIG_MAX_PROCESS_NAME);
+#ifdef BT_CONFIG_VIRTUAL_ADDRESSING	
 	kernel_handle.task.map = bt_vm_get_kernel_map();
+#endif
 	idle_thread.task = &kernel_handle.task;
 
 	return BT_ERR_NONE;
