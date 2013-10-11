@@ -29,6 +29,9 @@ typedef struct _BT_MOUNTPOINT {
 	BT_FILESYSTEM  *pFS;
 } BT_MOUNTPOINT;
 
+
+BT_HANDLE tFS; // @@MS
+
 BT_ERROR BT_RegisterFilesystem(BT_HANDLE hFS) {
 	if(hFS->h.pIf->eType != BT_HANDLE_T_FILESYSTEM) {
 		return BT_ERR_GENERIC;
@@ -40,6 +43,10 @@ BT_ERROR BT_RegisterFilesystem(BT_HANDLE hFS) {
 	}
 
 	pFilesystem->hFS = hFS;
+	tFS = hFS; // @@MS
+	bt_printf("pFilesystem: 0x%08x\n",(BT_u32)pFilesystem); // @@MS
+	bt_printf("&pFilesystem->hFS: 0x%08x\n",(BT_u32)&pFilesystem->hFS); // @@MS
+	bt_printf("pFilesystem->hFS: 0x%08x\n",(BT_u32)pFilesystem->hFS); // @@MS
 
 	BT_ListAddItem(&g_oFileSystems, &pFilesystem->oItem);
 
@@ -81,6 +88,11 @@ BT_ERROR BT_Mount(BT_HANDLE hVolume, const BT_i8 *szpPath) {
 	// Can any file-system mount this partition?
 	BT_FILESYSTEM *pFilesystem = (BT_FILESYSTEM *) BT_ListGetHead(&g_oFileSystems);
 	while(pFilesystem) {
+		bt_printf("pFilesystem: 0x%08x\n",(BT_u32)pFilesystem); // @@MS
+		bt_printf("pFilesystem->hFS: 0x%08x\n",(BT_u32)pFilesystem->hFS); // @@MS
+		pFilesystem->hFS=tFS;
+		bt_printf("pFilesystem->hFS: 0x%08x\n",(BT_u32)pFilesystem->hFS); // @@MS
+		bt_printf("&pFilesystem->hFS->h: 0x%08x\n",(BT_u32)&pFilesystem->hFS->h); // @@MS
 		const BT_IF_FS *pFs = pFilesystem->hFS->h.pIf->oIfs.pFilesystemIF;
 		hMount = pFs->pfnMount(pFilesystem->hFS, hVolume, &Error);
 		if(hMount) {
