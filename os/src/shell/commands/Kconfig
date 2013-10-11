@@ -57,7 +57,11 @@ config SHELL_CMD_IOMEM
 	default n
 
 config SHELL_CMD_LS
-	bool "LS"
+	bool "ls"
+	default n
+
+config SHELL_CMD_CAT
+	bool "cat"
 	default n
 
 endmenu

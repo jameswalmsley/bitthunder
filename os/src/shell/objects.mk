@@ -15,3 +15,4 @@ BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_ATAGS) 		+= $(BUILD_DIR)os/src/shell/command
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_SOURCE)		+= $(BUILD_DIR)os/src/shell/commands/source.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_IOMEM)		+= $(BUILD_DIR)os/src/shell/commands/iomem.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_LS)			+= $(BUILD_DIR)os/src/shell/commands/ls.o
+BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_CAT)		+= $(BUILD_DIR)os/src/shell/commands/cat.o
