@@ -218,6 +218,10 @@ static BT_ERROR fullfat_read_dir(BT_HANDLE hDir, BT_DIRENT *pDirent) {
 
 	pDirent->szpName = pDir->oDirent.FileName;
 	pDirent->ullFileSize = pDir->oDirent.Filesize;
+	pDirent->attr = 0;
+	if(pDir->oDirent.Attrib & FF_FAT_ATTR_DIR) {
+		pDirent->attr |= BT_ATTR_DIR;
+	}
 
 	pDir->ulCurrentEntry += 1;
 
