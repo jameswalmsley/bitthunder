@@ -1681,8 +1681,10 @@ void vTaskSwitchContext( void )
 		listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCB, &( pxReadyTasksLists[ uxTopReadyPriority ] ) );
 #if (configBITTHUNDER == 1)
 		curthread = (struct bt_thread *) pxCurrentTCB->pxTaskTag;
-		#ifdef BT_CONFIG_VIRTUAL_ADDRESSING
-		bt_mmu_switch(curtask->map->pgd);
+		#ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
+		if(curthread) {
+			bt_mmu_switch(curtask->map->pgd);
+		}
 		#endif
 #endif
 
