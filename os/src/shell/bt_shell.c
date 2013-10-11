@@ -232,6 +232,10 @@ BT_ERROR BT_ShellCommand(const char *cmdline) {
 	BT_u32 bIgnoreSpace = BT_FALSE;
 	char *input;
 
+	if(!cmdline || cmdline[0] == '\0') {
+		return BT_ERR_NONE;
+	}
+
 	/*
 	 *	replace_expressions always returns a reduced copy of the original input string.
 	 *	therefore it can always be free'd!
