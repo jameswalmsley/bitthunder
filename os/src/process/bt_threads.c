@@ -32,6 +32,10 @@ static void threadStartup(void *pParam) {
 
 	if(hThread->pfnStartRoutine) {
 		BT_kSetThreadTag(hThread->pKThreadID, &hThread->thread);	// Tag the task structure.
+		curthread = &hThread->thread;
+		if(curtask && curtask->map) {
+			bt_mmu_switch(curtask->map->pgd);
+		}
 		hThread->lastThreadError = hThread->pfnStartRoutine(hThread, hThread->pThreadParam);
 	}
 
