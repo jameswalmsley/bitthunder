@@ -8,7 +8,7 @@
 #define BT_VERSION_MINOR	8
 #define BT_VERSION_REVISION	0
 #ifndef BT_VERSION_SUFFIX
-#define BT_VERSION_SUFFIX	"pre"
+#define BT_VERSION_SUFFIX	"stable"
 #endif
 
 #define BT_VERSION_NAME		"2-acetoxybenzoic acid"
