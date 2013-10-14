@@ -20,7 +20,7 @@ typedef enum _BT_MAC_EVENT {
 typedef void (*BT_NET_IF_EVENTRECEIVER)(BT_NET_IF *pIF, BT_NET_IF_EVENT eEvent, BT_BOOL bInterruptContext);
 
 typedef struct _BT_NET_IF_OPS {
-	BT_u32 		ulCapabilites;			///< Primary Capability flags.
+	BT_u32 		ulCapabilities;			///< Primary Capability flags.
 
 #define	BT_NET_IF_CAPABILITIES_ETHERNET				0x00000001
 #define	BT_NET_IF_CAPABILITIES_100MBPS				0x00000002
@@ -82,4 +82,3 @@ typedef struct _BT_NET_IF {
 BT_ERROR BT_RegisterNetworkInterface(BT_HANDLE hIF, const BT_NET_IF_OPS *pOps);
 
 #endif
-

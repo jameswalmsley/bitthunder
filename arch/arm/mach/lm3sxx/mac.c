@@ -392,19 +392,19 @@ static BT_ERROR macGetPowerState(BT_HANDLE hMAC, BT_POWER_STATE *pePowerState) {
  */
 
 static const BT_NET_IF_OPS omacDeviceInterface= {
-		.ulCapabilites	= BT_NET_IF_CAPABILITIES_ETHERNET | BT_NET_IF_CAPABILITIES_100MBPS,
-		.pfnEventSubscribe	= mac_eventsubscribe,
-		.pfnInitialise		= mac_init,
-		.pfnGetMACAddr		= mac_getaddr,
-		.pfnSetMACAddr		= mac_setaddr,
-		.pfnGetMTU			= mac_getmtusize,
-		.pfnDataReady		= mac_dataready,
-		.pfnRead			= mac_read,
-		.pfnDropFrame		= mac_drop,
-		.pfnTxFifoReady		= mac_txfifoready,
-		.pfnWrite			= mac_write,
-		.pfnSendFrame		= mac_sendframe,
-		.pfnSendEvent		= mac_send_event,
+	.ulCapabilities		= BT_NET_IF_CAPABILITIES_ETHERNET | BT_NET_IF_CAPABILITIES_100MBPS,
+	.pfnEventSubscribe	= mac_eventsubscribe,
+	.pfnInitialise		= mac_init,
+	.pfnGetMACAddr		= mac_getaddr,
+	.pfnSetMACAddr		= mac_setaddr,
+	.pfnGetMTU			= mac_getmtusize,
+	.pfnDataReady		= mac_dataready,
+	.pfnRead			= mac_read,
+	.pfnDropFrame		= mac_drop,
+	.pfnTxFifoReady		= mac_txfifoready,
+	.pfnWrite			= mac_write,
+	.pfnSendFrame		= mac_sendframe,
+	.pfnSendEvent		= mac_send_event,
 };
 
 static const BT_DEV_IFS oDeviceInterface = {
