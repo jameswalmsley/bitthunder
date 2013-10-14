@@ -167,6 +167,10 @@ void *BT_kMalloc(BT_u32 ulSize) {
 
 	void *p;
 
+	if(!ulSize) {
+		return NULL;
+	}
+
 	BT_CACHE *pCache = BT_GetSuitableCache(ulSize+sizeof(BT_CACHE *));
 	if(pCache) {
 		p = BT_CacheAlloc(pCache);
