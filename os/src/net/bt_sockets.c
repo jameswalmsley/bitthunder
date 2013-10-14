@@ -161,7 +161,6 @@ int fcntl(int s, int cmd, int val) {
 
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
-	{NULL},
-	BT_HANDLE_T_SYSTEM,
-	socket_cleanup,
+	.eType = BT_HANDLE_T_SYSTEM,
+	.pfnCleanup = socket_cleanup,
 };

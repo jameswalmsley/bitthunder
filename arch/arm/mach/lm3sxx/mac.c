@@ -391,7 +391,7 @@ static BT_ERROR macGetPowerState(BT_HANDLE hMAC, BT_POWER_STATE *pePowerState) {
  *
  */
 
-static const BT_NET_IF_OPS omacDeviceInterface= {
+static const BT_DEV_IF_EMAC mac_ops = {
 	.ulCapabilities		= BT_NET_IF_CAPABILITIES_ETHERNET | BT_NET_IF_CAPABILITIES_100MBPS,
 	.pfnEventSubscribe	= mac_eventsubscribe,
 	.pfnInitialise		= mac_init,
@@ -407,10 +407,6 @@ static const BT_NET_IF_OPS omacDeviceInterface= {
 	.pfnSendEvent		= mac_send_event,
 };
 
-static const BT_DEV_IFS oDeviceInterface = {
-	(BT_DEV_INTERFACE) &omacDeviceInterface,
-};
-
 static const BT_IF_POWER oPowerInterface = {
 	macSetPowerState,											///< Pointers to the power state API implementations.
 	macGetPowerState,											///< This gets the current power state.
@@ -420,7 +416,7 @@ const BT_IF_DEVICE BT_LM3Sxx_mac_oDeviceInterface = {
 	&oPowerInterface,											///< Device does support powerstate functionality.
 	BT_DEV_IF_T_EMAC,											///< Allow configuration through the mac api.
 	.unConfigIfs = {
-		(BT_DEV_INTERFACE) &omacDeviceInterface,
+		.pEMacIF = &mac_ops,
 	},
 };
 

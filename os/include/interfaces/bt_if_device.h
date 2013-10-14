@@ -17,6 +17,7 @@
 #include "bt_dev_if_can.h"
 #include "bt_dev_if_sdio.h"
 #include "bt_dev_if_rtc.h"
+#include "bt_dev_if_emac.h"
 
 typedef enum _BT_DEV_IF_TYPE {
 	BT_DEV_IF_T_NONE=0,
@@ -68,7 +69,7 @@ typedef union {
 	const BT_DEV_IF_ADC 	   *pADCIF;
 	const BT_DEV_IF_UART 	   *pUartIF;
 	const BT_DEV_IF_SDIO	   *pSdioIF;
-	const BT_DEV_IF_SPI 	   *pEMacIF;
+	const BT_DEV_IF_EMAC 	   *pEMacIF;
 	const BT_DEV_IF_RTC		   *pRTCIF;
 } BT_DEV_IFS;
 

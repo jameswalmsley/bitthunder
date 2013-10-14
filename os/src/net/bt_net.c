@@ -9,8 +9,13 @@
 #include "lwip/tcpip.h"
 
 BT_DEF_MODULE_NAME("NET IF Manager")
-BT_DEF_MODULE_DESCRIPTION("Network interface manager")BT_DEF_MODULE_AUTHOR(
-		"Robert Steinbauer")BT_DEF_MODULE_EMAIL("rsteinbauer@riegl.co.at")
+BT_DEF_MODULE_DESCRIPTION("Network interface manager")
+BT_DEF_MODULE_AUTHOR("Robert Steinbauer")
+BT_DEF_MODULE_EMAIL("rsteinbauer@riegl.co.at")
+
+struct _BT_OPAQUE_HANDLE {
+	BT_HANDLE_HEADER h;
+};
 
 static BT_LIST g_oInterfaces = { NULL };
 
@@ -42,7 +47,7 @@ static void net_event_handler(BT_NET_IF *pIF, BT_NET_IF_EVENT eEvent,
 	//BT_TaskletSchedule(&sm_tasklet);
 }
 
-BT_ERROR BT_RegisterNetworkInterface(BT_HANDLE hIF, const BT_NET_IF_OPS *pOps) {
+BT_ERROR BT_RegisterNetworkInterface(BT_HANDLE hIF) {
 
 	BT_NETIF_PRIV *pNetIF = (BT_NETIF_PRIV *) BT_kMalloc(sizeof(BT_NETIF_PRIV));
 	if (!pNetIF) {
@@ -52,7 +57,7 @@ BT_ERROR BT_RegisterNetworkInterface(BT_HANDLE hIF, const BT_NET_IF_OPS *pOps) {
 	memset(pNetIF, 0, sizeof(BT_NETIF_PRIV));
 
 	pNetIF->base.hIF = hIF;
-	pNetIF->base.pOps = pOps;
+	pNetIF->base.pOps = hIF->h.pIf->oIfs.pDevIF->unConfigIfs.pEMacIF;
 
 	if (pNetIF->base.pOps->pfnEventSubscribe) {
 		pNetIF->base.pOps->pfnEventSubscribe(hIF, net_event_handler,
