@@ -383,15 +383,7 @@ static BT_u32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount,
 		ulBlock *= 512;
 	}
 
-	// Send the single block command.
-	/*if(ulCount > 1) {
-		oCommand.opcode 		= 18;
-	} else {
-		oCommand.opcode			= 17;
-	}*/
-
 	oCommand.opcode 		= 18;
-
 	oCommand.bCRC 			= BT_FALSE;
 	oCommand.ulResponseType = 48;
 	oCommand.bIsData 		= BT_TRUE;
@@ -403,7 +395,7 @@ static BT_u32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount,
 
 	BT_u32 cmd17_response = oCommand.response[0];
 	if(cmd17_response != 0x900) {	// STATE = transfer, READY_FOR_DATA = set
-		BT_kPrint("SDCARD: Invalid CMD17 response");
+		BT_kPrint("SDCARD: Invalid CMD18 response");
 		return 0;
 	}
 
@@ -418,7 +410,89 @@ static BT_u32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount,
 
 static BT_u32 sdcard_blockwrite(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount, void *pBuffer, BT_ERROR *pError) {
 
-	return 0;
+	BT_kPrint("SDCARD: BlockWrite (%d,%d)", ulBlock, ulCount);
+
+	if(!hBlock->pHost->rca) {
+		// Card not initialised!
+		return 0;
+	}
+
+	MMC_COMMAND oCommand;
+	oCommand.opcode 		= 13;
+	oCommand.arg 			= hBlock->pHost->rca << 16;
+	oCommand.bCRC 			= BT_TRUE;
+	oCommand.ulResponseType = 48;
+	oCommand.bIsData		= BT_FALSE;
+
+	hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
+
+	BT_u32 ulStatus = oCommand.response[0];
+	BT_u32 ulState = (ulStatus >> 9) & 0xF;
+
+	//BT_kPrint("SDCARD: Status (%02x)", ulState);
+
+	switch(ulState) {
+
+	case 4:
+		break;
+
+	case 5:
+		oCommand.opcode = 12;
+		oCommand.arg = 0;
+		oCommand.bCRC = BT_TRUE;
+		oCommand.ulResponseType = 48;
+		oCommand.bIsData = BT_FALSE;
+
+		hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
+
+		BT_kPrint("SDCARD: Sent CMD12");
+
+		oCommand.opcode 		= 13;
+		oCommand.arg 			= hBlock->pHost->rca << 16;
+		oCommand.bCRC 			= BT_TRUE;
+		oCommand.ulResponseType = 48;
+		oCommand.bIsData		= BT_FALSE;
+
+		hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
+
+		BT_u32 ulStatus = oCommand.response[0];
+		ulState = (ulStatus >> 9) & 0xF;
+
+		break;
+
+
+	default:
+		BT_kPrint("SDCARD: Unknown card state %d", ulState);
+		break;
+	}
+
+	if(!hBlock->pHost->bSDHC) {
+		ulBlock *= 512;
+	}
+
+	oCommand.opcode 		= 25;
+	oCommand.bCRC 			= BT_FALSE;
+	oCommand.ulResponseType = 48;
+	oCommand.bIsData 		= BT_TRUE;
+	oCommand.arg 			= ulBlock;
+	oCommand.bRead_nWrite	= BT_FALSE;
+	oCommand.ulBlocks		= ulCount;
+
+	hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
+
+	BT_u32 cmd25_response = oCommand.response[0];
+	if(cmd25_response != 0x900) {	// STATE = transfer, READY_FOR_DATA = set
+		BT_kPrint("SDCARD: Invalid CMD25 response (0x%08x)",cmd25_response);
+		return 0;
+	}
+
+	BT_kPrint("SDCARD: Write command complete, writing data now");
+
+	// Write the data.
+
+	BT_u32 ulWritten = hBlock->pHost->pOps->pfnWrite(hBlock->pHost->hHost, ulCount, pBuffer, pError);
+
+	return ulWritten;
 }
 
 static const BT_IF_BLOCK oBlockInterface = {

@@ -234,8 +234,41 @@ static BT_u32 sdhci_read(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer, BT_ERR
 }
 
 static BT_u32 sdhci_write(BT_HANDLE hSDIO, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
+	register BT_u8 *p = (BT_u8 *) pBuffer;
+	BT_u32 ulWritten = 0;
 
-	return 0;
+	while(ulWritten < ulSize) {
+		BT_u32 ulBlockSize = 512;
+
+		while(!(hSDIO->pRegs->NORMAL_INT_STATUS & NORMAL_INT_BUF_WRITE_READY)) {
+			BT_ThreadYield();
+		}
+
+		hSDIO->pRegs->NORMAL_INT_STATUS = NORMAL_INT_BUF_WRITE_READY;
+
+		while(ulBlockSize) {
+			BT_u32 ulData=0;
+
+			ulData |= ((BT_u32)*p++)<<0;
+			ulData |= ((BT_u32)*p++)<<8;
+			ulData |= ((BT_u32)*p++)<<16;
+			ulData |= ((BT_u32)*p++)<<24;
+
+			hSDIO->pRegs->BUFFER_DATA_PORT = ulData;
+
+			ulBlockSize -= 4;
+		}
+
+		ulWritten++;
+	}
+
+	while(! (hSDIO->pRegs->NORMAL_INT_STATUS & NORMAL_INT_TRANSFER_COMPLETE)) {
+		BT_ThreadYield();
+	}
+
+	hSDIO->pRegs->NORMAL_INT_STATUS = NORMAL_INT_TRANSFER_COMPLETE;
+
+	return ulWritten;
 }
 
 static BT_ERROR sdhci_event_subscribe(BT_HANDLE hSDIO, BT_MMC_CARD_EVENTRECEIVER pfnReceiver, MMC_HOST *pHost) {
