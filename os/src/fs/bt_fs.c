@@ -30,8 +30,6 @@ typedef struct _BT_MOUNTPOINT {
 } BT_MOUNTPOINT;
 
 
-BT_HANDLE tFS; // @@MS
-
 BT_ERROR BT_RegisterFilesystem(BT_HANDLE hFS) {
 	if(hFS->h.pIf->eType != BT_HANDLE_T_FILESYSTEM) {
 		return BT_ERR_GENERIC;
@@ -43,10 +41,6 @@ BT_ERROR BT_RegisterFilesystem(BT_HANDLE hFS) {
 	}
 
 	pFilesystem->hFS = hFS;
-	tFS = hFS; // @@MS
-	bt_printf("pFilesystem: 0x%08x\n",(BT_u32)pFilesystem); // @@MS
-	bt_printf("&pFilesystem->hFS: 0x%08x\n",(BT_u32)&pFilesystem->hFS); // @@MS
-	bt_printf("pFilesystem->hFS: 0x%08x\n",(BT_u32)pFilesystem->hFS); // @@MS
 
 	BT_ListAddItem(&g_oFileSystems, &pFilesystem->oItem);
 
@@ -88,11 +82,6 @@ BT_ERROR BT_Mount(BT_HANDLE hVolume, const BT_i8 *szpPath) {
 	// Can any file-system mount this partition?
 	BT_FILESYSTEM *pFilesystem = (BT_FILESYSTEM *) BT_ListGetHead(&g_oFileSystems);
 	while(pFilesystem) {
-		bt_printf("pFilesystem: 0x%08x\n",(BT_u32)pFilesystem); // @@MS
-		bt_printf("pFilesystem->hFS: 0x%08x\n",(BT_u32)pFilesystem->hFS); // @@MS
-		pFilesystem->hFS=tFS;
-		bt_printf("pFilesystem->hFS: 0x%08x\n",(BT_u32)pFilesystem->hFS); // @@MS
-		bt_printf("&pFilesystem->hFS->h: 0x%08x\n",(BT_u32)&pFilesystem->hFS->h); // @@MS
 		const BT_IF_FS *pFs = pFilesystem->hFS->h.pIf->oIfs.pFilesystemIF;
 		hMount = pFs->pfnMount(pFilesystem->hFS, hVolume, &Error);
 		if(hMount) {
@@ -134,6 +123,53 @@ static const BT_i8 *get_relative_path(BT_MOUNTPOINT *pMount, const BT_i8 *szpPat
 	return szpPath+mountlen-1;
 }
 
+#define BT_FS_MODE_READ				0x01
+#define	BT_FS_MODE_WRITE			0x02
+#define BT_FS_MODE_APPEND			0x04
+#define	BT_FS_MODE_CREATE			0x08
+#define BT_FS_MODE_TRUNCATE			0x10
+
+BT_u32 get_mode_flags(BT_i8 *mode) {
+	BT_u32 ulModeFlags = 0x00;
+	while(*mode) {
+		switch(*mode) {
+			case 'r':	// Allow Read
+			case 'R':
+				ulModeFlags |= BT_FS_MODE_READ;
+				break;
+
+			case 'w':	// Allow Write
+			case 'W':
+				ulModeFlags |= BT_FS_MODE_WRITE;
+				ulModeFlags |= BT_FS_MODE_CREATE;	// Create if not exist.
+				ulModeFlags |= BT_FS_MODE_TRUNCATE;
+				break;
+
+			case 'a':	// Append new writes to the end of the file.
+			case 'A':
+				ulModeFlags |= BT_FS_MODE_WRITE;
+				ulModeFlags |= BT_FS_MODE_APPEND;
+				ulModeFlags |= BT_FS_MODE_CREATE;	// Create if not exist.
+				break;
+
+			case '+':	// Update the file, don't Append!
+				ulModeFlags |= BT_FS_MODE_READ;	// RW Mode
+				ulModeFlags |= BT_FS_MODE_WRITE;	// RW Mode
+				break;
+
+			/*case 'D':	// Internal use only!
+				ModeBits |= FF_MODE_DIR;
+				break;*/
+
+			default:	// b|B flags not supported (Binary mode is native anyway).
+				break;
+		}
+		mode++;
+	}
+
+	return ulModeFlags;
+}
+
 BT_HANDLE BT_Open(const BT_i8 *szpPath, BT_i8 *mode, BT_ERROR *pError) {
 	BT_MOUNTPOINT *pMount = GetMountPoint(szpPath);
 	if(!pMount) {
@@ -143,7 +179,7 @@ BT_HANDLE BT_Open(const BT_i8 *szpPath, BT_i8 *mode, BT_ERROR *pError) {
 	const BT_i8 *path = get_relative_path(pMount, szpPath);
 
 	const BT_IF_FS *pFS = pMount->pFS->hFS->h.pIf->oIfs.pFilesystemIF;
-	return pFS->pfnOpen(pMount->hMount, path, 1, pError);
+	return pFS->pfnOpen(pMount->hMount, path, get_mode_flags(mode), pError);
 }
 
 BT_ERROR BT_MkDir(BT_i8 *szpPath) {

@@ -107,6 +107,8 @@ static BT_HANDLE fullfat_open(BT_HANDLE hMount, const BT_i8 *szpPath, BT_u32 ulM
 
 	FF_ERROR ffError;
 
+	BT_kPrint("fullfat_open: %s, 0x%08x", szpPath, ulModeFlags); // @@MS
+
 	BT_FF_FILE *pFile = (BT_FF_FILE *) BT_CreateHandle(&oFileHandleInterface, sizeof(BT_FF_FILE), pError);
 	if(!pFile) {
 		return NULL;
@@ -114,7 +116,7 @@ static BT_HANDLE fullfat_open(BT_HANDLE hMount, const BT_i8 *szpPath, BT_u32 ulM
 
 	BT_FF_MOUNT *pMount = (BT_FF_MOUNT *) hMount;
 
-	pFile->pFile = FF_Open(pMount->pIoman, szpPath, FF_MODE_READ, &ffError);
+	pFile->pFile = FF_Open(pMount->pIoman, szpPath, ulModeFlags, &ffError); // @@MS: FF_MODE_READ
 	if(!pFile->pFile) {
 		return NULL;
 	}
@@ -166,13 +168,37 @@ static BT_ERROR fullfat_putc(BT_HANDLE hFile, BT_u32 ulFlags, BT_i8 cData) {
 }
 
 static BT_ERROR fullfat_seek(BT_HANDLE hFile, BT_s64 ulOffset, BT_u32 whence) {
-	return BT_ERR_NONE;
+	FF_T_INT8 Origin;
+	BT_FF_FILE *pFile = (BT_FF_FILE *) hFile;
+
+	if (whence==BT_SEEK_SET)
+		Origin = FF_SEEK_SET;
+	else if (whence==BT_SEEK_CUR)
+		Origin = FF_SEEK_CUR;
+	else
+		Origin = FF_SEEK_END;
+
+	FF_ERROR ret = FF_Seek(pFile->pFile, (FF_T_SINT32) ulOffset, Origin);
+
+	return (BT_ERROR) ret;
 }
 
 static BT_u64 fullfat_tell(BT_HANDLE hFile) {
 	BT_FF_FILE *pFile = (BT_FF_FILE *) hFile;
 
 	return (BT_u64) FF_Tell(pFile->pFile);
+}
+
+static BT_BOOL fullfat_eof(BT_HANDLE hFile) {
+	BT_FF_FILE *pFile = (BT_FF_FILE *) hFile;
+	FF_T_BOOL eof;
+
+	eof=FF_isEOF(pFile->pFile);
+
+	if (eof==FF_FALSE)
+		return BT_FALSE;
+
+	return BT_TRUE;
 }
 
 static BT_ERROR fullfat_mkdir(BT_HANDLE hMount, const BT_i8 *szpPath) {
@@ -282,6 +308,7 @@ static const BT_IF_FILE oFileOperations = {
 	.pfnPutC	= fullfat_putc,
 	.pfnSeek	= fullfat_seek,
 	.pfnTell	= fullfat_tell,
+	.pfnEOF		= fullfat_eof,
 };
 
 static const BT_IF_FS oFilesystemInterface = {

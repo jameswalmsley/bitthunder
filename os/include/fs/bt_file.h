@@ -15,6 +15,7 @@ BT_ERROR 	BT_Seek	(BT_HANDLE hFile, BT_s64 ulOffset, BT_u32 whence);
 BT_u64 		BT_Tell	(BT_HANDLE hFile, BT_ERROR *pError);
 BT_s32 		BT_GetS	(BT_HANDLE hFile, BT_u32 ulSize, BT_i8 *s);
 BT_ERROR	BT_Flush(BT_HANDLE hFile);
+BT_BOOL 	BT_EOF(BT_HANDLE hFile, BT_ERROR *pError);
 
 
 

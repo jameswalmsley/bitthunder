@@ -184,6 +184,22 @@ BT_u64 BT_Tell(BT_HANDLE hFile, BT_ERROR *pError) {
 }
 
 
+BT_BOOL BT_EOF(BT_HANDLE hFile, BT_ERROR *pError) {
+
+	if(!isHandleValid(hFile, pError)) {
+		return BT_FALSE;
+	}
+
+	if(!hFile->h.pIf->pFileIF->pfnEOF) {
+		if(pError) {
+			*pError = BT_ERR_UNSUPPORTED_INTERFACE;
+		}
+		return 0;
+	}
+
+	return hFile->h.pIf->pFileIF->pfnEOF(hFile);
+}
+
 
 BT_s32 BT_GetS(BT_HANDLE hFile, BT_u32 ulSize, BT_i8 *s) {
 
@@ -211,6 +227,7 @@ BT_s32 BT_GetS(BT_HANDLE hFile, BT_u32 ulSize, BT_i8 *s) {
 
     return s - t;
 }
+
 
 BT_ERROR BT_Flush(BT_HANDLE hFile) {
 	BT_ERROR Error;
