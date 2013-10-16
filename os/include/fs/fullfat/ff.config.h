@@ -34,6 +34,8 @@
 
 #define FF_FINDAPI_ALLOW_WILDCARDS
 
+#define FF_SHORTNAME_CASE
+
 #define FF_DEBUG
 
 #define FF_NOSTRCASECMP
