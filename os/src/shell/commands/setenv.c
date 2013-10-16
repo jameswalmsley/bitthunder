@@ -16,7 +16,9 @@ static int clear_env(char *name) {
 }
 
 
-static int bt_setenv(int argc, char **argv) {
+static int bt_setenv(BT_HANDLE hShell, int argc, char **argv) {
+
+	BT_HANDLE hStdout = BT_ShellGetStdout(hShell);
 
 	BT_u32 total_length = 0;
 	BT_u32 i;
@@ -32,7 +34,7 @@ static int bt_setenv(int argc, char **argv) {
 
 	char *s = BT_kMalloc(total_length+1);
 	if(!s) {
-		bt_printf("No memory could not allocated temporary memory to construct string\n");
+		bt_fprintf(hStdout, "No memory could not allocated temporary memory to construct string\n");
 		return -1;
 	}
 
@@ -54,6 +56,5 @@ static int bt_setenv(int argc, char **argv) {
 
 BT_SHELL_COMMAND_DEF oCommand = {
 	.szpName 	= "setenv",
-	.eType 		= BT_SHELL_NORMAL_COMMAND,
 	.pfnCommand = bt_setenv,
 };

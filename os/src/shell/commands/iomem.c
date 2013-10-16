@@ -29,18 +29,21 @@ static MODE getmode(BT_i8 *string) {
 	return MODE_UNKNOWN;
 }
 
-static int usage(char **argv) {
-	bt_printf("Usage: %s <mode> <addr>\n", argv[0]);
+static int usage(BT_HANDLE hStdout, char **argv) {
+	bt_fprintf(hStdout, "Usage: %s <mode> <addr>\n", argv[0]);
 	return -1;
 }
 
-static void print_addr(BT_u32 *p) {
-	bt_printf("0x%08x : 0x%08x\n", (BT_u32 ) p, *p);
+static void print_addr(BT_HANDLE hStdout, BT_u32 *p) {
+	bt_fprintf(hStdout, "0x%08x : 0x%08x\n", (BT_u32 ) p, *p);
 }
 
-static int bt_iomem(int argc, char **argv) {
+static int bt_iomem(BT_HANDLE hShell, int argc, char **argv) {
+
+	BT_HANDLE hStdout = BT_ShellGetStdout(hShell);
+
 	if(argc != 3 && argc != 4) {
-		return usage(argv);
+		return usage(hStdout, argv);
 	}
 
 	BT_u32 addr = strtoul(argv[2], NULL, 16);
@@ -49,17 +52,17 @@ static int bt_iomem(int argc, char **argv) {
 	MODE mode = getmode(argv[1]);
 	switch(mode) {
 	case MODE_R32:
-		print_addr(p);
+		print_addr(hStdout, p);
 		break;
 
 	case MODE_W32:
 		if(argc != 4) {
-			return usage(argv);
+			return usage(hStdout, argv);
 		}
 
 		BT_u32 value = strtoul(argv[3], NULL, 16);
 		*p = value;
-		print_addr(p);
+		print_addr(hStdout, p);
 		break;
 
 	default:
@@ -72,6 +75,5 @@ static int bt_iomem(int argc, char **argv) {
 
 BT_SHELL_COMMAND_DEF oIomemCommand = {
 	.szpName 	= "iomem",
-	.eType 		= BT_SHELL_NORMAL_COMMAND,
 	.pfnCommand	= bt_iomem,
 };

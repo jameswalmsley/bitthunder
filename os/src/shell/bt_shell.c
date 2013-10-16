@@ -8,6 +8,40 @@
 #include <ctype.h>
 #include <shell/bt_env.h>
 #include <stdio.h>
+#include <lib/putc.h>
+
+struct _BT_OPAQUE_HANDLE {
+	BT_HANDLE_HEADER 		h;			///< All handles must include a handle header.
+	BT_HANDLE			hStdin;
+	BT_HANDLE			hStdout;
+	const BT_i8 			*szpPrompt;
+	BT_u32	 			ulPromptLen;
+	BT_i32				bPrintPrompt;
+	BT_u32 				ulFlags;
+	#define BT_CONFIG_SHELL_INPUT_BUFFER_SIZE	256
+	BT_i8 				cStdinBuf[BT_CONFIG_SHELL_INPUT_BUFFER_SIZE];
+	BT_u32 				ulStdinBufCnt;
+	struct _BT_OPAQUE_HANDLE	*pNext;
+};
+
+typedef struct _BT_OPAQUE_HANDLE BT_SHELL;
+typedef BT_SHELL *BT_SHELL_HANDLE;
+
+BT_SHELL g_Stdsh = {
+	.h = {
+		.pIf = NULL,
+		.ulClaimedMemory = sizeof(BT_SHELL),
+	},
+	.hStdin = BT_stdin,
+	.hStdout = BT_stdout,
+	.szpPrompt = "",
+	.ulPromptLen = 0,
+	.ulFlags = 0,
+	.ulStdinBufCnt = 0,
+	.pNext = NULL,
+};
+
+BT_HANDLE BT_stdsh = (BT_HANDLE)&g_Stdsh;
 
 extern const BT_SHELL_COMMAND * __bt_shell_commands_start;
 extern const BT_SHELL_COMMAND * __bt_shell_commands_end;
@@ -55,7 +89,7 @@ static char *eatspace(char *input) {
 	return input;
 }
 
-static char *evaluate_command(char *input) {
+static char *evaluate_command(BT_HANDLE hShell, char *input) {
 	char *start = input + 2;
 	char *end = strchr(start, ')');
 	if(!end) {
@@ -63,7 +97,7 @@ static char *evaluate_command(char *input) {
 	}
 
 	*end = '\0';
-	BT_ERROR retval = BT_ShellCommand(start);
+	BT_ERROR retval = BT_ShellCommand(NULL, start);
 	*end = ')';
 
 	char *output = BT_kMalloc(64);
@@ -77,11 +111,11 @@ static char *evaluate_command(char *input) {
 	return output;
 }
 
-static char *reduce_value(BT_i8 *value, BT_BOOL *bAlloced) {
+static char *reduce_value(BT_HANDLE hShell, BT_i8 *value, BT_BOOL *bAlloced) {
 	if(value[0] == '$' && value[1] == '{') {
 		return replace_var(value);
 	} else if(value[0] == '$' && value[1] == '(') {
-		char *ret = evaluate_command(value);
+		char *ret = evaluate_command(hShell, value);
 		if(!ret) {
 			return "\0";
 		}
@@ -103,7 +137,7 @@ static char *unquote(char *line) {
 	return line;
 }
 
-static BT_BOOL parse_condition(BT_i8 *line) {
+static BT_BOOL parse_condition(BT_HANDLE hShell, BT_i8 *line) {
 
 	BT_BOOL retval = BT_FALSE;
 
@@ -118,8 +152,8 @@ static BT_BOOL parse_condition(BT_i8 *line) {
 
 		BT_BOOL bAlloced_a = BT_FALSE;
 		BT_BOOL bAlloced_b = BT_FALSE;
-		a = reduce_value(a, &bAlloced_a);
-		b = reduce_value(b, &bAlloced_b);
+		a = reduce_value(hShell, a, &bAlloced_a);
+		b = reduce_value(hShell, b, &bAlloced_b);
 
 		char *a_unquoted = unquote(a);
 		char *b_unquoted = unquote(b);
@@ -143,7 +177,7 @@ static BT_BOOL parse_condition(BT_i8 *line) {
 
 	BT_BOOL bAlloced = BT_FALSE;
 	eval = eatspace(line+2);
-	eval = reduce_value(eval, &bAlloced);
+	eval = reduce_value(hShell, eval, &bAlloced);
 
 	if(strcmp(eval, "\0")) {
 		retval = BT_TRUE;
@@ -156,7 +190,7 @@ static BT_BOOL parse_condition(BT_i8 *line) {
 	return retval;
 }
 
-static char *replace_expressions(const char *input) {
+static char *replace_expressions(BT_HANDLE hShell, const char *input) {
 
 	char   *last_replace 	= BT_kMalloc(strlen(input) + 1);
 	char   *replaced  		= NULL;
@@ -181,7 +215,7 @@ static char *replace_expressions(const char *input) {
 
 		BT_BOOL	bAlloced = BT_FALSE;
 
-		char   *reduced 		= reduce_value(item, &bAlloced);
+		char   *reduced 		= reduce_value(hShell, item, &bAlloced);
 
 		BT_u32 	reduced_len 	= strlen(reduced);
 		BT_u32 	orig_len 		= (item_end - item);
@@ -223,7 +257,33 @@ static char *replace_expressions(const char *input) {
 	return last_replace;
 }
 
-BT_ERROR BT_ShellCommand(const char *cmdline) {
+BT_HANDLE BT_ShellGetStdout(BT_HANDLE hShell) {
+	return (hShell ? ((BT_SHELL_HANDLE)hShell)->hStdout : NULL);
+}
+
+BT_HANDLE BT_ShellGetStdin(BT_HANDLE hShell) {
+	return (hShell ? ((BT_SHELL_HANDLE)hShell)->hStdin : NULL);
+}
+
+const char *BT_ShellGetPrompt(BT_HANDLE hShell)
+{
+	return (hShell ? ((BT_SHELL_HANDLE)hShell)->szpPrompt : NULL);
+}
+
+void BT_ShellUpdatePrompt(BT_HANDLE hShell, const char *szpPrompt)
+{
+	if(hShell) {
+		((BT_SHELL_HANDLE)hShell)->szpPrompt = szpPrompt;
+	}
+	return;
+}
+
+BT_u32 BT_ShellGetFlags(BT_HANDLE hShell)
+{
+	return (hShell ? ((BT_SHELL_HANDLE)hShell)->ulFlags : 0);
+}
+
+BT_ERROR BT_ShellCommand(BT_HANDLE hShell, const char *cmdline) {
 
 	BT_ERROR Error = BT_ERR_NONE;
 
@@ -240,7 +300,7 @@ BT_ERROR BT_ShellCommand(const char *cmdline) {
 	 *	replace_expressions always returns a reduced copy of the original input string.
 	 *	therefore it can always be free'd!
 	 */
-	char *copy = replace_expressions(cmdline);				// This does complete string variable/command substitution.
+	char *copy = replace_expressions(hShell, cmdline);				// This does complete string variable/command substitution.
 
 	input = copy;
 	input = eatspace(input);
@@ -325,7 +385,7 @@ BT_ERROR BT_ShellCommand(const char *cmdline) {
 	if(!pCommand) {
 		BT_ENV_VARIABLE *env = BT_ShellGetStarredEnv(pargs[0]);
 		if(env) {
-			Error = BT_ShellCommand(env->o.string->s);
+			Error = BT_ShellCommand(hShell, env->o.string->s);
 			goto executed;
 		}
 
@@ -334,7 +394,7 @@ BT_ERROR BT_ShellCommand(const char *cmdline) {
 		return -1;
 	}
 
-	Error = pCommand->pfnCommand(ulArguments, pargs);
+	Error = pCommand->pfnCommand(hShell, ulArguments, pargs);
 
 executed:
 	BT_kFree(pargs);
@@ -343,7 +403,7 @@ executed:
 	return Error;
 }
 
-BT_ERROR BT_ShellScript(const BT_i8 *path) {
+BT_ERROR BT_ShellScript(BT_HANDLE hShell, const BT_i8 *path) {
 
 	BT_ERROR 	Error			= BT_ERR_NONE;
 	BT_u32		if_false_depth 	= 0;
@@ -386,7 +446,7 @@ BT_ERROR BT_ShellScript(const BT_i8 *path) {
 		}
 
 		if(!strncmp(p, "if", 2)) {
-			if_reduced = parse_condition(p);
+			if_reduced = parse_condition(hShell, p);
 			if(!if_reduced) {
 				if_false_depth += 1;
 			}
@@ -411,7 +471,7 @@ BT_ERROR BT_ShellScript(const BT_i8 *path) {
 		}
 
 		if(!if_false_depth) {
-			Error = BT_ShellCommand(p);
+			Error = BT_ShellCommand(hShell, p);
 			if(Error) {
 				BT_kPrint("Error executing line %d in %s:", lineno, path);
 				BT_kPrint("%d : %s", lineno, p);
@@ -428,9 +488,69 @@ err_out:
 	return BT_ERR_NONE;
 }
 
-BT_ERROR BT_Shell(BT_HANDLE hStdin, BT_HANDLE hStdout, const BT_i8 *prompt, BT_u32 flags) {
+BT_HANDLE BT_ShellCreate(BT_HANDLE hStdin, BT_HANDLE hStdout, const BT_i8 *szpPrompt, BT_u32 ulFlags, BT_ERROR *pError) {
+	BT_HANDLE hShell;
 
+	hShell = BT_CreateHandle(NULL, sizeof(BT_SHELL), pError);
+	if(!hShell) {
+		goto err_out;
+	}
 
+	hShell->hStdin = hStdin;
+	hShell->hStdout = hStdout;
+	hShell->szpPrompt = szpPrompt;
+	hShell->ulPromptLen = strlen(szpPrompt);
+	hShell->ulFlags = ulFlags;
+	hShell->ulStdinBufCnt = 0;
+	hShell->bPrintPrompt = 1;
 
-	return BT_ERR_NONE;
+	return hShell;
+
+err_out:
+
+	return NULL;
 }
+
+void BT_ShellDestroy(BT_HANDLE hShell) {
+	BT_DestroyHandle(hShell);
+}
+
+BT_ERROR BT_Shell(BT_HANDLE hShell) {
+	BT_ERROR Error = BT_ERR_NONE;
+
+	if(hShell) {
+		do {
+			// print prompt
+			if(hShell->bPrintPrompt) {
+				BT_Write(hShell->hStdout, 0, hShell->ulPromptLen, (char *)hShell->szpPrompt, &Error);
+				hShell->bPrintPrompt = 0;
+			} 
+			// get next char
+			BT_s32 c = BT_GetC(hShell->hStdin, BT_FILE_NON_BLOCK, &Error);
+			if(Error == BT_ERR_NONE) {
+				if(c == '\r' || c == '\n') {
+					// cr or lf detected .. echo cr and lf
+					BT_Write(hShell->hStdout, 0, 2, "\r\n", NULL);
+					// zero terminate command buffer
+					hShell->cStdinBuf[hShell->ulStdinBufCnt] = 0;
+					// execute command
+					BT_ShellCommand(hShell, hShell->cStdinBuf);
+					// prepare for next command
+					hShell->ulStdinBufCnt = 0;
+					hShell->bPrintPrompt = 1;
+
+				} else {
+					// echo char
+					BT_PutC(hShell->hStdout, 0, c);
+					hShell->cStdinBuf[hShell->ulStdinBufCnt++] = c ;
+				}
+			}
+		} 
+		while((hShell->ulFlags & BT_SHELL_FLAG_NON_BLOCK) == 0);
+	} else {
+		Error = BT_ERR_GENERIC;
+	}
+
+	return Error;
+}
+

@@ -5,10 +5,12 @@
 typedef void (*jump) 		(void);
 typedef void (*jump_regs)	(BT_u32 a, BT_u32 b, BT_u32 c, BT_u32 d);
 
-static int bt_boot(int argc, char **argv) {
+static int bt_boot(BT_HANDLE hShell, int argc, char **argv) {
+
+	BT_HANDLE hStdout = BT_ShellGetStdout(hShell);
 
 	if(argc != 2 && argc != 4) {
-		bt_printf("Usage: %s {--core [coreID]} [start-address]\n", argv[0]);
+		bt_fprintf(hStdout, "Usage: %s {--core [coreID]} [start-address]\n", argv[0]);
 		return -1;
 	}
 
@@ -17,7 +19,7 @@ static int bt_boot(int argc, char **argv) {
 
 	if(argc == 4) {
 		if(strcmp(argv[1], "--core")) {
-			bt_printf("Invalid argument %s\n", argv[1]);
+			bt_fprintf(hStdout, "Invalid argument %s\n", argv[1]);
 			return -1;
 		}
 		coreID = strtoul(argv[2], NULL, 10);
@@ -51,6 +53,5 @@ static int bt_boot(int argc, char **argv) {
 
 BT_SHELL_COMMAND_DEF oCommand = {
 	.szpName 	= "boot",
-	.eType 		= BT_SHELL_NORMAL_COMMAND,
 	.pfnCommand = bt_boot,
 };

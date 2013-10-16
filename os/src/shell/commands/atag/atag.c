@@ -106,10 +106,12 @@ setup_end_tag(void)
 }
 
 
-static int bt_atag_core(int argc, char **argv) {
+static int bt_atag_core(BT_HANDLE hShell, int argc, char **argv) {
+
+	BT_HANDLE hStdout = BT_ShellGetStdout(hShell);
 
 	if(argc != 2) {
-		bt_printf("Usage: %s [0x{start-address}]\n", argv[0]);
+		bt_fprintf(hStdout, "Usage: %s [0x{start-address}]\n", argv[0]);
 		return -1;
 	}
 
@@ -122,14 +124,15 @@ static int bt_atag_core(int argc, char **argv) {
 
 BT_SHELL_COMMAND_DEF oCoreCommand = {
 	.szpName 	= "atag_start",
-	.eType 	 	= BT_SHELL_NORMAL_COMMAND,
 	.pfnCommand	= bt_atag_core,
 };
 
 #ifdef BT_CONFIG_SHELL_CMD_ATAG_RAMDISK
-static int bt_atag_ramdisk(int argc, char **argv) {
+static int bt_atag_ramdisk(BT_HANDLE hShell, int argc, char **argv) {
+	BT_HANDLE hStdout = BT_ShellGetStdout(hShell);
+
 	if(argc != 2) {
-		bt_printf("Usage: %s [0x{size(bytes)}]\n", argv[0]);
+		bt_fprintf(hStdout, "Usage: %s [0x{size(bytes)}]\n", argv[0]);
 		return -1;
 	}
 
@@ -142,16 +145,16 @@ static int bt_atag_ramdisk(int argc, char **argv) {
 
 BT_SHELL_COMMAND_DEF oRamDiskCommand = {
 	.szpName 	= "atag_ramdisk",
-	.eType 		= BT_SHELL_NORMAL_COMMAND,
 	.pfnCommand	= bt_atag_ramdisk,
 };
 #endif
 
 #ifdef BT_CONFIG_SHELL_CMD_ATAG_INITRD2
-static int bt_atag_initrd2(int argc, char **argv) {
+static int bt_atag_initrd2(BT_HANDLE hShell, int argc, char **argv) {
+	BT_HANDLE hStdout = BT_ShellGetStdout(hShell);
 
 	if(argc != 3) {
-		bt_printf("Usage: %s [0x{start_address}] [0x{size(bytes)}]\n", argv[0]);
+		bt_fprintf(hStdout, "Usage: %s [0x{start_address}] [0x{size(bytes)}]\n", argv[0]);
 		return -1;
 	}
 
@@ -166,15 +169,16 @@ static int bt_atag_initrd2(int argc, char **argv) {
 
 BT_SHELL_COMMAND_DEF oInitrdCommand = {
 	.szpName	= "atag_initrd2",
-	.eType		= BT_SHELL_NORMAL_COMMAND,
 	.pfnCommand	= bt_atag_initrd2,
 };
 #endif
 
 #ifdef BT_CONFIG_SHELL_CMD_ATAG_MEM
-static int bt_atag_mem(int argc, char **argv) {
+static int bt_atag_mem(BT_HANDLE hShell, int argc, char **argv) {
+	BT_HANDLE hStdout = BT_ShellGetStdout(hShell);
+
 	if(argc != 3) {
-		bt_printf("Usage: %s [0x{start_address}] [0x{size(bytes)}]\n", argv[0]);
+		bt_fprintf(hStdout, "Usage: %s [0x{start_address}] [0x{size(bytes)}]\n", argv[0]);
 		return -1;
 	}
 
@@ -189,15 +193,16 @@ static int bt_atag_mem(int argc, char **argv) {
 
 BT_SHELL_COMMAND_DEF oMemCommand = {
 	.szpName 	= "atag_mem",
-	.eType		= BT_SHELL_NORMAL_COMMAND,
 	.pfnCommand	= bt_atag_mem,
 };
 #endif
 
 #ifdef BT_CONFIG_SHELL_CMD_ATAG_CMDLINE
-static int bt_atag_cmdline(int argc, char **argv) {
+static int bt_atag_cmdline(BT_HANDLE hShell, int argc, char **argv) {
+	BT_HANDLE hStdout = BT_ShellGetStdout(hShell);
+
 	if(argc != 2) {
-		bt_printf("Usage: %s \"[kernel command line]\"\n", argv[0]);
+		bt_fprintf(hStdout, "Usage: %s \"[kernel command line]\"\n", argv[0]);
 		return -1;
 	}
 
@@ -208,18 +213,16 @@ static int bt_atag_cmdline(int argc, char **argv) {
 
 BT_SHELL_COMMAND_DEF oCmdlineCommand = {
 	.szpName	= "atag_cmdline",
-	.eType		= BT_SHELL_NORMAL_COMMAND,
 	.pfnCommand	= bt_atag_cmdline,
 };
 #endif
 
-static int bt_atag_finish(int argc, char **argv) {
+static int bt_atag_finish(BT_HANDLE hShell, int argc, char **argv) {
 	setup_end_tag();
 	return 0;
 }
 
 BT_SHELL_COMMAND_DEF oFinishCommand = {
 	.szpName 	= "atag_finish",
-	.eType 		= BT_SHELL_NORMAL_COMMAND,
 	.pfnCommand	= bt_atag_finish,
 };

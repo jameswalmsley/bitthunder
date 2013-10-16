@@ -10,17 +10,19 @@ static void wait_jtag() {
 	}
 }
 
-static int bt_boot_jtag(int argc, char **argv) {
+static int bt_boot_jtag(BT_HANDLE hShell, int argc, char **argv) {
+
+	BT_HANDLE hStdout = BT_ShellGetStdout(hShell);
 
 	if(argc != 3) {
-		bt_printf("Usage: %s --core [coreID]\n", argv[0]);
+		bt_fprintf(hStdout, "Usage: %s --core [coreID]\n", argv[0]);
 		return -1;
 	}
 
 	BT_u32 coreID = 0;
 
 	if(strcmp(argv[1], "--core")) {
-		bt_printf("Invalid argument %s\n", argv[1]);
+		bt_fprintf(hStdout, "Invalid argument %s\n", argv[1]);
 		return -1;
 	}
 
@@ -53,6 +55,5 @@ static int bt_boot_jtag(int argc, char **argv) {
 
 BT_SHELL_COMMAND_DEF oCommand = {
 	.szpName 	= "boot_jtag",
-	.eType 		= BT_SHELL_NORMAL_COMMAND,
 	.pfnCommand = bt_boot_jtag,
 };

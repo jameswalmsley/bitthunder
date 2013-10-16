@@ -1,17 +1,18 @@
 #include <bitthunder.h>
 
-static int bt_source(int argc, char **argv) {
+static int bt_source(BT_HANDLE hShell, int argc, char **argv) {
+
+	BT_HANDLE hStdout = BT_ShellGetStdout(hShell);
 
 	if(argc != 2) {
-		bt_printf("Usage: %s [path]\n", argv[0]);
+		bt_fprintf(hStdout, "Usage: %s [path]\n", argv[0]);
 		return -1;
 	}
 
-	return BT_ShellScript(argv[1]);
+	return BT_ShellScript(hShell, argv[1]);
 }
 
 BT_SHELL_COMMAND_DEF oCommand = {
 	.szpName = "source",
-	.eType = BT_SHELL_NORMAL_COMMAND,
 	.pfnCommand = bt_source,
 };

@@ -1,12 +1,13 @@
 #include <bitthunder.h>
 #include <stdlib.h>
 
-static int bt_load_fpga(int argc, char **argv) {
+static int bt_load_fpga(BT_HANDLE hShell, int argc, char **argv) {
 
+	BT_HANDLE hStdout = BT_ShellGetStdout(hShell);
 	BT_ERROR Error;
 
 	if(argc != 4 && argc != 5) {
-		bt_printf("Usage: %s [buffer_address] [fpga_device] [bitstream] [length]\n", argv[0]);
+		bt_fprintf(hStdout, "Usage: %s [buffer_address] [fpga_device] [bitstream] [length]\n", argv[0]);
 		return -1;
 	}
 
@@ -22,13 +23,13 @@ static int bt_load_fpga(int argc, char **argv) {
 
 	BT_HANDLE hFile = BT_Open(argv[3], "rb", &Error);
 	if(!hFile) {
-		bt_printf("Could not open bitstream at %s\n", argv[3]);
+		bt_fprintf(hStdout, "Could not open bitstream at %s\n", argv[3]);
 		return -1;
 	}
 
 	BT_HANDLE hInode = BT_GetInode(argv[3], &Error);
 	if(!hInode) {
-		bt_printf("Could not stat bitstream at %s\n", argv[3]);
+		bt_fprintf(hStdout, "Could not stat bitstream at %s\n", argv[3]);
 		BT_CloseHandle(hFile);
 		return -1;
 	}
@@ -36,7 +37,11 @@ static int bt_load_fpga(int argc, char **argv) {
 	BT_INODE oInode;
 	BT_ReadInode(hInode, &oInode);
 
+	BT_u32 addr = strtoul(argv[1], NULL, 16);
+
 	BT_kPrint("Loading %s at %08X (%llu bytes)", argv[3], addr, oInode.ullFilesize);
+
+	void *p = (void *) addr;
 
 	BT_Read(hFile, 0, oInode.ullFilesize, p, &Error);
 

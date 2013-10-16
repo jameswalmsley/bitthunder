@@ -2,8 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-static int bt_ls(int argc, char **argv) {
+static int bt_ls(BT_HANDLE hShell, int argc, char **argv) {
 
+	BT_HANDLE hStdout = BT_ShellGetStdout(hShell);
 	BT_ERROR Error;
 	char *szpDir = 0;
 	BT_DIRENT oDirent;
@@ -13,13 +14,13 @@ static int bt_ls(int argc, char **argv) {
 	} else if(argc == 2) {
 		szpDir = argv[1];
 	} else {
-		bt_printf("Usage: %s [dir]\n", argv[0]);
+		bt_fprintf(hStdout, "Usage: %s [dir]\n", argv[0]);
 		return -1;
 	}
 
 	BT_HANDLE hDir = BT_OpenDir(szpDir, &Error);
 	if(!hDir) {
-		bt_printf("ls: cannot access %s: No such file or directory\n", szpDir);
+		bt_fprintf(hStdout, "ls: cannot access %s: No such file or directory\n", szpDir);
 		return 0;
 	}
 
@@ -30,8 +31,8 @@ static int bt_ls(int argc, char **argv) {
 			attr[0] = 'd';
 		}
 
-		bt_printf("%s %10d ", attr, oDirent.ullFileSize);
-		bt_printf("%s\n", oDirent.szpName);
+		bt_fprintf(hStdout, "%s %10d ", attr, oDirent.ullFileSize);
+		bt_fprintf(hStdout, "%s\n", oDirent.szpName);
 	}
 
 	BT_CloseHandle(hDir);
@@ -41,6 +42,5 @@ static int bt_ls(int argc, char **argv) {
 
 BT_SHELL_COMMAND_DEF oCommand = {
 	.szpName = "ls",
-	.eType = BT_SHELL_NORMAL_COMMAND,
 	.pfnCommand = bt_ls,
 };
