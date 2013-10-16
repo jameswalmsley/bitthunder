@@ -9,8 +9,8 @@ typedef struct _BT_CACHE {
 } BT_CACHE;
 
 struct _PAGE_ALLOC {
-	BT_CACHE *null;
 	BT_u32	size;
+	BT_CACHE *null;
 };
 
 void bt_initialise_slab();

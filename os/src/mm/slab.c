@@ -205,6 +205,7 @@ void BT_kFree(void *p) {
 		BT_CacheFree(pCache, tag);
 	} else {
 		struct _PAGE_ALLOC *alloc = (struct _PAGE_ALLOC *) p;
+		alloc -= 1;
 		bt_page_free((BT_PHYS_ADDR) bt_virt_to_phys(tag), alloc->size);
 	}
 }
