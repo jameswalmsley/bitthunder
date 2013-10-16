@@ -78,6 +78,10 @@ static BT_HANDLE fullfat_mount(BT_HANDLE hFS, BT_HANDLE hVolume, BT_ERROR *pErro
 	}
 
 	pMount->pBlockCache = BT_kMalloc(8192);
+	if(!pMount->pBlockCache) {
+		goto err_block_cache_free_out;
+	}
+
 	pMount->hVolume = hVolume;
 	pMount->pIoman = FF_CreateIOMAN(pMount->pBlockCache, 8192, 512, &ffError);
 	if(!pMount->pIoman) {
@@ -88,11 +92,20 @@ static BT_HANDLE fullfat_mount(BT_HANDLE hFS, BT_HANDLE hVolume, BT_ERROR *pErro
 	ffError = FF_RegisterBlkDevice(pMount->pIoman, 512, fullfat_writeblocks, fullfat_readblocks, pMount);
 
 	ffError = FF_MountPartition(pMount->pIoman, 0);
+	if(ffError) {
+		BT_kPrint("fullfat_mount: %s", FF_GetErrMessage(ffError));
+		goto err_mount_out;
+	}
 
-return (BT_HANDLE) pMount;
+	return (BT_HANDLE) pMount;
+
+err_mount_out:
+	ffError = FF_DestroyIOMAN(pMount->pIoman);
+	BT_kFree(pMount->pBlockCache);
+
+err_block_cache_free_out:
 
 err_free_out:
-	BT_kFree(pMount->pBlockCache);
 	BT_DestroyHandle((BT_HANDLE)pMount);
 
 	*pError = Error;
