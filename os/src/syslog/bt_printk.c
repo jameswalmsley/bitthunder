@@ -20,7 +20,7 @@ BT_ERROR BT_kPrint(const char *format, ... ) {
 #endif
 
 	va_start(ap, format);
-	bt_kvprintf(format, bt_putc, NULL, 10, ap);
+	bt_kvprintf(format, bt_fputc, BT_stdout, 10, ap);
 	va_end(ap);
 
 #ifdef BT_CONFIG_SYSLOG_LINE_ENDINGS_CR

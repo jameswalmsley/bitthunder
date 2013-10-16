@@ -438,7 +438,18 @@ bt_printf(const char *fmt, ...)
 	va_list ap;
 
 	va_start(ap, fmt);
-	bt_kvprintf(fmt, bt_putc, NULL, 10, ap);
+	bt_kvprintf(fmt, bt_fputc, BT_stdout, 10, ap);
+	va_end(ap);
+}
+
+void
+bt_fprintf(void *stream, const char *fmt, ...)
+{
+	/* http://www.pagetable.com/?p=298 */
+	va_list ap;
+
+	va_start(ap, fmt);
+	bt_kvprintf(fmt, bt_fputc, stream, 10, ap);
 	va_end(ap);
 }
 
