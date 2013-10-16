@@ -1927,9 +1927,7 @@ cleanup:
 FF_T_BOOL FF_ValidShortChar (FF_T_INT8 Chr)
 {
 	return (Chr >= 'A' && Chr <= 'Z') ||
-#if defined(FF_SHORTNAME_CASE)
 		(Chr >= 'a' && Chr <= 'z') ||	// lower-case can be stored using NT/XP attribute
-#endif
 		(Chr >= '0' && Chr <= '9') ||
 		strchr ("$%-_@~`!(){}^#&", Chr) != NULL;
 }
