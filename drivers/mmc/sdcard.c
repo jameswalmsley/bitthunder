@@ -410,7 +410,7 @@ static BT_u32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount,
 
 static BT_u32 sdcard_blockwrite(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount, void *pBuffer, BT_ERROR *pError) {
 
-	BT_kPrint("SDCARD: BlockWrite (%d,%d)", ulBlock, ulCount);
+	//BT_kPrint("SDCARD: BlockWrite (%d,%d)", ulBlock, ulCount);
 
 	if(!hBlock->pHost->rca) {
 		// Card not initialised!
@@ -486,7 +486,7 @@ static BT_u32 sdcard_blockwrite(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount
 		return 0;
 	}
 
-	BT_kPrint("SDCARD: Write command complete, writing data now");
+	//BT_kPrint("SDCARD: Write command complete, writing data now");
 
 	// Write the data.
 
