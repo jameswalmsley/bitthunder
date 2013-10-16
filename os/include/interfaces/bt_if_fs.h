@@ -12,6 +12,8 @@ typedef struct _BT_IF_FS {
 	BT_ERROR	(*pfnMkDir)		(BT_HANDLE hMount, const BT_i8 *szpPath);
 	BT_HANDLE	(*pfnOpenDir)	(BT_HANDLE hMount, const BT_i8 *szpPath, BT_ERROR *pError);
 	BT_HANDLE	(*pfnGetInode)	(BT_HANDLE hMount, const BT_i8 *szpPath, BT_ERROR *pError);
+	BT_ERROR	(*pfnRemove)	(BT_HANDLE hMount, const BT_i8 *szpPath);
+	BT_ERROR	(*pfnRename)	(BT_HANDLE hMount, const BT_i8 *szpPathA, const BT_i8 *szpPathB);
 } BT_IF_FS;
 
 

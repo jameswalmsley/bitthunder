@@ -120,8 +120,6 @@ static BT_HANDLE fullfat_open(BT_HANDLE hMount, const BT_i8 *szpPath, BT_u32 ulM
 
 	FF_ERROR ffError;
 
-	BT_kPrint("fullfat_open: %s, 0x%08x", szpPath, ulModeFlags); // @@MS
-
 	BT_FF_FILE *pFile = (BT_FF_FILE *) BT_CreateHandle(&oFileHandleInterface, sizeof(BT_FF_FILE), pError);
 	if(!pFile) {
 		return NULL;
@@ -129,7 +127,7 @@ static BT_HANDLE fullfat_open(BT_HANDLE hMount, const BT_i8 *szpPath, BT_u32 ulM
 
 	BT_FF_MOUNT *pMount = (BT_FF_MOUNT *) hMount;
 
-	pFile->pFile = FF_Open(pMount->pIoman, szpPath, ulModeFlags, &ffError); // @@MS: FF_MODE_READ
+	pFile->pFile = FF_Open(pMount->pIoman, szpPath, ulModeFlags, &ffError);
 	if(!pFile->pFile) {
 		return NULL;
 	}
@@ -137,6 +135,28 @@ static BT_HANDLE fullfat_open(BT_HANDLE hMount, const BT_i8 *szpPath, BT_u32 ulM
 	pFile->pMount = pMount;
 
 	return (BT_HANDLE) pFile;
+}
+
+static BT_ERROR fullfat_remove(BT_HANDLE hMount, const BT_i8 *szpPath) {
+
+	FF_ERROR ffError;
+
+	BT_FF_MOUNT *pMount = (BT_FF_MOUNT *) hMount;
+
+	ffError = FF_RmFile(pMount->pIoman, szpPath);
+
+	return (BT_ERROR) ffError;
+}
+
+static BT_ERROR fullfat_rename(BT_HANDLE hMount, const BT_i8 *szpPathA, const BT_i8 *szpPathB) {
+
+	FF_ERROR ffError;
+
+	BT_FF_MOUNT *pMount = (BT_FF_MOUNT *) hMount;
+
+	ffError = FF_Move(pMount->pIoman, szpPathA, szpPathB);
+
+	return (BT_ERROR) ffError;
 }
 
 static BT_ERROR fullfat_file_cleanup(BT_HANDLE hFile) {
@@ -331,6 +351,8 @@ static const BT_IF_FS oFilesystemInterface = {
 	.pfnMkDir		= fullfat_mkdir,
 	.pfnOpenDir 	= fullfat_opendir,
 	.pfnGetInode 	= fullfat_open_inode,
+	.pfnRemove 		= fullfat_remove,
+	.pfnRename 		= fullfat_rename,
 };
 
 static const BT_IF_HANDLE oHandleInterface = {

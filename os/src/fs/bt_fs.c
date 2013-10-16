@@ -218,6 +218,40 @@ BT_HANDLE BT_GetInode(const BT_i8 *szpPath, BT_ERROR *pError) {
 	return pFS->pfnGetInode(pMount->hMount, path, pError);
 }
 
+BT_ERROR BT_Remove(const BT_i8 *szpPath) {
+	BT_MOUNTPOINT *pMount = GetMountPoint(szpPath);
+	if(!pMount) {
+		return BT_ERR_GENERIC;
+	}
+
+	const BT_i8 *path = get_relative_path(pMount, szpPath);
+
+	const BT_IF_FS *pFS = pMount->pFS->hFS->h.pIf->oIfs.pFilesystemIF;
+	return pFS->pfnRemove(pMount->hMount, path);
+}
+
+BT_ERROR BT_Rename(const BT_i8 *szpPathA, const BT_i8 *szpPathB) {
+	BT_MOUNTPOINT *pMountA = GetMountPoint(szpPathA);
+	if(!pMountA) {
+		return BT_ERR_GENERIC;
+	}
+
+	BT_MOUNTPOINT *pMountB = GetMountPoint(szpPathB);
+	if(!pMountB) {
+		return BT_ERR_GENERIC;
+	}
+
+	if (strcmp(pMountA->szpPath,pMountB->szpPath)!=0) {
+		return BT_ERR_GENERIC;
+	}
+
+	const BT_i8 *pathA = get_relative_path(pMountA, szpPathA);
+	const BT_i8 *pathB = get_relative_path(pMountB, szpPathB);
+
+	const BT_IF_FS *pFS = pMountA->pFS->hFS->h.pIf->oIfs.pFilesystemIF;
+	return pFS->pfnRename(pMountA->hMount, pathA, pathB);
+}
+
 static BT_ERROR bt_fs_init() {
 	BT_ListInit(&g_oFileSystems);
 	BT_ListInit(&g_oMountPoints);
