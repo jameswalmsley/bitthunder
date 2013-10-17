@@ -90,7 +90,11 @@ static BT_HANDLE fullfat_mount(BT_HANDLE hFS, BT_HANDLE hVolume, BT_ERROR *pErro
 	}
 
 	ffError = FF_RegisterBlkDevice(pMount->pIoman, 512, fullfat_writeblocks, fullfat_readblocks, pMount);
-
+	if(ffError != FF_ERR_NONE) {
+		Error = BT_ERR_GENERIC;
+		goto err_free_out;
+	}
+		 
 	ffError = FF_MountPartition(pMount->pIoman, 0);
 	if(ffError) {
 		BT_kPrint("fullfat_mount: %s", FF_GetErrMessage(ffError));
@@ -106,6 +110,7 @@ err_mount_out:
 err_block_cache_free_out:
 
 err_free_out:
+	BT_kFree(pMount->pBlockCache);
 	BT_DestroyHandle((BT_HANDLE)pMount);
 
 	*pError = Error;

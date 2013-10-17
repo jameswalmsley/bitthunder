@@ -47,4 +47,9 @@ config FS_FULLFAT_DRIVER_BUSY_SLEEP
 
 endmenu
 
+config FS_EXT2
+    bool "Ext2 filesystem support (Read Only)"
+	select FS
+	default n
+
 endmenu
