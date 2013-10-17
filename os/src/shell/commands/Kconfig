@@ -64,4 +64,8 @@ config SHELL_CMD_CAT
 	bool "cat"
 	default n
 
+config SHELL_CMD_MOUNT
+	bool "mount"
+	default n
+
 endmenu
