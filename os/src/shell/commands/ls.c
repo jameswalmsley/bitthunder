@@ -31,7 +31,7 @@ static int bt_ls(BT_HANDLE hShell, int argc, char **argv) {
 			attr[0] = 'd';
 		}
 
-		bt_fprintf(hStdout, "%s %10d ", attr, oDirent.ullFileSize);
+		bt_fprintf(hStdout, "%s %10llu ", attr, oDirent.ullFileSize);
 		bt_fprintf(hStdout, "%s\n", oDirent.szpName);
 	}
 
