@@ -175,13 +175,13 @@ static const BT_RESOURCE oZynq_i2c1_resources[] = {
 
 BT_INTEGRATED_DEVICE_DEF oZynq_i2c1_device = {
 	.name 					= "zynq,i2c",
-	.ulTotalResources		= BT_ARRAY_SIZE(oZynq_i2c0_resources),
-	.pResources				= oZynq_i2c0_resources,
+	.ulTotalResources		= BT_ARRAY_SIZE(oZynq_i2c1_resources),
+	.pResources				= oZynq_i2c1_resources,
 };
 
 BT_DEVFS_INODE_DEF oZynq_i2c1_inode = {
 	.szpName				= "i2c1",
-	.pDevice				= &oZynq_i2c0_device,
+	.pDevice				= &oZynq_i2c1_device,
 };
 #endif
 
