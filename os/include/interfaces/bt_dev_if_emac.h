@@ -31,7 +31,7 @@ typedef struct _BT_DEV_IF_EMAC {
 	BT_u32 		(*pfnGetMTU)			(BT_HANDLE hIF, BT_ERROR *pError);
 
 	BT_u32		(*pfnDataReady)			(BT_HANDLE hIF, BT_ERROR *pError);
-	BT_ERROR	(*pfnRead)				(BT_HANDLE hIF, BT_u32 ulSize, void *pBuffer);
+	BT_ERROR	(*pfnRead)				(BT_HANDLE hIF, BT_u32 ulSize, BT_u32 pos, void *pBuffer);
 	BT_ERROR	(*pfnDropFrame)			(BT_HANDLE hIF, BT_u32 ulSize);
 	BT_BOOL		(*pfnTxFifoReady)		(BT_HANDLE hIF, BT_ERROR *pError);
 	BT_ERROR	(*pfnWrite)				(BT_HANDLE hIF, BT_u32 ulSize, void *pBuffer);
@@ -39,17 +39,19 @@ typedef struct _BT_DEV_IF_EMAC {
 	BT_ERROR	(*pfnSendEvent)			(BT_HANDLE hIF, BT_u32 ulEvent);
 } BT_DEV_IF_EMAC;
 
+typedef struct _BT_DEV_IF_MII {
+	BT_u16 		(*pfnRead)	(BT_HANDLE hMII, BT_u32 phy_id, BT_u32 regnum, BT_ERROR *pError);
+	BT_ERROR 	(*pfnWrite)	(BT_HANDLE hMII, BT_u32 phy_id, BT_u32 regnum, BT_u16 val);
+	BT_ERROR	(*pfnReset)	(BT_HANDLE hMII);
+} BT_DEV_IF_MII;
 
-
-
-
-
-
-
-
-
-
-
-
+typedef struct BT_DEV_IF_PHY {
+	BT_ERROR 	(*pfnConfigInit)		(struct bt_phy_device *phydev);
+	BT_ERROR 	(*pfnConfigAneg)		(struct bt_phy_device *phydev);
+	BT_ERROR	(*pfnReadStatus)		(struct bt_phy_device *phydev);
+//	BT_ERROR	(*pfnAckInterrupt)		(struct bt_phy_device *phydev);
+//	BT_ERROR	(*pfnConfigInterrupt)	(struct bt_phy_device *phydev);
+//	BT_ERROR 	(*pfnDidInterrupt)		(struct bt_phy_device *phydev);
+} BT_DEV_IF_PHY;
 
 #endif
