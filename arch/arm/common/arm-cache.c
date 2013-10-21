@@ -3,6 +3,9 @@
 #include "arm11cpu.h"
 
 
+static volatile PL310_REGS *g_pregs = NULL;
+
+
 /* CP15 operations */
 #define wrcp(rn, v)	__asm__ __volatile__(\
 			 "mcr " rn "\n"\
@@ -20,7 +23,7 @@
 
 static BT_ERROR BT_L2CacheFlush() {
 	register BT_u32 L2CCReg;
-	volatile PL310_REGS *pRegs = (PL310_REGS *) (0xF8F02000);
+	volatile PL310_REGS *pRegs = g_pregs;
 	/* Flush the caches */
 
 	pRegs->reg7_clean_inv_way = 0x0000FFFF;
@@ -36,9 +39,38 @@ static BT_ERROR BT_L2CacheFlush() {
 	return BT_ERR_NONE;
 }
 
+BT_ERROR BT_L2CacheInvalidateRange(void *addr, BT_u32 len) {
+	volatile PL310_REGS *pRegs = (PL310_REGS *) g_pregs;
+	const BT_u32 cacheline = 32;
+	BT_u32 end;
+
+	if(len) {
+		end = (BT_u32) addr + len;
+		BT_u32 adr = (BT_u32) addr & ~(cacheline - 1);
+
+		while(adr < end) {
+		    pRegs->reg7_inv_pa = adr;
+			adr += cacheline;
+		}
+	}
+
+	while(pRegs->reg7_cache_sync);
+
+	dsb();
+
+	return BT_ERR_NONE;
+}
+
+BT_ERROR BT_L2CacheInvalidateLine(void *addr) {
+	volatile PL310_REGS *pRegs = (PL310_REGS *) g_pregs;
+	pRegs->reg7_inv_pa = (BT_u32) addr;
+	dsb();
+	return BT_ERR_NONE;
+}
+
 static BT_ERROR BT_L2CacheInvalidate() {
 	register unsigned int L2CCReg;
-	volatile PL310_REGS *pRegs = (PL310_REGS *) (0xF8F02000);
+	volatile PL310_REGS *pRegs = (PL310_REGS *) g_pregs;
 
 	/* Invalidate the caches */
 	pRegs->reg7_inv_way = 0x0000FFFF;
@@ -56,7 +88,7 @@ static BT_ERROR BT_L2CacheInvalidate() {
 
 static BT_ERROR BT_L2CacheEnable() {
 	register BT_u32 L2CCReg,CtrlReg;
-	volatile PL310_REGS *pRegs = (PL310_REGS *) (0xF8F02000);
+	volatile PL310_REGS *pRegs = g_pregs;
 
 	L2CCReg = pRegs->reg1_control;
 
@@ -100,7 +132,7 @@ static BT_ERROR BT_L2CacheEnable() {
 static BT_ERROR BT_L2CacheDisable() {
 
     register BT_u32 L2CCReg,CtrlReg;
-	volatile PL310_REGS *pRegs = (PL310_REGS *) (0xF8F02000);
+	volatile PL310_REGS *pRegs = (PL310_REGS *) g_pregs;
 
 	L2CCReg = pRegs->reg1_control;
 
@@ -131,6 +163,13 @@ static BT_ERROR BT_L2CacheDisable() {
     	dsb();
     }
 
+	return BT_ERR_NONE;
+}
+
+static BT_ERROR BT_L1DCacheInvalidateLine(void *addr) {
+	wrcp(ARM_CP15_CACHE_SIZE_SEL, 0);
+	wrcp(ARM_CP15_INVAL_DC_LINE_MVA_POC, ((BT_u32) addr & (~0x1F)));
+	dsb();
 	return BT_ERR_NONE;
 }
 
@@ -282,6 +321,40 @@ BT_ERROR BT_DCacheInvalidate() {
 	return BT_ERR_NONE;
 }
 
+BT_ERROR BT_DCacheInvalidateLine(void *addr) {
+	BT_L2CacheInvalidateLine(addr);
+	BT_L1DCacheInvalidateLine(addr);
+	return BT_ERR_NONE;
+}
+
+BT_ERROR BT_DCacheInvalidateRange(void *addr, BT_u32 len) {
+	volatile PL310_REGS *pRegs = (PL310_REGS *) g_pregs;
+	const BT_u32 cacheline = 32;
+	BT_u32 end;
+
+	if(len) {
+		end = (BT_u32) addr + len;
+		BT_u32 adr = (BT_u32) addr & ~(cacheline - 1);
+
+		wrcp(ARM_CP15_CACHE_SIZE_SEL, 0);
+
+		while(adr < end) {
+			pRegs->reg7_inv_pa = adr;
+			dsb();
+			__asm__ __volatile__("mcr "						\
+			ARM_CP15_INVAL_DC_LINE_MVA_POC :: "r" (adr));
+			//wrcp(ARM_CP15_INVAL_DC_LINE_MVA_POC, (BT_u32) adr);
+			adr += cacheline;
+		}
+	}
+
+	dsb();
+
+	while(pRegs->reg7_cache_sync);
+
+	return BT_ERR_NONE;
+}
+
 static BT_ERROR BT_L1ICacheInvalidate() {
 	wrcp(ARM_CP15_CACHE_SIZE_SEL, 1);
 	/* invalidate the instruction cache */
@@ -297,3 +370,14 @@ BT_ERROR BT_ICacheInvalidate() {
 	BT_L1ICacheInvalidate();
 	return BT_ERR_NONE;
 }
+
+
+BT_ERROR arm_pl310_init() {
+	g_pregs = (PL310_REGS *) bt_ioremap((void *) (0xF8F02000), BT_SIZE_4K);
+	return BT_ERR_NONE;
+}
+
+BT_MODULE_INIT_DEF oModuleEntry = {
+	.name = "arm,pl310-cache",
+	arm_pl310_init,
+};

@@ -10,6 +10,8 @@ BT_ERROR 	BT_DCacheEnable			();
 BT_ERROR 	BT_DCacheDisable		();
 BT_ERROR 	BT_DCacheFlush			();
 BT_ERROR 	BT_DCacheInvalidate		();
+BT_ERROR 	BT_DCacheInvalidateLine(void *addr);
+BT_ERROR 	BT_DCacheInvalidateRange(void *addr, BT_u32 len);
 
 BT_ERROR 	BT_ICacheEnable			();
 BT_ERROR 	BT_ICacheDisable		();
