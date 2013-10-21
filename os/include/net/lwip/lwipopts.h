@@ -32,7 +32,7 @@
 //*****************************************************************************
 // ---------- Pbuf options ----------
 //*****************************************************************************
-#define ETH_PAD_SIZE                    2		// to ensure 32 bit alignment
+#define ETH_PAD_SIZE                    0		// to ensure 32 bit alignment
 
 
 /* Minimal changes to opt.h required for etharp unit tests: */
@@ -47,7 +47,9 @@
 #define DEFAULT_TCP_RECVMBOX_SIZE       10
 #define DEFAULT_ACCEPTMBOX_SIZE         10
 
-
+#define CHECKSUM_GEN_IP					0
+#define CHECKSUM_GEN_UDP				0
+#define CHECKSUM_GEN_TCP 				0
 
 
 #endif /* __LWIPOPTS_H__ */
