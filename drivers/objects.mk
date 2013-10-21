@@ -1,3 +1,7 @@
+ifeq ($(BT_CONFIG_DRIVERS_NET), y)
+include $(BASE)drivers/net/objects.mk
+endif
+
 ifeq ($(BT_CONFIG_DRIVERS_SDCARD), y)
 include $(BASE)drivers/mmc/objects.mk
 endif

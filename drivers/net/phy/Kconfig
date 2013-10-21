@@ -1,0 +1,8 @@
+menu "PHYs"
+
+config DRIVERS_NET_PHY_MARVELL
+	   bool "Marvell Phys"
+	   select DRIVERS_NET
+	   default n
+
+endmenu

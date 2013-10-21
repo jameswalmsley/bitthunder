@@ -5,6 +5,8 @@ source drivers/gpio/Kconfig
 
 source drivers/rtc/Kconfig
 
+source drivers/net/Kconfig
+
 config DRIVERS_SDCARD
     bool "SDCard / MMC Support"
 	default n

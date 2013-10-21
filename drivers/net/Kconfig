@@ -1,0 +1,9 @@
+menu "Network Controllers"
+
+config DRIVERS_NET
+	bool
+	default n
+
+source drivers/net/phy/Kconfig
+
+endmenu
