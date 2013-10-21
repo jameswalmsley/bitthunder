@@ -2,10 +2,12 @@
 #define __BT_NET_H__
 
 #include <bitthunder.h>
+#include "bt_phy.h"
 
 typedef struct _BT_NET_IF {
 	BT_LIST_ITEM			oItem;
 	BT_HANDLE 				hIF;
+	BT_HANDLE 				hPhy;
 	BT_HANDLE 				hTxFifo;
 	BT_u32 					ulFlags;
 
