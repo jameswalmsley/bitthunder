@@ -80,6 +80,16 @@ config MACH_ZYNQ_CAN_1
     bool "Use CAN(1) peripheral"
 	default n
 
+comment "Gigabit Ethernet MACs"
+
+config MACH_ZYNQ_GEM_0
+    bool "Use GEM (MAC) 0 peripheral"
+	default n
+
+config MACH_ZYNQ_GEM_1
+	bool "Use GEM (MAC) 1 peripheral"
+	default n
+
 comment "I2C devices"
 config MACH_ZYNQ_I2C_0
     bool "Use I2C(0) peripheral"
