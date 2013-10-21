@@ -18,10 +18,11 @@ void *bt_ioremap(void *phys, BT_u32 size) {
 	BT_u32 diff = (bt_paddr_t) phys - BT_PAGE_TRUNC((bt_paddr_t) phys);
 
 	bt_vaddr_t mapping = bt_vm_map_region(map, (bt_paddr_t) BT_PAGE_TRUNC((bt_paddr_t) phys), 0, size+diff, BT_PAGE_IOMEM);
+
 	return (void *) mapping + diff;
 }
 
-void bt_iounmap(void *iomem) {
+void bt_iounmap(volatile void *iomem) {
 	struct bt_vm_map *map = bt_vm_get_kernel_map();
 	bt_vm_unmap_region(map, (bt_vaddr_t) iomem);
 	return;

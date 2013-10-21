@@ -6,8 +6,10 @@
 
 #ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
 void *bt_ioremap(void *phys_addr, BT_u32 size);
+void bt_iounmap(volatile void *iomem);
 #else
 #define bt_ioremap(x, y)	x
+#define bt_iounmap(x)
 #endif
 
 #endif
