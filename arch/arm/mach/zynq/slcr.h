@@ -271,6 +271,9 @@ BT_u32 BT_ZYNQ_GetDDRPLLFrequency();
 BT_u32 BT_ZYNQ_GetCpuFrequency();
 BT_u32 BT_ZYNQ_GetCpu1xFrequency();
 
+void zynq_slcr_unlock(volatile ZYNQ_SLCR_REGS *pRegs);
+void zynq_slcr_lock(volatile ZYNQ_SLCR_REGS *pRegs);
+
 void zynq_slcr_cpu_start(BT_u32 ulCoreID);
 void zynq_slcr_cpu_stop(BT_u32 ulCoreID);
 

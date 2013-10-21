@@ -133,26 +133,25 @@ BT_u32 BT_ZYNQ_GetCpu1xFrequency() {
 	return ulCPUClk / 4;
 }
 
-void zynq_slcr_unlock() {
-	volatile ZYNQ_SLCR_REGS *pRegs = bt_ioremap((void *)ZYNQ_SLCR, BT_SIZE_4K);
+void zynq_slcr_unlock(volatile ZYNQ_SLCR_REGS *pRegs) {
 	pRegs->SLCR_UNLOCK = 0xdf0d;
 }
 
-void zynq_slcr_lock() {
-	volatile ZYNQ_SLCR_REGS *pRegs = bt_ioremap((void *)ZYNQ_SLCR, BT_SIZE_4K);
+void zynq_slcr_lock(volatile ZYNQ_SLCR_REGS *pRegs) {
 	pRegs->SLCR_LOCK = 0x767b;
 }
 
-
 void zynq_slcr_cpu_start(BT_u32 ulCoreID) {
-	zynq_slcr_unlock();
 	volatile ZYNQ_SLCR_REGS *pRegs = bt_ioremap((void *)ZYNQ_SLCR, BT_SIZE_4K);
+	zynq_slcr_unlock(pRegs);
 	pRegs->A9_CPU_RST_CTRL &= ~((SLCR_A9_CPU_CLKSTOP | SLCR_A9_CPU_RST) << ulCoreID);
+	bt_iounmap(pRegs);
 }
 
 
 void zynq_slcr_cpu_stop(BT_u32 ulCoreID) {
-	zynq_slcr_unlock();
 	volatile ZYNQ_SLCR_REGS *pRegs = bt_ioremap((void *)ZYNQ_SLCR, BT_SIZE_4K);
+	zynq_slcr_unlock(pRegs);
 	pRegs->A9_CPU_RST_CTRL = (SLCR_A9_CPU_CLKSTOP | SLCR_A9_CPU_RST) << ulCoreID;
+	bt_iounmap(pRegs);
 }
