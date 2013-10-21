@@ -94,83 +94,12 @@ static BT_u32 write_packet(BT_NET_IF *pIF, struct pbuf *pBuf) {
  */
 static err_t lwIPif_transmit(struct netif *netif, struct pbuf *p) {
 	BT_NET_IF *pIF = (BT_NET_IF*)netif->state;
-	int iBuf;
-	unsigned char *pucBuf;
-	unsigned long *pulBuf;
 	struct pbuf *q;
-	int iGather;
-	unsigned long ulGather;
-	unsigned char *pucGather;
-
-	/**
-	* Fill in the first two bytes of the payload data (configured as padding
-	* with ETH_PAD_SIZE = 2) with the total length of the payload data
-	* (minus the Ethernet MAC layer header).
-	*
-	*/
-	*((unsigned short *)(p->payload)) = p->tot_len - 16;
-
-	/* Initialize the gather register. */
-	iGather = 0;
-	pucGather = (unsigned char *)&ulGather;
-	ulGather = 0;
 
 	/* Copy data from the pbuf(s) into the TX Fifo. */
 	for(q = p; q != NULL; q = q->next) {
-		/* Intialize a char pointer and index to the pbuf payload data. */
-		pucBuf = (unsigned char *)q->payload;
-		iBuf = 0;
-
-		/**
-		* If the gather buffer has leftover data from a previous pbuf
-		* in the chain, fill it up and write it to the Tx FIFO.
-		*
-		*/
-		while((iBuf < q->len) && (iGather != 0)) {
-			/* Copy a byte from the pbuf into the gather buffer. */
-			pucGather[iGather] = pucBuf[iBuf++];
-
-			/* Increment the gather buffer index modulo 4. */
-			iGather = ((iGather + 1) % 4);
-		}
-
-		/**
-		* If the gather index is 0 and the pbuf index is non-zero,
-		* we have a gather buffer to write into the Tx FIFO.
-		*
-		*/
-		if((iGather == 0) && (iBuf != 0)) {
-			pIF->pOps->pfnWrite(pIF->hIF, 1, (void*)&ulGather);
-			ulGather = 0;
-		}
-
-		/* Initialze a long pointer into the pbuf for 32-bit access. */
-		pulBuf = (unsigned long *)&pucBuf[iBuf];
-
-		/**
-		* Copy words of pbuf data into the Tx FIFO, but don't go past
-		* the end of the pbuf.
-		*
-		*/
-		pIF->pOps->pfnWrite(pIF->hIF, q->len/4, (void*)pulBuf);
-		pulBuf += q->len/4;
-
-		/**
-		* Check if leftover data in the pbuf and save it in the gather
-		* buffer for the next time.
-		*
-		*/
-		while(iBuf < q->len) {
-			/* Copy a byte from the pbuf into the gather buffer. */
-			pucGather[iGather] = pucBuf[iBuf++];
-
-			/* Increment the gather buffer index modulo 4. */
-			iGather = ((iGather + 1) % 4);
-		}
+		pIF->pOps->pfnWrite(pIF->hIF, q->len, q->payload);
 	}
-
-	/* Send any leftover data to the FIFO. */
-	pIF->pOps->pfnWrite(pIF->hIF, 1, (void*)&ulGather);
 
 	/* Wakeup the transmitter. */
 	pIF->pOps->pfnSendFrame(pIF->hIF);
@@ -249,7 +178,6 @@ static struct pbuf * lwip_receive(struct netif *netif) {
 
 	struct pbuf *p, *q;
 	BT_u32 ullen;
-	unsigned long *ptr;
 	#if LWIP_PTPD
 	u32_t time_s, time_ns;
 
@@ -272,31 +200,25 @@ static struct pbuf * lwip_receive(struct netif *netif) {
 	/* If a pbuf was allocated, read the packet into the pbuf. */
 	if(p != NULL) {
 		/* Place the first word into the first pbuf location. */
-		*(unsigned long *)p->payload = ulTemp;
-		p->payload = (char *)(p->payload) + 4;
-		p->len -= 4;
+		//*(unsigned long *)p->payload = ulTemp;
+		//p->payload = (char *)(p->payload) + 4;
+		//p->len -= 4;
 
 		/* Process all but the last buffer in the pbuf chain. */
 		q = p;
+		BT_u32 pos = 0;
 		while(q != NULL) {
 			/* Setup a byte pointer into the payload section of the pbuf. */
-			ptr = q->payload;
-
-			/**
-			* Read data from FIFO into the current pbuf
-			* (assume pbuf length is modulo 4)
-			*
-			*/
-			pIF->pOps->pfnRead(pIF->hIF, q->len, ptr);
-			ptr += q->len/4;
+			pIF->pOps->pfnRead(pIF->hIF, q->len, pos, q->payload);
+			pos += q->len;
 
 			/* Link in the next pbuf in the chain. */
 			q = q->next;
 		}
 
 		/* Restore the first pbuf parameters to their original values. */
-		p->payload = (char *)(p->payload) - 4;
-		p->len += 4;
+		//p->payload = (char *)(p->payload) - 4;
+		//p->len += 4;
 
 		/* Adjust the link statistics */
 		LINK_STATS_INC(link.recv);
@@ -428,8 +350,5 @@ BT_ERROR bt_lwip_netif_init(BT_NETIF_PRIV *pIF) {
 	/* don't set NETIF_FLAG_ETHARP if this device is not an ethernet one */
 	netif->flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP;
 
-
 	return BT_ERR_NONE;
 }
-
-
