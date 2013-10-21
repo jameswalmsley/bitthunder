@@ -18,10 +18,14 @@ PYTHON:=$(BT_CONFIG_DBUILD_PYTHON)
 
 BSP_DIR:=$(shell echo $(BT_CONFIG_BSP_DIR))
 
+GIT_DESCRIBE:=$(shell git --git-dir=$(BASE).git describe)
+
 test_dir:
 	echo $(BT_CONFIG_BSP_NAME)
 	echo $(BT_CONFIG_BSP_DIR)
 
+test_git:
+	echo $(GIT_DESCRIBE)
 
 include $(BASE)$(BSP_DIR)/objects.mk
 
@@ -37,6 +41,7 @@ $(OBJECTS) $(OBJECTS-y): CFLAGS += $(CC_TCDEBUGFLAGS)
 $(OBJECTS) $(OBJECTS-y): CFLAGS += -march=$(CC_MARCH)
 $(OBJECTS) $(OBJECTS-y): CFLAGS += -mtune=$(CC_MTUNE) $(CC_TCFLAGS) $(CC_OPTIMISE)
 $(OBJECTS) $(OBJECTS-y): CFLAGS += $(CC_MACHFLAGS)
+$(OBJECTS) $(OBJECTS-y): CFLAGS += -D BT_VERSION_SUFFIX="\"$(GIT_DESCRIBE)\""
 
 $(OBJECTS) $(OBJECTS-y): CFLAGS += -nostdlib -fno-builtin -fdata-sections -ffunction-sections
 $(OBJECTS) $(OBJECTS-y): CFLAGS += -I $(BASE)/${BSP_DIR}/
