@@ -186,7 +186,7 @@ void *BT_kMalloc(BT_u32 ulSize) {
 
 	struct _PAGE_ALLOC *tag = (struct _PAGE_ALLOC *) p;
     tag->null = NULL;
-	tag->size = ulSize;
+	tag->size = ulSize + sizeof(struct _PAGE_ALLOC);
 
 	/*
 	 *	Before the allocated memory we place a pointer to the pCache.
