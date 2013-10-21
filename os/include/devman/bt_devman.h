@@ -31,6 +31,8 @@ typedef struct {
 BT_MACHINE_DESCRIPTION *BT_GetMachineDescription(BT_ERROR *pError);
 //BT_INTEGRATED_DEVICE *BT_GetIntergratedDeviceByName(const BT_i8 *szpName);
 BT_INTEGRATED_DRIVER *BT_GetIntegratedDriverByName(const BT_i8 *szpName);
+BT_u32 BT_GetTotalIntegratedDriversByType(BT_DRIVER_TYPE eType);
+BT_INTEGRATED_DRIVER *BT_GetIntegratedDriverByType(BT_DRIVER_TYPE eType, BT_u32 i);
 
 BT_ERROR BT_ProbeIntegratedDevices(BT_HANDLE hLogDevice);
 

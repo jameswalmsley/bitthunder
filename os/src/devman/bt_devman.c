@@ -75,6 +75,44 @@ BT_INTEGRATED_DRIVER *BT_GetIntegratedDriverByName(const BT_i8 *szpName) {
 	return NULL;
 }
 
+BT_u32 BT_GetTotalIntegratedDriversByType(BT_DRIVER_TYPE eType) {
+	BT_u32 total = 0;
+	BT_u32 size = (BT_u32) ((BT_u32) &__bt_arch_drivers_end - (BT_u32) &__bt_arch_drivers_start);
+	BT_u32 i;
+
+	size /= sizeof(BT_INTEGRATED_DRIVER);
+
+	for(i = 0; i < size; i++) {
+		BT_INTEGRATED_DRIVER *pDriver = (BT_INTEGRATED_DRIVER *) &__bt_arch_drivers_start;
+		pDriver += i;
+
+		if(pDriver->eType == eType) {
+			total += 1;
+		}
+	}
+
+	return total;
+}
+
+BT_INTEGRATED_DRIVER *BT_GetIntegratedDriverByType(BT_DRIVER_TYPE eType, BT_u32 i) {
+	BT_u32 size = (BT_u32) ((BT_u32) &__bt_arch_drivers_end - (BT_u32) &__bt_arch_drivers_start);
+	size /= sizeof(BT_INTEGRATED_DRIVER);
+
+	BT_u32 y;
+	for(y = 0; y < size; y++) {
+		BT_INTEGRATED_DRIVER *pDriver = (BT_INTEGRATED_DRIVER *) &__bt_arch_drivers_start;
+		pDriver += y;
+
+		if(pDriver->eType == eType) {
+			if(!i--) {
+				return pDriver;
+			}
+		}
+	}
+
+	return NULL;
+}
+
 const BT_RESOURCE *BT_GetIntegratedResource(const BT_INTEGRATED_DEVICE *pDevice, BT_u32 ulType, BT_u32 ulNum) {
 	return BT_GetResource(pDevice->pResources, pDevice->ulTotalResources, ulType, ulNum);
 }
