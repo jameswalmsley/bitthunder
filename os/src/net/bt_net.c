@@ -71,6 +71,10 @@ BT_ERROR BT_RegisterNetworkInterface(BT_HANDLE hIF) {
 	if (g_bDone) {
 		BT_TaskletHighSchedule(&sm_tasklet);
 	}
+	BT_u8 mac[6];
+
+	pNetIF->base.pOps->pfnGetMACAddr(hIF, mac, 6);
+	BT_kPrint("Registered MAC with addr: %02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
 	return BT_ERR_NONE;
 }
