@@ -172,8 +172,8 @@ static BT_ERROR bt_net_manager_init() {
 	BT_PendMutex(g_hMutex, 0);
 
 	BT_THREAD_CONFIG oThreadConfig = {
-		.ulStackDepth = 128,
-		.ulPriority = 1,
+		.ulStackDepth = 256,
+		.ulPriority = 0,
 	};
 
 	BT_kTaskCreate(net_task, "netif", &oThreadConfig, &Error);
