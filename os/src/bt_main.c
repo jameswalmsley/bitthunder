@@ -124,13 +124,6 @@ int bt_main(int argc, char **argv) {
 		BT_CloseHandle(hUart);
 	}
 
-	BT_Flush(hUart);
-
-	BT_SetStandardHandle(NULL);
-	if (hUart) {
-		BT_CloseHandle(hUart);
-	}
-
 	BT_kStartScheduler();
 #endif
 
