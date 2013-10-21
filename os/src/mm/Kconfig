@@ -28,6 +28,7 @@ config RAM_PHYS
 config RAM_VIRT
     depends on HAS_MMU
 	hex
-	default 0xC0000000
+	default 0xC0000000 if USE_VIRTUAL_ADDRESSING
+	default 0x0
 
 endmenu
