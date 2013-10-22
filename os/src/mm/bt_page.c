@@ -270,6 +270,9 @@ bt_paddr_t bt_initialise_coherent_pages() {
 #ifndef BT_CONFIG_USE_VIRTUAL_ADDRESSING
 	bt_mmu_set_section(coherent, BT_CONFIG_MEM_PAGE_COHERENT_LENGTH, BT_PAGE_IOMEM);
 #endif
+
+	BT_DCacheFlush();
+
 	return coherent;
 #else
 	return NULL;
