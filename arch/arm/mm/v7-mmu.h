@@ -11,7 +11,7 @@
  *	Defines the BitMask patterns for a section permissions.
  **/
 #define MMU_SECTION_MASK	0x00040002
-#define MMU_SECTION			0x00040002
+#define MMU_SECTION			0x00000002
 #define MMU_SECTION_BASE	0xFFF00000
 #define MMU_SECTION_NS		0x00080000	///< Shareable Bit.
 #define MMU_SECTION_nG		0x00020000	///< Non-global section, e.g. Global and Process attributes.
