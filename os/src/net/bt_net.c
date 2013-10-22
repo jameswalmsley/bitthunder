@@ -145,7 +145,7 @@ static void net_manager_sm(void *pParam) {
 	while (pIF) {
 		if (pIF->base.smFlags & NET_IF_ADDED) {
 
-			bt_lwip_netif_init(pIF);
+			//bt_lwip_netif_init(pIF);
 
 			pIF->base.hTxFifo = BT_FifoCreate(20, sizeof(void *), 0, &Error);
 
