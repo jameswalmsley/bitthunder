@@ -204,12 +204,15 @@ static BT_ERROR fullfat_seek(BT_HANDLE hFile, BT_s64 ulOffset, BT_u32 whence) {
 	FF_T_INT8 Origin;
 	BT_FF_FILE *pFile = (BT_FF_FILE *) hFile;
 
-	if (whence==BT_SEEK_SET)
+	if (whence==BT_SEEK_SET) {
 		Origin = FF_SEEK_SET;
-	else if (whence==BT_SEEK_CUR)
+	}
+	else if (whence==BT_SEEK_CUR) {
 		Origin = FF_SEEK_CUR;
-	else
+	}
+	else {
 		Origin = FF_SEEK_END;
+	}
 
 	FF_ERROR ret = FF_Seek(pFile->pFile, (FF_T_SINT32) ulOffset, Origin);
 
@@ -228,14 +231,22 @@ static BT_BOOL fullfat_eof(BT_HANDLE hFile) {
 
 	eof=FF_isEOF(pFile->pFile);
 
-	if (eof==FF_FALSE)
+	if (eof==FF_FALSE) {
 		return BT_FALSE;
+	}
 
 	return BT_TRUE;
 }
 
 static BT_ERROR fullfat_mkdir(BT_HANDLE hMount, const BT_i8 *szpPath) {
-	return BT_ERR_GENERIC;
+
+	BT_FF_MOUNT *pMount = (BT_FF_MOUNT *) hMount;
+	FF_ERROR ffError = FF_MkDir(pMount->pIoman, szpPath);
+	if(ffError) {
+		return BT_ERR_GENERIC;
+	}
+
+	return BT_ERR_NONE;
 }
 
 static BT_HANDLE fullfat_opendir(BT_HANDLE hMount, const BT_i8 *szpPath, BT_ERROR *pError) {

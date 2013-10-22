@@ -182,7 +182,7 @@ BT_HANDLE BT_Open(const BT_i8 *szpPath, BT_i8 *mode, BT_ERROR *pError) {
 	return pFS->pfnOpen(pMount->hMount, path, get_mode_flags(mode), pError);
 }
 
-BT_ERROR BT_MkDir(BT_i8 *szpPath) {
+BT_ERROR BT_MkDir(const BT_i8 *szpPath) {
 	BT_MOUNTPOINT *pMount = GetMountPoint(szpPath);
 	if(!pMount) {
 		return BT_ERR_GENERIC;
@@ -241,7 +241,7 @@ BT_ERROR BT_Rename(const BT_i8 *szpPathA, const BT_i8 *szpPathB) {
 		return BT_ERR_GENERIC;
 	}
 
-	if (strcmp(pMountA->szpPath,pMountB->szpPath)!=0) {
+	if (pMountA != pMountB) {
 		return BT_ERR_GENERIC;
 	}
 
