@@ -12,11 +12,13 @@ typedef struct _bt_page_pool {
 } bt_page_pool;
 
 void bt_initialise_pages(void);
-void bt_initialise_pages_second_stage();
+void bt_initialise_pages_second_stage(void);
+bt_paddr_t bt_initialise_coherent_pages(void);
 
-bt_paddr_t 	bt_page_alloc		(BT_u32 psize);
-void 		bt_page_free		(bt_paddr_t paddr, BT_u32 psize);
-BT_ERROR 	bt_page_reserve		(bt_paddr_t paddr, BT_u32 psize);
+bt_paddr_t 	bt_page_alloc			(BT_u32 psize);
+bt_paddt_r 	bt_page_alloc_aligned	(BT_u32 psize, BT_u32 order);
+void 		bt_page_free			(bt_paddr_t paddr, BT_u32 psize);
+BT_ERROR 	bt_page_reserve			(bt_paddr_t paddr, BT_u32 psize);
 
 #ifdef BT_CONFIG_MEM_PAGE_COHERENT_POOL
 bt_paddr_t 	bt_page_alloc_coherent	(BT_u32 psize);

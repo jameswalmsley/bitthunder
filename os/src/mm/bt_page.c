@@ -18,7 +18,7 @@ static bt_page_pool default_pool;
 static bt_page_pool coherent_pool;
 #endif
 
-bt_paddr_t bt_page_pool_alloc(bt_page_pool *pool, BT_u32 psize) {
+bt_paddr_t bt_page_pool_alloc(bt_page_pool *pool, BT_u32 psize, BT_u32 order) {
 
 	struct bt_page *blk = NULL, *tmp;
 	struct bt_list_head *pos;
@@ -36,6 +36,15 @@ bt_paddr_t bt_page_pool_alloc(bt_page_pool *pool, BT_u32 psize) {
 	bt_list_for_each(pos, &pool->page_head) {
 		struct bt_page *page = (struct bt_page *) pos;
 		if(page->size >= size) {
+			if(order) {
+				bt_vaddr_t 	align_mask 	= ((BT_PAGE_SIZE<<order)-1);
+				bt_vaddr_t 	aligned 	= (bt_vaddr_t) (((bt_vaddr_t) page) + align_mask) & ~align_mask;
+				BT_u32 		diff 		= aligned - (bt_vaddr_t) page;
+				if(page->size < (size + diff)) {
+					continue;
+				}
+			}
+
 			blk = page;
 			break;
 		}
@@ -44,6 +53,20 @@ bt_paddr_t bt_page_pool_alloc(bt_page_pool *pool, BT_u32 psize) {
 	if(!blk) {
 		BT_PAGE_UNLOCK();
 		return 0;	// OOM
+	}
+
+	if(order) {
+		bt_vaddr_t 	align_mask 	= ((BT_PAGE_SIZE<<order)-1);
+		bt_vaddr_t 	aligned 	= (bt_vaddr_t) (((bt_vaddr_t) blk) + align_mask) & ~align_mask;
+		BT_u32 		diff 		= aligned - (bt_vaddr_t) blk;
+
+		if(diff) {	// Split off the unaligned part.
+			tmp = (struct bt_page *) ((bt_vaddr_t) blk + diff);
+			tmp->size = blk->size - diff;
+			blk->size = diff;
+			bt_list_add(&tmp->list, &blk->list);
+			blk = tmp;
+		}
 	}
 
 	if(blk->size == size) {
@@ -110,6 +133,7 @@ void bt_page_pool_free(bt_page_pool *pool, bt_paddr_t paddr, BT_u32 size) {
 
 void bt_page_pool_attach(bt_page_pool *pool, bt_paddr_t paddr, BT_u32 size) {
 	pool->total_size += size;
+	pool->used_size += size;
 	bt_page_pool_free(pool, paddr, size);
 }
 
@@ -171,7 +195,11 @@ BT_ERROR bt_page_pool_reserve(bt_page_pool *pool, bt_paddr_t paddr, BT_u32 psize
 }
 
 bt_paddr_t bt_page_alloc(BT_u32 psize) {
-	return bt_page_pool_alloc(&default_pool, psize);
+	return bt_page_pool_alloc(&default_pool, psize, 0);
+}
+
+bt_paddr_t bt_page_alloc_aligned(BT_u32 psize, BT_u32 order) {
+	return bt_page_pool_alloc(&default_pool, psize, order);
 }
 
 void bt_page_free(bt_paddr_t paddr, BT_u32 psize) {
@@ -184,7 +212,7 @@ BT_ERROR bt_page_reserve(bt_paddr_t paddr, BT_u32 psize) {
 
 #ifdef BT_CONFIG_MEM_PAGE_COHERENT_POOL
 bt_paddr_t bt_page_alloc_coherent(BT_u32 psize) {
-	return bt_page_pool_alloc(&coherent_pool, psize);
+	return bt_page_pool_alloc(&coherent_pool, psize, 0);
 }
 
 void bt_page_free_coherent(bt_paddr_t paddr, BT_u32 psize) {
@@ -228,13 +256,16 @@ void bt_initialise_pages(void) {
 	len = &__absolute_end - &_heap_end;
 
 	bt_page_reserve(start, len);
-
-#ifdef BT_CONFIG_MEM_PAGE_COHERENT_POOL
-	bt_page_reserve(BT_CONFIG_MEM_PAGE_COHERENT_BASE, BT_CONFIG_MEM_PAGE_COHERENT_LENGTH);
-	bt_page_pool_attach(&coherent_pool, BT_CONFIG_MEM_PAGE_COHERENT_BASE, BT_CONFIG_MEM_PAGE_COHERENT_LENGTH);
-#endif
 }
 
 void bt_initialise_pages_second_stage() {
 	g_page_mutex = BT_kMutexCreate();
+}
+
+bt_paddr_t bt_initialise_coherent_pages() {
+#ifdef BT_CONFIG_MEM_PAGE_COHERENT_POOL
+	bt_paddr_t coherent = bt_page_alloc_aligned(BT_CONFIG_MEM_PAGE_COHERENT_LENGTH, 8);	// Order 8 aligned for 1MB.
+	bt_page_pool_attach(&coherent_pool, coherent, BT_CONFIG_MEM_PAGE_COHERENT_LENGTH);
+	return coherent;
+#endif
 }
