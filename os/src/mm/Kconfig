@@ -4,6 +4,25 @@ config MEM_PAGE_ALLOCATOR
 	bool "Page Based Allocation"
 	default n
 
+config MEM_PAGE_COHERENT_POOL
+	bool "Coherent Memory Pool (for use by DMA devices)"
+	depends on !USE_VIRTUAL_ADDRESSING
+	default n
+	---help---
+	This pool is for use by drivers when the virtual memory manager is not available.
+	It allows them to get a coarse-grain configured region of non-cached and coherent memory.
+	Note, the addresses set below must be aligned as required by your system.
+
+config MEM_PAGE_COHERENT_BASE
+	hex "Start address"
+	default 0x00100000
+	depends on MEM_PAGE_COHERENT_POOL
+
+config MEM_PAGE_COHERENT_LENGTH
+	hex "Coherent length"
+	default 0x00100000
+	depends on MEM_PAGE_COHERENT_POOL
+
 config MEM_KHEAP
     bool
 	default y if !MEM_PAGE_ALLOCATOR

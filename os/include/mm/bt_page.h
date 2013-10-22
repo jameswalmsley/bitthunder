@@ -5,19 +5,23 @@
 #include <bt_types.h>
 #include <collections/bt_list.h>
 
-typedef struct _BT_PAGE {
-	struct bt_list_head		list;
-	BT_u32					size;
-	BT_u32 					flags;
-    #define BT_PAGE_USED			0x00000001	///< Flags if this page is free or not.
-    #define BT_PAGE_HEAD 			0x00000002	///< Node is head of an allocated block.
-    #define BT_PAGE_RESERVED		0x80000000	///< Page has been removed from PAGE allocator.
-} BT_PAGE;
+typedef struct _bt_page_pool {
+	struct bt_list_head 	page_head;
+	BT_u32					total_size;
+	BT_u32					used_size;
+} bt_page_pool;
 
 void bt_initialise_pages(void);
 void bt_initialise_pages_second_stage();
 
-bt_paddr_t bt_page_alloc(BT_u32 psize);
-void bt_page_free(bt_paddr_t paddr, BT_u32 size);
+bt_paddr_t 	bt_page_alloc		(BT_u32 psize);
+void 		bt_page_free		(bt_paddr_t paddr, BT_u32 psize);
+BT_ERROR 	bt_page_reserve		(bt_paddr_t paddr, BT_u32 psize);
+
+#ifdef BT_CONFIG_MEM_PAGE_COHERENT_POOL
+bt_paddr_t 	bt_page_alloc_coherent	(BT_u32 psize);
+void 		bt_page_free_coherent	(bt_paddr_t paddr, BT_u32 psize);
+BT_ERROR 	bt_page_reserve_coherent(bt_paddr_t paddr, BT_u32 psize);
+#endif
 
 #endif
