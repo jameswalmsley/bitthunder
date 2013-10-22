@@ -81,4 +81,8 @@ extern void bt_mmu_killmap(bt_pgd_t pgd);
 extern int bt_mmu_map(bt_pgd_t pgd, bt_paddr_t pa, bt_vaddr_t va, BT_u32 size, int type);
 extern bt_pgd_t bt_mmu_get_kernel_pgd(void);
 
+#ifndef BT_CONFIG_USE_VIRTUAL_ADDRESSING
+void bt_mmu_set_section(bt_paddr_t p, BT_u32 psize, int type);
+#endif
+
 #endif

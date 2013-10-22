@@ -226,7 +226,7 @@ void bt_mmu_init(struct bt_mmumap *mmumap) {
 		// If region is within the coherent pool, then configure as an uncached section
 		bt_paddr_t phys 			= bt_virt_to_phys(index * 0x00100000);
 
-		if(phys >= params->coherent && phys <= params->coherent + BT_SECTION_ALIGN(BT_CONFIG_MEM_PAGE_COHERENT_LENGTH)) {
+		if(params->coherent && (phys >= params->coherent && phys <= params->coherent + BT_SECTION_ALIGN(BT_CONFIG_MEM_PAGE_COHERENT_LENGTH))) {
 			pgd[index] = phys | MMU_SECTION | MMU_SECTION_SYSTEM;
 		} else {
 			pgd[index] = (bt_paddr_t) bt_virt_to_phys(pte) | MMU_PDE_PRESENT;
@@ -235,6 +235,23 @@ void bt_mmu_init(struct bt_mmumap *mmumap) {
 
 	bt_mmu_flush_tlb();
 }
+
+#ifndef BT_CONFIG_USE_VIRTUAL_ADDRESSING
+void bt_mmu_set_section(bt_paddr_t p, BT_u32 psize, int type) {
+
+	bt_pgd_t 	pgd 	= (bt_pgd_t) g_MMUTable;
+	BT_u32 		index 	= p / BT_SECTION_SIZE;
+	BT_u32 		size 	= BT_SECTION_ALIGN(psize);
+	bt_paddr_t	paddr	= BT_SECTION_TRUNC(p);
+	BT_u32 		i;
+
+	for(i = 0; i < size/BT_SECTION_SIZE; i++) {
+		pgd[index + i] = paddr | MMU_SECTION | MMU_SECTION_SYSTEM;
+	}
+
+	bt_mmu_flush_tlb();
+}
+#endif
 
 bt_pgd_t bt_mmu_get_kernel_pgd(void) {
 	return (bt_pgd_t) g_MMUTable;
