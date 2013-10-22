@@ -10,17 +10,13 @@ config MEM_PAGE_COHERENT_POOL
 	---help---
 	This pool is for use by drivers when the virtual memory manager is not available.
 	It allows them to get a coarse-grain configured region of non-cached and coherent memory.
-	Note, the addresses set below must be aligned as required by your system.
-
-config MEM_PAGE_COHERENT_BASE
-	hex "Start address"
-	default 0x00100000
-	depends on MEM_PAGE_COHERENT_POOL
 
 config MEM_PAGE_COHERENT_LENGTH
 	hex "Coherent length"
 	default 0x00100000
 	depends on MEM_PAGE_COHERENT_POOL
+	---help---
+	Note. The length here will be rounded to your system's section size.
 
 config MEM_KHEAP
     bool
