@@ -277,7 +277,15 @@ static BT_u32 zynq_get_cpu_clock_frequency() {
 	return BT_ZYNQ_GetCpuFrequency();
 }
 
+extern BT_ERROR arm_pl310_init();
+
+static BT_ERROR zynq_machine_init(struct _BT_MACHINE_DESCRIPTION *pMachine) {
+	arm_pl310_init();
+	return BT_ERR_NONE;
+}
+
 BT_MACHINE_START(ARM, ZYNQ, "Xilinx Embedded Zynq Platform")
+	.pfnMachineInit 			= zynq_machine_init,
 	.pfnGetCpuClockFrequency 	= zynq_get_cpu_clock_frequency,
 	.pInterruptController		= &oZynq_intc_device,
 	.pSystemTimer 				= &oZynq_cpu_timer_device,
