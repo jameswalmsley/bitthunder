@@ -2,8 +2,8 @@
 #include <bitthunder.h>
 #include "lwip/sockets.h"
 
-BT_DEF_MODULE_NAME			("LM3Sxx-mac")
-BT_DEF_MODULE_DESCRIPTION	("LM3Sxx mac kernel driver")
+BT_DEF_MODULE_NAME			("BitThunder Socket Layer")
+BT_DEF_MODULE_DESCRIPTION	("Provides a berkeley sockets api for bitthunder")
 BT_DEF_MODULE_AUTHOR		("Robert Steinbauer")
 BT_DEF_MODULE_EMAIL			("rsteinbauer@riegl.com")
 
@@ -159,8 +159,27 @@ int fcntl(int s, int cmd, int val) {
 }
 
 
+static BT_u32 socket_read(BT_HANDLE hSocket, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
+	return 0;
+}
+
+static BT_u32 socket_write(BT_HANDLE hSocket, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
+	return 0;
+}
+
+/**
+ *	Here we allow socket handles to be passed into BT_Read and BT_Write apis.
+ *
+ *
+ **/
+static const BT_IF_FILE oFileOperations = {
+	.pfnRead 	= socket_read,
+	.pfnWrite	= socket_write,
+};
+
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
 	.eType = BT_HANDLE_T_SYSTEM,
 	.pfnCleanup = socket_cleanup,
+	.pFileIF = &oFileOperations,
 };
