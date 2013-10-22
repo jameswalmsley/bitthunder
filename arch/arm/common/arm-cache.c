@@ -219,6 +219,13 @@ static BT_ERROR BT_L1DCacheInvalidate() {
 	return BT_ERR_NONE;
 }
 
+static BT_ERROR BT_L1DCacheFlushLine(void *addr) {
+	wrcp(ARM_CP15_CACHE_SIZE_SEL, 0);
+	wrcp(ARM_CP15_INVAL_DC_LINE_MVA_POC, ((BT_u32) addr & (~0x1F)));
+	dsb();
+	return BT_ERR_NONE;
+}
+
 static BT_ERROR BT_L1DCacheFlush() {
 	register BT_u32 CsidReg, C7Reg;
 	BT_u32 CacheSize, LineSize, NumWays;
@@ -312,6 +319,12 @@ BT_ERROR  BT_DCacheDisable() {
 BT_ERROR BT_DCacheFlush() {
 	BT_L1DCacheFlush();
 	BT_L2CacheFlush();
+	return BT_ERR_NONE;
+}
+
+BT_ERROR BT_DCacheFlushLine(void *addr) {
+	BT_L1DCacheFlushLine(addr);
+	BT_L2CacheFlushLine(addr);
 	return BT_ERR_NONE;
 }
 
