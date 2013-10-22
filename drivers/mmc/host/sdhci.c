@@ -32,6 +32,43 @@ struct _BT_OPAQUE_HANDLE {
 
 static const BT_IF_HANDLE oHandleInterface;
 
+#ifdef BT_CONFIG_SDHCI_DUMP_REGS
+static void sdhci_dump_regs(BT_HANDLE hSDIO) {
+	BT_kPrint("SDMA_ADDRESS  : %08X", hSDIO->pRegs->SDMA_Address);
+	BT_kPrint("BLOCK_SIZE    : %08X", hSDIO->pRegs->BLOCK_SIZE);
+	BT_kPrint("BLOCK_COUNT   : %08X", hSDIO->pRegs->BLOCK_COUNT);
+	BT_kPrint("ARGUMENT      : %08X", hSDIO->pRegs->ARGUMENT);
+	BT_kPrint("TRANSFERMODE  : %08X", hSDIO->pRegs->TRANSFERMODE);
+	BT_kPrint("COMMAND       : %08X", hSDIO->pRegs->COMMAND);
+	BT_kPrint("RESPONSE_0    : %08X", hSDIO->pRegs->RESPONSE[0]);
+	BT_kPrint("RESPONSE_1    : %08X", hSDIO->pRegs->RESPONSE[1]);
+	BT_kPrint("RESPONSE_2    : %08X", hSDIO->pRegs->RESPONSE[2]);
+	BT_kPrint("RESPONSE_3    : %08X", hSDIO->pRegs->RESPONSE[3]);
+	BT_kPrint("BUFFER_DATA   : %08X", hSDIO->pRegs->BUFFER_DATA_PORT);
+	BT_kPrint("PRESENT_STATE : %08X", hSDIO->pRegs->PRESENT_STATE);
+	BT_kPrint("HOST_CONTROL  : %08X", hSDIO->pRegs->HOST_CONTROL);
+	BT_kPrint("POWER_CONTROL : %08X", hSDIO->pRegs->POWER_CONTROL);
+	BT_kPrint("BLOCK_GAP_CTL : %08X", hSDIO->pRegs->BLOCK_GAP_CONTROL);
+	BT_kPrint("WAKEUP_CTL    : %08X", hSDIO->pRegs->WAKEUP_CONTROL);
+	BT_kPrint("CLOCK_CONTROL : %08X", hSDIO->pRegs->CLOCK_CONTROL);
+	BT_kPrint("TIMEOUT_CTL   : %08X", hSDIO->pRegs->TIMEOUT_CONTROL);
+	BT_kPrint("SOFTWARE_RST  : %08X", hSDIO->pRegs->SOFTWARE_RESET);
+	BT_kPrint("NORMAL_INT_ST : %08X", hSDIO->pRegs->NORMAL_INT_STATUS);
+	BT_kPrint("ERROR_INT_ST  : %08X", hSDIO->pRegs->ERROR_INT_STATUS);
+	BT_kPrint("NORMAL_INT_EN : %08X", hSDIO->pRegs->NORMAL_INT_ENABLE);
+	BT_kPrint("ERROR_INT_EN  : %08X", hSDIO->pRegs->ERROR_INT_ENABLE);
+	BT_kPrint("NORMAL_INT_SIG: %08X", hSDIO->pRegs->NORMAL_INT_SIGNAL_ENABLE);
+	BT_kPrint("ERROR_INT_SIG : %08X", hSDIO->pRegs->ERROR_INT_SIGNAL_ENABLE);
+	BT_kPrint("AUTO12_ERROR  : %08X", hSDIO->pRegs->AUTO_CMD12_ERROR);
+	BT_kPrint("CAPABILITIES  : %08X", hSDIO->pRegs->CAPABILITIES);
+	BT_kPrint("MAX_CURRENT_C : %08X", hSDIO->pRegs->MAX_CURRENT_CAPS);
+	BT_kPrint("FORCE_EVT_C12 : %08X", hSDIO->pRegs->FORCE_EVENT_AUTO_CMD12);
+	BT_kPrint("ADMA_ERROR_ST : %08X", hSDIO->pRegs->ADMA_ERROR_STATUS);
+	BT_kPrint("ADMA_SYS_ADDR : %08X", hSDIO->pRegs->ADMA_SYS_ADDRESS);
+	BT_kPrint("VERSION       : %08X", hSDIO->pRegs->SLOT_INT_STAT_HCVERSION);
+}
+#endif
+
 static BT_ERROR sdhci_irq_handler(BT_u32 ulIRQ, void *pParam) {
 
 	BT_HANDLE hSDHCI = (BT_HANDLE) pParam;
@@ -377,7 +414,7 @@ static BT_ERROR sdhci_initialise(BT_HANDLE hSDIO) {
 		BT_ThreadYield();
 	}
 
-	hSDIO->pRegs->TIMEOUT_CONTROL = 0x7;	// Timeout at TMCLK 2 ^ 20;
+	hSDIO->pRegs->TIMEOUT_CONTROL = 0xA;	// Timeout at TMCLK 2 ^ 23;
 
 	BT_u32 caps = hSDIO->pRegs->CAPABILITIES;
 	if(caps & CAPS_1_8V) {
@@ -470,42 +507,6 @@ static const BT_MMC_OPS sdhci_mmc_ops = {
 	.pfnEnableClock		= sdhci_enable_clock,
 	.pfnDisableClock	= sdhci_disable_clock,
 };
-
-#ifdef BT_CONFIG_SDHCI_DUMP_REGS
-static void sdhci_dump_regs(BT_HANDLE hSDIO) {
-	BT_kPrint("SDMA_ADDRESS  : %08X", hSDIO->pRegs->SDMA_Address);
-	BT_kPrint("BLOCK_SIZE    : %08X", hSDIO->pRegs->BLOCK_SIZE);
-	BT_kPrint("BLOCK_COUNT   : %08X", hSDIO->pRegs->BLOCK_COUNT);
-	BT_kPrint("ARGUMENT      : %08X", hSDIO->pRegs->ARGUMENT);
-	BT_kPrint("TRANSFERMODE  : %08X", hSDIO->pRegs->COMMAND);
-	BT_kPrint("RESPONSE_0    : %08X", hSDIO->pRegs->RESPONSE[0]);
-	BT_kPrint("RESPONSE_1    : %08X", hSDIO->pRegs->RESPONSE[1]);
-	BT_kPrint("RESPONSE_2    : %08X", hSDIO->pRegs->RESPONSE[2]);
-	BT_kPrint("RESPONSE_3    : %08X", hSDIO->pRegs->RESPONSE[3]);
-	BT_kPrint("BUFFER_DATA   : %08X", hSDIO->pRegs->BUFFER_DATA_PORT);
-	BT_kPrint("PRESENT_STATE : %08X", hSDIO->pRegs->PRESENT_STATE);
-	BT_kPrint("HOST_CONTROL  : %08X", hSDIO->pRegs->HOST_CONTROL);
-	BT_kPrint("POWER_CONTROL : %08X", hSDIO->pRegs->POWER_CONTROL);
-	BT_kPrint("BLOCK_GAP_CTL : %08X", hSDIO->pRegs->BLOCK_GAP_CONTROL);
-	BT_kPrint("WAKEUP_CTL    : %08X", hSDIO->pRegs->WAKEUP_CONTROL);
-	BT_kPrint("CLOCK_CONTROL : %08X", hSDIO->pRegs->CLOCK_CONTROL);
-	BT_kPrint("TIMEOUT_CTL   : %08X", hSDIO->pRegs->TIMEOUT_CONTROL);
-	BT_kPrint("SOFTWARE_RST  : %08X", hSDIO->pRegs->SOFTWARE_RESET);
-	BT_kPrint("NORMAL_INT_ST : %08X", hSDIO->pRegs->NORMAL_INT_STATUS);
-	BT_kPrint("ERROR_INT_ST  : %08X", hSDIO->pRegs->ERROR_INT_STATUS);
-	BT_kPrint("NORMAL_INT_EN : %08X", hSDIO->pRegs->NORMAL_INT_ENABLE);
-	BT_kPrint("ERROR_INT_EN  : %08X", hSDIO->pRegs->ERROR_INT_ENABLE);
-	BT_kPrint("NORMAL_INT_SIG: %08X", hSDIO->pRegs->NORMAL_INT_SIGNAL_ENABLE);
-	BT_kPrint("ERROR_INT_SIG : %08X", hSDIO->pRegs->ERROR_INT_SIGNAL_ENABLE);
-	BT_kPrint("AUTO12_ERROR  : %08X", hSDIO->pRegs->AUTO_CMD12_ERROR);
-	BT_kPrint("CAPABILITIES  : %08X", hSDIO->pRegs->CAPABILITIES);
-	BT_kPrint("MAX_CURRENT_C : %08X", hSDIO->pRegs->MAX_CURRENT_CAPS);
-	BT_kPrint("FORCE_EVT_C12 : %08X", hSDIO->pRegs->FORCE_EVENT_AUTO_CMD12);
-	BT_kPrint("ADMA_ERROR_ST : %08X", hSDIO->pRegs->ADMA_ERROR_STATUS);
-	BT_kPrint("ADMA_SYS_ADDR : %08X", hSDIO->pRegs->ADMA_SYS_ADDRESS);
-	BT_kPrint("VERSION       : %08X", hSDIO->pRegs->SLOT_INT_STAT_HCVERSION);
-}
-#endif
 
 static BT_HANDLE sdhci_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
 
