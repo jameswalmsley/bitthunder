@@ -218,6 +218,15 @@ skip_sram:
 	ldrle	r4, =CACHED_MEM
 skip_ram:
 #endif
+#ifdef BT_CONFIG_MEM_PAGE_COHERENT_POOL
+	ldr		r5, =BT_CONFIG_MEM_PAGE_COHERENT_BASE
+	cmp		r2, r5
+	blt		skip_coherent
+	ldrge	r5, =(BT_CONFIG_MEM_PAGE_COHERENT_BASE + BT_CONFIG_MEM_PAGE_COHERENT_LENGTH)
+	cmpge	r2, r5
+	ldrle	r4, =UNCACHED_MEM
+skip_coherent:
+#endif
 
 	orr		r2,	r4
 	str		r2,	[r0]
