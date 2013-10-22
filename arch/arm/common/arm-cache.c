@@ -386,7 +386,9 @@ BT_ERROR BT_ICacheInvalidate() {
 
 
 BT_ERROR arm_pl310_init() {
-	g_pregs = (PL310_REGS *) bt_ioremap((void *) (0xF8F02000), BT_SIZE_4K);
+	if(!g_pregs) {
+		g_pregs = (PL310_REGS *) bt_ioremap((void *) (0xF8F02000), BT_SIZE_4K);
+	}
 	return BT_ERR_NONE;
 }
 
