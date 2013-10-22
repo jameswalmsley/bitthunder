@@ -6,7 +6,6 @@ config MEM_PAGE_ALLOCATOR
 
 config MEM_PAGE_COHERENT_POOL
 	bool "Coherent Memory Pool (for use by DMA devices)"
-	depends on !USE_VIRTUAL_ADDRESSING
 	default n
 	---help---
 	This pool is for use by drivers when the virtual memory manager is not available.
