@@ -266,6 +266,12 @@ bt_paddr_t bt_initialise_coherent_pages() {
 #ifdef BT_CONFIG_MEM_PAGE_COHERENT_POOL
 	bt_paddr_t coherent = bt_page_alloc_aligned(BT_CONFIG_MEM_PAGE_COHERENT_LENGTH, 8);	// Order 8 aligned for 1MB.
 	bt_page_pool_attach(&coherent_pool, coherent, BT_CONFIG_MEM_PAGE_COHERENT_LENGTH);
+
+#ifndef BT_CONFIG_VIRTUAL_ADDRESSING
+	bt_mmu_set_section(coherent, BT_CONFIG_MEM_PAGE_COHERENT_LENGTH, BT_PAGE_IOMEM);
+#endif
 	return coherent;
+#else
+	return NULL;
 #endif
 }
