@@ -1,3 +1,4 @@
+
 #include <bitthunder.h>
 #include <asm/barrier.h>
 #include <string.h>
@@ -36,21 +37,17 @@ struct _BT_OPAQUE_HANDLE {
 	BT_NET_IF_EVENTRECEIVER			pfnEvent;
 	BT_HANDLE 						hMII;
 	bt_paddr_t						rxbd_phys;
-	GEM_BD						   *rxbd_cached;
 	volatile GEM_BD				   *rxbd;
 	BT_u32							rx_ci;
 	enum RX_STATE					rx_state;
 	BT_u32							rx_bytes;
 	bt_paddr_t						rxbufs_phys;
-	void						   *rxbufs_cached;
 	void 						   *rxbufs;
 	bt_paddr_t						txbd_phys;
-	GEM_BD						   *txbd_cached;
 	volatile GEM_BD				   *txbd;
 	BT_u32							tx_ci;
 	BT_u32							tx_bytes;
 	bt_paddr_t 						txbufs_phys;
-	void 						   *txbufs_cached;
 	void						   *txbufs;
 };
 
@@ -382,55 +379,43 @@ BT_u8 dividers[8] = {
 };
 
 static BT_ERROR descriptor_init(BT_HANDLE hMac) {
-	// Allocate coherent memory for buffers.
-	hMac->rxbufs_phys = bt_page_alloc(RX_BUF_SIZE * RECV_BD_CNT);
-	hMac->rxbufs_cached = (void *) bt_phys_to_virt(hMac->rxbufs_phys);
-	hMac->rxbufs = bt_ioremap((void *) hMac->rxbufs_phys, RX_BUF_SIZE * RECV_BD_CNT);	// Get an uncached view on the buffer memory.
 
-    memset(hMac->rxbufs_cached, 0, RX_BUF_SIZE * RECV_BD_CNT);
 
-	hMac->rxbd_phys = bt_page_alloc(sizeof(GEM_BD) * RECV_BD_CNT);
-	hMac->rxbd_cached = (void *) bt_phys_to_virt(hMac->rxbd_phys);
-	hMac->rxbd = bt_ioremap((void *) hMac->rxbd_phys, sizeof(GEM_BD) * RECV_BD_CNT);		// Get an uncached view on the buffer descriptor memory.
+	hMac->rxbufs_phys = bt_page_alloc_coherent(RX_BUF_SIZE * RECV_BD_CNT);
+	hMac->rxbufs = (void *) bt_phys_to_virt(hMac->rxbufs_phys);
 
-	//BT_DCacheInvalidateLine((void *) hMac->rxbd_cached);
+    memset(hMac->rxbufs, 0, RX_BUF_SIZE * RECV_BD_CNT);
+
+	hMac->rxbd_phys = bt_page_alloc_coherent(sizeof(GEM_BD) * RECV_BD_CNT);
+	hMac->rxbd = (void *) bt_phys_to_virt(hMac->rxbd_phys);
 
 	memset((void *) hMac->rxbd, 0, sizeof(GEM_BD) * RECV_BD_CNT);
 
 	BT_u32 i;
 	for(i = 0; i < RECV_BD_CNT; i++) {
-		hMac->rxbd_cached[i].address = (hMac->rxbufs_phys + (RX_BUF_SIZE * i));
+		hMac->rxbd[i].address = (hMac->rxbufs_phys + (RX_BUF_SIZE * i));
 	}
 
 	// Set last bd to wrap!
-	hMac->rxbd_cached[RECV_BD_CNT-1].address |= RX_BD_WRAP;
+	hMac->rxbd[RECV_BD_CNT-1].address |= RX_BD_WRAP;
 
 	// Allocate coherent memory for buffers.
-	hMac->txbufs_phys = bt_page_alloc(TX_BUF_SIZE * SEND_BD_CNT);
-	hMac->txbufs_cached = (void *) bt_phys_to_virt(hMac->txbufs_phys);
-	hMac->txbufs = bt_ioremap((void *) hMac->txbufs_phys, TX_BUF_SIZE * SEND_BD_CNT);	// Get an uncached view on the buffer memory.
+	hMac->txbufs_phys = bt_page_alloc_coherent(TX_BUF_SIZE * SEND_BD_CNT);
+	hMac->txbufs = (void *) bt_phys_to_virt(hMac->txbufs_phys);
 
-    memset(hMac->txbufs_cached, 0, TX_BUF_SIZE * SEND_BD_CNT);
+    memset(hMac->txbufs, 0, TX_BUF_SIZE * SEND_BD_CNT);
 
-	hMac->txbd_phys 	= bt_page_alloc(sizeof(GEM_BD) * SEND_BD_CNT);
-	hMac->txbd_cached	= (void *) bt_phys_to_virt(hMac->txbd_phys);
-	hMac->txbd 			= bt_ioremap((void *) hMac->txbd_phys, sizeof(GEM_BD) * SEND_BD_CNT);
-
-	//BT_DCacheInvalidateRange((void *) hMac->txbd_cached, (sizeof(GEM_BD) * SEND_BD_CNT));
+    hMac->txbd_phys 	= bt_page_alloc_coherent(sizeof(GEM_BD) * SEND_BD_CNT);
+	hMac->txbd 			= (void *) bt_phys_to_virt(hMac->txbd_phys);
 
 	memset((void *) hMac->txbd, 0, sizeof(GEM_BD) * SEND_BD_CNT);
 
 	for(i = 0; i < SEND_BD_CNT; i++) {
-		hMac->txbd_cached[i].address 	= (hMac->txbufs_phys + (TX_BUF_SIZE * i));
-		hMac->txbd_cached[i].flags 	= TX_BD_USED;
+		hMac->txbd[i].address 	= (hMac->txbufs_phys + (TX_BUF_SIZE * i));
+		hMac->txbd[i].flags 	= TX_BD_USED;
 	}
 
-	hMac->txbd_cached[SEND_BD_CNT-1].flags |= TX_BD_WRAP;
-
-	BT_DCacheFlush();
-
-	BT_kPrint("GEM: TXBD: %08x (%08x)", hMac->txbd_phys, hMac->txbd);
-	BT_kPrint("GEM: RXBD: %08x (%08x)", hMac->rxbd_phys, hMac->rxbd);
+	hMac->txbd[SEND_BD_CNT-1].flags |= TX_BD_WRAP;
 
 	return BT_ERR_NONE;
 }
@@ -513,6 +498,7 @@ static void mac_init_hw(BT_HANDLE hMac) {
 		break;
 
 	default:
+		InputClk = BT_ZYNQ_GetIOPLLFrequency();
 		break;
 	}
 
