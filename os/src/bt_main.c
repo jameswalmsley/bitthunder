@@ -50,6 +50,15 @@ int bt_main(int argc, char **argv) {
 
 	g_kernel_params.cmdline = 0;
 
+	BT_MACHINE_DESCRIPTION *pMachine = BT_GetMachineDescription(&Error);
+	if(pMachine->szpName) {
+		Error = 0;
+	}
+
+	if (pMachine->pfnMachineInit) {
+		pMachine->pfnMachineInit(pMachine);
+	}
+
 #ifdef BT_CONFIG_MEM_PAGE_ALLOCATOR
 	bt_initialise_pages();
 #endif
@@ -66,15 +75,6 @@ int bt_main(int argc, char **argv) {
 #ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
 	bt_vm_init();
 #endif
-
-	BT_MACHINE_DESCRIPTION *pMachine = BT_GetMachineDescription(&Error);
-	if(pMachine->szpName) {
-		Error = 0;
-	}
-
-	if (pMachine->pfnMachineInit) {
-		pMachine->pfnMachineInit(pMachine);
-	}
 
 	const BT_INTEGRATED_DRIVER *pDriver = BT_GetIntegratedDriverByName(pMachine->pInterruptController->name);
 	if(pDriver) {
