@@ -14,6 +14,8 @@
 #include <bt_kernel.h>
 #include <lib/putc.h>
 
+static bt_kernel_params g_kernel_params;
+
 extern int main(int argc, char **argv);
 
 void bt_do_bug(void *pc) {
@@ -133,4 +135,8 @@ int bt_main(int argc, char **argv) {
 	// It was not possible to start the scheduler.
 
 	return BT_ERR_NONE;
+}
+
+bt_kernel_params *bt_get_kernel_params() {
+	return &g_kernel_params;
 }

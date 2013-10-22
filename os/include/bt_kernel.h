@@ -4,6 +4,11 @@
 #include <bt_types.h>
 #include <process/bt_threads.h>
 
+typedef struct _bt_kernel_params {
+	const char *cmdline;
+	bt_paddr_t 	coherent;
+} bt_kernel_params;
+
 typedef void (*BT_FN_TASK_ENTRY)(void *pParam);
 
 BT_ERROR 	BT_kStartScheduler	(void);
@@ -37,8 +42,9 @@ BT_ERROR 	BT_kQueueReceive			(void *pQueue, void* pMessage, BT_TICK oTimeoutTick
 BT_ERROR 	BT_kQueueReceiveFromISR		(void *pQueue, void* pMessage, BT_BOOL *pbHigherPriorityTaskWoken);
 BT_u32		BT_kQueueMessagesWaiting	(void *pQueue);
 
-
 void 		BT_kEnterCritical	();
 void 		BT_kExitCritical	();
+
+bt_kernel_params *bt_get_kernel_params();
 
 #endif
