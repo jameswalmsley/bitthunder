@@ -48,6 +48,8 @@ int bt_main(int argc, char **argv) {
 	BT_ERROR 	Error;
 	BT_HANDLE 	hUart = NULL;
 
+	g_kernel_params.cmdline = 0;
+
 #ifdef BT_CONFIG_MEM_PAGE_ALLOCATOR
 	bt_initialise_pages();
 #endif
@@ -58,7 +60,10 @@ int bt_main(int argc, char **argv) {
 #ifdef BT_CONFIG_MEM_PAGE_ALLOCATOR
 	bt_initialise_pages_second_stage();
 #endif
-#ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING	
+#ifdef BT_CONFIG_MEM_PAGE_ALLOCATOR
+	g_kernel_params.coherent = bt_initialise_coherent_pages();
+#endif
+#ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
 	bt_vm_init();
 #endif
 
