@@ -44,6 +44,8 @@ $(OBJECTS) $(OBJECTS-y): CFLAGS += $(CC_MACHFLAGS)
 $(OBJECTS) $(OBJECTS-y): CFLAGS += -D BT_VERSION_SUFFIX="\"$(GIT_DESCRIBE)\""
 
 $(OBJECTS) $(OBJECTS-y): CFLAGS += -nostdlib -fno-builtin -fdata-sections -ffunction-sections
-$(OBJECTS) $(OBJECTS-y): CFLAGS += -I $(BASE)/${BSP_DIR}/
+$(OBJECTS) $(OBJECTS-y): CFLAGS += -I $(BASE)${BSP_DIR}/
+$(OBJECTS) $(OBJECTS-y): CFLAGS += -I $(BASE)include/
+$(OBJECTS) $(OBJECTS-y): CFLAGS += -I $(BASE)os/src/net/lwip/src/include/ -I $(BASE)os/include/net/lwip/ -I $(BASE)os/src/net/lwip/src/include/ipv4/
 
 $(LINKER_SCRIPTS): CFLAGS += -I $(BASE)/${BSP_DIR}/

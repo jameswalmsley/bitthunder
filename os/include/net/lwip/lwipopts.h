@@ -19,6 +19,9 @@
 #define LWIP_DHCP						BT_CONFIG_USE_DHCP
 #define LWIP_IGMP						BT_CONFIG_USE_IGMP
 #define LWIP_NETIF_HOSTNAME				BT_CONFIG_USE_DHCP
+#define LWIP_DNS						1
+
+#define LWIP_SO_RCVTIMEO				1
 
 
 #define TCP_MSS							1500
