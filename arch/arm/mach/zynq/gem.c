@@ -68,14 +68,12 @@ static BT_ERROR gem_interrupt_handler(BT_u32 ulIRQ, void *pParam) {
 		if(regisr & GEM_INT_RX_COMPLETE) {
 			hMac->pfnEvent(hMac->pIf, BT_NET_IF_RX_READY, BT_TRUE);
 			hMac->pRegs->rx_status = RX_STAT_FRAME_RECD;
-		}
-
-		if(regisr & GEM_INT_TX_COMPLETE) {
+		} else if(regisr & GEM_INT_TX_COMPLETE) {
 			hMac->pRegs->tx_status = 0x20;
-		}
-
-		if(regisr & GEM_INT_RX_OVERRUN) {
+		}else if(regisr & GEM_INT_RX_OVERRUN) {
 			BT_kPrint("rx overrun");
+		} else {
+			BT_kPrint("other int:%08x", regisr);
 		}
 
 		regisr = hMac->pRegs->intr_status;
@@ -430,7 +428,7 @@ static BT_ERROR descriptor_init(BT_HANDLE hMac) {
 static void mac_set_hwaddr(BT_HANDLE hMac) {
 	// Set mac address
 	// Get mac address from device tree, or bootloader params.
-	BT_u8 ucMac[6] = {0x00, 0x50, 0x45, 0x67, 0x89, 0x00};
+	BT_u8 ucMac[6] = {0x00, 0xE0, 0x0C, 0x00, 0x73, 0x21};
 	mac_setaddr(hMac, ucMac, 6);
 }
 
