@@ -1,6 +1,28 @@
 #include <bitthunder.h>
 #include <stdlib.h>
 
+#define CALC_HASH	1
+
+#if (CALC_HASH)
+
+#include "md5.h"
+#include "stdio.h"
+#include "string.h"
+
+#define CHUNKSZ_MD5 (64 * 1024)
+
+static int calculate_hash (const void *data, int data_len, const char *algo, unsigned char *value, int *value_len)
+{
+	if (strcmp (algo, "md5") == 0 ) {
+		md5_wd ((unsigned char *)data, data_len, value, CHUNKSZ_MD5);
+		*value_len = 16;
+	}
+
+	return 0;
+}
+
+#endif
+
 static int bt_load_fpga(BT_HANDLE hShell, int argc, char **argv) {
 
 	BT_HANDLE hStdout = BT_ShellGetStdout(hShell);
@@ -46,6 +68,21 @@ static int bt_load_fpga(BT_HANDLE hShell, int argc, char **argv) {
 	BT_Read(hFile, 0, oInode.ullFilesize, p, &Error);
 
 	BT_kPrint("Load successful");
+
+#if (CALC_HASH)
+
+	unsigned char md5[16];
+	char szmd5[33] = { 0 };
+	int i, md5_len; 
+	calculate_hash(p, oInode.ullFilesize, "md5", md5, &md5_len);	
+	for(i=0;i<md5_len;i++) {
+		char sztmp[3];
+		sprintf(sztmp, "%02x", md5[i]);
+		strcat(szmd5, sztmp);
+	}
+	BT_kPrint("MD5: %s", szmd5);
+
+#endif
 
 	if(hFile) {
 		BT_CloseHandle(hFile);
