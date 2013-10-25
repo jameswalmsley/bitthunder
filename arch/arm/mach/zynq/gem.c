@@ -583,6 +583,8 @@ static BT_HANDLE mac_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 		goto err_free_buffers_out;
 	}
 
+	BT_SetInterruptLabel(pResource->ulStart, gem_interrupt_handler, hMac, "zynq,gem");
+
 	BT_EnableInterrupt(pResource->ulStart);
 
 	BT_RegisterNetworkInterface(hMac);
