@@ -82,6 +82,42 @@ BT_ERROR BT_RegisterInterrupt(BT_u32 ulIRQ, BT_FN_INTERRUPT_HANDLER pfnHandler, 
 	return pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnRegister(pIntc->hIRQ, ulIRQ-pIntc->ulBaseIRQ, pfnHandler, pParam);
 }
 
+BT_ERROR BT_SetInterruptLabel(BT_u32 ulIRQ, BT_FN_INTERRUPT_HANDLER pfnHandler, void *pParam, const BT_i8 *label) {
+	BT_INTERRUPT_CONTROLLER *pIntc = getInterruptController(ulIRQ);
+	if(!pIntc) {
+		return BT_ERR_GENERIC;
+	}
+
+	return pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnSetLabel(pIntc->hIRQ, ulIRQ-pIntc->ulBaseIRQ, pfnHandler, pParam, label);
+}
+
+const BT_i8 *BT_GetInterruptLabel(BT_u32 ulIRQ) {
+	BT_INTERRUPT_CONTROLLER *pIntc = getInterruptController(ulIRQ);
+	if(!pIntc) {
+		return NULL;
+	}
+
+	return pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnGetLabel(pIntc->hIRQ, ulIRQ-pIntc->ulBaseIRQ);
+}
+
+BT_BOOL BT_InterruptRegistered(BT_u32 ulIRQ) {
+	BT_INTERRUPT_CONTROLLER *pIntc = getInterruptController(ulIRQ);
+	if(!pIntc) {
+		return BT_FALSE;
+	}
+
+	return pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnRegistered(pIntc->hIRQ, ulIRQ-pIntc->ulBaseIRQ);
+}
+
+BT_u32 BT_GetInterruptCount(BT_u32 ulIRQ) {
+	BT_INTERRUPT_CONTROLLER *pIntc = getInterruptController(ulIRQ);
+	if(!pIntc) {
+		return 0;
+	}
+
+	return pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnGetCount(pIntc->hIRQ, ulIRQ-pIntc->ulBaseIRQ);
+}
+
 BT_ERROR BT_UnregisterInterrupt(BT_u32 ulIRQ, BT_FN_INTERRUPT_HANDLER pfnHandler, void *pParam) {
 
 	BT_ERROR Error;

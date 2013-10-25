@@ -7,22 +7,34 @@
 
 typedef BT_ERROR (*BT_FN_INTERRUPT_HANDLER)(BT_u32 ulIRQ, void *pParam);
 
+#define BT_INTERRUPT_MAX_LABEL	32
 
 typedef struct _BT_INTERRUPT_VECTOR {
 	BT_FN_INTERRUPT_HANDLER		pfnHandler;
 	void 				   	   *pParam;
+	char						label[BT_INTERRUPT_MAX_LABEL];
 } BT_INTERRUPT_VECTOR;
 
-BT_ERROR 	BT_RegisterInterruptController	(BT_u32 ulBaseIRQ, BT_u32 ulTotalIRQs, BT_HANDLE hIRQ);
+struct bt_interrupt_stat {
+	BT_u32			ulIRQ;
+	BT_u32			ulHits;
+	const BT_i8    *label;
+};
 
+BT_ERROR 	BT_RegisterInterruptController	(BT_u32 ulBaseIRQ, BT_u32 ulTotalIRQs, BT_HANDLE hIRQ);
 BT_ERROR 	BT_RegisterInterrupt			(BT_u32 ulIRQ, BT_FN_INTERRUPT_HANDLER pfnHandler, void *pParam);
+BT_ERROR 	BT_SetInterruptLabel			(BT_u32 ulIRQ, BT_FN_INTERRUPT_HANDLER pfnHandler, void *pParam, const BT_i8 *label);
+const BT_i8 *BT_GetInterruptLabel			(BT_u32 ulIRQ);
+BT_BOOL 	BT_InterruptRegistered			(BT_u32 ulIRQ);
 BT_ERROR 	BT_UnregisterInterrupt			(BT_u32 ulIRQ, BT_FN_INTERRUPT_HANDLER pfnHandler, void *pParam);
 BT_ERROR 	BT_SetInterruptPriority			(BT_u32 ulIRQ, BT_u32 ulPriority);
 BT_u32 		BT_GetInterruptPriority			(BT_u32 ulIRQ, BT_ERROR *pError);
 BT_ERROR	BT_EnableInterrupt				(BT_u32 ulIRQ);
 BT_ERROR	BT_DisableInterrupt				(BT_u32 ulIRQ);
+BT_u32		BT_GetInterruptCount			(BT_u32 ulIRQ);
 BT_ERROR	BT_EnableInterrupts				();
 BT_ERROR	BT_DisableInterrupts			();
+BT_u32		BT_GetInterruptCount			();
 
 /**
  *	@brief		Controls CPU Interrupt Affinity.

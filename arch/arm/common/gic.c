@@ -9,6 +9,7 @@
 #include <interrupts/bt_interrupts.h>
 #include <bt_module.h>
 #include <mm/bt_heap.h>
+#include <string.h>
 
 BT_DEF_MODULE_NAME				("Arm GIC")
 BT_DEF_MODULE_DESCRIPTION		("Provides a complete interrupt controller interface for BitThunder")
@@ -21,6 +22,7 @@ BT_DEF_MODULE_EMAIL				("james@fullfat-fs.co.uk")
 
 static BT_HANDLE				g_hActiveHandle = NULL;
 static BT_INTERRUPT_VECTOR 		g_oVectorTable[BT_CONFIG_ARCH_ARM_GIC_TOTAL_IRQS];
+static BT_u32 					g_oVectorStats[BT_CONFIG_ARCH_ARM_GIC_TOTAL_IRQS];
 
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER 			h;
@@ -39,6 +41,7 @@ void BT_ARCH_ARM_GIC_IRQHandler() {
 	ulIRQ = ulStatus & 0x01FF;
 
 	while(ulIRQ < 1020) {
+		g_oVectorStats[ulIRQ] += 1;
 		ulIRQ 	   += hGic->ulBaseIRQ;		// Remap the IRQn into logical IRQ# space.
 		g_oVectorTable[ulIRQ].pfnHandler(ulIRQ, g_oVectorTable[ulIRQ].pParam);
 		hGic->pGICC->EOIR = ulIRQ;
@@ -108,6 +111,29 @@ static BT_ERROR gic_register(BT_HANDLE hGic, BT_u32 ulIRQ, BT_FN_INTERRUPT_HANDL
 	g_oVectorTable[ulIRQ].pParam 		= pParam;
 
 	return BT_ERR_NONE;
+}
+
+static BT_ERROR gic_set_label(BT_HANDLE hGic, BT_u32 ulIRQ, BT_FN_INTERRUPT_HANDLER pfnHandler, void *pParam, const BT_i8 *label) {
+	if(g_oVectorTable[ulIRQ].pfnHandler != pfnHandler) {
+		return BT_ERR_GENERIC;
+	}
+
+	strncpy(g_oVectorTable[ulIRQ].label, label, BT_INTERRUPT_MAX_LABEL);
+	g_oVectorTable[ulIRQ].label[BT_INTERRUPT_MAX_LABEL-1] = '\0';
+
+	return BT_ERR_NONE;
+}
+
+static const BT_i8 *gic_get_label(BT_HANDLE hGic, BT_u32 ulIRQ) {
+	return g_oVectorTable[ulIRQ].label;
+}
+
+static BT_BOOL gic_registered(BT_HANDLE hGic, BT_u32 ulIRQ) {
+	if(g_oVectorTable[ulIRQ].pfnHandler != gic_stubhandler) {
+		return BT_TRUE;
+	}
+
+	return BT_FALSE;
 }
 
 static BT_ERROR gic_unregister(BT_HANDLE hGic, BT_u32 ulIRQ, BT_FN_INTERRUPT_HANDLER pfnHandler, void *pParam) {
@@ -188,8 +214,15 @@ static BT_ERROR gic_disable_interrupts(BT_HANDLE hGic) {
 	return BT_ERR_NONE;
 }
 
+static BT_u32 gic_get_count(BT_HANDLE hGic, BT_u32 ulIRQ) {
+	return g_oVectorStats[ulIRQ];
+}
+
 static const BT_DEV_IF_IRQ oDeviceOps = {
 	.pfnRegister			= gic_register,
+	.pfnSetLabel			= gic_set_label,
+	.pfnGetLabel			= gic_get_label,
+	.pfnRegistered			= gic_registered,
 	.pfnUnregister			= gic_unregister,
 	.pfnSetPriority			= gic_setpriority,
 	.pfnGetPriority			= gic_getpriority,
@@ -198,6 +231,7 @@ static const BT_DEV_IF_IRQ oDeviceOps = {
 	.pfnSetAffinity			= gic_setaffinity,						///< An option interface, GIC could implement this.
 	.pfnEnableInterrupts	= gic_enable_interrupts,
 	.pfnDisableInterrupts	= gic_disable_interrupts,
+	.pfnGetCount			= gic_get_count,
 };
 
 static const BT_IF_DEVICE oDeviceInterface = {
