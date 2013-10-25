@@ -6,9 +6,11 @@
 
 struct bt_thread {
 	struct bt_task *task;
+	BT_u64		ullRunTimeCounter;
 };
 
 extern struct bt_thread *curthread;
+extern BT_u64 ullTaskSwitchedInTime;
 
 typedef struct _BT_THREAD_CONFIG {
 	BT_u32		ulStackDepth;

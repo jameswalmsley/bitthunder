@@ -22,10 +22,10 @@ struct _BT_OPAQUE_HANDLE {
 };
 
 static struct bt_list_head process_handles;
+static BT_u32 total_processes = 0;
 static BT_u16 usLastPID = 0;
 
 struct _BT_OPAQUE_HANDLE kernel_handle;
-struct bt_task *kernel_task = &kernel_handle.task;
 
 static const BT_IF_HANDLE oHandleInterface;
 
@@ -54,6 +54,11 @@ BT_HANDLE BT_CreateProcess(BT_FN_THREAD_ENTRY pfnStartRoutine, const BT_i8 *szpN
 
 	bt_list_add(&hProcess->h.list, &process_handles);
 
+	BT_HANDLE hParent = BT_GetProcessHandle();
+	hProcess->task.parent = &hParent->task;
+
+	total_processes += 1;
+
 	return hProcess;
 }
 
@@ -67,11 +72,37 @@ BT_HANDLE BT_GetProcessHandle(void) {
 		struct bt_task *task = curtask;
 		return bt_container_of(task, struct _BT_OPAQUE_HANDLE, task, struct bt_task);
 	}
-	return NULL;
+	return (BT_HANDLE) &kernel_handle;
 }
 
 struct bt_task *BT_GetProcessTask(BT_HANDLE hProcess) {
 	return &hProcess->task;
+}
+
+BT_ERROR BT_GetProcessTime(struct bt_process_time *time, BT_u32 i) {
+	struct bt_list_head *pos;
+	BT_HANDLE hProcess = NULL;
+
+	bt_list_for_each(pos, &process_handles) {
+		if(!i--) {
+			hProcess = (BT_HANDLE) pos;
+		}
+	}
+
+	if(!hProcess) {
+		return BT_ERR_GENERIC;
+	}
+
+	time->hProcess 			= hProcess;
+	time->ullRunTimeCounter = hProcess->task.ullRunTimeCounter;
+	time->ulRunTimePercent 	= ((time->ullRunTimeCounter) / (BT_GetGlobalTimer() / 100));
+	time->name 				= hProcess->task.name;
+
+	return BT_ERR_NONE;
+}
+
+BT_u32 BT_GetTotalProcesses() {
+	return total_processes;
 }
 
 static BT_ERROR bt_process_cleanup(BT_HANDLE hProcess) {
@@ -91,11 +122,15 @@ static BT_ERROR bt_process_manager_init() {
 
 	// Create the kernel process handle!
 	BT_LIST_INIT_HEAD(&process_handles);
+	memset(&kernel_handle, 0, sizeof(struct _BT_OPAQUE_HANDLE));
 	strncpy(kernel_handle.task.name, "kernel", BT_CONFIG_MAX_PROCESS_NAME);
 #ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
 	kernel_handle.task.map = bt_vm_get_kernel_map();
 #endif
+	bt_list_add(&kernel_handle.h.list, &process_handles);
 	idle_thread.task = &kernel_handle.task;
+
+	total_processes = 1;
 
 	return BT_ERR_NONE;
 }

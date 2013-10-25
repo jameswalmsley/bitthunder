@@ -1641,6 +1641,15 @@ void vTaskSwitchContext( void )
 	{
 		traceTASK_SWITCHED_OUT();
 
+#if (configBITTHUNDER == 1)
+		BT_u64 ullTempCounter = BT_GetGlobalTimer();
+		curthread->ullRunTimeCounter += (BT_u64) (ullTempCounter - ullTaskSwitchedInTime);
+		if(curtask) {
+			curtask->ullRunTimeCounter += (BT_u64) (ullTempCounter - ullTaskSwitchedInTime);
+		}
+		ullTaskSwitchedInTime = ullTempCounter;
+#endif
+
 		#if ( configGENERATE_RUN_TIME_STATS == 1 )
 		{
 			unsigned long ulTempCounter;

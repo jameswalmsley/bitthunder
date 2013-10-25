@@ -10,6 +10,14 @@ struct bt_task {
 	BT_u32				flags;
 	struct bt_list_head threads;
 	struct bt_list_head handles;
+	BT_u64 				ullRunTimeCounter;
+};
+
+struct bt_process_time {
+	BT_u64 		ullRunTimeCounter;
+	BT_u32 		ulRunTimePercent;
+	BT_HANDLE 	hProcess;
+	char 	   *name;
 };
 
 #define curtask 	curthread->task
@@ -19,5 +27,8 @@ BT_HANDLE BT_CreateProcess(BT_FN_THREAD_ENTRY pfnStartRoutine, const BT_i8 *szpN
 BT_HANDLE BT_GetProcessHandle(void);
 struct bt_task *BT_GetProcessTask(BT_HANDLE hProces);
 BT_LIST *BT_GetProcessThreadList(BT_HANDLE hProcess);
+
+BT_ERROR BT_GetProcessTime(struct bt_process_time *time, BT_u32 i);
+BT_u32 BT_GetTotalProcesses();
 
 #endif

@@ -25,6 +25,7 @@ struct _BT_OPAQUE_HANDLE {
 
 struct bt_thread idle_thread;
 struct bt_thread *curthread = &idle_thread;
+BT_u64 ullTaskSwitchedInTime = 0;
 
 static void threadStartup(void *pParam) {
 
