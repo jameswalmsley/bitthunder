@@ -5,6 +5,7 @@
 #include "bt_dev_if_irq.h"
 #include "bt_dev_if_gpio.h"
 #include "bt_dev_if_systimer.h"
+#include "bt_dev_if_gtimer.h"
 #include "bt_dev_if_timer.h"
 #include "bt_if_power.h"
 #include "bt_if_block.h"
@@ -23,6 +24,7 @@ typedef enum _BT_DEV_IF_TYPE {
 	BT_DEV_IF_T_SYSTEM,
 	BT_DEV_IF_T_INTC,
 	BT_DEV_IF_T_SYSTIMER,
+	BT_DEV_IF_T_GTIMER,
 	BT_DEV_IF_T_TIMER,
 	BT_DEV_IF_T_PWM,
 	BT_DEV_IF_T_ADC,
@@ -60,6 +62,7 @@ typedef union {
 	const BT_DEV_IF_GPIO	   *pGpioIF;
 	const BT_DEV_IF_IRQ		   *pIRQIF;
 	const BT_DEV_IF_SYSTIMER   *pSysTimerIF;
+	const BT_DEV_IF_GTIMER 	   *pGTimerIF;
 	const BT_DEV_IF_TIMER	   *pTimerIF;
 	const BT_DEV_IF_PWM		   *pPwmIF;
 	const BT_DEV_IF_CAN 	   *pCANIF;
@@ -76,6 +79,7 @@ typedef union {
 #define BT_IF_GPIO_OPS(handle)		BT_IF_DEV_CONFIG(handle).pGpioIF
 #define BT_IF_IRQ_OPS(handle)		BT_IF_DEV_CONFIG(handle).pIRQIF
 #define BT_IF_SYSTIMER_OPS(handle)	BT_IF_DEV_CONFIG(handle).pSysTimerIF
+#define BT_IF_GTIMER_OPS(handle)	BT_IF_DEV_CONFIG(handle).pGTimerIF
 #define BT_IF_TIMER_OPS(handle)		BT_IF_DEV_CONFIG(handle).pTimerIF
 #define	BT_IF_PWM_OPS(handle)		BT_IF_DEV_CONFIG(handle).pPwmIF
 #define BT_IF_CAN_OPS(handle)		BT_IF_DEV_CONFIG(handle).pCANIF
