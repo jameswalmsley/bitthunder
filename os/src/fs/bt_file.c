@@ -118,13 +118,18 @@ BT_s32 BT_GetC(BT_HANDLE hFile, BT_u32 ulFlags, BT_ERROR *pError) {
 	}
 
 	BT_u8 c;
-	hFile->h.pIf->pFileIF->pfnRead(hFile, ulFlags, 1, &c, &Error);
+	Error = 0;
+	BT_u32 i = hFile->h.pIf->pFileIF->pfnRead(hFile, ulFlags, 1, &c, &Error);
 
 	if(pError) {
 		*pError = Error;
 	}
 
 	if(Error) {
+		return Error;
+	}
+
+	if(!i) {
 		return -1;
 	}
 
