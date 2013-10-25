@@ -339,7 +339,9 @@ static BT_ERROR uartDisable(BT_HANDLE hUart) {
  *	Each I/O interface will be used by different Application Level API's.
  **/
 
-static BT_ERROR uartRead(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, BT_u8 *pucDest) {
+static BT_u32 uart_read(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
+	BT_u8 *pucDest = (BT_u8 *) pBuffer;
+	BT_u32 read = 0;
 	volatile ZYNQ_UART_REGS *pRegs = hUart->pRegs;
 	switch(hUart->eMode) {
 	case BT_UART_MODE_POLLED:
@@ -347,13 +349,14 @@ static BT_ERROR uartRead(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, BT_u8 *
 		while(ulSize) {
 			while((pRegs->SR & ZYNQ_UART_SR_RXEMPTY)) {
 				if(ulFlags & BT_FILE_NON_BLOCK) {
-					return BT_ERR_GENERIC;
+					return 0;
 				}
 				BT_ThreadYield();
 			}
 
 			*pucDest++ = pRegs->FIFO & 0x000000FF;
 			ulSize--;
+			read++;
 		}
 		break;
 	}
@@ -370,7 +373,7 @@ static BT_ERROR uartRead(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, BT_u8 *
 				ulSize--;
 			} else {
 				if(ulFlags & BT_FILE_NON_BLOCK) {
-					return BT_ERR_GENERIC;
+					return 0;
 				}
 				BT_ThreadYield();
 			}
@@ -382,7 +385,7 @@ static BT_ERROR uartRead(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, BT_u8 *
 		// ERR, invalid handle configuration.
 		break;
 	}
-	return BT_ERR_NONE;
+	return read;
 }
 
 /**
@@ -390,7 +393,9 @@ static BT_ERROR uartRead(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, BT_u8 *
  *
  *	Note, this doesn't implement ulFlags specific options yet!
  **/
-static BT_ERROR uartWrite(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const BT_u8 *pucSource) {
+static BT_u32 uart_write(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer, BT_ERROR *pError) {
+
+	BT_u8 *pucSource = (BT_u8 *) pBuffer;
 	volatile ZYNQ_UART_REGS *pRegs = hUart->pRegs;
 	switch(hUart->eMode) {
 	case BT_UART_MODE_POLLED:
@@ -436,31 +441,6 @@ static BT_ERROR uartFlush(BT_HANDLE hUart) {
 	return BT_ERR_NONE;
 }
 
-static BT_u32 file_read(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
-	*pError = uartRead(hUart, ulFlags, ulSize, pBuffer);
-	return ulSize;
-}
-
-static BT_u32 file_write(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
-	*pError = uartWrite(hUart, ulFlags, ulSize, pBuffer);
-	return ulSize;
-}
-
-
-/**
- *	A driver doesn't have to implement all API's all at once, therefore we left the boring
- *	GETCH/PUTCH interfaces.
- **/
-/*
-static BT_ERROR uartGetch(BT_HANDLE hUart, BT_u32 ulFlags) {
-	return BT_ERR_NONE;
-}
-
-static BT_ERROR uartPutch(BT_HANDLE hUart, BT_u32 ulFlags, BT_u8 ucData) {
-	return BT_ERR_NONE;
-}
-*/
-
 static const BT_DEV_IF_UART oUartConfigInterface = {
 	uartSetBaudrate,											///< UART setBaudrate implementation.
 	uartSetConfig,												///< UART set config imple.
@@ -474,12 +454,6 @@ static const BT_IF_POWER oPowerInterface = {
 	uartGetPowerState,											///< This gets the current power state.
 };
 
-static const BT_IF_CHARDEV oCharDevInterface = {
-	.pfnRead = uartRead,										///< CH device read function.
-	.pfnWrite = uartWrite,										///< CH device write function.
-	.pfnFlush = uartFlush,
-};
-
 static const BT_DEV_IFS oConfigInterface = {
 	(BT_DEV_INTERFACE) &oUartConfigInterface,
 };
@@ -490,12 +464,11 @@ static const BT_IF_DEVICE oDeviceInterface = {
 	.unConfigIfs = {
 		(BT_DEV_INTERFACE) &oUartConfigInterface,
 	},
-	&oCharDevInterface,											///< Provide a Character device interface implementation.
 };
 
 static const BT_IF_FILE oFileInterface = {
-	.pfnRead = file_read,
-	.pfnWrite = file_write,
+	.pfnRead = uart_read,
+	.pfnWrite = uart_write,
 	.pfnFlush = uartFlush,
 	.ulSupported = BT_FILE_NON_BLOCK,
 };
