@@ -1,4 +1,3 @@
-BT_OS_INTERFACE_OBJECTS += $(BUILD_DIR)os/src/interfaces/bt_if_chardev.o
 BT_OS_INTERFACE_OBJECTS += $(BUILD_DIR)os/src/interfaces/bt_if_cpu.o
 BT_OS_INTERFACE_OBJECTS += $(BUILD_DIR)os/src/interfaces/bt_if_power.o
 

@@ -2,7 +2,6 @@
 #define _BT_IF_DEVICE_H_
 
 #include "bt_types.h"
-#include "bt_if_chardev.h"
 #include "bt_dev_if_irq.h"
 #include "bt_dev_if_gpio.h"
 #include "bt_dev_if_systimer.h"
@@ -52,7 +51,6 @@ typedef enum _BT_DEV_IF_TYPE {
 #define BT_IF_DEVICE(handle)		handle->h.pIf->oIfs.pDevIF
 #define BT_IF_DEVICE_TYPE(handle)	BT_IF_DEVICE(handle)->eConfigType
 #define BT_IF_DEV_CONFIG(handle)	BT_IF_DEVICE(handle)->unConfigIfs
-#define BT_IF_CHARDEV_OPS(handle)	BT_IF_DEVICE(handle)->pCharDevIf
 
 
 typedef struct _BT_DEV_INTERFACE *BT_DEV_INTERFACE;
@@ -94,7 +92,6 @@ typedef struct _BT_IF_DEVICE {
 	const BT_IF_POWER	   *pPowerIF;
 	BT_DEV_IF_TYPE 			eConfigType;
 	const BT_DEV_IFS 	    unConfigIfs;
-	const BT_IF_CHARDEV	   *pCharDevIf;
 	const BT_IF_BLOCK	   *pBlockIf;
 } BT_IF_DEVICE;
 
