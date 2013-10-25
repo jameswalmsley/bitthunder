@@ -324,7 +324,7 @@ BT_ERROR BT_DCacheFlush() {
 
 BT_ERROR BT_DCacheFlushLine(void *addr) {
 	BT_L1DCacheFlushLine(addr);
-	BT_L2CacheFlushLine(addr);
+	//BT_L2CacheFlushLine(addr);
 	return BT_ERR_NONE;
 }
 
