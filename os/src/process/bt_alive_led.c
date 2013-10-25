@@ -48,7 +48,7 @@ static BT_ERROR bt_led_init() {
 		.ulPriority		= BT_CONFIG_ALIVE_LED_PRIORITY,
 	};
 
-	BT_kTaskCreate((BT_FN_TASK_ENTRY) led_task, "LED", &oThreadConfig, &Error);
+	BT_CreateThread((BT_FN_TASK_ENTRY) led_task, &oThreadConfig, &Error);
 
 	return Error;
 }

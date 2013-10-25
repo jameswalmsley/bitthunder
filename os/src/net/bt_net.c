@@ -85,7 +85,7 @@ static void tcpip_init_done(void *arg) {
 	*bDone = BT_TRUE;
 }
 
-static void net_task(void *pParam) {
+static BT_ERROR net_task(BT_HANDLE hThread, void *pParam) {
 	BT_NETIF_PRIV *pIF;
 
 	BT_BOOL bDone = BT_FALSE;
@@ -120,7 +120,7 @@ static void net_task(void *pParam) {
 		}
 	}
 
-	BT_kTaskDelete(NULL );
+	return BT_ERR_NONE;
 }
 
 static err_t lwip_init(struct netif *netif) {
@@ -180,7 +180,7 @@ static BT_ERROR bt_net_manager_init() {
 		.ulPriority = 0,
 	};
 
-	BT_kTaskCreate(net_task, "netif", &oThreadConfig, &Error);
+	BT_CreateThread(net_task, &oThreadConfig, &Error);
 
 	return BT_ERR_NONE;
 }

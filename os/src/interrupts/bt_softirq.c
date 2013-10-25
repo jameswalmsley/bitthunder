@@ -44,7 +44,7 @@ BT_ERROR BT_RaiseSoftIRQFromISR(BT_u32 ulSoftIRQ) {
 }
 
 
-static void softirq_dispatcher(void *pParam) {
+static BT_ERROR softirq_dispatcher(BT_HANDLE hThread, void *pParam) {
 
 	BT_u32 ulPending;
 	BT_SOFTIRQ *p;
@@ -67,6 +67,8 @@ static void softirq_dispatcher(void *pParam) {
 			} while(ulPending);
 		}
 	}
+
+	return BT_ERR_NONE;
 }
 
 static BT_ERROR bt_softirq_init() {
@@ -83,7 +85,7 @@ static BT_ERROR bt_softirq_init() {
 
 	BT_PendMutex(g_hMutex, 0);
 
-	BT_kTaskCreate(softirq_dispatcher, "ksoftirqd", &oConfig, &Error);
+	BT_CreateThread(softirq_dispatcher, &oConfig, &Error);
 
 	return BT_ERR_NONE;
 }

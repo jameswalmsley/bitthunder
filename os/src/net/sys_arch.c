@@ -400,24 +400,40 @@ u32_t sys_now(void) {
  * Outputs:
  *      sys_thread_t            -- Pointer to per-thread timeouts.
  *---------------------------------------------------------------------------*/
+
+struct thread_params {
+	void *pParam;
+	void (*pxThread) (void *pvParameters);
+};
+
+static BT_ERROR lwip_thread_startup(BT_HANDLE hThread, void *pParam) {
+
+	struct thread_params *params = (struct thread_params *) pParam;
+	params->pxThread(params->pParam);
+	return BT_ERR_NONE;
+}
+
 sys_thread_t sys_thread_new( const char *pcName, void( *pxThread )( void *pvParameters ), void *pvArg, int iStackSize, int iPriority ) {
-	BT_HANDLE hCreatedTask;
+	BT_HANDLE hThread;
 	BT_ERROR Error = BT_ERR_NONE;
 	sys_thread_t xReturn;
 
 	BT_THREAD_CONFIG oThreadConfig;
+	struct thread_params *params = BT_kMalloc(sizeof(*params));
 
 	oThreadConfig.ulStackDepth = iStackSize;
 	oThreadConfig.ulPriority = iPriority;
 	oThreadConfig.ulFlags = 0;
-	oThreadConfig.pParam = pvArg;
+	oThreadConfig.pParam = params;
 
-	hCreatedTask = BT_kTaskCreate( pxThread, (const BT_i8 *) pcName, &oThreadConfig, &Error);
+	params->pParam = pvArg;
+	params->pxThread = pxThread;
+
+	hThread = BT_CreateThread(lwip_thread_startup, &oThreadConfig, &Error);
 
 	if( Error == BT_ERR_NONE ) {
-		xReturn = hCreatedTask;
-	}
-	else {
+		xReturn = hThread;
+	} else {
 		xReturn = NULL;
 	}
 
