@@ -4,9 +4,13 @@
 #include <bitthunder.h>
 
 BT_ERROR BT_SetSystemTimerHandle(BT_HANDLE hTimer);
+BT_ERROR BT_SetGlobalTimerHandle(BT_HANDLE hTimer);
 
 BT_u32 BT_GetSystemTimerOffset(void);
 BT_ERROR BT_StopSystemTimer();
+
+BT_u64 	BT_GetGlobalTimer(void);
+BT_u32	BT_GetGlobalTimerRate(void);
 
 BT_u32 BT_GetKernelTime(void);
 BT_u32 BT_GetKernelTick(void);
