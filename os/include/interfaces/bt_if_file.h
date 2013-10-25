@@ -30,7 +30,7 @@
  **/
 typedef struct _BT_IF_FILE {
 	BT_u32 		(*pfnRead)	(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError);
-	BT_u32 		(*pfnWrite)	(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError);
+	BT_u32 		(*pfnWrite)	(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer, BT_ERROR *pError);
 	BT_s32 		(*pfnGetC)	(BT_HANDLE hFile, BT_u32 ulFlags, BT_ERROR *pError);
 	BT_ERROR	(*pfnPutC)	(BT_HANDLE hFile, BT_u32 ulFlags, BT_i8 cData);
 	BT_ERROR	(*pfnSeek)	(BT_HANDLE hFile, BT_s64 ulOffset, BT_u32 whence);

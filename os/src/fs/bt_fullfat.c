@@ -175,7 +175,7 @@ static BT_u32 fullfat_read(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void 
 	return (BT_u32) sRead;
 }
 
-static BT_u32 fullfat_write(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
+static BT_u32 fullfat_write(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer, BT_ERROR *pError) {
 	BT_FF_FILE *pFile = (BT_FF_FILE *) hFile;
 
 	FF_T_SINT32 sWritten = FF_Write(pFile->pFile, 1, ulSize, (FF_T_UINT8 *) pBuffer);
