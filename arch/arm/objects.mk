@@ -26,6 +26,7 @@ BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_USE_NVIC)	+= $(BUILD_DIR)arch/arm/commo
 #	Timer Devices
 #
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-A9)	+= $(BUILD_DIR)arch/arm/common/cortex-a9-cpu-timers.o
+BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-A9)	+= $(BUILD_DIR)arch/arm/common/gt.o
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-M0)	+= $(BUILD_DIR)arch/arm/common/cortex/systick.o
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-M3)	+= $(BUILD_DIR)arch/arm/common/cortex/systick.o
 
