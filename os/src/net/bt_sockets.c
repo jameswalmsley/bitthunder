@@ -163,7 +163,7 @@ static BT_u32 socket_read(BT_HANDLE hSocket, BT_u32 ulFlags, BT_u32 ulSize, void
 	return 0;
 }
 
-static BT_u32 socket_write(BT_HANDLE hSocket, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
+static BT_u32 socket_write(BT_HANDLE hSocket, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer, BT_ERROR *pError) {
 	return 0;
 }
 
