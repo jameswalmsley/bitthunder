@@ -5,9 +5,19 @@ static int bt_load_fpga(int argc, char **argv) {
 
 	BT_ERROR Error;
 
-	if(argc != 4) {
-		bt_printf("Usage: %s [buffer_address] [fpga_device] [bitstream]\n", argv[0]);
+	if(argc != 4 && argc != 5) {
+		bt_printf("Usage: %s [buffer_address] [fpga_device] [bitstream] [length]\n", argv[0]);
 		return -1;
+	}
+
+	BT_u32 length = 0;
+	BT_u32 addr = strtoul(argv[1], NULL, 16);
+	void *p = (void *) addr;
+
+	if(argv[3][0] == '-' && argc == 5) {
+		// Image loaded and length provided.
+		length = strtoul(argv[4], NULL, 10);
+		goto flush;
 	}
 
 	BT_HANDLE hFile = BT_Open(argv[3], "rb", &Error);
@@ -26,11 +36,7 @@ static int bt_load_fpga(int argc, char **argv) {
 	BT_INODE oInode;
 	BT_ReadInode(hInode, &oInode);
 
-	BT_u32 addr = strtoul(argv[1], NULL, 16);
-
 	BT_kPrint("Loading %s at %08X (%llu bytes)", argv[3], addr, oInode.ullFilesize);
-
-	void *p = (void *) addr;
 
 	BT_Read(hFile, 0, oInode.ullFilesize, p, &Error);
 
@@ -44,6 +50,10 @@ static int bt_load_fpga(int argc, char **argv) {
 		BT_CloseHandle(hInode);
 	}
 
+	length = oInode.ullFilesize;
+
+flush:
+
 	BT_DCacheFlush();
 
 	BT_HANDLE hFPGA = BT_DeviceOpen(argv[2], &Error);
@@ -52,7 +62,7 @@ static int bt_load_fpga(int argc, char **argv) {
 		return -1;
 	}
 
-	BT_Write(hFPGA, 0, oInode.ullFilesize, p, &Error);
+	BT_Write(hFPGA, 0, length, p, &Error);
 
 	BT_CloseHandle(hFPGA);
 
