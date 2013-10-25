@@ -29,7 +29,7 @@ static BT_ERROR devcfg_cleanup(BT_HANDLE h) {
 /**
  *	This assumes a single write request will be generated.
  **/
-static BT_u32 devcfg_write(BT_HANDLE hDevcfg, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
+static BT_u32 devcfg_write(BT_HANDLE hDevcfg, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer, BT_ERROR *pError) {
 	// Wait for PCFG_INIT bit to be high.
 
 	// Enable level shifters
