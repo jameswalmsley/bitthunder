@@ -54,6 +54,8 @@ endif
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_HAS_MMU)			+= $(BUILD_DIR)arch/arm/mm/v7-mmu.o
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_HAS_MMU)			+= $(BUILD_DIR)arch/arm/mm/v7-mmu-asm.o
 
+$(BUILD_DIR)arch/arm/mm/v7-mmu.o: CFLAGS_REMOVE += -mthumb
+
 #
 #	Boot-Up
 #
@@ -72,6 +74,7 @@ $(BUILD_DIR)arch/arm/common/freertos-arm11-portisr.o: CFLAGS += -I $(BASE)arch/a
 $(BUILD_DIR)arch/arm/common/freertos-arm.o: CFLAGS += -I $(BASE)kernel/FreeRTOS/Source/include/
 $(BUILD_DIR)arch/arm/common/freertos-arm.o: CFLAGS += -I $(BASE)arch/arm/include/arch/common/
 $(BUILD_DIR)arch/arm/common/freertos-arm.o: CFLAGS += -D $(BT_CONFIG_FREERTOS_PORT_ARCH)
+$(BUILD_DIR)arch/arm/common/freertos-arm.o: CFLAGS_REMOVE += -mthumb
 $(BUILD_DIR)arch/arm/common/freertos-m0.o: CFLAGS += -I $(BASE)kernel/FreeRTOS/Source/include/
 $(BUILD_DIR)arch/arm/common/freertos-m0.o: CFLAGS += -I $(BASE)arch/arm/include/arch/common/
 $(BUILD_DIR)arch/arm/common/freertos-m0.o: CFLAGS += -D $(BT_CONFIG_FREERTOS_PORT_ARCH)
