@@ -105,12 +105,11 @@ static BT_HANDLE fullfat_mount(BT_HANDLE hFS, BT_HANDLE hVolume, BT_ERROR *pErro
 
 err_mount_out:
 	ffError = FF_DestroyIOMAN(pMount->pIoman);
-	BT_kFree(pMount->pBlockCache);
 
 err_block_cache_free_out:
+	BT_kFree(pMount->pBlockCache);
 
 err_free_out:
-	BT_kFree(pMount->pBlockCache);
 	BT_DestroyHandle((BT_HANDLE)pMount);
 
 	*pError = Error;
