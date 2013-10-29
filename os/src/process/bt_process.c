@@ -130,12 +130,14 @@ static BT_ERROR bt_process_manager_init() {
 	bt_list_add(&kernel_handle.h.list, &process_handles);
 	idle_thread.task = &kernel_handle.task;
 
+	BT_LIST_INIT_HEAD(&kernel_handle.task.threads);
+
 	total_processes = 1;
 
 	return BT_ERR_NONE;
 }
 
-BT_MODULE_INIT_DEF oModuleEntry = {
+BT_MODULE_INIT_0_DEF oModuleEntry = {
 	.name = BT_MODULE_NAME,
 	bt_process_manager_init,
 };
