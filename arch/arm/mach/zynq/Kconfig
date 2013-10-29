@@ -90,6 +90,11 @@ config MACH_ZYNQ_GEM_1
 	bool "Use GEM (MAC) 1 peripheral"
 	default n
 
+config MACH_ZYNQ_GEM
+	bool
+	default y if MACH_ZYNQ_GEM_0 || MACH_ZYNQ_GEM_1
+	
+
 comment "I2C devices"
 config MACH_ZYNQ_I2C_0
     bool "Use I2C(0) peripheral"

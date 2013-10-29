@@ -14,7 +14,7 @@ MACH_ZYNQ_OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/sdio.o
 MACH_ZYNQ_OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/devcfg.o
 MACH_ZYNQ_OBJECTS-$(BT_CONFIG_I2C) += $(BUILD_DIR)arch/arm/mach/zynq/i2c.o
 
-MACH_ZYNQ_OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/gem.o
+MACH_ZYNQ_OBJECTS-$(BT_CONFIG_MACH_ZYNQ_GEM) += $(BUILD_DIR)arch/arm/mach/zynq/gem.o
 
 
 $(BUILD_DIR)arch/arm/mach/zynq/zynq.o: CFLAGS += -DBT_CONFIG_ARCH_ARM_GIC_BASE=$(BT_CONFIG_ARCH_ARM_GIC_BASE)
