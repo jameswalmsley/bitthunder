@@ -32,5 +32,6 @@ typedef struct _BT_ENV_VARIABLE {
 BT_ERROR BT_ShellSetEnv(const char *name, const char *value, BT_ENV_TYPE eType);
 BT_ENV_VARIABLE *BT_ShellGetEnv(const char *name);
 BT_ENV_VARIABLE *BT_ShellGetStarredEnv(const char *name);
+BT_ENV_VARIABLE *BT_ShellGetNextEnv(BT_ENV_VARIABLE *env);
 
 #endif

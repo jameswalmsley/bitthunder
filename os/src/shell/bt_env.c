@@ -117,3 +117,18 @@ BT_ENV_VARIABLE *BT_ShellGetStarredEnv(const char *name) {
 
 	return find_starred_var(name, len);
 }
+
+BT_ENV_VARIABLE *BT_ShellGetNextEnv(BT_ENV_VARIABLE *env) {
+	BT_ENV_VARIABLE *ret = NULL;
+
+	if(env == NULL) {
+		ret = (BT_ENV_VARIABLE *)vars.next; 
+	} else {
+		ret = (BT_ENV_VARIABLE *)((struct bt_list_head *)env)->next;
+	}
+
+	if(ret == (BT_ENV_VARIABLE *)&vars) ret = NULL;
+
+	return ret;
+}
+
