@@ -14,8 +14,6 @@ typedef struct _BT_SHELL_COMMAND {
 	BT_SHELL_COMMAND_FN	pfnCommand;
 } BT_SHELL_COMMAND;
 
-extern BT_HANDLE BT_stdsh;
-
 #define BT_SHELL_COMMAND_DEF 		static const BT_ATTRIBUTE_SECTION(".bt.shell.commands") BT_SHELL_COMMAND
 
 #define BT_SHELL_FLAG_ALLOW_EXIT	0x00000001

@@ -27,22 +27,6 @@ struct _BT_OPAQUE_HANDLE {
 typedef struct _BT_OPAQUE_HANDLE BT_SHELL;
 typedef BT_SHELL *BT_SHELL_HANDLE;
 
-BT_SHELL g_Stdsh = {
-	.h = {
-		.pIf = NULL,
-		.ulClaimedMemory = sizeof(BT_SHELL),
-	},
-	.hStdin = BT_stdin,
-	.hStdout = BT_stdout,
-	.szpPrompt = "",
-	.ulPromptLen = 0,
-	.ulFlags = 0,
-	.ulStdinBufCnt = 0,
-	.pNext = NULL,
-};
-
-BT_HANDLE BT_stdsh = (BT_HANDLE)&g_Stdsh;
-
 extern const BT_SHELL_COMMAND * __bt_shell_commands_start;
 extern const BT_SHELL_COMMAND * __bt_shell_commands_end;
 
@@ -527,7 +511,7 @@ BT_ERROR BT_Shell(BT_HANDLE hShell) {
 			} 
 			// get next char
 			BT_s32 c = BT_GetC(hShell->hStdin, BT_FILE_NON_BLOCK, &Error);
-			if(Error == BT_ERR_NONE) {
+			if(c >= 0) {
 				if(c == '\r' || c == '\n') {
 					// cr or lf detected .. echo cr and lf
 					BT_Write(hShell->hStdout, 0, 2, "\r\n", NULL);
