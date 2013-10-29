@@ -88,7 +88,7 @@ BT_HANDLE BT_CreateThread(BT_FN_THREAD_ENTRY pfnStartRoutine, BT_THREAD_CONFIG *
 }
 
 BT_HANDLE BT_GetThreadHandle() {
-	BT_HANDLE hThread = bt_container_of(curthread, struct _BT_OPAQUE_HANDLE, thread, struct bt_thread);
+	BT_HANDLE hThread = bt_container_of(curthread, struct _BT_OPAQUE_HANDLE, thread);
 	return hThread;
 }
 

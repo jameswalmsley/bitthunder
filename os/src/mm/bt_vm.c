@@ -41,7 +41,7 @@ static void bt_segment_delete(struct bt_vm_map *map, struct bt_segment *seg) {
 	if(seg->flags & BT_SEG_SHARED) {
 		bt_list_del(&seg->shared_list);
 		if(seg->shared_list.next == seg->shared_list.prev) {
-			struct bt_segment *oldseg = bt_container_of(seg->shared_list.prev, struct bt_segment, shared_list, struct bt_list_head);
+			struct bt_segment *oldseg = bt_container_of(seg->shared_list.prev, struct bt_segment, shared_list);
 			oldseg->flags &= ~BT_SEG_SHARED;
 		}
 	}
@@ -109,7 +109,7 @@ static void bt_segment_free(struct bt_vm_map *map, struct bt_segment *seg) {
 	if(seg->flags & BT_SEG_SHARED) {
 		bt_list_del(&seg->list);
 		if(seg->shared_list.next == seg->shared_list.prev) {
-			struct bt_segment *oldseg = bt_container_of(seg->shared_list.prev, struct bt_segment, shared_list, struct bt_list_head);
+			struct bt_segment *oldseg = bt_container_of(seg->shared_list.prev, struct bt_segment, shared_list);
 			oldseg->flags &= ~BT_SEG_SHARED;
 		}
 	}
@@ -572,7 +572,7 @@ static BT_ERROR do_attribute(struct bt_vm_map *map, void *addr, BT_u32 attr) {
 
 		bt_list_del(&seg->shared_list);
 		if(seg->shared_list.next == seg->shared_list.prev) {
-			struct bt_segment *oldseg = bt_container_of(seg->shared_list.prev, struct bt_segment, shared_list, struct bt_list_head);
+			struct bt_segment *oldseg = bt_container_of(seg->shared_list.prev, struct bt_segment, shared_list);
 			oldseg->flags &= ~BT_SEG_SHARED;
 		}
 

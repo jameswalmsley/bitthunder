@@ -54,7 +54,7 @@ BT_HANDLE BT_DeviceOpen(const char *szpFilename, BT_ERROR *pError) {
 #ifdef BT_CONFIG_FS_DEV_DYNAMIC_REGISTRATION
 	BT_LIST_ITEM *pItem = oInodeList.pStart;
 	while(pItem) {
-		BT_HANDLE hInode = bt_container_of(pItem, BT_DEVFS_INODE_ITEM, oItem, BT_LIST_ITEM);
+		BT_HANDLE hInode = bt_container_of(pItem, BT_DEVFS_INODE_ITEM, oItem);
 		if(!strcmp(hInode->szpName, szpFilename)) {
 			return hInode->pOps->pfnOpen(hInode->hDevice, pError);
 		}

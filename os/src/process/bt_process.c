@@ -70,7 +70,7 @@ BT_ERROR BT_DestroyProcess(BT_HANDLE hProcess) {
 BT_HANDLE BT_GetProcessHandle(void) {
 	if(curthread && curtask) {
 		struct bt_task *task = curtask;
-		return bt_container_of(task, struct _BT_OPAQUE_HANDLE, task, struct bt_task);
+		return bt_container_of(task, struct _BT_OPAQUE_HANDLE, task);
 	}
 	return (BT_HANDLE) &kernel_handle;
 }
