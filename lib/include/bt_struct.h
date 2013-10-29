@@ -9,11 +9,15 @@
  *	@ptr:       the pointer to the member.
  * 	@type:   	the type of the container struct this is embedded in.
  * 	@member:    the name of the member within the struct.
- *	@t_member:	the type of the member -- linux uses typeof() but most compilers dont have this.
  *
  *	@citation:	Linux kernel source-code.
  */
-#define bt_container_of(ptr, type, member, t_member) ((type *) (((char *) ((t_member *) (ptr))) - offsetof(type,member)))
+
+#define bt_container_of(ptr, type, member) ({                      \
+        const typeof( ((type *)0)->member ) *__mptr = (ptr);    \
+        (type *)( (char *)__mptr - offsetof(type,member) );})
+
+
 
 
 /**
