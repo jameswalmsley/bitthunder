@@ -19,5 +19,5 @@ BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_IOMEM)		+= $(BUILD_DIR)os/src/shell/commands
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_LS)			+= $(BUILD_DIR)os/src/shell/commands/ls.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_CAT)		+= $(BUILD_DIR)os/src/shell/commands/cat.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_MOUNT)		+= $(BUILD_DIR)os/src/shell/commands/mount.o
-BT_OS_OBJECTS-$(BT_CONFIG_SHELL)				+= $(BUILD_DIR)os/src/shell/commands/tftp.o
-BT_OS_OBJECTS-$(BT_CONFIG_SHELL)				+= $(BUILD_DIR)os/src/shell/commands/ps.o
+BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_TFTP)				+= $(BUILD_DIR)os/src/shell/commands/tftp.o
+BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_PS)				+= $(BUILD_DIR)os/src/shell/commands/ps.o
