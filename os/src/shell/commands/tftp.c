@@ -35,23 +35,25 @@ struct tftp_packet {
 	char 	info[514];
 };
 
-static int bt_tftp_command(int argc, char **argv) {
+static int bt_tftp_command(BT_HANDLE hShell, int argc, char **argv) {
+
+	BT_HANDLE hStdout = BT_ShellGetStdout(hShell);
 
 	BT_ENV_VARIABLE *server_host = BT_ShellGetEnv("server-host");
 	if(!server_host) {
-		bt_printf("Error: env: server-host variable not defined.\n");
+		bt_fprintf(hStdout, "Error: env: server-host variable not defined.\n");
 		return -1;
 	}
 
 	if(argc != 3) {
-		bt_printf("Usage: %s 0x[address] [remote-path]\n", argv[0]);
+		bt_fprintf(hStdout, "Usage: %s 0x[address] [remote-path]\n", argv[0]);
 		return -1;
 	}
 
 	int sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	struct sockaddr_in sad;
 
-	bt_printf("sockfd = %08x\n", sockfd);
+	bt_fprintf(hStdout, "sockfd = %08x\n", sockfd);
 
 	memset(&sad, 0, sizeof(sad));
 	sad.sin_family = AF_INET;
@@ -68,9 +70,9 @@ static int bt_tftp_command(int argc, char **argv) {
 	}
 
 	if(ptrh) {
-		bt_printf("ptrh->h_addr: %d.%d.%d.%d\n", ptrh->h_addr[0], ptrh->h_addr[1], ptrh->h_addr[2], ptrh->h_addr[3]);
+		bt_fprintf(hStdout, "ptrh->h_addr: %d.%d.%d.%d\n", ptrh->h_addr[0], ptrh->h_addr[1], ptrh->h_addr[2], ptrh->h_addr[3]);
 	} else {
-		bt_printf("Could not resolve hostname: %s\n", server_host->o.string->s);
+		bt_fprintf(hStdout, "Could not resolve hostname: %s\n", server_host->o.string->s);
 		goto cleanup_socket;
 	}
 
@@ -95,9 +97,9 @@ static int bt_tftp_command(int argc, char **argv) {
 
 	n = recvfrom(sockfd, pBuffer, 1024, 0, &rxaddr, &rxaddr_len);
 	if(n) {
-		bt_printf("Received %d bytes\n");
+		bt_fprintf(hStdout, "Received %d bytes\n");
 	} else {
-		bt_printf("No response from server\n");
+		bt_fprintf(hStdout, "No response from server\n");
 		goto err_free_buffer;
 	}
 
@@ -105,7 +107,7 @@ static int bt_tftp_command(int argc, char **argv) {
 	switch(ntohs(packet->opcode)) {
 	case TFTP_ERROR: {
 		struct error_packet *err_packet = (struct error_packet *) packet;
-		bt_printf("tftp error: %d - %s\n", ntohs(err_packet->error_code), err_packet->message);
+		bt_fprintf(hStdout, "tftp error: %d - %s\n", ntohs(err_packet->error_code), err_packet->message);
 		goto err_free_buffer;
 		break;
 	}
@@ -142,7 +144,7 @@ static int bt_tftp_command(int argc, char **argv) {
 			n = recvfrom(sockfd, pBuffer, 1024, 0, &rxaddr, &rxaddr_len);
 		} while(length == 512);
 
-		bt_printf("received %d bytes\n", total_length);
+		bt_fprintf(hStdout, "received %d bytes\n", total_length);
 
 		sprintf(pBuffer, "%d", (int) total_length);
 
@@ -169,6 +171,5 @@ cleanup_socket:
 
 BT_SHELL_COMMAND_DEF oCommand = {
 	.szpName = "tftp",
-	.eType = BT_SHELL_NORMAL_COMMAND,
 	.pfnCommand = bt_tftp_command,
 };

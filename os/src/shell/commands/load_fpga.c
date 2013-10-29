@@ -59,11 +59,8 @@ static int bt_load_fpga(BT_HANDLE hShell, int argc, char **argv) {
 	BT_INODE oInode;
 	BT_ReadInode(hInode, &oInode);
 
-	BT_u32 addr = strtoul(argv[1], NULL, 16);
 
 	BT_kPrint("Loading %s at %08X (%llu bytes)", argv[3], addr, oInode.ullFilesize);
-
-	void *p = (void *) addr;
 
 	BT_Read(hFile, 0, oInode.ullFilesize, p, &Error);
 
@@ -113,6 +110,5 @@ flush:
 
 BT_SHELL_COMMAND_DEF oCommand = {
 	.szpName 	= "load_fpga",
-	.eType   	= BT_SHELL_NORMAL_COMMAND,
 	.pfnCommand = bt_load_fpga,
 };

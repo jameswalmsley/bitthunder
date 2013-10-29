@@ -6,8 +6,9 @@ struct process_time {
 	BT_u32 ullRuntimeCounter;
 };
 
-static int bt_ps(int argc, char **argv) {
+static int bt_ps(BT_HANDLE hShell, int argc, char **argv) {
 
+	BT_HANDLE hStdout = BT_ShellGetStdout(hShell);
 	BT_u32 i = 0;
 	struct bt_process_time oTime;
 
@@ -35,10 +36,10 @@ static int bt_ps(int argc, char **argv) {
 
 	for(i = 0; i < total_processes; i++) {
 		BT_GetProcessTime(&oTime, i);
-		bt_printf("%s : %d%%\n", oTime.name, runtimes[i].ullRuntimeCounter / (runtime / 100));
+		bt_fprintf(hStdout, "%s : %d%%\n", oTime.name, runtimes[i].ullRuntimeCounter / (runtime / 100));
 	}
 
-	bt_printf("Total runtime %d seconds\n", (BT_u32) (BT_GetGlobalTimer() / (BT_u64)BT_GetGlobalTimerRate()));
+	bt_fprintf(hStdout, "Total runtime %d seconds\n", (BT_u32) (BT_GetGlobalTimer() / (BT_u64)BT_GetGlobalTimerRate()));
 
 	BT_kFree(runtimes);
 
@@ -48,6 +49,5 @@ static int bt_ps(int argc, char **argv) {
 
 BT_SHELL_COMMAND_DEF oCommand = {
 	.szpName = "ps",
-	.eType = BT_SHELL_NORMAL_COMMAND,
 	.pfnCommand = bt_ps,
 };
