@@ -51,14 +51,14 @@ static int ext2fs_devread_cached (int sector, int byte_offset, int byte_len, cha
 			}
 			cd[0] = tmp;
 #if DEBUG
-			bt_printf("- CACHE HIT -\n");
+			BT_kPrint("- CACHE HIT -\n");
 #endif
 			return rc;
 		}
 
 	rc = ext2fs_devread(sector, byte_offset, byte_len, buf);
 
-	BT_kFree(cd[EXT2FS_DEVREAD_CACHE_SIZE-1].buf);
+	if(cd[EXT2FS_DEVREAD_CACHE_SIZE-1].buf) BT_kFree(cd[EXT2FS_DEVREAD_CACHE_SIZE-1].buf);
 	for (i=EXT2FS_DEVREAD_CACHE_SIZE-1; i>0; i--)
 		cd[i] = cd[i-1];
 	cd[0].sector = sector;
@@ -68,7 +68,7 @@ static int ext2fs_devread_cached (int sector, int byte_offset, int byte_len, cha
 	cd[0].buf = BT_kMalloc(byte_len);
 	memcpy(cd[0].buf, buf, byte_len);
 #if DEBUG
-	bt_printf("- CACHE MISS -\n");
+	BT_kPrint("- CACHE MISS -\n");
 #endif
 	return rc;
 }
@@ -217,13 +217,13 @@ static int ext2fs_blockgroup
 		 group * sizeof (struct ext2_block_group),
 		 sizeof (struct ext2_block_group), (char *) blkgrp));
 #if DEBUG
-	bt_printf ("ext2fs read blockgroup (rc = %d)\n", rc);
-	bt_printf("  block_id = %d\n", ((struct ext2_block_group *)blkgrp)->block_id);
-	bt_printf("  inode_id = %d\n", ((struct ext2_block_group *)blkgrp)->inode_id);
-	bt_printf("  inode_table_id = %d\n", ((struct ext2_block_group *)blkgrp)->inode_table_id);
-	bt_printf("  free_blocks = %d\n", ((struct ext2_block_group *)blkgrp)->free_blocks);
-	bt_printf("  free_inodes = %d\n", ((struct ext2_block_group *)blkgrp)->free_inodes);
-	bt_printf("  used_dirs_count = %d\n", ((struct ext2_block_group *)blkgrp)->used_dirs_count);
+	BT_kPrint ("ext2fs read blockgroup (rc = %d)\n", rc);
+	BT_kPrint("  block_id = %d\n", ((struct ext2_block_group *)blkgrp)->block_id);
+	BT_kPrint("  inode_id = %d\n", ((struct ext2_block_group *)blkgrp)->inode_id);
+	BT_kPrint("  inode_table_id = %d\n", ((struct ext2_block_group *)blkgrp)->inode_table_id);
+	BT_kPrint("  free_blocks = %d\n", ((struct ext2_block_group *)blkgrp)->free_blocks);
+	BT_kPrint("  free_inodes = %d\n", ((struct ext2_block_group *)blkgrp)->free_inodes);
+	BT_kPrint("  used_dirs_count = %d\n", ((struct ext2_block_group *)blkgrp)->used_dirs_count);
 #endif
 
 	return rc;
@@ -243,7 +243,7 @@ static int ext2fs_read_inode
 	/* It is easier to calculate if the first inode is 0.  */
 	ino--;
 #if DEBUG
-	bt_printf ("ext2fs read inode %d\n", ino);
+	BT_kPrint ("ext2fs read inode %d\n", ino);
 #endif
 	status = ext2fs_blockgroup (data,
 				    ino /
@@ -258,7 +258,7 @@ static int ext2fs_read_inode
 	blkoff = (ino % bt_le32_to_cpu (sblock->inodes_per_group)) %
 		inodes_per_block;
 #if DEBUG
-	bt_printf ("ext2fs read inode blkno %d blkoff %d\n", blkno, blkoff);
+	BT_kPrint ("ext2fs read inode blkno %d blkoff %d\n", blkno, blkoff);
 #endif
 	/* Read the inode.  */
 	status = ext2fs_devread (((bt_le32_to_cpu (blkgrp.inode_table_id) +
@@ -270,27 +270,27 @@ static int ext2fs_read_inode
 	}
 	
 #if DEBUG
-	bt_printf ("  mode = %d\n", inode->mode);
-	bt_printf ("  uid = %d\n", inode->uid);
-	bt_printf ("  size = %d\n", inode->size);
-	bt_printf ("  atime = %d\n", inode->atime);
-	bt_printf ("  ctime = %d\n", inode->ctime);
-	bt_printf ("  mtime = %d\n", inode->mtime);
-	bt_printf ("  dtime = %d\n", inode->dtime);
-	bt_printf ("  gid = %d\n", inode->gid);
-	bt_printf ("  nlinks = %d\n", inode->nlinks);
-	bt_printf ("  blockcnt = %d\n", inode->blockcnt);
-	bt_printf ("  flags = %d\n", inode->flags);
-	bt_printf ("  osd1 = %d\n", inode->osd1);
+	BT_kPrint ("  mode = %d\n", inode->mode);
+	BT_kPrint ("  uid = %d\n", inode->uid);
+	BT_kPrint ("  size = %d\n", inode->size);
+	BT_kPrint ("  atime = %d\n", inode->atime);
+	BT_kPrint ("  ctime = %d\n", inode->ctime);
+	BT_kPrint ("  mtime = %d\n", inode->mtime);
+	BT_kPrint ("  dtime = %d\n", inode->dtime);
+	BT_kPrint ("  gid = %d\n", inode->gid);
+	BT_kPrint ("  nlinks = %d\n", inode->nlinks);
+	BT_kPrint ("  blockcnt = %d\n", inode->blockcnt);
+	BT_kPrint ("  flags = %d\n", inode->flags);
+	BT_kPrint ("  osd1 = %d\n", inode->osd1);
 	int i;
-	for(i=0;i<INDIRECT_BLOCKS;i++) bt_printf ("  dir_blocks[%d] = %d\n", i, inode->b.blocks.dir_blocks[i]);
-	bt_printf ("  indir_blocks = %d\n", inode->b.blocks.indir_block);
-	bt_printf ("  double_indir_blocks = %d\n", inode->b.blocks.double_indir_block);
-	bt_printf ("  tripple_indir_blocks = %d\n", inode->b.blocks.tripple_indir_block);
-	bt_printf ("  acl = %d\n", inode->acl);
-	bt_printf ("  dir_acl = %d\n", inode->dir_acl);
-	bt_printf ("  fragment_addr = %d\n", inode->fragment_addr);
-	bt_printf ("  osd2 = %d %d %d\n", inode->osd2[0], inode->osd2[1], inode->osd2[2]);
+	for(i=0;i<INDIRECT_BLOCKS;i++) BT_kPrint ("  dir_blocks[%d] = %d\n", i, inode->b.blocks.dir_blocks[i]);
+	BT_kPrint ("  indir_blocks = %d\n", inode->b.blocks.indir_block);
+	BT_kPrint ("  double_indir_blocks = %d\n", inode->b.blocks.double_indir_block);
+	BT_kPrint ("  tripple_indir_blocks = %d\n", inode->b.blocks.tripple_indir_block);
+	BT_kPrint ("  acl = %d\n", inode->acl);
+	BT_kPrint ("  dir_acl = %d\n", inode->dir_acl);
+	BT_kPrint ("  fragment_addr = %d\n", inode->fragment_addr);
+	BT_kPrint ("  osd2 = %d %d %d\n", inode->osd2[0], inode->osd2[1], inode->osd2[2]);
 #endif
 
 	return (1);
@@ -312,6 +312,8 @@ static int ext2fs_read_block (ext2fs_node_t node, int fileblock, struct ext2fs_d
 	int log2_blksz = LOG2_EXT2_BLOCK_SIZE (data);
 	int status;
 
+	//bt_printf("ext2fs_read_block %d ...\n", fileblock);
+
 	/* Direct blocks.  */
 	if (fileblock < INDIRECT_BLOCKS) {
 		blknr = bt_le32_to_cpu (inode->b.blocks.dir_blocks[fileblock]);
@@ -321,7 +323,7 @@ static int ext2fs_read_block (ext2fs_node_t node, int fileblock, struct ext2fs_d
 		if (indir1_block == NULL) {
 			indir1_block = (uint32_t *) BT_kMalloc (blksz);
 			if (indir1_block == NULL) {
-				bt_printf ("** ext2fs read block (indir 1) BT_kMalloc failed. **\n");
+				BT_kPrint ("** ext2fs read block (indir 1) BT_kMalloc failed. **\n");
 				return (-1);
 			}
 			indir1_size = blksz;
@@ -334,7 +336,7 @@ static int ext2fs_read_block (ext2fs_node_t node, int fileblock, struct ext2fs_d
 			indir1_blkno = -1;
 			indir1_block = (uint32_t *) BT_kMalloc (blksz);
 			if (indir1_block == NULL) {
-				bt_printf ("** ext2fs read block (indir 1) BT_kMalloc failed. **\n");
+				BT_kPrint ("** ext2fs read block (indir 1) BT_kMalloc failed. **\n");
 				return (-1);
 			}
 			indir1_size = blksz;
@@ -345,7 +347,7 @@ static int ext2fs_read_block (ext2fs_node_t node, int fileblock, struct ext2fs_d
 						 0, blksz,
 						 (char *) indir1_block, cd);
 			if (status == 0) {
-				bt_printf ("** ext2fs read block (indir 1) failed. **\n");
+				BT_kPrint ("** ext2fs read block (indir 1) failed. **\n");
 				return (0);
 			}
 			indir1_blkno =
@@ -365,7 +367,7 @@ static int ext2fs_read_block (ext2fs_node_t node, int fileblock, struct ext2fs_d
 		if (indir1_block == NULL) {
 			indir1_block = (uint32_t *) BT_kMalloc (blksz);
 			if (indir1_block == NULL) {
-				bt_printf ("** ext2fs read block (indir 2 1) BT_kMalloc failed. **\n");
+				BT_kPrint ("** ext2fs read block (indir 2 1) BT_kMalloc failed. **\n");
 				return (-1);
 			}
 			indir1_size = blksz;
@@ -378,7 +380,7 @@ static int ext2fs_read_block (ext2fs_node_t node, int fileblock, struct ext2fs_d
 			indir1_blkno = -1;
 			indir1_block = (uint32_t *) BT_kMalloc (blksz);
 			if (indir1_block == NULL) {
-				bt_printf ("** ext2fs read block (indir 2 1) BT_kMalloc failed. **\n");
+				BT_kPrint ("** ext2fs read block (indir 2 1) BT_kMalloc failed. **\n");
 				return (-1);
 			}
 			indir1_size = blksz;
@@ -389,7 +391,7 @@ static int ext2fs_read_block (ext2fs_node_t node, int fileblock, struct ext2fs_d
 						0, blksz,
 						(char *) indir1_block, cd);
 			if (status == 0) {
-				bt_printf ("** ext2fs read block (indir 2 1) failed. **\n");
+				BT_kPrint ("** ext2fs read block (indir 2 1) failed. **\n");
 				return (-1);
 			}
 			indir1_blkno =
@@ -399,7 +401,7 @@ static int ext2fs_read_block (ext2fs_node_t node, int fileblock, struct ext2fs_d
 		if (indir2_block == NULL) {
 			indir2_block = (uint32_t *) BT_kMalloc (blksz);
 			if (indir2_block == NULL) {
-				bt_printf ("** ext2fs read block (indir 2 2) BT_kMalloc failed. **\n");
+				BT_kPrint ("** ext2fs read block (indir 2 2) BT_kMalloc failed. **\n");
 				return (-1);
 			}
 			indir2_size = blksz;
@@ -412,7 +414,7 @@ static int ext2fs_read_block (ext2fs_node_t node, int fileblock, struct ext2fs_d
 			indir2_blkno = -1;
 			indir2_block = (uint32_t *) BT_kMalloc (blksz);
 			if (indir2_block == NULL) {
-				bt_printf ("** ext2fs read block (indir 2 2) BT_kMalloc failed. **\n");
+				BT_kPrint ("** ext2fs read block (indir 2 2) BT_kMalloc failed. **\n");
 				return (-1);
 			}
 			indir2_size = blksz;
@@ -423,7 +425,7 @@ static int ext2fs_read_block (ext2fs_node_t node, int fileblock, struct ext2fs_d
 						 0, blksz,
 						 (char *) indir2_block, cd);
 			if (status == 0) {
-				bt_printf ("** ext2fs read block (indir 2 2) failed. **\n");
+				BT_kPrint ("** ext2fs read block (indir 2 2) failed. **\n");
 				return (-1);
 			}
 			indir2_blkno =
@@ -433,11 +435,11 @@ static int ext2fs_read_block (ext2fs_node_t node, int fileblock, struct ext2fs_d
 	}
 	/* Tripple indirect.  */
 	else {
-		bt_printf ("** ext2fs doesn't support tripple indirect blocks. **\n");
+		BT_kPrint ("** ext2fs doesn't support tripple indirect blocks. **\n");
 		return (-1);
 	}
 #if DEBUG
-	bt_printf ("ext2fs_read_block %08x\n", blknr);
+	BT_kPrint ("ext2fs_read_block %08x\n", blknr);
 #endif
 	return (blknr);
 }
@@ -524,13 +526,13 @@ static int ext2fs_iterate_dir (ext2fs_node_t dir, char *name, ext2fs_node_t * fn
 	
 #if DEBUG
 	if (name != NULL)
-		bt_printf ("Iterate dir %s\n", name);
+		BT_kPrint ("Iterate dir %s\n", name);
 #endif /* of DEBUG */
 	if (!diro->inode_read) {
 		status = ext2fs_read_inode (diro->data, diro->ino,
 					    &diro->inode);
 		if (status == 0) {
-			bt_printf("** Failed to read inode **\n");
+			BT_kPrint("** Failed to read inode **\n");
 			return (0);
 		}
 	}
@@ -542,7 +544,7 @@ static int ext2fs_iterate_dir (ext2fs_node_t dir, char *name, ext2fs_node_t * fn
 					   sizeof (struct ext2_dirent),
 					   (char *) &dirent);
 		if (status < 1) {
-			bt_printf("** Failed to read file **\n");
+			BT_kPrint("** Failed to read file **\n");
 			return (0);
 		}
 		if (dirent.namelen != 0) {
@@ -554,12 +556,12 @@ static int ext2fs_iterate_dir (ext2fs_node_t dir, char *name, ext2fs_node_t * fn
 						   fpos + sizeof (struct ext2_dirent),
 						   dirent.namelen, filename);
 			if (status < 1) {
-				bt_printf("** Failed to read file 2 **\n");
+				BT_kPrint("** Failed to read file 2 **\n");
 				return (0);
 			}
 			fdiro = BT_kMalloc (sizeof (struct ext2fs_node));
 			if (!fdiro) {
-				bt_printf("** Failed to malloc **\n");
+				BT_kPrint("** Failed to malloc **\n");
 				return (0);
 			}
 
@@ -587,7 +589,7 @@ static int ext2fs_iterate_dir (ext2fs_node_t dir, char *name, ext2fs_node_t * fn
 							    &fdiro->inode);
 				if (status == 0) {
 					BT_kFree(fdiro);
-					bt_printf("** Failed to read inode 2 **\n");
+					BT_kPrint("** Failed to read inode 2 **\n");
 					return (0);
 				}
 				fdiro->inode_read = 1;
@@ -607,7 +609,7 @@ static int ext2fs_iterate_dir (ext2fs_node_t dir, char *name, ext2fs_node_t * fn
 				}
 			}
 #if DEBUG
-			bt_printf ("iterate >%s<\n", filename);
+			BT_kPrint ("iterate >%s<\n", filename);
 #endif /* of DEBUG */
 			if (strcmp (filename, name) == 0) {
 				*ftype = type;
@@ -730,7 +732,7 @@ int ext2fs_find_file1
 				return (0);
 			}
 #if DEBUG
-			bt_printf ("Got symlink >%s<\n", symlink);
+			BT_kPrint ("Got symlink >%s<\n", symlink);
 #endif /* of DEBUG */
 			/* The symlink is an absolute path, go back to the root inode.  */
 			if (symlink[0] == '/') {
@@ -801,7 +803,7 @@ int ext2fs_get_inode(char *name, struct ext2_inode *inode) {
 	status = ext2fs_find_file (name, &ext2fs_root->diropen, &fnode,
 				   EXT2_FILETYPE_REG);
 	if (status != 1) {
-		bt_printf ("** Can not find file. **\n");
+		BT_kPrint ("** Can not find file. **\n");
 		return -1;
 	}
 
@@ -830,7 +832,7 @@ int ext2fs_open_dir (char *dirname) {
 	status = ext2fs_find_file (dirname, &ext2fs_root->diropen, &dirnode,
 				   EXT2_FILETYPE_DIRECTORY);
 	if (status != 1) {
-		bt_printf ("** Can not find directory. **\n");
+		BT_kPrint ("** Can not find directory. **\n");
 		return (-1);
 	}
 
@@ -908,7 +910,7 @@ int ext2fs_read_dir (char *fname, int maxlen, unsigned long *fsize, int *ftype) 
 				}
 			}
 #if DEBUG
-			bt_printf ("iterate >%s<\n", filename);
+			BT_kPrint ("iterate >%s<\n", filename);
 #endif /* of DEBUG */
 
 			if (fdiro->inode_read == 0) {
@@ -1037,41 +1039,41 @@ int ext2fs_mount (unsigned part_length) {
 	}
 
 #if DEBUG
-        bt_printf ("ext2fs read superblock\n");
-	bt_printf ("  total_inodes = %d\n", data->sblock.total_inodes); 
-	bt_printf ("  total_blocks = %d\n", data->sblock.total_blocks); 
-	bt_printf ("  free_blocks = %d\n", data->sblock.free_blocks); 
-	bt_printf ("  free_inodes = %d\n", data->sblock.free_inodes); 
-	bt_printf ("  first_data_block = %d\n", data->sblock.first_data_block); 
-	bt_printf ("  log2_block_size = %d\n", data->sblock.log2_block_size); 
-	bt_printf ("  log2_fragment_size = %d\n", data->sblock.log2_fragment_size); 
-	bt_printf ("  blocks_per_group = %d\n", data->sblock.blocks_per_group); 
-	bt_printf ("  fragments_per_group = %d\n", data->sblock.fragments_per_group); 
-	bt_printf ("  inodes_per_group = %d\n", data->sblock.inodes_per_group); 
-	bt_printf ("  mtime = %d\n", data->sblock.mtime); 
-	bt_printf ("  utime = %d\n", data->sblock.utime); 
-	bt_printf ("  mnt_count = %d\n", data->sblock.mnt_count); 
-	bt_printf ("  max_mnt_count = %d\n", data->sblock.max_mnt_count); 
-	bt_printf ("  magic = 0x%04x\n", data->sblock.magic); 
-	bt_printf ("  fs_state = %d\n", data->sblock.fs_state); 
-	bt_printf ("  error_handling = %d\n", data->sblock.error_handling); 
-	bt_printf ("  minor_revision_level = %d\n", data->sblock.minor_revision_level); 
-	bt_printf ("  lastcheck = %d\n", data->sblock.lastcheck); 
-	bt_printf ("  checkinterval = %d\n", data->sblock.checkinterval); 
-	bt_printf ("  creator_os = %d\n", data->sblock.creator_os); 
-	bt_printf ("  revision_level = %d\n", data->sblock.revision_level); 
-	bt_printf ("  uid_reserved = %d\n", data->sblock.uid_reserved); 
-	bt_printf ("  gid_reserved = %d\n", data->sblock.gid_reserved); 
-	bt_printf ("  first_inode = %d\n", data->sblock.first_inode); 
-	bt_printf ("  inode_size = %d\n", data->sblock.inode_size); 
-	bt_printf ("  block_group_number = %d\n", data->sblock.block_group_number); 
-	bt_printf ("  feature_compatibility = %d\n", data->sblock.feature_compatibility); 
-	bt_printf ("  feature_incompat = %d\n", data->sblock.feature_incompat); 
-	bt_printf ("  feature_ro_compat = %d\n", data->sblock.feature_ro_compat); 
-	bt_printf ("  unique_id = %08x%08x%08x%08x\n", data->sblock.unique_id[0], data->sblock.unique_id[1], data->sblock.unique_id[2], data->sblock.unique_id[3]); 
-	bt_printf ("  volume_name = %s\n", data->sblock.volume_name); 
-	bt_printf ("  last_mounted_on = %d\n", data->sblock.last_mounted_on); 
-	bt_printf ("  compression_info = %d\n", data->sblock.compression_info); 
+        BT_kPrint ("ext2fs read superblock\n");
+	BT_kPrint ("  total_inodes = %d\n", data->sblock.total_inodes); 
+	BT_kPrint ("  total_blocks = %d\n", data->sblock.total_blocks); 
+	BT_kPrint ("  free_blocks = %d\n", data->sblock.free_blocks); 
+	BT_kPrint ("  free_inodes = %d\n", data->sblock.free_inodes); 
+	BT_kPrint ("  first_data_block = %d\n", data->sblock.first_data_block); 
+	BT_kPrint ("  log2_block_size = %d\n", data->sblock.log2_block_size); 
+	BT_kPrint ("  log2_fragment_size = %d\n", data->sblock.log2_fragment_size); 
+	BT_kPrint ("  blocks_per_group = %d\n", data->sblock.blocks_per_group); 
+	BT_kPrint ("  fragments_per_group = %d\n", data->sblock.fragments_per_group); 
+	BT_kPrint ("  inodes_per_group = %d\n", data->sblock.inodes_per_group); 
+	BT_kPrint ("  mtime = %d\n", data->sblock.mtime); 
+	BT_kPrint ("  utime = %d\n", data->sblock.utime); 
+	BT_kPrint ("  mnt_count = %d\n", data->sblock.mnt_count); 
+	BT_kPrint ("  max_mnt_count = %d\n", data->sblock.max_mnt_count); 
+	BT_kPrint ("  magic = 0x%04x\n", data->sblock.magic); 
+	BT_kPrint ("  fs_state = %d\n", data->sblock.fs_state); 
+	BT_kPrint ("  error_handling = %d\n", data->sblock.error_handling); 
+	BT_kPrint ("  minor_revision_level = %d\n", data->sblock.minor_revision_level); 
+	BT_kPrint ("  lastcheck = %d\n", data->sblock.lastcheck); 
+	BT_kPrint ("  checkinterval = %d\n", data->sblock.checkinterval); 
+	BT_kPrint ("  creator_os = %d\n", data->sblock.creator_os); 
+	BT_kPrint ("  revision_level = %d\n", data->sblock.revision_level); 
+	BT_kPrint ("  uid_reserved = %d\n", data->sblock.uid_reserved); 
+	BT_kPrint ("  gid_reserved = %d\n", data->sblock.gid_reserved); 
+	BT_kPrint ("  first_inode = %d\n", data->sblock.first_inode); 
+	BT_kPrint ("  inode_size = %d\n", data->sblock.inode_size); 
+	BT_kPrint ("  block_group_number = %d\n", data->sblock.block_group_number); 
+	BT_kPrint ("  feature_compatibility = %d\n", data->sblock.feature_compatibility); 
+	BT_kPrint ("  feature_incompat = %d\n", data->sblock.feature_incompat); 
+	BT_kPrint ("  feature_ro_compat = %d\n", data->sblock.feature_ro_compat); 
+	BT_kPrint ("  unique_id = %08x%08x%08x%08x\n", data->sblock.unique_id[0], data->sblock.unique_id[1], data->sblock.unique_id[2], data->sblock.unique_id[3]); 
+	BT_kPrint ("  volume_name = %s\n", data->sblock.volume_name); 
+	BT_kPrint ("  last_mounted_on = %d\n", data->sblock.last_mounted_on); 
+	BT_kPrint ("  compression_info = %d\n", data->sblock.compression_info); 
 #endif
 
 	/* Make sure this is an ext2 filesystem.  */
@@ -1094,7 +1096,7 @@ int ext2fs_mount (unsigned part_length) {
 	return (0);
 
 fail:
-	bt_printf ("Failed to mount ext2 filesystem...\n");
+	BT_kPrint ("Failed to mount ext2 filesystem...\n");
 	BT_kFree(data);
 	ext2fs_root = NULL;
 	return (-1);
