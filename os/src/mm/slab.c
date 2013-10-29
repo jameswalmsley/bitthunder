@@ -38,8 +38,12 @@ struct block {
 	BT_u32					ulSize;
 };
 
-static BT_CACHE g_oDefault[10];		///< Array of primary caches, starting at 16bytes, upto 8192 bytes
+struct MEM_TAG {
+        BT_CACHE   *pCache;
+        BT_u32          size;
+};
 
+static BT_CACHE g_oDefault[10];		///< Array of primary caches, starting at 16bytes, upto 8192 bytes
 
 static void init_attach_block(BT_CACHE *pCache, struct block *pBlock, BT_u32 ulSize) {
 	BT_u32 i;
@@ -60,7 +64,7 @@ static void init_attach_block(BT_CACHE *pCache, struct block *pBlock, BT_u32 ulS
 
 static BT_ERROR extend_cache(BT_CACHE *pCache) {
 
-	BT_u32 ulSize = BT_PAGE_ALIGN((pCache->ulObjectSize + sizeof(struct block)));
+	BT_u32 ulSize = BT_PAGE_ALIGN(pCache->ulObjectSize);
 
 	void *p = (void *) bt_page_alloc(ulSize);
 	if(!p) {
@@ -171,22 +175,22 @@ void *BT_kMalloc(BT_u32 ulSize) {
 		return NULL;
 	}
 
-	BT_CACHE *pCache = BT_GetSuitableCache(ulSize+sizeof(BT_CACHE *));
+	BT_CACHE *pCache = BT_GetSuitableCache(ulSize+sizeof(struct MEM_TAG));
 	if(pCache) {
 		p = BT_CacheAlloc(pCache);
-		BT_CACHE **tag = (BT_CACHE **) p;
-		*tag = pCache;
+		struct MEM_TAG *tag = (struct MEM_TAG *) p;
+		tag->pCache = pCache;
 		return ((void *) (tag + 1));
 	} else {
-		p = (void *) bt_phys_to_virt(bt_page_alloc(ulSize+sizeof(struct _PAGE_ALLOC)));
+		p = (void *) bt_phys_to_virt(bt_page_alloc(ulSize+sizeof(struct MEM_TAG)));
 		if(!p) {
 			return NULL;
 		}
 	}
 
-	struct _PAGE_ALLOC *tag = (struct _PAGE_ALLOC *) p;
-    tag->null = NULL;
-	tag->size = ulSize + sizeof(struct _PAGE_ALLOC);
+	struct MEM_TAG *tag = (struct MEM_TAG *) p;
+	tag->pCache = NULL;
+	tag->size = ulSize + sizeof(struct MEM_TAG);
 
 	/*
 	 *	Before the allocated memory we place a pointer to the pCache.
@@ -197,16 +201,17 @@ void *BT_kMalloc(BT_u32 ulSize) {
 }
 
 void BT_kFree(void *p) {
-	BT_CACHE **tag = (BT_CACHE **) p;
+
+	if(!p) return;
+
+	struct MEM_TAG *tag = (struct MEM_TAG *) p;
 	tag -= 1;
 
-	BT_CACHE *pCache = *tag;
+	BT_CACHE *pCache = tag->pCache;
 	if(pCache) {
 		BT_CacheFree(pCache, tag);
 	} else {
-		struct _PAGE_ALLOC *alloc = (struct _PAGE_ALLOC *) p;
-		alloc -= 1;
-		bt_page_free((BT_PHYS_ADDR) bt_virt_to_phys(tag), alloc->size);
+		bt_page_free((BT_PHYS_ADDR) bt_virt_to_phys(tag), tag->size);
 	}
 }
 
@@ -222,6 +227,7 @@ void bt_initialise_slab() {
 		pCache->slab_mutex = NULL;
 		i = i << 1;
 	}
+
 }
 
 void bt_initialise_slab_second_stage() {

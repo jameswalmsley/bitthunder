@@ -8,10 +8,6 @@ typedef struct _BT_CACHE {
 	void 				   *slab_mutex;
 } BT_CACHE;
 
-struct _PAGE_ALLOC {
-	BT_u32	size;
-	BT_CACHE *null;
-};
 
 void bt_initialise_slab();
 void bt_initialise_slab_second_stage();
