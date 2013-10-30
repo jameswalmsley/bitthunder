@@ -330,36 +330,11 @@ static BT_u32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount,
 		return 0;
 	}
 
-	MMC_COMMAND oCommand;
-	oCommand.opcode 		= 13;
-	oCommand.arg 			= hBlock->pHost->rca << 16;
-	oCommand.bCRC 			= BT_TRUE;
-	oCommand.ulResponseType = 48;
-	oCommand.bIsData		= BT_FALSE;
-
-	hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
-
-	BT_u32 ulStatus = oCommand.response[0];
-	BT_u32 ulState = (ulStatus >> 9) & 0xF;
-
-	//BT_kPrint("SDCARD: Status (%02x)", ulState);
-
-	switch(ulState) {
-
-	case 4:
-		break;
-
-	case 5:
-		oCommand.opcode = 12;
-		oCommand.arg = 0;
-		oCommand.bCRC = BT_TRUE;
-		oCommand.ulResponseType = 48;
-		oCommand.bIsData = BT_FALSE;
-
-		hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
-
-		BT_kPrint("SDCARD: Sent CMD12");
-
+	BT_u32 ulRead;
+	BT_s32 nlRetryCount = 0;
+	while(1)
+	{
+		MMC_COMMAND oCommand;
 		oCommand.opcode 		= 13;
 		oCommand.arg 			= hBlock->pHost->rca << 16;
 		oCommand.bCRC 			= BT_TRUE;
@@ -369,41 +344,79 @@ static BT_u32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount,
 		hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
 
 		BT_u32 ulStatus = oCommand.response[0];
-		ulState = (ulStatus >> 9) & 0xF;
+		BT_u32 ulState = (ulStatus >> 9) & 0xF;
 
-		break;
+		//BT_kPrint("SDCARD: Status (%02x)", ulState);
+
+		switch(ulState) {
+
+		case 4:
+			break;
+
+		case 5:
+			oCommand.opcode = 12;
+			oCommand.arg = 0;
+			oCommand.bCRC = BT_TRUE;
+			oCommand.ulResponseType = 48;
+			oCommand.bIsData = BT_FALSE;
+
+			hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
+
+			//BT_kPrint("SDCARD: Sent CMD12");
+
+			oCommand.opcode 		= 13;
+			oCommand.arg 			= hBlock->pHost->rca << 16;
+			oCommand.bCRC 			= BT_TRUE;
+			oCommand.ulResponseType = 48;
+			oCommand.bIsData		= BT_FALSE;
+
+			hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
+
+			BT_u32 ulStatus = oCommand.response[0];
+			ulState = (ulStatus >> 9) & 0xF;
+
+			break;
 
 
-	default:
-		BT_kPrint("SDCARD: Unknown card state %d", ulState);
-		break;
+		default:
+			BT_kPrint("SDCARD: Unknown card state %d", ulState);
+			break;
+		}
+
+		if(!hBlock->pHost->bSDHC) {
+			ulBlock *= 512;
+		}
+
+		oCommand.opcode 		= 18;
+		oCommand.bCRC 			= BT_FALSE;
+		oCommand.ulResponseType = 48;
+		oCommand.bIsData 		= BT_TRUE;
+		oCommand.arg 			= ulBlock;
+		oCommand.bRead_nWrite	= BT_TRUE;
+		oCommand.ulBlocks		= ulCount;
+
+		hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
+
+		BT_u32 cmd17_response = oCommand.response[0];
+		if(cmd17_response != 0x900) {	// STATE = transfer, READY_FOR_DATA = set
+			BT_kPrint("SDCARD: Invalid CMD18 response");
+			return 0;
+		}
+
+		//BT_kPrint("SDCARD: Read command complete, waiting for data");
+
+		// Read the data.
+
+		ulRead = hBlock->pHost->pOps->pfnRead(hBlock->pHost->hHost, ulCount, pBuffer, pError);
+		if(ulRead == ulCount) break;
+
+		if(nlRetryCount++ >= 3) {
+			BT_kPrint("SDCARD: read block (%d,%d) fatal error!", ulBlock, ulCount);
+			break;
+		} else {
+			BT_kPrint("SDCARD: read block (%d,%d) error, retrying (%d) ... ", ulBlock, ulCount, nlRetryCount);
+		}
 	}
-
-	if(!hBlock->pHost->bSDHC) {
-		ulBlock *= 512;
-	}
-
-	oCommand.opcode 		= 18;
-	oCommand.bCRC 			= BT_FALSE;
-	oCommand.ulResponseType = 48;
-	oCommand.bIsData 		= BT_TRUE;
-	oCommand.arg 			= ulBlock;
-	oCommand.bRead_nWrite	= BT_TRUE;
-	oCommand.ulBlocks		= ulCount;
-
-	hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
-
-	BT_u32 cmd17_response = oCommand.response[0];
-	if(cmd17_response != 0x900) {	// STATE = transfer, READY_FOR_DATA = set
-		BT_kPrint("SDCARD: Invalid CMD18 response");
-		return 0;
-	}
-
-	//BT_kPrint("SDCARD: Read command complete, waiting for data");
-
-	// Read the data.
-
-	BT_u32 ulRead = hBlock->pHost->pOps->pfnRead(hBlock->pHost->hHost, ulCount, pBuffer, pError);
 
 	return ulRead;
 }

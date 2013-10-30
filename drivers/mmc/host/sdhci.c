@@ -216,56 +216,62 @@ static BT_ERROR sdhci_request(BT_HANDLE hSDIO, MMC_COMMAND *pCommand) {
 static BT_u32 sdhci_read(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError) {
 	register BT_u8 *p = (BT_u8 *) pBuffer;
 
-	//BT_kPrint("SDHCI: Awaiting buffer read ready interrupt:");
-
-
-
-	//BT_kPrint("SDHCI: Buffer is now ready...");
-
-	// Clear the buffer ready interrupt.
 	BT_u32 ulRead = 0;
-
 	while(ulRead < ulBlocks) {
-		BT_u32 ulSize = 512;
 
-		while(!(hSDIO->pRegs->NORMAL_INT_STATUS & NORMAL_INT_BUF_READ_READY)) {
+		BT_u32 ulStat = hSDIO->pRegs->NORMAL_INT_STATUS;
+
+		if(ulStat) {
+
+			if(ulStat & NORMAL_INT_ERROR) {
+				hSDIO->pRegs->NORMAL_INT_STATUS = NORMAL_INT_ERROR;
+				break;
+			}
+
+			if(ulStat & NORMAL_INT_BUF_READ_READY) {
+				hSDIO->pRegs->NORMAL_INT_STATUS = NORMAL_INT_BUF_READ_READY;
+
+				BT_u32 ulSize = 512;
+				while(ulSize) {
+					BT_u32 ulData = hSDIO->pRegs->BUFFER_DATA_PORT;
+					BT_u8 d0 = (BT_u8) (ulData & 0xff);
+					BT_u8 d1 = (BT_u8) ((ulData >> 8) & 0xff);
+					BT_u8 d2 = (BT_u8) ((ulData >> 16) & 0xff);
+					BT_u8 d3 = (BT_u8) ((ulData >> 24) & 0xff);
+
+					*p++ = d0;
+					*p++ = d1;
+					*p++ = d2;
+					*p++ = d3;
+
+					ulSize -= 4;
+				}
+
+				ulRead++;
+			}
+
+			if(ulStat & NORMAL_INT_BUF_WRITE_READY) {
+				hSDIO->pRegs->NORMAL_INT_STATUS = NORMAL_INT_BUF_WRITE_READY;
+				break;
+			}
+
+			if(ulStat & NORMAL_INT_TRANSFER_COMPLETE) {
+				hSDIO->pRegs->NORMAL_INT_STATUS = NORMAL_INT_TRANSFER_COMPLETE;
+				break;
+			}
+		}
+
+		BT_ThreadYield();
+	}
+
+	if(ulRead != ulBlocks) {
+		// software reset on data line if an error occurred ...
+		hSDIO->pRegs->SOFTWARE_RESET = RESET_DATA;
+
+		while(hSDIO->pRegs->SOFTWARE_RESET) {
 			BT_ThreadYield();
 		}
-
-		hSDIO->pRegs->NORMAL_INT_STATUS = NORMAL_INT_BUF_READ_READY;
-
-		while(ulSize) {
-			BT_u32 ulData = hSDIO->pRegs->BUFFER_DATA_PORT;
-			BT_u8 d0 = (BT_u8) (ulData & 0xff);
-			BT_u8 d1 = (BT_u8) ((ulData >> 8) & 0xff);
-			BT_u8 d2 = (BT_u8) ((ulData >> 16) & 0xff);
-			BT_u8 d3 = (BT_u8) ((ulData >> 24) & 0xff);
-
-			*p++ = d0;
-			*p++ = d1;
-			*p++ = d2;
-			*p++ = d3;
-
-			ulSize -= 4;
-		}
-
-		ulRead++;
 	}
-
-	while(! (hSDIO->pRegs->NORMAL_INT_STATUS & NORMAL_INT_TRANSFER_COMPLETE)) {
-		//volatile BT_u32 ulData2 = (volatile) hSDIO->pRegs->BUFFER_DATA_PORT;
-		BT_ThreadYield();
-	}
-
-	hSDIO->pRegs->NORMAL_INT_STATUS = NORMAL_INT_TRANSFER_COMPLETE;
-
-	//BT_kPrint("SDHCI: Block transfer complete");
-
-	/*hSDIO->pRegs->SOFTWARE_RESET = RESET_DATA;
-
-	while(hSDIO->pRegs->SOFTWARE_RESET) {
-		BT_ThreadYield();
-	}*/
 
 	return ulRead;
 }
@@ -277,7 +283,9 @@ static BT_u32 sdhci_write(BT_HANDLE hSDIO, BT_u32 ulSize, void *pBuffer, BT_ERRO
 	while(ulWritten < ulSize) {
 		BT_u32 ulBlockSize = 512;
 
+		bt_printf("wd irq0 = 0x%08x\n", hSDIO->pRegs->NORMAL_INT_STATUS);
 		while(!(hSDIO->pRegs->NORMAL_INT_STATUS & NORMAL_INT_BUF_WRITE_READY)) {
+			bt_printf("wr irq  = 0x%08x\n", hSDIO->pRegs->NORMAL_INT_STATUS);
 			BT_ThreadYield();
 		}
 
