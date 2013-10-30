@@ -92,7 +92,7 @@ static int bt_tftp_command(BT_HANDLE hShell, int argc, char **argv) {
 	struct sockaddr rxaddr;
 	socklen_t rxaddr_len = sizeof(rxaddr);
 
-	int sock_opt = 2500;
+	int sock_opt = 250;
 	setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &sock_opt, sizeof(sock_opt));
 
 	n = recvfrom(sockfd, pBuffer, 1024, 0, &rxaddr, &rxaddr_len);
