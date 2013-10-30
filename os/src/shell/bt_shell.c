@@ -526,7 +526,9 @@ BT_ERROR BT_Shell(BT_HANDLE hShell) {
 				} else {
 					// echo char
 					BT_PutC(hShell->hStdout, 0, c);
-					hShell->cStdinBuf[hShell->ulStdinBufCnt++] = c ;
+					if(hShell->ulStdinBufCnt < BT_CONFIG_SHELL_INPUT_BUFFER_SIZE-1) {
+						hShell->cStdinBuf[hShell->ulStdinBufCnt++] = c;
+					}
 				}
 			}
 		} 

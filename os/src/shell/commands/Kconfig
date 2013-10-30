@@ -73,4 +73,16 @@ config SHELL_CMD_MOUNT
 	bool "mount"
 	default n
 
+config SHELL_CMD_TFTP
+	bool "tftp"
+	default n
+
+config SHELL_CMD_PS
+	bool "ps"
+	default n
+
+config SHELL_CMD_SLEEP
+	bool "sleep"
+	default n
+
 endmenu
