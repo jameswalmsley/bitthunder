@@ -31,7 +31,7 @@ OBJECTS += $(FF_OBJECTS-y)
 
 
 # Ext2 Objects
-FF_OBJECTS-$(BT_CONFIG_FS_FULLFAT) += $(BUILD_DIR)os/src/fs/bt_ext2.o
+EXT2_OBJECTS-$(BT_CONFIG_FS_EXT2) += $(BUILD_DIR)os/src/fs/bt_ext2.o
 EXT2_OBJECTS-$(BT_CONFIG_FS_EXT2) += $(BUILD_DIR)os/src/fs/ext2/ext2fs.o
 EXT2_OBJECTS-$(BT_CONFIG_FS_EXT2) += $(BUILD_DIR)os/src/fs/ext2/dev.o
 

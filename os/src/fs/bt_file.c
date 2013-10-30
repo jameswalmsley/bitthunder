@@ -125,10 +125,6 @@ BT_s32 BT_GetC(BT_HANDLE hFile, BT_u32 ulFlags, BT_ERROR *pError) {
 		*pError = Error;
 	}
 
-	if(Error) {
-		return Error;
-	}
-
 	if(!i) {
 		return -1;
 	}
