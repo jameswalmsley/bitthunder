@@ -94,7 +94,7 @@ static BT_HANDLE fullfat_mount(BT_HANDLE hFS, BT_HANDLE hVolume, BT_ERROR *pErro
 		Error = BT_ERR_GENERIC;
 		goto err_free_out;
 	}
-		 
+
 	ffError = FF_MountPartition(pMount->pIoman, 0);
 	if(ffError) {
 		BT_kPrint("fullfat_mount: %s", FF_GetErrMessage(ffError));
@@ -360,6 +360,7 @@ static const BT_IF_FILE oFileOperations = {
 };
 
 static const BT_IF_FS oFilesystemInterface = {
+	.name 			= "vfat",
 	.pfnMount 		= fullfat_mount,
 	.pfnUnmount 	= fullfat_unmount,
 	.pfnOpen		= fullfat_open,

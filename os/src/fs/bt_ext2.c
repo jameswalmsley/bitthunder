@@ -80,7 +80,7 @@ static BT_HANDLE ext2_mount(BT_HANDLE hFS, BT_HANDLE hVolume, BT_ERROR *pError) 
 		goto err_out;
 	}
 	pMount->hVolume = hVolume;
-	ext2fs_set_readblocks(ext2_readblocks, hVolume);	
+	ext2fs_set_readblocks(ext2_readblocks, hVolume);
 	if(ext2fs_mount(0) < 0) {
 		if(pError) *pError = BT_ERR_GENERIC;
 		goto err_free_out;
@@ -107,7 +107,7 @@ static BT_HANDLE ext2_open(BT_HANDLE hMount, const BT_i8 *szpPath, BT_u32 ulMode
 		goto err_out;
 	}
 	pFile->pMount = (BT_EXT2_MOUNT *)hMount;
-	if(ext2fs_open((char *)szpPath) < 0) 
+	if(ext2fs_open((char *)szpPath) < 0)
 	{
 		if(pError) *pError = BT_ERR_GENERIC;
 		goto err_free_out;
@@ -136,7 +136,7 @@ static BT_u32 ext2_read(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void *pB
 	return rc;
 }
 
-static BT_u32 ext2_write(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
+static BT_u32 ext2_write(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer, BT_ERROR *pError) {
 	if(pError) *pError = BT_ERR_GENERIC;
 	return 0;
 }
@@ -151,7 +151,7 @@ static BT_s32 ext2_getc(BT_HANDLE hFile, BT_u32 ulFlags, BT_ERROR *pError) {
 	BT_s32 rc = ext2fs_read (&c, 1);
 	if(rc == 0) rc = -1;
 	else rc = c;
-	
+
 	return rc;
 }
 
@@ -186,14 +186,14 @@ static BT_HANDLE ext2_opendir(BT_HANDLE hMount, const BT_i8 *szpPath, BT_ERROR *
 	if(!pDir->szpFname) {
 		*pError = BT_ERR_NO_MEMORY;
 		goto err_free_out;
-	}	
-	if(ext2fs_open_dir((char *)szpPath) < 0) 
+	}
+	if(ext2fs_open_dir((char *)szpPath) < 0)
 	{
 		if(pError) *pError = BT_ERR_GENERIC;
 		goto err_free_out;
 	}
 #if 0
-	if(ext2fs_ls((char *)szpPath) < 0) 
+	if(ext2fs_ls((char *)szpPath) < 0)
 	{
 		if(pError) *pError = BT_ERR_GENERIC;
 		goto err_free_out;
@@ -223,7 +223,7 @@ static BT_ERROR ext2_read_dir(BT_HANDLE hDir, BT_DIRENT *pDirent) {
 	if(nlFtype & EXT2_FILETYPE_DIRECTORY) {
 		pDirent->attr |= BT_ATTR_DIR;
 	}
-	
+
 	return BT_ERR_NONE;
 }
 
