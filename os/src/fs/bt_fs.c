@@ -4,26 +4,27 @@
  **/
 #include <bitthunder.h>
 #include <string.h>
+#include <collections/bt_list.h>
 
 BT_DEF_MODULE_NAME			("Filesystem Manager")
 BT_DEF_MODULE_DESCRIPTION	("Filesystem Mountpoint management")
 BT_DEF_MODULE_AUTHOR	  	("James Walmsley")
 BT_DEF_MODULE_EMAIL			("james@fullfat-fs.co.uk")
 
-static BT_LIST g_oFileSystems = {0};
-static BT_LIST g_oMountPoints = {0};
+static BT_LIST_HEAD(g_filesystems);
+static BT_LIST_HEAD(g_mountpoints);
 
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;
 };
 
 typedef struct _BT_FILESYSTEM {
-	BT_LIST_ITEM oItem;
+	struct bt_list_head item;
 	BT_HANDLE	 hFS;
 } BT_FILESYSTEM;
 
 typedef struct _BT_MOUNTPOINT {
-	BT_LIST_ITEM 	oItem;
+	struct bt_list_head item;
 	BT_HANDLE 		hMount;
 	BT_i8 		   *szpPath;
 	BT_FILESYSTEM  *pFS;
@@ -42,78 +43,111 @@ BT_ERROR BT_RegisterFilesystem(BT_HANDLE hFS) {
 
 	pFilesystem->hFS = hFS;
 
-	BT_ListAddItem(&g_oFileSystems, &pFilesystem->oItem);
+	bt_list_add(&pFilesystem->item, &g_filesystems);
 
 	return BT_ERR_NONE;
 }
 
-static BT_MOUNTPOINT *GetMountPoint(const BT_i8 *szpPath) {
-	BT_MOUNTPOINT *pMountPoint = (BT_MOUNTPOINT *) BT_ListGetHead(&g_oMountPoints);
-	while(pMountPoint) {
-		BT_i8 *common = (BT_i8 *) strstr(szpPath, pMountPoint->szpPath);
-		if(common == szpPath) {	// Ensure the common section is from root of szpPath!
-			return pMountPoint;
+static BT_FILESYSTEM *getfs(const BT_i8 *name) {
+	struct bt_list_head *pos;
+	bt_list_for_each(pos, &g_filesystems) {
+		BT_FILESYSTEM *pFS = (BT_FILESYSTEM *) pos;
+		if(!strcmp(name, pFS->hFS->h.pIf->oIfs.pFilesystemIF->name)) {
+			return pFS;
 		}
-
-		pMountPoint = (BT_MOUNTPOINT *) BT_ListGetNext(&pMountPoint->oItem);
 	}
 
 	return NULL;
 }
 
-BT_ERROR BT_Mount(BT_HANDLE hVolume, const BT_i8 *szpPath) {
+static BT_MOUNTPOINT *GetMountPoint(const BT_i8 *szpPath) {
+
+	struct bt_list_head *pos;
+	bt_list_for_each(pos, &g_mountpoints) {
+		BT_MOUNTPOINT *pMountPoint = (BT_MOUNTPOINT *) pos;
+		BT_i8 *common = (BT_i8 *) strstr(szpPath, pMountPoint->szpPath);
+		if(common == szpPath) {	// Ensure the common section is from root of szpPath!
+			return pMountPoint;
+		}
+	}
+
+	return NULL;
+}
+
+
+
+
+BT_ERROR BT_Mount(const BT_i8 *src, const BT_i8 *target, const BT_i8 *filesystem, BT_u32 mountflags, const void *data) {
 	BT_ERROR Error;
 
-	if(hVolume->h.pIf->eType != BT_HANDLE_T_VOLUME &&
-	   hVolume->h.pIf->eType != BT_HANDLE_T_PARTITION &&
-	   hVolume->h.pIf->eType != BT_HANDLE_T_BLOCK &&
-	   hVolume->h.pIf->eType != BT_HANDLE_T_INODE) {
-
+	if(!target) {
 		return BT_ERR_GENERIC;
 	}
 
-	BT_HANDLE hMount = NULL;
-
-	// Is path already mounted?
-	if(GetMountPoint(szpPath)) {
+	BT_FILESYSTEM *fs = getfs(filesystem);
+	if(!fs) {
 		return BT_ERR_GENERIC;
 	}
 
-	// Can any file-system mount this partition?
-	BT_FILESYSTEM *pFilesystem = (BT_FILESYSTEM *) BT_ListGetHead(&g_oFileSystems);
-	while(pFilesystem) {
-		const BT_IF_FS *pFs = pFilesystem->hFS->h.pIf->oIfs.pFilesystemIF;
-		hMount = pFs->pfnMount(pFilesystem->hFS, hVolume, &Error);
-		if(hMount) {
-			break;
+	const BT_IF_FS *pFs = fs->hFS->h.pIf->oIfs.pFilesystemIF;
+
+	BT_MOUNTPOINT *pMountPoint = GetMountPoint(target);
+	if(pMountPoint) {
+		return BT_ERR_GENERIC;
+	}
+
+	BT_HANDLE hMount;
+
+	if(!src) {
+		if(!fs->hFS->h.pIf->oIfs.pFilesystemIF->ulFlags & BT_FS_FLAG_NODEV) {
+			return BT_ERR_GENERIC;
 		}
 
-		pFilesystem = (BT_FILESYSTEM *) BT_ListGetNext(&pFilesystem->oItem);
+		hMount = pFs->pfnMountPseudo(fs->hFS, data, &Error);
+		if(!hMount) {
+			return BT_ERR_GENERIC;
+		}
+
+		pMountPoint = BT_kMalloc(sizeof(BT_MOUNTPOINT));
+		if(!pMountPoint) {
+			return BT_ERR_NO_MEMORY;
+		}
+
+		pMountPoint->hMount = hMount;
+		pMountPoint->pFS = fs;
+		pMountPoint->szpPath = BT_kMalloc(strlen(target)+1);
+		strcpy(pMountPoint->szpPath, target);
+
+		bt_list_add(&pMountPoint->item, &g_mountpoints);
+
+		return BT_ERR_NONE;
 	}
 
+	BT_HANDLE hVolume = BT_Open(src, 0, &Error);
+
+	hMount = pFs->pfnMount(fs->hFS, hVolume, data, &Error);
 	if(!hMount) {
-		BT_kPrint("FS: Could not mount volume, no compatible filesystem.");
-		return BT_ERR_GENERIC;
+		return BT_ERR_NO_MEMORY;
 	}
 
 	// A filesystem was able to mount the volume, now we can handle this under our own namespace.
-	BT_MOUNTPOINT *pMountPoint = (BT_MOUNTPOINT *) BT_kMalloc(sizeof(BT_MOUNTPOINT));
+	pMountPoint = (BT_MOUNTPOINT *) BT_kMalloc(sizeof(BT_MOUNTPOINT));
 	if(!pMountPoint) {
 		Error = BT_ERR_GENERIC;
 		goto err_unmount_out;
 	}
 
 	pMountPoint->hMount 	= hMount;
-	pMountPoint->pFS 		= pFilesystem;
-	pMountPoint->szpPath 	= BT_kMalloc(strlen(szpPath) + 1);
-	strcpy(pMountPoint->szpPath, szpPath);
+	pMountPoint->pFS 		= fs;
+	pMountPoint->szpPath  	= BT_kMalloc(strlen(target) + 1);
+	strcpy(pMountPoint->szpPath, target);
 
-	BT_ListAddItem(&g_oMountPoints, &pMountPoint->oItem);
+	bt_list_add(&pMountPoint->item, &g_mountpoints);
 
 	return BT_ERR_NONE;
 
 err_unmount_out:
-	pFilesystem->hFS->h.pIf->oIfs.pFilesystemIF->pfnUnmount(hMount);
+	fs->hFS->h.pIf->oIfs.pFilesystemIF->pfnUnmount(hMount);
 
 	return Error;
 }
@@ -251,14 +285,3 @@ BT_ERROR BT_Rename(const BT_i8 *szpPathA, const BT_i8 *szpPathB) {
 	const BT_IF_FS *pFS = pMountA->pFS->hFS->h.pIf->oIfs.pFilesystemIF;
 	return pFS->pfnRename(pMountA->hMount, pathA, pathB);
 }
-
-static BT_ERROR bt_fs_init() {
-	BT_ListInit(&g_oFileSystems);
-	BT_ListInit(&g_oMountPoints);
-	return BT_ERR_NONE;
-}
-
-BT_MODULE_INIT_0_DEF oModuleEntry = {
-	BT_MODULE_NAME,
-	bt_fs_init,
-};
