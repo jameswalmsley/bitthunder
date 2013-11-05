@@ -522,7 +522,13 @@ BT_ERROR BT_Shell(BT_HANDLE hShell) {
 					// prepare for next command
 					hShell->ulStdinBufCnt = 0;
 					hShell->bPrintPrompt = 1;
-
+				} else if(c == '\b') {
+					if(hShell->ulStdinBufCnt) {
+						BT_PutC(hShell->hStdout, 0, c);
+						BT_PutC(hShell->hStdout, 0, ' ');
+						BT_PutC(hShell->hStdout, 0, c);
+						hShell->ulStdinBufCnt -= 1;
+					}
 				} else {
 					// echo char
 					BT_PutC(hShell->hStdout, 0, c);
