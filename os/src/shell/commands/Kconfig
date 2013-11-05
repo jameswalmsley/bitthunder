@@ -45,6 +45,11 @@ config SHELL_CMD_SETENV
 	depends on SHELL
 	default n
 
+config SHELL_CMD_SLEEP
+	bool "sleep"
+	depends on SHELL
+	default n
+
 config SHELL_CMD_GETENV
 	bool "getenv"
 	depends on SHELL
