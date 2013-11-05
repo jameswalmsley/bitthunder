@@ -13,10 +13,20 @@ struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;
 };
 
+
+BT_ERROR BT_AttachHandle(BT_HANDLE hProcess, const BT_IF_HANDLE *pIf, BT_HANDLE h) {
+	h->h.pIf = pIf;
+	return BT_ERR_NONE;
+}
+
+BT_ERROR BT_DetachHandle(BT_HANDLE hProcess, BT_HANDLE h) {
+
+	return BT_ERR_NONE;
+}
+
 BT_HANDLE BT_CreateHandle(const BT_IF_HANDLE *pIf, BT_u32 ulHandleMemory, BT_ERROR *pError) {
 	BT_HANDLE hHandle = BT_Calloc(ulHandleMemory);
-	hHandle->h.pIf = pIf;
-	hHandle->h.ulClaimedMemory = ulHandleMemory;
+	BT_AttachHandle(NULL, pIf, hHandle);
 	return hHandle;
 }
 
@@ -37,13 +47,10 @@ BT_ERROR BT_CloseHandle(BT_HANDLE hHandle) {
 	if(!isHandleValid(hHandle)) {
 		return BT_ERR_INVALID_HANDLE;
 	}
-	BT_ERROR Error = hHandle->h.pIf->pfnCleanup(hHandle);
-	if(!Error) {
-		BT_DestroyHandle(hHandle);
-	}
 
-	if(Error == BT_HANDLE_DO_NOT_FREE) {
-		Error = BT_ERR_NONE;
+	BT_ERROR Error = hHandle->h.pIf->pfnCleanup(hHandle);
+	if(!hHandle->h.pIf->ulFlags & BT_HANDLE_FLAGS_NO_DESTROY) {
+		BT_DestroyHandle(hHandle);
 	}
 
 	return Error;

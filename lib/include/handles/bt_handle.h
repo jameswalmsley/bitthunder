@@ -15,6 +15,8 @@ typedef struct _BT_HANDLE_HEADER {
 	BT_u32					ulClaimedMemory;	///< Amount of memory claimed by this handle.
 } BT_HANDLE_HEADER;
 
+
+BT_ERROR 	BT_AttachHandle(BT_HANDLE hProcess, const BT_IF_HANDLE *pIf, BT_HANDLE h);
 BT_HANDLE 	BT_CreateHandle	(const BT_IF_HANDLE *pIf, BT_u32 ulHandleMemory, BT_ERROR *pError);
 BT_ERROR 	BT_DestroyHandle(BT_HANDLE h);
 BT_ERROR 	BT_CloseHandle	(BT_HANDLE hHandle);
