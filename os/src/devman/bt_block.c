@@ -4,30 +4,32 @@
  **/
 
 #include <bitthunder.h>
+#include <collections/bt_list.h>
 
 BT_DEF_MODULE_NAME			("Block-device Manager")
 BT_DEF_MODULE_DESCRIPTION	("Block Device manager for BitThunder")
 BT_DEF_MODULE_AUTHOR		("James Walmsley")
 BT_DEF_MODULE_EMAIL			("james@fullfat-fs.co.uk")
 
-
 struct _BT_OPAQUE_HANDLE {
-	BT_HANDLE_HEADER 	h;
-	BT_LIST_ITEM 			oItem;			///< Can be a list item member.
-	BT_HANDLE 				hBlkDev;		///< Handle to the block device instance.
-	BT_BLKDEV_DESCRIPTOR 	oDescriptor;	///< To be populated with block geometry.
-	BT_u32					ulRefCount;		///< Number of users.
-	BT_HANDLE				hInode;
+	BT_HANDLE_HEADER 		h;
 };
 
-static BT_LIST g_oBlockDevices = {0};
+static BT_LIST_HEAD(g_block_devices);
 
 static const BT_IF_HANDLE oHandleInterface;
 
-static BT_HANDLE devfs_open(BT_HANDLE hDevice, BT_ERROR *pError) {
-	if(!hDevice->ulRefCount) {
-		hDevice->ulRefCount += 1;
-		return hDevice;
+static BT_HANDLE devfs_open(struct bt_devfs_node *node, BT_ERROR *pError) {
+
+	BT_BLKDEV_DESCRIPTOR *blk = bt_container_of(node, BT_BLKDEV_DESCRIPTOR, node);
+	if(!blk->ulRefCount) {
+		blk->ulRefCount += 1;
+		BT_AttachHandle(NULL, &oHandleInterface, (BT_HANDLE) &blk->h);
+		return (BT_HANDLE) blk;
+	}
+
+	if(pError) {
+		*pError = BT_ERR_GENERIC;
 	}
 
 	return NULL;
@@ -38,7 +40,7 @@ static const BT_DEVFS_OPS oDevfsOps = {
 };
 
 static BT_BOOL isHandleValid(BT_HANDLE hBlock) {
-	if(hBlock && hBlock->h.pIf->eType == BT_HANDLE_T_INODE) {
+	if(hBlock && hBlock->h.pIf->eType == BT_HANDLE_T_BLOCK) {
 		return BT_TRUE;
 	}
 	return BT_FALSE;
@@ -53,8 +55,10 @@ BT_u32 BT_BlockRead(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *p
 		return 0;
 	}
 
-	const BT_IF_BLOCK *pBlock = hBlock->hBlkDev->h.pIf->oIfs.pBlockIF;
-	return pBlock->pfnReadBlocks(hBlock->hBlkDev, ulAddress, ulBlocks, pBuffer, pError);
+	BT_BLKDEV_DESCRIPTOR *blkdev = (BT_BLKDEV_DESCRIPTOR *) hBlock;
+
+	const BT_IF_BLOCK *pOps = blkdev->hBlkDev->h.pIf->oIfs.pDevIF->pBlockIF;
+	return pOps->pfnReadBlocks(blkdev->hBlkDev, ulAddress, ulBlocks, pBuffer, pError);
 }
 
 BT_u32 BT_BlockWrite(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError) {
@@ -64,43 +68,47 @@ BT_u32 BT_BlockWrite(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *
 		}
 		return 0;
 	}
-	const BT_IF_BLOCK *pBlock = hBlock->hBlkDev->h.pIf->oIfs.pBlockIF;
-	return pBlock->pfnWriteBlocks(hBlock->hBlkDev, ulAddress, ulBlocks, pBuffer, pError);
+
+	BT_BLKDEV_DESCRIPTOR *blkdev = (BT_BLKDEV_DESCRIPTOR *) hBlock;
+
+	const BT_IF_BLOCK *pOps = blkdev->hBlkDev->h.pIf->oIfs.pDevIF->pBlockIF;
+	return pOps->pfnWriteBlocks(blkdev->hBlkDev, ulAddress, ulBlocks, pBuffer, pError);
 }
 
 BT_ERROR BT_GetBlockGeometry(BT_HANDLE hBlock, BT_BLOCK_GEOMETRY *pGeometry) {
-	*pGeometry = hBlock->oDescriptor.oGeometry;
-	pGeometry->ulBlockSize = hBlock->oDescriptor.oGeometry.ulBlockSize;
-	return BT_ERR_NONE;
+
+	BT_BLKDEV_DESCRIPTOR *blkdev = (BT_BLKDEV_DESCRIPTOR *) hBlock;
+	*pGeometry = blkdev->oGeometry;
+
+	return BT_ERR_GENERIC;
 }
 
 BT_ERROR BT_RegisterBlockDevice(BT_HANDLE hDevice, const BT_i8 *szpName, BT_BLKDEV_DESCRIPTOR *pDescriptor) {
 
 	BT_ERROR Error;
-	BT_HANDLE hBlock = BT_CreateHandle(&oHandleInterface, sizeof(struct _BT_OPAQUE_HANDLE), &Error);
-	if(!hBlock) {
-		return BT_ERR_NO_MEMORY;
-	}
 
-	hBlock->hBlkDev = hDevice;
-	hBlock->oDescriptor = *pDescriptor;
+	pDescriptor->h.pIf = &oHandleInterface;
+	pDescriptor->hBlkDev = hDevice;
+	bt_list_add(&pDescriptor->item, &g_block_devices);
 
-	BT_ListAddItem(&g_oBlockDevices, &hBlock->oItem);
+	BT_LIST_INIT_HEAD(&pDescriptor->volumes);
 
-	hBlock->hInode = BT_DeviceRegister(hBlock, szpName, &oDevfsOps, &Error);
+	Error = BT_DeviceRegister(&pDescriptor->node, szpName);
 
-	BT_EnumerateVolumes(hBlock);
+	BT_kPrint("Block device: %s registered, enumerating partitions.", szpName);
 
-	return BT_ERR_NONE;
+	BT_EnumerateVolumes(pDescriptor);
+
+	return Error;
 }
 
-BT_HANDLE BT_BlockGetInode(BT_HANDLE hDevice) {
+/*BT_HANDLE BT_BlockGetInode(BT_HANDLE hDevice) {
 	if(!isHandleValid(hDevice)) {
 		return NULL;
 	}
 
 	return hDevice->hInode;
-}
+	}*/
 
 BT_ERROR BT_UnregisterBlockDevice(BT_HANDLE hDevice) {
 	// find the block device entry that owns this handle
@@ -111,12 +119,12 @@ BT_ERROR BT_UnregisterBlockDevice(BT_HANDLE hDevice) {
 	return BT_ERR_NONE;
 }
 
-static BT_ERROR bt_blockdev_inode_cleanup(BT_HANDLE hBlockdev) {
-	if(hBlockdev->ulRefCount) {
-		hBlockdev->ulRefCount -= 1;
-		return BT_HANDLE_DO_NOT_FREE;	// Ensure handle is not free'd!
-	} else {
-		// Request to destroy the inode!
+static BT_ERROR bt_blockdev_cleanup(BT_HANDLE hBlockDev) {
+
+	BT_BLKDEV_DESCRIPTOR *blk = (BT_BLKDEV_DESCRIPTOR *) hBlockDev;
+
+	if(!blk->ulRefCount) {
+		blk->ulRefCount -= 1;
 	}
 
 	return BT_ERR_NONE;
@@ -124,20 +132,6 @@ static BT_ERROR bt_blockdev_inode_cleanup(BT_HANDLE hBlockdev) {
 
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
-	.eType = BT_HANDLE_T_INODE,
-	.pfnCleanup = bt_blockdev_inode_cleanup,
-};
-
-static BT_ERROR bt_block_device_manager_init() {
-
-	BT_ERROR Error;
-
-	Error = BT_ListInit(&g_oBlockDevices);
-
-	return Error;
-}
-
-BT_MODULE_INIT_DEF oModuleEntry = {
-	BT_MODULE_NAME,
-	bt_block_device_manager_init,
+	.eType = BT_HANDLE_T_BLOCK,
+	.pfnCleanup = bt_blockdev_cleanup,
 };
