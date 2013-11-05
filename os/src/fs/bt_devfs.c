@@ -5,6 +5,7 @@
  **/
 
 #include <bitthunder.h>
+#include <collections/bt_list.h>
 #include <bt_struct.h>
 #include <string.h>
 
@@ -17,17 +18,7 @@ extern const BT_DEVFS_INODE __bt_devfs_entries_start;
 extern const BT_DEVFS_INODE __bt_devfs_entries_end;
 
 #ifdef BT_CONFIG_FS_DEV_DYNAMIC_REGISTRATION
-
-static BT_LIST oInodeList = {0};
-
-typedef struct _BT_OPAQUE_HANDLE {
-	BT_HANDLE_HEADER 	h;
-	BT_LIST_ITEM 		oItem;
-	char 		   	   *szpName;
-	BT_HANDLE			hDevice;
-	BT_u32				ulReferences;
-	const BT_DEVFS_OPS *pOps;
-} BT_DEVFS_INODE_ITEM;
+static BT_LIST_HEAD(g_devfs_nodes);
 #endif
 
 BT_HANDLE BT_DeviceOpen(const char *szpFilename, BT_ERROR *pError) {
@@ -52,14 +43,12 @@ BT_HANDLE BT_DeviceOpen(const char *szpFilename, BT_ERROR *pError) {
 	}
 
 #ifdef BT_CONFIG_FS_DEV_DYNAMIC_REGISTRATION
-	BT_LIST_ITEM *pItem = oInodeList.pStart;
-	while(pItem) {
-		BT_HANDLE hInode = bt_container_of(pItem, BT_DEVFS_INODE_ITEM, oItem);
-		if(!strcmp(hInode->szpName, szpFilename)) {
-			return hInode->pOps->pfnOpen(hInode->hDevice, pError);
+	struct bt_list_head *pos;
+	bt_list_for_each(pos, &g_devfs_nodes) {
+		struct bt_devfs_node *node = (struct bt_devfs_node *) pos;
+		if(!strcmp(node->szpName, szpFilename)) {
+			return node->pOps->pfnOpen(node, pError);
 		}
-
-		pItem = BT_ListGetNext(pItem);
 	}
 #endif
 
@@ -69,58 +58,151 @@ BT_HANDLE BT_DeviceOpen(const char *szpFilename, BT_ERROR *pError) {
 #ifdef BT_CONFIG_FS_DEV_DYNAMIC_REGISTRATION
 
 static const BT_IF_HANDLE oHandleInterface;
+static const BT_IF_HANDLE oDirHandleInterface;
 
-BT_HANDLE BT_DeviceRegister(BT_HANDLE hDevice, const char *szpName, const BT_DEVFS_OPS *pOps, BT_ERROR *pError) {
+BT_ERROR BT_DeviceRegister(struct bt_devfs_node *node, const char *szpName) {
+
+	node->szpName = BT_kMalloc(strlen(szpName) + 1);
+	strcpy(node->szpName, szpName);
+
+	bt_list_add(&node->item, &g_devfs_nodes);
+
+	return BT_ERR_NONE;
+}
+
+struct _BT_OPAQUE_HANDLE {
+	BT_HANDLE_HEADER h;
+};
+
+struct devfs_mount {
+	BT_HANDLE_HEADER h;
+};
+
+struct devfs_dir {
+	BT_HANDLE_HEADER h;
+	BT_u32 ulCurrentEntry;
+};
+
+static BT_HANDLE devfs_mount(BT_HANDLE hFS, const void *data, BT_ERROR *pError) {
+	BT_HANDLE hMount = BT_CreateHandle(&oHandleInterface, sizeof(struct devfs_mount), pError);
+	return hMount;
+}
+
+static BT_HANDLE devfs_open(BT_HANDLE hMount, const BT_i8 *szpPath, BT_u32 ulModeFlags, BT_ERROR *pError) {
+
 	BT_ERROR Error;
-	BT_HANDLE hInode = BT_CreateHandle(&oHandleInterface, sizeof(struct _BT_OPAQUE_HANDLE), pError);
-	if(!hInode) {
-		Error = BT_ERR_NO_MEMORY;
-		goto err_out;
+	BT_HANDLE hDev = BT_DeviceOpen(&szpPath[1], &Error);
+	if(hDev) {
+		return hDev;
 	}
 
-	hInode->szpName = BT_kMalloc(strlen(szpName) + 1);
-	strcpy(hInode->szpName, szpName);
-
-	hInode->hDevice = hDevice;
-	hInode->pOps = pOps;
-
-	BT_ListAddItem(&oInodeList, &hInode->oItem);
-
-	if(pError) {
-		*pError = BT_ERR_NONE;
-	}
-
-	return hInode;
-
-err_out:
-	if(pError) {
-		*pError = Error;
+	struct bt_list_head *pos;
+	bt_list_for_each(pos, &g_devfs_nodes) {
+		struct bt_devfs_node *node = (struct bt_devfs_node *) pos;
+		if(!strcmp(node->szpName, &szpPath[1])) {
+			return node->pOps->pfnOpen(node, pError);
+		}
 	}
 
 	return NULL;
 }
 
-BT_i8 *BT_GetInodeName(BT_HANDLE h, BT_ERROR *pError) {
-	return h->szpName;
+static BT_HANDLE devfs_opendir(BT_HANDLE hMount, const BT_i8 *szpPath, BT_ERROR *pError) {
+
+	BT_HANDLE hDir = BT_CreateHandle(&oDirHandleInterface, sizeof(struct devfs_dir), pError);
+	return hDir;
 }
 
-static BT_ERROR bt_devfs_cleanup(BT_HANDLE hDevfs) {
+static BT_ERROR devfs_readdir(BT_HANDLE hDir, BT_DIRENT *pDirent) {
+
+	struct devfs_dir *pDir = (struct devfs_dir *) hDir;
+
+	struct bt_list_head *pos;
+	BT_u32 i = 0;
+
+	BT_u32 size = (BT_u32) ((BT_u32) &__bt_devfs_entries_end - (BT_u32) &__bt_devfs_entries_start);
+	size /= sizeof(BT_DEVFS_INODE);
+
+	const BT_DEVFS_INODE *pInode = &__bt_devfs_entries_start;
+
+	while(size--) {
+		if(i++ == pDir->ulCurrentEntry) {
+			pDirent->szpName = (BT_i8 *) pInode->szpName;
+			pDirent->ullFileSize = 0;
+			pDir->ulCurrentEntry += 1;
+			return BT_ERR_NONE;
+		}
+		pInode++;
+	}
+
+
+	bt_list_for_each(pos, &g_devfs_nodes) {
+		struct bt_devfs_node *node = (struct bt_devfs_node *) pos;
+		if(i++ == pDir->ulCurrentEntry) {
+			pDirent->szpName = node->szpName;
+			pDirent->ullFileSize = 0;
+			pDir->ulCurrentEntry += 1;
+			return BT_ERR_NONE;
+		}
+	}
+
+	return BT_ERR_GENERIC;
+}
+
+static BT_ERROR devfs_cleanup(BT_HANDLE hFS) {
+	return BT_ERR_NONE;
+}
+
+static const BT_IF_DIR oDirOperations = {
+	.pfnReadDir = devfs_readdir,
+};
+
+static const BT_IF_FS oFilesystemInterface = {
+	.ulFlags 		= BT_FS_FLAG_NODEV,
+	.name			= "devfs",
+	.pfnMountPseudo	= devfs_mount,
+	.pfnOpen 		= devfs_open,
+	.pfnOpenDir 	= devfs_opendir,
+	//.pfnGetInode 	= devfs_get_inode,
+};
+
+static const BT_IF_HANDLE oHandleInterface = {
+	BT_MODULE_DEF_INFO,
+	.pfnCleanup = devfs_cleanup,
+	.oIfs = {
+		.pFilesystemIF = &oFilesystemInterface,
+	},
+	.eType = BT_HANDLE_T_FILESYSTEM,
+};
+
+static const BT_IF_HANDLE oDirHandleInterface = {
+	BT_MODULE_DEF_INFO,
+	.pfnCleanup = devfs_cleanup,
+	.oIfs = {
+		.pDirIF = &oDirOperations,
+	},
+	.eType = BT_HANDLE_T_DIRECTORY,
+};
+
+static BT_ERROR devfs_init() {
+
+	BT_ERROR Error;
+
+	BT_HANDLE hFS = BT_CreateHandle(&oHandleInterface, sizeof(struct _BT_OPAQUE_HANDLE), &Error);
+	if(!hFS) {
+		return Error;
+	}
+
+	BT_RegisterFilesystem(hFS);
+
+	BT_Mount(NULL, "/dev/", "devfs", 0, NULL);
 
 	return BT_ERR_NONE;
 }
 
-static const BT_IF_HANDLE oHandleInterface = {
-	BT_MODULE_DEF_INFO,
-	.eType = BT_HANDLE_T_INODE,
-	.pfnCleanup = bt_devfs_cleanup,
+BT_MODULE_INIT_DEF devfs_init_tab = {
+	.name = BT_MODULE_NAME,
+	devfs_init,
 };
 
-static BT_ERROR bt_devfs_init() {
-	return BT_ListInit(&oInodeList);
-}
-
-BT_MODULE_INIT_DEF oModuleEntry = {
-	BT_MODULE_NAME,
-	bt_devfs_init,
-};
 #endif

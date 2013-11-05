@@ -14,23 +14,31 @@
 #ifndef _BT_DEVFS_H_
 #define _BT_DEVFS_H_
 
+#include <collections/bt_list.h>
 #include "bt_types.h"
+
+struct bt_devfs_node;
+
+typedef struct _BT_DEVFS_OPS {
+	BT_HANDLE (*pfnOpen) (struct bt_devfs_node *node, BT_ERROR *pError);
+} BT_DEVFS_OPS;
+
+struct bt_devfs_node {
+	struct bt_list_head item;
+	BT_i8			   *szpName;
+	const BT_DEVFS_OPS *pOps;
+};
 
 typedef struct _BT_DEVFS_INODE {
 	const char 					*szpName;	///< Device file-system entry name.
 	const BT_INTEGRATED_DEVICE 	*pDevice;	///< Integrated device that the entry represents.
 } BT_DEVFS_INODE;
 
-typedef struct _BT_DEVFS_OPS {
-	BT_HANDLE (*pfnOpen) (BT_HANDLE hDevice, BT_ERROR *pError);
-
-} BT_DEVFS_OPS;
-
 #define BT_DEVFS_INODE_DEF 		static const BT_ATTRIBUTE_SECTION(".bt.devfs.entries") BT_DEVFS_INODE
 
 BT_HANDLE BT_DeviceOpen(const char *szpDevicePath, BT_ERROR *pError);
 
-BT_HANDLE BT_DeviceRegister(BT_HANDLE hDevice, const char *szpName, const BT_DEVFS_OPS *pOps, BT_ERROR *pError);
+BT_ERROR BT_DeviceRegister(struct bt_devfs_node *node, const char *szpName);
 BT_i8 *BT_GetInodeName(BT_HANDLE h, BT_ERROR *pError);
 
 #endif
