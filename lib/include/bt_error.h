@@ -5,12 +5,8 @@
 
 typedef BT_u32	BT_ERROR;
 
-
-
-
-
-
-#define BT_ERR_DEF_GLOBAL(x)			(x)
+#define BT_ERR_FLAG						0x80000000
+#define BT_ERR_DEF_GLOBAL(x)			(x | BT_ERR_FLAG)
 
 #define BT_ERR_NONE						0
 
