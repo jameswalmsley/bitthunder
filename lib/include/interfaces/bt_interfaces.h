@@ -36,7 +36,6 @@ typedef union _BT_IF_INTERFACES {
 	BT_HANDLE_INTERFACE	p;
 #ifdef BT_CONFIG_OS
 	const BT_IF_DEVICE *pDevIF;
-	const BT_IF_BLOCK  *pBlockIF;
 	const BT_IF_FS	   *pFilesystemIF;
 	const BT_IF_DIR    *pDirIF;
 	const BT_IF_INODE  *pInodeIF;
@@ -44,7 +43,9 @@ typedef union _BT_IF_INTERFACES {
 } BT_UN_IFS;
 
 typedef struct _BT_IF_HANDLE {
-	BT_MODULE_INFO	   oInfo;
+	BT_MODULE_INFO	   	oInfo;
+	BT_u32				ulFlags;
+#define BT_HANDLE_FLAGS_NO_DESTROY 	0x00000001
 	const BT_UN_IFS	   	oIfs;
 #ifdef BT_CONFIG_OS
 	const BT_IF_FILE   *pFileIF;	///< If handle implements a file interface then use this!
@@ -52,7 +53,5 @@ typedef struct _BT_IF_HANDLE {
 	BT_HANDLE_TYPE 		eType;
 	BT_ERROR			(*pfnCleanup)	(BT_HANDLE h);
 } BT_IF_HANDLE;
-
-#define BT_HANDLE_DO_NOT_FREE	0x40000001	///< Cleanup interfaces can return this to mean success, but DO not free the handle!
 
 #endif
