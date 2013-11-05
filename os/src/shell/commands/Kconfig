@@ -10,6 +10,11 @@ config SHELL_CMD_BOOT_JTAG
 	depends on SHELL
 	default n
 
+config SHELL_CMD_CP
+    bool "cp"
+	depends on SHELL
+	default n
+
 config SHELL_CMD_ECHO
 	bool "echo"
 	depends on SHELL
