@@ -29,9 +29,10 @@ typedef struct _MMC_HOST {
 } MMC_HOST;
 
 struct _BT_OPAQUE_HANDLE {
-	BT_HANDLE_HEADER 	h;
-	MMC_HOST 		   *pHost;
+	BT_HANDLE_HEADER 		h;
+	MMC_HOST 		   	   *pHost;
 	BT_BLKDEV_DESCRIPTOR	oDescriptor;
+	BT_BOOL					bInUse;
 };
 
 static const BT_IF_HANDLE oHandleInterface;
@@ -508,7 +509,7 @@ static BT_u32 sdcard_blockwrite(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount
 	return ulWritten;
 }
 
-static const BT_IF_BLOCK oBlockInterface = {
+static const BT_IF_BLOCK sdcard_blockdev_interface = {
 	sdcard_blockread,
 	sdcard_blockwrite,
 };
@@ -521,12 +522,16 @@ static BT_ERROR sdcard_blockdev_cleanup(BT_HANDLE hHandle) {
 	return BT_ERR_NONE;
 }
 
+static const BT_IF_DEVICE oDeviceInterface = {
+	.pBlockIF = &sdcard_blockdev_interface,
+};
+
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
 	.pfnCleanup = sdcard_blockdev_cleanup,
-	.eType = BT_HANDLE_T_BLOCK,
+	.eType = BT_HANDLE_T_DEVICE,
 	.oIfs = {
-		.pBlockIF = &oBlockInterface,
+		.pDevIF = &oDeviceInterface,
 	},
 };
 
