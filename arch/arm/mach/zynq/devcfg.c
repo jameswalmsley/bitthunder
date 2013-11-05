@@ -6,6 +6,7 @@
  **/
 
 #include <bitthunder.h>
+#include <string.h>
 #include "devcfg.h"
 #include "slcr.h"
 
@@ -17,59 +18,131 @@ BT_DEF_MODULE_EMAIL				("james@fullfat-fs.co.uk")
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;
 	volatile ZYNQ_DEVCFG_REGS	*pRegs;
+	volatile ZYNQ_SLCR_REGS		*pSLCR;
+	BT_BOOL	bEndianSwap;
+	BT_u8 residue_buf[3];
+	BT_u32 residue_len;
+	BT_u32 offset;
 };
 
 static BT_BOOL g_bInUse = BT_FALSE;
 
 static BT_ERROR devcfg_cleanup(BT_HANDLE h) {
 	g_bInUse = BT_FALSE;
+
+	zynq_slcr_unlock(h->pSLCR);
+	zynq_slcr_postload_fpga(h->pSLCR);
+	zynq_slcr_lock(h->pSLCR);
+
+	bt_iounmap(h->pRegs);
+	bt_iounmap(h->pSLCR);
+
 	return BT_ERR_NONE;
 }
+
+
+static void devcfg_reset_pl(BT_HANDLE hDevcfg) {
+
+	hDevcfg->pRegs->CTRL |= CTRL_PCFG_PROG_B;				// Setting PCFG_PROGB signal to high
+
+	while(!(hDevcfg->pRegs->STATUS & STATUS_PCFG_INIT)) {	// Wait for PL for reset
+		;
+	}
+
+	hDevcfg->pRegs->CTRL &= ~CTRL_PCFG_PROG_B;				// Setting PCFG_PROGB signal to low
+
+	while((hDevcfg->pRegs->STATUS & STATUS_PCFG_INIT)) {	// Wait for PL for status set
+		;
+	}
+
+	hDevcfg->pRegs->CTRL |= CTRL_PCFG_PROG_B;
+	while(!(hDevcfg->pRegs->STATUS & STATUS_PCFG_INIT)) {	// Wait for PL for status set
+		;
+	}
+}
+
 
 /**
  *	This assumes a single write request will be generated.
  **/
 static BT_u32 devcfg_write(BT_HANDLE hDevcfg, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer, BT_ERROR *pError) {
-	// Wait for PCFG_INIT bit to be high.
 
-	// Enable level shifters
-	ZYNQ_SLCR->LVL_SHFTR_EN = 0x0000000A;	// Enable PS to PL level shifting.
+	BT_u32 user_count = ulSize;
 
-	// Reset the PL
-
-	hDevcfg->pRegs->CTRL |= CTRL_PCFG_PROG_B;	// Setting PCFG_PROGB signal to high
-
-	BT_ThreadYield();							// A small delay.
-
-	hDevcfg->pRegs->CTRL &= ~CTRL_PCFG_PROG_B;	// Setting PCFG_PROGB signal to low
-
-	while(hDevcfg->pRegs->STATUS & STATUS_PCFG_INIT) {	// Wait for PL for reset
-		BT_ThreadYield();
+	BT_u32 kmem_size = ulSize + hDevcfg->residue_len;
+	bt_paddr_t kmem = bt_page_alloc_coherent(kmem_size);
+	if(!kmem) {
+		*pError = BT_ERR_NO_MEMORY;
+		return 0;
 	}
 
-	hDevcfg->pRegs->CTRL |= CTRL_PCFG_PROG_B;
+	BT_u8 *buf = (BT_u8 *) bt_phys_to_virt(kmem);
 
-	while(!(hDevcfg->pRegs->STATUS & STATUS_PCFG_INIT)) {	// Wait for PL for status set
-		BT_ThreadYield();
+	// Collect stragglers from last time (0 to 3 bytes).
+	memcpy(buf, hDevcfg->residue_buf, hDevcfg->residue_len);
+
+	// Copy the user data.
+	memcpy(buf + hDevcfg->residue_len, pBuffer, ulSize);
+
+	// Include straggles in total to be counted.
+	ulSize += hDevcfg->residue_len;
+
+	// Check if header?
+	if(!hDevcfg->offset && ulSize > 4) {
+		BT_u32 i;
+		for(i = 0; i < ulSize - 4; i++) {
+			if(!memcmp(buf + i, "\x66\x55\x99\xAA", 4)) {
+				BT_kPrint("xdevcfg: found normal sync word.");
+				hDevcfg->bEndianSwap = 0;
+				break;
+			}
+
+			if(!memcmp(buf + i, "\xAA\x99\x55\x66", 4)) {
+				BT_kPrint("xdevcfg: found byte-swapped sync word.");
+				hDevcfg->bEndianSwap = 1;
+				break;
+			}
+		}
+
+		if(i != ulSize - 4) {
+			ulSize -= i;
+			memmove(buf, buf + i, ulSize);	// ulSize - i ??
+		}
 	}
 
-	hDevcfg->pRegs->INT_STS = 0xFFFFFFFF;
+	// Save stragglers for next time.
+	hDevcfg->residue_len = ulSize % 4;
+	ulSize -= hDevcfg->residue_len;
+	memcpy(hDevcfg->residue_buf, buf + ulSize, hDevcfg->residue_len);
 
-	hDevcfg->pRegs->MCTRL &= ~MCTRL_PCAP_LPBK;
+	// Fixup the endianness
 
-	hDevcfg->pRegs->DMA_SRC_ADDR = (BT_u32 ) pBuffer | 1;
+	// Transfer the data.
+
+	hDevcfg->pRegs->DMA_SRC_ADDR = (BT_u32 ) buf | 1;
 	hDevcfg->pRegs->DMA_DST_ADDR = 0xFFFFFFFF;
 
-	hDevcfg->pRegs->DMA_SRC_LEN = (ulSize/4);
-	hDevcfg->pRegs->DMA_DST_LEN = (ulSize/4);
+	BT_u32 transfer_len = 0;
+	if(ulSize % 4) {
+		transfer_len = (ulSize / 4) + 1;
+	} else {
+		transfer_len = (ulSize / 4);
+	}
+
+	hDevcfg->pRegs->DMA_SRC_LEN = transfer_len;
+	hDevcfg->pRegs->DMA_DST_LEN = 0;
 
 	while(!(hDevcfg->pRegs->INT_STS & INT_STS_DMA_DONE_INT)) {
 		BT_ThreadYield();
 	}
 
-	hDevcfg->pRegs->INT_STS = INT_STS_DMA_DONE_INT;	// Clear FPGA_DONE status.
+	hDevcfg->pRegs->INT_STS = INT_STS_DMA_DONE_INT;	// Clear DMA_DONE status
 
-	return ulSize;
+	hDevcfg->offset += user_count;
+
+	bt_page_free_coherent(kmem, kmem_size);
+
+	return user_count;
 }
 
 
@@ -111,15 +184,26 @@ static BT_HANDLE devcfg_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pEr
 		goto err_free_out;
 	}
 
-	hDevcfg->pRegs = (ZYNQ_DEVCFG_REGS *) pResource->ulStart;
+	hDevcfg->pRegs = (volatile ZYNQ_DEVCFG_REGS *) bt_ioremap(pResource->ulStart, sizeof(ZYNQ_DEVCFG_REGS));
 
 	hDevcfg->pRegs->UNLOCK = 0x757BDF0D;				// Unlock the DEVCFG interface.
 
 	hDevcfg->pRegs->INT_STS = 0xFFFFFFFF;				// Clear all interrupt status signals.
 
+	hDevcfg->pRegs->CTRL |= CTRL_PCFG_PROG_B;
 	hDevcfg->pRegs->CTRL |= CTRL_PCAP_MODE;				// Enable PCAP transfer mode.
 	hDevcfg->pRegs->CTRL |= CTRL_PCAP_PR;				// Select PCAP for reconfiguration, (disables ICAP).
 	hDevcfg->pRegs->CTRL &= ~CTRL_QUARTER_PCAP_RATE;	// Set full bandwidth PCAP loading rate.
+
+	hDevcfg->pRegs->MCTRL &= ~MCTRL_PCAP_LPBK; 			// Ensure internal PCAP looback is disabled.
+
+	hDevcfg->pSLCR = (volatile ZYNQ_SLCR_REGS *) bt_ioremap(ZYNQ_SLCR_BASE, sizeof(ZYNQ_SLCR_REGS));
+
+	zynq_slcr_unlock(hDevcfg->pSLCR);
+	zynq_slcr_preload_fpga(hDevcfg->pSLCR);
+	zynq_slcr_lock(hDevcfg->pSLCR);
+
+	devcfg_reset_pl(hDevcfg);
 
 	if(pError) {
 		*pError = BT_ERR_NONE;

@@ -148,10 +148,20 @@ void zynq_slcr_cpu_start(BT_u32 ulCoreID) {
 	bt_iounmap(pRegs);
 }
 
-
 void zynq_slcr_cpu_stop(BT_u32 ulCoreID) {
 	volatile ZYNQ_SLCR_REGS *pRegs = bt_ioremap((void *)ZYNQ_SLCR, BT_SIZE_4K);
 	zynq_slcr_unlock(pRegs);
 	pRegs->A9_CPU_RST_CTRL = (SLCR_A9_CPU_CLKSTOP | SLCR_A9_CPU_RST) << ulCoreID;
 	bt_iounmap(pRegs);
+}
+
+void zynq_slcr_preload_fpga(volatile ZYNQ_SLCR_REGS *pSLCR) {
+	pSLCR->FPGA_RST_CTRL	= 0xF;	// Assert FPGA top-level output resets.
+	pSLCR->LVL_SHFTR_EN 	= 0;	// Disable the level shifters.
+	pSLCR->LVL_SHFTR_EN     = 0xA;	// Enable output level shifters.
+}
+
+void zynq_slcr_postload_fpga(volatile ZYNQ_SLCR_REGS *pSLCR) {
+	pSLCR->LVL_SHFTR_EN 	= 0xF;	// Enable all level shifters.
+	pSLCR->FPGA_RST_CTRL    = 0;	// De-assert AXI interface resets.
 }

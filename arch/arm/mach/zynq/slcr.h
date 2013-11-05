@@ -277,4 +277,7 @@ void zynq_slcr_lock(volatile ZYNQ_SLCR_REGS *pRegs);
 void zynq_slcr_cpu_start(BT_u32 ulCoreID);
 void zynq_slcr_cpu_stop(BT_u32 ulCoreID);
 
+void zynq_slcr_preload_fpga(volatile ZYNQ_SLCR_REGS *pSLCR);
+void zynq_slcr_postload_fpga(volatile ZYNQ_SLCR_REGS *pSLCR);
+
 #endif
