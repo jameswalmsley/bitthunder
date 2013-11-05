@@ -388,13 +388,9 @@ static BT_u32 uart_read(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, void *pB
 	return read;
 }
 
-/**
- *	Implementing the CHAR dev write API.
- *
- *	Note, this doesn't implement ulFlags specific options yet!
- **/
 static BT_u32 uart_write(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer, BT_ERROR *pError) {
 
+	BT_u32 ulRead = 0;
 	BT_u8 *pucSource = (BT_u8 *) pBuffer;
 	volatile ZYNQ_UART_REGS *pRegs = hUart->pRegs;
 	switch(hUart->eMode) {
@@ -406,6 +402,7 @@ static BT_u32 uart_write(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const v
 			}
 			pRegs->FIFO = *pucSource++;
 			ulSize--;
+			ulRead += 1;
 		}
 		break;
 	}
@@ -420,6 +417,7 @@ static BT_u32 uart_write(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const v
 			}
 			ulSize--;
 			//pRegs->CR1 |= USART_CR1_TXEIE;	// Enable the interrupt
+			ulRead += 1;
 		}
 
 		break;
@@ -428,7 +426,12 @@ static BT_u32 uart_write(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const v
 	default:
 		break;
 	}
-	return BT_ERR_NONE;
+
+	if(pError) {
+		*pError = BT_ERR_NONE;
+	}
+
+	return ulRead;
 }
 
 static BT_ERROR uartFlush(BT_HANDLE hUart) {
