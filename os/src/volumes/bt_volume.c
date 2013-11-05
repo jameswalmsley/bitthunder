@@ -5,6 +5,7 @@
  **/
 
 #include <bitthunder.h>
+#include <collections/bt_list.h>
 #include <lib/getmem.h>
 #include "ibm_mbr.h"
 #include <string.h>
@@ -21,13 +22,14 @@ typedef enum _BT_VOLUME_TYPE {
 } BT_VOLUME_TYPE;
 
 struct _BT_OPAQUE_HANDLE {
-	BT_HANDLE_HEADER 	h;
-	BT_LIST_ITEM		oItem;
-	BT_VOLUME_TYPE 		eType;
-	BT_HANDLE			hBlock;
-	BT_u32				ulTotalBlocks;
-	BT_HANDLE			hInode;
-	BT_u32				ulReferenceCount;
+	BT_HANDLE_HEADER 		h;
+	struct bt_list_head  	item;
+	struct bt_devfs_node 	node;
+	BT_VOLUME_TYPE 			eType;
+	BT_BLKDEV_DESCRIPTOR   *blkdev;
+	BT_u32					ulTotalBlocks;
+	BT_HANDLE				hInode;
+	BT_u32					ulReferenceCount;
 };
 
 typedef struct _BT_PARTITION {
@@ -36,15 +38,17 @@ typedef struct _BT_PARTITION {
 	BT_u32	ulPartitionNumber;
 } BT_PARTITION;
 
-static BT_LIST g_oVolumes 		= {0};
-//static BT_LIST g_oPartitions 	= {0};
-
 static const BT_IF_HANDLE oHandleInterface;
 
-static BT_HANDLE devfs_open(BT_HANDLE hVolume, BT_ERROR *pError) {
-	if(!hVolume->ulReferenceCount) {
-		hVolume->ulReferenceCount += 1;
-		return hVolume;
+static BT_HANDLE devfs_open(struct bt_devfs_node *dev_node, BT_ERROR *pError) {
+
+	struct _BT_OPAQUE_HANDLE *h = bt_container_of(dev_node, struct _BT_OPAQUE_HANDLE, node);
+	if(!h->ulReferenceCount) {
+		h->ulReferenceCount += 1;
+
+		BT_AttachHandle(NULL, &oHandleInterface, h);
+
+		return h;
 	}
 
 	return NULL;
@@ -81,61 +85,54 @@ static BT_u32 BT_PartitionCount(BT_u8 *pBuffer)
 	return count;
 }
 
-BT_ERROR BT_EnumerateVolumes(BT_HANDLE hBlockDevice) {
+static void init_devfs_node(BT_HANDLE hVolume) {
+	hVolume->node.pOps = &oDevfsOps;
+}
+
+BT_ERROR BT_EnumerateVolumes(BT_BLKDEV_DESCRIPTOR *blk) {
 
 	BT_ERROR Error = BT_ERR_NONE;
-	BT_BLOCK_GEOMETRY oGeometry;
 
-	BT_i8 *szpName = BT_GetInodeName(BT_BlockGetInode(hBlockDevice), &Error);
-	if(!szpName) {
-		BT_kPrint("Block device has no named inode entry");
-		return BT_ERR_GENERIC;
-	}
 
-	if(hBlockDevice->h.pIf->eType != BT_HANDLE_T_INODE) {
-		Error = BT_ERR_GENERIC;
-		goto err_out;
-	}
 
-	Error = BT_GetBlockGeometry(hBlockDevice, &oGeometry);
-	if(Error) {
-		goto err_out;
-	}
-
-	BT_u8 *pMBR = BT_kMalloc(oGeometry.ulBlockSize);
+	BT_u8 *pMBR = BT_kMalloc(blk->oGeometry.ulBlockSize);
 	if(!pMBR) {
 		Error = BT_ERR_NO_MEMORY;
 		goto err_out;
 	}
 
-	if(BT_BlockRead(hBlockDevice, 0, 1, pMBR, &Error) != 1) {
+	if(BT_BlockRead((BT_HANDLE) &blk->h, 0, 1, pMBR, &Error) != 1) {
 		goto err_free_out;
 	}
 
 	// Create the volume handle.
 	BT_u32 partCount = BT_PartitionCount(pMBR);
 	if(!partCount) {
-		BT_HANDLE hVolume = BT_CreateHandle(&oHandleInterface, sizeof(struct _BT_OPAQUE_HANDLE), &Error);
+		BT_HANDLE hVolume = BT_kMalloc(sizeof(struct _BT_OPAQUE_HANDLE));
 		if(!hVolume) {
 			return BT_ERR_NO_MEMORY;
 		}
 
 		hVolume->eType 			= BT_VOLUME_NORMAL;
-		hVolume->ulTotalBlocks 	= oGeometry.ulTotalBlocks;
-		hVolume->hBlock 		= hBlockDevice;
+		hVolume->ulTotalBlocks 	= blk->oGeometry.ulTotalBlocks;
+		hVolume->blkdev         = blk;
+		hVolume->ulReferenceCount = 0;
 
-		BT_ListAddItem(&g_oVolumes, &hVolume->oItem);
+		bt_list_add(&hVolume->item, &blk->volumes);
 
-		BT_i8 *iname = BT_kMalloc(strlen(szpName) + 10);;
-		sprintf(iname, "%s%d", szpName, 0);
+		BT_i8 *iname = BT_kMalloc(strlen(blk->node.szpName) + 10);;
+		sprintf(iname, "%s%d", blk->node.szpName, 0);
 
-		hVolume->hInode = BT_DeviceRegister(hVolume, iname, &oDevfsOps, &Error);
+		init_devfs_node(hVolume);
+
+		BT_DeviceRegister(&hVolume->node, iname);
+
 		BT_kFree(iname);
 
 	} else {
 		BT_u32 i;
 		for(i = 0; i < partCount; i++) {
-			BT_HANDLE hVolume = BT_CreateHandle(&oHandleInterface, sizeof(BT_PARTITION), &Error);
+			BT_HANDLE hVolume = BT_kMalloc(sizeof(BT_PARTITION));
 			if(!hVolume) {
 				return BT_ERR_NO_MEMORY;
 			}
@@ -146,13 +143,17 @@ BT_ERROR BT_EnumerateVolumes(BT_HANDLE hBlockDevice) {
 			pPart->ulBaseAddress 		= BT_GetLongLE(pMBR, (IBM_MBR_PTBL + (16 * i) + IBM_MBR_PTBL_LBA));
 			pPart->ulPartitionNumber 	= i;
 			hVolume->ulTotalBlocks		= BT_GetLongLE(pMBR, (IBM_MBR_PTBL + (16 * i) + IBM_MBR_PTBL_SECTORS));
-			hVolume->hBlock				= hBlockDevice;
+			hVolume->blkdev     		= blk;
+			hVolume->ulReferenceCount 	= 0;
 
-			BT_ListAddItem(&g_oVolumes, &hVolume->oItem);
+			bt_list_add(&hVolume->item, &blk->volumes);
 
-			BT_i8 *iname = BT_kMalloc(strlen(szpName) + 10);
-			sprintf(iname, "%s%lu", szpName, i);
-			hVolume->hInode = BT_DeviceRegister(hVolume, iname, &oDevfsOps, &Error);
+			BT_i8 *iname = BT_kMalloc(strlen(blk->node.szpName) + 10);
+			sprintf(iname, "%s%lu", blk->node.szpName, i);
+
+			init_devfs_node(hVolume);
+
+			BT_DeviceRegister(&hVolume->node, iname);
 
 			BT_kFree(iname);
 		}
@@ -173,41 +174,33 @@ err_out:
 BT_u32 BT_VolumeRead(BT_HANDLE hVolume, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError) {
 
 	if(hVolume->eType == BT_VOLUME_NORMAL) {
-		return BT_BlockRead(hVolume->hBlock, ulAddress, ulBlocks, pBuffer, pError);
+		return BT_BlockRead((BT_HANDLE) hVolume->blkdev, ulAddress, ulBlocks, pBuffer, pError);
 	}
 
 	BT_PARTITION *pPart = (BT_PARTITION *)  hVolume;
 
-	return BT_BlockRead(hVolume->hBlock, ulAddress + pPart->ulBaseAddress, ulBlocks, pBuffer, pError);
+	return BT_BlockRead((BT_HANDLE) hVolume->blkdev, ulAddress + pPart->ulBaseAddress, ulBlocks, pBuffer, pError);
 }
 
 BT_u32 BT_VolumeWrite(BT_HANDLE hVolume, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError) {
+
 	if(hVolume->eType == BT_VOLUME_NORMAL) {
-		return BT_BlockWrite(hVolume->hBlock, ulAddress, ulBlocks, pBuffer, pError);
+		return BT_BlockWrite((BT_HANDLE) hVolume->blkdev, ulAddress, ulBlocks, pBuffer, pError);
 	}
 
 	BT_PARTITION *pPart = (BT_PARTITION *)  hVolume;
 
-	return BT_BlockWrite(hVolume->hBlock, ulAddress + pPart->ulBaseAddress, ulBlocks, pBuffer, pError);
+	return BT_BlockWrite((BT_HANDLE) hVolume->blkdev, ulAddress + pPart->ulBaseAddress, ulBlocks, pBuffer, pError);
 }
 
 static BT_ERROR bt_volume_inode_cleanup(BT_HANDLE hVolume) {
-
+	hVolume->ulReferenceCount -= 1;
 	return BT_ERR_NONE;
 }
 
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
-	.eType = BT_HANDLE_T_INODE,
+	.ulFlags = BT_HANDLE_FLAGS_NO_DESTROY,
+	.eType = BT_HANDLE_T_VOLUME,
 	.pfnCleanup = bt_volume_inode_cleanup,
-};
-
-static BT_ERROR bt_volume_manager_init() {
-	BT_ListInit(&g_oVolumes);
-	return BT_ERR_NONE;
-}
-
-BT_MODULE_INIT_DEF oModuleEntry = {
-	BT_MODULE_NAME,
-	bt_volume_manager_init,
 };
