@@ -96,7 +96,7 @@ typedef struct _BT_IF_DEVICE {
 	const BT_IF_POWER	   *pPowerIF;
 	BT_DEV_IF_TYPE 			eConfigType;
 	const BT_DEV_IFS 	    unConfigIfs;
-	const BT_IF_BLOCK	   *pBlockIf;
+	const BT_IF_BLOCK	   *pBlockIF;
 } BT_IF_DEVICE;
 
 
