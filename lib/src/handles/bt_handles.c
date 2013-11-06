@@ -48,8 +48,12 @@ BT_ERROR BT_CloseHandle(BT_HANDLE hHandle) {
 		return BT_ERR_INVALID_HANDLE;
 	}
 
-	BT_ERROR Error = hHandle->h.pIf->pfnCleanup(hHandle);
-	if(!hHandle->h.pIf->ulFlags & BT_HANDLE_FLAGS_NO_DESTROY) {
+	BT_ERROR Error = BT_ERR_NONE;
+	if(hHandle->h.pIf->pfnCleanup) {
+		hHandle->h.pIf->pfnCleanup(hHandle);
+	}
+
+	if(!(hHandle->h.pIf->ulFlags & BT_HANDLE_FLAGS_NO_DESTROY)) {
 		BT_DestroyHandle(hHandle);
 	}
 
