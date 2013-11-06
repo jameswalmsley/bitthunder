@@ -438,7 +438,7 @@ bt_printf(const char *fmt, ...)
 	va_list ap;
 
 	va_start(ap, fmt);
-	bt_kvprintf(fmt, bt_fputc, BT_stdout, 10, ap);
+	bt_kvprintf(fmt, bt_fputc, BT_GetStdout(), 10, ap);
 	va_end(ap);
 }
 
@@ -452,4 +452,3 @@ bt_fprintf(void *stream, const char *fmt, ...)
 	bt_kvprintf(fmt, bt_fputc, stream, 10, ap);
 	va_end(ap);
 }
-
