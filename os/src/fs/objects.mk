@@ -1,4 +1,5 @@
 BT_OS_OBJECTS-$(BT_CONFIG_OS) 		+= $(BUILD_DIR)os/src/fs/bt_devfs.o
+BT_OS_OBJECTS-$(BT_CONFIG_OS) 		+= $(BUILD_DIR)os/src/fs/bt_mountfs.o
 BT_OS_OBJECTS-$(BT_CONFIG_FS) 		+= $(BUILD_DIR)os/src/fs/bt_fs.o
 BT_OS_OBJECTS-$(BT_CONFIG_FILE) 	+= $(BUILD_DIR)os/src/fs/bt_file.o
 BT_OS_OBJECTS-$(BT_CONFIG_DIR) 		+= $(BUILD_DIR)os/src/fs/bt_dir.o
@@ -39,4 +40,3 @@ EXT2_OBJECTS-$(BT_CONFIG_FS_EXT2) += $(BUILD_DIR)os/src/fs/ext2/dev.o
 $(EXT2_OBJECTS-y): MODULE_NAME="Ext2"
 
 OBJECTS += $(EXT2_OBJECTS-y)
-
