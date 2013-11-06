@@ -1096,7 +1096,7 @@ int ext2fs_mount (unsigned part_length) {
 	return (0);
 
 fail:
-	BT_kPrint ("Failed to mount ext2 filesystem...\n");
+	//BT_kPrint ("Failed to mount ext2 filesystem...\n");
 	BT_kFree(data);
 	ext2fs_root = NULL;
 	return (-1);

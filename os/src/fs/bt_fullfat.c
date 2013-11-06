@@ -97,7 +97,7 @@ static BT_HANDLE fullfat_mount(BT_HANDLE hFS, BT_HANDLE hVolume, BT_ERROR *pErro
 
 	ffError = FF_MountPartition(pMount->pIoman, 0);
 	if(ffError) {
-		BT_kPrint("fullfat_mount: %s", FF_GetErrMessage(ffError));
+		//BT_kPrint("fullfat_mount: %s", FF_GetErrMessage(ffError));
 		goto err_mount_out;
 	}
 
