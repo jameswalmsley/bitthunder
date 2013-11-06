@@ -20,9 +20,9 @@ struct _BT_OPAQUE_HANDLE {
 	volatile ZYNQ_DEVCFG_REGS	*pRegs;
 	volatile ZYNQ_SLCR_REGS		*pSLCR;
 	BT_BOOL	bEndianSwap;
-	BT_u8 residue_buf[3];
 	BT_u32 residue_len;
 	BT_u32 offset;
+	BT_u8 residue_buf[3];
 };
 
 static BT_BOOL g_bInUse = BT_FALSE;
@@ -72,6 +72,7 @@ static BT_u32 devcfg_write(BT_HANDLE hDevcfg, BT_u32 ulFlags, BT_u32 ulSize, con
 	BT_u32 kmem_size = ulSize + hDevcfg->residue_len;
 	bt_paddr_t kmem = bt_page_alloc_coherent(kmem_size);
 	if(!kmem) {
+		bt_printf("Cannot allocate memory");
 		*pError = BT_ERR_NO_MEMORY;
 		return 0;
 	}
@@ -88,7 +89,7 @@ static BT_u32 devcfg_write(BT_HANDLE hDevcfg, BT_u32 ulFlags, BT_u32 ulSize, con
 	ulSize += hDevcfg->residue_len;
 
 	// Check if header?
-	if(!hDevcfg->offset && ulSize > 4) {
+	if(hDevcfg->offset == 0 && ulSize > 4) {
 		BT_u32 i;
 		for(i = 0; i < ulSize - 4; i++) {
 			if(!memcmp(buf + i, "\x66\x55\x99\xAA", 4)) {
@@ -116,10 +117,17 @@ static BT_u32 devcfg_write(BT_HANDLE hDevcfg, BT_u32 ulFlags, BT_u32 ulSize, con
 	memcpy(hDevcfg->residue_buf, buf + ulSize, hDevcfg->residue_len);
 
 	// Fixup the endianness
+	if(hDevcfg->bEndianSwap) {
+		BT_u32 i;
+		for (i = 0; i < ulSize; i += 4) {
+			BT_u32 *p = (BT_u32 *) &buf[i];
+			p[0] = __builtin_bswap32(p[0]);
+		}
+	}
 
 	// Transfer the data.
 
-	hDevcfg->pRegs->DMA_SRC_ADDR = (BT_u32 ) buf | 1;
+	hDevcfg->pRegs->DMA_SRC_ADDR = (BT_u32 ) kmem | 1;
 	hDevcfg->pRegs->DMA_DST_ADDR = 0xFFFFFFFF;
 
 	BT_u32 transfer_len = 0;
