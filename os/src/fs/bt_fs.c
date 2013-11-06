@@ -12,24 +12,11 @@ BT_DEF_MODULE_AUTHOR	  	("James Walmsley")
 BT_DEF_MODULE_EMAIL			("james@fullfat-fs.co.uk")
 
 static BT_LIST_HEAD(g_filesystems);
-static BT_LIST_HEAD(g_mountpoints);
+BT_LIST_HEAD(g_mountpoints);
 
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;
 };
-
-typedef struct _BT_FILESYSTEM {
-	struct bt_list_head item;
-	BT_HANDLE	 hFS;
-} BT_FILESYSTEM;
-
-typedef struct _BT_MOUNTPOINT {
-	struct bt_list_head item;
-	BT_HANDLE 		hMount;
-	BT_i8 		   *szpPath;
-	BT_FILESYSTEM  *pFS;
-} BT_MOUNTPOINT;
-
 
 BT_ERROR BT_RegisterFilesystem(BT_HANDLE hFS) {
 	if(hFS->h.pIf->eType != BT_HANDLE_T_FILESYSTEM) {

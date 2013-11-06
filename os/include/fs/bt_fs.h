@@ -1,6 +1,18 @@
 #ifndef _BT_FS_H_
 #define _BT_FS_H_
 
+typedef struct _BT_FILESYSTEM {
+	struct bt_list_head item;
+	BT_HANDLE	 hFS;
+} BT_FILESYSTEM;
+
+typedef struct _BT_MOUNTPOINT {
+	struct bt_list_head item;
+	BT_HANDLE 		hMount;
+	BT_i8 		   *szpPath;
+	BT_FILESYSTEM  *pFS;
+} BT_MOUNTPOINT;
+
 BT_ERROR BT_RegisterFilesystem(BT_HANDLE hFS);
 
 BT_HANDLE BT_Open(const BT_i8 *szpPath, BT_i8 *mode, BT_ERROR *pError);
