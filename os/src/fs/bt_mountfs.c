@@ -21,7 +21,7 @@ struct _BT_OPAQUE_HANDLE {
 
 struct mountfs_dir {
 	BT_HANDLE_HEADER 	h;
-	BT_ul32 			ulCurrentEntry;
+	BT_u32 				ulCurrentEntry;
 };
 
 static const BT_IF_HANDLE oHandleInterface;
@@ -30,6 +30,10 @@ static const BT_IF_HANDLE oDirHandleInterface;
 static BT_HANDLE mountfs_mount(BT_HANDLE hFS, const void *data, BT_ERROR *pError) {
 	BT_HANDLE hMount = BT_CreateHandle(&oHandleInterface, sizeof(struct _BT_OPAQUE_HANDLE), pError);
 	return hMount;
+}
+
+static BT_HANDLE mountfs_open(BT_HANDLE hFs, const BT_i8 *szpPath, BT_u32 ulModeFlags, BT_ERROR *pError) {
+	return NULL;
 }
 
 static BT_HANDLE mountfs_opendir(BT_HANDLE hMount, const BT_i8 *szpPath, BT_ERROR *pError) {
@@ -48,7 +52,7 @@ static BT_ERROR mountfs_readdir(BT_HANDLE hDir, BT_DIRENT *pDirent) {
 	bt_list_for_each(pos, &g_mountpoints) {
 		BT_MOUNTPOINT *pMountPoint = (BT_MOUNTPOINT *) pos;
 		if(i++ == pDir->ulCurrentEntry) {
-			pDirent->szpName = pMountPoint->szpName;
+			pDirent->szpName = pMountPoint->szpPath;
 			pDirent->ullFileSize = 0;
 			pDirent->attr = BT_ATTR_DIR;
 			pDir->ulCurrentEntry += 1;
@@ -67,6 +71,7 @@ static const BT_IF_FS oFilesystemInterface = {
 	.ulFlags 		= BT_FS_FLAG_NODEV,
 	.name 			= "mountfs",
 	.pfnMountPseudo	= mountfs_mount,
+	.pfnOpen		= mountfs_open,
 	.pfnOpenDir 	= mountfs_opendir,
 };
 
