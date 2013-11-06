@@ -26,10 +26,13 @@ struct _BT_OPAQUE_HANDLE {
 
 static BT_u32 mux_file_write(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer, BT_ERROR *pError) {
 
+	BT_ERROR Error;
+
 	struct bt_list_head *pos;
 	bt_list_for_each(pos, &hFile->handles) {
-		struct handle_item *item = (struct handle_item *) item;
-		BT_Write(item->hHandle, hFile->flags, ulSize, pBuffer, &Error);
+		struct handle_item *item = (struct handle_item *) pos;
+		BT_Write(item->hHandle, hFile->mode_flags, ulSize, pBuffer, &Error);
+		if(pError && Error) if(!*pError) *pError = Error;
 	}
 
 	return ulSize;
@@ -41,8 +44,9 @@ static BT_u32 mux_file_read(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void
 
 	struct bt_list_head *pos;
 	bt_list_for_each(pos, &hFile->handles) {
-		struct handle_item *item = (struct handle_item *) item;
-		BT_u32 read = BT_Read(item->hHandle, hFile->flags, ulSize, pBuffer, &Error);
+		struct handle_item *item = (struct handle_item *) pos;
+		BT_u32 read = BT_Read(item->hHandle, hFile->mode_flags, ulSize, pBuffer, &Error);
+		if(pError && Error) if(!*pError) *pError = Error;
 		if(read) {
 			return read;
 		}
@@ -56,10 +60,15 @@ static BT_IF_FILE mux_file_ops = {
 	.pfnRead = mux_file_read,
 };
 
+static BT_u32 mux_cleanup(BT_HANDLE hFile) {
+	// @@AF: TODO
+	return BT_ERR_NONE;
+}
+
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
 	.eType = BT_HANDLE_T_FILE,
-	.pFileIF = mux_file_ops,
+	.pFileIF = &mux_file_ops,
 	.pfnCleanup = mux_cleanup,
 };
 
@@ -67,7 +76,7 @@ BT_HANDLE BT_CreateMux(BT_u32 ulFlags, BT_ERROR *pError) {
 	BT_ERROR Error = BT_ERR_NONE;
 
 	BT_HANDLE hMux = BT_CreateHandle(&oHandleInterface, sizeof(struct _BT_OPAQUE_HANDLE), &Error);
-	if(hMux) {
+	if(!hMux) {
 		goto err_out;
 	}
 
@@ -83,8 +92,6 @@ err_out:
 
 	return NULL;
 }
-
-static
 
 static BT_ERROR mux_attach(BT_HANDLE hMux, BT_HANDLE h, BT_u32 flags) {
 	struct handle_item *item = BT_kMalloc(sizeof(*item));
