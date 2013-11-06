@@ -76,6 +76,8 @@ int bt_main(int argc, char **argv) {
 		pMachine->pfnMachineInit(pMachine);
 	}
 
+	bt_process_init();
+
 	const BT_INTEGRATED_DRIVER *pDriver = BT_GetIntegratedDriverByName(pMachine->pInterruptController->name);
 	if(pDriver) {
 		pDriver->pfnProbe(pMachine->pInterruptController, &Error);

@@ -135,7 +135,7 @@ static const BT_IF_HANDLE oHandleInterface = {
 
 extern struct bt_thread idle_thread;
 
-static BT_ERROR bt_process_manager_init() {
+BT_ERROR bt_process_init() {
 
 	// Create the kernel process handle!
 	BT_LIST_INIT_HEAD(&process_handles);
@@ -153,8 +153,3 @@ static BT_ERROR bt_process_manager_init() {
 
 	return BT_ERR_NONE;
 }
-
-BT_MODULE_INIT_0_DEF oModuleEntry = {
-	.name = BT_MODULE_NAME,
-	bt_process_manager_init,
-};

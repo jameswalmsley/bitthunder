@@ -35,4 +35,6 @@ BT_u32 BT_GetTotalProcesses();
 BT_ERROR BT_SetFileDescriptor(BT_u32 i, BT_HANDLE h);
 BT_HANDLE BT_GetFileDescriptor(BT_u32 i, BT_ERROR *pError);
 
+BT_ERROR bt_process_init();
+
 #endif
