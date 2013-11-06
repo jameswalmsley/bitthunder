@@ -25,7 +25,7 @@
  *
  *	@pfnEOF		[OPTIONAL]	Returs true if eof is reached
  *
- *	@ulSupported			A mask of FILE flags supported.
+ *	@ulSupported			A mask of FILE flags supported. @ref os/include/fs/bt_file.h for file flags.
  *
  **/
 typedef struct _BT_IF_FILE {
