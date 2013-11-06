@@ -18,7 +18,7 @@ static int bt_cp(BT_HANDLE hShell, int argc, char **argv) {
 		return 0;
 	}
 
-	BT_HANDLE hDest = BT_Open(argv[2], "rb", &Error);
+	BT_HANDLE hDest = BT_Open(argv[2], "wb+", &Error);
 	if(!hDest) {
 		bt_fprintf(hStdout, "Cannot open destination file: %s\n", argv[2]);
 		goto err_source_out;
