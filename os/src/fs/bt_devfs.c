@@ -9,7 +9,7 @@
 #include <bt_struct.h>
 #include <string.h>
 
-BT_DEF_MODULE_NAME			("Device Filesystem")
+BT_DEF_MODULE_NAME			("devfs")
 BT_DEF_MODULE_DESCRIPTION	("Device mount-point management")
 BT_DEF_MODULE_AUTHOR		("James Walmsley")
 BT_DEF_MODULE_EMAIL			("james@fullfat-fs.co.uk")
@@ -149,10 +149,6 @@ static BT_ERROR devfs_readdir(BT_HANDLE hDir, BT_DIRENT *pDirent) {
 	return BT_ERR_GENERIC;
 }
 
-static BT_ERROR devfs_cleanup(BT_HANDLE hFS) {
-	return BT_ERR_NONE;
-}
-
 static const BT_IF_DIR oDirOperations = {
 	.pfnReadDir = devfs_readdir,
 };
@@ -168,7 +164,6 @@ static const BT_IF_FS oFilesystemInterface = {
 
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
-	.pfnCleanup = devfs_cleanup,
 	.oIfs = {
 		.pFilesystemIF = &oFilesystemInterface,
 	},
@@ -177,7 +172,6 @@ static const BT_IF_HANDLE oHandleInterface = {
 
 static const BT_IF_HANDLE oDirHandleInterface = {
 	BT_MODULE_DEF_INFO,
-	.pfnCleanup = devfs_cleanup,
 	.oIfs = {
 		.pDirIF = &oDirOperations,
 	},
