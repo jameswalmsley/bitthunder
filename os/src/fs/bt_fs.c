@@ -89,26 +89,39 @@ BT_ERROR BT_Mount(const BT_i8 *src, const BT_i8 *target, const BT_i8 *filesystem
 		return BT_ERR_GENERIC;
 	}
 
-	BT_FILESYSTEM *fs = getfs(filesystem);
-	if(!fs) {
+	BT_FILESYSTEM *fs = NULL;
+
+	if(filesystem) {
+		fs = getfs(filesystem);
+		if(!fs) {
+			return BT_ERR_GENERIC;
+		}
+	}
+
+	if(!src && !filesystem) {
 		return BT_ERR_GENERIC;
 	}
 
-	const BT_IF_FS *pFs = fs->hFS->h.pIf->oIfs.pFilesystemIF;
-
-	BT_u32 i = strlen(target);
-	if(target[i] == '/' || target[i] == '\\') {
-		i -= 1;
+	if(!target) {	
+		return BT_ERR_GENERIC;
 	}
 
+	BT_u32 i = strlen(target);
+	if(i>1) {
+		if(target[i-1] == '/' || target[i-1] == '\\') {
+			i -= 1;
+		}
+	}
+
+	BT_HANDLE hMount;
 	BT_MOUNTPOINT *pMountPoint = find_mountpoint(target, i);
 	if(pMountPoint) {
 		return BT_ERR_GENERIC;
 	}
 
-	BT_HANDLE hMount;
-
 	if(!src) {
+		const BT_IF_FS *pFs = fs->hFS->h.pIf->oIfs.pFilesystemIF;
+
 		if(!fs->hFS->h.pIf->oIfs.pFilesystemIF->ulFlags & BT_FS_FLAG_NODEV) {
 			return BT_ERR_GENERIC;
 		}
@@ -125,8 +138,9 @@ BT_ERROR BT_Mount(const BT_i8 *src, const BT_i8 *target, const BT_i8 *filesystem
 
 		pMountPoint->hMount = hMount;
 		pMountPoint->pFS = fs;
-		pMountPoint->szpPath = BT_kMalloc(strlen(target)+1);
-		strcpy(pMountPoint->szpPath, target);
+		pMountPoint->szpPath = BT_kMalloc(i+1);
+		strncpy(pMountPoint->szpPath, target, i);
+		pMountPoint->szpPath[i] = 0;
 
 		bt_list_add(&pMountPoint->item, &g_mountpoints);
 
@@ -135,9 +149,26 @@ BT_ERROR BT_Mount(const BT_i8 *src, const BT_i8 *target, const BT_i8 *filesystem
 
 	BT_HANDLE hVolume = BT_Open(src, 0, &Error);
 
-	hMount = pFs->pfnMount(fs->hFS, hVolume, data, &Error);
-	if(!hMount) {
-		return BT_ERR_NO_MEMORY;
+	if(fs) {
+		const BT_IF_FS *pFs = fs->hFS->h.pIf->oIfs.pFilesystemIF;
+
+		hMount = pFs->pfnMount(fs->hFS, hVolume, data, &Error);
+		if(!hMount) {
+			return BT_ERR_NO_MEMORY;
+		}
+	} else {
+		struct bt_list_head *pos;
+		bt_list_for_each(pos, &g_filesystems) {
+			fs = (BT_FILESYSTEM *) pos;
+			const BT_IF_FS *pFs = fs->hFS->h.pIf->oIfs.pFilesystemIF;
+			if(!(pFs->ulFlags & BT_FS_FLAG_NODEV)) {
+				hMount = pFs->pfnMount(fs->hFS, hVolume, data, &Error);
+				if(hMount) break;
+			}
+		}
+		if(!hMount) {
+			return BT_ERR_GENERIC;
+		}
 	}
 
 	// A filesystem was able to mount the volume, now we can handle this under our own namespace.
@@ -149,8 +180,9 @@ BT_ERROR BT_Mount(const BT_i8 *src, const BT_i8 *target, const BT_i8 *filesystem
 
 	pMountPoint->hMount 	= hMount;
 	pMountPoint->pFS 		= fs;
-	pMountPoint->szpPath  	= BT_kMalloc(strlen(target) + 1);
-	strcpy(pMountPoint->szpPath, target);
+	pMountPoint->szpPath  	= BT_kMalloc(i+1);
+	strncpy(pMountPoint->szpPath, target, i);
+	pMountPoint->szpPath[i] = 0;
 
 	bt_list_add(&pMountPoint->item, &g_mountpoints);
 
@@ -163,7 +195,7 @@ err_unmount_out:
 }
 
 static const BT_i8 *get_relative_path(BT_MOUNTPOINT *pMount, const BT_i8 *szpPath) {
-	BT_u32 mountlen = strlen(pMount->szpPath);
+	BT_u32 mountlen = strlen(pMount->szpPath) + 1;
 	return szpPath+mountlen-1;
 }
 
