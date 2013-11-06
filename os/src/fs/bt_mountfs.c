@@ -52,11 +52,15 @@ static BT_ERROR mountfs_readdir(BT_HANDLE hDir, BT_DIRENT *pDirent) {
 	bt_list_for_each(pos, &g_mountpoints) {
 		BT_MOUNTPOINT *pMountPoint = (BT_MOUNTPOINT *) pos;
 		if(i++ == pDir->ulCurrentEntry) {
-			pDirent->szpName = pMountPoint->szpPath;
-			pDirent->ullFileSize = 0;
-			pDirent->attr = BT_ATTR_DIR;
-			pDir->ulCurrentEntry += 1;
-			return BT_ERR_NONE;
+			if(!strcmp(pMountPoint->szpPath, "/")) {
+				pDir->ulCurrentEntry += 1;
+			} else {
+				pDirent->szpName = pMountPoint->szpPath + 1;
+				pDirent->ullFileSize = 0;
+				pDirent->attr = BT_ATTR_DIR;
+				pDir->ulCurrentEntry += 1;
+				return BT_ERR_NONE;
+			}
 		}
 	}
 
