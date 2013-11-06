@@ -283,9 +283,7 @@ static BT_u32 sdhci_write(BT_HANDLE hSDIO, BT_u32 ulSize, void *pBuffer, BT_ERRO
 	while(ulWritten < ulSize) {
 		BT_u32 ulBlockSize = 512;
 
-		bt_printf("wd irq0 = 0x%08x\n", hSDIO->pRegs->NORMAL_INT_STATUS);
 		while(!(hSDIO->pRegs->NORMAL_INT_STATUS & NORMAL_INT_BUF_WRITE_READY)) {
-			bt_printf("wr irq  = 0x%08x\n", hSDIO->pRegs->NORMAL_INT_STATUS);
 			BT_ThreadYield();
 		}
 
