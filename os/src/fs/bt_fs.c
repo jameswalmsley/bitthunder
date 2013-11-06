@@ -47,13 +47,12 @@ static BT_FILESYSTEM *getfs(const BT_i8 *name) {
 	return NULL;
 }
 
-static BT_MOUNTPOINT *GetMountPoint(const BT_i8 *szpPath) {
-
+static BT_MOUNTPOINT *find_mountpoint(const BT_i8 *szpPath, BT_u32 len) {
 	struct bt_list_head *pos;
+
 	bt_list_for_each(pos, &g_mountpoints) {
 		BT_MOUNTPOINT *pMountPoint = (BT_MOUNTPOINT *) pos;
-		BT_i8 *common = (BT_i8 *) strstr(szpPath, pMountPoint->szpPath);
-		if(common == szpPath) {	// Ensure the common section is from root of szpPath!
+		if(!strncmp(szpPath, pMountPoint->szpPath, len) && strlen(pMountPoint->szpPath) == len) {
 			return pMountPoint;
 		}
 	}
@@ -61,8 +60,27 @@ static BT_MOUNTPOINT *GetMountPoint(const BT_i8 *szpPath) {
 	return NULL;
 }
 
+static BT_MOUNTPOINT *GetMountPoint(const BT_i8 *szpPath) {
 
+	BT_MOUNTPOINT *pTarget = NULL;
 
+	struct bt_list_head *pos;
+	bt_list_for_each(pos, &g_mountpoints) {
+		BT_MOUNTPOINT *pMountPoint = (BT_MOUNTPOINT *) pos;
+		BT_i8 *common = (BT_i8 *) strstr(szpPath, pMountPoint->szpPath);
+		if(common == szpPath) {	// Ensure the common section is from root of szpPath!
+			if(!pTarget) {
+				pTarget = pMountPoint;
+			} else {
+				if(strlen(pMountPoint->szpPath) > strlen(pTarget->szpPath)) {
+					pTarget = pMountPoint;
+				}
+			}
+		}
+	}
+
+	return pTarget;
+}
 
 BT_ERROR BT_Mount(const BT_i8 *src, const BT_i8 *target, const BT_i8 *filesystem, BT_u32 mountflags, const void *data) {
 	BT_ERROR Error;
@@ -78,7 +96,12 @@ BT_ERROR BT_Mount(const BT_i8 *src, const BT_i8 *target, const BT_i8 *filesystem
 
 	const BT_IF_FS *pFs = fs->hFS->h.pIf->oIfs.pFilesystemIF;
 
-	BT_MOUNTPOINT *pMountPoint = GetMountPoint(target);
+	BT_u32 i = strlen(target);
+	if(target[i] == '/' || target[i] == '\\') {
+		i -= 1;
+	}
+
+	BT_MOUNTPOINT *pMountPoint = find_mountpoint(target, i);
 	if(pMountPoint) {
 		return BT_ERR_GENERIC;
 	}
