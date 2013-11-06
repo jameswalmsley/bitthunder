@@ -104,11 +104,8 @@ int bt_main(int argc, char **argv) {
 
 	BT_UartEnable(hUart);
 
-#if (BT_CONFIG_LIB_PRINTF_SUPPORT_MULTIPLE_STDOUT)
-	BT_AddStdout(hUart);
-#else
 	BT_SetStdout(hUart);
-#endif
+
 	BT_kPrint("%s (%s)", BT_VERSION_STRING, BT_VERSION_NAME);
 
 	BT_kPrint("Start Loading kernel modules...");
@@ -125,11 +122,7 @@ int bt_main(int argc, char **argv) {
 
 	BT_Flush(hUart);
 
-#if (BT_CONFIG_LIB_PRINTF_SUPPORT_MULTIPLE_STDOUT)
-	BT_RemoveStdout(hUart);
-#else
 	BT_SetStdout(NULL);
-#endif
 
 	if (hUart) {
 		BT_CloseHandle(hUart);

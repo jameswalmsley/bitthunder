@@ -11,10 +11,6 @@ config LIB_PRINTF_SUPPORT_HEX
     bool "Support %x format specifier"
 	default y
 	depends on LIB_PRINTF
-config LIB_PRINTF_SUPPORT_MULTIPLE_STDOUT
-    bool "Support printf output to multiple standard outputs"
-	default n
-	depends on LIB_PRINTF
 endmenu
 
 
