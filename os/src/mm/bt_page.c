@@ -96,8 +96,7 @@ void bt_page_pool_free(bt_page_pool *pool, bt_paddr_t paddr, BT_u32 size) {
 
 	BT_PAGE_LOCK();
 
-	size 	= BT_PAGE_TRUNC(size);
-	paddr 	= BT_PAGE_ALIGN(paddr);
+	size 	= BT_PAGE_ALIGN(size);
 
 	blk = (struct bt_page *) bt_phys_to_virt(paddr);
 
