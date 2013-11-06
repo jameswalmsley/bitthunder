@@ -11,6 +11,7 @@ struct bt_task {
 	struct bt_list_head threads;
 	struct bt_list_head handles;
 	BT_u64 				ullRunTimeCounter;
+	BT_HANDLE			fds[8];
 };
 
 struct bt_process_time {
@@ -30,5 +31,8 @@ BT_LIST *BT_GetProcessThreadList(BT_HANDLE hProcess);
 
 BT_ERROR BT_GetProcessTime(struct bt_process_time *time, BT_u32 i);
 BT_u32 BT_GetTotalProcesses();
+
+BT_ERROR BT_SetFileDescriptor(BT_u32 i, BT_HANDLE h);
+BT_HANDLE BT_GetFileDescriptor(BT_u32 i, BT_ERROR *pError);
 
 #endif

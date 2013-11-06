@@ -76,7 +76,11 @@ BT_HANDLE BT_GetProcessHandle(void) {
 }
 
 struct bt_task *BT_GetProcessTask(BT_HANDLE hProcess) {
-	return &hProcess->task;
+	if(hProcess) {
+		return &hProcess->task;
+	}
+
+	return &BT_GetProcessHandle()->task;
 }
 
 BT_ERROR BT_GetProcessTime(struct bt_process_time *time, BT_u32 i) {
@@ -104,6 +108,19 @@ BT_ERROR BT_GetProcessTime(struct bt_process_time *time, BT_u32 i) {
 BT_u32 BT_GetTotalProcesses() {
 	return total_processes;
 }
+
+
+BT_ERROR BT_SetFileDescriptor(BT_u32 i, BT_HANDLE h) {
+	struct bt_task *task = BT_GetProcessTask(NULL);
+	task->fds[i] = h;
+	return BT_ERR_NONE;
+}
+
+BT_HANDLE BT_GetFileDescriptor(BT_u32 i, BT_ERROR *pError) {
+	struct bt_task *task = BT_GetProcessTask(NULL);
+	return task->fds[i];
+}
+
 
 static BT_ERROR bt_process_cleanup(BT_HANDLE hProcess) {
 
