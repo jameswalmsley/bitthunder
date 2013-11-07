@@ -48,10 +48,6 @@ static const BT_IF_HANDLE oFileHandleInterface;
 static const BT_IF_HANDLE oDirHandleInterface;
 static const BT_IF_HANDLE oInodeHandleInterface;
 
-static BT_ERROR fullfat_cleanup(BT_HANDLE h) {
-	return BT_ERR_NONE;
-}
-
 static FF_T_SINT32 fullfat_readblocks(FF_T_UINT8 *pBuffer, FF_T_UINT32 Address, FF_T_UINT32 Count, void *pParam) {
 	BT_FF_MOUNT *pMount = (BT_FF_MOUNT *) pParam;
 	BT_ERROR Error;
@@ -68,7 +64,7 @@ static FF_T_SINT32 fullfat_writeblocks(FF_T_UINT8 *pBuffer, FF_T_UINT32 Address,
 	return (FF_T_SINT32) ulWritten;
 }
 
-static BT_HANDLE fullfat_mount(BT_HANDLE hFS, BT_HANDLE hVolume, BT_ERROR *pError) {
+static BT_HANDLE fullfat_mount(BT_HANDLE hFS, BT_HANDLE hVolume, const void *data, BT_ERROR *pError) {
 
 	FF_ERROR ffError;
 	BT_ERROR Error = BT_ERR_GENERIC;
@@ -302,10 +298,6 @@ static BT_ERROR fullfat_read_dir(BT_HANDLE hDir, BT_DIRENT *pDirent) {
 	return BT_ERR_NONE;
 }
 
-static BT_ERROR fullfat_dir_cleanup(BT_HANDLE hDir) {
-	return BT_ERR_NONE;
-}
-
 static BT_HANDLE fullfat_open_inode(BT_HANDLE hMount, const BT_i8 *szpPath, BT_ERROR *pError) {
 
 	BT_FF_INODE *pInode = (BT_FF_INODE *) BT_CreateHandle(&oInodeHandleInterface, sizeof(BT_FF_INODE), pError);
@@ -334,10 +326,6 @@ static BT_ERROR fullfat_read_inode(BT_HANDLE hInode, BT_INODE *pInode) {
 
 	BT_FF_INODE *phInode = (BT_FF_INODE *) hInode;
 	pInode->ullFilesize = phInode->oDirent.Filesize;
-	return BT_ERR_NONE;
-}
-
-static BT_ERROR fullfat_inode_cleanup(BT_HANDLE hInode) {
 	return BT_ERR_NONE;
 }
 
@@ -373,7 +361,6 @@ static const BT_IF_FS oFilesystemInterface = {
 
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
-	.pfnCleanup = fullfat_cleanup,
 	.oIfs = {
 		.pFilesystemIF = &oFilesystemInterface,
 	},
@@ -389,7 +376,6 @@ static const BT_IF_HANDLE oFileHandleInterface = {
 
 static const BT_IF_HANDLE oDirHandleInterface = {
 	BT_MODULE_DEF_INFO,
-	.pfnCleanup = fullfat_dir_cleanup,
 	.oIfs = {
 		.pDirIF = &oDirOperations,
 	},
@@ -398,7 +384,6 @@ static const BT_IF_HANDLE oDirHandleInterface = {
 
 static const BT_IF_HANDLE oInodeHandleInterface = {
 	BT_MODULE_DEF_INFO,
-	.pfnCleanup = fullfat_inode_cleanup,
 	.oIfs = {
 		.pInodeIF = &oInodeOperations,
 	},
