@@ -15,6 +15,11 @@ config SHELL_CMD_CP
 	depends on SHELL
 	default n
 
+config SHELL_CMD_CP_BUFFER_SIZE
+	int "cp buffer size"
+	depends on SHELL_CMD_CP
+	default 4096
+
 config SHELL_CMD_ECHO
 	bool "echo"
 	depends on SHELL

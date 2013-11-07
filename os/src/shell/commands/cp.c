@@ -24,16 +24,16 @@ static int bt_cp(BT_HANDLE hShell, int argc, char **argv) {
 		goto err_source_out;
 	}
 
-	void *buffer = BT_kMalloc(4096);
+	void *buffer = BT_kMalloc(BT_CONFIG_SHELL_CMD_CP_BUFFER_SIZE);
 	if(!buffer) {
 		bt_fprintf(hStdout, "Cannot allocate buffer for copying.\n");
 		goto err_dest_out;
 	}
 
-	BT_u32 read = BT_Read(hSource, 0, 4096, buffer, &Error);
+	BT_u32 read = BT_Read(hSource, 0, BT_CONFIG_SHELL_CMD_CP_BUFFER_SIZE, buffer, &Error);
 	while(read) {
 		BT_Write(hDest, 0, read, buffer, &Error);
-		read = BT_Read(hSource, 0, 4096, buffer, &Error);
+		read = BT_Read(hSource, 0, BT_CONFIG_SHELL_CMD_CP_BUFFER_SIZE, buffer, &Error);
 	}
 
 	BT_kFree(buffer);
