@@ -37,6 +37,10 @@ static BT_HANDLE mountfs_open(BT_HANDLE hFs, const BT_i8 *szpPath, BT_u32 ulMode
 }
 
 static BT_HANDLE mountfs_opendir(BT_HANDLE hMount, const BT_i8 *szpPath, BT_ERROR *pError) {
+	if(strcmp(szpPath, "/")) {
+		return NULL;
+	}
+
 	BT_HANDLE hDir = BT_CreateHandle(&oDirHandleInterface, sizeof(struct mountfs_dir), pError);
 	return hDir;
 }
