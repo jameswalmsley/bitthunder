@@ -47,10 +47,6 @@ static const BT_IF_HANDLE oFileHandleInterface;
 static const BT_IF_HANDLE oDirHandleInterface;
 static const BT_IF_HANDLE oInodeHandleInterface;
 
-static BT_ERROR ext2_cleanup(BT_HANDLE h) {
-	return BT_ERR_NONE;
-}
-
 static int ext2_readblocks(unsigned char *pBuffer, unsigned int SectorAddress, unsigned int Count, void *pParam) {
 	BT_HANDLE hVolume = (BT_HANDLE)pParam;
 	BT_ERROR Error;
@@ -69,7 +65,7 @@ static int ext2_readblocks(unsigned char *pBuffer, unsigned int SectorAddress, u
 	return (int)ulRead;
 }
 
-static BT_HANDLE ext2_mount(BT_HANDLE hFS, BT_HANDLE hVolume, BT_ERROR *pError) {
+static BT_HANDLE ext2_mount(BT_HANDLE hFS, BT_HANDLE hVolume, const void *data, BT_ERROR *pError) {
 	if(!hFS || !hVolume) {
 		if(pError) *pError = BT_ERR_GENERIC;
 		goto err_out;
@@ -269,10 +265,6 @@ static BT_ERROR ext2_read_inode(BT_HANDLE hInode, BT_INODE *pInode) {
 	return BT_ERR_NONE;
 }
 
-static BT_ERROR ext2_inode_cleanup(BT_HANDLE hInode) {
-	return BT_ERR_NONE;
-}
-
 static const BT_IF_DIR oDirOperations = {
 	.pfnReadDir 	= ext2_read_dir,
 };
@@ -301,7 +293,6 @@ static const BT_IF_FS oFilesystemInterface = {
 
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
-	.pfnCleanup 	= ext2_cleanup,
 	.oIfs = {
 		.pFilesystemIF = &oFilesystemInterface,
 	},
@@ -310,14 +301,14 @@ static const BT_IF_HANDLE oHandleInterface = {
 
 static const BT_IF_HANDLE oFileHandleInterface = {
 	BT_MODULE_DEF_INFO,
-	.pfnCleanup 	= ext2_file_cleanup,
+	.pfnCleanup = ext2_file_cleanup,
 	.pFileIF 	= &oFileOperations,
 	.eType 		= BT_HANDLE_T_FILE,
 };
 
 static const BT_IF_HANDLE oDirHandleInterface = {
 	BT_MODULE_DEF_INFO,
-	.pfnCleanup 	= ext2_dir_cleanup,
+	.pfnCleanup = ext2_dir_cleanup,
 	.oIfs = {
 		.pDirIF = &oDirOperations,
 	},
@@ -326,7 +317,6 @@ static const BT_IF_HANDLE oDirHandleInterface = {
 
 static const BT_IF_HANDLE oInodeHandleInterface = {
 	BT_MODULE_DEF_INFO,
-	.pfnCleanup 	= ext2_inode_cleanup,
 	.oIfs = {
 		.pInodeIF = &oInodeOperations,
 	},
