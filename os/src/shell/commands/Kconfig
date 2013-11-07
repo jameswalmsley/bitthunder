@@ -10,6 +10,11 @@ config SHELL_CMD_BOOT_JTAG
 	depends on SHELL
 	default n
 
+config SHELL_CMD_CD
+    bool "cd"
+	depends on SHELL
+	default n
+
 config SHELL_CMD_CP
     bool "cp"
 	depends on SHELL
@@ -99,6 +104,10 @@ config SHELL_CMD_TFTP
 
 config SHELL_CMD_PS
 	bool "ps"
+	default n
+
+config SHELL_CMD_PWD
+	bool "pwd"
 	default n
 
 config SHELL_CMD_SLEEP
