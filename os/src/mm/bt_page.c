@@ -267,7 +267,10 @@ bt_paddr_t bt_initialise_coherent_pages() {
 	bt_page_pool_attach(&coherent_pool, coherent, BT_CONFIG_MEM_PAGE_COHERENT_LENGTH);
 
 #ifndef BT_CONFIG_USE_VIRTUAL_ADDRESSING
-	bt_mmu_set_section(coherent, BT_CONFIG_MEM_PAGE_COHERENT_LENGTH, BT_PAGE_IOMEM);
+	BT_u32 i;
+	for(i = 0; i < BT_CONFIG_MEM_PAGE_COHERENT_LENGTH/BT_SECTION_SIZE; i++) {
+		bt_mmu_set_section(coherent+(BT_SECTION_SIZE * i), BT_SECTION_SIZE, BT_PAGE_IOMEM);
+	}
 #endif
 
 	return coherent;
