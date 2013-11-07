@@ -72,7 +72,7 @@ static BT_u32 devcfg_write(BT_HANDLE hDevcfg, BT_u32 ulFlags, BT_u32 ulSize, con
 	BT_u32 kmem_size = ulSize + hDevcfg->residue_len;
 	bt_paddr_t kmem = bt_page_alloc_coherent(kmem_size);
 	if(!kmem) {
-		bt_printf("Cannot allocate memory");
+		BT_kPrint("xdevcfg: Cannot allocate memory.");
 		*pError = BT_ERR_NO_MEMORY;
 		return 0;
 	}
