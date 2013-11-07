@@ -10,7 +10,7 @@ static int bt_ls(BT_HANDLE hShell, int argc, char **argv) {
 	BT_DIRENT oDirent;
 
 	if(argc == 1) {
-		szpDir = "/";
+		szpDir = "";
 	} else if(argc == 2) {
 		szpDir = argv[1];
 	} else {
