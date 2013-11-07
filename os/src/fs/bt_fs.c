@@ -327,3 +327,44 @@ BT_ERROR BT_Rename(const BT_i8 *szpPathA, const BT_i8 *szpPathB) {
 	const BT_IF_FS *pFS = pMountA->pFS->hFS->h.pIf->oIfs.pFilesystemIF;
 	return pFS->pfnRename(pMountA->hMount, pathA, pathB);
 }
+
+BT_ERROR BT_GetCwd(BT_i8 *buf, BT_u32 len) {
+	BT_u32 i = strlen(curtask->cwd);
+	if(i >= len) {
+		return BT_ERR_GENERIC;
+	}
+
+	strcpy(buf, curtask->cwd);
+
+	return BT_ERR_NONE;
+}
+
+BT_ERROR BT_ChDir(const BT_i8 *path) {
+	BT_ERROR Error = BT_ERR_NONE;
+	BT_u32 len = strlen(path);
+	if(len >= BT_PATH_MAX) {
+		return BT_ERR_GENERIC;
+	}
+
+	BT_HANDLE hDir = BT_OpenDir(path, &Error);
+	if(!hDir) {
+		return BT_ERR_GENERIC;
+	}
+
+	BT_CloseHandle(hDir);
+
+	strncpy(curtask->cwd, path, BT_PATH_MAX);
+
+	BT_u32 i;
+	for(i = 0; i < len; i++) {
+		if(curtask->cwd[i] == '\\') {
+			curtask->cwd[i] = '/';
+		}
+	}
+
+	if(curtask->cwd[len-1] == '/' && len > 1) {
+		curtask->cwd[len-1] = '\0';
+	}
+
+	return BT_ERR_NONE;
+}
