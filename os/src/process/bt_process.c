@@ -56,6 +56,7 @@ BT_HANDLE BT_CreateProcess(BT_FN_THREAD_ENTRY pfnStartRoutine, const BT_i8 *szpN
 
 	BT_HANDLE hParent = BT_GetProcessHandle();
 	hProcess->task.parent = &hParent->task;
+	strcpy(hProcess->task.cwd, hParent->task.cwd);	// Iherit the current working directory from parent.
 
 	total_processes += 1;
 
@@ -121,7 +122,6 @@ BT_HANDLE BT_GetFileDescriptor(BT_u32 i, BT_ERROR *pError) {
 	return task->fds[i];
 }
 
-
 static BT_ERROR bt_process_cleanup(BT_HANDLE hProcess) {
 
 	return BT_ERR_NONE;
@@ -149,6 +149,7 @@ BT_ERROR bt_process_init() {
 
 	BT_LIST_INIT_HEAD(&kernel_handle.task.threads);
 
+	strcpy(kernel_handle.task.cwd, "/");
 	total_processes = 1;
 
 	return BT_ERR_NONE;

@@ -3,6 +3,8 @@
 
 #include <collections/bt_list.h>
 
+#define BT_PATH_MAX		2600
+
 struct bt_task {
 	BT_i8				name[BT_CONFIG_MAX_PROCESS_NAME+1];
 	struct bt_task 	   *parent;
@@ -12,6 +14,7 @@ struct bt_task {
 	struct bt_list_head handles;
 	BT_u64 				ullRunTimeCounter;
 	BT_HANDLE			fds[8];
+	BT_i8			    cwd[BT_PATH_MAX];
 };
 
 struct bt_process_time {
