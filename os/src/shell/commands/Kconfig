@@ -40,6 +40,11 @@ config SHELL_CMD_LOAD_FPGA
 	depends on SHELL
 	default n
 
+config SHELL_CMD_MEMCAT
+	bool "memcat"
+	depends on SHELL
+	default n
+
 config SHELL_CMD_SETENV
 	bool "setenv"
 	depends on SHELL

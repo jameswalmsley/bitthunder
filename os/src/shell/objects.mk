@@ -12,6 +12,7 @@ BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_HELP) 		+= $(BUILD_DIR)os/src/shell/commands
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_LOAD) 		+= $(BUILD_DIR)os/src/shell/commands/load.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_LOAD_FPGA) 	+= $(BUILD_DIR)os/src/shell/commands/md5.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_LOAD_FPGA) 	+= $(BUILD_DIR)os/src/shell/commands/load_fpga.o
+BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_MEMCAT) 	+= $(BUILD_DIR)os/src/shell/commands/memcat.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_SETENV)	  	+= $(BUILD_DIR)os/src/shell/commands/setenv.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_GETENV)	  	+= $(BUILD_DIR)os/src/shell/commands/getenv.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_ATAGS) 		+= $(BUILD_DIR)os/src/shell/commands/atag/atag.o
