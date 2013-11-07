@@ -18,6 +18,41 @@ struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;
 };
 
+static BT_ERROR to_absolute_path(BT_i8 *buf, BT_u32 len, const BT_i8 *path, BT_BOOL isDir) {
+
+	BT_u32 path_len = strlen(path);
+	BT_u32 cwd_len = strlen(curtask->cwd);
+
+	if(path_len + cwd_len >= BT_PATH_MAX) {
+		return BT_ERR_GENERIC;
+	}
+
+	if(path[0] != '/' && path[0] != '\\') {
+		strncpy(buf, curtask->cwd, len);
+		if(buf[cwd_len-1] != '/') {
+			strcat(buf, "/");
+		}
+
+		strcat(buf, path);
+	} else {
+		strncpy(buf, path, len);
+	}
+
+	if(isDir && path_len) {
+		strcat(buf, "/");
+	}
+
+	BT_i8 *p = buf;
+	while(*p) {
+		if(*p == '\\') {
+			*p = '/';
+		}
+		p++;
+	}
+
+	return BT_ERR_NONE;
+}
+
 BT_ERROR BT_RegisterFilesystem(BT_HANDLE hFS) {
 	if(hFS->h.pIf->eType != BT_HANDLE_T_FILESYSTEM) {
 		return BT_ERR_GENERIC;
@@ -63,18 +98,31 @@ static BT_MOUNTPOINT *find_mountpoint(const BT_i8 *szpPath, BT_u32 len) {
 static BT_MOUNTPOINT *GetMountPoint(const BT_i8 *szpPath) {
 
 	BT_MOUNTPOINT *pTarget = NULL;
+	BT_u32 path_len = strlen(szpPath);
+	BT_u32 target_len = 0;
 
 	struct bt_list_head *pos;
 	bt_list_for_each(pos, &g_mountpoints) {
 		BT_MOUNTPOINT *pMountPoint = (BT_MOUNTPOINT *) pos;
 		BT_i8 *common = (BT_i8 *) strstr(szpPath, pMountPoint->szpPath);
 		if(common == szpPath) {	// Ensure the common section is from root of szpPath!
+			BT_u32 mount_len = strlen(pMountPoint->szpPath);
+			if(mount_len > path_len) {
+				continue;
+			}
+
 			if(!pTarget) {
 				pTarget = pMountPoint;
+				target_len = strlen(pTarget->szpPath);
 			} else {
-				if(strlen(pMountPoint->szpPath) > strlen(pTarget->szpPath)) {
+				if(mount_len > target_len) {
 					pTarget = pMountPoint;
+					target_len = strlen(pTarget->szpPath);
 				}
+			}
+
+			if(mount_len == path_len) {
+				break;
 			}
 		}
 	}
@@ -102,7 +150,7 @@ BT_ERROR BT_Mount(const BT_i8 *src, const BT_i8 *target, const BT_i8 *filesystem
 		return BT_ERR_GENERIC;
 	}
 
-	if(!target) {	
+	if(!target) {
 		return BT_ERR_GENERIC;
 	}
 
@@ -195,8 +243,12 @@ err_unmount_out:
 }
 
 static const BT_i8 *get_relative_path(BT_MOUNTPOINT *pMount, const BT_i8 *szpPath) {
-	BT_u32 mountlen = strlen(pMount->szpPath) + 1;
-	return szpPath+mountlen-1;
+	BT_u32 mountlen = strlen(pMount->szpPath);
+	if(mountlen > 1) {
+		return szpPath+mountlen;
+	}
+
+	return szpPath;
 }
 
 #define BT_FS_MODE_READ				0x01
@@ -247,15 +299,41 @@ BT_u32 get_mode_flags(BT_i8 *mode) {
 }
 
 BT_HANDLE BT_Open(const BT_i8 *szpPath, BT_i8 *mode, BT_ERROR *pError) {
-	BT_MOUNTPOINT *pMount = GetMountPoint(szpPath);
-	if(!pMount) {
-		return NULL;
+
+	BT_ERROR Error = BT_ERR_NONE;
+	BT_HANDLE h = NULL;
+
+	BT_i8 *absolute_path = BT_kMalloc(BT_PATH_MAX);
+	if(!absolute_path) {
+		Error = BT_ERR_GENERIC;
+		goto err_out;
 	}
 
-	const BT_i8 *path = get_relative_path(pMount, szpPath);
+	Error = to_absolute_path(absolute_path, BT_PATH_MAX, szpPath, BT_FALSE);
+	if(Error) {
+		goto err_free_out;
+	}
+
+	BT_MOUNTPOINT *pMount = GetMountPoint(absolute_path);
+	if(!pMount) {
+		Error = BT_ERR_GENERIC;
+		goto err_free_out;
+	}
+
+	const BT_i8 *path = get_relative_path(pMount, absolute_path);
 
 	const BT_IF_FS *pFS = pMount->pFS->hFS->h.pIf->oIfs.pFilesystemIF;
-	return pFS->pfnOpen(pMount->hMount, path, get_mode_flags(mode), pError);
+	h = pFS->pfnOpen(pMount->hMount, path, get_mode_flags(mode), pError);
+
+err_free_out:
+	BT_kFree(absolute_path);
+
+err_out:
+	if(pError) {
+		*pError = Error;
+	}
+
+	return h;
 }
 
 BT_ERROR BT_MkDir(const BT_i8 *szpPath) {
@@ -271,15 +349,42 @@ BT_ERROR BT_MkDir(const BT_i8 *szpPath) {
 }
 
 BT_HANDLE BT_OpenDir(const BT_i8 *szpPath, BT_ERROR *pError) {
-	BT_MOUNTPOINT *pMount = GetMountPoint(szpPath);
-	if(!pMount) {
-		return NULL;
+
+	BT_ERROR Error = BT_ERR_NONE;
+	BT_HANDLE h = NULL;
+
+	BT_i8 *absolute_path = BT_kMalloc(BT_PATH_MAX);
+	if(!absolute_path) {
+		Error = BT_ERR_NO_MEMORY;
+		goto err_out;
 	}
 
-	const BT_i8 *path = get_relative_path(pMount, szpPath);
+	Error = to_absolute_path(absolute_path, BT_PATH_MAX, szpPath, BT_TRUE);
+	if(Error) {
+		goto err_free_out;
+	}
+
+	BT_MOUNTPOINT *pMount = GetMountPoint(absolute_path);
+	if(!pMount) {
+		Error = BT_ERR_GENERIC;
+		goto err_free_out;
+	}
+
+	const BT_i8 *path = get_relative_path(pMount, absolute_path);
 
 	const BT_IF_FS *pFS = pMount->pFS->hFS->h.pIf->oIfs.pFilesystemIF;
-	return pFS->pfnOpenDir(pMount->hMount, path, pError);
+
+	h =  pFS->pfnOpenDir(pMount->hMount, path, pError);
+
+err_free_out:
+	BT_kFree(absolute_path);
+
+err_out:
+	if(pError) {
+		*pError = Error;
+	}
+
+	return h;
 }
 
 BT_HANDLE BT_GetInode(const BT_i8 *szpPath, BT_ERROR *pError) {

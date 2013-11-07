@@ -109,6 +109,10 @@ static BT_HANDLE devfs_open(BT_HANDLE hMount, const BT_i8 *szpPath, BT_u32 ulMod
 
 static BT_HANDLE devfs_opendir(BT_HANDLE hMount, const BT_i8 *szpPath, BT_ERROR *pError) {
 
+	if(strcmp(szpPath, "/")) {
+		return NULL;
+	}
+
 	BT_HANDLE hDir = BT_CreateHandle(&oDirHandleInterface, sizeof(struct devfs_dir), pError);
 	return hDir;
 }
