@@ -30,7 +30,7 @@ def parse_line(line, linenum):
         else:
             syntax_error(item.line, linenum, item.line.find(attribute), "Invalid/unsupported attribute!")
             exit(1)
-        
+
 
     item.name = line;
 
@@ -54,16 +54,24 @@ def preprocess_init_data(name):
             print(line, file=output_file)
 
     output_file.close
-        
+
 
 def process_init_data(item):
-    preprocess_init_data(item.name)         
-    os.system("%s-gcc -c %s.S -o %s.o" % (os.environ["TOOLCHAIN"], item.name, item.name))
-    os.system("%s-objcopy --only-section=.text -O binary %s.o %s.bin" % (os.environ["TOOLCHAIN"], item.name, item.name))
+    preprocess_init_data(item.name)
+    toolchain = os.environ["TOOLCHAIN"]
+    if toolchain.endswith("-"):
+        toolchain = toolchain[:-1]
+
+    os.system("%s-gcc -c %s.S -o %s.o" % (toolchain, item.name, item.name))
+    os.system("%s-objcopy --only-section=.text -O binary %s.o %s.bin" % (toolchain, item.name, item.name))
     item.binfile = "%s.bin" % item.name
 
 def process_elf(item):
-    os.system("%s-objcopy -O binary %s %s.bin" % (os.environ["TOOLCHAIN"], item.name, item.name))
+    toolchain = os.environ["TOOLCHAIN"]
+    if toolchain.endswith("-"):
+        toolchain = toolchain[:-1]
+
+    os.system("%s-objcopy -O binary %s %s.bin" % (toolchain, item.name, item.name))
     item.binfile = "%s.bin" % item.name
 
 def process_item(item):
@@ -74,4 +82,3 @@ def process_item(item):
     if ".bit" in item.name:
         print("WARNING: .bit bitstreams currently unsupported")
         print("WARNING: %d : %s - NOT IN IMAGE" % (item.linenum, item.line))
-
