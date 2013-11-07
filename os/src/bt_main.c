@@ -137,10 +137,9 @@ int bt_main(int argc, char **argv) {
 	BT_CreateProcess((BT_FN_THREAD_ENTRY) main, "MAIN", &oThreadConfig, &Error);
 
 	BT_kStartScheduler();
-
-#endif
-
+#else
 	main(0, NULL);
+#endif
 
 	// Write a debug message to the debugger port,
 	// It was not possible to start the scheduler.
