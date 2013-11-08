@@ -259,6 +259,11 @@ static const BT_i8 *get_relative_path(BT_MOUNTPOINT *pMount, const BT_i8 *szpPat
 
 BT_u32 get_mode_flags(BT_i8 *mode) {
 	BT_u32 ulModeFlags = 0x00;
+
+	if(!mode) {
+		return 0;
+	}
+
 	while(*mode) {
 		switch(*mode) {
 			case 'r':	// Allow Read
