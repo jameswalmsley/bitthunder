@@ -393,15 +393,43 @@ err_out:
 }
 
 BT_HANDLE BT_GetInode(const BT_i8 *szpPath, BT_ERROR *pError) {
-	BT_MOUNTPOINT *pMount = GetMountPoint(szpPath);
-	if(!pMount) {
-		return NULL;
+
+	BT_ERROR 	Error = BT_ERR_NONE;
+	BT_HANDLE 	h = NULL;
+
+	BT_i8 *absolute_path = BT_kMalloc(BT_PATH_MAX);
+	if(!absolute_path) {
+		Error = BT_ERR_NO_MEMORY;
+		goto err_out;
 	}
 
-	const BT_i8 *path = get_relative_path(pMount, szpPath);
+	Error = to_absolute_path(absolute_path, BT_PATH_MAX, szpPath, BT_TRUE);
+	if(Error) {
+		goto err_free_out;
+	}
+
+	BT_MOUNTPOINT *pMount = GetMountPoint(absolute_path);
+	if(!pMount) {
+		Error = BT_ERR_GENERIC;
+		goto err_free_out;
+	}
+
+	const BT_i8 *path = get_relative_path(pMount, absolute_path);
 
 	const BT_IF_FS *pFS = pMount->pFS->hFS->h.pIf->oIfs.pFilesystemIF;
-	return pFS->pfnGetInode(pMount->hMount, path, pError);
+	if(pFS->pfnGetInode) {
+		h = pFS->pfnGetInode(pMount->hMount, path, pError);
+	}
+
+err_free_out:
+	BT_kFree(absolute_path);
+
+err_out:
+	if(pError) {
+		*pError = Error;
+	}
+
+	return h;
 }
 
 BT_ERROR BT_Remove(const BT_i8 *szpPath) {
