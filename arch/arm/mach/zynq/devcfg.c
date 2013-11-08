@@ -192,7 +192,7 @@ static BT_HANDLE devcfg_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pEr
 		goto err_free_out;
 	}
 
-	hDevcfg->pRegs = (volatile ZYNQ_DEVCFG_REGS *) bt_ioremap(pResource->ulStart, sizeof(ZYNQ_DEVCFG_REGS));
+	hDevcfg->pRegs = (volatile ZYNQ_DEVCFG_REGS *) bt_ioremap((void *) pResource->ulStart, sizeof(ZYNQ_DEVCFG_REGS));
 
 	hDevcfg->pRegs->UNLOCK = 0x757BDF0D;				// Unlock the DEVCFG interface.
 
@@ -205,7 +205,7 @@ static BT_HANDLE devcfg_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pEr
 
 	hDevcfg->pRegs->MCTRL &= ~MCTRL_PCAP_LPBK; 			// Ensure internal PCAP looback is disabled.
 
-	hDevcfg->pSLCR = (volatile ZYNQ_SLCR_REGS *) bt_ioremap(ZYNQ_SLCR_BASE, sizeof(ZYNQ_SLCR_REGS));
+	hDevcfg->pSLCR = (volatile ZYNQ_SLCR_REGS *) bt_ioremap((void *) ZYNQ_SLCR_BASE, sizeof(ZYNQ_SLCR_REGS));
 
 	zynq_slcr_unlock(hDevcfg->pSLCR);
 	zynq_slcr_preload_fpga(hDevcfg->pSLCR);
