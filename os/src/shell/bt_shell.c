@@ -10,6 +10,11 @@
 #include <stdio.h>
 #include <lib/putc.h>
 
+BT_DEF_MODULE_NAME			("shell")
+BT_DEF_MODULE_DESCRIPTION	("Kernel Shell subsystem")
+BT_DEF_MODULE_AUTHOR	  	("James Walmsley")
+BT_DEF_MODULE_EMAIL			("james@fullfat-fs.co.uk")
+
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER 		h;			///< All handles must include a handle header.
 	BT_HANDLE			hStdin;
@@ -472,10 +477,15 @@ err_out:
 	return BT_ERR_NONE;
 }
 
+static const BT_IF_HANDLE oHandleInterface = {
+	BT_MODULE_DEF_INFO,
+	.eType = BT_HANDLE_T_SHELL,
+};
+
 BT_HANDLE BT_ShellCreate(BT_HANDLE hStdin, BT_HANDLE hStdout, const BT_i8 *szpPrompt, BT_u32 ulFlags, BT_ERROR *pError) {
 	BT_HANDLE hShell;
 
-	hShell = BT_CreateHandle(NULL, sizeof(BT_SHELL), pError);
+	hShell = BT_CreateHandle(&oHandleInterface, sizeof(BT_SHELL), pError);
 	if(!hShell) {
 		goto err_out;
 	}
@@ -493,10 +503,6 @@ BT_HANDLE BT_ShellCreate(BT_HANDLE hStdin, BT_HANDLE hStdout, const BT_i8 *szpPr
 err_out:
 
 	return NULL;
-}
-
-void BT_ShellDestroy(BT_HANDLE hShell) {
-	BT_DestroyHandle(hShell);
 }
 
 BT_ERROR BT_Shell(BT_HANDLE hShell) {
