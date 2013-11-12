@@ -115,7 +115,9 @@ BT_ERROR BT_TimerSetFrequency(BT_HANDLE hTimer, BT_u32 ulFrequencyHz) {
 	}
 
 	BT_ERROR Error = BT_ERR_NONE;
-	BT_u32 ulPeriodCount = BT_IF_TIMER_OPS(hTimer)->pfnGetInputClock(hTimer, &Error) / ulFrequencyHz;
+	BT_u32 ulPeriodCount = BT_IF_TIMER_OPS(hTimer)->pfnGetInputClock(hTimer, &Error);
+	if (ulFrequencyHz != 0)
+	ulPeriodCount /= ulFrequencyHz;
 
 	if (Error != BT_ERR_NONE) return Error;
 
