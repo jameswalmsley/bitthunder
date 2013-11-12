@@ -33,8 +33,6 @@ BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/lib/putc.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/syslog/bt_printk.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/lib/multiplexer.o
 
-BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/shell/commands/help.o
-
 include $(BASE)os/src/mm/objects.mk
 include $(BASE)os/src/devman/objects.mk
 include $(BASE)os/src/fs/objects.mk

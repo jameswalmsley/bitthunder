@@ -111,7 +111,9 @@ int bt_main(int argc, char **argv) {
 	BT_kPrint("Start Loading kernel modules...");
 	Error = BT_InitialiseKernelModules(hUart);
 
+#ifdef BT_CONFIG_CACHE_MAINTENANCE
 	BT_DCacheFlush();	// Flush the cache now, to ensure all memory pools are coherent.
+#endif
 
 	BT_kPrint("Enumerate integrated devices");
 	Error = BT_ProbeIntegratedDevices(hUart);

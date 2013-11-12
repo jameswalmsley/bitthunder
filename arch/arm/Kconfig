@@ -108,7 +108,7 @@ config TOOLCHAIN_CPU
 config TOOLCHAIN_MACH_FLAGS
     string
 	default "-mthumb -mcpu=cortex-m0" if ARCH_ARM_CORTEX_M0
-	default "-mthumb" if ARCH_ARM_CORTEX_M3
+	default "-mthumb -mcpu=cortex-m3" if ARCH_ARM_CORTEX_M3
 	default "-mthumb" if ARCH_ARM_CORTEX_M4
 	default "-mfpu=vfpv3 -mfloat-abi=softfp" if ARCH_ARM_CORTEX_A9 && !ARCH_ARM_THUMB
 	default "-mthumb -mthumb-interwork -mfpu=vfpv3 -mfloat-abi=softfp" if ARCH_ARM_CORTEX_A9 && ARCH_ARM_THUMB
@@ -178,8 +178,13 @@ config ARCH_ARM_FULL_INIT
 config ARCH_ARM_THUMB
 	bool "Compile with thumb"
 	default y
+	
+config ARCH_ARM_THUMB_INTERWORK
+	bool
+	default y if ARCH_ARM_CORTEX_A9
+	default n
 
 config KERNEL_CFLAGS_REMOVE
 	string
-	default "-mthumb" if ARCH_ARM_THUMB
+	default "-mthumb" if ARCH_ARM_THUMB && ARCH_ARM_THUMB_INTERWORK
 	default "" if !ARCH_ARM_THUMB
