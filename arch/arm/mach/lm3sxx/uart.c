@@ -609,6 +609,7 @@ static const BT_IF_HANDLE oHandleInterface = {
 	.oIfs = {
 		(BT_HANDLE_INTERFACE) &BT_LM3Sxx_UART_oDeviceInterface,
 	},
+	.pFileIF 	= &oFileInterface,
 	.eType 		= BT_HANDLE_T_DEVICE,											///< Handle Type!
 	.pfnCleanup = uartCleanup,												///< Handle's cleanup routine.
 };

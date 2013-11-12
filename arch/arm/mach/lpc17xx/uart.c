@@ -598,13 +598,15 @@ static BT_ERROR uartWrite(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const 
 	case BT_UART_MODE_BUFFERED:
 	{
 		BT_FifoWrite(hUart->hTxFifo, ulSize, pSrc, &Error);
-		pRegs->IER |= LPC17xx_UART_IER_THREIE;	// Enable the interrupt
+		pRegs->IER &= ~LPC17xx_UART_IER_THREIE;	// Disable the interrupt
 
 		while (!BT_FifoIsEmpty(hUart->hTxFifo, &Error) && (TX_FIFO_LVL[hUart->id] < 16)) {
 			BT_FifoRead(hUart->hTxFifo, 1, &ucData, &Error);
 			pRegs->FIFO = ucData;
 			TX_FIFO_LVL[hUart->id]++;
 		}
+		pRegs->IER |= LPC17xx_UART_IER_THREIE;	// Enable the interrupt
+
 		break;
 	}
 
@@ -651,13 +653,6 @@ static const BT_IF_POWER oPowerInterface = {
 	uartGetPowerState,											///< This gets the current power state.
 };
 
-static const BT_IF_CHARDEV oCharDevInterface = {
-	uartRead,													///< CH device read function.
-	uartWrite,													///< CH device write function.
-	uartGetch,													///< This API wasn't implemented in this driver.
-	uartPutch,													///< :: Therefore the pointer must be NULL for BT to handle.
-};
-
 static const BT_DEV_IFS oConfigInterface = {
 	(BT_DEV_INTERFACE) &oUartConfigInterface,
 };
@@ -668,7 +663,6 @@ const BT_IF_DEVICE BT_LPC17xx_UART_oDeviceInterface = {
 	.unConfigIfs = {
 		(BT_DEV_INTERFACE) &oUartConfigInterface,
 	},
-	&oCharDevInterface,											///< Provide a Character device interface implementation.
 };
 
 static const BT_IF_FILE oFileInterface = {
@@ -681,6 +675,7 @@ static const BT_IF_HANDLE oHandleInterface = {
 	.oIfs = {
 		(BT_HANDLE_INTERFACE) &BT_LPC17xx_UART_oDeviceInterface,
 	},
+	.pFileIF 	= &oFileInterface,
 	.eType 		= BT_HANDLE_T_DEVICE,											///< Handle Type!
 	.pfnCleanup = uartCleanup,												///< Handle's cleanup routine.
 };
