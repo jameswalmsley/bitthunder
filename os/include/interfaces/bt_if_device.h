@@ -18,6 +18,8 @@
 #include "bt_dev_if_sdio.h"
 #include "bt_dev_if_rtc.h"
 #include "bt_dev_if_emac.h"
+#include "bt_dev_if_qei.h"
+#include "bt_dev_if_mcpwm.h"
 
 typedef enum _BT_DEV_IF_TYPE {
 	BT_DEV_IF_T_NONE=0,
@@ -27,6 +29,7 @@ typedef enum _BT_DEV_IF_TYPE {
 	BT_DEV_IF_T_GTIMER,
 	BT_DEV_IF_T_TIMER,
 	BT_DEV_IF_T_PWM,
+	BT_DEV_IF_T_MCPWM,
 	BT_DEV_IF_T_ADC,
 	BT_DEV_IF_T_GPIO,
 	BT_DEV_IF_T_UART,
@@ -37,6 +40,7 @@ typedef enum _BT_DEV_IF_TYPE {
 	BT_DEV_IF_T_EMAC,
 	BT_DEV_IF_T_MII,
 	BT_DEV_IF_T_RTC,
+	BT_DEV_IF_T_QEI,
 } BT_DEV_IF_TYPE;
 
 /**
@@ -65,6 +69,7 @@ typedef union {
 	const BT_DEV_IF_GTIMER 	   *pGTimerIF;
 	const BT_DEV_IF_TIMER	   *pTimerIF;
 	const BT_DEV_IF_PWM		   *pPwmIF;
+	const BT_DEV_IF_MCPWM	   *pMCPwmIF;
 	const BT_DEV_IF_CAN 	   *pCANIF;
 	const BT_DEV_IF_SPI 	   *pSpiIF;
 	const BT_DEV_IF_I2C 	   *pI2CIF;
@@ -74,6 +79,7 @@ typedef union {
 	const BT_DEV_IF_EMAC 	   *pEMacIF;
 	const BT_DEV_IF_MII 	   *pMiiIF;
 	const BT_DEV_IF_RTC		   *pRTCIF;
+	const BT_DEV_IF_QEI		   *pQEIIF;
 } BT_DEV_IFS;
 
 #define BT_IF_GPIO_OPS(handle)		BT_IF_DEV_CONFIG(handle).pGpioIF
@@ -82,6 +88,7 @@ typedef union {
 #define BT_IF_GTIMER_OPS(handle)	BT_IF_DEV_CONFIG(handle).pGTimerIF
 #define BT_IF_TIMER_OPS(handle)		BT_IF_DEV_CONFIG(handle).pTimerIF
 #define	BT_IF_PWM_OPS(handle)		BT_IF_DEV_CONFIG(handle).pPwmIF
+#define	BT_IF_MCPWM_OPS(handle)		BT_IF_DEV_CONFIG(handle).pMCPwmIF
 #define BT_IF_CAN_OPS(handle)		BT_IF_DEV_CONFIG(handle).pCANIF
 #define BT_IF_UART_OPS(handle)		BT_IF_DEV_CONFIG(handle).pUartIF
 #define BT_IF_SPI_OPS(handle)		BT_IF_DEV_CONFIG(handle).pSpiIF
@@ -91,6 +98,7 @@ typedef union {
 #define	BT_IF_ADC_OPS(handle)		BT_IF_DEV_CONFIG(handle).pADCIF
 #define BT_IF_SDIO_OPS(handle)		BT_IF_DEV_CONFIG(handle).pSdioIF
 #define	BT_IF_RTC_OPS(handle)		BT_IF_DEV_CONFIG(handle).pRTCIF
+#define	BT_IF_QEI_OPS(handle)		BT_IF_DEV_CONFIG(handle).pQEIIF
 
 typedef struct _BT_IF_DEVICE {
 	const BT_IF_POWER	   *pPowerIF;
