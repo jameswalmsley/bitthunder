@@ -36,9 +36,9 @@ static BT_ERROR gpio_set(BT_HANDLE hGPIO, BT_u32 ulGPIO, BT_BOOL bValue) {
 	BT_u32 ulMask	= (1 << ulBit);
 
 	if(bValue) {
-		hGPIO->pRegs->banks[ulBank].FIOSET |= ulMask;
+		hGPIO->pRegs->banks[ulBank].FIOSET = ulMask;
 	} else {
-		hGPIO->pRegs->banks[ulBank].FIOCLR |= ulMask;
+		hGPIO->pRegs->banks[ulBank].FIOCLR = ulMask;
 	}
 
 	return BT_ERR_NONE;

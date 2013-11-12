@@ -305,6 +305,8 @@ static BT_u32 lpc17xx_get_cpu_clock_frequency() {
 
 static BT_u32 lpc17xx_machine_init() {
 
+	BT_LPC17xx_SetPeripheralClockDivider(31, 1);
+
 	BT_LPC17xx_SetSystemFrequency(BT_CONFIG_SYSCLK_CTRL,
 								  BT_CONFIG_MAINPLLCLK_SRC,
 								  BT_CONFIG_MAINPLLCLK_CTRL,

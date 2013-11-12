@@ -55,9 +55,6 @@ BT_ERROR BT_NVIC_IRQ_28(void) {
 	return 0;
 }
 
-static BT_ERROR i2cDisable(BT_HANDLE hI2C);
-static BT_ERROR i2cEnable(BT_HANDLE hI2C);
-
 
 static void ResetI2C(BT_HANDLE hI2C)
 {
@@ -268,13 +265,13 @@ static BT_ERROR i2cEnable(BT_HANDLE hI2C) {
 /**
  *	Make the I2C inactive (Clear the Enable bit).
  **/
-static BT_ERROR i2cDisable(BT_HANDLE hI2C) {
+/*static BT_ERROR i2cDisable(BT_HANDLE hI2C) {
 	volatile LPC17xx_I2C_REGS *pRegs = hI2C->pRegs;
 
 	pRegs->LPC17xx_I2C_CONCLR |= LPC17xx_I2C_CONSET_I2EN;
 
 	return BT_ERR_NONE;
-}
+}*/
 
 static BT_ERROR i2cStart(BT_HANDLE hI2C) {
 	volatile LPC17xx_I2C_REGS *pRegs = hI2C->pRegs;
@@ -363,7 +360,7 @@ static BT_ERROR i2cSendData(BT_HANDLE hI2C, BT_u8 *pSrc, BT_u32 ulLength) {
 }
 
 
-static BT_BOOL i2cGetAck(BT_HANDLE hI2C, BT_ERROR *pError) {
+/*static BT_BOOL i2cGetAck(BT_HANDLE hI2C, BT_ERROR *pError) {
 	volatile LPC17xx_I2C_REGS *pRegs = hI2C->pRegs;
 	if (pError) *pError = BT_ERR_NONE;
 
@@ -373,7 +370,7 @@ static BT_BOOL i2cGetAck(BT_HANDLE hI2C, BT_ERROR *pError) {
 		(pRegs->LPC17xx_I2C_STAT != LPC17xx_I2C_STAT_DATA_R_ACK   )) return BT_FALSE;
 
 	return BT_TRUE;
-}
+}*/
 
 static BT_ERROR i2cStop(BT_HANDLE hI2C) {
 	volatile LPC17xx_I2C_REGS *pRegs = hI2C->pRegs;

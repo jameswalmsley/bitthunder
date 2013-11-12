@@ -12,6 +12,12 @@ BT_DEF_MODULE_DESCRIPTION	("LPC17xx Timers kernel driver, also providing kernel 
 BT_DEF_MODULE_AUTHOR		("Robert Steinbauer")
 BT_DEF_MODULE_EMAIL			("rsteinbauer@riegl.com")
 
+struct _TIMER_CALLBACK_HANDLE {
+	BT_HANDLE_HEADER	h;
+	BT_QEI_CALLBACK		pfnCallback;
+	void 			   *pParam;
+} ;
+
 /**
  *	We can define how a handle should look in a Timer driver, probably we only need a
  *	hardware-ID number. (Remember, try to keep HANDLES as low-cost as possible).
@@ -20,6 +26,7 @@ struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER 		h;			///< All handles must include a handle header.
 	LPC17xx_TIMER_REGS	   *pRegs;
 	const BT_INTEGRATED_DEVICE   *pDevice;
+	struct _TIMER_CALLBACK_HANDLE	   *pCallback;
 };
 
 static BT_HANDLE g_TIMER_HANDLES[4] = {
@@ -33,34 +40,62 @@ static const BT_u32 g_TIMER_PERIPHERAL[4] = {1, 2, 22, 23};
 
 static void disableTimerPeripheralClock(BT_HANDLE hTimer);
 
-BT_ERROR BT_NVIC_IRQ_17(void) {
-	BT_u32 IRValue = TIMER0->TMRBIR;
+static const BT_IF_HANDLE oCallbackHandleInterface;
 
-	TIMER0->TMRBIR = IRValue;
+BT_ERROR BT_NVIC_IRQ_17(void) {
+	volatile BT_HANDLE Handle = g_TIMER_HANDLES[0];
+	volatile LPC17xx_TIMER_REGS *pRegs = Handle->pRegs;
+
+	BT_u32 IRValue = pRegs->TMRBIR;
+
+	BT_u32 ulValue = pRegs->TMRBTC;
+
+	pRegs->TMRBIR = IRValue;
+
+	if (Handle->pCallback)
+		Handle->pCallback->pfnCallback(Handle, Handle->pCallback->pParam);
 
 	return 0;
 }
 
 BT_ERROR BT_NVIC_IRQ_18(void) {
-	BT_u32 IRValue = TIMER1->TMRBIR;
+	volatile BT_HANDLE Handle = g_TIMER_HANDLES[1];
+	volatile LPC17xx_TIMER_REGS *pRegs = Handle->pRegs;
 
-	TIMER1->TMRBIR = IRValue;
+	BT_u32 IRValue = pRegs->TMRBIR;
+
+	pRegs->TMRBIR = IRValue;
+
+	if (Handle->pCallback)
+		Handle->pCallback->pfnCallback(Handle, Handle->pCallback->pParam);
 
 	return 0;
 }
 
 BT_ERROR BT_NVIC_IRQ_19(void) {
-	BT_u32 IRValue = TIMER2->TMRBIR;
+	volatile BT_HANDLE Handle = g_TIMER_HANDLES[2];
+	volatile LPC17xx_TIMER_REGS *pRegs = Handle->pRegs;
 
-	TIMER2->TMRBIR = IRValue;
+	BT_u32 IRValue = pRegs->TMRBIR;
+
+	pRegs->TMRBIR = IRValue;
+
+	if (Handle->pCallback)
+		Handle->pCallback->pfnCallback(Handle, Handle->pCallback->pParam);
 
 	return 0;
 }
 
 BT_ERROR BT_NVIC_IRQ_20(void) {
-	BT_u32 IRValue = TIMER3->TMRBIR;
+	volatile BT_HANDLE Handle = g_TIMER_HANDLES[3];
+	volatile LPC17xx_TIMER_REGS *pRegs = Handle->pRegs;
 
-	TIMER3->TMRBIR = IRValue;
+	BT_u32 IRValue = pRegs->TMRBIR;
+
+	pRegs->TMRBIR = IRValue;
+
+	if (Handle->pCallback)
+		Handle->pCallback->pfnCallback(Handle, Handle->pCallback->pParam);
 
 	return BT_ERR_NONE;
 }
@@ -168,12 +203,36 @@ static BT_ERROR timer_disable_interrupt(BT_HANDLE hTimer) {
 	return BT_ERR_NONE;
 }
 
+static BT_ERROR timer_callback_cleanup(BT_HANDLE hCallback) {
+	struct _TIMER_CALLBACK_HANDLE *hCleanup = (struct _TIMER_CALLBACK_HANDLE*)hCallback;
+
+	hCleanup->pfnCallback = NULL;
+	hCleanup->pParam	  = NULL;
+
+	BT_CloseHandle((BT_HANDLE)hCleanup);
+
+	return BT_ERR_NONE;
+}
+
 static BT_HANDLE timer_register_callback(BT_HANDLE hTimer, BT_TIMER_CALLBACK pfnCallback, void *pParam, BT_ERROR *pError) {
-	return NULL;
+	struct _TIMER_CALLBACK_HANDLE *pCallback = (struct _TIMER_CALLBACK_HANDLE*)BT_CreateHandle(&oCallbackHandleInterface, sizeof(struct _TIMER_CALLBACK_HANDLE),pError);
+
+	if (pCallback) {
+		pCallback->pfnCallback = pfnCallback;
+		pCallback->pParam	   = pParam;
+
+		hTimer->pCallback      = pCallback;
+	}
+
+	return (BT_HANDLE)pCallback;
 }
 
 static BT_ERROR timer_unregister_callback(BT_HANDLE hTimer, BT_HANDLE hCallback) {
-	return BT_ERR_UNIMPLEMENTED;
+	timer_callback_cleanup(hCallback);
+
+	hTimer->pCallback = NULL;
+
+	return BT_ERR_NONE;
 }
 
 static BT_u32 timer_get_prescaler(BT_HANDLE hTimer, BT_ERROR *pError) {
@@ -410,6 +469,11 @@ const BT_IF_DEVICE BT_LPC17xx_TIMER_oDeviceInterface = {
 	},
 };
 
+static const BT_IF_HANDLE oCallbackHandleInterface = {
+	BT_MODULE_DEF_INFO,
+	.eType		= BT_HANDLE_T_CALLBACK,											///< Handle Type!
+	.pfnCleanup = timer_callback_cleanup,												///< Handle's cleanup routine.
+};
 
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
