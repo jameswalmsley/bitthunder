@@ -51,7 +51,7 @@ static BT_ERROR nvic_enable(BT_HANDLE hNVIC, BT_u32 ulIRQ) {
 	BT_u32 ulBank = (ulIRQ-16) / 32;
 	BT_u32 ulBit = (ulIRQ-16) % 32;
 
-	hNVIC->pRegs->ISE[ulBank] |= 1 << ulBit;
+	hNVIC->pRegs->ISE[ulBank] = 1 << ulBit;
 
 	return BT_ERR_NONE;
 }
@@ -60,7 +60,7 @@ static BT_ERROR nvic_disable(BT_HANDLE hNVIC, BT_u32 ulIRQ) {
 	BT_u32 ulBank = (ulIRQ-16) / 32;
 	BT_u32 ulBit = (ulIRQ-16) % 32;
 
-	hNVIC->pRegs->ISE[ulBank] &= ~(1 << ulBit);
+	hNVIC->pRegs->ICE[ulBank] = (1 << ulBit);
 
 	return BT_ERR_NONE;
 }

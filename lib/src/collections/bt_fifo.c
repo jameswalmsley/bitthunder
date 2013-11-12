@@ -20,13 +20,13 @@ BT_DEF_MODULE_EMAIL						("rsteinbauer@riegl.com")
 /**
  **/
 struct _BT_OPAQUE_HANDLE {
-	BT_HANDLE_HEADER 		h;			///< All handles must include a handle header.
-	BT_u8	*pBuf;						///< Pointer to the start of the ring-buffer.
-	BT_u8	*pIn;						///< Input pointer.
-	BT_u8	*pOut;						///< Output pointer.
-	BT_u8	*pEnd;						///< Pointer to end of buffer.
-	BT_u32	 ulElementWidth;
-	BT_u32	 ulFlags;
+	BT_HANDLE_HEADER h;			///< All handles must include a handle header.
+	BT_u8			*pBuf;						///< Pointer to the start of the ring-buffer.
+	BT_u8			*pIn;						///< Input pointer.
+	BT_u8			*pOut;						///< Output pointer.
+	BT_u8			*pEnd;						///< Pointer to end of buffer.
+	BT_u32	 		 ulElementWidth;
+	BT_u32	 		 ulFlags;
 };
 
 static const BT_IF_HANDLE oHandleInterface;
@@ -91,16 +91,15 @@ BT_u32 BT_FifoWrite(BT_HANDLE hFifo, BT_u32 ulElements, void * pData, BT_ERROR *
 		if (hFifo->ulFlags & BT_FIFO_NONBLOCKING) {
 			if (BT_FifoIsFull(hFifo, pError)) return ulWritten;
 		}
-		else
-		{
-			if (!(hFifo->ulFlags & BT_FIFO_OVERWRITE))
-				BT_FifoWaitFull(hFifo);
-			memcpy(pDest, pSrc, ulElementWidth);
-			pDest += ulElementWidth;
-			pSrc += ulElementWidth;
-			if(pDest >= hFifo->pEnd) {
-				pDest = hFifo->pBuf;
-			}
+
+		if (!(hFifo->ulFlags & BT_FIFO_OVERWRITE))
+			BT_FifoWaitFull(hFifo);
+		memcpy(pDest, pSrc, ulElementWidth);
+		pDest += ulElementWidth;
+		pSrc += ulElementWidth;
+		if(pDest >= hFifo->pEnd) {
+			pDest = hFifo->pBuf;
+		}
 //			if (pDest == pOut) {
 //				pOut += ulElementWidth;
 //				if(pOut >= hFifo->pEnd) {
@@ -108,7 +107,6 @@ BT_u32 BT_FifoWrite(BT_HANDLE hFifo, BT_u32 ulElements, void * pData, BT_ERROR *
 //				}
 //				hFifo->pOut = pOut;
 //			}
-		}
 		hFifo->pIn = pDest;
 	}
 	return ulWritten;

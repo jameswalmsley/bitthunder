@@ -452,3 +452,23 @@ bt_fprintf(void *stream, const char *fmt, ...)
 	bt_kvprintf(fmt, bt_fputc, stream, 10, ap);
 	va_end(ap);
 }
+static void sputchar(int c, void * p) {
+	char ** ptr = p;
+	**ptr = (char)c;
+
+	*ptr += 1;
+}
+
+void
+bt_sprintf(char * s, const char *fmt, ...)
+{
+	char *str = s;
+
+	/* http://www.pagetable.com/?p=298 */
+	va_list ap;
+
+	va_start(ap, fmt);
+	bt_kvprintf(fmt, sputchar, &str, 10, ap);
+	*(str) = 0;
+	va_end(ap);
+}
