@@ -28,6 +28,32 @@ BT_u32 BT_LPC17xx_GetPeripheralClock(BT_u32 ulPeripheral) {
 	return BT_LPC17xx_GetSystemFrequency() / ulDivider;
 }
 
+BT_u32 BT_LPC17xx_SetPeripheralClockDivider(BT_u32 ulPeripheral, BT_u32 ulDivider) {
+
+	volatile LPC17xx_RCC_REGS *pRegs = LPC17xx_RCC;
+
+	BT_u32 ulShift = 2*(ulPeripheral % 16);
+	BT_u32 ulMask = 0x03 << ulShift;
+
+	switch (ulDivider){
+		case 4: ulDivider = 0; break;
+		case 1: ulDivider = 1; break;
+		case 2: ulDivider = 2; break;
+		case 8: ulDivider = 3; break;
+	}
+
+	if (ulPeripheral < 16)
+	{
+		pRegs->PCLKSEL0 &= ulMask;
+		pRegs->PCLKSEL0 |= (ulDivider << ulShift);
+	}
+	else if (ulPeripheral < 32)
+	{
+		pRegs->PCLKSEL1 &= ulMask;
+		pRegs->PCLKSEL1 |= (ulDivider << ulShift);
+	}
+}
+
 
 BT_u32 BT_LPC17xx_GetMainPLLFrequency(void)
 {

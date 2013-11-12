@@ -68,6 +68,8 @@ typedef struct _LPC17xx_RCC_REGS {
 #define	LPC17xx_RCC_PCONP_ADC0EN			0x00001000
 #define	LPC17xx_RCC_PCONP_CAN1EN			0x00002000
 #define	LPC17xx_RCC_PCONP_CAN2EN			0x00004000
+#define	LPC17xx_RCC_PCONP_MCPWM0EN			0x00020000
+#define	LPC17xx_RCC_PCONP_QEI0EN			0x00040000
 #define	LPC17xx_RCC_PCONP_I2C1EN			0x00080000
 #define	LPC17xx_RCC_PCONP_SSP0EN			0x00200000
 #define	LPC17xx_RCC_PCONP_TIMER2EN			0x00400000
@@ -106,6 +108,7 @@ typedef struct _LPC17xx_RCC_REGS {
 #define LPC17xx_RCC 		((LPC17xx_RCC_REGS *) (LPC17xx_RCC_BASE))
 
 BT_u32 BT_LPC17xx_GetPeripheralClock(BT_u32 ulPeripheral);
+BT_u32 BT_LPC17xx_SetPeripheralClockDivider(BT_u32 ulPeripheral, BT_u32 ulDivider);
 BT_u32 BT_LPC17xx_GetMainFrequency(void);
 BT_u32 BT_LPC17xx_GetSystemFrequency(void);
 void BT_LPC17xx_SetSystemFrequency(BT_u32 SysClkCtrl,
