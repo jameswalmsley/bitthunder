@@ -145,7 +145,7 @@ static BT_ERROR adc_setconfig(BT_HANDLE hAdc, BT_ADC_CONFIG *pConfig) {
 
 			i = 0;
 			while (pConfig->ulActiveChannels & (0x1<<i)) {
-				pRegs->ADINTEN = 0x1<<i;	// Enable the interrupt
+				pRegs->ADINTEN |= 0x1<<i;	// Enable the interrupt
 				i++;
 			}
 

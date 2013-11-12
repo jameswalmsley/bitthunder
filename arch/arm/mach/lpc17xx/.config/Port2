@@ -267,6 +267,7 @@ config LPC17xx_PIO2_3_OPENDRAIN
 endmenu  
 
 menu "LPC17xx_PIO2_4"
+	depends on HAS_100pin
 
 config LPC17xx_PIO2__DEFAULT
 	bool "default"
@@ -276,7 +277,7 @@ choice
 	prompt "FUNCTION"	
 	default LPC17xx_PIO2_4_GPIO
 	depends on !LPC17xx_PIO2__DEFAULT
-	depends on HAS_100pin
+	
 
 config LPC17xx_PIO2_4_GPIO
     bool	"GPIO"
@@ -337,6 +338,7 @@ config LPC17xx_PIO2_4_OPENDRAIN
 endmenu  
     
 menu "LPC17xx_PIO2_5"
+	depends on HAS_100pin
 
 config LPC17xx_PIO2__DEFAULT
 	bool "default"
@@ -345,8 +347,7 @@ config LPC17xx_PIO2__DEFAULT
 choice
 	prompt "FUNCTION"	
 	default LPC17xx_PIO2_5_GPIO
-	depends on !LPC17xx_PIO2__DEFAULT
-	depends on HAS_100pin
+	depends on !LPC17xx_PIO2__DEFAULT	
 
 config LPC17xx_PIO2_5_GPIO
     bool	"GPIO"

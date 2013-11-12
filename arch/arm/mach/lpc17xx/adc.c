@@ -41,8 +41,6 @@ BT_ERROR BT_NVIC_IRQ_38(void) {
 	volatile LPC17xx_ADC_REGS *pRegs = hAdc->pRegs;
 	BT_ERROR Error;
 
-	pRegs->ADCR &= ~LPC17xx_ADC_ADCR_BURST;
-
 	static BT_u32 ulSum[8] = {0};
 	static BT_u32 ulAverage;
 
@@ -51,7 +49,7 @@ BT_ERROR BT_NVIC_IRQ_38(void) {
 	BT_u32 i;
 	for (i = 0; i < 8; i++) {
 		if (ulActive & (0x01<<i))
-			ulSum[i] += ((pRegs->ADData[i] >> 4) & 0xFFF);
+			ulSum[i] += ((pRegs->ADData[i] >> 4) & 0xFFF);		
 	}
 	if (ulActive) ulAverage++;
 	if (ulAverage >= hAdc->ulSWAverageCount) {
@@ -64,8 +62,6 @@ BT_ERROR BT_NVIC_IRQ_38(void) {
 		}
 		ulAverage = 0;
 	}
-
-	pRegs->ADCR |= LPC17xx_ADC_ADCR_BURST;
 
 	return Error;
 }
@@ -110,6 +106,8 @@ static BT_ERROR adc_setconfig(BT_HANDLE hAdc, BT_ADC_CONFIG *pConfig) {
 
 	hAdc->ulSWAverageCount = pConfig->ulSWAverageCount;
 
+	pRegs->ADINTEN &= ~LPC17xx_ADC_ADINTEN_ADGINTEN;	// Disable the interrupt
+
 	switch(pConfig->eMode) {
 	case BT_UART_MODE_POLLED: {
 		if(hAdc->eMode !=  BT_ADC_MODE_POLLED) {
@@ -123,7 +121,7 @@ static BT_ERROR adc_setconfig(BT_HANDLE hAdc, BT_ADC_CONFIG *pConfig) {
 			hAdc->eMode = BT_ADC_MODE_POLLED;
 		}
 
-		pRegs->ADINTEN &= ~LPC17xx_ADC_ADINTEN_ADGINTEN;	// Disable the interrupt
+		//pRegs->ADINTEN &= ~LPC17xx_ADC_ADINTEN_ADGINTEN;	// Disable the interrupt
 
 		break;
 	}
@@ -136,10 +134,15 @@ static BT_ERROR adc_setconfig(BT_HANDLE hAdc, BT_ADC_CONFIG *pConfig) {
 			BT_u32 i;
 			for (i = 0; i < 8; i++) {
 				if(!hAdc->hFifo[i]) {
-					hAdc->hFifo[i] = BT_FifoCreate(pConfig->ulBufferSize, 4, BT_FIFO_OVERWRITE, &Error);
+					hAdc->hFifo[i] = BT_FifoCreate(pConfig->ulBufferSize, 4, BT_FIFO_NONBLOCKING, &Error);
 				}
 			}
-			pRegs->ADINTEN |= LPC17xx_ADC_ADINTEN_ADGINTEN;	// Enable the interrupt
+			//pRegs->ADINTEN |= LPC17xx_ADC_ADINTEN_ADGINTEN;	// Enable the interrupt
+			for (i = 0; i < 8; i++) {
+				if (pConfig->ulActiveChannels & (0x1<<i)) {
+					pRegs->ADINTEN = 0x1<<i;	// Enable the interrupt
+				}
+			}
 
 			hAdc->eMode = BT_ADC_MODE_BUFFERED;
 		}

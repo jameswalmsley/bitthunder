@@ -555,6 +555,7 @@ endmenu
 
     
 menu "LPC17xx_PIO1_17"
+	depends on HAS_100pin
 
 config LPC17xx_PIO1_1_DEFAULT
 	bool "default"
@@ -564,7 +565,6 @@ choice
 	prompt "FUNCTION"	
 	default LPC17xx_PIO1_17_GPIO
 	depends on !LPC17xx_PIO1_1_DEFAULT
-	depends on HAS_100pin
 
 config LPC17xx_PIO1_17_GPIO
     bool	"GPIO"
@@ -828,6 +828,7 @@ endmenu
 
     
 menu "LPC17xx_PIO1_21"
+	depends on HAS_100pin
 
 config LPC17xx_PIO1_2_DEFAULT
 	bool "default"
@@ -836,8 +837,7 @@ config LPC17xx_PIO1_2_DEFAULT
 choice
 	prompt "FUNCTION"	
 	default LPC17xx_PIO1_21_GPIO
-	depends on !LPC17xx_PIO1_2_DEFAULT
-	depends on HAS_100pin
+	depends on !LPC17xx_PIO1_2_DEFAULT	
 
 config LPC17xx_PIO1_21_GPIO
     bool	"GPIO"
@@ -1245,7 +1245,8 @@ endmenu
 
     
 menu "LPC17xx_PIO1_27"
-
+	depends on HAS_100pin
+	
 config LPC17xx_PIO1_2_DEFAULT
 	bool "default"
 	default y
@@ -1253,8 +1254,7 @@ config LPC17xx_PIO1_2_DEFAULT
 choice
 	prompt "FUNCTION"	
 	default LPC17xx_PIO1_27_GPIO
-	depends on !LPC17xx_PIO1_2_DEFAULT
-	depends on HAS_100pin
+	depends on !LPC17xx_PIO1_2_DEFAULT	
 
 config LPC17xx_PIO1_27_GPIO
     bool	"GPIO"

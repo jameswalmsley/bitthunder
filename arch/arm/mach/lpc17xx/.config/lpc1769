@@ -8,6 +8,8 @@ config MACH_LPC1769
 	select HAS_I2S
 	select HAS_DAC
 	select HAS_100pin
+	select HAS_QEI_0
+	select HAS_MCPWM_0
 
 
     select LINKER_MEMORY_DEFINED

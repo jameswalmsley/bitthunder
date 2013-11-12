@@ -17,6 +17,14 @@ config HAS_I2C0
 	bool
 	default n
 	
+config HAS_QEI_0
+	bool
+	default n
+	
+config HAS_MCPWM_0
+	bool
+	default n
+	
 	
 choice
 	prompt "LPC17xx Chip Variant"
@@ -185,6 +193,14 @@ config MACH_LPC17xx_CAN1_BASE
 config MACH_LPC17xx_PWM0_BASE  
 	hex
 	default 0x40018000
+
+config MACH_LPC17xx_QEI0_BASE  
+	hex
+	default 0x400BC000
+	
+config MACH_LPC17xx_MCPWM0_BASE
+	hex
+	default 0x400B8000
 
 config MACH_LPC17xx_ADC0_BASE  
 	hex
@@ -551,6 +567,43 @@ config MACH_LPC17xx_PWM_0_INODE_NAME
 	default "pwm0"
 	depends on MACH_LPC17xx_PWM_0
 endmenu
+
+menu "MCPWM devices"
+
+config MACH_LPC17xx_MCPWM
+	bool
+	default n
+
+config MACH_LPC17xx_MCPWM_0
+    bool "Use MCPWM(0) peripheral"
+	default n
+	select MACH_LPC17xx_MCPWM
+	depends on HAS_MCPWM_0
+
+config MACH_LPC17xx_MCPWM_0_INODE_NAME
+	string "MCPWM(0) devfs name"
+	default "mcpwm0"
+	depends on MACH_LPC17xx_MCPWM_0
+endmenu
+
+menu "QEI devices"
+
+config MACH_LPC17xx_QEI
+	bool
+	default n
+
+config MACH_LPC17xx_QEI_0
+    bool "Use QEI(0) peripheral"
+	default n
+	select MACH_LPC17xx_QEI
+	depends on HAS_QEI_0
+
+config MACH_LPC17xx_QEI_0_INODE_NAME
+	string "QEI(0) devfs name"
+	default "qei0"
+	depends on MACH_LPC17xx_QEI_0
+endmenu
+
 
 endmenu
 

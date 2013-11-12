@@ -277,6 +277,7 @@ config LPC17xx_PIO0_3_OPENDRAIN
 endmenu
 
 menu "LPC17xx_PIO0_4"	
+	depends on HAS_100pin
 
 config LPC17xx_PIO0_4_DEFAULT
 	bool "default"
@@ -286,7 +287,7 @@ choice
 	prompt "FUNCTION"
 	default LPC17xx_PIO0_4_GPIO
 	depends on !LPC17xx_PIO0_4_DEFAULT
-	depends on !HAS_100pin
+	
 
 config LPC17xx_PIO0_4_GPIO
     bool	"GPIO"
@@ -347,7 +348,8 @@ config LPC17xx_PIO0_4_OPENDRAIN
 	default 1 if LPC17xx_PIO0_4_OPENDRAIN_ENABLE
 endmenu
 
-menu "LPC17xx_PIO0_5"	
+menu "LPC17xx_PIO0_5"
+	depends on HAS_100pin	
 
 config LPC17xx_PIO0_5_DEFAULT
 	bool "default"
@@ -357,8 +359,7 @@ choice
 	prompt "FUNCTION"
 	default LPC17xx_PIO0_5_GPIO
 	depends on !LPC17xx_PIO0_5_DEFAULT
-	depends on !HAS_100pin
-
+	
 config LPC17xx_PIO0_5_GPIO
     bool	"GPIO"
     
@@ -1123,7 +1124,8 @@ config LPC17xx_PIO0_18_OPENDRAIN
 	default 1 if LPC17xx_PIO0_18_OPENDRAIN_ENABLE
 endmenu
 
-menu "LPC17xx_PIO0_19"	
+menu "LPC17xx_PIO0_19"
+	depends on HAS_100pin	
 
 config LPC17xx_PIO0_19_DEFAULT
 	bool "default"
@@ -1132,8 +1134,7 @@ config LPC17xx_PIO0_19_DEFAULT
 choice
 	prompt "FUNCTION"
 	default LPC17xx_PIO0_19_GPIO
-	depends on !LPC17xx_PIO0_19_DEFAULT
-	depends on !HAS_100pin
+	depends on !LPC17xx_PIO0_19_DEFAULT	
 
 config LPC17xx_PIO0_19_GPIO
     bool	"GPIO"
@@ -1192,7 +1193,8 @@ config LPC17xx_PIO0_19_OPENDRAIN
 	default 1 if LPC17xx_PIO0_19_OPENDRAIN_ENABLE
 endmenu
 
-menu "LPC17xx_PIO0_20"	
+menu "LPC17xx_PIO0_20"
+	depends on HAS_100pin	
 
 config LPC17xx_PIO0_20_DEFAULT
 	bool "default"
@@ -1202,8 +1204,7 @@ choice
 	prompt "FUNCTION"
 	default LPC17xx_PIO0_20_GPIO
 	depends on !LPC17xx_PIO0_20_DEFAULT
-	depends on !HAS_100pin
-
+	
 config LPC17xx_PIO0_20_GPIO
     bool	"GPIO"
     
@@ -1263,7 +1264,8 @@ config LPC17xx_PIO0_20_OPENDRAIN
 	default 1 if LPC17xx_PIO0_20_OPENDRAIN_ENABLE
 
 
-menu "LPC17xx_PIO0_21"	
+menu "LPC17xx_PIO0_21"
+	depends on HAS_100pin	
 
 config LPC17xx_PIO0_21_DEFAULT
 	bool "default"
@@ -1273,7 +1275,6 @@ choice
 	prompt "FUNCTION"
 	default LPC17xx_PIO0_21_GPIO
 	depends on !LPC17xx_PIO0_21_DEFAULT
-	depends on !HAS_100pin
 
 config LPC17xx_PIO0_21_GPIO
     bool	"GPIO"
