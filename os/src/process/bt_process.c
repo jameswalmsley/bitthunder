@@ -33,6 +33,9 @@ BT_ERROR BT_StartScheduler() {
 	return BT_kStartScheduler();
 }
 
+
+static BT_s32 task_alloc_fd(struct bt_task *task);
+
 BT_HANDLE BT_CreateProcess(BT_FN_THREAD_ENTRY pfnStartRoutine, const BT_i8 *szpName, BT_THREAD_CONFIG *pConfig, BT_ERROR *pError) {
 	BT_HANDLE hProcess = BT_CreateHandle(&oHandleInterface, sizeof(struct _BT_OPAQUE_HANDLE), pError);
 	if(!hProcess) {
@@ -59,6 +62,10 @@ BT_HANDLE BT_CreateProcess(BT_FN_THREAD_ENTRY pfnStartRoutine, const BT_i8 *szpN
 	strcpy(hProcess->task.cwd, hParent->task.cwd);	// Iherit the current working directory from parent.
 
 	total_processes += 1;
+
+	task_alloc_fd(&hProcess->task);	// stdin
+	task_alloc_fd(&hProcess->task);	// stdout
+	task_alloc_fd(&hProcess->task);	// stderr
 
 	return hProcess;
 }
@@ -122,6 +129,51 @@ BT_HANDLE BT_GetFileDescriptor(BT_u32 i, BT_ERROR *pError) {
 	return task->fds[i];
 }
 
+
+static BT_s32 task_alloc_fd(struct bt_task *task) {
+	BT_s32 i;
+	BT_u32 mask = 0x80000000 >> task->free_fd;
+
+	for(i = task->free_fd; i < 8; i++) {
+		if(!(mask & task->flags)) {
+			task->flags |= mask;
+			task->free_fd = i;
+			return i;
+		}
+
+		mask >>= 1;
+	}
+
+	return BT_ERR_GENERIC;
+}
+
+BT_s32 BT_AllocFileDescriptor() {
+	struct bt_task *task = BT_GetProcessTask(NULL);
+	return task_alloc_fd(task);
+}
+
+static BT_ERROR task_free_fd(struct bt_task *task, BT_s32 fd) {
+	if(fd < 0) {
+		return BT_ERR_GENERIC;
+	}
+
+	if(fd < 8) {
+		BT_u32 mask = 0x80000000 >> fd;
+		task->flags &= ~mask;
+		if(fd < task->free_fd) {
+			task->free_fd = fd;
+		}
+		return BT_ERR_NONE;
+	}
+
+	return BT_ERR_GENERIC;
+}
+
+BT_ERROR BT_FreeFileDescriptor(BT_s32 fd) {
+	struct bt_task *task = BT_GetProcessTask(NULL);
+	return task_free_fd(task, fd);
+}
+
 static BT_ERROR bt_process_cleanup(BT_HANDLE hProcess) {
 
 	return BT_ERR_NONE;
@@ -151,6 +203,10 @@ BT_ERROR bt_process_init() {
 
 	strcpy(kernel_handle.task.cwd, "/");
 	total_processes = 1;
+
+	BT_AllocFileDescriptor();	// stdin
+	BT_AllocFileDescriptor();	// stdout
+	BT_AllocFileDescriptor();	// stderr
 
 	return BT_ERR_NONE;
 }

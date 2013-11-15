@@ -9,10 +9,13 @@ struct bt_task {
 	BT_i8				name[BT_CONFIG_MAX_PROCESS_NAME+1];
 	struct bt_task 	   *parent;
 	struct bt_vm_map   *map;
-	BT_u32				flags;
 	struct bt_list_head threads;
 	struct bt_list_head handles;
 	BT_u64 				ullRunTimeCounter;
+	BT_u32				flags;
+    #define 			BT_PFD_BITMAP	0xFF000000	///< Bitmap of allocated primary bitmaps.
+    #define 			BT_FD_BITMAP	0x00800000	///< If fd_tbl was allocated.
+	BT_u32				free_fd;					///< Number of the last known free FD.
 	BT_HANDLE			fds[8];
 	BT_i8			    cwd[BT_PATH_MAX];
 };
@@ -35,6 +38,8 @@ BT_LIST *BT_GetProcessThreadList(BT_HANDLE hProcess);
 BT_ERROR BT_GetProcessTime(struct bt_process_time *time, BT_u32 i);
 BT_u32 BT_GetTotalProcesses();
 
+BT_s32 BT_AllocFileDescriptor();
+BT_ERROR BT_FreeFileDescriptor(BT_s32 fd);
 BT_ERROR BT_SetFileDescriptor(BT_u32 i, BT_HANDLE h);
 BT_HANDLE BT_GetFileDescriptor(BT_u32 i, BT_ERROR *pError);
 
