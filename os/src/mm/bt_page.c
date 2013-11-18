@@ -246,8 +246,6 @@ void bt_initialise_pages(void) {
 	bt_paddr_t start 	= (bt_paddr_t) bt_virt_to_phys(&__bt_init_start);
 	BT_u32 len  		= (bt_paddr_t) (bt_virt_to_phys(&__bss_end)) - start;
 
-	default_pool.total_size = (BT_TOTAL_PAGES * BT_PAGE_SIZE);
-
 	// Initialise the free list to total size of ram!
 	bt_page_pool_attach(&default_pool, BT_PAGE_ALIGN(start+len), (BT_TOTAL_PAGES * BT_PAGE_SIZE) - len);
 
