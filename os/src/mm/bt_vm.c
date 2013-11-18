@@ -65,7 +65,7 @@ static struct bt_segment *bt_segment_lookup(struct bt_vm_map *map, bt_vaddr_t ad
 		BT_u64 lookup_end 	= (addr + size);
 
 		if(seg->addr <= addr &&
-		   seg_end >= lookup_end) {
+		   seg_end > lookup_end) {
 			return seg;
 		}
 	}
