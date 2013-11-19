@@ -251,13 +251,7 @@ static const BT_i8 *get_relative_path(BT_MOUNTPOINT *pMount, const BT_i8 *szpPat
 	return szpPath;
 }
 
-#define BT_FS_MODE_READ				0x01
-#define	BT_FS_MODE_WRITE			0x02
-#define BT_FS_MODE_APPEND			0x04
-#define	BT_FS_MODE_CREATE			0x08
-#define BT_FS_MODE_TRUNCATE			0x10
-
-BT_u32 get_mode_flags(BT_i8 *mode) {
+BT_u32 BT_GetModeFlags(const BT_i8 *mode) {
 	BT_u32 ulModeFlags = 0x00;
 
 	if(!mode) {
@@ -290,10 +284,6 @@ BT_u32 get_mode_flags(BT_i8 *mode) {
 				ulModeFlags |= BT_FS_MODE_WRITE;	// RW Mode
 				break;
 
-			/*case 'D':	// Internal use only!
-				ModeBits |= FF_MODE_DIR;
-				break;*/
-
 			default:	// b|B flags not supported (Binary mode is native anyway).
 				break;
 		}
@@ -303,7 +293,7 @@ BT_u32 get_mode_flags(BT_i8 *mode) {
 	return ulModeFlags;
 }
 
-BT_HANDLE BT_Open(const BT_i8 *szpPath, BT_i8 *mode, BT_ERROR *pError) {
+BT_HANDLE BT_Open(const BT_i8 *szpPath, BT_u32 mode, BT_ERROR *pError) {
 
 	BT_ERROR Error = BT_ERR_NONE;
 	BT_HANDLE h = NULL;
@@ -328,7 +318,7 @@ BT_HANDLE BT_Open(const BT_i8 *szpPath, BT_i8 *mode, BT_ERROR *pError) {
 	const BT_i8 *path = get_relative_path(pMount, absolute_path);
 
 	const BT_IF_FS *pFS = pMount->pFS->hFS->h.pIf->oIfs.pFilesystemIF;
-	h = pFS->pfnOpen(pMount->hMount, path, get_mode_flags(mode), pError);
+	h = pFS->pfnOpen(pMount->hMount, path, mode, pError);
 
 err_free_out:
 	BT_kFree(absolute_path);
