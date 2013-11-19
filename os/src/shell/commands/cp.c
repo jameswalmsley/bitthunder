@@ -12,13 +12,13 @@ static int bt_cp(BT_HANDLE hShell, int argc, char **argv) {
 		return 0;
 	}
 
-	BT_HANDLE hSource = BT_Open(argv[1], "rb", &Error);
+	BT_HANDLE hSource = BT_Open(argv[1], BT_GetModeFlags("rb"), &Error);
 	if(!hSource) {
 		bt_fprintf(hStdout, "Cannot open source file: %s\n", argv[1]);
 		return 0;
 	}
 
-	BT_HANDLE hDest = BT_Open(argv[2], "wb+", &Error);
+	BT_HANDLE hDest = BT_Open(argv[2], BT_GetModeFlags("wb+"), &Error);
 	if(!hDest) {
 		bt_fprintf(hStdout, "Cannot open destination file: %s\n", argv[2]);
 		goto err_source_out;

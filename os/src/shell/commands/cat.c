@@ -18,7 +18,7 @@ static int bt_cat(BT_HANDLE hShell, int argc, char **argv) {
 	}
 
 
-	BT_HANDLE hFile = BT_Open(szpPath, "rb", &Error);
+	BT_HANDLE hFile = BT_Open(szpPath, BT_GetModeFlags("rb"), &Error);
 	if(!hFile) {
 		bt_fprintf(hStdout, "cat: cannot access %s: No such file or not a file\n", szpPath);
 		return 0;

@@ -43,7 +43,7 @@ static int bt_load_fpga(BT_HANDLE hShell, int argc, char **argv) {
 		goto flush;
 	}
 
-	BT_HANDLE hFile = BT_Open(argv[3], "rb", &Error);
+	BT_HANDLE hFile = BT_Open(argv[3], BT_GetModeFlags("rb"), &Error);
 	if(!hFile) {
 		bt_fprintf(hStdout, "Could not open bitstream at %s\n", argv[3]);
 		return -1;
@@ -70,8 +70,8 @@ static int bt_load_fpga(BT_HANDLE hShell, int argc, char **argv) {
 
 	unsigned char md5[16];
 	char szmd5[33] = { 0 };
-	int i, md5_len; 
-	calculate_hash(p, oInode.ullFilesize, "md5", md5, &md5_len);	
+	int i, md5_len;
+	calculate_hash(p, oInode.ullFilesize, "md5", md5, &md5_len);
 	for(i=0;i<md5_len;i++) {
 		char sztmp[3];
 		sprintf(sztmp, "%02x", md5[i]);

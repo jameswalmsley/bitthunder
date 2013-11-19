@@ -398,7 +398,7 @@ BT_ERROR BT_ShellScript(BT_HANDLE hShell, const BT_i8 *path) {
 	BT_u32		if_false_depth 	= 0;
 	BT_BOOL		if_reduced 		= BT_FALSE;		// Result of parsed condition.
 
-	BT_HANDLE hFile = BT_Open(path, "rb", &Error);
+	BT_HANDLE hFile = BT_Open(path, BT_GetModeFlags("rb"), &Error);
 	if(!hFile) {
 		BT_kPrint("Could not open shell script %s\n", path);
 		return BT_ERR_GENERIC;
@@ -514,7 +514,7 @@ BT_ERROR BT_Shell(BT_HANDLE hShell) {
 			if(hShell->bPrintPrompt) {
 				BT_Write(hShell->hStdout, 0, hShell->ulPromptLen, (char *)hShell->szpPrompt, &Error);
 				hShell->bPrintPrompt = 0;
-			} 
+			}
 			// get next char
 			BT_s32 c = BT_GetC(hShell->hStdin, BT_FILE_NON_BLOCK, &Error);
 			if(c >= 0) {
@@ -543,7 +543,7 @@ BT_ERROR BT_Shell(BT_HANDLE hShell) {
 					}
 				}
 			}
-		} 
+		}
 		while((hShell->ulFlags & BT_SHELL_FLAG_NON_BLOCK) == 0);
 	} else {
 		Error = BT_ERR_GENERIC;
@@ -551,4 +551,3 @@ BT_ERROR BT_Shell(BT_HANDLE hShell) {
 
 	return Error;
 }
-

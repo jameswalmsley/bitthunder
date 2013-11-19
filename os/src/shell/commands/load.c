@@ -11,7 +11,7 @@ static int bt_load_command(BT_HANDLE hShell, int argc, char **argv) {
 		return -1;
 	}
 
-	BT_HANDLE hFile = BT_Open(argv[2], "rb", &Error);
+	BT_HANDLE hFile = BT_Open(argv[2], BT_GetModeFlags("rb"), &Error);
 	if(!hFile) {
 		bt_fprintf(hStdout, "Could not open path: %s\n", argv[2]);
 		return -1;

@@ -17,7 +17,7 @@ static int bt_memcat(BT_HANDLE hShell, int argc, char **argv) {
 
 	length = strtoul(argv[2], NULL, 10);
 
-	BT_HANDLE hFile = BT_Open(argv[3], "wb", &Error);
+	BT_HANDLE hFile = BT_Open(argv[3], BT_GetModeFlags("wb"), &Error);
 	if(!hFile) {
 		bt_fprintf(hStdout, "Could not open %s for writing\n", argv[3]);
 		return -1;
