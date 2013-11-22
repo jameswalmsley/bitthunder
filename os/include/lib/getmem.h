@@ -5,6 +5,9 @@
 #ifndef _BT_GETMEM_H_
 #define _BT_GETMEM_H_
 
+#include <bt_config.h>
+#include <bt_types.h>
+
 typedef BT_u64	BT_be64;
 typedef BT_u32	BT_be32;
 typedef BT_u16	BT_be16;
