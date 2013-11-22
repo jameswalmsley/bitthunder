@@ -336,7 +336,11 @@ err_out:
 static BT_ERROR fullfat_read_inode(BT_HANDLE hInode, BT_INODE *pInode) {
 
 	BT_FF_INODE *phInode = (BT_FF_INODE *) hInode;
-	pInode->ullFilesize = phInode->oDirent.Filesize;
+	pInode->ullFileSize = phInode->oDirent.Filesize;
+	pInode->attr = 0;
+	if(phInode->oDirent.Attrib & FF_FAT_ATTR_DIR) {
+		pInode->attr |= BT_ATTR_DIR;
+	}
 	return BT_ERR_NONE;
 }
 

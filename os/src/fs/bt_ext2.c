@@ -260,7 +260,12 @@ static BT_ERROR ext2_read_inode(BT_HANDLE hInode, BT_INODE *pInode) {
 	if(ext2fs_get_inode((char *)phInode->szpPath, &inode) < 0) {
 		return BT_ERR_GENERIC;
 	}
+
 	pInode->ullFilesize = inode.size;
+	pInode->attr = 0;
+	if(inode.mode & FILETYPE_INO_DIRECTORY) {
+		pInode->attr |= BT_ATTR_DIR;
+	}
 
 	return BT_ERR_NONE;
 }
