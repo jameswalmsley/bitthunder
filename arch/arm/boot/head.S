@@ -50,9 +50,12 @@ bt_reset:
 	/*
 		Disable the IRQs as soon as possible, just in-case the boot-loader was naughty!
 	*/
-	mrs	r0,cpsr
-	orr	r0,r0,#0x80
-	msr	cpsr_c,r0
+	mrs	r9,cpsr
+	orr	r9,r9,#0x80
+	msr	cpsr_c,r9
+
+	mov r7,	r1	// Save the architecture ID.	// According to ARM abi, r7 and r8 must be preserved by a function if used.
+	mov r8, r2	// Save the fdt pointer.
 
 	ldr		r0, =__bt_init_start + ((_bt_vector_table_end-_bt_vector_table)/2)		// Set-up Initial kernel stack
 	mcr		p15, 0, r0, c12, c0, 0		// Set the VBAR (Vector base address register).
@@ -69,6 +72,9 @@ bt_reset:
 	/*
 	 *	Enable the snoop control unit.
 	 */
+
+	stmdb sp!, {r7}					// Preserve r7
+
 	ldr	r7, =0xf8f00000
 	ldr	r0, [r7]
 	orr	r0, r0, #0x1
@@ -81,10 +87,11 @@ bt_reset:
 	ldr	r6, =0xffff
 	str	r6, [r7]
 
+	ldmfd sp!, {r7}					// Restore R7
+
 	mrc	p15, 0, r0, c1, c0, 0		// Read SCTLR
 	bic	r0, r0, #(0x1 << 25)		// Ensure EE bit is cleared, reset to LITTLE_ENDIAN data.
 	mcr	p15, 0, r0, c1, c0, 0		// Write SCTLR
-
 
 	/* Write to ACTLR */
 	mrc	p15, 0, r0, c1, c0, 1		// Read ACTLR
@@ -218,7 +225,7 @@ skip_sram:
 	ldrle	r4, =CACHED_MEM
 skip_ram:
 #endif
-	
+
 	orr		r2,	r4
 	str		r2,	[r0]
 	add		r0,	r0, #0x4

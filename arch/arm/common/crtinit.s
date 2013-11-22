@@ -55,8 +55,9 @@ _bt_start:
 
 
 	/* make sure argc and argv are valid */
-	mov	r0, #0
-	mov	r1, #0
+
+	mov	r0, r7		// First argument is the machine id.
+	mov	r1,	r8		// Second argument is the fdt address.
 
 	/* Let her rip */
 	bl	bt_main
