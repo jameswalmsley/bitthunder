@@ -8,6 +8,10 @@ source os/src/shell/Kconfig
 source os/src/syslog/Kconfig
 source os/src/lib/Kconfig
 
+config OF
+	bool "Support Device Tree / Open Firmware framework"
+	default n
+
 config CACHE_MAINTENANCE
 	bool
 	default n
