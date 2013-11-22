@@ -425,7 +425,7 @@ BT_HANDLE BT_GetInode(const BT_i8 *szpPath, BT_ERROR *pError) {
 		goto err_out;
 	}
 
-	Error = to_absolute_path(absolute_path, BT_PATH_MAX, szpPath, BT_TRUE);
+	Error = to_absolute_path(absolute_path, BT_PATH_MAX, szpPath, BT_FALSE);
 	if(Error) {
 		goto err_free_out;
 	}
