@@ -287,7 +287,7 @@ void bt_vm_init(void) {
 
 	bt_list_add(&seg->list, &kernel_map.segments);
 
-	bt_vaddr_t start = (bt_vaddr_t) &__bt_init_start;
+	bt_vaddr_t start = bt_phys_to_virt(BT_CONFIG_LINKER_RAM_START_ADDRESS);
 	BT_u32 len   	 = (BT_u32) (BT_TOTAL_PAGES * BT_PAGE_SIZE);
 
 	bt_segment_reserve(&kernel_map, start, len);	// Reserve RAM section.
