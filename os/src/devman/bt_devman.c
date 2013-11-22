@@ -130,7 +130,7 @@ BT_ERROR BT_ProbeIntegratedDevices(BT_HANDLE hLogDevice) {
 		pDevice += i;
 
 		BT_INTEGRATED_DRIVER *pDriver = BT_GetIntegratedDriverByName(pDevice->name);
-		if(pDriver && pDriver->eType == BT_DRIVER_STANDARD) {
+		if(pDriver && (pDriver->eType & BT_DRIVER_TYPE_CODE_MASK) == BT_DRIVER_INTEGRATED) {
 			BT_HANDLE hDevice = pDriver->pfnProbe(pDevice, &Error);
 			if(Error) {
 				BT_kPrint("Error probing: %s device.", pDevice->name);

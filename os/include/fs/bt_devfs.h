@@ -18,6 +18,7 @@
 #include "bt_types.h"
 
 struct bt_devfs_node;
+struct _BT_DEVICE;
 
 typedef struct _BT_DEVFS_OPS {
 	BT_HANDLE (*pfnOpen) (struct bt_devfs_node *node, BT_ERROR *pError);
@@ -31,7 +32,7 @@ struct bt_devfs_node {
 
 typedef struct _BT_DEVFS_INODE {
 	const char 					*szpName;	///< Device file-system entry name.
-	const BT_INTEGRATED_DEVICE 	*pDevice;	///< Integrated device that the entry represents.
+	const struct _BT_DEVICE		*pDevice;	///< Integrated device that the entry represents.
 } BT_DEVFS_INODE;
 
 #define BT_DEVFS_INODE_DEF 		static const BT_ATTRIBUTE_SECTION(".bt.devfs.entries") BT_DEVFS_INODE
