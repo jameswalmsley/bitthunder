@@ -137,7 +137,7 @@ static BT_HANDLE fullfat_open(BT_HANDLE hMount, const BT_i8 *szpPath, BT_u32 ulM
 	return (BT_HANDLE) pFile;
 }
 
-static BT_ERROR fullfat_remove(BT_HANDLE hMount, const BT_i8 *szpPath) {
+static BT_ERROR fullfat_unlink(BT_HANDLE hMount, const BT_i8 *szpPath) {
 
 	FF_ERROR ffError;
 
@@ -249,6 +249,17 @@ static BT_ERROR fullfat_mkdir(BT_HANDLE hMount, const BT_i8 *szpPath) {
 	return BT_ERR_NONE;
 }
 
+static BT_ERROR fullfat_rmdir(BT_HANDLE hMount, const BT_i8 *szpPath) {
+
+	BT_FF_MOUNT *pMount = (BT_FF_MOUNT *) hMount;
+	FF_ERROR ffError = FF_RmDir(pMount->pIoman, szpPath);
+	if(ffError) {
+		return BT_ERR_GENERIC;
+	}
+
+	return BT_ERR_NONE;
+}
+
 static BT_HANDLE fullfat_opendir(BT_HANDLE hMount, const BT_i8 *szpPath, BT_ERROR *pError) {
 
 	BT_FF_DIR *pDir = (BT_FF_DIR *) BT_CreateHandle(&oDirHandleInterface, sizeof(BT_FF_DIR), pError);
@@ -353,9 +364,10 @@ static const BT_IF_FS oFilesystemInterface = {
 	.pfnUnmount 	= fullfat_unmount,
 	.pfnOpen		= fullfat_open,
 	.pfnMkDir		= fullfat_mkdir,
+	.pfnRmDir		= fullfat_rmdir,
 	.pfnOpenDir 	= fullfat_opendir,
 	.pfnGetInode 	= fullfat_open_inode,
-	.pfnRemove 		= fullfat_remove,
+	.pfnUnlink 		= fullfat_unlink,
 	.pfnRename 		= fullfat_rename,
 };
 
@@ -404,3 +416,4 @@ BT_MODULE_INIT_DEF oModuleEntry = {
 	BT_MODULE_NAME,
 	fullfat_init,
 };
+

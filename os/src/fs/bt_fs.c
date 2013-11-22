@@ -343,6 +343,38 @@ BT_ERROR BT_MkDir(const BT_i8 *szpPath) {
 	return pFS->pfnMkDir(pMount->hMount, path);
 }
 
+BT_ERROR BT_RmDir(const BT_i8 *szpPath) {
+	BT_ERROR Error = BT_ERR_NONE;
+
+	BT_i8 *absolute_path = BT_kMalloc(BT_PATH_MAX);
+	if(!absolute_path) {
+		Error = BT_ERR_GENERIC;
+		goto err_out;
+	}
+
+	Error = to_absolute_path(absolute_path, BT_PATH_MAX, szpPath, BT_FALSE);
+	if(Error) {
+		goto err_free_out;
+	}
+
+	BT_MOUNTPOINT *pMount = GetMountPoint(absolute_path);
+	if(!pMount) {
+		Error = BT_ERR_GENERIC;
+		goto err_free_out;
+	}
+
+	const BT_i8 *path = get_relative_path(pMount, absolute_path);
+
+	const BT_IF_FS *pFS = pMount->pFS->hFS->h.pIf->oIfs.pFilesystemIF;
+	Error = pFS->pfnRmDir(pMount->hMount, path);
+
+err_free_out:
+	BT_kFree(absolute_path);
+
+err_out:
+	return Error;
+}
+
 BT_HANDLE BT_OpenDir(const BT_i8 *szpPath, BT_ERROR *pError) {
 
 	BT_ERROR Error = BT_ERR_NONE;
@@ -423,15 +455,56 @@ err_out:
 }
 
 BT_ERROR BT_Remove(const BT_i8 *szpPath) {
-	BT_MOUNTPOINT *pMount = GetMountPoint(szpPath);
-	if(!pMount) {
+
+	BT_HANDLE h;
+	BT_ERROR Error;
+	h = BT_GetInode(szpPath, &Error);
+	if(!h) {
 		return BT_ERR_GENERIC;
 	}
 
-	const BT_i8 *path = get_relative_path(pMount, szpPath);
+	BT_INODE inode;
+	Error = BT_ReadInode(h, &inode);
+	BT_CloseHandle(h);
 
+	if(inode.attr & BT_ATTR_DIR) {
+		return BT_RmDir(szpPath);
+	}
+
+	return BT_Unlink(szpPath);
+}
+
+BT_ERROR BT_Unlink(const BT_i8 *szpPath) {
+
+	BT_ERROR Error = BT_ERR_NONE;
+
+	BT_i8 *absolute_path = BT_kMalloc(BT_PATH_MAX);
+	if(!absolute_path) {
+		Error = BT_ERR_GENERIC;
+		goto err_out;
+	}
+
+	Error = to_absolute_path(absolute_path, BT_PATH_MAX, szpPath, BT_FALSE);
+	if(Error) {
+		goto err_free_out;
+	}
+
+	BT_MOUNTPOINT *pMount = GetMountPoint(absolute_path);
+	if(!pMount) {
+		Error = BT_ERR_GENERIC;
+		goto err_free_out;
+	}
+
+	const BT_i8 *path = get_relative_path(pMount, absolute_path);
 	const BT_IF_FS *pFS = pMount->pFS->hFS->h.pIf->oIfs.pFilesystemIF;
-	return pFS->pfnRemove(pMount->hMount, path);
+
+	Error = pFS->pfnUnlink(pMount->hMount, path);
+
+err_free_out:
+	BT_kFree(absolute_path);
+
+err_out:
+	return Error;
 }
 
 BT_ERROR BT_Rename(const BT_i8 *szpPathA, const BT_i8 *szpPathB) {
