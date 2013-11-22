@@ -60,52 +60,35 @@
  *	FF_DestroySemaphore() should do nothing.
  *
  **/
-
+#include <bitthunder.h>
 #include "ff_safety.h"	// Íncludes ff_types.h
 
 void *FF_CreateSemaphore(void) {
 	// Call your OS's CreateSemaphore function
 	//
-
-	// return pointer to semaphore
-	return NULL;	// Comment this out for your implementation.
+	return BT_kMutexCreate();
 }
 
 void FF_PendSemaphore(void *pSemaphore) {
-	// Call your OS's PendSemaphore with the provided pSemaphore pointer.
-	//
-	// This should block indefinitely until the Semaphore
-	// becomes available. (No timeout!)
-	// If your OS doesn't do it for you, you should sleep
-	// this thread until the Semaphore is available.
-	pSemaphore = 0;
+	BT_kMutexPend(pSemaphore, 0);
 }
 
 void FF_ReleaseSemaphore(void *pSemaphore) {
-	// Call your OS's ReleaseSemaphore with the provided pSemaphore pointer.
-	//
-
-	//
-	pSemaphore = 0;
+	BT_kMutexRelease(pSemaphore);
 }
 
 void FF_DestroySemaphore(void *pSemaphore) {
-	// Call your OS's DestroySemaphore with the provided pSemaphore pointer.
-	//
-
-	//
-	pSemaphore = 0;
+	BT_kMutexDestroy(pSemaphore);
 }
 
 void FF_Yield(void) {
 	// Call your OS's thread Yield function.
 	// If this doesn't work, then a deadlock will occur
+	BT_ThreadYield();
 }
 
 void FF_Sleep(FF_T_UINT32 TimeMs) {
-	// Call your OS's thread sleep function,
-	// Sleep for TimeMs milliseconds
-	TimeMs = 0;
+	BT_ThreadSleep(TimeMs);
 }
 
 
