@@ -58,7 +58,11 @@ BT_u32 BT_BlockRead(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *p
 	BT_BLKDEV_DESCRIPTOR *blkdev = (BT_BLKDEV_DESCRIPTOR *) hBlock;
 
 	const BT_IF_BLOCK *pOps = blkdev->hBlkDev->h.pIf->oIfs.pDevIF->pBlockIF;
-	return pOps->pfnReadBlocks(blkdev->hBlkDev, ulAddress, ulBlocks, pBuffer, pError);
+
+	BT_kMutexPend(blkdev->kMutex, 0);
+	BT_u32 ret = pOps->pfnReadBlocks(blkdev->hBlkDev, ulAddress, ulBlocks, pBuffer, pError);
+	BT_kMutexRelease(blkdev->kMutex);
+	return ret;
 }
 
 BT_u32 BT_BlockWrite(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError) {
@@ -72,7 +76,12 @@ BT_u32 BT_BlockWrite(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *
 	BT_BLKDEV_DESCRIPTOR *blkdev = (BT_BLKDEV_DESCRIPTOR *) hBlock;
 
 	const BT_IF_BLOCK *pOps = blkdev->hBlkDev->h.pIf->oIfs.pDevIF->pBlockIF;
-	return pOps->pfnWriteBlocks(blkdev->hBlkDev, ulAddress, ulBlocks, pBuffer, pError);
+
+	BT_kMutexPend(blkdev->kMutex, 0);
+	BT_u32 ret = pOps->pfnWriteBlocks(blkdev->hBlkDev, ulAddress, ulBlocks, pBuffer, pError);
+	BT_kMutexRelease(blkdev->kMutex);
+
+	return ret;
 }
 
 BT_ERROR BT_GetBlockGeometry(BT_HANDLE hBlock, BT_BLOCK_GEOMETRY *pGeometry) {
@@ -89,6 +98,7 @@ BT_ERROR BT_RegisterBlockDevice(BT_HANDLE hDevice, const BT_i8 *szpName, BT_BLKD
 
 	pDescriptor->h.pIf = &oHandleInterface;
 	pDescriptor->hBlkDev = hDevice;
+	pDescriptor->kMutex = BT_kMutexCreate();
 	bt_list_add(&pDescriptor->item, &g_block_devices);
 
 	BT_LIST_INIT_HEAD(&pDescriptor->volumes);

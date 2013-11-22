@@ -25,6 +25,7 @@ typedef struct _BT_BLKDEV_DESCRIPTOR {
 	BT_HANDLE				hBlkDev;
 	BT_HANDLE 				hInode;
 	BT_u32					ulRefCount;
+	void 				   *kMutex;
 } BT_BLKDEV_DESCRIPTOR;
 
 BT_ERROR BT_RegisterBlockDevice(BT_HANDLE hDevice, const char *szpName, BT_BLKDEV_DESCRIPTOR *pDescriptor);
