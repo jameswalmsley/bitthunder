@@ -8,7 +8,6 @@
  *
  **/
 
-
 #include <bitthunder.h>
 #include <arch/common/gic.h>
 #include <arch/common/cortex-a9-cpu-timers.h>
@@ -185,7 +184,7 @@ BT_DEVFS_INODE_DEF oZynq_i2c1_inode = {
 };
 #endif
 
-
+#ifndef BT_CONFIG_OF
 #ifdef BT_CONFIG_MACH_ZYNQ_UART_0
 static const BT_RESOURCE oZynq_uart0_resources[] = {
 	{
@@ -201,7 +200,7 @@ static const BT_RESOURCE oZynq_uart0_resources[] = {
 };
 
 static const BT_INTEGRATED_DEVICE oZynq_uart0_device = {
-	.name					= "zynq,uart",
+	.name					= "xlnx,xuartps",
 	.ulTotalResources		= BT_ARRAY_SIZE(oZynq_uart0_resources),
 	.pResources				= oZynq_uart0_resources,
 };
@@ -228,7 +227,7 @@ static const BT_RESOURCE oZynq_uart1_resources[] = {
 };
 
 static const BT_INTEGRATED_DEVICE oZynq_uart1_device = {
-	.name					= "zynq,uart",
+	.name					= "xlnx,xuartps",
 	.ulTotalResources		= BT_ARRAY_SIZE(oZynq_uart1_resources),
 	.pResources				= oZynq_uart1_resources,
 };
@@ -237,6 +236,7 @@ BT_DEVFS_INODE_DEF oZynq_uart1_inode = {
 	.szpName = BT_CONFIG_MACH_ZYNQ_UART_1_INODE_NAME,
 	.pDevice = &oZynq_uart1_device,
 };
+#endif
 #endif
 
 extern BT_u32 zynq_trampoline_jump, zynq_trampoline, zynq_trampoline_end;
@@ -290,7 +290,7 @@ BT_MACHINE_START(ARM, ZYNQ, "Xilinx Embedded Zynq Platform")
 	.pInterruptController		= &oZynq_intc_device,
 	.pSystemTimer 				= &oZynq_cpu_timer_device,
 	.pfnBootCore				= zynq_boot_core,
-
+#ifndef BT_CONFIG_OF
 #ifdef BT_CONFIG_MACH_ZYNQ_BOOTLOG_UART_NULL
 	.pBootLogger				= NULL,
 #endif
@@ -299,5 +299,6 @@ BT_MACHINE_START(ARM, ZYNQ, "Xilinx Embedded Zynq Platform")
 #endif
 #ifdef BT_CONFIG_MACH_ZYNQ_BOOTLOG_UART_1
 	.pBootLogger				= &oZynq_uart1_device,
+#endif
 #endif
 BT_MACHINE_END

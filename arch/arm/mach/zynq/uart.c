@@ -544,7 +544,8 @@ err_out:
 	return NULL;
 }
 
-BT_INTEGRATED_DRIVER_DEF gpio_driver = {
-	.name 		= "zynq,uart",
+BT_INTEGRATED_DRIVER_DEF uart_driver = {
+	.name 		= "xlnx,xuartps",
+	.eType		= BT_DRIVER_INTEGRATED | BT_DRIVER_DEVFS_PROBE,	///< Integrated device that should only be probed on devfs open.
 	.pfnProbe	= uart_probe,
 };
