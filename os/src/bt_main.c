@@ -13,8 +13,9 @@
 #include <string.h>
 #include <bt_kernel.h>
 #include <lib/putc.h>
+#include <of/bt_of.h>
 
-static bt_kernel_params g_kernel_params;
+static bt_kernel_params g_kernel_params = { NULL };
 
 extern int main(int argc, char **argv);
 
@@ -40,15 +41,17 @@ struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;
 };
 
-/**
- *	@ Note: argc and argv may be used for kernel booting parameters at a later date.
- **/
-int bt_main(int argc, char **argv) {
+int bt_main(BT_u32 machid, const void *fdt) {
 
 	BT_ERROR 	Error;
 	BT_HANDLE 	hUart = NULL;
 
-	g_kernel_params.cmdline = 0;
+	g_kernel_params.cmdline = "";
+
+#ifdef BT_CONFIG_OF
+	g_kernel_params.fdt = fdt;
+	BT_LIST_INIT_HEAD(&g_kernel_params.devices);
+#endif
 
 #ifdef BT_CONFIG_MEM_PAGE_ALLOCATOR
 	bt_initialise_pages();
@@ -65,6 +68,10 @@ int bt_main(int argc, char **argv) {
 #endif
 #ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
 	bt_vm_init();
+#endif
+
+#ifdef BT_CONFIG_OF
+	bt_of_init();
 #endif
 
 	BT_MACHINE_DESCRIPTION *pMachine = BT_GetMachineDescription(&Error);

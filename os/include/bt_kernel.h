@@ -3,9 +3,15 @@
 
 #include <bt_types.h>
 #include <process/bt_threads.h>
+#include <devman/bt_device.h>
 
 typedef struct _bt_kernel_params {
 	const char *cmdline;
+#ifdef BT_CONFIG_OF
+	const void *fdt;					///< Pointer to the flattened device tree.
+	struct bt_list_head devices;		///< Unflattened device tree.
+	struct bt_list_head	all_of_nodes;	///< Linked list through all of_ nodes.
+#endif
 	bt_paddr_t 	coherent;
 } bt_kernel_params;
 

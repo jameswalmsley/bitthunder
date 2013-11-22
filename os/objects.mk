@@ -35,6 +35,7 @@ BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/lib/multiplexer.o
 
 include $(BASE)os/src/mm/objects.mk
 include $(BASE)os/src/devman/objects.mk
+include $(BASE)os/src/of/objects.mk
 include $(BASE)os/src/fs/objects.mk
 include $(BASE)os/src/net/objects.mk
 include $(BASE)os/src/shell/objects.mk

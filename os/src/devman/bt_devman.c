@@ -9,6 +9,12 @@
 #include <string.h>
 #include <stdio.h>
 
+#ifdef BT_CONFIG_OF
+#include <collections/bt_list.h>
+#include <of/bt_of.h>
+#endif
+
+
 extern const BT_MACHINE_DESCRIPTION * __bt_arch_init_start;
 extern const BT_MACHINE_DESCRIPTION * __bt_arch_init_end;
 
@@ -33,7 +39,6 @@ BT_MACHINE_DESCRIPTION *BT_GetMachineDescription(BT_ERROR *pError) {
 		}
 		return NULL;
 	}
-
 
 	return	(BT_MACHINE_DESCRIPTION *) &__bt_arch_init_start;
 }
@@ -117,6 +122,7 @@ const BT_RESOURCE *BT_GetIntegratedResource(const BT_INTEGRATED_DEVICE *pDevice,
 	return BT_GetResource(pDevice->pResources, pDevice->ulTotalResources, ulType, ulNum);
 }
 
+
 BT_ERROR BT_ProbeIntegratedDevices(BT_HANDLE hLogDevice) {
 
 	BT_ERROR Error;
@@ -143,6 +149,21 @@ BT_ERROR BT_ProbeIntegratedDevices(BT_HANDLE hLogDevice) {
 			BT_kPrint("Error: No driver to match %s device", pDevice->name);
 		}
 	}
+
+#ifdef BT_CONFIG_OF
+
+	BT_kPrint("Probing integrated devices from device tree:");
+
+	struct bt_device_node *root = bt_of_find_node_by_path("/");
+	struct bt_list_head *pos;
+	bt_list_for_each(pos, &root->children) {
+		struct bt_device_node *node = (struct bt_device_node *) pos;
+		BT_kPrint("devman: %s", node->full_name);
+		bt_of_integrated_probe(node);
+	}
+
+	BT_kPrint("Completing probing of OF devies");
+#endif
 
 	return BT_ERR_NONE;
 }
