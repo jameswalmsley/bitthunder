@@ -90,6 +90,18 @@ BT_be16 bt_cpu_to_be16(BT_u16 u16) {
 
 	return un16.u16;
 }
+
+BT_u64 bt_be64_to_cpu(BT_be64 be64) {
+	return __builtin_bswap64(be64);
+}
+
+BT_u32 bt_be32_to_cpu(BT_be32 be32) {
+	return __builtin_bswap32(be32);
+}
+
+BT_u16 bt_be16_to_cpu(BT_be16 be16) {
+	return __builtin_bswap16(be16);
+}
 #endif
 
 
