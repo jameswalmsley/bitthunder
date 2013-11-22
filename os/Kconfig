@@ -8,6 +8,10 @@ source os/src/shell/Kconfig
 source os/src/syslog/Kconfig
 source os/src/lib/Kconfig
 
+config CACHE_MAINTENANCE
+	bool
+	default n
+
 config MAIN_TASK_STACK_DEPTH
     int "Main task stack depth"
 	default 512
