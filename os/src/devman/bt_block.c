@@ -103,6 +103,8 @@ BT_ERROR BT_RegisterBlockDevice(BT_HANDLE hDevice, const BT_i8 *szpName, BT_BLKD
 
 	BT_LIST_INIT_HEAD(&pDescriptor->volumes);
 
+	pDescriptor->node.pOps = &oDevfsOps;
+
 	Error = BT_DeviceRegister(&pDescriptor->node, szpName);
 
 	BT_kPrint("Block device: %s registered, enumerating partitions.", szpName);
