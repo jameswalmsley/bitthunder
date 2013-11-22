@@ -26,11 +26,11 @@ static int bt_load_command(BT_HANDLE hShell, int argc, char **argv) {
 
 	addr = strtoul(argv[1], NULL,  16);
 
-	BT_kPrint("Loading %s at %08X (%llu bytes)", argv[2], addr, oInode.ullFilesize);
+	BT_kPrint("Loading %s at %08X (%llu bytes)", argv[2], addr, oInode.ullFileSize);
 
 	void *p = (void *) addr;
 
-	BT_Read(hFile, 0, oInode.ullFilesize, p, &Error);
+	BT_Read(hFile, 0, oInode.ullFileSize, p, &Error);
 
 	BT_kPrint("Load successful");
 
