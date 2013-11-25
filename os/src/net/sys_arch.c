@@ -169,7 +169,7 @@ u32_t sys_arch_mbox_fetch( sys_mbox_t *pxMailBox, void **ppvBuffer, u32_t ulTime
 		}
 	}
 	else {
-		while( BT_TRUE != BT_QueueReceive( *pxMailBox, &( *ppvBuffer ), 0 ) );
+		while( BT_TRUE != BT_QueueReceive( *pxMailBox, &( *ppvBuffer ), 1000 ) );
 		ulEndTime = BT_GetKernelTick();
 		ulElapsed = ( ulEndTime - ulStartTime );
 
