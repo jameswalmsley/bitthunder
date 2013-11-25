@@ -134,6 +134,9 @@ BT_ERROR BT_ProbeIntegratedDevices(BT_HANDLE hLogDevice) {
 	for(i = 0; i < size; i++) {
 		BT_INTEGRATED_DEVICE *pDevice = (BT_INTEGRATED_DEVICE *) &__bt_arch_devices_start;
 		pDevice += i;
+		if(pDevice->eType & BT_DEVICE_TYPE_CODE_MASK != BT_DEVICE_INTEGRATED) {
+			continue;
+		}
 
 		BT_INTEGRATED_DRIVER *pDriver = BT_GetIntegratedDriverByName(pDevice->name);
 		if(pDriver && (pDriver->eType & BT_DRIVER_TYPE_CODE_MASK) == BT_DRIVER_INTEGRATED) {
