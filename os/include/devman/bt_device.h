@@ -7,7 +7,8 @@
 #include <fs/bt_devfs.h>
 
 typedef enum {
-	#define BT_DEVICE_TYPE_OF_FLAG	0x80000000
+	#define BT_DEVICE_TYPE_CODE_MASK	0x000000FF
+	#define BT_DEVICE_TYPE_OF_FLAG		0x80000000
 	BT_DEVICE_INTEGRATED= 0,	///< Platform/Integrated device type.
 	BT_DEVICE_BUS,
 	BT_DEVICE_I2C,				///< I2C device type.

@@ -15,7 +15,7 @@ static BT_HANDLE devfs_open(struct bt_devfs_node *node, BT_ERROR *pError) {
 	BT_ERROR Error = BT_ERR_NONE;
 	struct bt_device_node *device = bt_container_of(node, struct bt_device_node, devfs_node);
 	BT_INTEGRATED_DRIVER *pDriver = BT_GetIntegratedDriverByName(device->dev.name);
-	if(pDriver && pDriver->eType == BT_DRIVER_INTEGRATED) {
+	if(pDriver && (pDriver->eType & BT_DRIVER_TYPE_CODE_MASK) == BT_DRIVER_INTEGRATED) {
 		BT_HANDLE hDevice = pDriver->pfnProbe(&device->dev, &Error);
 		*pError = Error;
 		return hDevice;
@@ -105,7 +105,7 @@ BT_ERROR bt_of_integrated_populate_device(struct bt_device_node *device) {
 
 	num_irq = bt_of_irq_count(device);
 
-	device->dev.eType = BT_DEVICE_INTEGRATED;
+	device->dev.eType = BT_DEVICE_INTEGRATED | BT_DEVICE_TYPE_OF_FLAG;
 	device->ulFlags |= BT_DEVICE_POPULATED;
 
 	// Generate the resource table.
@@ -138,7 +138,9 @@ BT_ERROR bt_of_integrated_populate_bus(struct bt_device_node *bus) {
 	struct bt_list_head *pos;
 	bt_list_for_each(pos, &bus->children) {
 		struct bt_device_node *child = (struct bt_device_node *) pos;
-		bt_of_integrated_populate_device(child);
+		if(!(child->ulFlags & BT_DEVICE_POPULATED)) {
+			bt_of_integrated_populate_device(child);
+		}
 		BT_kPrint("Found %s", child->name);
 	}
 
