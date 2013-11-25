@@ -25,7 +25,7 @@ static BT_I2C_BUS *getBusByID(BT_u32 ulID) {
 	return NULL;
 }
 
-BT_ERROR BT_I2C_RegisterBusWithID(BT_HANDLE hBus, BT_u32 ulBusID) {
+BT_ERROR BT_I2C_RegisterBus(BT_HANDLE hBus, BT_u32 ulBusID) {
 	BT_I2C_BUS *pBus = getBusByID(ulBusID);
 	if(pBus) {
 		return BT_ERR_GENERIC;	// Computer says no! Bus with same ID already exist!
