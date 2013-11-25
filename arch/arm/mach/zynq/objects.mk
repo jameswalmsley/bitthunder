@@ -12,6 +12,7 @@ MACH_ZYNQ_OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/timer.o
 MACH_ZYNQ_OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/gpio.o
 MACH_ZYNQ_OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/sdio.o
 MACH_ZYNQ_OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/devcfg.o
+MACH_ZYNQ_OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/qspi.o
 MACH_ZYNQ_OBJECTS-$(BT_CONFIG_I2C) += $(BUILD_DIR)arch/arm/mach/zynq/i2c.o
 
 MACH_ZYNQ_OBJECTS-$(BT_CONFIG_MACH_ZYNQ_GEM) += $(BUILD_DIR)arch/arm/mach/zynq/gem.o

@@ -16,6 +16,7 @@
 #include "slcr.h"
 #include "uart.h"
 #include "gpio.h"
+#include "qspi.h"
 
 static const BT_RESOURCE oZynq_gpio_resources[] = {
 	{
@@ -183,6 +184,47 @@ BT_DEVFS_INODE_DEF oZynq_i2c1_inode = {
 	.pDevice				= &oZynq_i2c1_device,
 };
 #endif
+
+static const BT_RESOURCE oZynq_qspi_resources[] = {
+	{
+		.ulStart			= ZYNQ_QSPI_CONTROLLER_BASE,
+		.ulEnd				= ZYNQ_QSPI_CONTROLLER_BASE + BT_SIZE_1K -1,
+		.ulFlags			= BT_RESOURCE_MEM,
+	},
+	{
+		.ulStart 			= 51,
+		.ulEnd				= 51,
+		.ulFlags			= BT_RESOURCE_IRQ,
+	},
+	{
+		.ulStart			= 0,			// bus_num
+		.ulEnd				= 0,
+		.ulFlags			= BT_RESOURCE_BUSID,
+	},
+	{
+		.ulStart 			= 1,			// num_cs
+		.ulEnd				= 1,
+		.ulFlags 			= BT_RESOURCE_NUM_CS,
+	},
+	{
+		.ulStart			= 0,			// is_dual
+		.ulEnd				= 0,
+		.ulFlags			= BT_RESOURCE_FLAGS,
+	},
+};
+
+BT_INTEGRATED_DEVICE_DEF oZynq_qspi_device = {
+	.name					= "zynq,qspi",
+	.ulTotalResources		= BT_ARRAY_SIZE(oZynq_qspi_resources),
+	.pResources				= oZynq_qspi_resources,
+};
+
+BT_DEVFS_INODE_DEF oZynq_qspi_inode = {
+	.szpName				= "qspi",
+	.pDevice				= &oZynq_qspi_device,
+};
+
+
 
 #ifndef BT_CONFIG_OF
 #ifdef BT_CONFIG_MACH_ZYNQ_UART_0
