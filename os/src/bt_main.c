@@ -98,6 +98,16 @@ int bt_main(BT_u32 machid, const void *fdt) {
 		}
 	}
 
+#ifdef BT_CONFIG_OF
+	if(!hUart) {
+		struct bt_device_node *logger = bt_of_get_bootlogger();
+		pDriver = BT_GetIntegratedDriverByName(logger->dev.name);
+		if(pDriver) {
+			hUart = pDriver->pfnProbe(&logger->dev, &Error);
+		}
+	}
+#endif
+
 	BT_UART_CONFIG oConfig;
 	BT_SetPowerState(hUart, BT_POWER_STATE_AWAKE);
 
