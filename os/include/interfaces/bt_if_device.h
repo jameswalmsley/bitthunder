@@ -12,6 +12,7 @@
 #include "bt_dev_if_uart.h"
 #include "bt_dev_if_pwm.h"
 #include "bt_dev_if_spi.h"
+#include "bt_dev_if_mtd.h"
 #include "bt_dev_if_i2c.h"
 #include "bt_dev_if_adc.h"
 #include "bt_dev_if_can.h"
@@ -36,6 +37,7 @@ typedef enum _BT_DEV_IF_TYPE {
 	BT_DEV_IF_T_I2C,
 	BT_DEV_IF_T_CAN,
 	BT_DEV_IF_T_SPI,
+	BT_DEV_IF_T_MTD,
 	BT_DEV_IF_T_SDIO,
 	BT_DEV_IF_T_EMAC,
 	BT_DEV_IF_T_MII,
@@ -73,6 +75,7 @@ typedef union {
 	const BT_DEV_IF_CAN 	   *pCANIF;
 	const BT_DEV_IF_SPI 	   *pSpiIF;
 	const BT_DEV_IF_I2C 	   *pI2CIF;
+	const BT_DEV_IF_MTD		   *pMtdIF;
 	const BT_DEV_IF_ADC 	   *pADCIF;
 	const BT_DEV_IF_UART 	   *pUartIF;
 	const BT_DEV_IF_SDIO	   *pSdioIF;
@@ -92,6 +95,7 @@ typedef union {
 #define BT_IF_CAN_OPS(handle)		BT_IF_DEV_CONFIG(handle).pCANIF
 #define BT_IF_UART_OPS(handle)		BT_IF_DEV_CONFIG(handle).pUartIF
 #define BT_IF_SPI_OPS(handle)		BT_IF_DEV_CONFIG(handle).pSpiIF
+#define BT_IF_MTD_OPS(handle)		BT_IF_DEV_CONFIG(handle).pMtdIF
 #define BT_IF_EMAC_OPS(handle)		BT_IF_DEV_CONFIG(handle).pEMacIF
 #define BT_IF_MII_OPS(handle)		BT_IF_DEV_CONFIG(handle).pMiiIF
 #define BT_IF_I2C_OPS(handle)		BT_IF_DEV_CONFIG(handle).pI2CIF

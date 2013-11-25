@@ -13,7 +13,7 @@
 #include "devman/bt_devman.h"
 #include "devman/bt_block.h"
 #include "devman/bt_i2c.h"
-#include "devman/bt_spi.h"
+#include "devman/bt_mtd.h"
 #include "volumes/bt_volume.h"
 #include "gpio/bt_gpio.h"
 #include "timers/bt_timers.h"
