@@ -113,5 +113,9 @@ config SHELL_CMD_PWD
 config SHELL_CMD_SLEEP
 	bool "sleep"
 	default n
+	
+config SHELL_CMD_FLASHTOOL
+	bool "flashtool"
+	default n
 
 endmenu
