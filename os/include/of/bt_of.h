@@ -40,5 +40,9 @@ static inline BT_u64 bt_of_read_number(const BT_be32 *cell, BT_u32 size) {
 	return r;
 }
 
+struct bt_device_node *bt_of_get_bootlogger();
+struct bt_device_node *bt_of_integrated_get_node(const BT_DEVICE *device);
+
+const void *bt_of_get_mac_address(struct bt_device_node *device);
 
 #endif
