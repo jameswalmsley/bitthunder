@@ -1,6 +1,6 @@
-
 #include <bitthunder.h>
 #include <asm/barrier.h>
+#include <of/bt_of.h>
 #include <string.h>
 #include "gem.h"
 #include "slcr.h"
@@ -33,6 +33,9 @@ struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER 				h;
 	volatile GEM_REGS			   *pRegs;
 	const BT_INTEGRATED_DEVICE 	   *pDevice;
+#ifdef BT_CONFIG_OF
+	struct bt_device_node 		   *dev;
+#endif
 	BT_NET_IF					   *pIf;
 	BT_NET_IF_EVENTRECEIVER			pfnEvent;
 	BT_HANDLE 						hMII;
@@ -428,8 +431,11 @@ static BT_ERROR descriptor_init(BT_HANDLE hMac) {
 static void mac_set_hwaddr(BT_HANDLE hMac) {
 	// Set mac address
 	// Get mac address from device tree, or bootloader params.
-	BT_u8 ucMac[6] = {0x00, 0xE0, 0x0C, 0x00, 0x73, 0x21};
-	mac_setaddr(hMac, ucMac, 6);
+#ifdef BT_CONFIG_OF
+	const void *mac = bt_of_get_mac_address(hMac->dev);
+	mac_setaddr(hMac, mac, 6);
+#endif
+
 }
 
 static void mac_reset_hw(BT_HANDLE hMac) {
@@ -553,6 +559,10 @@ static BT_HANDLE mac_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 	BT_HANDLE hMac;
 	BT_ERROR Error = BT_ERR_NONE;
 
+#ifdef BT_CONFIG_OF
+	struct bt_device_node *dev = bt_of_integrated_get_node(pDevice);
+#endif
+
 	hMac = BT_CreateHandle(&oHandleInterface, sizeof(struct _BT_OPAQUE_HANDLE), pError);
 	if(!hMac) {
 		Error = BT_ERR_NO_MEMORY;
@@ -567,8 +577,11 @@ static BT_HANDLE mac_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 
 	hMac->pRegs = bt_ioremap((void *) pResource->ulStart, sizeof(GEM_REGS));
 
-	descriptor_init(hMac);
+#ifdef BT_CONFIG_OF
+	hMac->dev = dev;
+#endif
 
+	descriptor_init(hMac);
 	mac_init_hw(hMac);
 
 	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_IRQ, 0);
@@ -609,6 +622,7 @@ BT_INTEGRATED_DRIVER_DEF mac_driver = {
 	.pfnProbe = mac_probe,
 };
 
+#ifndef BT_CONFIG_OF
 #ifdef BT_CONFIG_MACH_ZYNQ_GEM_0
 static const BT_RESOURCE oZynq_mac0_resources[] = {
 	{
@@ -659,4 +673,5 @@ BT_INTEGRATED_DEVICE_DEF oZynq_mac1_device = {
 	.ulTotalResources	= BT_ARRAY_SIZE(oZynq_mac1_resources),
 	.pResources			= oZynq_mac1_resources,
 };
+#endif
 #endif
