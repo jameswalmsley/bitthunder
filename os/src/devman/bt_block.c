@@ -135,7 +135,7 @@ static BT_ERROR bt_blockdev_cleanup(BT_HANDLE hBlockDev) {
 
 	BT_BLKDEV_DESCRIPTOR *blk = (BT_BLKDEV_DESCRIPTOR *) hBlockDev;
 
-	if(!blk->ulRefCount) {
+	if(blk->ulRefCount) {
 		blk->ulRefCount -= 1;
 	}
 
