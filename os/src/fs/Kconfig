@@ -15,6 +15,7 @@ config INODE
 config FS_DEV_DYNAMIC_REGISTRATION
 	bool "Dynamic DEVFS registration"
 	default n
+	select FS
 	select INODE
 
 config FS_FULLFAT
