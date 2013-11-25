@@ -159,3 +159,11 @@ BT_ERROR bt_of_integrated_populate(struct bt_device_node *root) {
 
 	return BT_ERR_NONE;
 }
+
+struct bt_device_node *bt_of_integrated_get_node(const BT_DEVICE *device) {
+	if(device->eType & BT_DEVICE_TYPE_OF_FLAG) {
+		return bt_container_of(device, struct bt_device_node, dev);
+	}
+
+	return NULL;
+}
