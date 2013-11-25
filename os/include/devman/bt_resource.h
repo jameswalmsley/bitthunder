@@ -35,7 +35,7 @@ typedef struct _BT_RESOURCE {
 #define BT_RESOURCE_FLAGS		0x00008000		///< A BT_u32 type for passing parameter flags.
 #define BT_RESOURCE_BUSID		0x00010000		///< A BusID.
 #define BT_RESOURCE_INTEGER		0x00020000		///< Generic Integer Value
-#define BT_RESOURCE_OF 			0x00040000		///< Presence detemines support of OF.
+#define BT_RESOURCE_NUM_CS		0x00040000
 
 #define BT_RESOURCE_TYPE(x)		(x & BT_RESOURCE_TYPE_BITS)
 

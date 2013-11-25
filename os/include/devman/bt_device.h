@@ -12,6 +12,7 @@ typedef enum {
 	BT_DEVICE_INTEGRATED= 0,	///< Platform/Integrated device type.
 	BT_DEVICE_BUS,
 	BT_DEVICE_I2C,				///< I2C device type.
+	BT_DEVICE_SPI,
 } BT_DEVICE_TYPE;
 
 /**
