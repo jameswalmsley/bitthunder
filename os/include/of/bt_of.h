@@ -12,6 +12,8 @@ struct bt_device_node *bt_of_node_get(struct bt_device_node *node);
 void bt_of_node_put(struct bt_device_node *node);
 
 struct bt_device_node *bt_of_get_parent(const struct bt_device_node *node);
+
+struct bt_device_property *bt_of_find_property(const struct bt_device_node *np, const BT_i8 *name, BT_u32 *lenp);
 const void *bt_of_get_property(const struct bt_device_node *np, const BT_i8 *name, BT_u32 *lenp);
 
 BT_u32 bt_of_n_addr_cells(struct bt_device_node *np);
@@ -30,6 +32,8 @@ BT_ERROR bt_of_integrated_probe(struct bt_device_node *node);
 
 
 BT_ERROR bt_of_integrated_populate(struct bt_device_node *root);
+BT_ERROR bt_of_integrated_populate_device(struct bt_device_node *device);
+
 BT_ERROR bt_of_unflatten_device_tree(const void *fdt, struct bt_list_head *devices, struct bt_list_head *allitems);
 BT_ERROR bt_of_init();
 

@@ -38,7 +38,7 @@ BT_ERROR bt_of_irq_map_raw(struct bt_device_node *parent, const BT_be32 *intspec
 
 	do {
 		tmp = bt_of_get_property(ipar, "#interrupt-cells", NULL);
-		if(!tmp) {
+		if(tmp) {
 			intsize = bt_be32_to_cpu(*tmp);
 			break;
 		}
@@ -69,7 +69,7 @@ BT_ERROR bt_of_irq_map_raw(struct bt_device_node *parent, const BT_be32 *intspec
 
 	addrsize = (!tmp) ? 2 : bt_be32_to_cpu(*tmp);
 
-	while(!ipar) {
+	while(ipar) {
 		if(bt_of_get_property(ipar, "interrupt-controller", NULL)) {
 			for(i = 0; i < intsize; i++) {
 				out_irq->specifier[i] = bt_of_read_number(intspec + i, 1);
