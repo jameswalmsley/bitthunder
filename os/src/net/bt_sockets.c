@@ -124,6 +124,11 @@ int sendto(int s, const void *dataptr, size_t size, int flags, const struct sock
 }
 
 int socket(int domain, int type, int protocol) {
+
+	if(!BT_isNetworkingReady()) {
+		return -1;
+	}
+
 	BT_ERROR Error;
 	BT_HANDLE hSocket = BT_CreateHandle(&oHandleInterface, sizeof(struct _BT_OPAQUE_HANDLE), &Error);
 	if(!hSocket) {

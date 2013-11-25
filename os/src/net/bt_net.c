@@ -88,7 +88,7 @@ static void tcpip_init_done(void *arg) {
 static BT_ERROR net_task(BT_HANDLE hThread, void *pParam) {
 	BT_NETIF_PRIV *pIF;
 
-	BT_BOOL bDone = BT_FALSE;
+	volatile BT_BOOL bDone = BT_FALSE;
 
 	tcpip_init(tcpip_init_done, &bDone);
 
@@ -165,6 +165,10 @@ static void net_manager_sm(void *pParam) {
 
 }
 
+BT_BOOL BT_isNetworkingReady() {
+	return g_bDone;
+}
+
 static BT_TASKLET sm_tasklet = { NULL, BT_TASKLET_IDLE, net_manager_sm, NULL };
 
 static BT_ERROR bt_net_manager_init() {
@@ -185,7 +189,7 @@ static BT_ERROR bt_net_manager_init() {
 	return BT_ERR_NONE;
 }
 
-BT_MODULE_INIT_0_DEF oModuleEntry = {
+BT_MODULE_INIT_DEF oModuleEntry = {
 	BT_MODULE_NAME,
 	bt_net_manager_init,
 };

@@ -36,5 +36,6 @@ typedef struct _BT_NET_IF {
 
 
 BT_ERROR BT_RegisterNetworkInterface(BT_HANDLE hIF);
+BT_BOOL BT_isNetworkingReady();
 
 #endif
