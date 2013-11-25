@@ -1,0 +1,7 @@
+MTD_OBJECTS-y += $(BUILD_DIR)drivers/mtd/m25p80.o
+
+
+MTD_OBJECTS += $(MTD_OBJECTS-y)
+
+$(MTD_OBJECTS): MODULE_NAME="drivers-MTD"
+OBJECTS += $(MTD_OBJECTS)
