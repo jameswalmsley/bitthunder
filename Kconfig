@@ -76,8 +76,13 @@ config OPTIMISE_NONE
 	bool "No Optimisations"
 
 config OPTIMISE_SIZE
-    bool "Optimise for size"
+    bool "-Os (Optimise for size)"
 
+config OPTIMISE_SPEED
+	bool "-O2 (Optimise for speed)"
+
+config OPTIMISE_ULTRA_SPEED
+	bool "-O3 (Optimise for ultra-speed (can increase code-size))"
 
 endchoice
 
@@ -85,6 +90,8 @@ config TOOLCHAIN_OPTIMISATION
     string
 	default "-Os" if OPTIMISE_SIZE
 	default "-O0" if OPTIMISE_NONE
+	default "-O2" if OPTIMISE_SPEED
+	default "-O3" if OPTIMISE_ULTRA_SPEED
 
 config TOOLCHAIN_DEBUG
     bool "Debug Symbols"
