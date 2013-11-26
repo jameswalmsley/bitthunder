@@ -323,6 +323,7 @@ extern BT_ERROR arm_pl310_init();
 
 static BT_ERROR zynq_machine_init(struct _BT_MACHINE_DESCRIPTION *pMachine) {
 	arm_pl310_init();
+	zynq_slcr_init();
 	return BT_ERR_NONE;
 }
 

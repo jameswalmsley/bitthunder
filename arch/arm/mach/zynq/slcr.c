@@ -1,9 +1,11 @@
 #include <bitthunder.h>
 #include "slcr.h"
 
+static volatile ZYNQ_SLCR_REGS *g_pSLCR = NULL;
+
 BT_u32 BT_ZYNQ_GetArmPLLFrequency() {
 
-	volatile ZYNQ_SLCR_REGS *pRegs = bt_ioremap((void *)ZYNQ_SLCR, BT_SIZE_4K);
+	volatile ZYNQ_SLCR_REGS *pRegs = g_pSLCR;
 
 	BT_u32 ctl = pRegs->ARM_PLL_CTRL;
 	BT_BOOL	bBypassed = BT_FALSE;
@@ -34,7 +36,7 @@ BT_u32 BT_ZYNQ_GetArmPLLFrequency() {
 
 BT_u32 BT_ZYNQ_GetIOPLLFrequency() {
 
-	volatile ZYNQ_SLCR_REGS *pRegs = bt_ioremap((void *)ZYNQ_SLCR, BT_SIZE_4K);
+	volatile ZYNQ_SLCR_REGS *pRegs = g_pSLCR;
 
 	BT_u32 ctl = pRegs->IO_PLL_CTRL;
 	BT_BOOL bBypassed = BT_FALSE;
@@ -64,7 +66,7 @@ BT_u32 BT_ZYNQ_GetIOPLLFrequency() {
 
 BT_u32 BT_ZYNQ_GetDDRPLLFrequency() {
 
-	volatile ZYNQ_SLCR_REGS *pRegs = bt_ioremap((void *)ZYNQ_SLCR, BT_SIZE_4K);
+	volatile ZYNQ_SLCR_REGS *pRegs = g_pSLCR;
 
 	BT_u32 ctl = pRegs->DDR_PLL_CTRL;
 	BT_BOOL bBypassed = BT_FALSE;
@@ -93,7 +95,7 @@ BT_u32 BT_ZYNQ_GetDDRPLLFrequency() {
 }
 
 BT_u32 BT_ZYNQ_GetCpuFrequency() {
-	volatile ZYNQ_SLCR_REGS *pRegs = bt_ioremap((void *)ZYNQ_SLCR, BT_SIZE_4K);
+	volatile ZYNQ_SLCR_REGS *pRegs = g_pSLCR;
 
 	BT_u32 	ctl 		= pRegs->ARM_CLK_CTRL;
 	BT_u32 	srcsel 		= ZYNQ_SLCR_CLK_CTRL_SRCSEL_VAL(ctl);
@@ -123,7 +125,7 @@ BT_u32 BT_ZYNQ_GetCpuFrequency() {
 }
 
 BT_u32 BT_ZYNQ_GetCpu1xFrequency() {
-	volatile ZYNQ_SLCR_REGS *pRegs = bt_ioremap((void *)ZYNQ_SLCR, BT_SIZE_4K);
+	volatile ZYNQ_SLCR_REGS *pRegs = g_pSLCR;
 
 	BT_u32 ulCPUClk = BT_ZYNQ_GetCpuFrequency();
 	if(pRegs->CLK_621_TRUE) {
@@ -164,4 +166,9 @@ void zynq_slcr_preload_fpga(volatile ZYNQ_SLCR_REGS *pSLCR) {
 void zynq_slcr_postload_fpga(volatile ZYNQ_SLCR_REGS *pSLCR) {
 	pSLCR->LVL_SHFTR_EN 	= 0xF;	// Enable all level shifters.
 	pSLCR->FPGA_RST_CTRL    = 0;	// De-assert AXI interface resets.
+}
+
+BT_ERROR zynq_slcr_init() {
+	g_pSLCR = bt_ioremap((void *)ZYNQ_SLCR, BT_SIZE_4K);
+	return BT_ERR_NONE;
 }
