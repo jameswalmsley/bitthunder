@@ -1,24 +1,22 @@
 #ifndef _BT_RTC_H_
 #define _BT_RTC_H_
 
+#include <fs/bt_devfs.h>
+#include <collections/bt_list.h>
 
-struct rtctime {
-	BT_s32 tm_sec;
-	BT_s32 tm_min;
-	BT_s32 tm_hour;
-	BT_s32 tm_mday;
-	BT_s32 tm_mon;
-	BT_s32 tm_year;
-	BT_s32 tm_wday;
-	BT_s32 tm_yday;
-	BT_s32 tm_isdst;
-};
+typedef struct _BT_RTC_INFO {
+	BT_HANDLE_HEADER h;
+	BT_HANDLE hRtc;
+	struct bt_list_head item;
+	struct bt_devfs_node node;
+	BT_u32 ulReferenceCount;
+} BT_RTC_INFO;
 
 /*
  *	Define the unified API for RTC devices in BitThunder
  */
+BT_ERROR BT_RTCRegisterDevice(BT_HANDLE hDevice, const BT_i8 *name, BT_RTC_INFO *rtc);
 BT_ERROR BT_RTCSetTime	(BT_HANDLE hRtc, struct rtctime *t);
 BT_ERROR BT_RTCGetTime	(BT_HANDLE hRtc, struct rtctime *t);
-
 
 #endif
