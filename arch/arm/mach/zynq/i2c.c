@@ -279,12 +279,17 @@ retry:
 			BT_ThreadSleep(2);
 			goto retry;
 		}
+
+		if(hI2C->err_status & INT_MASK_NACK) {
+			//BT_kPrint("ZYNQ I2C: NACK occured!");
+			break;
+		}
 	}
 
 	hI2C->p_msg = NULL;
 	hI2C->err_status = 0;
 
-	return num;
+	return count;
 }
 
 static const BT_DEV_IF_I2C oI2CInterface = {
