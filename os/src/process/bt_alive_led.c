@@ -15,7 +15,7 @@ BT_DEF_MODULE_EMAIL			("james@fullfat-fs.co.uk")
 #define	INVERT
 #endif
 
-static void led_task(void *pParam) {
+static void led_task(BT_HANDLE hThread, void *pParam) {
 
 	BT_GpioSetDirection(BT_CONFIG_ALIVE_LED_GPIO, BT_GPIO_DIR_OUTPUT);
 
@@ -48,7 +48,7 @@ static BT_ERROR bt_led_init() {
 		.ulPriority		= BT_CONFIG_ALIVE_LED_PRIORITY,
 	};
 
-	BT_CreateThread((BT_FN_TASK_ENTRY) led_task, &oThreadConfig, &Error);
+	BT_CreateThread((BT_FN_THREAD_ENTRY)led_task, &oThreadConfig, &Error);
 
 	return Error;
 }
