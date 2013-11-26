@@ -20,12 +20,12 @@ struct bt_match_table_32 {
 typedef struct _BT_DRIVER {
 	const BT_i8    *name;
 	BT_u32			eType;							///< Enum from BT_DRIVER_TYPE
-    #define BT_DRIVER_TYPE_CODE_MASK	0x000000FF	// Driver type code fiel
+    #define BT_DRIVER_TYPE_CODE_MASK	0x000000FF	// Driver type code field
     #define BT_DRIVER_DEVFS_PROBE 		0x80000000	// Flag the driver to not be probed on startup but be probed from devfs open.
 
 	union {
-		BT_HANDLE 		(*pfnProbe)		(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError);
-		BT_HANDLE		(*pfnI2CProbe)	(const BT_I2C_BUS *pBus, const BT_DEVICE *pDevice, BT_ERROR *pError);
+		BT_HANDLE 		(*pfnProbe)	(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError);
+		BT_HANDLE		(*pfnI2CProbe)	(BT_HANDLE hI2CBus, const BT_DEVICE *pDevice, BT_ERROR *pError);
 		BT_HANDLE 		(*pfnSPIProbe) 	(BT_SPI_DEVICE *pSpiDevice, const BT_DEVICE *pDevice, BT_ERROR *pError);
 		BT_HANDLE		(*pfnMIIProbe)	(BT_HANDLE hMII, struct bt_mii_bus *pBus, BT_u32 addr, BT_ERROR *pError);
 	};

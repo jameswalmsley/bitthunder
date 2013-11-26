@@ -6,27 +6,53 @@ BT_DEF_MODULE_DESCRIPTION	("Manages I2C bus adapters, and handles I2C device pro
 BT_DEF_MODULE_AUTHOR		("James Walmsley")
 BT_DEF_MODULE_EMAIL			("james@fullfat-fs.co.uk")
 
-static BT_LIST 		g_oI2CBusses = { NULL };
+static BT_LIST_HEAD(g_i2c_busses);
+
 static BT_TASKLET 	sm_tasklet;
 
-static BT_I2C_BUS *getBusByID(BT_u32 ulID) {
-	if(!BT_ListInitialised(&g_oI2CBusses)) {
-		return NULL;
-	}
+static const BT_IF_HANDLE oHandleInterface;
 
-	BT_I2C_BUS *pBus = (BT_I2C_BUS *) BT_ListGetHead(&g_oI2CBusses);
-	while(pBus) {
-		if(pBus->ulID == ulID) {
-			return pBus;
-		}
-		pBus = (BT_I2C_BUS *) BT_ListGetNext(&pBus->oItem);
+static BT_HANDLE i2c_bus_open(struct bt_devfs_node *node, BT_ERROR *pError) {
+
+	BT_I2C_BUS *pBus = (BT_I2C_BUS *) bt_container_of(node, BT_I2C_BUS, node);
+	if(!pBus->ulReferenceCount) {
+		pBus->ulReferenceCount += 1;
+		BT_AttachHandle(NULL, &oHandleInterface, (BT_HANDLE) &pBus->h);
+		return (BT_HANDLE) &pBus->h;
 	}
 
 	return NULL;
 }
 
-BT_ERROR BT_I2C_RegisterBus(BT_HANDLE hBus, BT_u32 ulBusID) {
-	BT_I2C_BUS *pBus = getBusByID(ulBusID);
+static const BT_DEVFS_OPS i2c_devfs_ops = {
+	.pfnOpen = i2c_bus_open,
+};
+
+static BT_ERROR i2c_bus_cleanup(BT_HANDLE h) {
+	BT_I2C_BUS *pBus = (BT_I2C_BUS *) h;
+	pBus->ulReferenceCount -= 1;
+	return BT_ERR_NONE;
+}
+
+BT_I2C_BUS *BT_I2C_GetBusByID(BT_u32 ulID) {
+	if (bt_list_empty(&g_i2c_busses)) {
+		return NULL;
+	}
+
+	struct bt_list_head *pos;
+	bt_list_for_each(pos, &g_i2c_busses) {
+		BT_I2C_BUS *pBus = (BT_I2C_BUS *) bt_container_of(pos, BT_I2C_BUS, item);
+		if(pBus->ulID == ulID) {
+			return pBus;
+		}
+	}
+
+	return NULL;
+}
+
+BT_ERROR BT_I2C_RegisterBusWithID(BT_HANDLE hBus, BT_u32 ulBusID) {
+	BT_I2C_BUS *pBus = BT_I2C_GetBusByID(ulBusID);
+	// @@MS: char name[16];
 	if(pBus) {
 		return BT_ERR_GENERIC;	// Computer says no! Bus with same ID already exist!
 	}
@@ -41,7 +67,12 @@ BT_ERROR BT_I2C_RegisterBus(BT_HANDLE hBus, BT_u32 ulBusID) {
 	pBus->ulStateFlags = BT_I2C_SM_PROBE_DEVICES;
 	pBus->pMutex = BT_kMutexCreate();
 
-	BT_ListAddItem(&g_oI2CBusses, &pBus->oItem);
+	bt_list_add(&pBus->item, &g_i2c_busses);
+	// @@MS: start
+	// @@MS: pBus->node.pOps = &i2c_devfs_ops;
+	// @@MS: snprintf(name,16,"_i2c%u",(unsigned int)ulBusID);
+	// @@MS: BT_DeviceRegister(&pBus->node, name);
+	// @@MS: start
 
 	BT_TaskletSchedule(&sm_tasklet);
 
@@ -69,32 +100,32 @@ static void i2c_probe_devices(BT_I2C_BUS *pBus) {
 			continue;
 		}
 
-		pDriver->pfnI2CProbe(pBus, pDevice, &Error);
+		pDriver->pfnI2CProbe((BT_HANDLE) pBus, pDevice, &Error);
 	}
 }
 
 static void i2c_sm(void *pData) {
-	BT_I2C_BUS *pBus = (BT_I2C_BUS *) BT_ListGetHead(&g_oI2CBusses);
-	while(pBus) {
 
+	struct bt_list_head *pos;
+	
+	bt_list_for_each(pos, &g_i2c_busses) {
+		BT_I2C_BUS *pBus = (BT_I2C_BUS *) bt_container_of(pos, BT_I2C_BUS, item);
 		if(pBus->ulStateFlags & BT_I2C_SM_PROBE_DEVICES) {
 			i2c_probe_devices(pBus);
 			pBus->ulStateFlags &= ~BT_I2C_SM_PROBE_DEVICES;
 		}
-
-		pBus = (BT_I2C_BUS *) BT_ListGetNext(&pBus->oItem);
 	}
+}
+
+BT_I2C_BUS *BT_I2C_GetBusObject(BT_HANDLE hBus) {
+	 return (BT_I2C_BUS *) hBus;
 }
 
 static BT_TASKLET sm_tasklet = {NULL, BT_TASKLET_IDLE, i2c_sm, NULL};
 
-
-static BT_ERROR bt_i2c_init() {
-	BT_ListInit(&g_oI2CBusses);
-	return BT_ERR_NONE;
-}
-
-BT_MODULE_INIT_DEF oI2CModuleEntry = {
-	BT_MODULE_NAME,
-	bt_i2c_init,
+static const BT_IF_HANDLE oHandleInterface = {
+	BT_MODULE_DEF_INFO,
+	.ulFlags = BT_HANDLE_FLAGS_NO_DESTROY,
+	.eType = BT_HANDLE_T_I2C_BUS,
+	.pfnCleanup = i2c_bus_cleanup,
 };

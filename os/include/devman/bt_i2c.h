@@ -6,16 +6,20 @@
 #ifndef _BT_I2C_H_
 #define _BT_I2C_H_
 
-#include "bt_types.h"
-#include <collections/bt_linked_list.h>
+#include "bt_types.h" 
+#include <fs/bt_devfs.h>
+#include <collections/bt_list.h>
 
 typedef struct _BT_I2C_BUS {
-	BT_LIST_ITEM 	oItem;
+	BT_HANDLE_HEADER h;
+	struct bt_list_head item;
+	struct bt_devfs_node node;
 	BT_HANDLE 		hBus;
 	BT_u32			ulID;
 	BT_u32			ulStateFlags;
 	#define BT_I2C_SM_PROBE_DEVICES 0x00000001
 	void		   *pMutex;
+	BT_u32			ulReferenceCount;
 } BT_I2C_BUS;
 
 typedef struct _BT_I2C_CLIENT {
@@ -39,7 +43,10 @@ typedef struct _BT_I2C_MESSAGE {
 	BT_u16 	len;
 } BT_I2C_MESSAGE;
 
-BT_ERROR BT_I2C_RegisterBus(BT_HANDLE hBus, BT_u32 ulBusID);
-//BT_ERROR BT_I2C_RegisterDevices(BT_u32 ulBusID, BT_I2C_BOARD_INFO *pInfo, BT_u32 ulNum);
+BT_ERROR BT_I2C_RegisterBusWithID(BT_HANDLE hBus, BT_u32 ulBusID);
+
+BT_I2C_BUS *BT_I2C_GetBusByID(BT_u32 ulID);
+
+BT_I2C_BUS *BT_I2C_GetBusObject(BT_HANDLE hBus);
 
 #endif

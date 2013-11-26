@@ -3,6 +3,10 @@
 
 #include "bt_types.h"
 
+typedef struct _BT_I2C_MESSAGE BT_I2C_MESSAGE;
+typedef struct _BT_I2C_CLIENT BT_I2C_CLIENT;
+typedef struct _BT_I2C_BUS BT_I2C_BUS;
+
 typedef enum {
 	BT_I2C_CLOCKRATE_100kHz = 0,
 	BT_I2C_CLOCKRATE_400kHz,
