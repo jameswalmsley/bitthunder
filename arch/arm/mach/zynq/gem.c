@@ -104,13 +104,6 @@ static BT_ERROR mac_getaddr(BT_HANDLE hMac, BT_u8 *addr, BT_u32 ulLength) {
 	regvall = pRegs->spec_addr1_bot;
     regvalh = pRegs->spec_addr1_top;
 
-    BT_kPrint("MAC 0x%08x, 0x%08x, %02x:%02x:%02x:%02x:%02x:%02x\n",
-			regvall, regvalh,
-			(regvall & 0xff), ((regvall >> 8) & 0xff),
-			((regvall >> 16) & 0xff), (regvall >> 24),
-			(regvalh & 0xff), (regvalh >> 8));
-
-
 	addr[0] = (regvall & 0xff);
 	addr[1] = ((regvall >>  8) & 0xff);
 	addr[2] = ((regvall >> 16) & 0xff);
