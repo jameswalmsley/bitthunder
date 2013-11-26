@@ -13,8 +13,8 @@ BT_DEF_MODULE_EMAIL				("james@fullfat-fs.co.uk")
 
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER 			h;
+	BT_I2C_BUS					i2c_master;
 	volatile ZYNQ_I2C_REGS 	   *pRegs;
-	const BT_INTEGRATED_DEVICE *pDevice;
 	void					   *pMutex;
 	BT_u32						err_status;
 	BT_I2C_MESSAGE 			   *p_msg;
@@ -114,7 +114,8 @@ static BT_ERROR i2c_irq_handler(BT_u32 ulIRQ, void *pParam) {
 }
 
 static BT_ERROR i2c_cleanup(BT_HANDLE hI2C) {
-	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hI2C->pDevice, BT_RESOURCE_IRQ, 0);
+
+	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hI2C->i2c_master.pDevice, BT_RESOURCE_IRQ, 0);
 	if(!pResource) {
 		return BT_ERR_GENERIC;
 	}
@@ -349,7 +350,7 @@ static BT_HANDLE i2c_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 
 	BT_EnableInterrupt(ulIRQ);
 
-	hI2C->pDevice = pDevice;
+	hI2C->i2c_master.pDevice = pDevice;
 	i2c_set_clock_rate(hI2C, BT_I2C_CLOCKRATE_400kHz);
 
 	hI2C->pMutex = BT_kMutexCreate();
@@ -368,9 +369,13 @@ static BT_HANDLE i2c_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 
 	BT_u32 ulBusID = pResource->ulStart;
 
+	hI2C->i2c_master.ulBusID	= ulBusID;
+	hI2C->i2c_master.hBus 		= hI2C;		// Save pointer to bus's private data.
+	hI2C->i2c_master.pDevice 	= pDevice;
+
 	hI2C->pRegs->CONTROL |= 0x0000000E;
 
-	BT_I2C_RegisterBusWithID(hI2C, ulBusID);
+	BT_I2C_RegisterBus(&hI2C->i2c_master);
 
 	if(pError) {
 		*pError = Error;
@@ -393,6 +398,6 @@ err_out:
 }
 
 BT_INTEGRATED_DRIVER_DEF oDriver = {
-	.name 		= "zynq,i2c",
+	.name 		= "xlnx,ps7-i2c-1.00.a",
 	.pfnProbe 	= i2c_probe,
 };

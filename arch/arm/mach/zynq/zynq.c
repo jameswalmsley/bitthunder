@@ -123,6 +123,7 @@ BT_DEVFS_INODE_DEF oZynq_devcfg_inode = {
 	.pDevice = &oZynq_devcfg_device,
 };
 
+#ifndef BT_CONFIG_OF
 #ifdef BT_CONFIG_MACH_ZYNQ_I2C_0
 static const BT_RESOURCE oZynq_i2c0_resources[] = {
 	{
@@ -143,7 +144,7 @@ static const BT_RESOURCE oZynq_i2c0_resources[] = {
 };
 
 BT_INTEGRATED_DEVICE_DEF oZynq_i2c0_device = {
-	.name 					= "zynq,i2c",
+	.name 					= "xlnx,ps7-i2c-1.00.a",
 	.ulTotalResources		= BT_ARRAY_SIZE(oZynq_i2c0_resources),
 	.pResources				= oZynq_i2c0_resources,
 };
@@ -174,7 +175,7 @@ static const BT_RESOURCE oZynq_i2c1_resources[] = {
 };
 
 BT_INTEGRATED_DEVICE_DEF oZynq_i2c1_device = {
-	.name 					= "zynq,i2c",
+	.name 					= "xlnx,ps7-i2c-1.00.a",
 	.ulTotalResources		= BT_ARRAY_SIZE(oZynq_i2c1_resources),
 	.pResources				= oZynq_i2c1_resources,
 };
@@ -184,7 +185,10 @@ BT_DEVFS_INODE_DEF oZynq_i2c1_inode = {
 	.pDevice				= &oZynq_i2c1_device,
 };
 #endif
+#endif
 
+#ifndef BT_CONFIG_OF
+#ifdef BT_CONFIG_MACH_ZYNQ_QSPI
 static const BT_RESOURCE oZynq_qspi_resources[] = {
 	{
 		.ulStart			= ZYNQ_QSPI_CONTROLLER_BASE,
@@ -223,8 +227,8 @@ BT_DEVFS_INODE_DEF oZynq_qspi_inode = {
 	.szpName				= "qspi",
 	.pDevice				= &oZynq_qspi_device,
 };
-
-
+#endif
+#endif
 
 #ifndef BT_CONFIG_OF
 #ifdef BT_CONFIG_MACH_ZYNQ_UART_0
