@@ -6,6 +6,7 @@
 #ifndef _BT_I2C_H_
 #define _BT_I2C_H_
 
+#include <bitthunder.h>
 #include "bt_types.h" 
 #include <fs/bt_devfs.h>
 #include <collections/bt_list.h>

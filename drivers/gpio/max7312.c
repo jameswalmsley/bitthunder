@@ -198,6 +198,6 @@ err_out:
 
 BT_INTEGRATED_DRIVER_DEF oDriver = {
 	.name 	= "maxim,7312",
-	.eType 	= BT_DEVICE_I2C,
+	.eType 	= BT_DRIVER_I2C,
 	.pfnI2CProbe = gpio_probe,
 };

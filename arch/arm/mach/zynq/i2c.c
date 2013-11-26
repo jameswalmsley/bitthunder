@@ -370,7 +370,7 @@ static BT_HANDLE i2c_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 
 	hI2C->pRegs->CONTROL |= 0x0000000E;
 
-	BT_I2C_RegisterBus(hI2C, ulBusID);
+	BT_I2C_RegisterBusWithID(hI2C, ulBusID);
 
 	if(pError) {
 		*pError = Error;

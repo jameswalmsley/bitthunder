@@ -91,7 +91,7 @@ static void i2c_probe_devices(BT_I2C_BUS *pBus) {
 		}
 
 		BT_INTEGRATED_DRIVER *pDriver = BT_GetIntegratedDriverByName(pDevice->name);
-		if(!pDriver || pDriver->eType != BT_DRIVER_I2C) {
+		if(!pDriver || (pDriver->eType & BT_DRIVER_TYPE_CODE_MASK) != BT_DRIVER_I2C) {
 			continue;
 		}
 

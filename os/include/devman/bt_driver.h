@@ -1,7 +1,6 @@
 #include "bt_types.h"
 #include "bt_device.h"
 #include "bt_resource.h"
-#include "bt_i2c.h"
 #include "interfaces/bt_dev_if_spi.h"
 #include <net/bt_phy.h>
 
