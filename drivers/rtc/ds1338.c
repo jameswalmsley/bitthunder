@@ -6,6 +6,7 @@
 
 #include <bitthunder.h>
 #include <lib/bcd.h>
+#include <rtc/bt_rtc.h>
 
 BT_DEF_MODULE_NAME				("Dallas 1338 RTC")
 BT_DEF_MODULE_DESCRIPTION		("Maxim I2C RTC")
@@ -28,8 +29,8 @@ BT_DEF_MODULE_EMAIL				("rsteinbauer@riegl.co.at")
 
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;
-	BT_HANDLE		 hI2C;
-	BT_u32			 addr;
+	BT_RTC_INFO		 oInfo;
+	BT_I2C_CLIENT	 oClient;
 	BT_I2C_MESSAGE	 oMessages[2];
 };
 
@@ -43,18 +44,18 @@ static BT_ERROR get_time(BT_HANDLE hRtc, struct rtctime *t) {
 	BT_u8 ucBuffer[8];
 	BT_u8 buf = 0;
 
-	hRtc->oMessages[0].addr 	= hRtc->addr;
+	hRtc->oMessages[0].addr 	= hRtc->oClient.addr;
 	hRtc->oMessages[0].len  	= 1;
 	hRtc->oMessages[0].buf  	= &buf;
 	hRtc->oMessages[0].flags    = 0;
 
-	hRtc->oMessages[1].addr 	= hRtc->addr;
+	hRtc->oMessages[1].addr 	= hRtc->oClient.addr;
 	hRtc->oMessages[1].len		= 7;
 	hRtc->oMessages[1].buf		= ucBuffer;
 	hRtc->oMessages[1].flags 	= BT_I2C_M_RD;
 
 	/* read the RTC date and time registers all at once */
-	BT_I2C_Transfer(hRtc->hI2C, hRtc->oMessages, 2, &Error);
+	BT_I2C_Transfer(hRtc->oClient.pBus, hRtc->oMessages, 2, &Error);
 
 	t->tm_sec = bcd2bin(ucBuffer[DS1338_REG_SECS] & 0x7f);
 	t->tm_min = bcd2bin(ucBuffer[DS1338_REG_MIN] & 0x7f);
@@ -88,16 +89,15 @@ static BT_ERROR set_time(BT_HANDLE hRtc, struct rtctime *t) {
 	BT_u8 uctmp = t->tm_year - 2000;
 	ucBuffer[1+DS1338_REG_YEAR] = bin2bcd(uctmp);
 
-	hRtc->oMessages[0].addr 	= hRtc->addr;
+	hRtc->oMessages[0].addr 	= hRtc->oClient.addr;
 	hRtc->oMessages[0].len		= 8;
 	hRtc->oMessages[0].buf		= ucBuffer;
 	hRtc->oMessages[0].flags 	= 0;
 
-	BT_I2C_Transfer(hRtc->hI2C, hRtc->oMessages, 1, &Error);
+	BT_I2C_Transfer(hRtc->oClient.pBus, hRtc->oMessages, 1, &Error);
 
 	return Error;
- }
-
+}
 
 static const BT_DEV_IF_RTC rtc_ops = {
 	.pfnGetTime			= get_time,
@@ -119,9 +119,13 @@ static const BT_IF_HANDLE oHandleInterface = {
 	},
 };
 
-static BT_HANDLE rtc_probe(BT_HANDLE hI2C, const BT_DEVICE *pDevice, BT_ERROR *pError) {
+static BT_HANDLE rtc_probe(BT_HANDLE hBus, const BT_DEVICE *pDevice, BT_ERROR *pError) {
 
 	BT_ERROR Error = BT_ERR_NONE;
+	struct rtctime Time;
+	const char *name;
+
+	BT_I2C_BUS *pBus = BT_I2C_GetBusObject(hBus);
 
 	BT_HANDLE hRtc = BT_CreateHandle(&oHandleInterface, sizeof(struct _BT_OPAQUE_HANDLE), pError);
 	if(!hRtc) {
@@ -129,39 +133,32 @@ static BT_HANDLE rtc_probe(BT_HANDLE hI2C, const BT_DEVICE *pDevice, BT_ERROR *p
 		goto err_out;
 	}
 
-	hRtc->hI2C = hI2C;
+	hRtc->oClient.pBus = pBus;
 
-	const BT_RESOURCE *pResource = BT_GetDeviceResource(pDevice, BT_RESOURCE_BUSID, 1);
+	const BT_RESOURCE *pResource = BT_GetDeviceResource(pDevice, BT_RESOURCE_INTEGER, 0);
 	if(!pResource) {
 		Error = BT_ERR_INVALID_RESOURCE;
 		goto err_free_out;
 	}
 
-	hRtc->addr = pResource->ulStart;
+	hRtc->oClient.addr = pResource->ulStart;
 
-	/*Error = BT_RegisterrtcController(base, total, hRtc);
-	if(Error) {
+	pResource = BT_GetDeviceResource(pDevice, BT_RESOURCE_STRING, 0);
+	if(!pResource) {
+		Error = BT_ERR_INVALID_RESOURCE;
 		goto err_free_out;
-	}*/
+	}
 
-	BT_kPrint("DS1338 : Initialising RTC.");
+	name = pResource->szpName;
 
-	struct rtctime Time;
-
-	Time.tm_hour = 16;
-	Time.tm_min  = 38;
-	Time.tm_sec  = 10;
-	Time.tm_year = 2013;
-	Time.tm_mon  = 6;
-	Time.tm_wday = 4;
-	Time.tm_mday = 12;
-
-	//set_time(hRtc, &Time);
+	BT_kPrint("Probing RTC DS1338 called %d on I2C-bus %d and I2C-address 0x%02x", name, hRtc->oClient.pBus->ulID, hRtc->oClient.addr);
 
 	get_time(hRtc, &Time);
 
 	BT_kPrint("Time : %02d:%02d:%02d", Time.tm_hour, Time.tm_min, Time.tm_sec);
-	BT_kPrint("Date : %04d.%02d.%02d", Time.tm_year, Time.tm_mon, Time.tm_mday);
+	BT_kPrint("Date : %02d.%02d.%04d", Time.tm_mday, Time.tm_mon, Time.tm_year);
+
+	BT_RTCRegisterDevice(hRtc, name, &hRtc->oInfo);
 
 	return hRtc;
 
