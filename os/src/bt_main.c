@@ -25,6 +25,7 @@ void bt_do_bug(void *pc) {
 #endif
 	BT_DisableInterrupts();
 
+	BT_kPrint("%p, 0x%08x",pc,*((BT_u32 *)pc));
 	BT_kPrint("Step 1. DO NOT PANIC!");
 	BT_kPrint("Step 2. Take a deep breath");
 	BT_kPrint("Step 3. Read the bad news below:");
