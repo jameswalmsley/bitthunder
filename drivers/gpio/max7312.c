@@ -152,7 +152,7 @@ static BT_HANDLE gpio_probe(const BT_I2C_BUS *pBus, const BT_DEVICE *pDevice, BT
 
 	hGPIO->oClient.pBus = pBus;
 
-	const BT_RESOURCE *pResource = BT_GetDeviceResource(pDevice, BT_RESOURCE_BUSID, 1);
+	const BT_RESOURCE *pResource = BT_GetDeviceResource(pDevice, BT_RESOURCE_BUSID, 0);
 	if(!pResource) {
 		Error = BT_ERR_INVALID_RESOURCE;
 		goto err_free_out;
