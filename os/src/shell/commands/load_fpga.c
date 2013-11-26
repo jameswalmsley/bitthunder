@@ -60,9 +60,9 @@ static int bt_load_fpga(BT_HANDLE hShell, int argc, char **argv) {
 	BT_ReadInode(hInode, &oInode);
 
 
-	BT_kPrint("Loading %s at %08X (%llu bytes)", argv[3], addr, oInode.ullFilesize);
+	BT_kPrint("Loading %s at %08X (%llu bytes)", argv[3], addr, oInode.ullFileSize);
 
-	BT_Read(hFile, 0, oInode.ullFilesize, p, &Error);
+	BT_Read(hFile, 0, oInode.ullFileSize, p, &Error);
 
 	BT_kPrint("Load successful");
 
@@ -71,7 +71,7 @@ static int bt_load_fpga(BT_HANDLE hShell, int argc, char **argv) {
 	unsigned char md5[16];
 	char szmd5[33] = { 0 };
 	int i, md5_len;
-	calculate_hash(p, oInode.ullFilesize, "md5", md5, &md5_len);
+	calculate_hash(p, oInode.ullFileSize, "md5", md5, &md5_len);
 	for(i=0;i<md5_len;i++) {
 		char sztmp[3];
 		sprintf(sztmp, "%02x", md5[i]);
@@ -89,7 +89,7 @@ static int bt_load_fpga(BT_HANDLE hShell, int argc, char **argv) {
 		BT_CloseHandle(hInode);
 	}
 
-	length = oInode.ullFilesize;
+	length = oInode.ullFileSize;
 
 flush:
 
