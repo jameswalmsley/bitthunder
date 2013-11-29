@@ -1,0 +1,14 @@
+OBJECTS += mkimage.o
+OBJECTS += fit_image.o
+OBJECTS += fit_hash.o
+OBJECTS += fit_timestamp.o
+OBJECTS += crc32.o
+OBJECTS += md5.o
+OBJECTS += sha1.o
+OBJECTS += ../dtc/libfdt/fdt.o
+OBJECTS += ../dtc/libfdt/fdt_ro.o
+OBJECTS += ../dtc/libfdt/fdt_wip.o
+OBJECTS += ../dtc/libfdt/fdt_sw.o
+OBJECTS += ../dtc/libfdt/fdt_rw.o
+OBJECTS += ../dtc/libfdt/fdt_strerror.o
+OBJECTS += ../dtc/libfdt/fdt_empty_tree.o

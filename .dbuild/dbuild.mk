@@ -47,8 +47,8 @@ all: dbuild_entry _all
 #	Optional Include directive, blue build attempts to build using lists of objects,
 #	targets and subdirs as found in objects.mk and subdirs.mk
 #
--include $(DBUILD_ROOT).config.mk
--include $(DBUILD_ROOT).config
+-include $(BUILD_BASE).config.mk
+#-include $(BUILD_BASE).config
 -include $(BUILD_BASE)objects.mk
 -include targets.mk
 -include subdirs.mk

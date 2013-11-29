@@ -1,0 +1,69 @@
+/*
+ * Simple BootThunder FIT source file.
+ */
+
+/dts-v1/;
+/ {
+	description = "Simple image BitThunder kernel";
+	#address-cells = <1>;
+
+	images {
+		btkernel: kernel@1 {
+			description = "Vanilla BitThunder kernel";
+			data = /incbin/("./kernel.img");
+			type = "kernel";
+			arch = "arm";
+			os = "bitthunder";
+			compression = "none";
+			load = <0x18000000>;
+			entry = <0x18008000>;
+			hash@1 {
+				algo = "crc32";
+			};
+
+			hash@2 {
+				algo = "sha1";
+			};
+
+			hash@3 {
+				algo = "md5";
+			};
+		};
+
+		fpga: fpga@2 {
+			 description = "FPGA bitstream";
+			 data = /incbin/("./fpga.bin");
+			 compression = "none";
+			 type = "bitstream";
+			 
+			 hash@1 {
+			 	algo = "crc32";				
+			 };
+
+			 hash@2 {
+			 	algo = "sha1";
+			 };
+
+			 hash@3 {
+			 	algo = "md5";
+			 };
+		};
+	};
+
+	configurations {
+		default = "config@1";
+		config@1 {
+			description = "Boot BitThunder kernel with default fpga";
+			kernel = "kernel@1";
+			fpga = "fpga@2";
+			fpga_device = "/dev/xdevcfg";
+		};
+
+		config@2 {
+			description = "Boot BitThunder kernel with alternative fpga";
+			kernel = "kernel@1";
+			fpga = "fpga@2";
+			fpga_device = "/dev/xdevcfg";
+		};
+	};
+};
