@@ -2,6 +2,7 @@ BT_LIB_OBJECTS += $(BUILD_DIR)lib/src/handles/bt_handles.o
 BT_LIB_OBJECTS += $(BUILD_DIR)lib/src/collections/bt_linked_list.o
 BT_LIB_OBJECTS += $(BUILD_DIR)lib/src/collections/bt_fifo.o
 
+include $(BASE)lib/src/hash/objects.mk
 
 #
 #	Include the correct Memory Manager implementation.
