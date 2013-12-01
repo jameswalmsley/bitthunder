@@ -118,7 +118,7 @@ static const BT_INTEGRATED_DEVICE oZynq_devcfg_device = {
 };
 
 BT_DEVFS_INODE_DEF oZynq_devcfg_inode = {
-	.szpName = "devcfg",
+	.szpName = "xdevcfg",
 	.pDevice = &oZynq_devcfg_device,
 };
 
