@@ -7,8 +7,9 @@
 
 typedef struct _BT_IF_FS {
 	BT_u32		ulFlags;
+	#define 	BT_FS_FLAG_NODEV	0x00000001	// No underlying block device is required
+    #define 	BT_FS_DIR_WILDCARDS	0x00010000	// DIR api supports wild-cards.
 	const BT_i8 *name;
-    #define 	BT_FS_FLAG_NODEV	0x00000001	// No underlying block device is required
 	union {
 	    BT_HANDLE 	(*pfnMount)			(BT_HANDLE hFS, BT_HANDLE hVolume, const void *data, BT_ERROR *pError);
 	    BT_HANDLE 	(*pfnMountPseudo) 	(BT_HANDLE hFS, const void *data, BT_ERROR *pError);
@@ -22,10 +23,5 @@ typedef struct _BT_IF_FS {
 	BT_ERROR	(*pfnUnlink)	(BT_HANDLE hMount, const BT_i8 *szpPath);
 	BT_ERROR	(*pfnRename)	(BT_HANDLE hMount, const BT_i8 *szpPathA, const BT_i8 *szpPathB);
 } BT_IF_FS;
-
-
-
-
-
 
 #endif
