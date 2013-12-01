@@ -50,6 +50,11 @@ config SHELL_CMD_LOAD_FPGA
 	depends on SHELL
 	default n
 
+config SHELL_CMD_MD5SUM
+	bool "md5sum"
+	depends on SHELL
+	default n
+
 config SHELL_CMD_MEMCAT
 	bool "memcat"
 	depends on SHELL
