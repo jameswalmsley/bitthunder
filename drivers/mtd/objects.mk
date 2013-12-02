@@ -1,4 +1,4 @@
-MTD_OBJECTS-y += $(BUILD_DIR)drivers/mtd/m25p80.o
+MTD_OBJECTS-$(BT_CONFIG_DRIVERS_MTD_M25P80) += $(BUILD_DIR)drivers/mtd/m25p80.o
 
 
 MTD_OBJECTS += $(MTD_OBJECTS-y)

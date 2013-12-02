@@ -3,6 +3,8 @@ comment "Configure all required driver sub-systems"
 
 source drivers/gpio/Kconfig
 
+source drivers/mtd/Kconfig
+
 source drivers/rtc/Kconfig
 
 source drivers/net/Kconfig
