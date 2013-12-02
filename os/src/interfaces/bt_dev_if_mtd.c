@@ -61,7 +61,7 @@ BT_ERROR BT_MTD_GetUserInfo(BT_HANDLE hMTD, BT_MTD_USER_INFO * info) {
 
 	if(mtd->size >= 0 && mtd->erasesize >= 0) {
 		info->size = mtd->size;
-		info->erasesize = mtd->size;
+		info->erasesize = mtd->erasesize;
 		info->flags = mtd->flags;
 		info->type = mtd->type;
 	}
@@ -96,7 +96,7 @@ BT_ERROR BT_MTD_Erase(BT_HANDLE hMTD, BT_MTD_ERASE_INFO *instr)
 	instr->fail_addr = BT_MTD_FAIL_ADDR_UNKNOWN;
 	if(!instr->len) {
 		instr->state = BT_MTD_ERASE_DONE;
-		mtd_erase_callback(mtd->hMtd, instr);	// FIXME: changed hMtd -> mtd->hMtd
+		//mtd_erase_callback(mtd->hMtd, instr);	// FIXME: changed hMtd -> mtd->hMtd
 		return BT_ERR_NONE;
 	}
 	return BT_IF_MTD_OPS(mtd->hMtd)->pfnErase(mtd->hMtd, instr);
