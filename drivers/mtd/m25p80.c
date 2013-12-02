@@ -1437,6 +1437,6 @@ err_out_free_spi:
 
 BT_INTEGRATED_DRIVER_DEF oDriver = {
 	.name 	= "mtd,flash",
-	.eType 	= BT_DEVICE_SPI,
+	.eType 	= BT_DRIVER_SPI,
 	.pfnSPIProbe = mtd_probe,
 };
