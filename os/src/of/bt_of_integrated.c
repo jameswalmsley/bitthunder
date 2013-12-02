@@ -51,7 +51,7 @@ static BT_ERROR bt_of_integrated_device_probe(struct bt_device_node *bus) {
 				device->devfs_node.pOps = &oDevfsOps;
 
 				BT_DeviceRegister(&device->devfs_node, devname);
-
+				BT_kFree(devname);
 				// Create a devfs node!
 			} else {
 				BT_HANDLE hDevice = pDriver->pfnProbe(&device->dev, &Error);
@@ -94,7 +94,7 @@ BT_ERROR bt_of_integrated_probe(struct bt_device_node *node) {
 }
 
 BT_ERROR bt_of_integrated_populate_device(struct bt_device_node *device) {
-	BT_u32 num_reg = 0, num_irq = 0;
+	BT_u32 num_reg = 0, num_irq = 0, num_bus_id = 0;
 	BT_RESOURCE *res, temp_res;
 
 	if(bt_of_can_translate_address(device)) {
@@ -108,21 +108,42 @@ BT_ERROR bt_of_integrated_populate_device(struct bt_device_node *device) {
 	device->dev.eType = BT_DEVICE_INTEGRATED | BT_DEVICE_TYPE_OF_FLAG;
 	device->ulFlags |= BT_DEVICE_POPULATED;
 
+	if(bt_of_get_property(device, "bus-id", NULL)) {
+		num_bus_id += 1;
+	} else {
+
+		if(bt_of_get_property(device, "bus-num", NULL)) {
+			num_bus_id += 1;
+		}
+	}
+
 	// Generate the resource table.
-	if(num_reg || num_irq) {
-		res = BT_kMalloc(sizeof(*res) * (num_irq + num_reg));
+	if(num_reg || num_irq || num_bus_id) {
+		res = BT_kMalloc(sizeof(*res) * (num_irq + num_reg + num_bus_id));
 		if(!res) {
 			device->ulFlags &= ~BT_DEVICE_POPULATED;	// Ensure device is not marked as populated, to prevent probing.
 			return BT_ERR_GENERIC;
 		}
 
-		device->dev.ulTotalResources = (num_irq + num_reg);
+		device->dev.ulTotalResources = (num_irq + num_reg + num_bus_id);
 		device->dev.pResources = res;
 		device->dev.name = bt_of_get_property(device, "compatible", NULL);
 
 		BT_u32 i;
 		for(i = 0; i < num_reg; i++, res++) {
 			bt_of_address_to_resource(device, i, res);
+		}
+
+		const BT_be64 *bus_id = bt_of_get_property(device, "bus-id", NULL);
+		if(!bus_id) {
+			bus_id = bt_of_get_property(device, "bus-num", NULL);
+		}
+
+		if(bus_id) {
+			res->ulStart = bt_be32_to_cpu(*bus_id);
+			res->ulEnd = res->ulStart;
+			res->ulFlags = BT_RESOURCE_BUSID;
+			res++;
 		}
 
 		// irq's to resources.
