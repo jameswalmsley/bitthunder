@@ -123,7 +123,6 @@ static BT_HANDLE rtc_probe(BT_HANDLE hBus, const BT_DEVICE *pDevice, BT_ERROR *p
 
 	BT_ERROR Error = BT_ERR_NONE;
 	struct rtctime Time;
-	const char *name;
 
 	BT_I2C_BUS *pBus = BT_I2C_GetBusObject(hBus);
 
@@ -135,7 +134,7 @@ static BT_HANDLE rtc_probe(BT_HANDLE hBus, const BT_DEVICE *pDevice, BT_ERROR *p
 
 	hRtc->oClient.pBus = pBus;
 
-	const BT_RESOURCE *pResource = BT_GetDeviceResource(pDevice, BT_RESOURCE_INTEGER, 0);
+	const BT_RESOURCE *pResource = BT_GetDeviceResource(pDevice, BT_RESOURCE_ADDR, 0);
 	if(!pResource) {
 		Error = BT_ERR_INVALID_RESOURCE;
 		goto err_free_out;
@@ -143,22 +142,16 @@ static BT_HANDLE rtc_probe(BT_HANDLE hBus, const BT_DEVICE *pDevice, BT_ERROR *p
 
 	hRtc->oClient.addr = pResource->ulStart;
 
-	pResource = BT_GetDeviceResource(pDevice, BT_RESOURCE_STRING, 0);
-	if(!pResource) {
-		Error = BT_ERR_INVALID_RESOURCE;
-		goto err_free_out;
-	}
-
-	name = pResource->szpName;
-
-	BT_kPrint("Probing RTC DS1338 called %d on I2C-bus %d and I2C-address 0x%02x", name, hRtc->oClient.pBus->ulID, hRtc->oClient.addr);
+	BT_kPrint("Probing RTC DS1338 on I2C-bus %d and I2C-address 0x%02x", hRtc->oClient.pBus->ulBusID, hRtc->oClient.addr);
 
 	get_time(hRtc, &Time);
 
 	BT_kPrint("Time : %02d:%02d:%02d", Time.tm_hour, Time.tm_min, Time.tm_sec);
 	BT_kPrint("Date : %02d.%02d.%04d", Time.tm_mday, Time.tm_mon, Time.tm_year);
 
-	BT_RTCRegisterDevice(hRtc, name, &hRtc->oInfo);
+	hRtc->oInfo.pDevice = pDevice;
+
+	BT_RTCRegisterDevice(hRtc, &hRtc->oInfo);
 
 	return hRtc;
 
@@ -174,7 +167,7 @@ err_out:
 }
 
 BT_INTEGRATED_DRIVER_DEF oDriver = {
-	.name 	= "dallas,1338",
+	.name 	= "dallas,ds1338",
 	.eType 	= BT_DRIVER_I2C,
 	.pfnI2CProbe = rtc_probe,
 };
