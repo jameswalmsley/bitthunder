@@ -7,7 +7,7 @@
 #define _BT_I2C_H_
 
 #include <bitthunder.h>
-#include "bt_types.h" 
+#include "bt_types.h"
 #include <fs/bt_devfs.h>
 #include <collections/bt_list.h>
 
@@ -15,8 +15,9 @@ typedef struct _BT_I2C_BUS {
 	BT_HANDLE_HEADER h;
 	struct bt_list_head item;
 	struct bt_devfs_node node;
+	const BT_DEVICE *pDevice;
 	BT_HANDLE 		hBus;
-	BT_u32			ulID;
+	BT_u32			ulBusID;
 	BT_u32			ulStateFlags;
 	#define BT_I2C_SM_PROBE_DEVICES 0x00000001
 	void		   *pMutex;
