@@ -4,11 +4,14 @@
 
 #include "btlinker_config.h"
 
+#ifdef BT_CONFIG_OF
+    .padding (NOLOAD) : {
+		. += 0x8000;			// reserve 32kb for fdt when using device tree support.
+
+    } > BT_LINKER_INIT_SECTION
+#endif
 
     .init : {
-#ifdef BT_CONFIG_OF
-		. += 0x8000;			// reserve 32kb for fdt when using device tree support.
-#endif
 		__bt_init_start = .;
 		KEEP(*(.init))
 		KEEP(*(.init.*))
