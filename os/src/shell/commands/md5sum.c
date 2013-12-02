@@ -5,7 +5,7 @@
 
 #define BUF_SIZE	1024*1024*4
 
-static sprint_digest(char dbuf[33], BT_u8 digest[16]) {
+static void sprint_digest(char dbuf[33], BT_u8 digest[16]) {
 	BT_u32 i;
 	dbuf[0] = '\0';
 	for(i = 0; i < 16; i++) {
@@ -14,7 +14,7 @@ static sprint_digest(char dbuf[33], BT_u8 digest[16]) {
 }
 
 static int bt_md5sum(BT_HANDLE hShell, int argc, char **argv) {
-	
+
 	BT_ERROR Error;
 	BT_HANDLE hStdout = BT_ShellGetStdout(hShell);
 
@@ -27,7 +27,7 @@ static int bt_md5sum(BT_HANDLE hShell, int argc, char **argv) {
 	if(argc == 2) {
 		BT_HANDLE hFile = BT_Open(argv[1], BT_GetModeFlags("rb"), &Error);
 		if(!hFile) {
-			bt_printf(hStdout, "Cannot open file: %s\n", argv[1]);
+			bt_fprintf(hStdout, "Cannot open file: %s\n", argv[1]);
 			return -1;
 		}
 
@@ -49,7 +49,7 @@ static int bt_md5sum(BT_HANDLE hShell, int argc, char **argv) {
 		bt_fprintf(hStdout, "%s  %s\n", dbuf, argv[1]);
 
 		BT_kFree(buffer);
-		
+
 		return 0;
 	}
 
