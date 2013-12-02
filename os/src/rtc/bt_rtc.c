@@ -8,6 +8,7 @@ BT_DEF_MODULE_AUTHOR		("James Walmsley")
 BT_DEF_MODULE_EMAIL			("james@fullfat-fs.co.uk")
 
 static BT_LIST_HEAD(g_rtc_devices);
+static g_total_rtcs = 0;
 
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;
@@ -47,11 +48,16 @@ static BT_ERROR bt_rtc_cleanup(BT_HANDLE hRTC) {
 	return BT_ERR_NONE;
 }
 
-BT_ERROR BT_RTCRegisterDevice(BT_HANDLE hDevice, const BT_i8 *name, BT_RTC_INFO *rtc) {
+BT_ERROR BT_RTCRegisterDevice(BT_HANDLE hDevice, BT_RTC_INFO *rtc) {
 
 	bt_list_add(&rtc->item, &g_rtc_devices);
 	rtc->node.pOps = &rtc_devfs_ops;
 	rtc->hRtc = hDevice;
+
+	char name[10];
+	snprintf(name, 10, "rtc%d", g_total_rtcs++);
+
+	BT_kPrint("Registering %s as /dev/%s", rtc->pDevice->name, name);
 
 	return BT_DeviceRegister(&rtc->node, name);
 }
@@ -77,7 +83,7 @@ BT_ERROR BT_RTCSetTime(BT_HANDLE hRtc, struct rtctime *t) {
  *
  **/
 BT_ERROR BT_RTCGetTime(BT_HANDLE hRtc, struct rtctime *t) {
-	
+
 	BT_RTC_INFO *rtc = (BT_RTC_INFO *) hRtc;
 
 	if(!isRtcHandle(hRtc)) {
@@ -93,4 +99,3 @@ static const BT_IF_HANDLE oHandleInterface = {
 	.eType = BT_HANDLE_T_RTC,
 	.pfnCleanup = bt_rtc_cleanup,
 };
-
