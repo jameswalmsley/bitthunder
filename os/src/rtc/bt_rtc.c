@@ -8,7 +8,7 @@ BT_DEF_MODULE_AUTHOR		("James Walmsley")
 BT_DEF_MODULE_EMAIL			("james@fullfat-fs.co.uk")
 
 static BT_LIST_HEAD(g_rtc_devices);
-static g_total_rtcs = 0;
+static BT_u32 g_total_rtcs = 0;
 
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;
@@ -55,7 +55,7 @@ BT_ERROR BT_RTCRegisterDevice(BT_HANDLE hDevice, BT_RTC_INFO *rtc) {
 	rtc->hRtc = hDevice;
 
 	char name[10];
-	snprintf(name, 10, "rtc%d", g_total_rtcs++);
+	bt_sprintf(name, "rtc%d", g_total_rtcs++);
 
 	BT_kPrint("Registering %s as /dev/%s", rtc->pDevice->name, name);
 
