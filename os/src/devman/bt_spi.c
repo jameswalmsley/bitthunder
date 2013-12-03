@@ -3,6 +3,7 @@
 #include <interrupts/bt_tasklets.h>
 #include <interfaces/bt_dev_if_spi.h>
 #include <string.h>
+#include <of/bt_of.h>
 
 BT_DEF_MODULE_NAME			("BT SPI Manager")
 BT_DEF_MODULE_DESCRIPTION	("Manages SPI Master busses, and handles SPI device probing")
@@ -54,12 +55,40 @@ static void spi_probe_devices(struct spi_bus_item *master) {
 		pDriver->pfnSPIProbe(pSpiDevice, pDevice, &Error);
 		if(Error) {
 			BT_kFree(pSpiDevice);
-			return;
+			continue;
 		}
 
 		bt_list_add(&pSpiDevice->item, &master->pMaster->spidevices);
 	}
 
+#ifdef BT_CONFIG_OF
+	struct bt_device_node *dev = bt_of_integrated_get_node(master->pMaster->pDevice);	// Node of bus device.
+	if(!dev) {
+		goto out;
+	}
+
+	struct bt_list_head *pos;
+	bt_list_for_each(pos, &dev->children) {
+		struct bt_device_node *spi_device = (struct bt_device_node *) pos;
+		bt_of_spi_populate_device(spi_device);
+		BT_INTEGRATED_DRIVER *pDriver = BT_GetIntegratedDriverByName(spi_device->dev.name);
+		if(!pDriver || (pDriver->eType & BT_DRIVER_TYPE_CODE_MASK) != BT_DRIVER_SPI) {
+			continue;
+		}
+
+		BT_SPI_DEVICE *pSpiDevice = BT_kMalloc(sizeof(*pSpiDevice));
+		pSpiDevice->pMaster = master->pMaster;
+
+		pDriver->pfnSPIProbe(pSpiDevice, &spi_device->dev, &Error);
+		if(Error) {
+			continue;
+		}
+
+		bt_list_add(&pSpiDevice->item, &master->pMaster->spidevices);
+	}
+#endif
+
+out:
 	BT_kPrint("All spi devices on bus probed");
 }
 
