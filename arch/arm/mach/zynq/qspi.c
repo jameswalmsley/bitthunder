@@ -54,7 +54,6 @@ BT_DEF_MODULE_EMAIL				("mdaniel@riegl.com")
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER 				 	 h;
 	volatile ZYNQ_QSPI_REGS 			*pRegs;
-	const BT_INTEGRATED_DEVICE 			*pDevice;
 	volatile ZYNQ_SLCR_REGS 			*pSLCR;
 
 	BT_SPI_MASTER						spi_master;
@@ -843,7 +842,7 @@ static BT_HANDLE qspi_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErro
 	hQSPI->irq = ulIRQ;
 	BT_EnableInterrupt(ulIRQ);
 
-	hQSPI->pDevice = pDevice;
+	hQSPI->spi_master.pDevice = pDevice;
 
 	// acquire is-dual property
 	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_FLAGS, 0);
@@ -964,6 +963,6 @@ err_out:
 }
 
 BT_INTEGRATED_DRIVER_DEF oQspiDriver = {
-	.name 		= "zynq,qspi",
+	.name 		= "xlnx,ps7-qspi-1.00.a",
 	.pfnProbe 	= qspi_probe,
 };

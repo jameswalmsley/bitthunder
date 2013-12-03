@@ -218,7 +218,7 @@ static const BT_RESOURCE oZynq_qspi_resources[] = {
 };
 
 BT_INTEGRATED_DEVICE_DEF oZynq_qspi_device = {
-	.name					= "zynq,qspi",
+	.name					= "xlnx,ps7-qspi-1.00-a",
 	.ulTotalResources		= BT_ARRAY_SIZE(oZynq_qspi_resources),
 	.pResources				= oZynq_qspi_resources,
 };
