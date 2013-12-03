@@ -27,7 +27,7 @@ typedef struct _BT_DEV_IF_EMAC {
 	BT_ERROR	(*pfnInitialise)		(BT_HANDLE hIF);
 
 	BT_ERROR	(*pfnGetMACAddr)		(BT_HANDLE hIF, BT_u8 *pAddr, BT_u32 ulLength);
-	BT_ERROR	(*pfnSetMACAddr)		(BT_HANDLE hIF, BT_u8 *pAddr, BT_u32 ulLength);
+	BT_ERROR	(*pfnSetMACAddr)		(BT_HANDLE hIF, const BT_u8 *pAddr, BT_u32 ulLength);
 	BT_u32 		(*pfnGetMTU)			(BT_HANDLE hIF, BT_ERROR *pError);
 
 	BT_u32		(*pfnDataReady)			(BT_HANDLE hIF, BT_ERROR *pError);

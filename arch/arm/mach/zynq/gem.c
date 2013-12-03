@@ -114,7 +114,7 @@ static BT_ERROR mac_getaddr(BT_HANDLE hMac, BT_u8 *addr, BT_u32 ulLength) {
 	return BT_ERR_NONE;
 }
 
-static BT_ERROR mac_setaddr(BT_HANDLE hMac, BT_u8 *addr, BT_u32 ulLength) {
+static BT_ERROR mac_setaddr(BT_HANDLE hMac, const BT_u8 *addr, BT_u32 ulLength) {
 	volatile GEM_REGS *pRegs = hMac->pRegs;
 
 	pRegs->spec_addr1_bot = addr[3] << 24 | addr[2] << 16 | addr[1] << 8 | addr[0];
