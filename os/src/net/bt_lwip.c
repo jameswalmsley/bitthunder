@@ -9,6 +9,8 @@
 #include <lwip/stats.h>
 #include <netif/etharp.h>
 #include <lwip/tcpip.h>
+#include <string.h>
+#include <ctype.h>
 
 BT_DEF_MODULE_NAME			("LWIP TCP/IP stack")
 BT_DEF_MODULE_DESCRIPTION	("BitThunder TCP/IP stack plugin for LWIP")
@@ -318,8 +320,8 @@ BT_ERROR bt_lwip_netif_init(BT_NETIF_PRIV *pIF) {
 	const char *hostname = strstr(params->cmdline, "hostname=");
 	if(hostname) {
 		hostname += 9;
-		char *end = hostname;
-		while(*end && !isspace(*end)) {
+		const char *end = hostname;
+		while(*end && !isspace((int) (*end))) {
 			end++;
 		}
 
@@ -365,7 +367,50 @@ BT_ERROR bt_lwip_netif_init(BT_NETIF_PRIV *pIF) {
 
 	/* device capabilities */
 	/* don't set NETIF_FLAG_ETHARP if this device is not an ethernet one */
-	netif->flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP;
+	netif->flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP;
+	pIF->base.smFlags |= NET_IF_INITIALISED;
+	pIF->base.name = netif->name;
 
 	return BT_ERR_NONE;
+}
+
+
+BT_ERROR bt_lwip_netif_up(BT_NETIF_PRIV *pIF) {
+	netif_set_up(&pIF->netif);
+	if(pIF->base.ulIFFlags & BT_NETIF_FLAG_DHCP) {
+		dhcp_start(&pIF->netif);
+	} else {
+		dhcp_inform(&pIF->netif);
+	}
+	return BT_ERR_NONE;
+}
+
+BT_ERROR bt_lwip_netif_down(BT_NETIF_PRIV *pIF) {
+	netif_set_down(&pIF->netif);
+	return BT_ERR_NONE;
+}
+
+BT_ERROR bt_lwip_netif_set_addr(BT_NETIF_PRIV *pIF, BT_IPADDRESS *ip, BT_IPADDRESS *netmask, BT_IPADDRESS *gw) {
+	netif_set_addr(&pIF->netif, (ip_addr_t *) &ip->ulIPAddress, (ip_addr_t *) &netmask->ulIPAddress, (ip_addr_t *) &gw->ulIPAddress);
+	return BT_ERR_NONE;
+}
+
+BT_ERROR bt_lwip_netif_get_addr(BT_NETIF_PRIV *pIF, BT_IPADDRESS *ip, BT_IPADDRESS *netmask, BT_IPADDRESS *gw) {
+	if(ip) {
+		ip->ulIPAddress = pIF->netif.ip_addr.addr;
+	}
+
+	if(netmask) {
+		netmask->ulIPAddress = pIF->netif.netmask.addr;
+	}
+
+	if(gw) {
+		gw->ulIPAddress = pIF->netif.gw.addr;
+	}
+
+	return BT_ERR_NONE;
+}
+
+BT_BOOL bt_lwip_netif_dhcp_done(BT_NETIF_PRIV *pIF) {
+	return (pIF->netif.dhcp && pIF->netif.dhcp->state == DHCP_BOUND);
 }
