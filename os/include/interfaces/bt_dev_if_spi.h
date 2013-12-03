@@ -17,6 +17,7 @@ struct bt_spi_device_id {
 
 typedef struct _BT_SPI_MASTER {
 	struct bt_list_head	spidevices;
+	const BT_DEVICE    *pDevice;
 	BT_u16 				bus_num;
 	BT_u16				num_chipselect;
 	BT_u16				dma_alignment;
@@ -29,7 +30,6 @@ typedef struct _BT_SPI_MASTER {
 #define SPI_MASTER_QUAD_MODE	BT_BIT(4)		/* support quad mode */
 	struct spi_bus_item *bus_item; 				//< internal data
 } BT_SPI_MASTER;
-
 
 typedef struct _BT_SPI_DEVICE {
 	struct bt_list_head	item;
