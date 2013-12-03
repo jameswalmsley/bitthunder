@@ -18,18 +18,16 @@ struct _BT_OPAQUE_HANDLE;
 typedef struct _BT_OPAQUE_HANDLE *BT_HANDLE;
 
 
-typedef struct {
-#ifdef BT_CONFIG_ARCH_LITTLE_ENDIAN
-	BT_u8	a,b,c,d;
-#endif
-#ifdef BT_CONFIG_ARCH_BIG_ENDIAN
-	BT_u8	d,c,b,a;
-#endif
-} BT_IPPARTS;
-
 typedef union {
 	BT_u32		ulIPAddress;
-	BT_IPPARTS 	oParts;
+	struct {
+#ifdef BT_CONFIG_ARCH_BIG_ENDIAN
+		BT_u8	a,b,c,d;
+#endif
+#ifdef BT_CONFIG_ARCH_LITTLE_ENDIAN
+		BT_u8	d,c,b,a;
+#endif
+	};
 } BT_IPADDRESS;
 
 /**
