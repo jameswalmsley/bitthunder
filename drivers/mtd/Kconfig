@@ -1,0 +1,15 @@
+menu "MTD Devices"
+
+config DRIVERS_MTD
+    bool
+	default n
+
+menu "SPI Flash devices"
+
+config DRIVERS_MTD_M25P80
+    bool "m25p80"
+	select DRIVERS_MTD
+	default n
+endmenu
+
+endmenu
