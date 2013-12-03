@@ -314,7 +314,24 @@ BT_ERROR bt_lwip_netif_init(BT_NETIF_PRIV *pIF) {
 
 	#if LWIP_NETIF_HOSTNAME
 	/* Initialize interface hostname */
-	netif->hostname = "BitThunder";
+	bt_kernel_params *params = bt_get_kernel_params();
+	const char *hostname = strstr(params->cmdline, "hostname=");
+	if(hostname) {
+		hostname += 9;
+		char *end = hostname;
+		while(*end && !isspace(*end)) {
+			end++;
+		}
+
+		BT_u32 len = end-hostname;
+		char *host = BT_kMalloc(len+1);
+		strncpy(host, hostname, len);
+		host[len] = '\0';
+		netif->hostname = host;
+	} else {
+		netif->hostname = "BitThunder";
+	}
+
 	#endif /* lwIP_NETIF_HOSTNAME */
 
 	/*
