@@ -1,5 +1,6 @@
 #include <bitthunder.h>
 #include <interrupts/bt_tasklets.h>
+#include <of/bt_of.h>
 
 BT_DEF_MODULE_NAME			("BT I2C Bus Manager")
 BT_DEF_MODULE_DESCRIPTION	("Manages I2C bus adapters, and handles I2C device probing")
