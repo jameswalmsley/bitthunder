@@ -45,7 +45,7 @@ typedef struct _BT_I2C_MESSAGE {
 	BT_u16 	len;
 } BT_I2C_MESSAGE;
 
-BT_ERROR BT_I2C_RegisterBusWithID(BT_HANDLE hBus, BT_u32 ulBusID);
+BT_ERROR BT_I2C_RegisterBus(BT_I2C_BUS *pBus);
 
 BT_I2C_BUS *BT_I2C_GetBusByID(BT_u32 ulID);
 
