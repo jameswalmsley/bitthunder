@@ -38,9 +38,16 @@ struct block {
 	BT_u32					ulSize;
 };
 
+struct MAGIC_TAG {
+	BT_u32 magic_0;			// 0xABAD1DEA
+	BT_u32 magic_1;			// 0xA55AA55A
+};
+
 struct MEM_TAG {
-        BT_CACHE   *pCache;
-        BT_u32          size;
+	struct MAGIC_TAG	tag_0;
+	BT_CACHE   *pCache;
+	BT_u32      size;
+	struct MAGIC_TAG	tag_1;
 };
 
 static BT_CACHE g_oDefault[10];		///< Array of primary caches, starting at 16bytes, upto 8192 bytes
@@ -167,6 +174,18 @@ BT_ERROR BT_CacheFree(BT_CACHE *pCache, void *p) {
 	return BT_ERR_NONE;
 }
 
+static void set_magic(struct MAGIC_TAG *tag) {
+	tag->magic_0 = 0xABAD1DEA;
+	tag->magic_1 = 0xA55AA55A;
+}
+
+static BT_BOOL verify_tag(struct MAGIC_TAG *tag) {
+	if(tag->magic_0 != 0xABAD1DEA || tag->magic_1 != 0xA55AA55A) {
+		return BT_FALSE;
+	}
+	return BT_TRUE;
+}
+
 void *BT_kMalloc(BT_u32 ulSize) {
 
 	void *p;
@@ -175,14 +194,22 @@ void *BT_kMalloc(BT_u32 ulSize) {
 		return NULL;
 	}
 
-	BT_CACHE *pCache = BT_GetSuitableCache(ulSize+sizeof(struct MEM_TAG));
+	struct MAGIC_TAG post_tag;
+	set_magic(&post_tag);
+
+	BT_CACHE *pCache = BT_GetSuitableCache(ulSize+sizeof(struct MEM_TAG)+(3*sizeof(struct MAGIC_TAG)));
 	if(pCache) {
 		p = BT_CacheAlloc(pCache);
 		struct MEM_TAG *tag = (struct MEM_TAG *) p;
 		tag->pCache = pCache;
+		tag->size = ulSize;
+		set_magic(&tag->tag_0);
+		set_magic(&tag->tag_1);
+		struct MAGIC_TAG *mempost = (BT_u8 *) (tag+1) + ulSize;
+		memcpy(mempost, &post_tag, sizeof(struct MAGIC_TAG));
 		return ((void *) (tag + 1));
 	} else {
-		p = (void *) bt_phys_to_virt(bt_page_alloc(ulSize+sizeof(struct MEM_TAG)));
+		p = (void *) bt_phys_to_virt(bt_page_alloc(ulSize+sizeof(struct MEM_TAG))+(3*sizeof(struct MAGIC_TAG)));
 		if(!p) {
 			return NULL;
 		}
@@ -191,6 +218,8 @@ void *BT_kMalloc(BT_u32 ulSize) {
 	struct MEM_TAG *tag = (struct MEM_TAG *) p;
 	tag->pCache = NULL;
 	tag->size = ulSize + sizeof(struct MEM_TAG);
+	set_magic(&tag->tag_0);
+	set_magic(&tag->tag_1);
 
 	/*
 	 *	Before the allocated memory we place a pointer to the pCache.
@@ -206,6 +235,15 @@ void BT_kFree(void *p) {
 
 	struct MEM_TAG *tag = (struct MEM_TAG *) p;
 	tag -= 1;
+
+	struct MAGIC_TAG *postmem = (struct MAGIC_TAG *) ((BT_u8 *) (tag+1) + tag->size);
+
+	if(!verify_tag(&tag->tag_0) || !verify_tag(&tag->tag_1) || !verify_tag(postmem)) {
+		BT_kPrint("Kernel Panic - Corrupted FREE");
+		while(1) {
+			;
+		}
+	}
 
 	BT_CACHE *pCache = tag->pCache;
 	if(pCache) {

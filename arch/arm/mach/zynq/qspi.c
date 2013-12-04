@@ -844,14 +844,24 @@ static BT_HANDLE qspi_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErro
 
 	hQSPI->spi_master.pDevice = pDevice;
 
+#ifdef BT_CONFIG_OF
+	struct bt_device_node *dev = bt_of_integrated_get_node(pDevice);
+#endif
+
 	// acquire is-dual property
 	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_FLAGS, 0);
 	if(!pResource) {
+#ifndef BT_CONFIG_OF
 		Error = BT_ERR_INVALID_RESOURCE;
 		goto err_free_int_out;
+#endif
+	} else {
+		hQSPI->is_dual = pResource->ulStart;
 	}
-	hQSPI->is_dual = pResource->ulStart;
 
+#ifdef BT_CONFIG_OF
+
+#endif
 
 	hQSPI->pSLCR = (ZYNQ_SLCR_REGS*) bt_ioremap((void*)ZYNQ_SLCR_BASE, sizeof(ZYNQ_SLCR_REGS));
 
