@@ -27,6 +27,8 @@
 #define FF_LFN_SUPPORT
 #endif
 
+#define FF_TIME_SUPPORT
+
 #define FF_DRIVER_BUSY_SLEEP BT_CONFIG_FS_FULLFAT_DRIVER_BUSY_SLEEP
 
 #define FF_MALLOC(aSize)	BT_kMalloc(aSize)

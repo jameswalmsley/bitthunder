@@ -286,6 +286,15 @@ err_out:
 	return NULL;
 }
 
+static void ff_time_to_bt_time(BT_DATETIME *bttime, FF_SYSTEMTIME *fftime) {
+	bttime->year 	= fftime->Year;
+	bttime->month 	= (BT_u8) fftime->Month;
+	bttime->day 	= (BT_u8) fftime->Day;
+	bttime->hour 	= (BT_u8) fftime->Hour;
+	bttime->min		= (BT_u8) fftime->Minute;
+	bttime->second 	= (BT_u8) fftime->Second;
+}
+
 static BT_ERROR fullfat_read_dir(BT_HANDLE hDir, BT_DIRENT *pDirent) {
 
 	BT_FF_DIR *pDir = (BT_FF_DIR *) hDir;
@@ -303,6 +312,10 @@ static BT_ERROR fullfat_read_dir(BT_HANDLE hDir, BT_DIRENT *pDirent) {
 	if(pDir->oDirent.Attrib & FF_FAT_ATTR_DIR) {
 		pDirent->attr |= BT_ATTR_DIR;
 	}
+
+	ff_time_to_bt_time(&pDirent->ctime, &pDir->oDirent.CreateTime);
+	ff_time_to_bt_time(&pDirent->atime, &pDir->oDirent.AccessedTime);
+	ff_time_to_bt_time(&pDirent->mtime, &pDir->oDirent.ModifiedTime);
 
 	pDir->ulCurrentEntry += 1;
 
@@ -341,6 +354,11 @@ static BT_ERROR fullfat_read_inode(BT_HANDLE hInode, BT_INODE *pInode) {
 	if(phInode->oDirent.Attrib & FF_FAT_ATTR_DIR) {
 		pInode->attr |= BT_ATTR_DIR;
 	}
+
+	ff_time_to_bt_time(&pInode->ctime, &phInode->oDirent.CreateTime);
+	ff_time_to_bt_time(&pInode->atime, &phInode->oDirent.AccessedTime);
+	ff_time_to_bt_time(&pInode->mtime, &phInode->oDirent.ModifiedTime);
+
 	return BT_ERR_NONE;
 }
 
@@ -420,4 +438,3 @@ BT_MODULE_INIT_DEF oModuleEntry = {
 	BT_MODULE_NAME,
 	fullfat_init,
 };
-
