@@ -101,6 +101,8 @@
 										// This incurs a small performance penalty, and is not required. (All filesystems should not
 										// trust the on-disk value anyway.
 
+//#define FF_FSINFO_TRUSTED				// Trust the values in the FSINFO sector. Safe when media is not removable.
+
 //---------- TIME SUPPORT
 #define FF_TIME_SUPPORT					// Should FullFAT use time stamping. Only if you have provided the relevant time drivers in ff_time.c
 										// Note, by default ff_time.c is set-up for the Windows Demonstration. Please see ff_time.c to disable.
