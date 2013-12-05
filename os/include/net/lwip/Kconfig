@@ -1,0 +1,98 @@
+menu "lwIP options"
+
+config NET_LWIP_MEMP_NUM_PBUF
+	   int "Number of memp pbufs, should be high for high throughput"
+	   default 256
+	   depends on NET_LWIP
+
+config NET_LWIP_MEMP_NUM_RAW_PCB
+	   int "Number of raw connection PCBs"
+	   default 32
+	   depends on NET_LWIP
+
+config NET_LWIP_MEMP_NUM_UDP_PCB
+	   int "Number of udp protocol control blocks"
+	   default 32
+	   depends on NET_LWIP
+
+config NET_LWIP_MEMP_NUM_TCP_PCB
+	   int "Number of simultaneously active tcp connections"
+	   default 32
+	   depends on NET_LWIP
+
+config NET_LWIP_MEMP_NUM_TCP_PCB_LISTEN
+	   int "Number of listening TCP connections"
+	   default 32
+	   depends on NET_LWIP
+
+config NET_LWIP_MEMP_NUM_TCP_SEG
+	   int "The number of simultaneously queued TCP segments"
+	   default 32
+	   depends on NET_LWIP
+
+config NET_LWIP_MEMP_NUM_REASSDATA
+	   int "The number of IP packets simultaneously queued for reassembly"
+	   default 64
+	   depends on NET_LWIP
+
+config NET_LWIP_MEMP_NUM_FRAG_PBUF
+	   int "The number of IP fragments simultaneously sent"
+	   default 32
+	   depends on NET_LWIP
+
+config NET_LWIP_MEMP_NUM_ARP_QUEUE
+	   int "The number of simultaneously queued outgoing packets (pbufs) waiting on an ARP request"
+	   default 32
+	   depends on NET_LWIP
+
+config NET_LWIP_MEMP_NUM_IGMP_GROUP
+	   int "The number of multicast groups whose network interfaces can members at the same time."
+	   default 	8
+	   depends on NET_LWIP
+
+config NET_LWIP_MEMP_NUM_NETBUF
+	   int "The number of struct netconns."
+	   default 32
+	   depends on NET_LWIP
+
+config NET_LWIP_MEMP_NUM_TCPIP_MSG_API
+	   int "The number of struct tcpip_msg, which are used for callback/timeout API communication."
+	   default 	32
+	   depends on NET_LWIP
+
+config NET_LWIP_MEMP_NUM_TCPIP_MSG_INPKT
+	   int "The number of struct tcpip_msg, which are used"
+	   default 32
+	   depends on NET_LWIP
+
+config NET_LWIP_MEMP_NUM_SNMP_NODE
+	   int "The number of leafs in the SNMP tree."
+	   default	50
+	   depends on NET_LWIP
+
+config NET_LWIP_MEMP_SNMP_ROOTNODE
+	   int "The number of branches in the SNMP tree."
+	   default 	30
+	   depends on NET_LWIP
+
+config NET_LWIP_MEMP_SNMP_VARBIND
+	   int "The number of concurrent requests (does not have to be changed normally)"
+	   default 2
+	   depends on NET_LWIP
+
+config NET_LWIP_PBUF_POOL_SIZE
+	   int "The number of buffers in the pbuf pool"
+	   default 256
+	   depends on NET_LWIP
+
+config NET_LWIP_ARP_TABLE_SIZE
+	   int "The ARP table size"
+	   default	64
+	   depends on NET_LWIP
+
+config NET_LWIP_IP_REASS_MAX_PBUFS
+	   int "Total maximum amount of pbufs waiting to be reassembled."
+	   default	128
+	   depends on NET_LWIP
+
+endmenu

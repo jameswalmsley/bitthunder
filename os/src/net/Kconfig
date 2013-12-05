@@ -4,7 +4,7 @@ config NET
     bool
     select TASKLETS
 	default n
-	
+
 config SUPPORTS_UDP
 	bool
 	default n
@@ -27,8 +27,11 @@ config NET_LWIP
 	select SUPPORTS_UDP
 	select SUPPORTS_TCP
 	select SUPPORTS_DHCP
-	select SUPPORTS_IGMP	
+	select SUPPORTS_IGMP
 	default n
+
+
+source os/include/net/lwip/Kconfig
 
 config BOOL_USE_TCP
     bool "use TCP"
@@ -53,23 +56,23 @@ config BOOL_USE_IGMP
 	default n
 
 config USE_TCP
-    int 
-    default 1 if BOOL_USE_TCP	
+    int
+    default 1 if BOOL_USE_TCP
 	default 0
 
 config USE_UDP
-    int 
+    int
     default 1 if BOOL_USE_UDP
 	default 0
 
 config USE_DHCP
-    int 
-    default 1 if BOOL_USE_DHCP	
+    int
+    default 1 if BOOL_USE_DHCP
 	default 0
 
 config USE_IGMP
-    int 
-    default 1 if BOOL_USE_IGMP	
+    int
+    default 1 if BOOL_USE_IGMP
 	default 0
 
 
