@@ -184,8 +184,8 @@ static int bt_flashtool(BT_HANDLE hShell, int argc, char **argv)
 	BT_u64 i;
 	BT_u64 size, written;
 	BT_MTD_ERASE_INFO erase;
-	unsigned char * src;
-	unsigned char * dest;
+	unsigned char * src = NULL;
+	unsigned char * dest = NULL;
     char dev_t[] = "/dev/mtd0\0";
     BT_ERROR Error;
     int optind = 1;
