@@ -1233,12 +1233,10 @@ static const BT_IF_HANDLE oHandleInterface = {
 
 static BT_HANDLE mtd_probe(BT_SPI_DEVICE *spi, const BT_DEVICE *pDevice, BT_ERROR *pError) {
 
-	//BT_ThreadSleep(1000);
 	int i=0;
 	BT_HANDLE flash = NULL;
 	BT_ERROR Error = BT_ERR_NONE;
 
-	BT_kPrint("M25P80: started probing...");
 	spi->bits_per_word = 32;
 	spi->chip_select = 0;
 	spi->mode = spi->pMaster->mode_bits;

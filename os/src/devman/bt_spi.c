@@ -10,7 +10,7 @@ BT_DEF_MODULE_DESCRIPTION	("Manages SPI Master busses, and handles SPI device pr
 BT_DEF_MODULE_AUTHOR		("Micheal Daniel")
 BT_DEF_MODULE_EMAIL			("mdaniel@riegl.com")
 
-static struct bt_list_head 	spi_masters;
+static BT_LIST_HEAD(g_spi_masters);
 
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;
@@ -30,6 +30,7 @@ static void spi_probe_devices(struct spi_bus_item *master) {
 	BT_u32 i;
 	BT_ERROR Error;
 
+	BT_ThreadSleep(1000);
 	BT_kPrint("spi_probe_devices called");
 
 	BT_u32 ulTotalDevices = BT_GetTotalDevicesByType(BT_DEVICE_SPI);
@@ -95,7 +96,10 @@ out:
 static void spi_sm(void *pData) {
 	struct spi_bus_item *master;
 
-	bt_list_for_each_entry(master, &spi_masters, bus_list) {
+	BT_ThreadSleep(1000);
+
+	bt_list_for_each_entry(master, &g_spi_masters, bus_list) {
+		BT_kPrint("in spi SM");
 		if(master->sm_flags & SM_FLAG_PROBE) {
 			spi_probe_devices(master);
 			master->sm_flags &= ~SM_FLAG_PROBE;
@@ -109,7 +113,7 @@ BT_ERROR BT_SpiRegisterMaster(BT_HANDLE hMaster, BT_SPI_MASTER *pMaster) {
   struct spi_bus_item *master;
 
   // Check if bus id already exists
-  bt_list_for_each_entry(master, &spi_masters, bus_list){
+  bt_list_for_each_entry(master, &g_spi_masters, bus_list){
     if( master->pMaster->bus_num == pMaster->bus_num)
       return BT_ERR_INVALID_RESOURCE;
   }
@@ -128,7 +132,7 @@ BT_ERROR BT_SpiRegisterMaster(BT_HANDLE hMaster, BT_SPI_MASTER *pMaster) {
 
   master->pMaster->bus_item = master;
 
-  bt_list_add(&master->bus_list, &spi_masters);
+  bt_list_add(&master->bus_list, &g_spi_masters);
 
   BT_TaskletSchedule(&spi_sm_tasklet);
 
@@ -371,13 +375,3 @@ BT_ERROR BT_SpiWriteThenRead(BT_SPI_DEVICE *pDevice, const void *txbuf, BT_u32 n
 
 	return status;
 }
-
-static BT_ERROR bt_spi_init() {
-	BT_LIST_INIT_HEAD(&spi_masters);
-	return BT_ERR_NONE;
-}
-
-BT_MODULE_INIT_DEF oSPIModuleEntry = {
-	BT_MODULE_NAME,
-	bt_spi_init,
-};

@@ -38,7 +38,7 @@ static BT_ERROR to_absolute_path(BT_i8 *buf, BT_u32 len, const BT_i8 *path, BT_B
 		strncpy(buf, path, len);
 	}
 
-	if(isDir && path_len) {
+	if(isDir && path_len > 1) {
 		strcat(buf, "/");
 	}
 
@@ -390,6 +390,8 @@ BT_HANDLE BT_OpenDir(const BT_i8 *szpPath, BT_ERROR *pError) {
 	if(Error) {
 		goto err_free_out;
 	}
+
+	BT_kPrint("absolute_path: %s", absolute_path);
 
 	BT_MOUNTPOINT *pMount = GetMountPoint(absolute_path);
 	if(!pMount) {

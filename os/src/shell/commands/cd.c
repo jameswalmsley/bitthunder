@@ -27,6 +27,8 @@ static int bt_cd(BT_HANDLE hShell, int argc, char **argv) {
 		}
 	}
 
+	BT_kPrint("changing dir to: %s", relpath ? relpath : path);
+
 	Error = BT_ChDir(relpath ? relpath : path);
 	if(Error) {
 		bt_printf("%s: %s: No such file or directory\n", argv[0], relpath ? relpath : path);

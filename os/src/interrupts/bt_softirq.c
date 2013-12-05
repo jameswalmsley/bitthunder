@@ -49,6 +49,9 @@ static BT_ERROR softirq_dispatcher(BT_HANDLE hThread, void *pParam) {
 	BT_u32 ulPending;
 	BT_SOFTIRQ *p;
 
+	BT_ThreadSleep(100);
+	BT_kPrint("Started the softIRQ dispatcher");
+
 	while(1) {
 		BT_PendMutex(g_hMutex, 0);
 
