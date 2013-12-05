@@ -51,10 +51,15 @@ config NET_LWIP_MEMP_NUM_IGMP_GROUP
 	   depends on NET_LWIP
 
 config NET_LWIP_MEMP_NUM_NETBUF
+	   int "The number of struct netbufs."
+	   default 32
+	   depends on NET_LWIP
+	   
+config NET_LWIP_MEMP_NUM_NETCONN
 	   int "The number of struct netconns."
 	   default 32
 	   depends on NET_LWIP
-
+	   
 config NET_LWIP_MEMP_NUM_TCPIP_MSG_API
 	   int "The number of struct tcpip_msg, which are used for callback/timeout API communication."
 	   default 	32
