@@ -36,6 +36,11 @@ static BT_ERROR tick_isr_handler(BT_u32 ulIRQ, void *pParam) {
 #define portINSTRUCTION_SIZE			( ( portSTACK_TYPE ) 4 )
 #define portNO_CRITICAL_SECTION_NESTING	( ( portSTACK_TYPE ) 0 )
 
+/* Saved as part of the task context.  If ulPortTaskHasFPUContext is non-zero then
+a floating point context must be saved and restored for the task. */
+unsigned long ulPortTaskHasFPUContext = pdFALSE;
+
+
 /**
  *	Initialise the stack of a task to look as if a call to
  *	portSAVE_CONTEXT has been called.
@@ -47,6 +52,18 @@ portSTACK_TYPE *pxPortInitialiseStack( portSTACK_TYPE *pxTopOfStack,
 {
 	portSTACK_TYPE *pxOriginalTOS;
 	pxOriginalTOS = pxTopOfStack;
+
+	/* Setup the initial stack of the task.  The stack is set exactly as
+	expected by the portRESTORE_CONTEXT() macro.
+
+	A few NULLs are added first to ensure
+	GDB does not try decoding a non-existent return address. */
+	*pxTopOfStack = NULL;
+	pxTopOfStack--;
+	*pxTopOfStack = NULL;
+	pxTopOfStack--;
+	*pxTopOfStack = NULL;
+	pxTopOfStack--;
 
 	/* Setup the initial stack of the task.  The stack is set exactly as
 	expected by the portRESTORE_CONTEXT() macro. */
@@ -90,6 +107,13 @@ portSTACK_TYPE *pxPortInitialiseStack( portSTACK_TYPE *pxTopOfStack,
 	/* When the task starts is will expect to find the function parameter in
 	R0. */
 	*pxTopOfStack = ( portSTACK_TYPE ) pvParameters; /* R0 */
+	pxTopOfStack--;
+
+	pxTopOfStack -= 64;	// Space for floating point.
+
+	*pxTopOfStack = 0;
+	pxTopOfStack--;
+	*pxTopOfStack = 0x40000000;	// FPEXC
 	pxTopOfStack--;
 
 	/* The last thing onto the stack is the status register, which is set for

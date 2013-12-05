@@ -66,16 +66,25 @@ extern volatile unsigned portLONG ulCriticalNesting;					\
 	"LDR		R0, [R0]										\n\t"	\
 	"LDR		LR, [R0]										\n\t"	\
 																		\
+	                                                                    \
 	/* The critical nesting depth is the first item on the stack. */	\
 	/* Load it into the ulCriticalNesting variable. */					\
 	"LDR		R0, =ulCriticalNesting							\n\t"	\
-	"LDMFD	LR!, {R1}											\n\t"	\
+	"LDMFD		LR!, {R1}										\n\t"	\
 	"STR		R1, [R0]										\n\t"	\
 																		\
 	/* Get the SPSR from the stack. */									\
-	"LDMFD	LR!, {R0}											\n\t"	\
+	"LDMFD		LR!, {R0}										\n\t"	\
 	"MSR		SPSR, R0										\n\t"	\
 																		\
+	/* Save the floating point state */									\
+	"LDMFD		LR!, {R0}										\n\t"	\
+	"VMSR		FPEXC, r0										\n\t"	\
+	"LDMFD		LR!, {R0}										\n\t"	\
+	"VMSR		FPSCR, r0										\n\t"	\
+	"VLDMIA		LR!, {D16-D31}									\n\t"	\
+	"VLDMIA		LR!, {D0-D15}									\n\t"	\
+	                                                                    \
 	/* Restore all system mode registers for the task. */				\
 	"LDMFD	LR, {R0-R14}^										\n\t"	\
 	"NOP														\n\t"	\
@@ -102,7 +111,6 @@ extern volatile unsigned portLONG ulCriticalNesting;					\
 	/* Push R0 as we are going to use the register. */					\
 	__asm volatile (													\
 	"STMDB	SP!, {R0}											\n\t"	\
-																		\
 	/* Set R0 to point to the task stack pointer. */					\
 	"STMDB	SP,{SP}^											\n\t"	\
 	"NOP														\n\t"	\
@@ -122,6 +130,14 @@ extern volatile unsigned portLONG ulCriticalNesting;					\
 	"STMDB	LR,{R0-LR}^											\n\t"	\
 	"NOP														\n\t"	\
 	"SUB	LR, LR, #60											\n\t"	\
+																		\
+	/* Save the FLOATING point state */									\
+	"VSTMDB	LR!, {D0-D15}										\n\t"	\
+	"VSTMDB	LR!, {D16-D31}										\n\t"	\
+	"VMRS	R1, FPSCR											\n\t"	\
+	"STMDB	LR!, {R1}											\n\t"	\
+	"VMRS	R1, FPEXC											\n\t"	\
+	"STMDB	LR!, {R1}											\n\t"	\
 																		\
 	/* Push the SPSR onto the task stack. */							\
 	"MRS	R0, SPSR											\n\t"	\
