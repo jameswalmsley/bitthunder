@@ -851,7 +851,15 @@ static BT_HANDLE qspi_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErro
 	// acquire is-dual property
 	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_FLAGS, 0);
 	if(!pResource) {
-#ifndef BT_CONFIG_OF
+#ifdef BT_CONFIG_OF
+		if(dev) {
+			const BT_be32 *is_dual = bt_of_get_property(dev, "is-dual", NULL);
+			if(is_dual) {
+				hQSPI->is_dual = bt_be32_to_cpu(*is_dual);
+				goto is_dual_set;
+			}
+		}
+#else
 		Error = BT_ERR_INVALID_RESOURCE;
 		goto err_free_int_out;
 #endif
@@ -860,7 +868,7 @@ static BT_HANDLE qspi_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErro
 	}
 
 #ifdef BT_CONFIG_OF
-
+	is_dual_set:
 #endif
 
 	hQSPI->pSLCR = (ZYNQ_SLCR_REGS*) bt_ioremap((void*)ZYNQ_SLCR_BASE, sizeof(ZYNQ_SLCR_REGS));
@@ -886,10 +894,24 @@ static BT_HANDLE qspi_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErro
 	// acquire num-chip-select
 	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_NUM_CS, 0);
 	if(!pResource) {
-			Error = BT_ERR_INVALID_RESOURCE;
-			goto err_free_int_out;
+#ifdef BT_CONFIG_OF
+		if(dev) {
+		    const BT_be32 *num_cs = bt_of_get_property(dev, "num-chip-select", NULL);
+			if(num_cs) {
+				hQSPI->spi_master.num_chipselect = bt_be32_to_cpu(*num_cs);
+				goto num_chipselect_set;
+	        }
+		}
+#endif
+		Error = BT_ERR_INVALID_RESOURCE;
+		goto err_free_int_out;
 	}
+
 	hQSPI->spi_master.num_chipselect = pResource->ulStart;
+
+#ifdef BT_CONFIG_OF
+	num_chipselect_set:
+#endif
 
 	// set quad mode
 	hQSPI->spi_master.flags = SPI_MASTER_QUAD_MODE;
