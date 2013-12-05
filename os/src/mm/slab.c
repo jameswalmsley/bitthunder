@@ -194,32 +194,24 @@ void *BT_kMalloc(BT_u32 ulSize) {
 		return NULL;
 	}
 
-	struct MAGIC_TAG post_tag;
-	set_magic(&post_tag);
-
-	BT_CACHE *pCache = BT_GetSuitableCache(ulSize+sizeof(struct MEM_TAG)+(3*sizeof(struct MAGIC_TAG)));
+	BT_CACHE *pCache = BT_GetSuitableCache(ulSize+sizeof(struct MEM_TAG)+sizeof(struct MAGIC_TAG));
 	if(pCache) {
 		p = BT_CacheAlloc(pCache);
-		struct MEM_TAG *tag = (struct MEM_TAG *) p;
-		tag->pCache = pCache;
-		tag->size = ulSize;
-		set_magic(&tag->tag_0);
-		set_magic(&tag->tag_1);
-		struct MAGIC_TAG *mempost = (BT_u8 *) (tag+1) + ulSize;
-		memcpy(mempost, &post_tag, sizeof(struct MAGIC_TAG));
-		return ((void *) (tag + 1));
 	} else {
-		p = (void *) bt_phys_to_virt(bt_page_alloc(ulSize+sizeof(struct MEM_TAG))+(3*sizeof(struct MAGIC_TAG)));
-		if(!p) {
-			return NULL;
-		}
+		p = (void *) bt_phys_to_virt(bt_page_alloc(ulSize+sizeof(struct MEM_TAG)+sizeof(struct MAGIC_TAG)));
+	}
+
+	if(!p) {
+		return NULL;
 	}
 
 	struct MEM_TAG *tag = (struct MEM_TAG *) p;
-	tag->pCache = NULL;
-	tag->size = ulSize + sizeof(struct MEM_TAG);
+	tag->pCache = pCache;
+	tag->size = ulSize;
 	set_magic(&tag->tag_0);
 	set_magic(&tag->tag_1);
+	struct MAGIC_TAG *mempost = (struct MAGIC_TAG *) ((BT_u8 *) (tag+1) + ulSize);
+	set_magic(mempost);
 
 	/*
 	 *	Before the allocated memory we place a pointer to the pCache.
@@ -249,7 +241,7 @@ void BT_kFree(void *p) {
 	if(pCache) {
 		BT_CacheFree(pCache, tag);
 	} else {
-		bt_page_free((BT_PHYS_ADDR) bt_virt_to_phys(tag), tag->size);
+		bt_page_free((BT_PHYS_ADDR) bt_virt_to_phys(tag), tag->size+sizeof(struct MEM_TAG)+sizeof(struct MAGIC_TAG));
 	}
 }
 
