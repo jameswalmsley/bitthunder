@@ -666,7 +666,7 @@ FF_T_UINT32 FF_FindFreeCluster(FF_IOMAN *pIoman, FF_ERROR *pError) {
 
 #ifdef FF_FSINFO_TRUSTED
 	if(pIoman->pPartition->Type == FF_T_FAT32 && !pIoman->pPartition->LastFreeCluster) {
-		pBuffer = FF_GetBuffer(pIoman, pIoman->pPartition->BeginLBA, FF_MODE_READ);
+		pBuffer = FF_GetBuffer(pIoman, pIoman->pPartition->FSInfoLBA, FF_MODE_READ);
 		{
 			if(!pBuffer) {
 				if(pError) {
@@ -921,7 +921,7 @@ FF_T_UINT32 FF_CountFreeClusters(FF_IOMAN *pIoman, FF_ERROR *pError) {
 
 #ifdef FF_FSINFO_TRUSTED
 	if(pIoman->pPartition->Type == FF_T_FAT32) {
-		pBuffer = FF_GetBuffer(pIoman, pIoman->pPartition->BeginLBA, FF_MODE_READ);
+		pBuffer = FF_GetBuffer(pIoman, pIoman->pPartition->FSInfoLBA, FF_MODE_READ);
 		{
 			if(!pBuffer) {
 				if(pError) {

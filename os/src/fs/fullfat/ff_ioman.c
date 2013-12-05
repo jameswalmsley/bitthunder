@@ -1125,6 +1125,14 @@ FF_ERROR FF_IncreaseFreeClusters(FF_IOMAN *pIoman, FF_T_UINT32 Count) {
 	} else {
 		 pIoman->pPartition->FreeClusterCount += Count;
 	}
+
+	if(!pIoman->pPartition->LastFreeCluster) {
+		 pIoman->pPartition->LastFreeCluster = FF_FindFreeCluster(pIoman, &Error);
+		 if(FF_isERR(Error)) {
+			  return Error;
+		 }
+	}
+
 #ifdef FF_WRITE_FREE_COUNT
 	// FAT32 update the FSINFO sector.
 	if(pIoman->pPartition->Type == FF_T_FAT32) {
@@ -1139,6 +1147,7 @@ FF_ERROR FF_IncreaseFreeClusters(FF_IOMAN *pIoman, FF_T_UINT32 Count) {
 					// FSINFO sector magic nums we're verified. Safe to write.
 					FF_putLong(pBuffer->pBuffer, 488, pIoman->pPartition->FreeClusterCount);
 					FF_putLong(pBuffer->pBuffer, 492, pIoman->pPartition->LastFreeCluster);
+
 			  }
 		 }
 		 Error = FF_ReleaseBuffer(pIoman, pBuffer);
@@ -1165,6 +1174,13 @@ FF_ERROR FF_DecreaseFreeClusters(FF_IOMAN *pIoman, FF_T_UINT32 Count) {
 		 }
 	} else {
 		 pIoman->pPartition->FreeClusterCount -= Count;
+	}
+
+	if(!pIoman->pPartition->LastFreeCluster) {
+		 pIoman->pPartition->LastFreeCluster = FF_FindFreeCluster(pIoman, &Error);
+		 if(FF_isERR(Error)) {
+			  return Error;
+		 }
 	}
 
 #ifdef FF_WRITE_FREE_COUNT
