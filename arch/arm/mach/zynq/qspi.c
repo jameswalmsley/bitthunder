@@ -1,5 +1,6 @@
 #include <bitthunder.h>
 #include <collections/bt_list.h>
+#include <of/bt_of.h>
 #include <string.h>
 #include "qspi.h"
 #include "slcr.h"
