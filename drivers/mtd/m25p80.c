@@ -1436,7 +1436,7 @@ err_out_free_spi:
 }
 
 BT_INTEGRATED_DRIVER_DEF oDriver = {
-	.name 	= "mtd,flash",
+	.name 	= "n25q128",
 	.eType 	= BT_DRIVER_SPI,
 	.pfnSPIProbe = mtd_probe,
 };
