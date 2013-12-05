@@ -50,4 +50,6 @@ BT_ERROR BT_NetifGetAddress(BT_NET_IF *interface, BT_IPADDRESS *ip, BT_IPADDRESS
 BT_ERROR BT_StartNetif(BT_NET_IF *interface);
 BT_ERROR BT_StopNetif(BT_NET_IF *interface);
 
+BT_ERROR BT_NetifGetHostname(BT_NET_IF *interface, char *hostname);
+
 #endif

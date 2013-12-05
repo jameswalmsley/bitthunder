@@ -139,6 +139,11 @@ BT_BOOL BT_NetifCompletedDHCP(BT_NET_IF *interface) {
 	return bt_lwip_netif_dhcp_done(pIF);
 }
 
+BT_ERROR BT_NetifGetHostname(BT_NET_IF *interface, char *hostname) {
+	BT_NETIF_PRIV *pIF = bt_container_of(interface, BT_NETIF_PRIV, base);
+	return bt_lwip_netif_get_hostname(pIF, hostname);
+}
+
 static void tcpip_init_done(void *arg) {
 	BT_BOOL *bDone = (BT_BOOL*) arg;
 

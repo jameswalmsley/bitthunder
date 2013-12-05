@@ -414,3 +414,16 @@ BT_ERROR bt_lwip_netif_get_addr(BT_NETIF_PRIV *pIF, BT_IPADDRESS *ip, BT_IPADDRE
 BT_BOOL bt_lwip_netif_dhcp_done(BT_NETIF_PRIV *pIF) {
 	return (pIF->netif.dhcp && pIF->netif.dhcp->state == DHCP_BOUND);
 }
+
+BT_ERROR bt_lwip_netif_get_hostname(BT_NETIF_PRIV *pIF, char *hostname)
+{
+	if(hostname) {
+		if (pIF->netif.hostname) {
+			strcpy(hostname, pIF->netif.hostname);
+		}
+		else {
+			*hostname = '\0';
+		}
+	}
+	return BT_ERR_NONE;
+}
