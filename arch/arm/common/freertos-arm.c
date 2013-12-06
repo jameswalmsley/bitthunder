@@ -58,11 +58,11 @@ portSTACK_TYPE *pxPortInitialiseStack( portSTACK_TYPE *pxTopOfStack,
 
 	A few NULLs are added first to ensure
 	GDB does not try decoding a non-existent return address. */
-	*pxTopOfStack = NULL;
+	*pxTopOfStack = 0;
 	pxTopOfStack--;
-	*pxTopOfStack = NULL;
+	*pxTopOfStack = 0;
 	pxTopOfStack--;
-	*pxTopOfStack = NULL;
+	*pxTopOfStack = 0;
 	pxTopOfStack--;
 
 	/* Setup the initial stack of the task.  The stack is set exactly as
