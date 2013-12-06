@@ -25,7 +25,7 @@
 #define BT_CACHE_FLAGS_UNALIGNED	0x00000002
 
 #define BT_CACHE_GENERIC_MIN		16
-#define BT_CACHE_GENERIC_MAX		8192
+#define BT_CACHE_GENERIC_MAX		8388608
 
 struct block;
 
@@ -50,7 +50,7 @@ struct MEM_TAG {
 	struct MAGIC_TAG	tag_1;
 };
 
-static BT_CACHE g_oDefault[10];		///< Array of primary caches, starting at 16bytes, upto 8192 bytes
+static BT_CACHE g_oDefault[BT_SLAB_MAX_ORDER];		///< Array of primary caches, starting at 16bytes, upto 8192 bytes
 
 static void init_attach_block(BT_CACHE *pCache, struct block *pBlock, BT_u32 ulSize) {
 	BT_u32 i;
@@ -67,6 +67,7 @@ static void init_attach_block(BT_CACHE *pCache, struct block *pBlock, BT_u32 ulS
 	free = (struct block_free *) (((BT_u8 *) free) - pCache->ulObjectSize);	// Reverse to correct the end of block.
 	free->next = pCache->free;
 	pCache->free = (struct block_free *) (pBlock);
+	pCache->available += total_objects;
 }
 
 static BT_ERROR extend_cache(BT_CACHE *pCache) {
@@ -99,15 +100,6 @@ BT_ERROR BT_CacheInit(BT_CACHE *pCache, BT_u32 ulObjectSize) {
 	pCache->slab_mutex = BT_kMutexCreate();
 	return init_cache(pCache, ulObjectSize);
 }
-
-/*
-BT_CACHE *BT_kCreateCache(BT_u32 ulObjectSize, BT_u32 ulFlags) {
-
-}*/
-/*
-BT_ERROR BT_kDestroyCache(BT_CACHE *pCache) {
-
-}*/
 
 static BT_CACHE *BT_GetSuitableCache(BT_u32 ulSize) {
 
@@ -243,6 +235,17 @@ void BT_kFree(void *p) {
 	} else {
 		bt_page_free((BT_PHYS_ADDR) bt_virt_to_phys(tag), tag->size+sizeof(struct MEM_TAG)+sizeof(struct MAGIC_TAG));
 	}
+}
+
+BT_ERROR bt_slab_info(struct bt_slab_info *pInfo) {
+	BT_u32 i;
+	for(i = 0; i < BT_SLAB_MAX_ORDER; i++) {
+		pInfo->slabs[i].ulObjectSize = g_oDefault[i].ulObjectSize;
+		pInfo->slabs[i].available = g_oDefault[i].available;
+		pInfo->slabs[i].allocated = g_oDefault[i].allocated;
+	}
+
+	return BT_ERR_NONE;
 }
 
 void bt_initialise_slab() {

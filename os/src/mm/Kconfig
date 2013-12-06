@@ -28,6 +28,14 @@ config MEM_SLAB_ALLOCATOR
     depends on MEM_PAGE_ALLOCATOR
 	default y
 
+config MEM_SLAB_MAX_ORDER
+	int "Slab Max order"
+	depends on MEM_SLAB_ALLOCATOR
+	default 16
+	---help---
+	1 = 16 bytes, 10 = 8192 bytes, 16 = 512k.
+	Allocation requests with greater orders will be passed to the page allocator.
+
 config USE_VIRTUAL_ADDRESSING
     depends on HAS_MMU
 	bool "Virtual Memory Support"
