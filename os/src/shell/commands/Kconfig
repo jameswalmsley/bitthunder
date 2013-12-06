@@ -115,10 +115,14 @@ config SHELL_CMD_PWD
 	bool "pwd"
 	default n
 
+config SHELL_CMD_SLABTOP
+	bool "slabtop"
+	default n
+
 config SHELL_CMD_SLEEP
 	bool "sleep"
 	default n
-	
+
 config SHELL_CMD_FLASHTOOL
 	bool "flashtool"
 	default n

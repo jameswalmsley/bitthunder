@@ -24,6 +24,7 @@ BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_MOUNT)		+= $(BUILD_DIR)os/src/shell/commands
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_PS)			+= $(BUILD_DIR)os/src/shell/commands/ps.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_PWD)		+= $(BUILD_DIR)os/src/shell/commands/pwd.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_SETENV)	  	+= $(BUILD_DIR)os/src/shell/commands/setenv.o
+BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_SLABTOP)  	+= $(BUILD_DIR)os/src/shell/commands/slabtop.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_SLEEP)		+= $(BUILD_DIR)os/src/shell/commands/sleep.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_SOURCE)		+= $(BUILD_DIR)os/src/shell/commands/source.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_TFTP)		+= $(BUILD_DIR)os/src/shell/commands/tftp.o
