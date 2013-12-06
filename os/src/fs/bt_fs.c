@@ -38,7 +38,7 @@ static BT_ERROR to_absolute_path(BT_i8 *buf, BT_u32 len, const BT_i8 *path, BT_B
 		strncpy(buf, path, len);
 	}
 
-	if(isDir && path_len) {
+	if(isDir && path_len > 1) {
 		strcat(buf, "/");
 	}
 
