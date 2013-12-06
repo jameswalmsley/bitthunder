@@ -42,7 +42,12 @@ static void threadStartup(void *pParam) {
 		hThread->lastThreadError = hThread->pfnStartRoutine(hThread, hThread->pThreadParam);
 	}
 
-	BT_kTaskDelete(hThread->pKThreadID);
+	void *pKThreadID = hThread->pKThreadID;
+	if(!(hThread->oConfig.ulFlags & BT_THREAD_FLAGS_NO_CLEANUP)) {
+		BT_CloseHandle(hThread);
+	}
+
+	BT_kTaskDelete(pKThreadID);
 }
 
 static const BT_IF_HANDLE oHandleInterface;
