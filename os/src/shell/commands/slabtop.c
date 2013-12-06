@@ -18,8 +18,8 @@ static int bt_slabtop(BT_HANDLE hShell, int argc, char **argv) {
 		struct bt_cache_info *slab = &oInfo.slabs[i];
 		BT_s32 d_allocated = 0, d_available = 0;
 		if(g_cached_valid) {
-			d_allocated = slab_cached.slabs[i].allocated - slab->allocated;
-			d_available = slab_cached.slabs[i].available - slab->available;
+			d_allocated = slab->allocated - slab_cached.slabs[i].allocated;
+			d_available = slab->available - slab_cached.slabs[i].available;
 		}
 
 		bt_fprintf(hStdout, " %6d (%5d)  %6d (%5d)  %3d%%  %8d   %8d\n", slab->available, d_available, slab->allocated, d_allocated, (slab->allocated * 100) / slab->available, slab->ulObjectSize, slab->ulObjectSize * slab->available);
