@@ -11,6 +11,15 @@ typedef struct _bt_page_pool {
 	BT_u32					used_size;
 } bt_page_pool;
 
+struct bt_page_info {
+	BT_u32 normal_size;
+	BT_u32 normal_used;
+	BT_u32 coherent_size;
+	BT_u32 coherent_used;
+};
+
+BT_ERROR bt_page_info(struct bt_page_info *pInfo);
+
 void bt_initialise_pages(void);
 void bt_initialise_pages_second_stage(void);
 bt_paddr_t bt_initialise_coherent_pages(void);

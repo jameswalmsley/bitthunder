@@ -230,6 +230,14 @@ BT_ERROR bt_page_pool_init(bt_page_pool *pool) {
 	return BT_ERR_NONE;
 }
 
+BT_ERROR bt_page_info(struct bt_page_info *pInfo) {
+	pInfo->normal_size = default_pool.total_size;
+	pInfo->normal_used = default_pool.used_size;
+	pInfo->coherent_size = coherent_pool.total_size;
+	pInfo->coherent_used = coherent_pool.used_size;
+	return BT_ERR_NONE;
+}
+
 extern bt_paddr_t __bt_init_start;
 extern bt_paddr_t __bss_end;
 extern bt_paddr_t _heap_end;
