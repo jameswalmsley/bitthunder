@@ -109,12 +109,14 @@ portSTACK_TYPE *pxPortInitialiseStack( portSTACK_TYPE *pxTopOfStack,
 	*pxTopOfStack = ( portSTACK_TYPE ) pvParameters; /* R0 */
 	pxTopOfStack--;
 
+#ifdef BT_CONFIG_TOOLCHAIN_FLOAT_HARD
 	pxTopOfStack -= 64;	// Space for floating point.
 
 	*pxTopOfStack = 0;
 	pxTopOfStack--;
 	*pxTopOfStack = 0x40000000;	// FPEXC
 	pxTopOfStack--;
+#endif
 
 	/* The last thing onto the stack is the status register, which is set for
 	system mode, with interrupts enabled. */

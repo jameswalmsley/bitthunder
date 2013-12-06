@@ -55,6 +55,29 @@ extern "C" {
  * THUMB mode code will result in a compile time error.
  */
 #if (defined BT_CONFIG_ARCH_ARM_CORTEX_A9) || defined (BT_CONFIG_ARCH_ARM_ARM11)
+#ifdef BT_CONFIG_TOOLCHAIN_FLOAT_HARD
+#define portRESTORE_FPU()												\
+	/* Save the floating point state */									\
+	"LDMFD		LR!, {R0}										\n\t"	\
+	"VMSR		FPEXC, r0										\n\t"	\
+	"LDMFD		LR!, {R0}										\n\t"	\
+	"VMSR		FPSCR, r0										\n\t"	\
+	"VLDMIA		LR!, {D16-D31}									\n\t"	\
+	"VLDMIA		LR!, {D0-D15}									\n\t"
+
+#define portSAVE_FPU()													\
+	/* Save the FLOATING point state */									\
+	"VSTMDB	LR!, {D0-D15}										\n\t"	\
+	"VSTMDB	LR!, {D16-D31}										\n\t"	\
+	"VMRS	R1, FPSCR											\n\t"	\
+	"STMDB	LR!, {R1}											\n\t"	\
+	"VMRS	R1, FPEXC											\n\t"	\
+	"STMDB	LR!, {R1}											\n\t"
+#else
+#define portRESTORE_FPU()
+#define portSAVE_FPU()
+#endif
+
 #define portRESTORE_CONTEXT()											\
 {																		\
 extern volatile void * volatile pxCurrentTCB;							\
@@ -77,13 +100,7 @@ extern volatile unsigned portLONG ulCriticalNesting;					\
 	"LDMFD		LR!, {R0}										\n\t"	\
 	"MSR		SPSR, R0										\n\t"	\
 																		\
-	/* Save the floating point state */									\
-	"LDMFD		LR!, {R0}										\n\t"	\
-	"VMSR		FPEXC, r0										\n\t"	\
-	"LDMFD		LR!, {R0}										\n\t"	\
-	"VMSR		FPSCR, r0										\n\t"	\
-	"VLDMIA		LR!, {D16-D31}									\n\t"	\
-	"VLDMIA		LR!, {D0-D15}									\n\t"	\
+	portRESTORE_FPU()													\
 	                                                                    \
 	/* Restore all system mode registers for the task. */				\
 	"LDMFD	LR, {R0-R14}^										\n\t"	\
@@ -130,14 +147,8 @@ extern volatile unsigned portLONG ulCriticalNesting;					\
 	"STMDB	LR,{R0-LR}^											\n\t"	\
 	"NOP														\n\t"	\
 	"SUB	LR, LR, #60											\n\t"	\
-																		\
-	/* Save the FLOATING point state */									\
-	"VSTMDB	LR!, {D0-D15}										\n\t"	\
-	"VSTMDB	LR!, {D16-D31}										\n\t"	\
-	"VMRS	R1, FPSCR											\n\t"	\
-	"STMDB	LR!, {R1}											\n\t"	\
-	"VMRS	R1, FPEXC											\n\t"	\
-	"STMDB	LR!, {R1}											\n\t"	\
+	                                                                    \
+	portSAVE_FPU()														\
 																		\
 	/* Push the SPSR onto the task stack. */							\
 	"MRS	R0, SPSR											\n\t"	\
