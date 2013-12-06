@@ -30,6 +30,11 @@ config SHELL_CMD_ECHO
 	depends on SHELL
 	default n
 
+config SHELL_CMD_FREE
+	bool "free"
+	depends on SHELL
+	default n
+
 config SHELL_CMD_GPIO
 	bool "gpio"
 	depends on SHELL
