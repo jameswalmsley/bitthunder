@@ -50,6 +50,8 @@ static int bt_md5sum(BT_HANDLE hShell, int argc, char **argv) {
 
 		BT_kFree(buffer);
 
+		BT_CloseHandle(hFile);
+
 		return 0;
 	}
 
