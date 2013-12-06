@@ -135,6 +135,10 @@ config MACH_ZYNQ_SDIO_1_ALWAYS_PRESENT
 	default n
 	depends on MACH_ZYNQ_SDIO_1
 
+config MACH_ZYNQ_QSPI
+	bool "Use QSPI bus controller"
+	default n
+
 comment "UART devices"
 config MACH_ZYNQ_UART_0
     bool "Use UART(0) peripheral"
