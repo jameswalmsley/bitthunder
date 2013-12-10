@@ -593,13 +593,6 @@ static const BT_IF_POWER oPowerInterface = {
 	uartGetPowerState,											///< This gets the current power state.
 };
 
-static const BT_IF_CHARDEV oCharDevInterface = {
-	uartRead,													///< CH device read function.
-	uartWrite,													///< CH device write function.
-	uartGetch,													///< This API wasn't implemented in this driver.
-	uartPutch,													///< :: Therefore the pointer must be NULL for BT to handle.
-};
-
 static const BT_DEV_IFS oConfigInterface = {
 	(BT_DEV_INTERFACE) &oUartConfigInterface,
 };
@@ -610,7 +603,6 @@ const BT_IF_DEVICE BT_LPC11xx_UART_oDeviceInterface = {
 	.unConfigIfs = {
 		(BT_DEV_INTERFACE) &oUartConfigInterface,
 	},
-	&oCharDevInterface,											///< Provide a Character device interface implementation.
 };
 
 static const BT_IF_FILE oFileInterface = {
