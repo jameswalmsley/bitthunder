@@ -14,6 +14,10 @@
 #define PGD_ALIGN(x)	((((bt_paddr_t)(x)) + MMU_L1TBL_MASK) & ~MMU_L1TBL_MASK)
 
 static BT_CACHE g_ptCache;	// Slab cache for page tables.
+static BT_u32 g_asid=0;
+
+#define GET_ASID(h)	((BT_u32)(h) & 0xff)
+#define GET_PGD(h) 	((bt_pgd_t) ((BT_u32)(h) & ~0xff))
 
 /**
  *	The actual MMU Table.
@@ -41,13 +45,20 @@ static bt_paddr_t create_pgd(void) {
 
 	bt_page_free((pgd + MMU_L1TBL_SIZE), (MMU_L1TBL_SIZE - gap));
 
-	return pgd;
+	return pgd | (g_asid++);
 }
 
-int bt_mmu_map(bt_pgd_t pgd, bt_paddr_t pa, bt_vaddr_t va, BT_u32 size, int type) {
+int bt_mmu_map(bt_pgd_t pgd_h, bt_paddr_t pa, bt_vaddr_t va, BT_u32 size, int type) {
 	BT_u32 flag = 0;
 	bt_pte_t pte;
 	bt_paddr_t pg;
+	BT_u32 ng = 0;
+	BT_u32 asid = GET_ASID(pgd_h);
+	bt_pgd_t pgd = GET_PGD(pgd_h);
+
+	if((va + size) < 0xC0000000) {
+		ng = MMU_PTE_NG;
+	}
 
 	pa = BT_PAGE_TRUNC(pa);		// Ensure correct alignments.
 	va = BT_PAGE_TRUNC(va);
@@ -97,7 +108,7 @@ int bt_mmu_map(bt_pgd_t pgd, bt_paddr_t pa, bt_vaddr_t va, BT_u32 size, int type
 			pgd[PAGE_DIR(va)] = (BT_u32) bt_virt_to_phys(pte) | MMU_PDE_PRESENT;
 		}
 
-		pte[PAGE_TABLE(va)] = (BT_u32) pa | flag;
+		pte[PAGE_TABLE(va)] = (BT_u32) pa | flag | ng;
 
 		pa += BT_PAGE_SIZE;
 		va += BT_PAGE_SIZE;
@@ -118,7 +129,7 @@ bt_pgd_t bt_mmu_newmap(void) {
 		return 0;
 	}
 
-	pgd = (bt_pgd_t) bt_phys_to_virt(pg);
+	pgd = (bt_pgd_t) bt_phys_to_virt(GET_PGD(pg));
 	memset(pgd, 0, MMU_L1TBL_SIZE);
 
 	/*
@@ -131,12 +142,13 @@ bt_pgd_t bt_mmu_newmap(void) {
 	 */
 	memcpy(pgd, g_MMUTable, MMU_L1TBL_SIZE);
 
-	return pgd;
+	return (bt_pgd_t) ((BT_u32)pgd | (GET_ASID(pg)));
 }
 
-void bt_mmu_terminate(bt_pgd_t pgd) {
+void bt_mmu_terminate(bt_pgd_t pgd_h) {
 
 	int i;
+	bt_pgd_t pgd = GET_PGD(pgd_h);
 	bt_pte_t pte;
 
 	bt_mmu_flush_tlb();
@@ -158,19 +170,23 @@ static bt_paddr_t current_user_ttb(void) {
 	return bt_mmu_get_ttb();
 }
 
-void bt_mmu_switch(bt_pgd_t pgd) {
+void bt_mmu_switch(bt_pgd_t pgd_h) {
+	bt_pgd_t pgd = GET_PGD(pgd_h);
+	BT_u32 asid = GET_ASID(pgd_h);
 	bt_paddr_t phys = (bt_paddr_t) bt_virt_to_phys(pgd);
 
 	if(phys != current_user_ttb()) {
-		bt_mmu_switch_ttb(phys);
+		bt_mmu_switch_ttb(phys, asid);
 	}
 }
 
 
-bt_paddr_t bt_mmu_extract(bt_pgd_t pgd, bt_vaddr_t virt, BT_u32 size) {
+bt_paddr_t bt_mmu_extract(bt_pgd_t pgd_h, bt_vaddr_t virt, BT_u32 size) {
 	bt_pte_t pte;
 	bt_vaddr_t start, end, pg;
 	bt_paddr_t pa;
+	bt_pgd_t pgd = GET_PGD(pgd_h);
+
 
 	start = BT_PAGE_TRUNC(virt);
 	end = BT_PAGE_TRUNC(virt+size-1);
@@ -231,7 +247,7 @@ void bt_mmu_init(struct bt_mmumap *mmumap) {
 		} else {
 			pgd[index] = (bt_paddr_t) bt_virt_to_phys(pte) | MMU_PDE_PRESENT;
 		}
-#else 
+#else
 		pgd[index] = (bt_paddr_t) bt_virt_to_phys(pte) | MMU_PDE_PRESENT;
 #endif
 	}

@@ -41,6 +41,8 @@
 #define MMU_PTE_SYSTEM		0x00000010
 #define MMU_PTE_USER_RO		0x00000020
 #define MMU_PTE_USER_RW 	0x00000030
+#define MMU_PTE_NG			0x00000800	///< Non-global bit for page table
+
 #define MMU_PTE_ADDRESS		0xFFFFFC00	///< Page table must appear at a 1Kb offset.
 
 #define MMU_PT_IMP			0x00000200
@@ -66,5 +68,7 @@
 
 #define virt_to_pte(pgd, virt)	(bt_pte_t) bt_phys_to_virt((pgd)[PAGE_DIR(virt)] & MMU_PDE_ADDRESS)
 #define pte_to_phys(pte, virt)	((pte)[PAGE_TABLE(virt)] & MMU_PTE_ADDRESS)
+
+extern void bt_mmu_switch_ttb(bt_paddr_t pgd, BT_u32 asid);
 
 #endif
