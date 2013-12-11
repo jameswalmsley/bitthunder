@@ -7,6 +7,7 @@
 
 struct bt_task {
 	BT_i8				name[BT_CONFIG_MAX_PROCESS_NAME+1];
+	BT_u32				pid;
 	struct bt_task 	   *parent;
 	struct bt_vm_map   *map;
 	struct bt_list_head threads;
@@ -56,21 +57,6 @@ BT_HANDLE BT_CreateProcess(BT_FN_THREAD_ENTRY pfnStartRoutine, const BT_i8 *szpN
  **/
 BT_HANDLE BT_GetProcessHandle(void);
 struct bt_task *BT_GetProcessTask(BT_HANDLE hProces);
-
-/**
- *	@private
- *	@brief	Get processes thread list.
- *
- *	This function is really intended for use by the thread manager, and use by kernel applications
- *	is discouraged. Of course user mode applications cannot call this.
- *
- *	@hProcess	[IN] Handle of process to get thread list from.
- *
- *	@return Pointer to the BT_LIST containing all thread handles of the provided hProcess.
- *
- **/
-BT_LIST *BT_GetProcessThreadList(BT_HANDLE hProcess);
-BT_LIST *BT_GetProcessThreadList(BT_HANDLE hProcess);
 
 BT_ERROR BT_GetProcessTime(struct bt_process_time *time, BT_u32 i);
 BT_u32 BT_GetTotalProcesses();

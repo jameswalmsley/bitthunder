@@ -18,7 +18,6 @@ struct _BT_OPAQUE_HANDLE {
 	BT_u32				flags;
 	BT_BOOL				bIsStarted;		///< Flag process started, prevent dual starting!
 	BT_BOOL				bAutoRestart;	///< Flag allow auto-restarting of process.
-	BT_u16				usPID;			///< ProcessID of this process.
 };
 
 static struct bt_list_head process_handles;
@@ -42,7 +41,7 @@ BT_HANDLE BT_CreateProcess(BT_FN_THREAD_ENTRY pfnStartRoutine, const BT_i8 *szpN
 		return NULL;
 	}
 
-	hProcess->usPID 		= ++usLastPID;
+	hProcess->task.pid 		= ++usLastPID;
 
 	memcpy(&hProcess->oConfig, pConfig, sizeof(BT_THREAD_CONFIG));
 	strncpy(hProcess->task.name, szpName, BT_CONFIG_MAX_PROCESS_NAME);
