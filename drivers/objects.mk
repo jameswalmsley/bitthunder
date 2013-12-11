@@ -1,3 +1,5 @@
+include $(BASE)drivers/block/objects.mk
+
 ifeq ($(BT_CONFIG_DRIVERS_NET), y)
 include $(BASE)drivers/net/objects.mk
 endif

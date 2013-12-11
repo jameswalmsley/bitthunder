@@ -1,0 +1,7 @@
+BLOCK_OBJECTS += $(BUILD_DIR)drivers/block/ramdisk.o
+
+
+BLOCK_OBJECTS += $(BLOCK_OBJECTS-y)
+
+$(BLOCK_OBJECTS): MODULE_NAME="drivers-BLOCK"
+OBJECTS += $(BLOCK_OBJECTS)
