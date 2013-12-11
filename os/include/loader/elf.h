@@ -23,36 +23,35 @@
 
 
 /* Standard ELF types.  */
-
-#include <stdint.h>
+#include <bt_types.h>
 
 /* Type for a 16-bit quantity.  */
-typedef uint16_t Elf32_Half;
-typedef uint16_t Elf64_Half;
+typedef BT_u16 Elf32_Half;
+typedef BT_u16 Elf64_Half;
 
 /* Types for signed and unsigned 32-bit quantities.  */
-typedef uint32_t Elf32_Word;
-typedef	int32_t  Elf32_Sword;
-typedef uint32_t Elf64_Word;
-typedef	int32_t  Elf64_Sword;
+typedef BT_u32 Elf32_Word;
+typedef	BT_s32  Elf32_Sword;
+typedef BT_u32 Elf64_Word;
+typedef	BT_s32  Elf64_Sword;
 
 /* Types for signed and unsigned 64-bit quantities.  */
-typedef uint64_t Elf32_Xword;
-typedef	int64_t  Elf32_Sxword;
-typedef uint64_t Elf64_Xword;
-typedef	int64_t  Elf64_Sxword;
+typedef BT_u64 Elf32_Xword;
+typedef	BT_s64  Elf32_Sxword;
+typedef BT_u64 Elf64_Xword;
+typedef	BT_s64  Elf64_Sxword;
 
 /* Type of addresses.  */
-typedef uint32_t Elf32_Addr;
-typedef uint64_t Elf64_Addr;
+typedef BT_u32 Elf32_Addr;
+typedef BT_u64 Elf64_Addr;
 
 /* Type of file offsets.  */
-typedef uint32_t Elf32_Off;
-typedef uint64_t Elf64_Off;
+typedef BT_u32 Elf32_Off;
+typedef BT_u64 Elf64_Off;
 
 /* Type for section indices, which are 16-bit quantities.  */
-typedef uint16_t Elf32_Section;
-typedef uint16_t Elf64_Section;
+typedef BT_u16 Elf32_Section;
+typedef BT_u16 Elf64_Section;
 
 /* Type for version symbol information.  */
 typedef Elf32_Half Elf32_Versym;
@@ -910,10 +909,10 @@ typedef struct
 
 typedef struct
 {
-  uint32_t a_type;		/* Entry type */
+  BT_u32 a_type;		/* Entry type */
   union
     {
-      uint32_t a_val;		/* Integer value */
+      BT_u32 a_val;		/* Integer value */
       /* We use to have pointer elements added here.  We cannot do that,
 	 though, since it does not work when using 32-bit definitions
 	 on 64-bit platforms and vice versa.  */
@@ -922,10 +921,10 @@ typedef struct
 
 typedef struct
 {
-  uint64_t a_type;		/* Entry type */
+  BT_u64 a_type;		/* Entry type */
   union
     {
-      uint64_t a_val;		/* Integer value */
+      BT_u64 a_val;		/* Integer value */
       /* We use to have pointer elements added here.  We cannot do that,
 	 though, since it does not work when using 32-bit definitions
 	 on 64-bit platforms and vice versa.  */

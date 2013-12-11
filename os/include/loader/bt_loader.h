@@ -18,6 +18,6 @@ typedef struct _BT_LOADER {
 	void   *(*pfnDecode)(void *image_start, BT_u32 len, BT_LOADER_SEGMENT_CB pfnLoad, void *pParam, BT_ERROR *pError);
 } BT_LOADER;
 
-#define BT_LOADER_DEF	static const BT_ATTRIBUTE_SECTION(".bt.module.loaders") BT_LOADER
+#define BT_LOADER_DEF	static const BT_ATTRIBUTE_SECTION(".bt.loaders") BT_LOADER
 
 #endif

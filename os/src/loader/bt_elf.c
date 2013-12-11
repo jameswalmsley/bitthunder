@@ -54,7 +54,7 @@ void *bt_elf_image_load(void *elf_start, BT_u32 len, BT_LOADER_SEGMENT_CB pfnLoa
 	/*
 	 *	First iterate the program headers to load text and data sections.
 	 */
-	phdr = (Elf32_Phdr *) elf_start + hdr->e_phoff;
+	phdr = (Elf32_Phdr *) ((BT_u8 *)(elf_start) + hdr->e_phoff);
 	for(i = 0; i < hdr->e_phnum; ++i) {
 		switch(phdr[i].p_type) {
 		case PT_NULL:
