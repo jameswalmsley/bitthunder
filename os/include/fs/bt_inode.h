@@ -4,7 +4,10 @@
 #include "bt_dir.h"
 
 typedef struct _BT_INODE {
-	BT_u64			ullFileSize;
+	union {
+		BT_u64			ullFileSize;
+		BT_u64 			ullFilesize;
+	};
 	BT_u32			attr;
 	BT_DATETIME	    ctime;
 	BT_DATETIME		atime;
