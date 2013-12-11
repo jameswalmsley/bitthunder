@@ -437,7 +437,7 @@ static BT_ERROR do_allocate(struct bt_vm_map *map, void **addr, BT_u32 size, BT_
 		}
 	}
 
-	seg->flags = BT_SEG_READ | BT_SEG_WRITE;
+	seg->flags = BT_SEG_READ | BT_SEG_WRITE | BT_SEG_EXEC;
 
 	// Allocate physical pages and map into the virtual segment just allocated.
 	pa = bt_page_alloc(size);
@@ -446,7 +446,7 @@ static BT_ERROR do_allocate(struct bt_vm_map *map, void **addr, BT_u32 size, BT_
 		goto err_free_seg;
 	}
 
-	if(bt_mmu_map(map->pgd, pa, seg->addr, size, BT_PAGE_WRITE)) {
+	if(bt_mmu_map(map->pgd, pa, seg->addr, size, BT_PAGE_SYSTEM)) {
 		Error = BT_ERR_NO_MEMORY;
 		goto err_free_page;
 	}
