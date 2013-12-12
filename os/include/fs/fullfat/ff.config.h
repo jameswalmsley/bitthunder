@@ -46,4 +46,6 @@
 
 #define FF_NOSTRCASECMP
 
+#define FF_OPTIMISE_UNALIGNED_ACCESS
+
 #endif
