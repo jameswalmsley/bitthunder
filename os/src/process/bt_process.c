@@ -58,7 +58,9 @@ BT_HANDLE BT_CreateProcess(BT_FN_THREAD_ENTRY pfnStartRoutine, const BT_i8 *szpN
 
 	BT_HANDLE hParent = BT_GetProcessHandle();
 	hProcess->task.parent = &hParent->task;
+#ifdef BT_CONFIG_PROCESS_CWD
 	strcpy(hProcess->task.cwd, hParent->task.cwd);	// Iherit the current working directory from parent.
+#endif
 
 	total_processes += 1;
 
@@ -218,7 +220,9 @@ BT_ERROR bt_process_init() {
 
 	BT_LIST_INIT_HEAD(&kernel_handle.task.threads);
 
+#ifdef BT_CONFIG_PROCESS_CWD
 	strcpy(kernel_handle.task.cwd, "/");
+#endif
 	total_processes = 1;
 
 	BT_AllocFileDescriptor();	// stdin

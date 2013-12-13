@@ -18,7 +18,9 @@ struct bt_task {
     #define 			BT_FD_BITMAP	0x00800000	///< If fd_tbl was allocated.
 	BT_u32				free_fd;					///< Number of the last known free FD.
 	BT_HANDLE			fds[8];
+#ifdef BT_CONFIG_PROCESS_CWD
 	BT_i8			    cwd[BT_PATH_MAX];
+#endif
 };
 
 struct bt_process_time {
