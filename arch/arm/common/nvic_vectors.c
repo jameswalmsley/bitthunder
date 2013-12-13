@@ -599,9 +599,9 @@ void bt_reset(void) {
 
 	BT_u32 i;
 
-	for (i = 0; i < 1000000; i++) {
+	/*for (i = 0; i < 1000000; i++) {
 		__asm__ ("");
-	}
+	}*/
 
 	bt_startup_init_hook();
 
