@@ -300,6 +300,7 @@ _mmu_init_loop3:
 
 	ldr		r0,=MMUCRVAL
 	mcr		p15,0,r0,c1,c0,0			// Enable cache and MMU!
+	mcr		p15, 0, r0, c8, c7, 0	// Invalidate the TLBs
 
 	data_sync
 	instr_sync
