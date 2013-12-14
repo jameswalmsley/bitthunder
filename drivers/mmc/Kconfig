@@ -1,6 +1,6 @@
 menu "MMC / SDCard Subsystem"
 
-config DRIVERS_SDCARD
+config DRIVERS_MMC
     bool "SDCard / MMC Support"
 	default n
 	select TASKLETS
@@ -10,6 +10,7 @@ comment "Host Controllers"
 
 config DRIVERS_SDCARD_SDHCI
     bool "SDHCI Support"
+	depends on DRIVERS_MMC
 	default n
 
 endmenu

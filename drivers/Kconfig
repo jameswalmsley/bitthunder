@@ -4,11 +4,10 @@ source drivers/block/Kconfig
 
 source drivers/gpio/Kconfig
 
-source drivers/mtd/Kconfig
+source drivers/mmc/Kconfig
 
-source drivers/rtc/Kconfig
+source drivers/mtd/Kconfig
 
 source drivers/net/Kconfig
 
-source drivers/mmc/Kconfig
-
+source drivers/rtc/Kconfig
