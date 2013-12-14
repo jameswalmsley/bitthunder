@@ -177,7 +177,7 @@ config MACH_ZYNQ_UART_0
 
 config MACH_ZYNQ_UART_0_INODE_NAME
 	string "UART(0) devfs name"
-	default "uart0"
+	default "serial0"
 	depends on MACH_ZYNQ_UART_0
 
 config MACH_ZYNQ_UART_1
@@ -187,7 +187,7 @@ config MACH_ZYNQ_UART_1
 
 config MACH_ZYNQ_UART_1_INODE_NAME
 	string "UART(1) devfs name"
-	default "uart1"
+	default "serial1"
 	depends on MACH_ZYNQ_UART_1
 
 endmenu
