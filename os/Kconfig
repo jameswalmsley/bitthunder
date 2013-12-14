@@ -36,9 +36,9 @@ config VOLUME
 	default n
 
 config FILE
-    bool "File I/O interfaces"
+    bool
 	select FS
-	default n
+	default y
 
 config DIR
     bool "Directory I/O interfaces"
