@@ -26,6 +26,7 @@ config MAIN_TASK_PRIORITY
     int "Main task stack priority"
 	default 0
 
+menu "Subsystems"
 config BLOCK
     bool "Block device support"
 	default n
@@ -50,6 +51,12 @@ config I2C
 config SPI
 	bool "SPI subsystem"
 	default n
+
+config UART
+ 	bool "UART subsystem"
+	default y
+
+endmenu
 
 config THREADS
     bool
