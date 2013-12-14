@@ -45,6 +45,10 @@ config I2C
     bool "I2C subsystem"
 	default n
 
+config SPI
+	bool "SPI subsystem"
+	default n
+
 config THREADS
     bool
 	default y
