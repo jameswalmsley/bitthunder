@@ -171,7 +171,7 @@ BT_ERROR bt_page_pool_reserve(bt_page_pool *pool, bt_paddr_t paddr, BT_u32 psize
 		bt_list_del(&blk->list);
 	} else {
 		// split it
-		if((bt_vaddr_t) blk + blk->size != end) {
+		if(((bt_vaddr_t) blk + blk->size) < end) {
 			tmp = (struct bt_page *) end;
 			tmp->size = (bt_vaddr_t) blk + blk->size - end;
 			blk->size -= tmp->size;
@@ -260,7 +260,7 @@ void bt_initialise_pages(void) {
 	BT_u32 len  		= (bt_paddr_t) (bt_virt_to_phys(&__bss_end)) - start;
 
 	// Initialise the free list to total size of ram!
-	bt_page_pool_attach(&default_pool, BT_PAGE_ALIGN(start+len), (BT_TOTAL_PAGES * BT_PAGE_SIZE) - len);
+	bt_page_pool_attach(&default_pool, BT_PAGE_ALIGN(start+len), (BT_TOTAL_PAGES * BT_PAGE_SIZE) - BT_PAGE_ALIGN(len));
 
 	start = (bt_paddr_t) bt_virt_to_phys(&_heap_end);
 	len = &__absolute_end - &_heap_end;
