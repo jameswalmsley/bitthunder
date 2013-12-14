@@ -7,10 +7,10 @@ MACH_ZYNQ_OBJECTS-$(BT_CONFIG_MACH_ZYNQ_USE_STARTUP) += $(BUILD_DIR)arch/arm/mac
 
 MACH_ZYNQ_OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/headsmp.o
 MACH_ZYNQ_OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/slcr.o
-MACH_ZYNQ_OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/uart.o
-MACH_ZYNQ_OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/timer.o
-MACH_ZYNQ_OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/gpio.o
-MACH_ZYNQ_OBJECTS += $(BUILD_DIR)arch/arm/mach/zynq/sdio.o
+MACH_ZYNQ_OBJECTS-$(BT_CONFIG_MACH_ZYNQ_UART) += $(BUILD_DIR)arch/arm/mach/zynq/uart.o
+MACH_ZYNQ_OBJECTS-$(BT_CONFIG_MACH_ZYNQ_TIMER) += $(BUILD_DIR)arch/arm/mach/zynq/timer.o
+MACH_ZYNQ_OBJECTS-$(BT_CONFIG_MACH_ZYNQ_GPIO) += $(BUILD_DIR)arch/arm/mach/zynq/gpio.o
+MACH_ZYNQ_OBJECTS-$(BT_CONFIG_MACH_ZYNQ_SDIO) += $(BUILD_DIR)arch/arm/mach/zynq/sdio.o
 MACH_ZYNQ_OBJECTS-$(BT_CONFIG_MACH_ZYNQ_DEVCFG) += $(BUILD_DIR)arch/arm/mach/zynq/devcfg.o
 MACH_ZYNQ_OBJECTS-$(BT_CONFIG_MACH_ZYNQ_QSPI) += $(BUILD_DIR)arch/arm/mach/zynq/qspi.o
 MACH_ZYNQ_OBJECTS-$(BT_CONFIG_MACH_ZYNQ_I2C) += $(BUILD_DIR)arch/arm/mach/zynq/i2c.o

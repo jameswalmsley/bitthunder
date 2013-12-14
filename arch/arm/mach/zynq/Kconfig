@@ -102,6 +102,11 @@ config MACH_ZYNQ_GEM
 	bool
 	default y if MACH_ZYNQ_GEM_0 || MACH_ZYNQ_GEM_1
 	
+comment "GPIO"
+
+config MACH_ZYNQ_GPIO
+	bool "Enable GPIO (MIO) driver"
+	default n
 
 comment "I2C devices"
 
@@ -131,8 +136,13 @@ config MACH_ZYNQ_I2C_1_BUSID
 	depends on MACH_ZYNQ_I2C_1
 
 comment "SDIO (SDCard Interfaces)"
+config MACH_ZYNQ_SDIO
+	bool
+	default n
+
 config MACH_ZYNQ_SDIO_0
     bool "Use SDIO(0) peripheral"
+	select MACH_ZYNQ_SDIO
 	default n
 
 config MACH_ZYNQ_SDIO_0_ALWAYS_PRESENT
@@ -140,8 +150,9 @@ config MACH_ZYNQ_SDIO_0_ALWAYS_PRESENT
 	default n
 	depends on MACH_ZYNQ_SDIO_0
 
-config MACH_ZYNQ_SDIO_1
+config MACH_ZYNQ_SDIO_1	  
     bool "Use SDIO(1) peripheral"
+	select MACH_ZYNQ_SDIO
 	default n
 
 config MACH_ZYNQ_SDIO_1_ALWAYS_PRESENT
@@ -155,8 +166,13 @@ config MACH_ZYNQ_QSPI
 	select SPI
 
 comment "UART devices"
+config MACH_ZYNQ_UART
+	bool
+	default n
+
 config MACH_ZYNQ_UART_0
     bool "Use UART(0) peripheral"
+	select MACH_ZYNQ_UART
 	default n
 
 config MACH_ZYNQ_UART_0_INODE_NAME
@@ -166,6 +182,7 @@ config MACH_ZYNQ_UART_0_INODE_NAME
 
 config MACH_ZYNQ_UART_1
     bool "Use UART(1) peripheral"
+	select MACH_ZYNQ_UART
 	default n
 
 config MACH_ZYNQ_UART_1_INODE_NAME
