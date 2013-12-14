@@ -35,7 +35,7 @@ static struct bt_device_property *__bt_of_find_property(const struct bt_device_n
 }
 
 struct bt_device_property *bt_of_find_property(const struct bt_device_node *np, const BT_i8 *name, BT_u32 *lenp) {
-	BT_u32 len;
+	BT_u32 len = 0;
 	struct bt_device_property *property = __bt_of_find_property(np, name, &len);
 	if(lenp) {
 		*lenp = len;

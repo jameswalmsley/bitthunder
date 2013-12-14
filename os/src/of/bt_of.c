@@ -70,7 +70,8 @@ static struct bt_device_node *bt_of_unflatten_dt_node(const void *fdt, int offse
 
 		if(!strcmp(pname, "phandle") || !strcmp(pname, "linux,phandle")) {
 			if(!node->phandle) {
-				node->phandle = bt_be32_to_cpu(*((BT_u32 *) &prop->data[0]));
+				BT_be32 *data = (BT_be32 *) prop->data;
+				node->phandle = bt_be32_to_cpu(*data);
 			}
 		}
 

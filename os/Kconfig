@@ -12,6 +12,7 @@ source os/src/lib/Kconfig
 
 config OF
 	bool "Support Device Tree / Open Firmware framework"
+	select FS_DEV_DYNAMIC_REGISTRATION
 	default n
 
 config CACHE_MAINTENANCE
