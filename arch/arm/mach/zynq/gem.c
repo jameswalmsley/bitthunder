@@ -10,6 +10,10 @@ BT_DEF_MODULE_DESCRIPTION			("Zynq Gigabit Ethernet Mac driver")
 BT_DEF_MODULE_AUTHOR				("James Walmsley")
 BT_DEF_MODULE_EMAIL					("jwalmsley@riegl.com")
 
+#ifndef BT_CONFIG_MEM_PAGE_COHERENT_POOL
+#error "Xilinx gem (ethernet) requires a coherent memory pool to use DMA. Ensure CONFIG_MEM_PAGE_COHERENT_POOL is configured."
+#endif
+
 #define SEND_BD_CNT					256
 #define RECV_BD_CNT					256
 

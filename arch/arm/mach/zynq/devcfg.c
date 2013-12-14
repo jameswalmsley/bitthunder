@@ -15,6 +15,10 @@ BT_DEF_MODULE_DESCRIPTION		("Provides filesystem access to the devcfg hardware")
 BT_DEF_MODULE_AUTHOR			("James Walmsley")
 BT_DEF_MODULE_EMAIL				("james@fullfat-fs.co.uk")
 
+#ifndef BT_CONFIG_MEM_PAGE_COHERENT_POOL
+#error "Xilinx xdevcfg requires a coherent memory pool to use DMA. Ensure CONFIG_MEM_PAGE_COHERENT_POOL is configured."
+#endif
+
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;
 	volatile ZYNQ_DEVCFG_REGS	*pRegs;
