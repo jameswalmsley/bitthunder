@@ -6,24 +6,30 @@
 #include <bitthunder.h>
 #include <string.h>
 #include <asm/barrier.h>
+#ifdef BT_CONFIG_MEM_SLAB_ALLOCATOR
 #include <mm/slab.h>
+#endif
 #include <mm/bt_vm.h>
 #include "v7-mmu.h"
 
 #define MMU_L1TBL_MASK	(MMU_L1TBL_SIZE - 1)
 #define PGD_ALIGN(x)	((((bt_paddr_t)(x)) + MMU_L1TBL_MASK) & ~MMU_L1TBL_MASK)
 
+#ifdef BT_CONFIG_MEM_SLAB_ALLOCATOR
 static BT_CACHE g_ptCache;	// Slab cache for page tables.
 static BT_u32 g_asid=0;
 
 #define GET_ASID(h)	((BT_u32)(h) & 0xff)
 #define GET_PGD(h) 	((bt_pgd_t) ((BT_u32)(h) & ~0xff))
+#endif
 
 /**
  *	The actual MMU Table.
  **/
 
 BT_ATTRIBUTE_SECTION(".bt.mmu.table") static bt_pgd_t g_MMUTable[4096];
+
+#ifdef BT_CONFIG_MEM_SLAB_ALLOCATOR
 BT_ATTRIBUTE_SECTION(".bt.mmu.table.noload") static bt_pte_t kernel_pages[1024][256];	// Kernel pages. - 1GB of 1MB regions, with 256 pages per mb.
 
 static bt_paddr_t create_pgd(void) {
@@ -254,6 +260,7 @@ void bt_mmu_init(struct bt_mmumap *mmumap) {
 
 	bt_mmu_flush_tlb();
 }
+#endif
 
 #ifndef BT_CONFIG_USE_VIRTUAL_ADDRESSING
 void bt_mmu_set_section(bt_paddr_t p, BT_u32 psize, int type) {
@@ -272,6 +279,8 @@ void bt_mmu_set_section(bt_paddr_t p, BT_u32 psize, int type) {
 }
 #endif
 
+#ifdef BT_CONFIG_MEM_SLAB_ALLOCATOR
 bt_pgd_t bt_mmu_get_kernel_pgd(void) {
 	return (bt_pgd_t) g_MMUTable;
 }
+#endif
