@@ -18,6 +18,7 @@
 #include "gpio.h"
 #include "qspi.h"
 
+#ifdef BT_CONFIG_MACH_ZYNQ_GPIO
 static const BT_RESOURCE oZynq_gpio_resources[] = {
 	{
 		.ulStart 			= ZYNQ_GPIO_BASE,
@@ -47,6 +48,7 @@ BT_INTEGRATED_DEVICE_DEF oZynq_gpio_device = {
 	.ulTotalResources 		= BT_ARRAY_SIZE(oZynq_gpio_resources),
 	.pResources 			= oZynq_gpio_resources,
 };
+#endif
 
 static const BT_RESOURCE oZynq_intc_resources[] = {
 	{
