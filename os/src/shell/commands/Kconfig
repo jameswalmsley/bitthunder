@@ -2,6 +2,7 @@ menu "Commands"
 
 config SHELL_CMD_ATAGS
 	bool "ATAG Support"
+	depends on SHELL
 	default n
 
 if SHELL_CMD_ATAGS
@@ -20,6 +21,7 @@ config SHELL_CMD_BOOT_JTAG
 
 config SHELL_CMD_CAT
 	bool "cat"
+	depends on SHELL
 	default n
 	select FILE
 
@@ -47,6 +49,7 @@ config SHELL_CMD_ECHO
 
 config SHELL_CMD_FLASHTOOL
 	bool "flashtool"
+	depends on SHELL
 	default n
 
 config SHELL_CMD_FREE
@@ -71,6 +74,7 @@ config SHELL_CMD_HELP
 
 config SHELL_CMD_IOMEM
 	bool "iomem"
+	depends on SHELL
 	default n
 
 config SHELL_CMD_LOAD
@@ -87,6 +91,7 @@ config SHELL_CMD_LOAD_FPGA
 
 config SHELL_CMD_LS
 	bool "ls"
+	depends on SHELL
 	default n
 	select FILE
 
@@ -104,15 +109,18 @@ config SHELL_CMD_MEMCAT
 
 config SHELL_CMD_MOUNT
 	bool "mount"
+	depends on SHELL
 	default n
 	select FILE
 
 config SHELL_CMD_PS
 	bool "ps"
+	depends on SHELL
 	default n
 
 config SHELL_CMD_PWD
 	bool "pwd"
+	depends on SHELL
 	default n
 
 config SHELL_CMD_SETENV
@@ -122,6 +130,7 @@ config SHELL_CMD_SETENV
 
 config SHELL_CMD_SLABTOP
 	bool "slabtop"
+	depends on SHELL
 	default n
 
 config SHELL_CMD_SLEEP
@@ -131,11 +140,13 @@ config SHELL_CMD_SLEEP
 
 config SHELL_CMD_SOURCE
 	bool "Source (command to execute other scripts)"
+	depends on SHELL
 	default n
 	select FILE
 
-config SHELL_CMD_TFTP
+config SHELL_CMD_TFTP	
 	bool "tftp"
+	depends on SHELL
 	default n	
 
 endmenu
