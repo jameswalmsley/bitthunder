@@ -6,9 +6,7 @@
 #include "module/bt_module_init.h"
 #include "mm/bt_ioremap.h"
 #include "mm/bt_mm.h"
-#ifdef BT_CONFIG_MEM_KHEAP
 #include "mm/bt_heap.h"
-#endif
 #ifdef BT_CONFIG_MEM_PAGE_ALLOCATOR
 #include "mm/bt_page.h"
 #endif
