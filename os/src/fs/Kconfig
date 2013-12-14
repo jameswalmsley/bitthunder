@@ -2,11 +2,6 @@ menu "Filesystems"
 
 config FS
     bool
-	select VOLUME
-	select BLOCK
-	select FILE
-	select DIR
-	select INODE
 	default n
 
 config INODE
