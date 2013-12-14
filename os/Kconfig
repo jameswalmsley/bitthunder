@@ -48,6 +48,8 @@ config I2C
     bool "I2C subsystem"
 	default n
 
+source os/src/rtc/Kconfig
+
 config SPI
 	bool "SPI subsystem"
 	default n
