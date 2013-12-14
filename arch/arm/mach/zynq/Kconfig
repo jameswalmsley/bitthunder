@@ -104,9 +104,15 @@ config MACH_ZYNQ_GEM
 	
 
 comment "I2C devices"
+
+config MACH_ZYNQ_I2C
+	bool
+	default n
+	select I2C
+
 config MACH_ZYNQ_I2C_0
     bool "Use I2C(0) peripheral"
-	select I2C
+	select MACH_ZYNQ_I2C
 	default n
 
 config MACH_ZYNQ_I2C_0_BUSID
@@ -116,7 +122,7 @@ config MACH_ZYNQ_I2C_0_BUSID
 
 config MACH_ZYNQ_I2C_1
 	bool "Use I2C(1) peripheral"
-	select I2C
+	select MACH_ZYNQ_I2C
 	default n
 
 config MACH_ZYNQ_I2C_1_BUSID
@@ -146,6 +152,7 @@ config MACH_ZYNQ_SDIO_1_ALWAYS_PRESENT
 config MACH_ZYNQ_QSPI
 	bool "Use QSPI bus controller"
 	default n
+	select SPI
 
 comment "UART devices"
 config MACH_ZYNQ_UART_0
