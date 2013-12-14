@@ -45,6 +45,7 @@ setup_core_tag(void * address,long pagesize)
     params = tag_next(params);              /* move pointer to next tag */
 }
 
+#ifdef BT_CONFIG_SHELL_CMD_ATAG_RAMDISK
 static void
 setup_ramdisk_tag(BT_u32 size)
 {
@@ -57,7 +58,9 @@ setup_ramdisk_tag(BT_u32 size)
 
     params = tag_next(params);              /* move pointer to next tag */
 }
+#endif
 
+#ifdef BT_CONFIG_SHELL_CMD_ATAG_INITRD2
 static void
 setup_initrd2_tag(BT_u32 start, BT_u32 size)
 {
@@ -69,7 +72,9 @@ setup_initrd2_tag(BT_u32 start, BT_u32 size)
 
     params = tag_next(params);              /* move pointer to next tag */
 }
+#endif
 
+#ifdef BT_CONFIG_SHELL_CMD_ATAG_MEM
 static void
 setup_mem_tag(BT_u32 start, BT_u32 len)
 {
@@ -81,7 +86,9 @@ setup_mem_tag(BT_u32 start, BT_u32 len)
 
     params = tag_next(params);              /* move pointer to next tag */
 }
+#endif
 
+#ifdef BT_CONFIG_SHELL_CMD_ATAG_CMDLINE
 static void
 setup_cmdline_tag(const char * line)
 {
@@ -97,6 +104,7 @@ setup_cmdline_tag(const char * line)
 
     params = tag_next(params);              /* move pointer to next tag */
 }
+#endif
 
 static void
 setup_end_tag(void)
