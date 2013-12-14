@@ -2,6 +2,7 @@ source os/src/process/Kconfig
 source os/src/gpio/Kconfig
 source os/src/interrupts/Kconfig
 source os/src/fs/Kconfig
+source os/src/loader/Kconfig
 source os/src/net/Kconfig
 source os/src/mm/Kconfig
 source os/src/shell/Kconfig

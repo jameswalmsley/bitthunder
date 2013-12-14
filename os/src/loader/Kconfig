@@ -1,0 +1,12 @@
+menu "Loader"
+
+config LOADER
+	bool "Enable Dynamic loading"
+	default n
+
+config LOADER_ELF
+	bool "Support ELF file loading"
+	default n
+	depends on LOADER
+
+endmenu
