@@ -460,7 +460,7 @@ _bt_syscall_entry:
 	ldmeqfd	sp!, {r4,r5,r6}			// Restore context for FreeRTOS yield handler.
 	beq		vPortYieldProcessor
 
-
+#ifdef BT_CONFIG_SYSCALL
 	/*
 	 *	Get Kernel stack pointer.
 	 */
@@ -539,13 +539,11 @@ _bt_syscall_return:
 	ldmfd	r4, {lr}^				// POP the user mode LR from stack.
 
 	ldmfd	sp!, {r4, r5, r6}
-
+#endif
+#endif
 	// Return for SVC handler
 	subs	pc, lr, #0
-#else
-	subs	pc, lr, #0
-#endif
-
+	
 /*
  *************************************************************************
  *

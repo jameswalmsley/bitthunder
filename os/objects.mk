@@ -11,8 +11,6 @@ BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/lib/string.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/lib/ctype.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/lib/bcd.o
 BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/bt_main.o
-BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/syscall/bt_syscall.o
-BT_OS_OBJECTS-$(BT_CONFIG_OS) += $(BUILD_DIR)os/src/syscall/getpid/getpid.o
 BT_OS_OBJECTS-$(BT_CONFIG_PROCESS) += $(BUILD_DIR)os/src/process/bt_process.o
 BT_OS_OBJECTS-$(BT_CONFIG_THREADS) += $(BUILD_DIR)os/src/process/bt_threads.o
 BT_OS_OBJECTS-$(BT_CONFIG_ALIVE_LED) += $(BUILD_DIR)os/src/process/bt_alive_led.o
@@ -40,6 +38,8 @@ include $(BASE)os/src/fs/objects.mk
 include $(BASE)os/src/loader/objects.mk
 include $(BASE)os/src/net/objects.mk
 include $(BASE)os/src/shell/objects.mk
+include $(BASE)os/src/syscall/objects.mk
+
 
 include $(BASE)os/src/interfaces/objects.mk
 include $(BASE)os/src/helpers/objects.mk

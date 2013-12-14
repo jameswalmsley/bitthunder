@@ -6,6 +6,7 @@ source os/src/loader/Kconfig
 source os/src/net/Kconfig
 source os/src/mm/Kconfig
 source os/src/shell/Kconfig
+source os/src/syscall/Kconfig
 source os/src/syslog/Kconfig
 source os/src/lib/Kconfig
 

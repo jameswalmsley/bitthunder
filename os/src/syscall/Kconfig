@@ -1,0 +1,8 @@
+menu "System Calls"
+
+config SYSCALL
+	bool "System Call Mechanism"
+	default n
+
+
+endmenu
