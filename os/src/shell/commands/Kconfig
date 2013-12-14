@@ -21,16 +21,19 @@ config SHELL_CMD_BOOT_JTAG
 config SHELL_CMD_CAT
 	bool "cat"
 	default n
+	select FILE
 
 config SHELL_CMD_CD
     bool "cd"
 	depends on SHELL
 	default n
+	select FILE
 
 config SHELL_CMD_CP
     bool "cp"
 	depends on SHELL
 	default n
+	select FILE
 
 config SHELL_CMD_CP_BUFFER_SIZE
 	int "cp buffer size"
@@ -74,29 +77,35 @@ config SHELL_CMD_LOAD
     bool "load"
 	depends on SHELL
 	default n
+	select FILE
 
 config SHELL_CMD_LOAD_FPGA
     bool "load_fpga"
 	depends on SHELL
 	default n
+	select FILE
 
 config SHELL_CMD_LS
 	bool "ls"
 	default n
+	select FILE
 
 config SHELL_CMD_MD5SUM
 	bool "md5sum"
 	depends on SHELL
 	default n
+	select FILE
 
 config SHELL_CMD_MEMCAT
 	bool "memcat"
 	depends on SHELL
 	default n
+	select FILE
 
 config SHELL_CMD_MOUNT
 	bool "mount"
 	default n
+	select FILE
 
 config SHELL_CMD_PS
 	bool "ps"
@@ -123,9 +132,10 @@ config SHELL_CMD_SLEEP
 config SHELL_CMD_SOURCE
 	bool "Source (command to execute other scripts)"
 	default n
+	select FILE
 
 config SHELL_CMD_TFTP
 	bool "tftp"
-	default n
+	default n	
 
 endmenu

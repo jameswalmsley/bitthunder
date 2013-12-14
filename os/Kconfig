@@ -34,6 +34,7 @@ config VOLUME
 
 config FILE
     bool "File I/O interfaces"
+	select FS
 	default n
 
 config DIR
