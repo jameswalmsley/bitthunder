@@ -1,4 +1,12 @@
-menu "SDCard Subsystem"
+menu "MMC / SDCard Subsystem"
+
+config DRIVERS_SDCARD
+    bool "SDCard / MMC Support"
+	default n
+	select TASKLETS
+	select SOFTIRQ
+
+comment "Host Controllers"
 
 config DRIVERS_SDCARD_SDHCI
     bool "SDHCI Support"

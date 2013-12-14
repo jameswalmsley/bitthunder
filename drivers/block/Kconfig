@@ -1,0 +1,13 @@
+menu "Block Devices"
+
+config DRIVERS_BLOCK
+    bool
+	default n
+	select BLOCK
+
+config DRIVERS_BLOCK_RAMDISK
+    bool "Ramdisk"
+	select DRIVERS_BLOCK
+	default n
+
+endmenu
