@@ -1,5 +1,13 @@
 menu "Commands"
 
+config SHELL_CMD_ATAGS
+	bool "ATAG Support"
+	default n
+
+if SHELL_CMD_ATAGS
+source os/src/shell/commands/atag/Kconfig
+endif
+
 config SHELL_CMD_BOOT
     bool "boot"
 	depends on SHELL
@@ -8,6 +16,10 @@ config SHELL_CMD_BOOT
 config SHELL_CMD_BOOT_JTAG
     bool "boot_jtag"
 	depends on SHELL
+	default n
+
+config SHELL_CMD_CAT
+	bool "cat"
 	default n
 
 config SHELL_CMD_CD
@@ -30,8 +42,17 @@ config SHELL_CMD_ECHO
 	depends on SHELL
 	default n
 
+config SHELL_CMD_FLASHTOOL
+	bool "flashtool"
+	default n
+
 config SHELL_CMD_FREE
 	bool "free"
+	depends on SHELL
+	default n
+
+config SHELL_CMD_GETENV
+	bool "getenv"
 	depends on SHELL
 	default n
 
@@ -45,6 +66,10 @@ config SHELL_CMD_HELP
 	depends on SHELL
 	default n
 
+config SHELL_CMD_IOMEM
+	bool "iomem"
+	default n
+
 config SHELL_CMD_LOAD
     bool "load"
 	depends on SHELL
@@ -53,6 +78,10 @@ config SHELL_CMD_LOAD
 config SHELL_CMD_LOAD_FPGA
     bool "load_fpga"
 	depends on SHELL
+	default n
+
+config SHELL_CMD_LS
+	bool "ls"
 	default n
 
 config SHELL_CMD_MD5SUM
@@ -65,51 +94,8 @@ config SHELL_CMD_MEMCAT
 	depends on SHELL
 	default n
 
-config SHELL_CMD_SETENV
-	bool "setenv"
-	depends on SHELL
-	default n
-
-config SHELL_CMD_SLEEP
-	bool "sleep"
-	depends on SHELL
-	default n
-
-config SHELL_CMD_GETENV
-	bool "getenv"
-	depends on SHELL
-	default n
-
-config SHELL_CMD_ATAGS
-	bool "ATAG Support"
-	default n
-
-if SHELL_CMD_ATAGS
-source os/src/shell/commands/atag/Kconfig
-endif
-
-config SHELL_CMD_SOURCE
-	bool "Source (command to execute other scripts)"
-	default n
-
-config SHELL_CMD_IOMEM
-	bool "IOMEM"
-	default n
-
-config SHELL_CMD_LS
-	bool "ls"
-	default n
-
-config SHELL_CMD_CAT
-	bool "cat"
-	default n
-
 config SHELL_CMD_MOUNT
 	bool "mount"
-	default n
-
-config SHELL_CMD_TFTP
-	bool "tftp"
 	default n
 
 config SHELL_CMD_PS
@@ -120,16 +106,26 @@ config SHELL_CMD_PWD
 	bool "pwd"
 	default n
 
+config SHELL_CMD_SETENV
+	bool "setenv"
+	depends on SHELL
+	default n
+
 config SHELL_CMD_SLABTOP
 	bool "slabtop"
 	default n
 
 config SHELL_CMD_SLEEP
 	bool "sleep"
+	depends on SHELL
 	default n
 
-config SHELL_CMD_FLASHTOOL
-	bool "flashtool"
+config SHELL_CMD_SOURCE
+	bool "Source (command to execute other scripts)"
+	default n
+
+config SHELL_CMD_TFTP
+	bool "tftp"
 	default n
 
 endmenu
