@@ -80,6 +80,14 @@ config MACH_ZYNQ_CAN_1
     bool "Use CAN(1) peripheral"
 	default n
 
+comment "Device Configuration (FPGA loading)"
+
+config MACH_ZYNQ_DEVCFG
+	bool "Use xdevcfg peripheral"
+	default n
+	---help---
+	Allow bitstream files to be piped to the xdevcfg device file to load an fpga.
+
 comment "Gigabit Ethernet MACs"
 
 config MACH_ZYNQ_GEM_0

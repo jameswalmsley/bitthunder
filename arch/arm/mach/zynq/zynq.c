@@ -103,7 +103,7 @@ static const BT_INTEGRATED_DEVICE oZynq_watchdog_device = {
 	.pResources				= oZynq_cpu_timer_resources,
 };
 
-
+#ifdef BT_CONFIG_MACH_ZYNQ_DEVCFG
 static const BT_RESOURCE oZynq_devcfg_resources[] = {
 	{
 		.ulStart			= 0xF8007000,
@@ -122,6 +122,7 @@ BT_DEVFS_INODE_DEF oZynq_devcfg_inode = {
 	.szpName = "xdevcfg",
 	.pDevice = &oZynq_devcfg_device,
 };
+#endif
 
 #ifndef BT_CONFIG_OF
 #ifdef BT_CONFIG_MACH_ZYNQ_I2C_0
