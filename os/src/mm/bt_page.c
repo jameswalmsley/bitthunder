@@ -233,8 +233,13 @@ BT_ERROR bt_page_pool_init(bt_page_pool *pool) {
 BT_ERROR bt_page_info(struct bt_page_info *pInfo) {
 	pInfo->normal_size = default_pool.total_size;
 	pInfo->normal_used = default_pool.used_size;
+#ifdef BT_CONFIG_MEM_PAGE_COHERENT_POOL
 	pInfo->coherent_size = coherent_pool.total_size;
 	pInfo->coherent_used = coherent_pool.used_size;
+#else
+	pInfo->coherent_size = 0;
+	pInfo->coherent_used = 0;
+#endif
 	return BT_ERR_NONE;
 }
 
@@ -281,6 +286,6 @@ bt_paddr_t bt_initialise_coherent_pages() {
 
 	return coherent;
 #else
-	return NULL;
+	return 0;
 #endif
 }
