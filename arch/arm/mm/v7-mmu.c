@@ -59,7 +59,6 @@ int bt_mmu_map(bt_pgd_t pgd_h, bt_paddr_t pa, bt_vaddr_t va, BT_u32 size, int ty
 	bt_pte_t pte;
 	bt_paddr_t pg;
 	BT_u32 ng = 0;
-	BT_u32 asid = GET_ASID(pgd_h);
 	bt_pgd_t pgd = GET_PGD(pgd_h);
 
 	if((va + size) < 0xC0000000) {
@@ -220,8 +219,6 @@ void bt_mmu_init(struct bt_mmumap *mmumap) {
 	// Set-up proper kernel page-tables, so that the super-sections will always be valid and can be copied directly to
 	// The process PGD's on creation.
 
-	bt_kernel_params *params = bt_get_kernel_params();
-
 	bt_pgd_t 	pgd 	= (bt_pgd_t) g_MMUTable;
 	BT_u32 		index;
 
@@ -246,8 +243,9 @@ void bt_mmu_init(struct bt_mmumap *mmumap) {
 
 		// Page Table is now valid. We can make the pgd point to it for these regions.
 		// If region is within the coherent pool, then configure as an uncached section
-		bt_paddr_t phys 			= bt_virt_to_phys(index * 0x00100000);
 #ifdef BT_CONFIG_MEM_PAGE_COHERENT_POOL
+		bt_kernel_params *params = bt_get_kernel_params();
+		bt_paddr_t phys 			= bt_virt_to_phys(index * 0x00100000);
 		if(params->coherent && (phys >= params->coherent && phys < params->coherent + BT_SECTION_ALIGN(BT_CONFIG_MEM_PAGE_COHERENT_LENGTH))) {
 			pgd[index] = phys | MMU_SECTION | MMU_SECTION_SYSTEM;
 		} else {
