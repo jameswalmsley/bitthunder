@@ -57,6 +57,7 @@ BT_HANDLE BT_CreateProcess(BT_FN_THREAD_ENTRY pfnStartRoutine, const BT_i8 *szpN
  **/
 BT_HANDLE BT_GetProcessHandle(void);
 BT_HANDLE BT_GetKernelProcessHandle(void);
+BT_HANDLE BT_GetParentProcessHandle(void);
 
 struct bt_task *BT_GetProcessTask(BT_HANDLE hProces);
 
