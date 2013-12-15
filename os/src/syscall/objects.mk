@@ -1,2 +1,10 @@
 BT_OS_OBJECTS-$(BT_CONFIG_SYSCALL)	+= $(BUILD_DIR)os/src/syscall/bt_syscall.o
-BT_OS_OBJECTS-$(BT_CONFIG_SYSCALL) += $(BUILD_DIR)os/src/syscall/getpid/getpid.o
+BT_OS_OBJECTS-$(BT_CONFIG_SYSCALL) 	+= $(BUILD_DIR)os/src/syscall/calls/getpid.o
+BT_OS_OBJECTS-$(BT_CONFIG_SYSCALL) 	+= $(BUILD_DIR)os/src/syscall/calls/yield.o
+BT_OS_OBJECTS-$(BT_CONFIG_SYSCALL) 	+= $(BUILD_DIR)os/src/syscall/calls/open.o
+BT_OS_OBJECTS-$(BT_CONFIG_SYSCALL) 	+= $(BUILD_DIR)os/src/syscall/calls/close.o
+BT_OS_OBJECTS-$(BT_CONFIG_SYSCALL) 	+= $(BUILD_DIR)os/src/syscall/calls/read.o
+BT_OS_OBJECTS-$(BT_CONFIG_SYSCALL) 	+= $(BUILD_DIR)os/src/syscall/calls/write.o
+BT_OS_OBJECTS-$(BT_CONFIG_SYSCALL) 	+= $(BUILD_DIR)os/src/syscall/calls/klog.o
+BT_OS_OBJECTS-$(BT_CONFIG_SYSCALL) 	+= $(BUILD_DIR)os/src/syscall/calls/sleep.o
+BT_OS_OBJECTS-$(BT_CONFIG_SYSCALL) 	+= $(BUILD_DIR)os/src/syscall/calls/gpio.o
