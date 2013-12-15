@@ -47,6 +47,11 @@ config SHELL_CMD_ECHO
 	depends on SHELL
 	default n
 
+config SHELL_CMD_EXEC
+	bool "exec"
+	depends on SHELL
+	default n
+
 config SHELL_CMD_FLASHTOOL
 	bool "flashtool"
 	depends on SHELL
@@ -139,7 +144,7 @@ config SHELL_CMD_SLEEP
 	default n
 
 config SHELL_CMD_SOURCE
-	bool "Source (command to execute other scripts)"
+	bool "source"
 	depends on SHELL
 	default n
 	select FILE

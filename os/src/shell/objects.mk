@@ -10,6 +10,7 @@ BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_CAT)		+= $(BUILD_DIR)os/src/shell/commands/c
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_CD) 		+= $(BUILD_DIR)os/src/shell/commands/cd.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_CP) 		+= $(BUILD_DIR)os/src/shell/commands/cp.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_ECHO)  		+= $(BUILD_DIR)os/src/shell/commands/echo.o
+BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_EXEC)  		+= $(BUILD_DIR)os/src/shell/commands/exec.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_FREE)  		+= $(BUILD_DIR)os/src/shell/commands/free.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_FLASHTOOL)	+= $(BUILD_DIR)os/src/shell/commands/flashtool.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_GETENV)	  	+= $(BUILD_DIR)os/src/shell/commands/getenv.o
