@@ -26,6 +26,7 @@
 
 #include <bitthunder.h>
 #include <loader/bt_loader.h>
+#include <string.h>
 
 extern const BT_LOADER * __bt_loaders_start;
 extern const BT_LOADER * __bt_loaders_end;
@@ -51,7 +52,7 @@ void *bt_image_load(void *image_start, BT_u32 len, BT_LOADER_SEGMENT_CB pfnLoad,
 static void executor_load_segment(BT_LOADER_SEGMENT *pSegment, void *pParam) {
 
 	void *addr = pSegment->v_addr;
-	BT_ERROR Error = bt_vm_allocate(curtask, &addr, pSegment->size, 0);
+	bt_vm_allocate(curtask, &addr, pSegment->size, 0);
 	memcpy(addr, pSegment->data, pSegment->data_len);
 }
 
@@ -88,7 +89,6 @@ static BT_ERROR exec_loader_thread(BT_HANDLE hThread, void *pParam) {
 	BT_DCacheFlush();
 
 	entry_point pfnEntry = (entry_point) entry;
-	BT_u32 instruction = *((BT_u32 *) entry);
 
 	pfnEntry(0, NULL);	// Currently pass process code no arguments, but we could provide a mechanism for a process to get its args without passing.
 
@@ -129,7 +129,7 @@ BT_ERROR BT_ExecImage(void *image_start, BT_u32 len, const BT_i8 *name) {
 	oConfig.ulFlags			= 0;
 	oConfig.pParam			= pParams;
 
-	BT_HANDLE hProcess = BT_CreateProcess(exec_loader_thread, name, &oConfig, &Error);
+	BT_CreateProcess(exec_loader_thread, name, &oConfig, &Error);
 	while(!pParams->bComplete) {
 		BT_ThreadSleep(100);
 		continue;

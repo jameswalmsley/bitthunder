@@ -20,4 +20,6 @@ typedef struct _BT_LOADER {
 
 #define BT_LOADER_DEF	static const BT_ATTRIBUTE_SECTION(".bt.loaders") BT_LOADER
 
+BT_ERROR BT_ExecImageFile(const BT_i8 *szpPath);
+
 #endif

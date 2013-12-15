@@ -37,5 +37,6 @@
 #include "helpers/bt_clkdiv.h"
 #include "shell/bt_shell.h"
 #include "rtc/bt_rtc.h"
+#include "loader/bt_loader.h"
 
 #endif
