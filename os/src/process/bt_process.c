@@ -82,6 +82,10 @@ BT_HANDLE BT_GetProcessHandle(void) {
 	return (BT_HANDLE) &kernel_handle;
 }
 
+BT_HANDLE BT_GetKernelProcessHandle(void) {
+	return (BT_HANDLE) &kernel_handle;
+}
+
 struct bt_task *BT_GetProcessTask(BT_HANDLE hProcess) {
 	if(hProcess) {
 		return &hProcess->task;

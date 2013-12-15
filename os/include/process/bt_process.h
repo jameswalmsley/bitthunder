@@ -56,6 +56,8 @@ BT_HANDLE BT_CreateProcess(BT_FN_THREAD_ENTRY pfnStartRoutine, const BT_i8 *szpN
  *	@return	BT_HANDLE of the current process.
  **/
 BT_HANDLE BT_GetProcessHandle(void);
+BT_HANDLE BT_GetKernelProcessHandle(void);
+
 struct bt_task *BT_GetProcessTask(BT_HANDLE hProces);
 
 BT_ERROR BT_GetProcessTime(struct bt_process_time *time, BT_u32 i);
