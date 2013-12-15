@@ -139,7 +139,7 @@ BT_ERROR BT_ExecImage(void *image_start, BT_u32 len, const BT_i8 *name) {
 
 	BT_CreateProcess(exec_loader_thread, name, &oConfig, &Error);
 	while(!pParams->bComplete) {
-		BT_ThreadSleep(100);
+		BT_ThreadSleep(10);
 		continue;
 	}
 
@@ -170,5 +170,10 @@ BT_ERROR BT_ExecImageFile(const BT_i8 *szpPath) {
 	void *image = BT_kMalloc(oInode.ullFilesize);
 	BT_u32 read = BT_Read(hFile, 0, oInode.ullFilesize, image, &Error);
 
-	return BT_ExecImage(image, read, szpPath);
+	Error = BT_ExecImage(image, read, szpPath); 
+
+	BT_kFree(image);
+	BT_CloseHandle(hFile);
+
+	return Error;
 }
