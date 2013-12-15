@@ -25,6 +25,7 @@
  **/
 
 #include <bitthunder.h>
+#include <lib/putc.h>
 #include <loader/bt_loader.h>
 #include <string.h>
 
@@ -87,6 +88,13 @@ static BT_ERROR exec_loader_thread(BT_HANDLE hThread, void *pParam) {
 	pParams->bComplete = BT_TRUE;
 
 	BT_DCacheFlush();
+
+	BT_HANDLE hParent = BT_GetParentProcessHandle();
+	BT_HANDLE hStdin  = BT_GetProcessFileDescriptor(hParent, 0, NULL);
+	BT_HANDLE hStdout = BT_GetProcessFileDescriptor(hParent, 1, NULL);
+
+	BT_SetStdin(hStdin);
+	BT_SetStdout(hStdout);
 
 	entry_point pfnEntry = (entry_point) entry;
 
