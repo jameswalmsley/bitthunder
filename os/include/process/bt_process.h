@@ -67,6 +67,8 @@ BT_s32 BT_AllocFileDescriptor();
 BT_ERROR BT_FreeFileDescriptor(BT_s32 fd);
 BT_ERROR BT_SetFileDescriptor(BT_u32 i, BT_HANDLE h);
 BT_HANDLE BT_GetFileDescriptor(BT_u32 i, BT_ERROR *pError);
+BT_ERROR BT_SetProcessFileDescriptor(BT_HANDLE hProcess, BT_u32 i, BT_HANDLE h);
+BT_HANDLE BT_GetProcessFileDescriptor(BT_HANDLE hProcess, BT_u32 i, BT_ERROR *pError);
 
 BT_ERROR bt_process_init();
 

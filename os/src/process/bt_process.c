@@ -120,18 +120,26 @@ BT_u32 BT_GetTotalProcesses() {
 	return total_processes;
 }
 
-
-BT_ERROR BT_SetFileDescriptor(BT_u32 i, BT_HANDLE h) {
-	struct bt_task *task = BT_GetProcessTask(NULL);
+BT_ERROR BT_SetProcessFileDescriptor(BT_HANDLE hProcess, BT_u32 i, BT_HANDLE h) {
+	struct bt_task *task = BT_GetProcessTask(hProcess);
 	task->fds[i] = h;
 	return BT_ERR_NONE;
 }
 
-BT_HANDLE BT_GetFileDescriptor(BT_u32 i, BT_ERROR *pError) {
-	struct bt_task *task = BT_GetProcessTask(NULL);
+BT_HANDLE BT_GetProcessFileDescriptor(BT_HANDLE hProcess, BT_u32 i, BT_ERROR *pError) {
+	struct bt_task *task = BT_GetProcessTask(hProcess);
 	return task->fds[i];
 }
 
+BT_ERROR BT_SetFileDescriptor(BT_u32 i, BT_HANDLE h) {
+	BT_HANDLE hProcess = BT_GetProcessHandle();
+	return BT_SetProcessFileDescriptor(hProcess, i, h);
+}
+
+BT_HANDLE BT_GetFileDescriptor(BT_u32 i, BT_ERROR *pError) {
+	BT_HANDLE hProcess = BT_GetProcessHandle();
+	return BT_GetProcessFileDescriptor(hProcess, i, pError);
+}
 
 static BT_s32 task_alloc_fd(struct bt_task *task) {
 	BT_s32 i;
