@@ -6,6 +6,7 @@
 
 struct bt_thread {
 	struct bt_task *task;
+	void		   *tag;						///< A Tag item used e.g. by newlib for reent structures.
 	BT_u64		ullRunTimeCounter;
 };
 
@@ -36,6 +37,8 @@ BT_HANDLE BT_GetThreadProcessHandle(BT_HANDLE hThread);
 BT_ERROR BT_ThreadSleepUntil(BT_TICK *pulPreviousWakeTime, BT_u32 ulTimeMs);
 BT_ERROR BT_ThreadSleep(BT_u32 ulTimeMs);
 BT_ERROR BT_ThreadYield(void);
+void *BT_GetThreadTag(void);
+void BT_SetThreadTag(void *tag);
 
 #ifdef BT_CONFIG_KERNEL_NONE
 #define BT_ThreadYield(x)

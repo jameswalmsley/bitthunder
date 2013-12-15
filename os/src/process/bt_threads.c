@@ -116,6 +116,14 @@ BT_ERROR BT_ThreadYield() {
 	return BT_ERR_NONE;
 }
 
+void *BT_GetThreadTag() {
+	return curthread->tag;
+}
+
+void BT_SetThreadTag(void *tag) {
+	curthread->tag = tag;
+}
+
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
 };
