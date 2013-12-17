@@ -155,8 +155,8 @@ u32_t sys_arch_mbox_fetch( sys_mbox_t *pxMailBox, void **ppvBuffer, u32_t ulTime
 	}
 
 
-	if( ulTimeOut != 0UL ) {
-		if( BT_TRUE == BT_QueueReceive( *pxMailBox, &( *ppvBuffer ), ulTimeOut ) ) {
+	if( ulTimeOut != 0UL ) {		
+		if( BT_TRUE == BT_QueueReceive( *pxMailBox, (void *) ppvBuffer, ulTimeOut ) ) {
 			ulEndTime = BT_GetKernelTick();
 			ulElapsed = ( ulEndTime - ulStartTime );
 
@@ -169,7 +169,7 @@ u32_t sys_arch_mbox_fetch( sys_mbox_t *pxMailBox, void **ppvBuffer, u32_t ulTime
 		}
 	}
 	else {
-		while( BT_TRUE != BT_QueueReceive( *pxMailBox, &( *ppvBuffer ), 1000 ) );
+		while( BT_TRUE != BT_QueueReceive( *pxMailBox, (void *) ppvBuffer, 1000 ) );
 		ulEndTime = BT_GetKernelTick();
 		ulElapsed = ( ulEndTime - ulStartTime );
 
@@ -206,7 +206,7 @@ u32_t sys_arch_mbox_tryfetch( sys_mbox_t *pxMailBox, void **ppvBuffer ) {
 		ppvBuffer = &pvDummy;
 	}
 
-	lResult = BT_QueueReceive( *pxMailBox, &( *ppvBuffer ), 0UL );
+	lResult = BT_QueueReceive( *pxMailBox, (void *) ppvBuffer, 0UL );
 
 	if( lResult == BT_TRUE ) {
 		ulReturn = ERR_OK;
