@@ -119,6 +119,8 @@ static BT_ERROR timer_setconfig(BT_HANDLE hTimer, void *pConfig) {
 	volatile LPC11xx_TIMER_REGS *pRegs = hTimer->pRegs;
 
 	pRegs->TMRBCTCR	= ((BT_LPC11xx_TIMER_CONFIG*)pConfig)->Control;
+	if (!(pRegs->TMRBMCR & LPC11xx_TIMER_TMRMCR_MR3R))
+		pRegs->TMRBMR3	= ((BT_LPC11xx_TIMER_CONFIG*)pConfig)->Match[3];
 	pRegs->TMRBMCR &= LPC11xx_TIMER_TMRMCR_MR3R;
 	pRegs->TMRBMCR |= ((BT_LPC11xx_TIMER_CONFIG*)pConfig)->MatchControl;
 	pRegs->TMRBMR0	= ((BT_LPC11xx_TIMER_CONFIG*)pConfig)->Match[0];
