@@ -52,6 +52,11 @@ static void threadStartup(void *pParam) {
 
 static const BT_IF_HANDLE oHandleInterface;
 
+static BT_ERROR thread_cleanup(BT_HANDLE hThread) {
+	bt_list_del(&hThread->h.list);
+	return BT_ERR_NONE;
+}
+
 BT_HANDLE BT_CreateProcessThread(BT_HANDLE hProcess, BT_FN_THREAD_ENTRY pfnStartRoutine, BT_THREAD_CONFIG *pConfig, BT_ERROR *pError) {
 
 	BT_ERROR Error;
@@ -126,4 +131,5 @@ void BT_SetThreadTag(void *tag) {
 
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
+	.pfnCleanup = thread_cleanup,
 };
