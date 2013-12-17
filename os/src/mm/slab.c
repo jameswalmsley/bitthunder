@@ -186,6 +186,8 @@ void *BT_kMalloc(BT_u32 ulSize) {
 		return NULL;
 	}
 
+	ulSize=(ulSize+3)&0xFFFFFFFC;
+
 	BT_CACHE *pCache = BT_GetSuitableCache(ulSize+sizeof(struct MEM_TAG)+sizeof(struct MAGIC_TAG));
 	if(pCache) {
 		p = BT_CacheAlloc(pCache);
