@@ -8,7 +8,7 @@
 typedef struct _BT_LPC11xx_TIMER_CONFIG{
 	BT_u32	Control;
 	BT_u32	MatchControl;
-	BT_u32	Match[3];
+	BT_u32	Match[4];
 	BT_u32	CaptureControl;
 	BT_u32	Capture;
 	BT_u32	ExtMatchControl;
