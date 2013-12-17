@@ -5,6 +5,10 @@ config SYSLOG_REMOVE_PRINTK
 	default n	 if LIB_PRINTF
 	default y	 if !LIB_PRINTF
 
+config SYSLOG_SYSTICK
+    bool "Use SysTick Timer for BT_kPrint() outputs"
+    default n
+
 
 choice SYSLOG_LINE_ENDINGS
     prompt "kPrint line endings"
