@@ -78,7 +78,10 @@ config LINKER_FLASH_LENGTH
 	default MACH_FLASH_SIZE if LINKER_MEMORY_DEFINED
 	default 0x0
 	depends on LINKER_SECTION_FLASH
-
+	
+config LINKER_FLASH_RESERVED
+	hex "Reserve Flash Memory for e.g. bootloader"
+	default 0x0
 
 config LINKER_SECTION_SRAM
     bool "SRAM / On-chip-memory section" if !LINKER_MEMORY_DEFINED
@@ -187,7 +190,7 @@ choice LINKER_BSS_SECTION
 config LINKER_BSS_SECTION_FLASH
     bool "Flash"
 	depends on LINKER_SECTION_FLASH
-
+	
 config LINKER_BSS_SECTION_SRAM
     bool "SRAM"
 	depends on LINKER_SECTION_SRAM
