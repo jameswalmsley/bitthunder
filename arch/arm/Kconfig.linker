@@ -103,6 +103,10 @@ config LINKER_SRAM_LENGTH
 config LINKER_SRAM_RESERVED
 	hex "Reserve SRAM Memory for e.g. bootloader"
 	default 0x0
+
+config LINKER_HEAP_DOWN
+	hex "Move HEAP down by xx bytes"
+	default 0x0
 	
 
 config LINKER_SECTION_RAM
