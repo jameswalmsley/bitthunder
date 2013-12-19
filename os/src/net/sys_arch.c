@@ -235,11 +235,11 @@ err_t sys_sem_new( sys_sem_t *pxSemaphore, u8_t ucCount ) {
 	err_t xReturn = ERR_MEM;
 	BT_ERROR Error = BT_ERR_NONE;
 
-	*pxSemaphore = BT_CreateMutex(&Error);
+	*pxSemaphore = BT_kMutexCreate();
 
 	if( *pxSemaphore != NULL ) {
 		if( ucCount == 0U ) {
-			BT_PendMutex( *pxSemaphore, 0 );
+			BT_kMutexPend( *pxSemaphore, 0 );
 		}
 		xReturn = ERR_OK;
 		SYS_STATS_INC_USED( sem );
@@ -281,7 +281,7 @@ u32_t sys_arch_sem_wait( sys_sem_t *pxSemaphore, u32_t ulTimeout ) {
 	ulStartTime = BT_GetKernelTick();
 
 	if( ulTimeout != 0UL ) {
-		if(BT_PendMutex( *pxSemaphore, ulTimeout) == BT_TRUE ) {
+		if(BT_kMutexPend( *pxSemaphore, ulTimeout) == BT_TRUE ) {
 			ulEndTime = BT_GetKernelTick();
 			ulElapsed = (ulEndTime - ulStartTime);
 			ulReturn = ulElapsed;
@@ -291,7 +291,7 @@ u32_t sys_arch_sem_wait( sys_sem_t *pxSemaphore, u32_t ulTimeout ) {
 		}
 	}
 	else {
-		BT_PendMutex( *pxSemaphore, 0 );
+		BT_kMutexPend( *pxSemaphore, 0);
 		ulEndTime = BT_GetKernelTick();
 		ulElapsed = ( ulEndTime - ulStartTime );
 
@@ -309,7 +309,7 @@ err_t sys_mutex_new( sys_mutex_t *Mutex ) {
 	err_t xReturn = ERR_MEM;
 	BT_ERROR Error = BT_ERR_NONE;
 
-	*Mutex = BT_CreateMutex(&Error);
+	*Mutex = BT_kMutexCreate();
 
 	if( *Mutex != NULL ) {
 		xReturn = ERR_OK;
@@ -325,13 +325,13 @@ err_t sys_mutex_new( sys_mutex_t *Mutex ) {
 /** Lock a mutex
  * @param mutex the mutex to lock */
 void sys_mutex_lock( sys_mutex_t *Mutex ) {
-	BT_PendMutex( *Mutex, 0 );
+	BT_kMutexPend( *Mutex, 0 );
 }
 
 /** Unlock a mutex
  * @param mutex the mutex to unlock */
 void sys_mutex_unlock(sys_mutex_t *Mutex ) {
-	BT_ReleaseMutex( *Mutex );
+	BT_kMutexRelease( *Mutex );
 }
 
 
@@ -339,7 +339,7 @@ void sys_mutex_unlock(sys_mutex_t *Mutex ) {
  * @param mutex the mutex to delete */
 void sys_mutex_free( sys_mutex_t *Mutex ) {
 	SYS_STATS_DEC( mutex.used );
-	BT_CloseHandle( *Mutex );
+	BT_kMutexDestroy( *Mutex );
 }
 
 /*---------------------------------------------------------------------------*
@@ -352,7 +352,7 @@ void sys_mutex_free( sys_mutex_t *Mutex ) {
  *---------------------------------------------------------------------------*/
 void sys_sem_signal( sys_sem_t *pxSemaphore ) {
 
-	BT_ReleaseMutex( *pxSemaphore );
+	BT_kMutexRelease( *pxSemaphore );
 }
 
 /*---------------------------------------------------------------------------*
@@ -365,7 +365,7 @@ void sys_sem_signal( sys_sem_t *pxSemaphore ) {
  *---------------------------------------------------------------------------*/
 void sys_sem_free( sys_sem_t *pxSemaphore ) {
 	SYS_STATS_DEC(sem.used);
-	BT_CloseHandle( *pxSemaphore );
+	BT_kMutexDestroy( *pxSemaphore );
 }
 
 /*---------------------------------------------------------------------------*
