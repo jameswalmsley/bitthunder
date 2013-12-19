@@ -33,8 +33,8 @@ BT_DEF_MODULE_EMAIL						("rsteinbauer@riegl.com")
  **/
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER 		h;			///< All handles must include a handle header.
+	BT_I2C_BUS				i2c_master;
 	LPC17xx_I2C_REGS	   *pRegs;
-	const BT_INTEGRATED_DEVICE   *pDevice;
 };
 
 static const BT_u32 g_I2C_PERIPHERAL[3] = {7,19,26};
@@ -75,7 +75,7 @@ static BT_ERROR i2cCleanup(BT_HANDLE hI2C) {
 	// Disable peripheral clock.
 	disablei2cPeripheralClock(hI2C);
 
-	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hI2C->pDevice, BT_RESOURCE_IRQ, 0);
+	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hI2C->i2c_master.pDevice, BT_RESOURCE_IRQ, 0);
 
 	BT_DisableInterrupt(pResource->ulStart);
 
@@ -93,7 +93,7 @@ static BT_ERROR i2c_set_clock_rate(BT_HANDLE hI2C, BT_I2C_CLOCKRATE eClockrate) 
 	 *	We must determine the input clock frequency to the I2C peripheral.
 	 */
 
-	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hI2C->pDevice, BT_RESOURCE_ENUM, 0);
+	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hI2C->i2c_master.pDevice, BT_RESOURCE_ENUM, 0);
 
 	ulInputClk = BT_LPC17xx_GetPeripheralClock(g_I2C_PERIPHERAL[pResource->ulStart]);
 
@@ -136,7 +136,7 @@ static BT_ERROR i2c_set_clock_rate(BT_HANDLE hI2C, BT_I2C_CLOCKRATE eClockrate) 
  *	This actually allows the I2CS to be clocked!
  **/
 static void enablei2cPeripheralClock(BT_HANDLE hI2C) {
-	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hI2C->pDevice, BT_RESOURCE_ENUM, 0);
+	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hI2C->i2c_master.pDevice, BT_RESOURCE_ENUM, 0);
 
 	switch(pResource->ulStart) {
 	case 0: {
@@ -161,7 +161,7 @@ static void enablei2cPeripheralClock(BT_HANDLE hI2C) {
  *	If the serial port is not in use, we can make it sleep!
  **/
 static void disablei2cPeripheralClock(BT_HANDLE hI2C) {
-	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hI2C->pDevice, BT_RESOURCE_ENUM, 0);
+	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hI2C->i2c_master.pDevice, BT_RESOURCE_ENUM, 0);
 
 	switch(pResource->ulStart) {
 	case 0: {
@@ -186,7 +186,7 @@ static void disablei2cPeripheralClock(BT_HANDLE hI2C) {
  *	Function to test the current peripheral clock gate status of the devices.
  **/
 static BT_BOOL isi2cPeripheralClockEnabled(BT_HANDLE hI2C) {
-	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hI2C->pDevice, BT_RESOURCE_ENUM, 0);
+	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hI2C->i2c_master.pDevice, BT_RESOURCE_ENUM, 0);
 
 	switch(pResource->ulStart) {
 	case 0: {
@@ -493,7 +493,7 @@ static BT_HANDLE i2c_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 		goto err_free_out;
 	}
 
-	hI2C->pDevice = pDevice;
+	hI2C->i2c_master.pDevice = pDevice;
 
 	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_INTEGER, 0);
 	if(!pResource) {
@@ -532,7 +532,13 @@ static BT_HANDLE i2c_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 
 	BT_u32 ulBusID = pResource->ulStart;
 
-	BT_I2C_RegisterBusWithID(hI2C, ulBusID);
+	hI2C->i2c_master.ulBusID	= ulBusID;
+	hI2C->i2c_master.hBus 		= hI2C;		// Save pointer to bus's private data.
+	hI2C->i2c_master.pDevice 	= pDevice;
+
+
+	BT_I2C_RegisterBus(&hI2C->i2c_master);
+
 	if(pError) {
 		*pError = Error;
 	}
