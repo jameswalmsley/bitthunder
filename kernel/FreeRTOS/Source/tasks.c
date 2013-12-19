@@ -2416,7 +2416,7 @@ tskTCB *pxNewTCB;
 	{
 #ifdef configBITTHUNDER
 #ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
-		void *phys = bt_virt_to_phys(pxTCB->pxKernelStack);
+		bt_paddr_t phys = bt_virt_to_phys(pxTCB->pxKernelStack);
 		bt_page_free(phys, BT_PAGE_SIZE);
 #endif
 #endif
