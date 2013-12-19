@@ -80,6 +80,7 @@
  *----------------------------------------------------------*/
 
 #define configBITTHUNDER			1
+#define configUSE_NEWLIB_REENTRANT	1
 
 #define configUSE_PREEMPTION		1
 #define configUSE_IDLE_HOOK			0
@@ -131,4 +132,3 @@ NVIC value of 255. */
 #define configLIBRARY_KERNEL_INTERRUPT_PRIORITY	31
 
 #endif /* FREERTOS_CONFIG_H */
-

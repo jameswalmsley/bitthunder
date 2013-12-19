@@ -79,6 +79,10 @@ task.h is included from an application file. */
 #include "timers.h"
 #include "StackMacros.h"
 
+#if ( configUSE_NEWLIB_REENTRANT == 1 )
+#include <sys/reent.h>
+#endif
+
 #if ( configBITTHUNDER == 1 )
 #include <bitthunder.h>
 #include <mm/bt_mm.h>
@@ -120,6 +124,9 @@ typedef struct tskTaskControlBlock
 	unsigned portBASE_TYPE	uxPriority;			/*< The priority of the task where 0 is the lowest priority. */
 	portSTACK_TYPE			*pxStack;			/*< Points to the start of the stack. */
 	signed char				pcTaskName[ configMAX_TASK_NAME_LEN ];/*< Descriptive name given to the task when created.  Facilitates debugging only. */
+#if ( configUSE_NEWLIB_REENTRANT == 1)
+	struct _reent			newlib_reent;
+#endif
 
 	#if ( portSTACK_GROWTH > 0 )
 		portSTACK_TYPE *pxEndOfStack;			/*< Used for stack overflow checking on architectures where the stack grows up from low memory. */
@@ -1690,6 +1697,9 @@ void vTaskSwitchContext( void )
 #endif
 
 		listGET_OWNER_OF_NEXT_ENTRY( pxCurrentTCB, &( pxReadyTasksLists[ uxTopReadyPriority ] ) );
+#if ( configUSE_NEWLIB_REENTRANT == 1)
+		_impure_ptr = &(pxCurrentTCB->newlib_reent);
+#endif
 #if (configBITTHUNDER == 1)
 		curthread = (struct bt_thread *) pxCurrentTCB->pxTaskTag;
 		#ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
@@ -2061,6 +2071,10 @@ static void prvInitialiseTCBVariables( tskTCB *pxTCB, const signed char * const 
 		pxTCB->pxTaskTag = NULL;
 	}
 	#endif
+
+    #if (configUSE_NEWLIB_REENTRANT == 1)
+ 		_REENT_INIT_PTR((&(pxTCB->newlib_reent)));
+    #endif
 
 	#if ( configGENERATE_RUN_TIME_STATS == 1 )
 	{
