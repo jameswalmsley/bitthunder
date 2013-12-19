@@ -237,33 +237,33 @@
 } > BT_LINKER_TEXT_SECTION
 #endif
 
-//.ARM.exidx : {
-//   __exidx_start = .;
-//   *(.ARM.exidx*)
-//   *(.gnu.linkonce.armexidix.*.*)
-//   __exidx_end = .;
-//   } > BT_LINKER_TEXT_SECTION
+.ARM.exidx : {
+   __exidx_start = .;
+   KEEP(*(.ARM.exidx*))
+   KEEP(*(.gnu.linkonce.armexidix.*.*))
+   __exidx_end = .;
+   } > BT_LINKER_TEXT_SECTION
 
-//.preinit_array : {
-//  __preinit_array_start = .;
-//   KEEP (*(SORT(.preinit_array.*)))
-//   KEEP (*(.preinit_array))
-//   __preinit_array_end = .;
-//} > BT_LINKER_TEXT_SECTION
+.preinit_array : {
+  __preinit_array_start = .;
+   KEEP (*(SORT(.preinit_array.*)))
+   KEEP (*(.preinit_array))
+   __preinit_array_end = .;
+} > BT_LINKER_TEXT_SECTION
 
-//.init_array : {
-//   __init_array_start = .;
-//   KEEP (*(SORT(.init_array.*)))
-//   KEEP (*(.init_array))
-//   __init_array_end = .;
-//} > BT_LINKER_TEXT_SECTION
+.init_array : {
+   __init_array_start = .;
+   KEEP (*(SORT(.init_array.*)))
+   KEEP (*(.init_array))
+   __init_array_end = .;
+} > BT_LINKER_TEXT_SECTION
 
-//.fini_array : {
-//   __fini_array_start = .;
-//   KEEP (*(SORT(.fini_array.*)))
-//   KEEP (*(.fini_array))
-//   __fini_array_end = .;
-//} > BT_LINKER_TEXT_SECTION
+.fini_array : {
+   __fini_array_start = .;
+   KEEP (*(SORT(.fini_array.*)))
+   KEEP (*(.fini_array))
+   __fini_array_end = .;
+} > BT_LINKER_TEXT_SECTION
 
 
 _SDA_BASE_ = __sdata_start + ((__sbss_end - __sdata_start) / 2 );
