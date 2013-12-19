@@ -150,6 +150,7 @@ menu "ADC devices"
 config MACH_LM3Sxx_ADC
 	bool
 	default n
+	SELECT ADC
 	
 config MACH_LM3Sxx_ADC_0
     bool "Use ADC(0) peripheral"
@@ -178,6 +179,7 @@ menu "CAN devices"
 config MACH_LM3Sxx_CAN
 	bool
 	default n
+	SELECT CAN
 	
 config MACH_LM3Sxx_CAN_0
     bool "Use CAN(0) peripheral"
@@ -207,6 +209,7 @@ menu "UART devices"
 config MACH_LM3Sxx_UART
 	bool
 	default n
+	SELECT UART
 
 config MACH_LM3Sxx_UART_0
     bool "Use UART(0) peripheral"
@@ -245,6 +248,7 @@ menu "SPI devices"
 config MACH_LM3Sxx_SPI
 	bool
 	default n
+	SELECT SPI
 
 config MACH_LM3Sxx_SPI_0
     bool "Use SPI(0) peripheral"
@@ -273,11 +277,11 @@ menu "I2C devices"
 config MACH_LM3Sxx_I2C
 	bool
 	default n
+	SELECT I2C
 
 config MACH_LM3Sxx_I2C_0
     bool "Use I2C(0) peripheral"
 	default n
-	select I2C
 	select MACH_LM3Sxx_I2C
 	depends on HAS_I2C0
 
@@ -312,7 +316,6 @@ config MACH_LM3Sxx_I2C_0_SPEED
 config MACH_LM3Sxx_I2C_1
     bool "Use I2C(1) peripheral"
 	default n
-	select I2C
 	select MACH_LM3Sxx_I2C
 
 config MACH_LM3Sxx_I2C_1_BUSID
@@ -349,6 +352,7 @@ menu "MAC devices"
 config MACH_LM3Sxx_MAC
 	bool
 	default n
+	SELECT MAC
 
 config MACH_LM3Sxx_MAC_0
     bool "Use MAC(0) peripheral"
@@ -363,6 +367,7 @@ menu "TIMER devices"
 config MACH_LM3Sxx_TIMER
 	bool
 	default n
+	select TIMER
 
 config MACH_LM3Sxx_TIMER_0
     bool "Use TIMER(0) peripheral"
@@ -410,6 +415,7 @@ menu "PWM devices"
 config MACH_LM3Sxx_PWM
 	bool
 	default n
+	select PWM
 
 config MACH_LM3Sxx_PWM_0
     bool "Use PWM(0) peripheral"

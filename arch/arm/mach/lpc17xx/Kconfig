@@ -261,6 +261,7 @@ menu "ADC devices"
 config MACH_LPC17xx_ADC
 	bool
 	default n
+	select ADC
 	
 config MACH_LPC17xx_ADC_0
 
@@ -281,6 +282,7 @@ menu "CAN devices"
 config MACH_LPC17xx_CAN
 	bool
 	default n
+	select CAN
 	
 config MACH_LPC17xx_CAN_0
 
@@ -314,6 +316,7 @@ menu "UART devices"
 config MACH_LPC17xx_UART
 	bool
 	default n
+	select UART
 
 config MACH_LPC17xx_UART_0
     bool "Use UART(0) peripheral"
@@ -361,6 +364,7 @@ menu "SPI devices"
 config MACH_LPC17xx_SPI
 	bool
 	default n
+	select SPI
 
 config MACH_LPC17xx_SPI_0
     bool "Use SPI(0) peripheral"
@@ -398,12 +402,12 @@ menu "I2C devices"
 config MACH_LPC17xx_I2C
 	bool
 	default n
+	select I2C
 
 config MACH_LPC17xx_I2C_0
     bool "Use I2C(0) peripheral"
 	default n
 	select MACH_LPC17xx_I2C
-	select I2C
 	depends on HAS_I2C0
 	
 config MACH_LPC17xx_I2C_0_BUSID
@@ -437,7 +441,6 @@ config MACH_LPC17xx_I2C_0_SPEED
 config MACH_LPC17xx_I2C_1
     bool "Use I2C(1) peripheral"
 	default n
-	select I2C
 	select MACH_LPC17xx_I2C
 
 config MACH_LPC17xx_I2C_1_BUSID
@@ -471,7 +474,6 @@ config MACH_LPC17xx_I2C_1_SPEED
 config MACH_LPC17xx_I2C_2
     bool "Use I2C(2) peripheral"
 	default n
-	select I2C
 	select MACH_LPC17xx_I2C
 
 config MACH_LPC17xx_I2C_2_BUSID
@@ -509,10 +511,11 @@ menu "TIMER devices"
 config MACH_LPC17xx_TIMER
 	bool
 	default n
-
+	select TIMER
+	
 config MACH_LPC17xx_TIMER_0
     bool "Use TIMER(0) peripheral"
-	default n
+	default n	
 	select MACH_LPC17xx_TIMER
 
 config MACH_LPC17xx_TIMER_0_INODE_NAME
@@ -533,7 +536,7 @@ config MACH_LPC17xx_TIMER_1_INODE_NAME
 config MACH_LPC17xx_TIMER_2
     bool "Use TIMER(2) peripheral"
 	default n
-		select MACH_LPC17xx_TIMER
+	select MACH_LPC17xx_TIMER
 
 config MACH_LPC17xx_TIMER_2_INODE_NAME
 	string "TIMER(2) devfs name"
@@ -543,7 +546,7 @@ config MACH_LPC17xx_TIMER_2_INODE_NAME
 config MACH_LPC17xx_TIMER_3
     bool "Use TIMER(3) peripheral"
 	default n
-		select MACH_LPC17xx_TIMER
+	select MACH_LPC17xx_TIMER
 
 config MACH_LPC17xx_TIMER_3_INODE_NAME
 	string "TIMER(3) devfs name"
@@ -573,6 +576,7 @@ menu "MCPWM devices"
 config MACH_LPC17xx_MCPWM
 	bool
 	default n
+	select MCPWM
 
 config MACH_LPC17xx_MCPWM_0
     bool "Use MCPWM(0) peripheral"
@@ -591,6 +595,7 @@ menu "QEI devices"
 config MACH_LPC17xx_QEI
 	bool
 	default n
+	select QEI
 
 config MACH_LPC17xx_QEI_0
     bool "Use QEI(0) peripheral"

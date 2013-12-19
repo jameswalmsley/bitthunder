@@ -48,6 +48,26 @@ config DIR
 config I2C
     bool "I2C subsystem"
 	default n
+	
+config ADC
+    bool "ADC subsystem"
+	default n
+	
+config QEI
+    bool "QEI subsystem"
+	default n
+
+config MCPWM
+    bool "MCPWM subsystem"
+	default n
+
+config PWM
+    bool "PWM subsystem"
+	default n
+
+config TIMER
+    bool "Timer subsystem"
+	default n
 
 config MTD
     bool "MTD subsystem"
@@ -57,6 +77,10 @@ source os/src/rtc/Kconfig
 
 config SPI
 	bool "SPI subsystem"
+	default n
+
+config CAN
+    bool "CAN subsystem"
 	default n
 
 config UART
