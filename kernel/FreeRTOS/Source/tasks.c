@@ -2400,6 +2400,13 @@ tskTCB *pxNewTCB;
 
 	static void prvDeleteTCB( tskTCB *pxTCB )
 	{
+#ifdef configBITTHUNDER
+#ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
+		void *phys = bt_virt_to_phys(pxTCB->pxKernelStack);
+		bt_page_free(phys, BT_PAGE_SIZE);
+#endif
+#endif
+
 		/* This call is required specifically for the TriCore port.  It must be
 		above the vPortFree() calls.  The call is also used by ports/demos that
 		want to allocate and clean RAM statically. */
