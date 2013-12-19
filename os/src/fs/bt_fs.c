@@ -18,6 +18,7 @@ struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;
 };
 
+#ifdef BT_CONFIG_PROCESS_CWD
 static BT_ERROR to_absolute_path(BT_i8 *buf, BT_u32 len, const BT_i8 *path, BT_BOOL isDir) {
 
 	BT_u32 path_len = strlen(path);
@@ -52,6 +53,7 @@ static BT_ERROR to_absolute_path(BT_i8 *buf, BT_u32 len, const BT_i8 *path, BT_B
 
 	return BT_ERR_NONE;
 }
+#endif
 
 BT_ERROR BT_RegisterFilesystem(BT_HANDLE hFS) {
 	if(hFS->h.pIf->eType != BT_HANDLE_T_FILESYSTEM) {
@@ -266,7 +268,7 @@ BT_u32 BT_GetModeFlags(const BT_i8 *mode) {
 				break;
 
 			case 'w':	// Allow Write
-			case 'W':
+		case 'W':
 				ulModeFlags |= BT_FS_MODE_WRITE;
 				ulModeFlags |= BT_FS_MODE_CREATE;	// Create if not exist.
 				ulModeFlags |= BT_FS_MODE_TRUNCATE;
@@ -297,8 +299,10 @@ BT_HANDLE BT_Open(const BT_i8 *szpPath, BT_u32 mode, BT_ERROR *pError) {
 
 	BT_ERROR Error = BT_ERR_NONE;
 	BT_HANDLE h = NULL;
+	BT_i8 *absolute_path = (BT_i8 *) szpPath;
 
-	BT_i8 *absolute_path = BT_kMalloc(BT_PATH_MAX);
+#ifdef BT_CONFIG_PROCESS_CWD
+	absolute_path = BT_kMalloc(BT_PATH_MAX);
 	if(!absolute_path) {
 		Error = BT_ERR_GENERIC;
 		goto err_out;
@@ -308,6 +312,7 @@ BT_HANDLE BT_Open(const BT_i8 *szpPath, BT_u32 mode, BT_ERROR *pError) {
 	if(Error) {
 		goto err_free_out;
 	}
+#endif
 
 	BT_MOUNTPOINT *pMount = GetMountPoint(absolute_path);
 	if(!pMount) {
@@ -321,9 +326,11 @@ BT_HANDLE BT_Open(const BT_i8 *szpPath, BT_u32 mode, BT_ERROR *pError) {
 	h = pFS->pfnOpen(pMount->hMount, path, mode, pError);
 
 err_free_out:
+#ifdef BT_CONFIG_PROCESS_CWD
 	BT_kFree(absolute_path);
-
 err_out:
+#endif
+
 	if(pError) {
 		*pError = Error;
 	}
@@ -346,7 +353,10 @@ BT_ERROR BT_MkDir(const BT_i8 *szpPath) {
 BT_ERROR BT_RmDir(const BT_i8 *szpPath) {
 	BT_ERROR Error = BT_ERR_NONE;
 
-	BT_i8 *absolute_path = BT_kMalloc(BT_PATH_MAX);
+	BT_i8 *absolute_path = (BT_i8 *) szpPath;
+
+#ifdef BT_CONFIG_PROCESS_CWD
+	absolute_path = BT_kMalloc(BT_PATH_MAX);
 	if(!absolute_path) {
 		Error = BT_ERR_GENERIC;
 		goto err_out;
@@ -356,6 +366,7 @@ BT_ERROR BT_RmDir(const BT_i8 *szpPath) {
 	if(Error) {
 		goto err_free_out;
 	}
+#endif
 
 	BT_MOUNTPOINT *pMount = GetMountPoint(absolute_path);
 	if(!pMount) {
@@ -369,9 +380,11 @@ BT_ERROR BT_RmDir(const BT_i8 *szpPath) {
 	Error = pFS->pfnRmDir(pMount->hMount, path);
 
 err_free_out:
+#ifdef BT_CONFIG_PROCESS_CWD
 	BT_kFree(absolute_path);
-
 err_out:
+#endif
+
 	return Error;
 }
 
@@ -380,7 +393,10 @@ BT_HANDLE BT_OpenDir(const BT_i8 *szpPath, BT_ERROR *pError) {
 	BT_ERROR Error = BT_ERR_NONE;
 	BT_HANDLE h = NULL;
 
-	BT_i8 *absolute_path = BT_kMalloc(BT_PATH_MAX);
+	BT_i8 *absolute_path = (BT_i8 *) szpPath;
+
+#ifdef BT_CONFIG_PROCESS_CWD
+	absolute_path = BT_kMalloc(BT_PATH_MAX);
 	if(!absolute_path) {
 		Error = BT_ERR_NO_MEMORY;
 		goto err_out;
@@ -390,6 +406,7 @@ BT_HANDLE BT_OpenDir(const BT_i8 *szpPath, BT_ERROR *pError) {
 	if(Error) {
 		goto err_free_out;
 	}
+#endif
 
 	BT_MOUNTPOINT *pMount = GetMountPoint(absolute_path);
 	if(!pMount) {
@@ -404,9 +421,11 @@ BT_HANDLE BT_OpenDir(const BT_i8 *szpPath, BT_ERROR *pError) {
 	h =  pFS->pfnOpenDir(pMount->hMount, path, pError);
 
 err_free_out:
+#ifdef BT_CONFIG_PROCESS_CWD
 	BT_kFree(absolute_path);
-
 err_out:
+#endif
+
 	if(pError) {
 		*pError = Error;
 	}
@@ -419,7 +438,10 @@ BT_HANDLE BT_GetInode(const BT_i8 *szpPath, BT_ERROR *pError) {
 	BT_ERROR 	Error = BT_ERR_NONE;
 	BT_HANDLE 	h = NULL;
 
-	BT_i8 *absolute_path = BT_kMalloc(BT_PATH_MAX);
+	BT_i8 *absolute_path = (BT_i8 *) szpPath;
+
+#ifdef BT_CONFIG_PROCESS_CWD
+	absolute_path = BT_kMalloc(BT_PATH_MAX);
 	if(!absolute_path) {
 		Error = BT_ERR_NO_MEMORY;
 		goto err_out;
@@ -429,6 +451,7 @@ BT_HANDLE BT_GetInode(const BT_i8 *szpPath, BT_ERROR *pError) {
 	if(Error) {
 		goto err_free_out;
 	}
+#endif
 
 	BT_MOUNTPOINT *pMount = GetMountPoint(absolute_path);
 	if(!pMount) {
@@ -444,9 +467,11 @@ BT_HANDLE BT_GetInode(const BT_i8 *szpPath, BT_ERROR *pError) {
 	}
 
 err_free_out:
+#ifdef BT_CONFIG_PROCESS_CWD
 	BT_kFree(absolute_path);
-
 err_out:
+#endif
+
 	if(pError) {
 		*pError = Error;
 	}
@@ -478,7 +503,10 @@ BT_ERROR BT_Unlink(const BT_i8 *szpPath) {
 
 	BT_ERROR Error = BT_ERR_NONE;
 
-	BT_i8 *absolute_path = BT_kMalloc(BT_PATH_MAX);
+	BT_i8 *absolute_path = (BT_i8 *) szpPath;
+
+#ifdef BT_CONFIG_PROCESS_CWD
+	absolute_path = BT_kMalloc(BT_PATH_MAX);
 	if(!absolute_path) {
 		Error = BT_ERR_GENERIC;
 		goto err_out;
@@ -488,6 +516,7 @@ BT_ERROR BT_Unlink(const BT_i8 *szpPath) {
 	if(Error) {
 		goto err_free_out;
 	}
+#endif
 
 	BT_MOUNTPOINT *pMount = GetMountPoint(absolute_path);
 	if(!pMount) {
@@ -501,9 +530,11 @@ BT_ERROR BT_Unlink(const BT_i8 *szpPath) {
 	Error = pFS->pfnUnlink(pMount->hMount, path);
 
 err_free_out:
+#ifdef BT_CONFIG_PROCESS_CWD
 	BT_kFree(absolute_path);
-
 err_out:
+#endif
+
 	return Error;
 }
 
@@ -529,6 +560,7 @@ BT_ERROR BT_Rename(const BT_i8 *szpPathA, const BT_i8 *szpPathB) {
 	return pFS->pfnRename(pMountA->hMount, pathA, pathB);
 }
 
+#ifdef BT_CONFIG_PROCESS_CWD
 BT_ERROR BT_GetCwd(BT_i8 *buf, BT_u32 len) {
 	BT_u32 i = strlen(curtask->cwd);
 	if(i >= len) {
@@ -569,3 +601,4 @@ BT_ERROR BT_ChDir(const BT_i8 *path) {
 
 	return BT_ERR_NONE;
 }
+#endif
