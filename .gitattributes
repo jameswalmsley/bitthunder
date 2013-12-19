@@ -1,2 +1,23 @@
 # BitThunder Repository should store all text files with UNIX line endings.
-* text
+*.c text
+*.h text
+*.mk text
+.config text
+*.s text
+*.S text
+*.ld text
+*.asm text
+*.sh text
+*.dts text
+*.its text
+*.txt text
+*.tex text
+Kconfig text
+config text
+*.config text
+.config text
+*.lds text
+config/*
+*.py
+linker
+Makefile text
