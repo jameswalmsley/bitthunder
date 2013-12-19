@@ -28,6 +28,7 @@ config SHELL_CMD_CAT
 config SHELL_CMD_CD
     bool "cd"
 	depends on SHELL
+	depends on PROCESS_CWD
 	default n
 	select FILE
 
@@ -126,6 +127,7 @@ config SHELL_CMD_PS
 config SHELL_CMD_PWD
 	bool "pwd"
 	depends on SHELL
+	depends on PROCESS_CWD
 	default n
 
 config SHELL_CMD_SETENV
@@ -149,9 +151,9 @@ config SHELL_CMD_SOURCE
 	default n
 	select FILE
 
-config SHELL_CMD_TFTP	
+config SHELL_CMD_TFTP
 	bool "tftp"
 	depends on SHELL
-	default n	
+	default n
 
 endmenu
