@@ -192,7 +192,11 @@ void *BT_kMalloc(BT_u32 ulSize) {
 	if(pCache) {
 		p = BT_CacheAlloc(pCache);
 	} else {
-		p = (void *) bt_phys_to_virt(bt_page_alloc(ulSize+sizeof(struct MEM_TAG)+sizeof(struct MAGIC_TAG)));
+		bt_paddr_t phys = bt_page_alloc(ulSize+sizeof(struct MEM_TAG)+sizeof(struct MAGIC_TAG));
+		if(!phys) {
+			return NULL;
+		}
+		p = (void *) bt_phys_to_virt(phys);
 	}
 
 	if(!p) {
