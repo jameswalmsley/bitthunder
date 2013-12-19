@@ -155,7 +155,7 @@ u32_t sys_arch_mbox_fetch( sys_mbox_t *pxMailBox, void **ppvBuffer, u32_t ulTime
 	}
 
 
-	if( ulTimeOut != 0UL ) {		
+	if( ulTimeOut != 0UL ) {
 		if( BT_TRUE == BT_QueueReceive( *pxMailBox, (void *) ppvBuffer, ulTimeOut ) ) {
 			ulEndTime = BT_GetKernelTick();
 			ulElapsed = ( ulEndTime - ulStartTime );
@@ -233,7 +233,6 @@ u32_t sys_arch_mbox_tryfetch( sys_mbox_t *pxMailBox, void **ppvBuffer ) {
  *---------------------------------------------------------------------------*/
 err_t sys_sem_new( sys_sem_t *pxSemaphore, u8_t ucCount ) {
 	err_t xReturn = ERR_MEM;
-	BT_ERROR Error = BT_ERR_NONE;
 
 	*pxSemaphore = BT_kMutexCreate();
 
@@ -307,7 +306,6 @@ u32_t sys_arch_sem_wait( sys_sem_t *pxSemaphore, u32_t ulTimeout ) {
 
 err_t sys_mutex_new( sys_mutex_t *Mutex ) {
 	err_t xReturn = ERR_MEM;
-	BT_ERROR Error = BT_ERR_NONE;
 
 	*Mutex = BT_kMutexCreate();
 
