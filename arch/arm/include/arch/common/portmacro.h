@@ -3,6 +3,10 @@
 
 #include "bt_config.h"
 
+#if (defined BT_CONFIG_ARCH_ARM_CORTEX_A9)
+#include <portmacro-ca9.h>
+#else
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -275,4 +279,5 @@ void vApplicationSetupHardware( void );
 }
 #endif
 
+#endif
 #endif

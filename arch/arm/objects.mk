@@ -44,7 +44,8 @@ BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-A9)	+= $(BUILD_DIR)arch/arm/comm
 ifeq ($(BT_CONFIG_KERNEL_FREERTOS), y)
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_ARM11)		+= $(BUILD_DIR)arch/arm/common/freertos-arm11.o
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_ARM11)		+= $(BUILD_DIR)arch/arm/common/freertos-arm11-portisr.o
-BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-A9)	+= $(BUILD_DIR)arch/arm/common/freertos-arm.o
+BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-A9)	+= $(BUILD_DIR)arch/arm/common/freertos-ca9-asm.o
+BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-A9)	+= $(BUILD_DIR)arch/arm/common/freertos-ca9.o
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-M0) += $(BUILD_DIR)arch/arm/common/freertos-m0.o
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-M3) += $(BUILD_DIR)arch/arm/common/freertos-m3.o
 endif
@@ -76,6 +77,10 @@ $(BUILD_DIR)arch/arm/common/freertos-arm.o: CFLAGS += -I $(BASE)kernel/FreeRTOS/
 $(BUILD_DIR)arch/arm/common/freertos-arm.o: CFLAGS += -I $(BASE)arch/arm/include/arch/common/
 $(BUILD_DIR)arch/arm/common/freertos-arm.o: CFLAGS += -D $(BT_CONFIG_FREERTOS_PORT_ARCH)
 $(BUILD_DIR)arch/arm/common/freertos-arm.o: CFLAGS_REMOVE += -mthumb
+$(BUILD_DIR)arch/arm/common/freertos-ca9.o: CFLAGS += -I $(BASE)kernel/FreeRTOS/Source/include/
+$(BUILD_DIR)arch/arm/common/freertos-ca9.o: CFLAGS += -I $(BASE)arch/arm/include/arch/common/
+$(BUILD_DIR)arch/arm/common/freertos-ca9.o: CFLAGS += -D $(BT_CONFIG_FREERTOS_PORT_ARCH)
+$(BUILD_DIR)arch/arm/common/freertos-ca9.o: CFLAGS_REMOVE += -mthumb
 $(BUILD_DIR)arch/arm/common/freertos-m0.o: CFLAGS += -I $(BASE)kernel/FreeRTOS/Source/include/
 $(BUILD_DIR)arch/arm/common/freertos-m0.o: CFLAGS += -I $(BASE)arch/arm/include/arch/common/
 $(BUILD_DIR)arch/arm/common/freertos-m0.o: CFLAGS += -D $(BT_CONFIG_FREERTOS_PORT_ARCH)
