@@ -112,15 +112,12 @@ choice
 
 config TOOLCHAIN_FLOAT_HARD
 	bool "hardfp"
-	default n
 
 config TOOLCHAIN_FLOAT_SOFTFP
 	bool "softfp"
-	default n
 
 config TOOLCHAIN_FLOAT_SOFT
-	bool soft
-	default n
+	bool "soft"
 
 endchoice
 
