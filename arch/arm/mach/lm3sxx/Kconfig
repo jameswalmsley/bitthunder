@@ -150,7 +150,7 @@ menu "ADC devices"
 config MACH_LM3Sxx_ADC
 	bool
 	default n
-	SELECT ADC
+	select ADC
 	
 config MACH_LM3Sxx_ADC_0
     bool "Use ADC(0) peripheral"
@@ -179,7 +179,7 @@ menu "CAN devices"
 config MACH_LM3Sxx_CAN
 	bool
 	default n
-	SELECT CAN
+	select CAN
 	
 config MACH_LM3Sxx_CAN_0
     bool "Use CAN(0) peripheral"
@@ -209,7 +209,7 @@ menu "UART devices"
 config MACH_LM3Sxx_UART
 	bool
 	default n
-	SELECT UART
+	select UART
 
 config MACH_LM3Sxx_UART_0
     bool "Use UART(0) peripheral"
@@ -248,7 +248,7 @@ menu "SPI devices"
 config MACH_LM3Sxx_SPI
 	bool
 	default n
-	SELECT SPI
+	select SPI
 
 config MACH_LM3Sxx_SPI_0
     bool "Use SPI(0) peripheral"
@@ -277,7 +277,7 @@ menu "I2C devices"
 config MACH_LM3Sxx_I2C
 	bool
 	default n
-	SELECT I2C
+	select I2C
 
 config MACH_LM3Sxx_I2C_0
     bool "Use I2C(0) peripheral"
@@ -352,7 +352,7 @@ menu "MAC devices"
 config MACH_LM3Sxx_MAC
 	bool
 	default n
-	SELECT MAC
+	select MAC
 
 config MACH_LM3Sxx_MAC_0
     bool "Use MAC(0) peripheral"
