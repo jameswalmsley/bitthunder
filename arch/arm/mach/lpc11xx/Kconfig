@@ -228,8 +228,6 @@ config MACH_LPC11xx_ADC
 	select ADC
 	
 config MACH_LPC11xx_ADC_0
-
-config MACH_LPC11xx_ADC_0
     bool "Use ADC(0) peripheral"
 	default n
 	select MACH_LPC11xx_ADC
