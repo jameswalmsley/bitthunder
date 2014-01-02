@@ -22,6 +22,7 @@ BT_u32 bt_of_n_size_cells(struct bt_device_node *np);
 BT_BOOL bt_of_can_translate_address(struct bt_device_node *dev);
 BT_ERROR bt_of_address_to_resource(struct bt_device_node *dev, BT_u32 index, BT_RESOURCE *r);
 
+const BT_be32 *bt_of_get_address(struct bt_device_node *dev, int index, BT_u64 *size, BT_u32 *flags);
 
 BT_BOOL bt_of_is_compatible(struct bt_device_node *device, const BT_i8 *compat);
 

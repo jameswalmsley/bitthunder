@@ -60,6 +60,8 @@ typedef struct _BT_MTD_ERASE_REGION_INFO {
 typedef struct _BT_MTD_INFO {
 	BT_HANDLE_HEADER h;
 	struct bt_list_head item;
+	struct bt_list_head partitions;	///< not used if not containing partition
+	const BT_DEVICE *pDevice;
 	BT_u32 			offset;
 	BT_HANDLE		 hMtd;
 	struct bt_devfs_node node;
@@ -67,6 +69,7 @@ typedef struct _BT_MTD_INFO {
 	BT_u8			 type;
 	BT_u32			 flags;
 	BT_u64			 size;			// Total size of the MTD
+	BT_BOOL 		 isPartition;
 
 	/* "Major" erase size for the device. Naive users may take this
 	 * to be the only erase size available, or may use the more detailed
@@ -109,6 +112,10 @@ typedef struct _BT_MTD_INFO {
 	const char *name;
 	int numeraseregions;
 	BT_MTD_ERASE_REGION_INFO *eraseregions;
+  
+	BT_HANDLE_HEADER hBlockdev;
+	BT_BLKDEV_DESCRIPTOR oBlock;
+
 } BT_MTD_INFO;
 
 
@@ -118,6 +125,14 @@ typedef struct {
 	BT_u8			 type;
 	BT_u32			 flags;
 } BT_MTD_USER_INFO;
+
+
+typedef struct _BT_MTD_PART {
+	BT_MTD_INFO  mtd;
+	BT_MTD_INFO *master;
+	BT_u64		 offset;
+} BT_MTD_PART;
+
 
 /*
  *	Define the unified API for SPI devices in BitThunder

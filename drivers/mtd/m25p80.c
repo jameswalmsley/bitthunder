@@ -1414,17 +1414,14 @@ static BT_HANDLE mtd_probe(BT_SPI_DEVICE *spi, const BT_DEVICE *pDevice, BT_ERRO
 					flash->mtd.eraseregions[i].numblocks);
 
 
-
 	if(pError)
 		*pError = Error;
 
-	BT_MTD_RegisterDevice(flash, "mtd0", &flash->mtd);
-
+	flash->mtd.pDevice = pDevice;
+	BT_MTD_RegisterDevice(flash, "mtd", &flash->mtd);
 
 	BT_kPrint("M25P80: probe succeeded");
-
 	return flash;
-
 
 err_out_free_flash:
 	BT_DestroyHandle(flash);
