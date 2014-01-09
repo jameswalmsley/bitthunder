@@ -24,6 +24,8 @@ static BT_HANDLE				g_hActiveHandle = NULL;
 static BT_INTERRUPT_VECTOR 		g_oVectorTable[BT_CONFIG_ARCH_ARM_GIC_TOTAL_IRQS];
 static BT_u32 					g_oVectorStats[BT_CONFIG_ARCH_ARM_GIC_TOTAL_IRQS];
 
+static BT_s32					g_ulIRQ = -1;
+
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER 			h;
 	BT_u32						ulBaseIRQ;
@@ -43,11 +45,13 @@ void BT_ARCH_ARM_GIC_IRQHandler() {
 	while(ulIRQ < 1020) {
 		g_oVectorStats[ulIRQ] += 1;
 		ulIRQ 	   += hGic->ulBaseIRQ;		// Remap the IRQn into logical IRQ# space.
+		g_ulIRQ		= ulIRQ;
 		g_oVectorTable[ulIRQ].pfnHandler(ulIRQ, g_oVectorTable[ulIRQ].pParam);
 		hGic->pGICC->EOIR = ulIRQ;
 		ulStatus 	= hGic->pGICC->IAR;		// receive the first interrupt from the IAR.
 		ulIRQ 		= ulStatus & 0x03FF;	// Get the IRQ number.
 	}
+	g_ulIRQ = -1;
 }
 
 static BT_ERROR gic_stubhandler(BT_u32 ulIRQ, void *pParam) {
@@ -155,6 +159,14 @@ static BT_u32 gic_getpriority(BT_HANDLE hGic, BT_u32 ulIRQ, BT_ERROR *pError) {
 	return 0;
 }
 
+static BT_s32 gic_getactiveinterrupt(BT_HANDLE hGic, BT_ERROR *pError) {
+	if (pError)
+		*pError = BT_ERR_NONE;
+
+	return g_ulIRQ;
+}
+
+
 static BT_ERROR gic_enable(BT_HANDLE hGic, BT_u32 ulIRQ) {
 	BT_u32 ulMask = 1 << (ulIRQ %32);
 	hGic->pGICD->ISENABLER[ulIRQ/32] = ulMask;
@@ -232,6 +244,7 @@ static const BT_DEV_IF_IRQ oDeviceOps = {
 	.pfnEnableInterrupts	= gic_enable_interrupts,
 	.pfnDisableInterrupts	= gic_disable_interrupts,
 	.pfnGetCount			= gic_get_count,
+	.pfnGetActiveInterrupt  = gic_getactiveinterrupt,
 };
 
 static const BT_IF_DEVICE oDeviceInterface = {
