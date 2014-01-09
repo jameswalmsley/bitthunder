@@ -15,6 +15,7 @@
 #include <bitthunder.h>	 				// Include all those wonderful BitThunder APIs.
 #include "uart.h"						// Includes a full hardware definition for the integrated uarts.
 #include "rcc.h"						// Used for getting access to rcc regs, to determine the real Clock Freq.
+#include "../../common/cortex/systick.h"						// Used for getting access to rcc regs, to determine the real Clock Freq.
 #include "ioconfig.h"						// Used for getting access to IOCON regs.
 #include <collections/bt_fifo.h>
 
@@ -52,6 +53,8 @@ static const BT_u32 g_USART_PERIPHERAL[4] = {3, 4, 24, 25};
 
 static BT_u8 TX_FIFO_LVL[4] = {0, 0, 0, 0};
 
+
+static BT_u32 ulTime[10];
 static const BT_IF_HANDLE oHandleInterface;	// Protoype for the uartOpen function.
 static void disableUartPeripheralClock(BT_HANDLE hUart);
 
@@ -68,7 +71,7 @@ static void usartRxHandler(BT_HANDLE hUart) {
 		/* There are errors or break interrupt */
 		/* Read LSR will clear the interrupt */
 		pRegs->FIFO;	/* Dummy read on RX to clear interrupt, then bail out */
-      return;
+		return;
     }
 
 	while (pRegs->LSR & LPC17xx_UART_LSR_RDR)
@@ -77,6 +80,7 @@ static void usartRxHandler(BT_HANDLE hUart) {
 		BT_FifoWrite(hUart->hRxFifo, 1, &ucData, &Error);
 	}
 }
+
 
 static void usartTxHandler(BT_HANDLE hUart) {
 	volatile LPC17xx_UART_REGS *pRegs = hUart->pRegs;
@@ -567,6 +571,7 @@ static BT_ERROR uartRead(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, BT_u8 *
 		// ERR, invalid handle configuration.
 		break;
 	}
+
 	return Error;
 }
 
@@ -621,22 +626,9 @@ static BT_u32 file_read(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, void *pB
 	return ulSize;
 }
 
-static BT_u32 file_write(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
+static BT_u32 file_write(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer, BT_ERROR *pError) {
 	*pError = uartWrite(hUart, ulFlags, ulSize, pBuffer);
 	return ulSize;
-}
-
-/**
- *	A driver doesn't have to implement all API's all at once, therefore we left the boring
- *	GETCH/PUTCH interfaces.
- **/
-
-static BT_ERROR uartGetch(BT_HANDLE hUart, BT_u32 ulFlags) {
-	return BT_ERR_NONE;
-}
-
-static BT_ERROR uartPutch(BT_HANDLE hUart, BT_u32 ulFlags, BT_u8 ucData) {
-	return BT_ERR_NONE;
 }
 
 
