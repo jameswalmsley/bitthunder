@@ -30,7 +30,7 @@ static BT_BOOL isFifoHandle(BT_HANDLE hFifo) {
 }
 
 
-BT_HANDLE BT_FifoCreate(BT_u32 ulElements, BT_u32 ulElementWidth, BT_ERROR *pError) {
+BT_HANDLE BT_FifoCreate(BT_u32 ulElements, BT_u32 ulElementWidth, BT_u32 ulFlags, BT_ERROR *pError) {
 
 	BT_HANDLE hFifo;
 	BT_ERROR Error = BT_ERR_NONE;
@@ -49,6 +49,7 @@ BT_HANDLE BT_FifoCreate(BT_u32 ulElements, BT_u32 ulElementWidth, BT_ERROR *pErr
 
 	hFifo->ulElementWidth = ulElementWidth;
 	hFifo->ulElements     = ulElements;
+	hFifo->ulFlags        = ulFlags;
 
 	return hFifo;
 
