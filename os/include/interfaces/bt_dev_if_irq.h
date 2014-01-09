@@ -18,6 +18,7 @@ typedef struct _BT_DEV_IF_IRQ {
 	BT_ERROR		(*pfnEnableInterrupts)	(BT_HANDLE hIRQ);
 	BT_ERROR		(*pfnDisableInterrupts)	(BT_HANDLE hIRQ);
 	BT_u32			(*pfnGetCount)			(BT_HANDLE hIRQ, BT_u32 ulIRQ);
+	BT_s32			(*pfnGetActiveInterrupt)(BT_HANDLE hIRQ, BT_ERROR *pError);
 } BT_DEV_IF_IRQ;
 
 

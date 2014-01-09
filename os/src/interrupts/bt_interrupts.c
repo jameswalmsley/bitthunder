@@ -147,6 +147,21 @@ BT_ERROR BT_SetInterruptPriority(BT_u32 ulIRQ, BT_u32 ulPriority) {
 }
 BT_EXPORT_SYMBOL(BT_SetInterruptPriority);
 
+BT_s32 BT_GetActiveInterrupt(BT_ERROR *pError) {
+
+	BT_u32 i;
+
+	for(i=0; i < g_ulRegistered; i++) {
+		const BT_INTERRUPT_CONTROLLER *pIntc = &g_oControllers[i];
+
+		BT_s32 slActive = pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnGetActiveInterrupt(pIntc->hIRQ, pError);
+		if (slActive != -1)
+			return g_oControllers[i].ulBaseIRQ + slActive;
+	}
+	return -1;
+}
+
+
 BT_u32 BT_GetInterruptPriority(BT_u32 ulIRQ, BT_ERROR *pError) {
 	const BT_INTERRUPT_CONTROLLER *pIntc = getInterruptController(ulIRQ);
 	if(!pIntc) {

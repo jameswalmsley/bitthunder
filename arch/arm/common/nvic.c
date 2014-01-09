@@ -49,6 +49,20 @@ static BT_ERROR nvic_setpriority(BT_HANDLE hNVIC, BT_u32 ulIRQ, BT_u32 ulPriorit
 	return BT_ERR_NONE;
 }
 
+static BT_s32 nvic_getactiveinterrupt(BT_HANDLE hNVIC, BT_ERROR *pError) {
+	SCB_REGS * pSCB = SCB;
+
+	BT_u32 ulActiveInterrupt = pSCB->ICSR & 0x3F;
+
+	if (pError)
+		*pError = BT_ERR_NONE;
+
+	if (ulActiveInterrupt)
+		return ulActiveInterrupt;
+	else return -1;
+}
+
+
 static BT_u32 nvic_getpriority(BT_HANDLE hNVIC, BT_u32 ulIRQ, BT_ERROR *pError) {
 
 	return BT_ERR_NONE;
@@ -73,12 +87,13 @@ static BT_ERROR nvic_disable(BT_HANDLE hNVIC, BT_u32 ulIRQ) {
 }
 
 static const BT_DEV_IF_IRQ oDeviceOps = {
-	.pfnRegister 	= nvic_register,
-	.pfnUnregister	= nvic_unregister,
-	.pfnSetPriority	= nvic_setpriority,
-	.pfnGetPriority = nvic_getpriority,
-	.pfnEnable 		= nvic_enable,
-	.pfnDisable		= nvic_disable,
+	.pfnRegister 			= nvic_register,
+	.pfnUnregister			= nvic_unregister,
+	.pfnSetPriority			= nvic_setpriority,
+	.pfnGetPriority 		= nvic_getpriority,
+	.pfnEnable 				= nvic_enable,
+	.pfnDisable				= nvic_disable,
+	.pfnGetActiveInterrupt	= nvic_getactiveinterrupt,
 };
 
 static const BT_IF_DEVICE oDeviceInterface = {

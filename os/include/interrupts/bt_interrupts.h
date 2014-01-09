@@ -35,6 +35,7 @@ BT_u32		BT_GetInterruptCount			(BT_u32 ulIRQ);
 BT_ERROR	BT_EnableInterrupts				();
 BT_ERROR	BT_DisableInterrupts			();
 BT_u32		BT_GetInterruptCount			();
+BT_s32		BT_GetActiveInterrupt			(BT_ERROR *pError);
 
 /**
  *	@brief		Controls CPU Interrupt Affinity.
