@@ -120,6 +120,7 @@ static BT_HANDLE zynq_sdhci_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR 
 			pRegs->SLCR_UNLOCK = 0xDF0D;
 			pRegs->SDIO_RST_CTRL |= 0x11;
 			pRegs->SDIO_RST_CTRL &= ~0x11;
+			pRegs->SD0_WP_CD_SEL = 0x003F003F; // @@MS
 			pRegs->SLCR_LOCK = 0x767B;
 		}
 		break;
@@ -130,6 +131,7 @@ static BT_HANDLE zynq_sdhci_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR 
 			pRegs->SLCR_UNLOCK = 0xDF0D;
 			pRegs->SDIO_RST_CTRL |= 0x22;
 			pRegs->SDIO_RST_CTRL &= ~0x22;
+			pRegs->SD1_WP_CD_SEL = 0x003F003F; // @@MS
 			pRegs->SLCR_LOCK = 0x767B;
 		}
 		break;
