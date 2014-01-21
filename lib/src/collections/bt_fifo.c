@@ -73,7 +73,7 @@ BT_HANDLE BT_FifoCreate(BT_u32 ulElements, BT_u32 ulElementWidth, BT_u32 ulFlags
 		return NULL;
 }
 
-BT_u32 BT_FifoWrite(BT_HANDLE hFifo, BT_u32 ulElements, void * pData, BT_ERROR *pError) {
+BT_u32 BT_FifoWrite(BT_HANDLE hFifo, BT_u32 ulElements, const void *pData, BT_ERROR *pError) {
 	if(!isFifoHandle(hFifo)) {
 		// ERR_INVALID_HANDLE_TYPE
 		return BT_ERR_INVALID_HANDLE_TYPE;
