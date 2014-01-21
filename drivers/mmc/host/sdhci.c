@@ -531,7 +531,7 @@ static BT_HANDLE sdhci_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErr
 		goto err_free_out;
 	}
 
-	hSDIO->pRegs = (SDHCI_REGS *) bt_ioremap((void*)pResource->ulStart, BT_SIZE_4K); 
+	hSDIO->pRegs = (SDHCI_REGS *) bt_ioremap((void*)pResource->ulStart, BT_SIZE_4K);
 
 #ifdef BT_CONFIG_SDHCI_DUMP_REGS
 	sdhci_dump_regs(hSDIO);
@@ -552,16 +552,6 @@ static BT_HANDLE sdhci_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErr
 	if(Error) {
 		goto err_free_out;
 	}
-
-	// This enables the interrupt at with the interrupt controller.
-	/*Error = BT_EnableInterrupt(ulIRQ);
-	if(Error) {
-		goto err_free_irq;
-		}*/
-
-	BT_GpioSetDirection(0, BT_GPIO_DIR_OUTPUT);
-	BT_GpioSet(0, 0);
-
 
 	sdhci_set_data_width(hSDIO, BT_MMC_WIDTH_1BIT);
 
