@@ -38,7 +38,7 @@ void BT_ARCH_ARM_GIC_IRQHandler() {
 	BT_u32 ulStatus, ulIRQ;
 
 	ulStatus = hGic->pGICC->IAR;
-	ulIRQ = ulStatus & 0x01FF;
+	ulIRQ = ulStatus & 0x03FF;
 
 	while(ulIRQ < 1020) {
 		g_oVectorStats[ulIRQ] += 1;
