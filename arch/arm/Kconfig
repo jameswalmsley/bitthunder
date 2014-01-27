@@ -126,12 +126,22 @@ config TOOLCHAIN_MACH_FLAGS
 	default "-mthumb -mcpu=cortex-m0" if ARCH_ARM_CORTEX_M0
 	default "-mthumb -mcpu=cortex-m3" if ARCH_ARM_CORTEX_M3
 	default "-mthumb" if ARCH_ARM_CORTEX_M4
-	default "-mfpu=neon -mfloat-abi=soft" if ARCH_ARM_CORTEX_A9 && !ARCH_ARM_THUMB && TOOLCHAIN_FLOAT_SOFT
-	default "-mthumb -mthumb-interwork -mfpu=neon -mfloat-abi=soft" if ARCH_ARM_CORTEX_A9 && ARCH_ARM_THUMB && TOOLCHAIN_FLOAT_SOFT
-	default "-mfpu=neon -mfloat-abi=softfp" if ARCH_ARM_CORTEX_A9 && !ARCH_ARM_THUMB && TOOLCHAIN_FLOAT_SOFTFP
-	default "-mthumb -mthumb-interwork -mfpu=neon -mfloat-abi=softfp" if ARCH_ARM_CORTEX_A9 && ARCH_ARM_THUMB && TOOLCHAIN_FLOAT_SOFTFP
-	default "-mfpu=neon -mfloat-abi=hard" if ARCH_ARM_CORTEX_A9 && !ARCH_ARM_THUMB && TOOLCHAIN_FLOAT_HARD
-	default "-mthumb -mthumb-interwork -mfpu=neon -mfloat-abi=hard" if ARCH_ARM_CORTEX_A9 && ARCH_ARM_THUMB && TOOLCHAIN_FLOAT_HARD
+	default "-mthumb -mthumb-interwork" if ARCH_ARM_THUMB
+	default ""
+
+config TOOLCHAIN_MFPU
+	string
+	default "-mfpu=neon" if ARCH_ARM_HAS_NEON
+
+config TOOLCHAIN_FPU_ABI
+	string
+	default "-mfloat-abi=soft" if TOOLCHAIN_FLOAT_SOFT
+	default "-mfloat-abi=softfp" if TOOLCHAIN_FLOAT_SOFTFP
+	default "-mfloat-abi=hard" if TOOLCHAIN_FLOAT_HARD
+
+config ARCH_ARM_HAS_NEON
+	bool
+	default n
 
 config ARCH_ARM_BOOT
     bool
