@@ -63,13 +63,6 @@ BT_ERROR BT_I2C_RegisterBus(BT_I2C_BUS *pBus) {
 
 	bt_list_add(&pBus->item, &g_i2c_busses);
 
-	// @@MS: start
-
-	//pBus->node.pOps = &i2c_devfs_ops;
-	// @@MS: snprintf(name,16,"_i2c%u",(unsigned int)ulBusID);
-	// @@MS: BT_DeviceRegister(&pBus->node, name);
-	// @@MS: start
-
 	BT_TaskletSchedule(&sm_tasklet);
 
 	return BT_ERR_NONE;
