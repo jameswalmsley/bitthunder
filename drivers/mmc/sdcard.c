@@ -331,8 +331,11 @@ static BT_u32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount,
 		return 0;
 	}
 
-	BT_u32 ulRead;
+	BT_u32 ulRead = 0;
 	BT_s32 nlRetryCount = 0;
+	BT_u32 ulStatus = 0;
+	BT_u32 ulState = 0;
+
 	while(1)
 	{
 		MMC_COMMAND oCommand;
@@ -344,8 +347,8 @@ static BT_u32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount,
 
 		hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
 
-		BT_u32 ulStatus = oCommand.response[0];
-		BT_u32 ulState = (ulStatus >> 9) & 0xF;
+		ulStatus = oCommand.response[0];
+		ulState = (ulStatus >> 9) & 0xF;
 
 		//BT_kPrint("SDCARD: Status (%02x)", ulState);
 
@@ -373,7 +376,7 @@ static BT_u32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount,
 
 			hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
 
-			BT_u32 ulStatus = oCommand.response[0];
+			ulStatus = oCommand.response[0];
 			ulState = (ulStatus >> 9) & 0xF;
 
 			break;
