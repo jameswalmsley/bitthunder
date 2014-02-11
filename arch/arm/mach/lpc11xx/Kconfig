@@ -1,5 +1,10 @@
 comment "LPC11xx Platform Options"
 
+config MACH_PRIORITY_BITS
+	int
+	default 2
+	
+
 config MACH_LPC11xx_SYSCLOCK_IRC_FREQ
 	int
 	default 12000000

@@ -1,5 +1,8 @@
 comment "LPC17xx Platform Options"
 
+config MACH_PRIORITY_BITS
+	int
+	default 5
 
 config MACH_LPC17xx_SYSCLOCK_IRC_FREQ
 	int

@@ -1,5 +1,9 @@
 comment "LM3Sxx Platform Options"
 
+config MACH_PRIORITY_BITS
+	int
+	default 3
+
 config MACH_LM3Sxx_SYSCLOCK_IRC_FREQ
 	int
 	default 16000000
