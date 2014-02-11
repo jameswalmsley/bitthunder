@@ -557,6 +557,8 @@ static BT_HANDLE can_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 		goto err_free_out;
 	}
 
+	BT_SetInterruptPriority(pResource->ulStart, 1);
+
 /*	On NVIC we don't need to register interrupts, LINKER has patched vector for us
  * Error = BT_RegisterInterrupt(pResource->ulStart, uart_irq_handler, hCan);
 	if(Error) {

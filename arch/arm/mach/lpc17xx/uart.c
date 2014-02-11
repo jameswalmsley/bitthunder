@@ -53,7 +53,6 @@ static const BT_u32 g_USART_PERIPHERAL[4] = {3, 4, 24, 25};
 
 static BT_u8 TX_FIFO_LVL[4] = {0, 0, 0, 0};
 
-
 static BT_u32 ulTime[10];
 static const BT_IF_HANDLE oHandleInterface;	// Protoype for the uartOpen function.
 static void disableUartPeripheralClock(BT_HANDLE hUart);
@@ -603,6 +602,7 @@ static BT_ERROR uartWrite(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const 
 	case BT_UART_MODE_BUFFERED:
 	{
 		BT_FifoWrite(hUart->hTxFifo, ulSize, pSrc, &Error);
+
 		pRegs->IER &= ~LPC17xx_UART_IER_THREIE;	// Disable the interrupt
 
 		while (!BT_FifoIsEmpty(hUart->hTxFifo, &Error) && (TX_FIFO_LVL[hUart->id] < 16)) {
@@ -677,7 +677,6 @@ static BT_HANDLE uart_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErro
 	BT_ERROR Error = BT_ERR_NONE;
 	BT_HANDLE hUart = NULL;
 
-
 	const BT_RESOURCE *pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_ENUM, 0);
 	if(!pResource) {
 		Error = BT_ERR_NO_MEMORY;
@@ -719,6 +718,8 @@ static BT_HANDLE uart_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErro
 		Error = BT_ERR_GENERIC;
 		goto err_free_out;
 	}
+
+	BT_SetInterruptPriority(pResource->ulStart, 1);
 
 /*	On NVIC we don't need to register interrupts, LINKER has patched vector for us
  * Error = BT_RegisterInterrupt(pResource->ulStart, uart_irq_handler, hUart);
