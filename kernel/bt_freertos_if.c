@@ -87,6 +87,24 @@ BT_BOOL BT_kMutexPend(void *pMutex, BT_TICK oTimeoutTicks) {
 	return BT_FALSE;
 }
 
+BT_BOOL BT_kMutexAcquire(void *pMutex, BT_i32 nlTimeoutMs) {
+
+	BT_TICK oTimeoutTicks;
+	
+	if(nlTimeoutMs > 0) {
+		oTimeoutTicks = nlTimeoutMs / portTICK_RATE_MS;
+	} else if(nlTimeoutMs < 0) {
+		oTimeoutTicks = portMAX_DELAY;
+	} else {
+		oTimeoutTicks = 0;
+	}
+
+	if(xSemaphoreTake(pMutex, oTimeoutTicks) == pdPASS) {
+		return BT_TRUE;
+	}
+	return BT_FALSE;
+}
+
 BT_BOOL  BT_kMutexRelease(void *pMutex) {
 	if(xSemaphoreGive(pMutex) == pdTRUE) {
 		return BT_TRUE;
