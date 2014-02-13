@@ -46,29 +46,7 @@ static BT_ERROR i2c_irq_handler(BT_u32 ulIRQ, void *pParam) {
 	}
 
 	if(isr_status & INT_MASK_DATA) {
-		if(hI2C->p_msg->len > I2C_FIFO_LEN) {
-			bytes_to_recv = (I2C_FIFO_LEN + 1) - hI2C->pRegs->TRANSFER_SIZE;
-			hI2C->p_msg->len -= bytes_to_recv;
-
-			if(hI2C->p_msg->len > I2C_FIFO_LEN) {
-				hI2C->pRegs->TRANSFER_SIZE = I2C_FIFO_LEN + 1;
-			} else {
-				hI2C->pRegs->TRANSFER_SIZE = hI2C->p_msg->len;
-				if(!hI2C->bHold) {
-					hI2C->pRegs->CONTROL &= CONTROL_HOLD;
-				}
-			}
-
-			while(bytes_to_recv) {
-				*hI2C->p_recv_buf++ = hI2C->pRegs->DATA;
-				bytes_to_recv--;
-			}
-
-		}
-	}
-
-	if(isr_status & INT_MASK_COMP) {
-		if(!hI2C->p_recv_buf) {
+		if(hI2C->p_send_buf) {
 			if(hI2C->send_count > 0) {
 				avail_bytes = I2C_FIFO_LEN - hI2C->pRegs->TRANSFER_SIZE;
 				if(hI2C->send_count > avail_bytes) {
@@ -81,16 +59,66 @@ static BT_ERROR i2c_irq_handler(BT_u32 ulIRQ, void *pParam) {
 					hI2C->pRegs->DATA = *hI2C->p_send_buf++;
 					hI2C->send_count--;
 				}
-			} else {
-				bRelease = BT_TRUE;
-			}
 
-			if(!hI2C->send_count) {
-				if(!hI2C->bHold) {
-					hI2C->pRegs->CONTROL &= ~CONTROL_HOLD;
+				if(!hI2C->send_count) {
+					if(!hI2C->bHold) {
+						hI2C->pRegs->CONTROL &= ~CONTROL_HOLD;
+					}
 				}
 			}
-		} else {
+		}
+		else if(hI2C->p_recv_buf) {
+			if(hI2C->p_msg->len > I2C_FIFO_LEN) {
+				bytes_to_recv = (I2C_FIFO_LEN + 1) - hI2C->pRegs->TRANSFER_SIZE;
+				hI2C->p_msg->len -= bytes_to_recv;
+
+				if(hI2C->p_msg->len > I2C_FIFO_LEN) {
+					hI2C->pRegs->TRANSFER_SIZE = I2C_FIFO_LEN + 1;
+				} else {
+					hI2C->pRegs->TRANSFER_SIZE = hI2C->p_msg->len;
+					if(!hI2C->bHold) {
+						hI2C->pRegs->CONTROL &= CONTROL_HOLD;
+					}
+				}
+
+				while(bytes_to_recv) {
+					*hI2C->p_recv_buf++ = hI2C->pRegs->DATA;
+					bytes_to_recv--;
+				}
+
+			}
+		}
+	}
+
+	if(isr_status & INT_MASK_COMP) {
+		if(hI2C->p_send_buf) {
+			if(hI2C->send_count > 0) {
+				avail_bytes = I2C_FIFO_LEN - hI2C->pRegs->TRANSFER_SIZE;
+				if(hI2C->send_count > avail_bytes) {
+					bytes_to_send = avail_bytes;
+				} else {
+					bytes_to_send = hI2C->send_count;
+				}
+
+				while(bytes_to_send--) {
+					hI2C->pRegs->DATA = *hI2C->p_send_buf++;
+					hI2C->send_count--;
+				}
+
+				if(!hI2C->send_count) {
+					if(!hI2C->bHold) {
+						hI2C->pRegs->CONTROL &= ~CONTROL_HOLD;
+					}
+				}
+			}
+			else {
+				bRelease = BT_TRUE;
+			}
+		}
+		else if(hI2C->p_recv_buf) {
+
+			bRelease = BT_TRUE;
+
 			if(!hI2C->bHold) {
 				hI2C->pRegs->CONTROL &= ~CONTROL_HOLD;
 			}
@@ -99,7 +127,6 @@ static BT_ERROR i2c_irq_handler(BT_u32 ulIRQ, void *pParam) {
 				*hI2C->p_recv_buf++ = hI2C->pRegs->DATA;
 				hI2C->recv_count--;
 			}
-			bRelease = BT_TRUE;
 		}
 	}
 
