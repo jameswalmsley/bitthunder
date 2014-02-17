@@ -35,7 +35,7 @@ void 	   *BT_kMutexCreate		(void);
 void 	   *BT_kRecursiveMutexCreate(void);
 void	    BT_kMutexDestroy	(void *pMutex);
 BT_BOOL		BT_kMutexPend		(void *pMutex, BT_u32 ulTimeout);
-BT_BOOL 	BT_kMutexAcquire	(void *pMutex, BT_i32 nlTimeoutMs);
+BT_BOOL		BT_kMutexAcquire	(void *pMutex, BT_u32 ulTimeout);
 BT_BOOL		BT_kMutexRelease	(void *pMutex);
 BT_BOOL		BT_kMutexPendRecursive		(void *pMutex, BT_u32 ulTimeout);
 BT_BOOL		BT_kMutexReleaseRecursive	(void *pMutex);

@@ -40,8 +40,8 @@ BT_ERROR BT_PendMutex(BT_HANDLE hMutex, BT_TICK oTimeoutTicks) {
 }
 BT_EXPORT_SYMBOL(BT_PendMutex);
 
-BT_ERROR BT_AcquireMutex(BT_HANDLE hMutex, BT_i32 nlTimeoutMs) {
-	return BT_kMutexAcquire(hMutex->pMutex, nlTimeoutMs);
+BT_ERROR BT_AcquireMutex(BT_HANDLE hMutex, BT_TICK oTimeoutTicks) {
+	return BT_kMutexAcquire(hMutex->pMutex, oTimeoutTicks);
 }
 
 BT_ERROR BT_ReleaseMutex(BT_HANDLE hMutex) {
