@@ -407,6 +407,8 @@ static BT_ERROR canWrite(BT_HANDLE hCan, BT_CAN_MESSAGE *pCanMessage) {
 
 		pRegs->CANIER &= ~LPC17xx_CAN_IER_TIE;	// Disable the interrupt
 
+		pRegs->CANIER &= ~LPC17xx_CAN_IER_TIE;	// Disable the interrupt
+
 		while (!BT_FifoIsEmpty(hCan->hTxFifo, &Error) && (canFindFreeBuffer(hCan) != LPC17xx_CAN_NO_FREE_BUFFER)) {
 			BT_FifoRead(hCan->hTxFifo, 1, &oMessage, 0);
 			CanTransmit(hCan, &oMessage);
