@@ -335,6 +335,7 @@ static BT_ERROR canEnable(BT_HANDLE hCan) {
 	volatile LPC17xx_CAN_REGS *pRegs = hCan->pRegs;
 
 	pRegs->CANMOD &= ~LPC17xx_CAN_MOD_RM;
+	pRegs->CANMOD |= LPC17xx_CAN_MOD_TPM;
 
 	return BT_ERR_NONE;
 }
@@ -404,6 +405,8 @@ static BT_ERROR canWrite(BT_HANDLE hCan, BT_CAN_MESSAGE *pCanMessage) {
 	{
 		BT_FifoWrite(hCan->hTxFifo, 1, pCanMessage, &Error);
 
+		pRegs->CANIER &= ~LPC17xx_CAN_IER_TIE;	// Disable the interrupt
+
 		while (!BT_FifoIsEmpty(hCan->hTxFifo, &Error) && (canFindFreeBuffer(hCan) != LPC17xx_CAN_NO_FREE_BUFFER)) {
 			BT_FifoRead(hCan->hTxFifo, 1, &oMessage, &Error);
 			CanTransmit(hCan, &oMessage);
@@ -467,8 +470,8 @@ static BT_u32 canFindFreeBuffer(BT_HANDLE hCan) {
 	LPC17xx_CAN_REGS *pRegs = hCan->pRegs;
 
 	if (pRegs->CANSR & LPC17xx_CAN_SR_TBS1) return 0;
-	if (pRegs->CANSR & LPC17xx_CAN_SR_TBS2) return 1;
-	if (pRegs->CANSR & LPC17xx_CAN_SR_TBS3) return 2;
+	/*if (pRegs->CANSR & LPC17xx_CAN_SR_TBS2) return 1;
+	if (pRegs->CANSR & LPC17xx_CAN_SR_TBS3) return 2;*/
 	return LPC17xx_CAN_NO_FREE_BUFFER;
 }
 

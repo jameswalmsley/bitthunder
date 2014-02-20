@@ -719,7 +719,7 @@ static BT_HANDLE uart_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErro
 		goto err_free_out;
 	}
 
-	BT_SetInterruptPriority(pResource->ulStart, 1);
+	BT_SetInterruptPriority(pResource->ulStart, 2);
 
 /*	On NVIC we don't need to register interrupts, LINKER has patched vector for us
  * Error = BT_RegisterInterrupt(pResource->ulStart, uart_irq_handler, hUart);

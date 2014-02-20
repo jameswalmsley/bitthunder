@@ -46,6 +46,7 @@ typedef struct _LPC17xx_CAN_REGS {
 	BT_u32				CANMOD;					//R/W 0x000 mode register
 
 #define	LPC17xx_CAN_MOD_RM						0x00000001
+#define	LPC17xx_CAN_MOD_TPM						0x00000008
 
 	BT_u32				CANCMR;					//R/W 0x004 command register 0x0000
 
