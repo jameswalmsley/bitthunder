@@ -342,7 +342,9 @@ FF_FILE *FF_Open(FF_IOMAN *pIoman, const FF_T_INT8 *path, FF_T_UINT8 Mode, FF_ER
 		} else {
 			pFileChain = (FF_FILE *) pIoman->FirstFile;
 			do {
-				if(pFileChain->ObjectCluster == pFile->ObjectCluster) {
+				if(pFileChain->ObjectCluster == pFile->ObjectCluster &&
+				   pFileChain->DirCluster == pFile->DirCluster && 		// Guarantee an accurate comparison
+				   pFileChain->DirEntry == pFile->DirEntry) {			
 					// HT: Only fail if any of them has write access...
 					// Why not have 2 open read handles to a single file?
 					if ((pFileChain->Mode | pFile->Mode) & (FF_MODE_WRITE | FF_MODE_APPEND)) {
