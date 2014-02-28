@@ -198,3 +198,6 @@ static void prvSetupTimerInterrupt( void )
 }
 /*-----------------------------------------------------------*/
 
+void vPortReset( void )
+{
+}

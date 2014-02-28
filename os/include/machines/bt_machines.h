@@ -13,6 +13,7 @@
 #include "devman/bt_integrated_device.h"
 #include "devman/bt_integrated_driver.h"
 
+
 typedef enum {
 	BT_ARCH_NONE=0,
 	BT_ARCH_ARM,
@@ -54,5 +55,6 @@ BT_ATTRIBUTE_SECTION(".bt.arch.init") = {				\
 
 
 BT_u32 BT_GetCpuClockFrequency(void);
+void BT_SystemReset(void);
 
 #endif

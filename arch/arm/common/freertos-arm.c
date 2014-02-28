@@ -312,3 +312,7 @@ void vFreeRTOS_IRQInterrupt ( void )
 	/* Restore the context of the new task. */
 	portRESTORE_CONTEXT();
 }
+
+void vPortReset( void )
+{
+}

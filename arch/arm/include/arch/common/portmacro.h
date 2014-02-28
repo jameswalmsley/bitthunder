@@ -259,6 +259,7 @@ disagreeing. */
 
 extern void vPortEnterCritical( void );
 extern void vPortExitCritical( void );
+extern void vPortReset( void );
 
 #define portENTER_CRITICAL()		vPortEnterCritical();
 #define portEXIT_CRITICAL()			vPortExitCritical();

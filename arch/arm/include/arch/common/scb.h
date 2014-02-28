@@ -16,6 +16,10 @@ typedef struct _SCB_REGS {
 	BT_u32 ICSR;
 	BT_u32 VTOR;
 	BT_u32 AIRCR;
+
+#define SCB_AIRCR_VECTKEY			0x05FA0000  // Vector key
+#define SCB_AIRCR_SYSRESETREQ		0x00000004  // System reset request
+
 	BT_u32 SCR;
 	BT_u32 CCR;
 	BT_u8 SHPR[12];
@@ -33,5 +37,7 @@ typedef struct _SCB_REGS {
 
 #define SCB_BASE	0xE000E008
 #define SCB 		((SCB_REGS *) (SCB_BASE))
+
+
 
 #endif

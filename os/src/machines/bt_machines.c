@@ -7,6 +7,8 @@
 #include <bt_types.h>
 #include <machines/bt_machines.h>
 #include <devman/bt_devman.h>
+#include "portmacro.h"
+
 
 BT_u32 BT_GetCpuClockFrequency() {
 
@@ -20,3 +22,7 @@ BT_u32 BT_GetCpuClockFrequency() {
 	return pMachine->pfnGetCpuClockFrequency();
 }
 BT_EXPORT_SYMBOL(BT_GetCpuClockFrequency);
+
+void BT_SystemReset(void) {
+	vPortReset();
+}

@@ -11,6 +11,8 @@
 #include <task.h>
 #include <portmacro.h>
 #include <nvic.h>
+#include <scb.h>
+
 
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;
@@ -53,7 +55,7 @@ static BT_ERROR tick_isr_handler(BT_u32 ulIRQ, void *pParam) {
 #define portNVIC_PENDSVSET			0x10000000
 #define portNVIC_PENDSV_PRI			( ( ( unsigned long ) configKERNEL_INTERRUPT_PRIORITY ) << 16 )
 #define portNVIC_SYSTICK_PRI		( ( ( unsigned long ) configKERNEL_INTERRUPT_PRIORITY ) << 24 )
-
+#define portNVIC_AIRCR_CTRL			( ( volatile unsigned long *) 0xe000ed0c )
 
 /*
  * Exception handlers.
@@ -303,4 +305,10 @@ void vPortYieldFromISR( void )
 {
 	/* Set a PendSV to request a context switch. */
 	*(portNVIC_INT_CTRL) = portNVIC_PENDSVSET;
+}
+
+void vPortReset( void )
+{
+	*(portNVIC_AIRCR_CTRL) = SCB_AIRCR_VECTKEY | SCB_AIRCR_SYSRESETREQ;
+    while(1);
 }

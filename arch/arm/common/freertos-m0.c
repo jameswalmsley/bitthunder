@@ -10,6 +10,8 @@
 #include <FreeRTOS.h>
 #include <task.h>
 #include <portmacro.h>
+#include <scb.h>
+
 
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;
@@ -49,7 +51,7 @@ static BT_ERROR tick_isr_handler(BT_u32 ulIRQ, void *pParam) {
 #define portMIN_INTERRUPT_PRIORITY	( 255UL )
 #define portNVIC_PENDSV_PRI			( portMIN_INTERRUPT_PRIORITY << 16UL )
 #define portNVIC_SYSTICK_PRI		( portMIN_INTERRUPT_PRIORITY << 24UL )
-
+#define portNVIC_AIRCR_CTRL			( ( volatile unsigned long *) 0xe000ed0c )
 
 /*
  * Exception handlers.
@@ -301,4 +303,10 @@ void BT_NVIC_SysTick_Handler(void) {
 void vPortYieldFromISR(void) {
 	/* Set a PendSV to request a context switch. */
 	*(portNVIC_INT_CTRL) = portNVIC_PENDSVSET;
+}
+
+void vPortReset( void )
+{
+	*(portNVIC_AIRCR_CTRL) = SCB_AIRCR_VECTKEY | SCB_AIRCR_SYSRESETREQ;
+	while(1);
 }
