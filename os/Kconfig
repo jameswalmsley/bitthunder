@@ -52,6 +52,10 @@ config I2C
 config ADC
     bool "ADC subsystem"
 	default n
+
+config DAC
+    bool "DAC subsystem"
+	default n
 	
 config QEI
     bool "QEI subsystem"

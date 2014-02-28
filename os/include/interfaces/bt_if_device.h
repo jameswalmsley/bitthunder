@@ -15,6 +15,7 @@
 #include "bt_dev_if_mtd.h"
 #include "bt_dev_if_i2c.h"
 #include "bt_dev_if_adc.h"
+#include "bt_dev_if_dac.h"
 #include "bt_dev_if_can.h"
 #include "bt_dev_if_sdio.h"
 #include "bt_dev_if_rtc.h"
@@ -32,6 +33,7 @@ typedef enum _BT_DEV_IF_TYPE {
 	BT_DEV_IF_T_PWM,
 	BT_DEV_IF_T_MCPWM,
 	BT_DEV_IF_T_ADC,
+	BT_DEV_IF_T_DAC,
 	BT_DEV_IF_T_GPIO,
 	BT_DEV_IF_T_UART,
 	BT_DEV_IF_T_I2C,
@@ -78,6 +80,7 @@ typedef union {
 	const BT_DEV_IF_I2C 	   *pI2CIF;
 	const BT_DEV_IF_MTD		   *pMtdIF;
 	const BT_DEV_IF_ADC 	   *pADCIF;
+	const BT_DEV_IF_DAC 	   *pDACIF;
 	const BT_DEV_IF_UART 	   *pUartIF;
 	const BT_DEV_IF_SDIO	   *pSdioIF;
 	const BT_DEV_IF_EMAC 	   *pEMacIF;
@@ -103,6 +106,7 @@ typedef union {
 #define BT_IF_PHY_OPS(handle)		BT_IF_DEV_CONFIG(handle).pPhyIF
 #define BT_IF_I2C_OPS(handle)		BT_IF_DEV_CONFIG(handle).pI2CIF
 #define	BT_IF_ADC_OPS(handle)		BT_IF_DEV_CONFIG(handle).pADCIF
+#define	BT_IF_DAC_OPS(handle)		BT_IF_DEV_CONFIG(handle).pDACIF
 #define BT_IF_SDIO_OPS(handle)		BT_IF_DEV_CONFIG(handle).pSdioIF
 #define	BT_IF_RTC_OPS(handle)		BT_IF_DEV_CONFIG(handle).pRTCIF
 #define	BT_IF_QEI_OPS(handle)		BT_IF_DEV_CONFIG(handle).pQEIIF

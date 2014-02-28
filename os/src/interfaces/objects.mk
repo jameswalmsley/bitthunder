@@ -6,6 +6,7 @@ BT_OS_INTERFACE_OBJECTS-$(BT_CONFIG_UART) 	+= $(BUILD_DIR)os/src/interfaces/bt_d
 BT_OS_INTERFACE_OBJECTS-$(BT_CONFIG_I2C) 	+= $(BUILD_DIR)os/src/interfaces/bt_dev_if_i2c.o
 BT_OS_INTERFACE_OBJECTS-$(BT_CONFIG_TIMER) 	+= $(BUILD_DIR)os/src/interfaces/bt_dev_if_timer.o
 BT_OS_INTERFACE_OBJECTS-$(BT_CONFIG_ADC) 	+= $(BUILD_DIR)os/src/interfaces/bt_dev_if_adc.o
+BT_OS_INTERFACE_OBJECTS-$(BT_CONFIG_DAC) 	+= $(BUILD_DIR)os/src/interfaces/bt_dev_if_dac.o
 BT_OS_INTERFACE_OBJECTS-$(BT_CONFIG_PWM) 	+= $(BUILD_DIR)os/src/interfaces/bt_dev_if_pwm.o
 BT_OS_INTERFACE_OBJECTS-$(BT_CONFIG_QEI) 	+= $(BUILD_DIR)os/src/interfaces/bt_dev_if_qei.o
 BT_OS_INTERFACE_OBJECTS-$(BT_CONFIG_MCPWM) 	+= $(BUILD_DIR)os/src/interfaces/bt_dev_if_mcpwm.o
