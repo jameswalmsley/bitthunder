@@ -16,16 +16,6 @@ struct _BT_OPAQUE_HANDLE {
 	volatile LPC17xx_GPIO_REGS   *pRegs;
 };
 
-static BT_ERROR gpio_irq_handler(BT_u32 ulIRQ, void *pParam) {
-	//BT_HANDLE hGPIO = (BT_HANDLE) pParam;
-
-	//hGPIO->pRegs->bank[0].INT_STAT = 1;		///< Acknowledge the interrupt.
-
-	//hGPIO->pRegs->DATA[0] ^= 1 << 12;
-
-	return BT_ERR_NONE;
-}
-
 static BT_ERROR gpio_cleanup(BT_HANDLE hGPIO) {
 	return BT_ERR_NONE;
 }

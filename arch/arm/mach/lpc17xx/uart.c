@@ -53,7 +53,6 @@ static const BT_u32 g_USART_PERIPHERAL[4] = {3, 4, 24, 25};
 
 static BT_u8 TX_FIFO_LVL[4] = {0, 0, 0, 0};
 
-static BT_u32 ulTime[10];
 static const BT_IF_HANDLE oHandleInterface;	// Protoype for the uartOpen function.
 static void disableUartPeripheralClock(BT_HANDLE hUart);
 
@@ -607,7 +606,7 @@ static BT_ERROR uartWrite(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const 
 
 	BT_ERROR Error = BT_ERR_NONE;
 	BT_u8 ucData;
-	BT_u8 *pSrc = pucSource;
+	BT_u8 *pSrc = (BT_u8*)pucSource;
 
 	switch(hUart->eMode) {
 	case BT_UART_MODE_POLLED:

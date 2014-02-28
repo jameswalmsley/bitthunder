@@ -598,9 +598,9 @@ void __attribute__((naked)) bt_reset(void);
 void bt_reset(void) {
 	SCB_REGS * pSCB = SCB;
 
-	BT_u32 i;
+	/*BT_u32 i;
 
-	/*for (i = 0; i < 1000000; i++) {
+	for (i = 0; i < 1000000; i++) {
 		__asm__ ("");
 	}*/
 

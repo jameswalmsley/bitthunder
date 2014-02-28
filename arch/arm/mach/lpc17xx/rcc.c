@@ -52,6 +52,7 @@ BT_u32 BT_LPC17xx_SetPeripheralClockDivider(BT_u32 ulPeripheral, BT_u32 ulDivide
 		pRegs->PCLKSEL1 &= ulMask;
 		pRegs->PCLKSEL1 |= (ulDivider << ulShift);
 	}
+	return ulDivider;
 }
 
 

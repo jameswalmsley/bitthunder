@@ -48,7 +48,7 @@ BT_ERROR BT_NVIC_IRQ_17(void) {
 
 	BT_u32 IRValue = pRegs->TMRBIR;
 
-	BT_u32 ulValue = pRegs->TMRBTC;
+	pRegs->TMRBTC;
 
 	pRegs->TMRBIR = IRValue;
 
