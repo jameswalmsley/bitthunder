@@ -205,6 +205,10 @@ config MACH_LPC17xx_MCPWM0_BASE
 config MACH_LPC17xx_ADC0_BASE  
 	hex
 	default 0x40034000
+
+config MACH_LPC17xx_DAC0_BASE  
+	hex
+	default 0x4008C000
 	
 
 config MACH_LPC17xx_TIMER0_BASE
@@ -274,6 +278,27 @@ config MACH_LPC17xx_ADC_0_INODE_NAME
 	string "ADC(0) devfs name"
 	default "adc0"
 	depends on MACH_LPC17xx_ADC_0
+	
+endmenu
+
+menu "DAC devices"
+
+config MACH_LPC17xx_DAC
+	bool
+	default n
+	select DAC
+	
+config MACH_LPC17xx_DAC_0
+
+config MACH_LPC17xx_DAC_0
+    bool "Use DAC(0) peripheral"
+	default n
+	select MACH_LPC17xx_DAC
+
+config MACH_LPC17xx_DAC_0_INODE_NAME
+	string "DAC(0) devfs name"
+	default "dac0"
+	depends on MACH_LPC17xx_DAC_0
 	
 endmenu
 
