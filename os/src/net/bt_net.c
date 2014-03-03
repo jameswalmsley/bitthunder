@@ -18,7 +18,7 @@ struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;
 };
 
-static  BT_LIST_HEAD(g_interfaces);
+static BT_LIST_HEAD(g_interfaces);
 static BT_u32 n_interfaces=0;
 
 static BT_HANDLE g_hMutex = NULL;
@@ -246,5 +246,5 @@ static BT_ERROR bt_net_manager_init() {
 
 BT_MODULE_INIT_DEF oModuleEntry = {
 	BT_MODULE_NAME,
-	bt_net_manager_init,
+	.pfnInit = bt_net_manager_init,
 };
