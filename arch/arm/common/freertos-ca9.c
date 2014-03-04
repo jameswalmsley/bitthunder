@@ -202,12 +202,14 @@ portSTACK_TYPE *pxPortInitialiseStack( portSTACK_TYPE *pxTopOfStack, pdTASK_CODE
 	/* The task will start with a critical nesting count of 0 as interrupts are
 	enabled. */
 	*pxTopOfStack = portNO_CRITICAL_NESTING;
-	//pxTopOfStack--;
 
-	/* The task will start without a floating point context.  A task that uses
-	the floating point hardware must call vPortTaskUsesFPU() before executing
-	any floating point instructions. */
-	//*pxTopOfStack = portNO_FLOATING_POINT_CONTEXT;
+#ifdef BT_CONFIG_TOOLCHAIN_FLOAT_HARD
+	pxTopOfStack--;
+	pxTopOfStack -= 64;			// Space for the floating point context.
+	*pxTopOfStack = 0x40000000;	// Initial FPEXC value (FPU enabled).
+	pxTopOfStack--;
+	*pxTopOfStack = 0;			// Initial FPSCR value.
+#endif
 
 	return pxTopOfStack;
 }

@@ -1,8 +1,9 @@
+#include <bt_config.h>
 
 .equ SYS_MODE,			0x1f
 .equ SVC_MODE,			0x13
 .equ IRQ_MODE,			0x12
-	
+
 .macro portSAVE_CONTEXT
 	// Save the LR and SPSR onto the system mode stack before switching to
 	// system mode to save the remaining system mode registers
@@ -15,21 +16,13 @@
 	LDR		R1, [R2]
 	PUSH	{R1}
 
-#ifdef FLOAT
-	// Does the task have a floating point context that needs saving?  If
-	// ulPortTaskHasFPUContext is 0 then no.
-	LDR		R2, =ulPortTaskHasFPUContext
-	LDR		R3, [R2]
-	CMP		R3, #0
-
-	// Save the floating point context, if any
-	FMRXNE  R1,  FPSCR
-	VPUSHNE {D0-D15}
-	VPUSHNE	{D16-D31}
-	PUSHNE	{R1}
-
-	// Save ulPortTaskHasFPUContext itself
-	PUSH	{R3}
+#ifdef BT_CONFIG_TOOLCHAIN_FLOAT_HARD
+	// Save the floating point context
+	VPUSH 	{D0-D15}
+	VPUSH	{D16-D31}
+	VMRS	R0, FPSCR
+	VMRS	R1, FPEXC
+	PUSH	{R0-R1}
 #endif
 
 	// Save the stack pointer in the TCB
@@ -47,19 +40,13 @@
 	LDR		R1, [R0]
 	LDR		SP, [R1]
 
-#ifdef FLOAT
-	// Is there a floating point context to restore?  If the restored
-	// ulPortTaskHasFPUContext is zero then no.
-	LDR		R0, =ulPortTaskHasFPUContext
-	POP		{R1}
-	STR		R1, [R0]
-	CMP		R1, #0
-
-	// Restore the floating point context, if any
-	LDMFDNE SP!, {R0}
-	VPOPNE	{D16-D31}
-	VPOPNE	{D0-D15}
-	VMSRNE  FPSCR, R0
+#ifdef BT_CONFIG_TOOLCHAIN_FLOAT_HARD
+	// Restore the floating point context.
+	POP		{R0-R1}
+	VMSR	FPEXC, r1
+	VMSR	FPSCR, r0
+	VPOP	{D16-D31}
+	VPOP	{D0-D15}
 #endif
 
 	// Restore the critical section nesting depth
@@ -74,21 +61,29 @@
 	// Return to the task code, loading CPSR on the way.
 	RFEIA	sp!
 .endm
-	
+
 .globl vFreeRTOS_SWI_Handler
 	portSAVE_CONTEXT
 	LDR	 	r0, =vTaskSwitchContext
 	BLX		r0
 
 .globl vPortRestoreTaskContext
-vPortRestoreTaskContext:	
+vPortRestoreTaskContext:
 	portRESTORE_CONTEXT
 
 .globl vFreeRTOS_IRQInterrupt
 vFreeRTOS_IRQInterrupt:
 
+	portSAVE_CONTEXT
+	BL		BT_ARCH_ARM_GIC_IRQHandler
+	LDR 	r1, =ulPortYieldRequired
+	LDR		r0, [r1]
+	CMP		r0, #0
+	BL		vTaskSwitchContext
+	portRESTORE_CONTEXT
+/*
 	SUB		lr, lr, #4
-	
+
 	//  Push the return address and SPSR
 	PUSH	{lr}
 	MRS		lr, SPSR
@@ -123,7 +118,7 @@ vFreeRTOS_IRQInterrupt:
 
 	CMP		r1, #0
 	BNE		exit_without_switch
-	
+
 	LDR		r1, =ulPortYieldRequired
 	LDR		r0, [r1]
 	cmp		r0, #0
@@ -138,7 +133,7 @@ exit_without_switch:
 	POP		{LR}
 	SUBS	PC, LR, #4
 
-switch_before_exit:	
+switch_before_exit:
 	MOV		R0, #0
 	STR		R0, [r1]
 
@@ -151,7 +146,7 @@ switch_before_exit:
 	MSR		SPSR_cxsf,	LR
 	POP		{LR}
 	portSAVE_CONTEXT
-	
+
 	// Call the function that selects the new task to execute.
 	// vTaskSwitchContext() if vTaskSwitchContext() uses LDRD or STRD
 	// instructions, or 8 byte aligned stack allocated data.  LR does not need
@@ -160,6 +155,7 @@ switch_before_exit:
 
 	// Restore the context of, and branch to, the task selected to execute next.
 	portRESTORE_CONTEXT
+*/
 
 .globl vPortYieldProcessor
 vPortYieldProcessor:

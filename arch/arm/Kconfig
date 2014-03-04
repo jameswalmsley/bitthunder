@@ -162,6 +162,14 @@ config ARCH_HAVE_MPU
 config ARCH_HAVE_MMU
 	bool
 
+if ARCH_ARM_CORTEX_A9
+
+config KERNEL_FREERTOS_CA9_MODERN_PORT
+	bool "Modern FreeRTOS CA9 port (experimental)"
+	default n
+
+endif
+
 if MACH_STM32
 source arch/arm/mach/stm32/Kconfig
 endif

@@ -25,16 +25,17 @@ BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_USE_NVIC)	+= $(BUILD_DIR)arch/arm/commo
 #
 #	Timer Devices
 #
-BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-A9)	+= $(BUILD_DIR)arch/arm/common/cortex-a9-cpu-timers.o
-BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-A9)	+= $(BUILD_DIR)arch/arm/common/gt.o
-BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-M0)	+= $(BUILD_DIR)arch/arm/common/cortex/systick.o
-BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-M3)	+= $(BUILD_DIR)arch/arm/common/cortex/systick.o
+BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX_A9)	+= $(BUILD_DIR)arch/arm/common/cortex-a9-cpu-timers.o
+BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX_A9)	+= $(BUILD_DIR)arch/arm/common/gt.o
+#$(BUILD_DIR)arch/arm/common/gt.o: CFLAGS_REMOVE += $(CC_MFPU) $(CC_FPU_ABI)
+BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX_M0)	+= $(BUILD_DIR)arch/arm/common/cortex/systick.o
+BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX_M3)	+= $(BUILD_DIR)arch/arm/common/cortex/systick.o
 
 #
 #	Cache and CPU interfaces.
 #
-BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-A9)	+= $(BUILD_DIR)arch/arm/common/arm11cpu.o
-BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-A9)	+= $(BUILD_DIR)arch/arm/common/arm-cache.o
+BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX_A9)	+= $(BUILD_DIR)arch/arm/common/arm11cpu.o
+BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX_A9)	+= $(BUILD_DIR)arch/arm/common/arm-cache.o
 
 
 
@@ -44,10 +45,14 @@ BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-A9)	+= $(BUILD_DIR)arch/arm/comm
 ifeq ($(BT_CONFIG_KERNEL_FREERTOS), y)
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_ARM11)		+= $(BUILD_DIR)arch/arm/common/freertos-arm11.o
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_ARM11)		+= $(BUILD_DIR)arch/arm/common/freertos-arm11-portisr.o
-BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-A9)	+= $(BUILD_DIR)arch/arm/common/freertos-ca9-asm.o
-BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-A9)	+= $(BUILD_DIR)arch/arm/common/freertos-ca9.o
-BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-M0) += $(BUILD_DIR)arch/arm/common/freertos-m0.o
-BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX-M3) += $(BUILD_DIR)arch/arm/common/freertos-m3.o
+ifeq ($(BT_CONFIG_KERNEL_FREERTOS_CA9_MODERN_PORT), y)
+BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX_A9)	+= $(BUILD_DIR)arch/arm/common/freertos-ca9-asm.o
+BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX_A9)	+= $(BUILD_DIR)arch/arm/common/freertos-ca9.o
+else
+BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX_A9)	+= $(BUILD_DIR)arch/arm/common/freertos-arm.o
+endif
+BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX_M0) += $(BUILD_DIR)arch/arm/common/freertos-m0.o
+BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX_M3) += $(BUILD_DIR)arch/arm/common/freertos-m3.o
 endif
 
 #
