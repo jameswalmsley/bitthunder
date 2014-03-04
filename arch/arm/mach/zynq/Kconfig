@@ -94,14 +94,24 @@ config MACH_ZYNQ_GEM_0
     bool "Use GEM (MAC) 0 peripheral"
 	default n
 
+config MACH_ZYNQ_GEM_0_PHY_ADDR
+	int "GEM 0 PHY Address"
+	default 5
+	depends on MACH_ZYNQ_GEM_0
+
 config MACH_ZYNQ_GEM_1
 	bool "Use GEM (MAC) 1 peripheral"
 	default n
 
+config MACH_ZYNQ_GEM_1_PHY_ADDR
+	bool "GEM 1 PHY Address"
+	default 7
+	depends on MACH_ZYNQ_GEM_1
+
 config MACH_ZYNQ_GEM
 	bool
 	default y if MACH_ZYNQ_GEM_0 || MACH_ZYNQ_GEM_1
-	
+
 comment "GPIO"
 
 config MACH_ZYNQ_GPIO
@@ -150,7 +160,7 @@ config MACH_ZYNQ_SDIO_0_ALWAYS_PRESENT
 	default n
 	depends on MACH_ZYNQ_SDIO_0
 
-config MACH_ZYNQ_SDIO_1	  
+config MACH_ZYNQ_SDIO_1
     bool "Use SDIO(1) peripheral"
 	select MACH_ZYNQ_SDIO
 	default n
