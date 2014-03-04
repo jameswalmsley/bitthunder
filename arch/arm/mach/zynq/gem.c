@@ -78,9 +78,9 @@ static BT_ERROR gem_interrupt_handler(BT_u32 ulIRQ, void *pParam) {
 		} else if(regisr & GEM_INT_TX_COMPLETE) {
 			hMac->pRegs->tx_status = 0x20;
 		}else if(regisr & GEM_INT_RX_OVERRUN) {
-			BT_kPrint("rx overrun");
+			//BT_kPrint("rx overrun");
 		} else {
-			BT_kPrint("other int:%08x", regisr);
+			//BT_kPrint("other int:%08x", regisr);
 		}
 
 		regisr = hMac->pRegs->intr_status;
@@ -216,6 +216,16 @@ static BT_ERROR mac_send_event(BT_HANDLE hMac, BT_u32 ulEvent) {
 	return BT_ERR_NONE;
 }
 
+static void mac_adjust_link(BT_HANDLE hIF, struct bt_phy_device *phy) {
+	// Get the current PHY speed, etc and adjust the MAC clocks appropriately.
+	BT_kPrint("GEM: PHY signalled link adjustment");
+}
+
+static void mac_adjust_state(BT_HANDLE hIF, struct bt_phy_device *phy) {
+	// Get the current PHY state etc and enable / disable the MAC as appropriate.
+	BT_kPrint("GEM: PHY signalled link state change");
+}
+
 static struct _MII_HANDLE* mii_init(BT_HANDLE hMac, BT_ERROR *pError) {
 	struct _MII_HANDLE *pMII = (struct _MII_HANDLE *) BT_CreateHandle(&oMIIHandleInterface, sizeof(struct _MII_HANDLE), pError);
 	if(!pMII) {
@@ -233,18 +243,8 @@ hMac->hMII = (BT_HANDLE) pMII;
 	return pMII;
 }
 
-
 static BT_ERROR mac_init(BT_HANDLE hMac) {
 	BT_ERROR Error = BT_ERR_NONE;
-	struct _MII_HANDLE *pMII = mii_init(hMac, &Error);
-	if(!pMII) {
-		return Error;
-	}
-
-	Error = BT_RegisterMiiBus((BT_HANDLE) pMII, &pMII->mii);
-	if(Error) {
-		return Error;
-	}
 
 	hMac->pRegs->net_ctrl |= NET_CTRL_TXEN;
 	hMac->pRegs->net_ctrl |= NET_CTRL_RXEN;
@@ -341,6 +341,8 @@ static const BT_DEV_IF_EMAC mac_ops = {
 	.pfnTxFifoReady		= mac_tx_ready,
 	.pfnSendFrame		= mac_sendframe,
 	.pfnSendEvent		= mac_send_event,
+	.adjust_link		= mac_adjust_link,
+	.adjust_state		= mac_adjust_state,
 };
 
 /*static const BT_IF_POWER oPowerInterface = {
@@ -377,7 +379,6 @@ BT_u8 dividers[8] = {
 };
 
 static BT_ERROR descriptor_init(BT_HANDLE hMac) {
-
 
 	hMac->rxbufs_phys = bt_page_alloc_coherent(RX_BUF_SIZE * RECV_BD_CNT);
 	hMac->rxbufs = (void *) bt_phys_to_virt(hMac->rxbufs_phys);
@@ -417,13 +418,6 @@ static BT_ERROR descriptor_init(BT_HANDLE hMac) {
 
 	return BT_ERR_NONE;
 }
-
-
-/*static int descriptor_free(BT_HANDLE hMac) {
-
-
-	return BT_ERR_NONE;
-	}*/
 
 static void mac_set_hwaddr(BT_HANDLE hMac) {
 	// Set mac address
@@ -594,10 +588,49 @@ static BT_HANDLE mac_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 	}
 
 	BT_SetInterruptLabel(pResource->ulStart, gem_interrupt_handler, hMac, "zynq,gem");
-
 	BT_EnableInterrupt(pResource->ulStart);
 
+	/*
+	 * Initialise the MII bus for PHY communication.
+	 */
+
+	struct _MII_HANDLE *pMII = mii_init(hMac, &Error);
+	if(!pMII) {
+		return Error;
+	}
+
+	Error = BT_RegisterMiiBus((BT_HANDLE) pMII, &pMII->mii);
+	if(Error) {
+		return Error;
+	}
+
 	BT_RegisterNetworkInterface(hMac);
+
+	BT_u32 address = 0;
+	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_ADDR, 0);	// PHY address in the resource list.
+	if(!pResource) {
+#ifdef BT_CONFIG_OF
+		// Get a link from the device tree to the desired PHY.
+		if(dev) {
+			const BT_be32 *phy_handle = bt_of_get_property(dev, "phy-handle", NULL);
+			if(phy_handle) {
+				struct bt_device_node *phy_node = bt_of_find_node_by_phandle(bt_be32_to_cpu(*phy_handle));
+				if(phy_node) {
+					// We can now work out the phy's address.
+					const BT_be32 *phy_address = bt_of_get_address(phy_node, 0, NULL, NULL);
+					address = bt_be32_to_cpu(*phy_address);
+				}
+			}
+		}
+#else
+		Error = BT_ERR_GENERIC;
+		goto err_free_buffers_out;
+#endif
+	} else {
+		address = pResource->ulStart;
+	}
+
+	Error = BT_ConnectPHY(hMac, address);
 
 	return hMac;
 
@@ -637,6 +670,11 @@ static const BT_RESOURCE oZynq_mac0_resources[] = {
 		.ulEnd		= 55,	// Ethernet 0 Wakeup IRQ
 		.ulFlags	= BT_RESOURCE_IRQ,
 	},
+	{
+		.ulStart	= BT_CONFIG_MACH_ZYNQ_GEM_0_PHY_ADDRESS,
+		.ulEnd		= BT_CONFIG_MACH_ZYNQ_GEM_0_PHY_ADDRESS,
+		.ulFlags 	= BT_RESOURCE_ADDR,
+	},
 };
 
 BT_INTEGRATED_DEVICE_DEF oZynq_mac0_device = {
@@ -659,9 +697,14 @@ static const BT_RESOURCE oZynq_mac1_resources[] = {
 		.ulFlags	= BT_RESOURCE_ENUM,
 	},
 	{
-		.ulStart	= 77,	// Ethernet 0 IRQ
-		.ulEnd		= 78,	// Ethernet 0 Wakeup IRQ
+		.ulStart	= 77,	// Ethernet 1 IRQ
+		.ulEnd		= 78,	// Ethernet 1 Wakeup IRQ
 		.ulFlags	= BT_RESOURCE_IRQ,
+	},
+	{
+		.ulStart	= BT_CONFIG_MACH_ZYNQ_GEM_1_PHY_ADDRESS,
+		.ulEnd		= BT_CONFIG_MACH_ZYNQ_GEM_1_PHY_ADDRESS,
+		.ulFlags 	= BT_RESOURCE_ADDR,
 	},
 };
 
