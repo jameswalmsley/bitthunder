@@ -1,3 +1,8 @@
+/**
+ *	Network PHY support for BitThunder.
+ *
+ **/
+
 #ifndef _BT_PHY_H_
 #define _BT_PHY_H_
 
@@ -31,8 +36,12 @@ enum bt_phy_interface_t {
 	BT_PHY_INTERFACE_MODE_SMII,
 } bt_phy_interface_t;
 
+struct bt_mii_bus;
+
 struct bt_phy_device {
-	BT_HANDLE 				hMII;					///< Handle to MII bus driver.
+	struct bt_mii_bus 	   *mii_bus;
+	struct bt_list_head		item;
+	BT_HANDLE				hPHY;					///< PHY driver handle.
 	BT_u32					phy_id;					///< UID found during probe.
 	enum bt_phy_state		eState;
 	enum bt_phy_interface_t	interface;
@@ -48,15 +57,14 @@ struct bt_phy_device {
 	BT_u32					autoneg;
 	BT_u32					link_timeout;
 	BT_s32					irq;
-
-	BT_HANDLE 				hMAC;
-
-	void (*adjust_link)		(BT_HANDLE hMac);
-	void (*adjust_state)	(BT_HANDLE hMac);
+	BT_HANDLE				active_mac;				///< Handle of the associated/connected MAC.
 };
 
 struct bt_mii_bus {
 	BT_HANDLE 				hMAC;
+	BT_HANDLE 				hMII;			///< Handle to MII bus driver.
+	struct bt_list_head		item;
+	struct bt_list_head		phys;			// Phy devices on this bus.
 	const BT_i8			   *name;
 	BT_u8					id;
 	void				   *mutex;
@@ -65,5 +73,50 @@ struct bt_mii_bus {
 };
 
 BT_ERROR BT_RegisterMiiBus(BT_HANDLE hMII, struct bt_mii_bus *bus);
+
+BT_u16 bt_phy_read(struct bt_phy_device *phy, BT_u32 regnum, BT_ERROR *pError);
+BT_ERROR bt_phy_write(struct bt_phy_device *phy, BT_u32 regnum, BT_u16 val);
+
+/*
+ *	Standard PHY Register definitions.
+ *
+ *	The following definitions describe the standard PHY register layout.
+ *	All good PHYs should implement this scheme.
+ */
+
+/*
+ *	Register 0 : Copper Control Register
+ */
+#define BT_PHY_CCR_COPPER_RESET 			0x8000
+#define BT_PHY_CCR_LOOPBACK 				0x4000
+#define BT_PHY_CCR_SPEED_SELECT_LSB			0x2000
+#define BT_PHY_CCR_AUTONEG_ENABLE 			0x1000
+#define BT_PHY_CCR_POWER_DOWN 				0x0800
+#define BT_PHY_CCR_ISOLATE 					0x0400
+#define BT_PHY_CCR_RESTART_AUTONEG 			0x0200
+#define BT_PHY_CCR_COPPER_DUPLEX_MODE 		0x0100
+#define BT_PHY_CCR_COLLISION_TEST 			0x0080
+#define BT_PHY_CCR_SPEED_SELECT_MSB 		0x0040
+#define BT_PHY_CCR_RESERVED_0 				0x001F
+
+/*
+ *	Register 1 : Copper Status Register
+ */
+#define BT_PHY_CSR_100BASE_T4				0x8000		///< 0 = PHY not able to perform 100BASE-T4
+#define BT_PHY_CSR_100BASE_X_FULL_DUPLEX	0x4000		///< 1 = PHY able to perform full-duplex 100BASE-X
+#define BT_PHY_CSR_100BASE_X_HALF_DUPLEX 	0x2000		///< 1 = PHY able to perform half-duplex 100BASE-X
+#define BT_PHY_CSR_10MBPS_FULL_DUPLEX 		0x1000		///< 1 = PHY able to perform full-duplex 10BASE-T
+#define BT_PHY_CSR_10MBPS_HALF_DUPLEX		0x0800		///< 1 = PHY able to perform half-duplex 10BASE-T
+#define BT_PHY_CSR_100BASE_T2_FULL_DUPLEX 	0x0400		///< 0 = PHY not able to perform full duplex.
+#define BT_PHY_CSR_100BASE_T2_HALF_DUPLEX 	0x0200		///< 0 = PHY not able to perform half duplex.
+#define BT_PHY_CSR_EXTENDED_STATUS 			0x0100		///< 1 = Extended status information in Register 15.
+#define BT_PHY_CSR_RESERVED_0 				0x0080		///< Always read as 0.
+#define BT_PHY_CSR_MF_PREAMBLE_SUPPRESSION 	0x0040		///< 1 = PHY accepts management frames with preamble suppressed.
+#define BT_PHY_CSR_COPPER_AUTONEG_COMPLETE 	0x0020		///< 1 = Auto-negotiation process complete.
+#define BT_PHY_CSR_COPPER_REMOTE_FAULT 		0x0010		///< 1 = Remote fault condition detected.
+#define BT_PHY_CSR_COPPER_AUTONEG_ABILITY 	0x0008		///< 1 = PHY able to perform auto-negotiation.
+#define BT_PHY_CSR_COPPER_LINK_STATUS 		0x0004		///< 1 = link is up.
+#define BT_PHY_CSR_JABBER_DETECT 			0x0002		///< 1 = Jabber condition detected.
+#define BT_PHY_CSR_EXTENDED_CAPABILITY 		0x0001		///< 1 = Extended register capabilities.
 
 #endif

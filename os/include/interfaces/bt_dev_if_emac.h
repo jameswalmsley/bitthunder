@@ -21,7 +21,7 @@ typedef struct _BT_DEV_IF_EMAC {
 #define	BT_NET_IF_CAPABILITIES_ETHERNET				0x00000001
 #define	BT_NET_IF_CAPABILITIES_100MBPS				0x00000002
 #define	BT_NET_IF_CAPABILITIES_1000MBPS				0x00000004
-#define	BT_NET_IF_CAPABILITIES_MDIX					0x00000002
+#define	BT_NET_IF_CAPABILITIES_MDIX					0x00000008
 
 	BT_ERROR 	(*pfnEventSubscribe)	(BT_HANDLE hIF, BT_NET_IF_EVENTRECEIVER pfnReceiver, BT_NET_IF *pIF);
 	BT_ERROR	(*pfnInitialise)		(BT_HANDLE hIF);
@@ -37,6 +37,10 @@ typedef struct _BT_DEV_IF_EMAC {
 	BT_ERROR	(*pfnWrite)				(BT_HANDLE hIF, BT_u32 ulSize, void *pBuffer);
 	BT_ERROR	(*pfnSendFrame)			(BT_HANDLE hIF);
 	BT_ERROR	(*pfnSendEvent)			(BT_HANDLE hIF, BT_u32 ulEvent);
+
+	void 		(*adjust_link)			(BT_HANDLE hIF, struct bt_phy_device *phy);
+	void 		(*adjust_state)			(BT_HANDLE hIF, struct bt_phy_device *phy);
+
 } BT_DEV_IF_EMAC;
 
 typedef struct _BT_DEV_IF_MII {
