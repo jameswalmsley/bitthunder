@@ -50,12 +50,12 @@ typedef struct _BT_DEV_IF_MII {
 } BT_DEV_IF_MII;
 
 typedef struct BT_DEV_IF_PHY {
-	BT_ERROR 	(*pfnConfigInit)		(struct bt_phy_device *phydev);
-	BT_ERROR 	(*pfnConfigAneg)		(struct bt_phy_device *phydev);
-	BT_ERROR	(*pfnReadStatus)		(struct bt_phy_device *phydev);
-//	BT_ERROR	(*pfnAckInterrupt)		(struct bt_phy_device *phydev);
-//	BT_ERROR	(*pfnConfigInterrupt)	(struct bt_phy_device *phydev);
-//	BT_ERROR 	(*pfnDidInterrupt)		(struct bt_phy_device *phydev);
+	BT_ERROR 	(*pfnConfigInit)		(struct bt_phy_device *phy);
+	BT_ERROR 	(*pfnConfigAneg)		(struct bt_phy_device *phy);
+	BT_ERROR	(*pfnReadStatus)		(struct bt_phy_device *phy);
+//	BT_ERROR	(*pfnAckInterrupt)		(struct bt_phy_device *phy);
+//	BT_ERROR	(*pfnConfigInterrupt)	(struct bt_phy_device *phy);
+//	BT_ERROR 	(*pfnDidInterrupt)		(struct bt_phy_device *phy);
 } BT_DEV_IF_PHY;
 
 #endif
