@@ -94,7 +94,7 @@ struct bt_mii_bus {
 };
 
 BT_ERROR BT_RegisterMiiBus(BT_HANDLE hMII, struct bt_mii_bus *bus);
-
+BT_ERROR BT_ConnectPHY(BT_HANDLE hMAC, BT_u32 ulAddress);
 
 /*
  *	Kernel Internal PHY access API.
