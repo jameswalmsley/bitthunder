@@ -41,6 +41,7 @@ typedef enum _BT_DEV_IF_TYPE {
 	BT_DEV_IF_T_SDIO,
 	BT_DEV_IF_T_EMAC,
 	BT_DEV_IF_T_MII,
+	BT_DEV_IF_T_PHY,
 	BT_DEV_IF_T_RTC,
 	BT_DEV_IF_T_QEI,
 } BT_DEV_IF_TYPE;
@@ -81,6 +82,7 @@ typedef union {
 	const BT_DEV_IF_SDIO	   *pSdioIF;
 	const BT_DEV_IF_EMAC 	   *pEMacIF;
 	const BT_DEV_IF_MII 	   *pMiiIF;
+	const BT_DEV_IF_PHY		   *pPhyIF;
 	const BT_DEV_IF_RTC		   *pRTCIF;
 	const BT_DEV_IF_QEI		   *pQEIIF;
 } BT_DEV_IFS;
@@ -98,6 +100,7 @@ typedef union {
 #define BT_IF_MTD_OPS(handle)		BT_IF_DEV_CONFIG(handle).pMtdIF
 #define BT_IF_EMAC_OPS(handle)		BT_IF_DEV_CONFIG(handle).pEMacIF
 #define BT_IF_MII_OPS(handle)		BT_IF_DEV_CONFIG(handle).pMiiIF
+#define BT_IF_PHY_OPS(handle)		BT_IF_DEV_CONFIG(handle).pPhyIF
 #define BT_IF_I2C_OPS(handle)		BT_IF_DEV_CONFIG(handle).pI2CIF
 #define	BT_IF_ADC_OPS(handle)		BT_IF_DEV_CONFIG(handle).pADCIF
 #define BT_IF_SDIO_OPS(handle)		BT_IF_DEV_CONFIG(handle).pSdioIF
@@ -110,6 +113,5 @@ typedef struct _BT_IF_DEVICE {
 	const BT_DEV_IFS 	    unConfigIfs;
 	const BT_IF_BLOCK	   *pBlockIF;
 } BT_IF_DEVICE;
-
 
 #endif
