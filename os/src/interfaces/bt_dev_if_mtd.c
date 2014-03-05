@@ -50,7 +50,7 @@ static const BT_DEVFS_OPS mtd_devfs_ops = {
  ********************************************************************************************/
 
 static BT_u32 mtdblock_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount, void *pBuffer, BT_ERROR *pError) {
-	BT_MTD_INFO * mtd = bt_container_of(hBlock, BT_MTD_INFO, hBlockdev);
+	BT_MTD_INFO *mtd = (BT_MTD_INFO *) bt_container_of((BT_HANDLE_HEADER *) hBlock, BT_MTD_INFO, hBlockdev);
 	BT_ERROR ret;
 	BT_u32 retlen = 0;
 
@@ -71,7 +71,7 @@ static BT_u32 mtdblock_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCoun
 
 static BT_u32 mtdblock_blockwrite(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount, void *buf, BT_ERROR *pError) {
 	BT_u8 *pBuffer = (BT_u8 *) buf;
-	BT_MTD_INFO * mtd = bt_container_of(hBlock, BT_MTD_INFO, hBlockdev);
+	BT_MTD_INFO *mtd = (BT_MTD_INFO *) bt_container_of((BT_HANDLE_HEADER *) hBlock, BT_MTD_INFO, hBlockdev);
 	BT_u32 retlen_total = 0;
 	BT_u32 retlen = 0;
 	BT_ERROR ret;
@@ -439,4 +439,3 @@ static const BT_IF_HANDLE oHandleInterface = {
 	.pFileIF = &mtd_file_ops,
 	.pfnCleanup = bt_mtd_cleanup,
 };
-
