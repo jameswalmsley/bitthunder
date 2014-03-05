@@ -77,11 +77,13 @@ struct bt_phy_device {
 	BT_u32					link_timeout;
 	BT_s32					irq;
 	BT_HANDLE				active_mac;				///< Handle of the associated/connected MAC.
+	const BT_DEVICE		   *pDevice;
 };
 
 struct bt_mii_bus {
 	BT_HANDLE 				hMAC;
 	BT_HANDLE 				hMII;			///< Handle to MII bus driver.
+	const BT_DEVICE 	   *pDevice;		///< Bus device object, provides a reference into the device tree.
 	struct bt_list_head		item;
 	struct bt_list_head		phys;			// Phy devices on this bus.
 	const BT_i8			   *name;
