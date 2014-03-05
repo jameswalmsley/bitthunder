@@ -246,38 +246,50 @@ BT_ERROR BT_ConnectPHY(BT_HANDLE hMAC, BT_u32 ulAddress) {
 static BT_BOOL phy_sm(struct bt_phy_device *phy) {
 
 	BT_BOOL clock_again = BT_FALSE;
-	BT_ERROR Error = BT_ERR_NONE;
 
 	switch(phy->eState) {
 
 	case PHY_DOWN:					// NOP
-		break;
-
-	case PHY_STARTING:				// Get initial PHY state, and inform the MAC.
-		phy->eState = PHY_CHANGELINK;
-		BT_u16 ulCopperStatus = bt_phy_read(phy, 1, &Error);
-		if(ulCopperStatus & BT_PHY_CSR_COPPER_LINK_STATUS) {
-			BT_kPrint("PHY has an active link");
+		phy_read_status(phy);
+		if(phy->link) {
+			phy->eState = PHY_CHANGELINK;
+			clock_again = BT_TRUE;
 		}
-
 		break;
+
+	case PHY_STARTING:				// Initialise the PHY and move into PHY_DOWN.
+	{
+		phy_init(phy);
+		phy->eState = PHY_DOWN;
+		clock_again = BT_TRUE;
+		break;
+	}
 
 	case PHY_UP:					// NOP : link_state -> state
 		// Read the PHY status register, any change in the link?
+		phy_read_status(phy);
 
-		// YES ->
-		phy->eState = PHY_CHANGELINK;
-		clock_again = BT_TRUE;
+		if(!phy->link) {
+			phy->eState = PHY_CHANGELINK;
+			clock_again = BT_TRUE;
+		}
+
 		break;
 
 	case PHY_CHANGELINK: {
 		// Signal to the MAC that speed or link state has changed on the PHY.
 		// This allows the MAC to change its RX/TXD clocks, or stop processing data when PHY is down.
+		// Read the speed!
 
 		const BT_DEV_IF_EMAC *mac_ops = BT_IF_EMAC_OPS(phy->active_mac);
 		mac_ops->adjust_link(phy->active_mac, phy);
 
-		return BT_TRUE;
+		if(phy->link) {
+			phy->eState = PHY_UP;
+		} else {
+			phy->eState = PHY_DOWN;
+		}
+
 		break;
 	}
 
