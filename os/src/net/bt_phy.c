@@ -24,6 +24,147 @@ static BT_HANDLE g_hPhyMutex = NULL;
 #define PHY_LOCK(x)		MII_LOCK(x->mii_bus)
 #define PHY_UNLOCK(x)	MII_UNLOCK(x->mii_bus)
 
+static BT_ERROR bt_phy_generic_update_link(struct bt_phy_device *phy) {
+	BT_ERROR Error = BT_ERR_NONE;
+
+	BT_u16 status = bt_phy_read(phy, BT_PHY_MII_BMSR, &Error);
+	status = bt_phy_read(phy, BT_PHY_MII_BMSR, &Error);
+
+	if(status & BT_PHY_BMSR_LINK_STATUS) {
+		phy->link = 1;
+	} else {
+		phy->link = 0;
+	}
+
+	return BT_ERR_NONE;
+}
+
+
+BT_ERROR bt_phy_generic_read_status(struct bt_phy_device *phy) {
+	bt_phy_generic_update_link(phy);
+
+	BT_ERROR Error = BT_ERR_NONE;
+
+	BT_u16 lpagb = 0;
+	BT_u16 lpa;
+	BT_u16 adv;
+
+	if(phy->autoneg) {
+		if(phy->supported & (BT_PHY_SUPPORTED_1000baseT_Half | BT_PHY_SUPPORTED_1000baseT_Full)) {
+			lpagb = bt_phy_read(phy, BT_PHY_MII_STAT1000, &Error);
+			adv = bt_phy_read(phy, BT_PHY_MII_CTRL1000, &Error);
+			lpagb &= adv << 2;
+		}
+
+		lpa = bt_phy_read(phy, BT_PHY_MII_LPA, &Error);
+		adv = bt_phy_read(phy, BT_PHY_MII_ADVERTISE, &Error);
+
+		lpa &= adv;
+
+		phy->speed = 10;
+		phy->duplex = BT_PHY_DUPLEX_HALF;
+		phy->pause = phy->asym_pause = 0;
+
+		if(lpagb & (BT_PHY_LPA_1000FULL | BT_PHY_LPA_1000HALF)) {
+			phy->speed = 1000;
+			if(lpagb & BT_PHY_LPA_1000FULL)
+				phy->duplex = BT_PHY_DUPLEX_FULL;
+		} else if(lpa & (BT_PHY_LPA_100FULL | BT_PHY_LPA_100HALF)) {
+			phy->speed = 100;
+			if(lpa & BT_PHY_LPA_100FULL)
+				phy->duplex = BT_PHY_DUPLEX_FULL;
+		} else {
+			if(lpa & (BT_PHY_LPA_10FULL)) {
+				phy->duplex = BT_PHY_DUPLEX_FULL;
+			}
+		}
+
+		if(phy->duplex == BT_PHY_DUPLEX_FULL) {
+			phy->pause = lpa & BT_PHY_LPA_PAUSE_CAP ? 1 : 0;
+			phy->asym_pause = lpa & BT_PHY_LPA_PAUSE_ASYM ? 1 : 0;
+		}
+	} else {
+		BT_u16 bmcr = bt_phy_read(phy, BT_PHY_MII_BMCR, &Error);
+
+		if(bmcr & BT_PHY_BMCR_COPPER_DUPLEX_MODE) {
+			phy->duplex = BT_PHY_DUPLEX_FULL;
+		} else {
+			phy->duplex = BT_PHY_DUPLEX_HALF;
+		}
+
+		if(bmcr & BT_PHY_BMCR_SPEED_SELECT_MSB) {
+			phy->speed = 1000;
+		} else if(bmcr & BT_PHY_BMCR_SPEED_SELECT_LSB) {
+			phy->speed = 100;
+		} else {
+			phy->speed = 10;
+		}
+	}
+
+	return BT_ERR_NONE;
+}
+
+BT_ERROR bt_phy_generic_init(struct bt_phy_device *phy) {
+
+	BT_ERROR Error = BT_ERR_NONE;
+
+	// Assume support for all features :S
+	phy->supported = (BT_PHY_SUPPORTED_TP | BT_PHY_SUPPORTED_MII | BT_PHY_SUPPORTED_AUI
+					   | BT_PHY_SUPPORTED_FIBRE | BT_PHY_SUPPORTED_BNC);
+
+	BT_u16 val = bt_phy_read(phy, BT_PHY_MII_BMSR, &Error);
+
+
+
+	if(val & BT_PHY_BMSR_AUTONEG_ABILITY) {
+		phy->supported |= BT_PHY_SUPPORTED_Autoneg;
+	}
+
+	if(val & BT_PHY_BMSR_100BASE_X_FULL_DUPLEX)
+		phy->supported |= BT_PHY_SUPPORTED_100baseT_Full;
+
+	if(val & BT_PHY_BMSR_100BASE_X_HALF_DUPLEX)
+		phy->supported |= BT_PHY_SUPPORTED_100baseT_Half;
+
+	if(val & BT_PHY_BMSR_10MBPS_FULL_DUPLEX)
+		phy->supported |= BT_PHY_SUPPORTED_10baseT_Full;
+
+	if(val & BT_PHY_BMSR_10MBPS_HALF_DUPLEX)
+		phy->supported |= BT_PHY_SUPPORTED_10baseT_Half;
+
+	if(val & BT_PHY_BMSR_EXTENDED_STATUS) {
+		val = bt_phy_read(phy, BT_PHY_MII_ESTATUS, &Error);
+
+		if(val & BT_PHY_ESTATUS_1000_TFULL)
+			phy->supported |= BT_PHY_SUPPORTED_1000baseT_Full;
+
+		if(val & BT_PHY_ESTATUS_1000_THALF)
+			phy->supported |= BT_PHY_SUPPORTED_1000baseT_Half;
+	}
+
+	phy->advertising = phy->supported;
+
+	return BT_ERR_NONE;
+}
+
+static BT_ERROR phy_init(struct bt_phy_device *phy) {
+	const BT_DEV_IF_PHY *phy_ops = BT_IF_PHY_OPS(phy->hPHY);
+	if(phy_ops->pfnConfigInit) {
+		return phy_ops->pfnConfigInit(phy);
+	}
+
+	return bt_phy_generic_init(phy);
+}
+
+static BT_ERROR phy_read_status(struct bt_phy_device *phy) {
+	const BT_DEV_IF_PHY *phy_ops = BT_IF_PHY_OPS(phy->hPHY);
+	if(phy_ops->pfnReadStatus) {
+		return phy_ops->pfnReadStatus(phy);
+	}
+
+	return bt_phy_generic_read_status(phy);
+}
+
 BT_ERROR BT_RegisterMiiBus(BT_HANDLE hMII, struct bt_mii_bus *bus) {
 
 	BT_ERROR Error = BT_ERR_NONE;

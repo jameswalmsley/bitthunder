@@ -93,8 +93,19 @@ struct bt_mii_bus {
 
 BT_ERROR BT_RegisterMiiBus(BT_HANDLE hMII, struct bt_mii_bus *bus);
 
+
+/*
+ *	Kernel Internal PHY access API.
+ */
 BT_u16 bt_phy_read(struct bt_phy_device *phy, BT_u32 regnum, BT_ERROR *pError);
 BT_ERROR bt_phy_write(struct bt_phy_device *phy, BT_u32 regnum, BT_u16 val);
+
+
+/*
+ *	Generic PHY implementation methods:
+ */
+BT_ERROR	bt_phy_generic_init(struct bt_phy_device *phy);
+BT_ERROR 	bt_phy_generic_read_status(struct bt_phy_device *phy);
 
 /*
  *	Standard PHY Register definitions.
