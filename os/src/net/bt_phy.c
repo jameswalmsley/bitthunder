@@ -3,6 +3,7 @@
  *
  **/
 #include <bitthunder.h>
+#include <of/bt_of.h>
 #include <collections/bt_list.h>
 #include <string.h>
 
@@ -16,7 +17,6 @@ struct _BT_OPAQUE_HANDLE {
 };
 
 static BT_LIST_HEAD(g_mii_busses);
-static BT_HANDLE g_hPhyMutex = NULL;
 
 #define MII_LOCK(x)
 #define MII_UNLOCK(x)
@@ -174,6 +174,29 @@ BT_ERROR BT_RegisterMiiBus(BT_HANDLE hMII, struct bt_mii_bus *bus) {
 	bus->hMII = hMII;
 	bus->mutex = BT_kMutexCreate();
 
+#ifdef BT_CONFIG_OF
+	/*
+	 *	bus->pDevice should be now pointing to a parental BT_DEVICE structure.
+	 *	Usually this is a MAC peripheral which contains MDIO logic.
+	 */
+	struct bt_device_node *mdio_parent = bt_of_integrated_get_node(bus->pDevice);	// Cast to the device tree.
+	if(!mdio_parent) {
+		goto no_node;
+	}
+
+	struct bt_device_node *mdio_node = bt_of_mdio_get_node(mdio_parent);			// Get an MDIO bus node.
+	if(!mdio_node) {
+		goto no_node;
+	}
+
+	bt_of_mdio_populate_device(mdio_node);	// Populate the described PHY devices.
+
+	BT_DEVICE *pDevice = &mdio_node->dev;
+	bus->pDevice = pDevice;
+
+no_node:
+#endif
+
 	bt_list_add(&bus->item, &g_mii_busses);
 
 	BT_u32 i;
@@ -198,10 +221,43 @@ BT_ERROR BT_RegisterMiiBus(BT_HANDLE hMII, struct bt_mii_bus *bus) {
 					if((id & pMatch->id_mask) == pMatch->id) {
 						struct bt_phy_device *phy = BT_kMalloc(sizeof(*phy));
 						memset(phy, 0, sizeof(*phy));
-
 						BT_kPrint("PHY driver detected as: %s", pDriver->name);
-						BT_HANDLE hPHY = pDriver->pfnMIIProbe(hMII, bus, i, &Error);
+
+						/*
+						 *	If this device is described in the device tree, the we can use the BT_DEVICE structure provided,
+						 * 	Otherwise, we must create a BT_DEVICE for the phy.
+						 */
+
+						struct bt_device_node *phy_device = NULL;
+
+						struct bt_device_node *dev = bt_of_integrated_get_node(bus->pDevice);	// Cast out to device tree if available.
+						if(dev) {
+							struct bt_list_head *pos;
+							bt_list_for_each(pos, &dev->children) {
+								struct bt_device_node *phy_node = bt_container_of(pos, struct bt_device_node, item);
+								const BT_be32 *phy_address = bt_of_get_address(phy_node, 0, NULL, NULL);
+								if(bt_be32_to_cpu(*phy_address) == i) {
+									// Sucessfully matched a node in the DT.
+									phy_device = phy_node;
+								}
+							}
+
+						}
+
+						const BT_DEVICE *phy_legacy_device = phy_device ? &phy_device->dev : NULL;
+
+						phy->mii_bus	= bus;
+						phy->pDevice 	= phy_legacy_device;
+						phy->phy_id 	= i;
+
+						BT_HANDLE hPHY = pDriver->pfnMIIProbe(phy, &Error);
 						phy->hPHY = hPHY;
+						phy->mii_bus = bus;
+						phy->autoneg = 1;
+						phy->speed = 0;
+
+						phy_init(phy);
+
 						bt_list_add(&phy->item, &bus->phys);
 						break;
 					}
@@ -306,7 +362,6 @@ static BT_BOOL phy_sm(struct bt_phy_device *phy) {
 static BT_ERROR phy_task(BT_HANDLE hThread, void *pParam) {
 
 	while(1) {
-		BT_kPrint("Polling the PHYs");
 		struct bt_list_head *pos_bus;
 		bt_list_for_each(pos_bus, &g_mii_busses) {	// Iterate through the mii busses
 			struct bt_mii_bus *bus = bt_container_of(pos_bus, struct bt_mii_bus, item);
@@ -357,10 +412,9 @@ BT_ERROR bt_phy_write(struct bt_phy_device *phy, BT_u32 regnum, BT_u16 val) {
 BT_ERROR phy_module_init() {
 
 	BT_ERROR Error = BT_ERR_NONE;
-	g_hPhyMutex = BT_CreateMutex(&Error);
 
 	BT_THREAD_CONFIG oThreadConfig = {
-		.ulStackDepth = 256,
+		.ulStackDepth = 512,
 		.ulPriority = 0,
 	};
 
