@@ -80,7 +80,7 @@ BT_u32 BT_FifoWrite(BT_HANDLE hFifo, BT_u32 ulElements, const void *pData, BT_ER
 	}
 	if (pError) *pError = BT_ERR_NONE;
 
-	BT_u8 *pSrc  = pData;
+	const BT_u8 *pSrc  = pData;
 	BT_u8 *pDest = hFifo->pIn;
 //	BT_u8 *pOut  = hFifo->pOut;
 	BT_u32 ulElementWidth = hFifo->ulElementWidth;
