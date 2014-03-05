@@ -53,4 +53,7 @@ BT_ERROR bt_of_spi_populate_device(struct bt_device_node *device);
 
 const void *bt_of_get_mac_address(struct bt_device_node *device);
 
+struct bt_device_node *bt_of_mdio_get_node(struct bt_device_node *device);
+BT_ERROR bt_of_mdio_populate_device(struct bt_device_node *device);
+
 #endif

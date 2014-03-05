@@ -4,6 +4,7 @@ BT_OS_OBJECTS-$(BT_CONFIG_OF) += $(BUILD_DIR)os/src/of/base.o
 BT_OS_OBJECTS-$(BT_CONFIG_OF) += $(BUILD_DIR)os/src/of/irq.o
 BT_OS_OBJECTS-$(BT_CONFIG_OF) += $(BUILD_DIR)os/src/of/bt_of_i2c.o
 BT_OS_OBJECTS-$(BT_CONFIG_OF) += $(BUILD_DIR)os/src/of/bt_of_spi.o
+BT_OS_OBJECTS-$(BT_CONFIG_OF) += $(BUILD_DIR)os/src/of/bt_of_mdio.o
 BT_OS_OBJECTS-$(BT_CONFIG_OF) += $(BUILD_DIR)os/src/of/net.o
 BT_OS_OBJECTS-$(BT_CONFIG_OF) += $(BUILD_DIR)os/src/of/bootlogger.o
 BT_OS_OBJECTS-$(BT_CONFIG_OF) += $(BUILD_DIR)os/src/of/bt_of_integrated.o
