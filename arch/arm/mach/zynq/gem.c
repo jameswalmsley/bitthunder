@@ -219,6 +219,12 @@ static BT_ERROR mac_send_event(BT_HANDLE hMac, BT_u32 ulEvent) {
 static void mac_adjust_link(BT_HANDLE hIF, struct bt_phy_device *phy) {
 	// Get the current PHY speed, etc and adjust the MAC clocks appropriately.
 	BT_kPrint("GEM: PHY signalled link adjustment");
+
+	if(!phy->link) {	// Link has gone down! We can stop the DMA controller and save some power.
+
+	} else {			// Check that the PHY's link speed is the same and adjust as necessary.
+
+	}
 }
 
 static void mac_adjust_state(BT_HANDLE hIF, struct bt_phy_device *phy) {
@@ -235,7 +241,7 @@ static struct _MII_HANDLE* mii_init(BT_HANDLE hMac, BT_ERROR *pError) {
 		return NULL;
 	}
 
-hMac->hMII = (BT_HANDLE) pMII;
+	hMac->hMII = (BT_HANDLE) pMII;
 
 	pMII->mii.hMAC = hMac;
 	pMII->mii.name = "zynq gem-mii bus";
@@ -545,7 +551,7 @@ static void mac_init_hw(BT_HANDLE hMac) {
 	pRegs->net_ctrl |= NET_CTRL_MDEN;
 }
 
-static BT_HANDLE mac_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
+static BT_HANDLE mac_probe(const BT_DEVICE *pDevice, BT_ERROR *pError) {
 
 	BT_HANDLE hMac;
 	BT_ERROR Error = BT_ERR_NONE;
@@ -593,11 +599,12 @@ static BT_HANDLE mac_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 	/*
 	 * Initialise the MII bus for PHY communication.
 	 */
-
 	struct _MII_HANDLE *pMII = mii_init(hMac, &Error);
 	if(!pMII) {
 		return Error;
 	}
+
+	pMII->mii.pDevice = pDevice;	// The PHY layer expects this to be a parent node containing an MDIO bus.
 
 	Error = BT_RegisterMiiBus((BT_HANDLE) pMII, &pMII->mii);
 	if(Error) {
