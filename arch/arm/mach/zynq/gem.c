@@ -56,6 +56,9 @@ struct _BT_OPAQUE_HANDLE {
 	BT_u32							tx_bytes;
 	bt_paddr_t 						txbufs_phys;
 	void						   *txbufs;
+	BT_u32 							speed;			// Current operating speed of the MAC.
+	BT_u32							duplex;			// Current operating duplex of the MAC.
+	BT_u32							link;			// Current operating link mode of the MAC. (Up or Down?)
 };
 
 struct _MII_HANDLE {
@@ -216,14 +219,82 @@ static BT_ERROR mac_send_event(BT_HANDLE hMac, BT_u32 ulEvent) {
 	return BT_ERR_NONE;
 }
 
-static void mac_adjust_link(BT_HANDLE hIF, struct bt_phy_device *phy) {
+static void mac_set_freq(BT_HANDLE hMac, BT_u32 freq) {
+
+	volatile ZYNQ_SLCR_REGS *pSLCR = bt_ioremap((void *) ZYNQ_SLCR, BT_SIZE_4K);
+	BT_u32 InputClk;
+
+	zynq_slcr_unlock(pSLCR);
+	BT_u32 clk_sel = ZYNQ_SLCR_CLK_CTRL_SRCSEL_VAL(pSLCR->GEM0_CLK_CTRL);
+	switch(clk_sel) {
+	case ZYNQ_SLCR_CLK_CTRL_SRCSEL_ARMPLL:
+		InputClk = BT_ZYNQ_GetArmPLLFrequency();
+		break;
+
+	case ZYNQ_SLCR_CLK_CTRL_SRCSEL_IOPLL:
+		InputClk = BT_ZYNQ_GetIOPLLFrequency();
+		break;
+
+	case ZYNQ_SLCR_CLK_CTRL_SRCSEL_DDRPLL:
+		InputClk = BT_ZYNQ_GetDDRPLLFrequency();
+		break;
+
+	default:
+		InputClk = BT_ZYNQ_GetIOPLLFrequency();
+		break;
+	}
+
+	BT_DIVIDER_PARAMS oDiv;
+	oDiv.diva_max = 64;
+	oDiv.diva_min = 1;
+	oDiv.divb_max = 64;
+	oDiv.divb_min = 1;
+
+	BT_CalculateClockDivider(InputClk, freq, &oDiv);
+
+	pSLCR->GEM0_CLK_CTRL &= ~0x03F03F00;
+	pSLCR->GEM0_CLK_CTRL |=  ((oDiv.diva_val << 8) & 0x3f00) | ((oDiv.divb_val << 20) & 0x03f00000);
+
+	zynq_slcr_lock(pSLCR);
+
+	bt_iounmap(pSLCR);
+}
+
+static void mac_adjust_link(BT_HANDLE hMac, struct bt_phy_device *phy) {
 	// Get the current PHY speed, etc and adjust the MAC clocks appropriately.
 	BT_kPrint("GEM: PHY signalled link adjustment");
 
-	if(!phy->link) {	// Link has gone down! We can stop the DMA controller and save some power.
+	if(phy->link) {		// Check that the PHY's link speed is the same and adjust as necessary.
+		if((hMac->speed != phy->speed) || (hMac->duplex != phy->duplex)) {
+			BT_u32 regval = hMac->pRegs->net_cfg;
+			regval &= (NET_CFG_FDEN | NET_CFG_SPEED | NET_CFG_GIGEEN);	// Clear the speed and duplex bits.
 
-	} else {			// Check that the PHY's link speed is the same and adjust as necessary.
+			if(phy->duplex) {
+				regval |= NET_CFG_FDEN;
+			}
 
+			if(phy->speed == 1000) {
+				regval |= NET_CFG_GIGEEN;
+				mac_set_freq(hMac, 125000000);
+			} else if(phy->speed == 100) {
+				regval |= NET_CFG_SPEED;
+				mac_set_freq(hMac, 25000000);
+			} else if(phy->speed == 10) {
+				mac_set_freq(hMac, 2500000);
+			} else {
+				BT_kPrint("GEM: %s() Unknown PHY speed %d", __func__, phy->speed);
+				return;
+			}
+
+			hMac->pRegs->net_cfg = regval;
+
+			hMac->speed = phy->speed;
+			hMac->duplex = phy->duplex;
+		}
+	}
+
+	if(phy->link != hMac->link) {
+		hMac->link = phy->link;
 	}
 }
 
@@ -257,7 +328,7 @@ static BT_ERROR mac_init(BT_HANDLE hMac) {
 
 	hMac->pRegs->intr_enable = GEM_INT_ALL_MASK;
 
-	return BT_ERR_NONE;
+	return Error;
 }
 
 static BT_u16 mii_read(BT_HANDLE hMII, BT_u32 phy_id, BT_u32 regnum, BT_ERROR *pError) {
@@ -471,6 +542,8 @@ static void mac_init_hw(BT_HANDLE hMac) {
 	regval |= NET_CFG_HDRXEN;
 	regval |= NET_CFG_MCASTHASHEN;
 
+	mac_set_freq(hMac, 2500000);
+
 	// Set the MDC clock divisor.
 	BT_u32 cpu1x_freq = BT_ZYNQ_GetCpu1xFrequency();
 	BT_u32 div = 0;
@@ -479,44 +552,6 @@ static void mac_init_hw(BT_HANDLE hMac) {
 			break;
 		}
 	}
-
-	volatile ZYNQ_SLCR_REGS *pSLCR = bt_ioremap((void *) ZYNQ_SLCR, BT_SIZE_4K);
-	BT_u32 InputClk;
-
-	zynq_slcr_unlock(pSLCR);
-	BT_u32 clk_sel = ZYNQ_SLCR_CLK_CTRL_SRCSEL_VAL(pSLCR->GEM0_CLK_CTRL);
-	switch(clk_sel) {
-	case ZYNQ_SLCR_CLK_CTRL_SRCSEL_ARMPLL:
-		InputClk = BT_ZYNQ_GetArmPLLFrequency();
-		break;
-
-	case ZYNQ_SLCR_CLK_CTRL_SRCSEL_IOPLL:
-		InputClk = BT_ZYNQ_GetIOPLLFrequency();
-		break;
-
-	case ZYNQ_SLCR_CLK_CTRL_SRCSEL_DDRPLL:
-		InputClk = BT_ZYNQ_GetDDRPLLFrequency();
-		break;
-
-	default:
-		InputClk = BT_ZYNQ_GetIOPLLFrequency();
-		break;
-	}
-
-	BT_DIVIDER_PARAMS oDiv;
-	oDiv.diva_max = 64;
-	oDiv.diva_min = 1;
-	oDiv.divb_max = 64;
-	oDiv.divb_min = 1;
-
-	BT_CalculateClockDivider(InputClk, 25000000, &oDiv);
-
-	pSLCR->GEM0_CLK_CTRL &= ~0x03F03F00;
-	pSLCR->GEM0_CLK_CTRL |=  ((oDiv.diva_val << 8) & 0x3f00) | ((oDiv.divb_val << 20) & 0x03f00000);
-
-	zynq_slcr_lock(pSLCR);
-
-	bt_iounmap(pSLCR);
 
 	regval |= (7 << 18) & NET_CFG_MDCCLKDIV;
 
@@ -601,14 +636,14 @@ static BT_HANDLE mac_probe(const BT_DEVICE *pDevice, BT_ERROR *pError) {
 	 */
 	struct _MII_HANDLE *pMII = mii_init(hMac, &Error);
 	if(!pMII) {
-		return Error;
+		goto err_free_buffers_out;
 	}
 
 	pMII->mii.pDevice = pDevice;	// The PHY layer expects this to be a parent node containing an MDIO bus.
 
 	Error = BT_RegisterMiiBus((BT_HANDLE) pMII, &pMII->mii);
 	if(Error) {
-		return Error;
+		goto err_free_buffers_out;
 	}
 
 	BT_RegisterNetworkInterface(hMac);
