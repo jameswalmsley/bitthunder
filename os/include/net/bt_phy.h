@@ -38,6 +38,25 @@ enum bt_phy_interface_t {
 
 struct bt_mii_bus;
 
+#define BT_PHY_SUPPORTED_10baseT_Half 		(1 << 0)
+#define BT_PHY_SUPPORTED_10baseT_Full		(1 << 1)
+#define BT_PHY_SUPPORTED_100baseT_Half	   	(1 << 2)
+#define BT_PHY_SUPPORTED_100baseT_Full		(1 << 3)
+#define BT_PHY_SUPPORTED_1000baseT_Half 	(1 << 4)
+#define BT_PHY_SUPPORTED_1000baseT_Full 	(1 << 5)
+#define BT_PHY_SUPPORTED_Autoneg 			(1 << 6)
+#define BT_PHY_SUPPORTED_TP 				(1 << 7)
+#define BT_PHY_SUPPORTED_AUI 				(1 << 8)
+#define BT_PHY_SUPPORTED_MII 				(1 << 9)
+#define BT_PHY_SUPPORTED_FIBRE 				(1 << 10)
+#define BT_PHY_SUPPORTED_BNC 				(1 << 11)
+#define BT_PHY_SUPPORTED_10000baseT_Full 	(1 << 12)
+#define BT_PHY_SUPPORTED_Pause 				(1 << 13)
+#define BT_PHY_SUPPORTED_Asym_Pause 		(1 << 14)
+
+#define BT_PHY_DUPLEX_HALF	0
+#define BT_PHY_DUPLEX_FULL	1
+
 struct bt_phy_device {
 	struct bt_mii_bus 	   *mii_bus;
 	struct bt_list_head		item;
