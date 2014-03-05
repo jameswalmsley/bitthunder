@@ -302,6 +302,7 @@ _SDA2_BASE_ = __sdata2_start + ((__sbss2_end - __sdata2_start) / 2 );
 
 /* Generate Stack and Heap definitions */
 
+#if 0
 #ifdef BT_CONFIG_LINKER_BSS_SECTION_SRAM
 _HEAP_SIZE = BT_LINKER_SRAM_START_ADDRESS + BT_LINKER_SRAM_LENGTH - __bss_end - _STACK_SIZE - _IRQ_STACK_SIZE - BT_CONFIG_LINKER_HEAP_DOWN;
 #endif
@@ -319,6 +320,17 @@ _HEAP_SIZE = BT_LINKER_RAM_ADDRESS + BT_CONFIG_LINKER_RAM_LENGTH - __bss_end - _
    _heap_end = .;
    HeapLimit = .;
 } > BT_LINKER_BSS_SECTION
+#else
+.heap (NOLOAD) : {
+	_heap = .;
+
+   HeapBase = .;
+   _heap_start = .;
+   . += 0x8000;
+   _heap_end = .;
+   HeapLimit = .;
+} > SRAM2
+#endif
 
 .stack (NOLOAD) : {
    . = ALIGN(16);
