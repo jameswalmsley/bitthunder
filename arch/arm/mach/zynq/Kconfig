@@ -4,14 +4,11 @@ config MACH_ZYNQ_PLATFORM
 	select ARCH_ARM_CORTEX_A9
 	select ARCH_ARM_IRQ_STACK
 	select HAS_MMU
+	select ARCH_ARM_HAS_NEON
 
 config CPU_CORES
 	int
 	default 2
-
-config ARCH_ARM_HAS_NEON
-	bool
-	default y
 
 comment "Zynq Platform Options"
 
