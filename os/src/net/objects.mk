@@ -1,6 +1,6 @@
-LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/bt_net.o
-LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/bt_phy.o
-LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/bt_sockets.o
+NET_OBJECTS-$(BT_CONFIG_NET) += $(BUILD_DIR)os/src/net/bt_net.o
+NET_OBJECTS-$(BT_CONFIG_NET) += $(BUILD_DIR)os/src/net/bt_phy.o
+NET_OBJECTS-$(BT_CONFIG_NET) += $(BUILD_DIR)os/src/net/bt_sockets.o
 
 # lwIP Objects
 LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/sys_arch.o
@@ -76,5 +76,5 @@ $(LWIP_OBJECTS-y): CFLAGS += -I $(BASE)os/src/net/lwip/src/include/ipv4/
 $(LWIP_OBJECTS-y): CFLAGS += -I $(BASE)os/src/net/lwip/src/include/ipv6/
 $(LWIP_OBJECTS-y): CFLAGS += -I $(BASE)os/include/net/lwip/
 
-
+OBJECTS += $(NET_OBJECTS-y)
 OBJECTS += $(LWIP_OBJECTS-y)
