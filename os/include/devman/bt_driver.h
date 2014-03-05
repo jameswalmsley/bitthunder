@@ -26,7 +26,7 @@ typedef struct _BT_DRIVER {
 		BT_HANDLE 		(*pfnProbe)	(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError);
 		BT_HANDLE		(*pfnI2CProbe)	(BT_HANDLE hI2CBus, const BT_DEVICE *pDevice, BT_ERROR *pError);
 		BT_HANDLE 		(*pfnSPIProbe) 	(BT_SPI_DEVICE *pSpiDevice, const BT_DEVICE *pDevice, BT_ERROR *pError);
-		BT_HANDLE		(*pfnMIIProbe)	(BT_HANDLE hMII, struct bt_mii_bus *pBus, BT_u32 addr, BT_ERROR *pError);
+		BT_HANDLE		(*pfnMIIProbe)	(struct bt_phy_device *phy, BT_ERROR *pError);
 	};
 	union {
 		struct bt_match_table_32 *pMatch32;
