@@ -78,6 +78,12 @@ config SHELL_CMD_HELP
 	depends on SHELL
 	default n
 
+config SHELL_CMD_IFCONFIG
+	bool "ifconfig"
+	depends on SHELL
+	depends on NET
+	default n
+
 config SHELL_CMD_IOMEM
 	bool "iomem"
 	depends on SHELL

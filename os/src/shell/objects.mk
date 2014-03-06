@@ -16,6 +16,7 @@ BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_FLASHTOOL)	+= $(BUILD_DIR)os/src/shell/comma
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_GETENV)	  	+= $(BUILD_DIR)os/src/shell/commands/getenv.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_GPIO)	  	+= $(BUILD_DIR)os/src/shell/commands/gpio.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_HELP) 		+= $(BUILD_DIR)os/src/shell/commands/help.o
+BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_IFCONFIG)	+= $(BUILD_DIR)os/src/shell/commands/ifconfig.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_IOMEM)		+= $(BUILD_DIR)os/src/shell/commands/iomem.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_LOAD) 		+= $(BUILD_DIR)os/src/shell/commands/load.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_LOAD_FPGA) 	+= $(BUILD_DIR)os/src/shell/commands/load_fpga.o
