@@ -1,24 +1,26 @@
 /**
  *	Network PHY support for BitThunder.
  *
+ *
  **/
 
 #ifndef _BT_PHY_H_
 #define _BT_PHY_H_
 
 enum bt_phy_state {
-	PHY_DOWN=0,
-	PHY_STARTING,
-	PHY_READY,
-	PHY_PENDING,
-	PHY_UP,
-	PHY_AN,
-	PHY_RUNNING,
-	PHY_NOLINK,
-	PHY_FORCING,
-	PHY_CHANGELINK,
-	PHY_HALTED,
-	PHY_RESUMING
+	BT_PHY_DOWN=0,
+	BT_PHY_STARTING,
+	BT_PHY_READY,
+	BT_PHY_PENDING,
+	BT_PHY_UP,
+	BT_PHY_AN,
+	BT_PHY_RUNNING,
+	BT_PHY_NOLINK,
+	BT_PHY_FORCING,
+	BT_PHY_RENEGOTIATE,
+	BT_PHY_CHANGELINK,
+	BT_PHY_HALTED,
+	BT_PHY_RESUMING
 };
 
 enum bt_phy_interface_t {
