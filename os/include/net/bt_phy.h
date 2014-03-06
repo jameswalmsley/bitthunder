@@ -59,6 +59,19 @@ struct bt_mii_bus;
 #define BT_PHY_DUPLEX_HALF	0
 #define BT_PHY_DUPLEX_FULL	1
 
+struct bt_phy_linkstate {
+	BT_u32	link;
+	BT_u32	speed;
+	BT_u32 	duplex;
+	BT_u32	supported;
+	BT_u32 	advertising;
+	BT_u32	autoneg;
+};
+
+struct bt_phy_config {
+	BT_u32	advertising_disable;					///< Mask of modes and features not to be advertised.
+};
+
 struct bt_phy_device {
 	struct bt_mii_bus 	   *mii_bus;
 	struct bt_list_head		item;
@@ -132,7 +145,7 @@ BT_ERROR 	bt_phy_generic_read_status(struct bt_phy_device *phy);
 /*
  *	Register 0 : Basic Mode Control Register
  */
-#define BT_PHY_BMCR_COPPER_RESET			0x8000
+#define BT_PHY_BMCR_RESET					0x8000
 #define BT_PHY_BMCR_LOOPBACK				0x4000
 #define BT_PHY_BMCR_SPEED_SELECT_LSB		0x2000
 #define BT_PHY_BMCR_AUTONEG_ENABLE			0x1000
@@ -187,6 +200,12 @@ BT_ERROR 	bt_phy_generic_read_status(struct bt_phy_device *phy);
 #define BT_PHY_LPA_1000XFULL 				0x0020
 #define BT_PHY_LPA_10HALF 					0x0020
 #define BT_PHY_LPA_SLCT 					0x001F
+
+/*
+ *	Register 9 : Gigabit Control register
+ */
+#define BT_PHY_CTRL1000_1000FULL 			0x0200
+#define BT_PHY_CTRL1000_1000HALF 			0x0100
 
 /*
  *	Register 10 : 1000BASE-T Status Register
