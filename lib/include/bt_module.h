@@ -1,8 +1,6 @@
 #ifndef _BT_MODULE_H_
 #define _BT_MODULE_H_
 
-#define BT_CONFIG_NO_MODULE_STRINGS
-
 #define BT_MODULE_NAME					g_m_ModuleName
 #define BT_DEF_MODULE_NAME(title)		static const BT_i8 BT_MODULE_NAME[] 		= title;
 
