@@ -4,6 +4,8 @@
 #include "bt_types.h"
 #include <interrupts/bt_interrupts.h>
 
+typedef void 	 	(*BT_MCPWM_CALLBACK)					(BT_HANDLE hMCPWM, void *pParam);
+
 typedef enum {
 	BT_MCPWM_MODE_INDEPENDENT=0,
 	BT_MCPWM_MODE_DC,
@@ -56,6 +58,10 @@ typedef struct _BT_DEV_IF_MCPWM {
 	BT_u32		(*pfnGetChannelPulsewidth)	(BT_HANDLE hMCPwm, BT_u32 ulChannel, BT_ERROR *pError);
 	BT_ERROR 	(*pfnSetChannelPulsewidth)	(BT_HANDLE hMCPwm, BT_u32 ulChannel, BT_u32 ulValue);
 	BT_ERROR	(*pfnSetDCModePattern)		(BT_HANDLE hMCPwm, BT_MCPWM_DCMODE_PATTERN ulChannel0, BT_MCPWM_DCMODE_PATTERN ulChannel1, BT_MCPWM_DCMODE_PATTERN ulChannel2);
+	BT_ERROR	(*pfnEnableInterrupt)		(BT_HANDLE hMCPwm);
+	BT_ERROR	(*pfnDisableInterrupt)		(BT_HANDLE hMCPwm);
+	BT_HANDLE	(*pfnRegisterCallback)		(BT_HANDLE hMCPwm, BT_MCPWM_CALLBACK pfnCallback, void *pParam, BT_ERROR *pError);
+	BT_ERROR	(*pfnUnregisterCallback)	(BT_HANDLE hMCPwm, BT_HANDLE hCallback);
 } BT_DEV_IF_MCPWM;
 
 BT_ERROR 	BT_MCPwmStart					(BT_HANDLE hMCPwm, BT_u32 ulChannel);
@@ -70,6 +76,12 @@ BT_ERROR	BT_MCPwmSetChannelConfig		(BT_HANDLE hMCPwm, BT_u32 ulChannel, BT_MCPWM
 BT_u32		BT_MCPwmGetChannelPulsewidth	(BT_HANDLE hMCPwm, BT_u32 ulChannel, BT_ERROR *pError);
 BT_ERROR	BT_MCPwmSetChannelPulsewidth	(BT_HANDLE hMCPwm, BT_u32 ulChannel, BT_u32 ulValue);
 
-BT_ERROR	BT_MCPwmSetDCModePattern		(BT_HANDLE hMCPwm, BT_MCPWM_DCMODE_PATTERN ulChannel0, BT_MCPWM_DCMODE_PATTERN ulChannel1, BT_MCPWM_DCMODE_PATTERN ulChannel2);
+BT_ERROR	BT_MCPwmSetDCModePattern		(BT_HANDLE MCPwm, BT_MCPWM_DCMODE_PATTERN ulChannel0, BT_MCPWM_DCMODE_PATTERN ulChannel1, BT_MCPWM_DCMODE_PATTERN ulChannel2);
+
+BT_ERROR	BT_MCPwmEnableInterrupt			(BT_HANDLE MCPwm);
+BT_ERROR	BT_MCPwmDisableInterrupt		(BT_HANDLE MCPwm);
+BT_HANDLE	BT_MCPwmRegisterCallback		(BT_HANDLE MCPwm, BT_MCPWM_CALLBACK pfnCallback, void *pParam, BT_ERROR *pError);
+BT_ERROR	BT_MCPwmUnregisterCallback 		(BT_HANDLE MCPwm, BT_HANDLE hCallback);
+
 
 #endif

@@ -33,6 +33,9 @@ typedef struct _LPC17xx_MCPWM_REGS {
 	BT_u32	MCINTEN;			// 0x050		Interrupt Enable read address
 	BT_u32	MCINTEN_SET;		// 0x054		Interrupt Enable set address
 	BT_u32	MCINTEN_CLR;		// 0x058		Interrupt Enable clear address
+
+#define	LPC17xx_MCPWM_MCINTEN_ABORT				0x00008000
+
 	BT_u32	MCCNTCON;			// 0x05C		Count Control read address
 	BT_u32	MCCNTCON_SET;		// 0x060		Count Control set address
 	BT_u32	MCCNTCON_CLR;		// 0x064		Count Control clear address

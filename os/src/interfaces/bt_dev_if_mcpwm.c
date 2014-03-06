@@ -101,6 +101,43 @@ BT_ERROR BT_MCPwmSetConfiguration(BT_HANDLE hMCPwm, BT_MCPWM_CONFIG *pConfig) {
 }
 BT_EXPORT_SYMBOL(BT_MCPwmSetConfiguration);
 
+BT_ERROR BT_MCPwmEnableInterrupt(BT_HANDLE hMCPwm) {
+	if(!isMCPwmHandle(hMCPwm)) {
+		// ERR_INVALID_HANDLE_TYPE
+		return (BT_ERROR) -1;
+	}
+
+	return BT_IF_MCPWM_OPS(hMCPwm)->pfnEnableInterrupt(hMCPwm);
+}
+
+BT_ERROR BT_MCPwmDisableInterrupt(BT_HANDLE hMCPwm) {
+	if(!isMCPwmHandle(hMCPwm)) {
+		// ERR_INVALID_HANDLE_TYPE
+		return (BT_ERROR) -1;
+	}
+
+	return BT_IF_MCPWM_OPS(hMCPwm)->pfnDisableInterrupt(hMCPwm);
+}
+
+BT_HANDLE BT_MCPwmRegisterCallback(BT_HANDLE hMCPwm, BT_MCPWM_CALLBACK pfnCallback, void *pParam, BT_ERROR *pError) {
+	if(!isMCPwmHandle(hMCPwm)) {
+		// ERR_INVALID_HANDLE_TYPE
+		return NULL;
+	}
+
+	return BT_IF_MCPWM_OPS(hMCPwm)->pfnRegisterCallback(hMCPwm, pfnCallback, pParam, pError);
+}
+
+BT_ERROR BT_MCPwmUnregisterCallback(BT_HANDLE hMCPwm, BT_HANDLE hCallback) {
+	if(!isMCPwmHandle(hMCPwm)) {
+		// ERR_INVALID_HANDLE_TYPE
+		return (BT_ERROR) -1;
+	}
+
+	return BT_IF_MCPWM_OPS(hMCPwm)->pfnUnregisterCallback(hMCPwm, hCallback);
+}
+
+
 /**
  *	@brief	Get a Complete TIMER configuration for the TIMER device specified by the BT_HANDLE.
  *

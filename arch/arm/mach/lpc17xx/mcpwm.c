@@ -12,6 +12,14 @@ BT_DEF_MODULE_DESCRIPTION	("LPC17xx mcpwm kernel driver")
 BT_DEF_MODULE_AUTHOR		("Robert Steinbauer")
 BT_DEF_MODULE_EMAIL			("rsteinbauer@riegl.com")
 
+
+struct _MCPWM_CALLBACK_HANDLE {
+	BT_HANDLE_HEADER	h;
+	BT_MCPWM_CALLBACK	pfnCallback;
+	void 			   *pParam;
+} ;
+
+
 /**
  *	We can define how a handle should look in a MCPWM driver, probably we only need a
  *	hardware-ID number. (Remember, try to keep HANDLES as low-cost as possible).
@@ -21,6 +29,7 @@ struct _BT_OPAQUE_HANDLE {
 	LPC17xx_MCPWM_REGS	   *pRegs;
 	const BT_INTEGRATED_DEVICE   *pDevice;
 	BT_u32					id;
+	struct _MCPWM_CALLBACK_HANDLE	   *pCallback;
 };
 
 static BT_HANDLE g_MCPWM_HANDLES[1] = {
@@ -31,6 +40,7 @@ static const BT_u32 g_MCPWM_PERIPHERAL[1] = {31};
 
 static void disableMCPWMPeripheralClock(BT_HANDLE hMCPWM);
 
+static const BT_IF_HANDLE oCallbackHandleInterface;
 
 
 BT_ERROR BT_NVIC_IRQ_46(void) {
@@ -39,13 +49,16 @@ BT_ERROR BT_NVIC_IRQ_46(void) {
 
 	// Clear the position interrupt
 	BT_u32 ulIntStatus = pRegs->MCINTF;
+
+	if (hMCPWM->pCallback)
+		hMCPWM->pCallback->pfnCallback(hMCPWM, hMCPWM->pCallback->pParam);
+
 	pRegs->MCINTF_CLR = ulIntStatus;
 
 	return 0;
 }
 
-static void ResetMCPWM(BT_HANDLE hMCPWM)
-{
+static void ResetMCPWM(BT_HANDLE hMCPWM) {
 }
 
 static BT_ERROR mcpwm_cleanup(BT_HANDLE hMCPWM) {
@@ -64,6 +77,55 @@ static BT_ERROR mcpwm_cleanup(BT_HANDLE hMCPWM) {
 
 	return BT_ERR_NONE;
 }
+
+static BT_ERROR mcpwm_enable_interrupt(BT_HANDLE hMCPWM) {
+	volatile LPC17xx_MCPWM_REGS *pRegs = hMCPWM->pRegs;
+
+	pRegs->MCINTEN_SET = LPC17xx_MCPWM_MCINTEN_ABORT;
+
+	return BT_ERR_NONE;
+}
+
+static BT_ERROR mcpwm_disable_interrupt(BT_HANDLE hMCPWM) {
+	volatile LPC17xx_MCPWM_REGS *pRegs = hMCPWM->pRegs;
+
+	pRegs->MCINTEN_CLR = LPC17xx_MCPWM_MCINTEN_ABORT;
+
+	return BT_ERR_NONE;
+}
+
+static BT_ERROR mcpwm_callback_cleanup(BT_HANDLE hCallback) {
+	struct _MCPWM_CALLBACK_HANDLE *hCleanup = (struct _MCPWM_CALLBACK_HANDLE*)hCallback;
+
+	hCleanup->pfnCallback = NULL;
+	hCleanup->pParam	  = NULL;
+
+	BT_CloseHandle((BT_HANDLE)hCleanup);
+
+	return BT_ERR_NONE;
+}
+
+static BT_HANDLE mcpwm_register_callback(BT_HANDLE hMCPWM, BT_MCPWM_CALLBACK pfnCallback, void *pParam, BT_ERROR *pError) {
+	struct _MCPWM_CALLBACK_HANDLE *pCallback = (struct _MCPWM_CALLBACK_HANDLE*)BT_CreateHandle(&oCallbackHandleInterface, sizeof(struct _MCPWM_CALLBACK_HANDLE),pError);
+
+	if (pCallback) {
+		pCallback->pfnCallback = pfnCallback;
+		pCallback->pParam	   = pParam;
+
+		hMCPWM->pCallback      = pCallback;
+	}
+
+	return (BT_HANDLE)pCallback;
+}
+
+static BT_ERROR mcpwm_unregister_callback(BT_HANDLE hMCPWM, BT_HANDLE hCallback) {
+	mcpwm_callback_cleanup(hCallback);
+
+	hMCPWM->pCallback = NULL;
+
+	return BT_ERR_NONE;
+}
+
 
 static BT_ERROR mcpwm_set_channelconfig(BT_HANDLE hMCPWM, BT_u32 ulChannel, BT_MCPWM_CHANNEL_CONFIG *pConfig) {
 	volatile LPC17xx_MCPWM_REGS *pRegs = hMCPWM->pRegs;
@@ -370,6 +432,10 @@ static const BT_DEV_IF_MCPWM oMCPWMDeviceInterface= {
 	.pfnGetChannelPulsewidth	= mcpwm_get_channelpulsewidth,
 	.pfnSetChannelPulsewidth	= mcpwm_set_channelpulsewidth,
 	.pfnSetDCModePattern		= mcpwm_set_DCModePattern,
+	.pfnRegisterCallback		= mcpwm_register_callback,
+	.pfnUnregisterCallback		= mcpwm_unregister_callback,
+	.pfnEnableInterrupt			= mcpwm_enable_interrupt,
+	.pfnDisableInterrupt		= mcpwm_disable_interrupt,
 };
 
 static const BT_DEV_IFS oDeviceInterface = {
