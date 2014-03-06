@@ -14,7 +14,7 @@ BT_DEF_MODULE_EMAIL			("rsteinbauer@riegl.com")
 
 struct _TIMER_CALLBACK_HANDLE {
 	BT_HANDLE_HEADER	h;
-	BT_QEI_CALLBACK		pfnCallback;
+	BT_TIMER_CALLBACK	pfnCallback;
 	void 			   *pParam;
 } ;
 
