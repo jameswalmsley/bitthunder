@@ -267,7 +267,7 @@ static void mac_adjust_link(BT_HANDLE hMac, struct bt_phy_device *phy) {
 	if(phy->link) {		// Check that the PHY's link speed is the same and adjust as necessary.
 		if((hMac->speed != phy->speed) || (hMac->duplex != phy->duplex)) {
 			BT_u32 regval = hMac->pRegs->net_cfg;
-			regval &= (NET_CFG_FDEN | NET_CFG_SPEED | NET_CFG_GIGEEN);	// Clear the speed and duplex bits.
+			regval &= ~(NET_CFG_FDEN | NET_CFG_SPEED | NET_CFG_GIGEEN);	// Clear the speed and duplex bits.
 
 			if(phy->duplex) {
 				regval |= NET_CFG_FDEN;
