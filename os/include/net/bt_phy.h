@@ -73,24 +73,25 @@ struct bt_phy_config {
 };
 
 struct bt_phy_device {
-	struct bt_mii_bus 	   *mii_bus;
+	struct bt_mii_bus 	   *mii_bus;				///< Link back to the mii_bus used to communicate with this PHY.
 	struct bt_list_head		item;
 	BT_HANDLE				hPHY;					///< PHY driver handle.
 	BT_u32					phy_id;					///< UID found during probe.
-	enum bt_phy_state		eState;
+	enum bt_phy_state		eState;					///< Current state of the PHY state maching for this PHY.
 	enum bt_phy_interface_t	interface;
 	BT_u32					addr;					///< Phy bus address.
-	BT_u32					speed;
-	BT_u32					duplex;
-	BT_u32					pause;
-	BT_u32					asym_pause;
-	BT_u32					link;
+	BT_u32					speed;					///< Speed of link in MBit (10/100/1000/10000).
+	BT_u32					duplex;					///< 0 = Half, 1 = Full
+	BT_u32					pause;					///< 0 = Pause frames disabled, 1 = Pause frames enabled.
+	BT_u32					asym_pause;				///< 0 = Asymetric pause frames disabled, 1 = Asymetric pause frames enabled.
+	BT_u32					link;					///< 0 = Link "down", 1 = Link "up".
 	BT_u32					interrupts;
-	BT_u32					supported;
-	BT_u32					advertising;
-	BT_u32					autoneg;
+	BT_u32					supported;				///< Mask of link modes and features that the PHY supports.
+	BT_u32					advertising;			///< Mask of link modes and features that the PHY is advertising.
+	BT_u32					advertising_mask;		///< Mask of link modes and features that should be disabled during negotiation.
+	BT_u32					autoneg;				///< 0 = Autoneg disabled, 1 = Autoneg enabled.
 	BT_u32					link_timeout;
-	BT_s32					irq;
+	BT_s32					irq;					///< -1 = Polling mode, else IRQ number PHY uses for service requests.
 	BT_HANDLE				active_mac;				///< Handle of the associated/connected MAC.
 	const BT_DEVICE		   *pDevice;
 };
@@ -100,16 +101,16 @@ struct bt_mii_bus {
 	BT_HANDLE 				hMII;			///< Handle to MII bus driver.
 	const BT_DEVICE 	   *pDevice;		///< Bus device object, provides a reference into the device tree.
 	struct bt_list_head		item;
-	struct bt_list_head		phys;			// Phy devices on this bus.
+	struct bt_list_head		phys;			///< List of PHY devices on this bus.
 	const BT_i8			   *name;
 	BT_u8					id;
-	void				   *mutex;
-	struct bt_phy_device   *phy_map[32];	// List of all phys on the bus.
-	BT_u32					phy_mask;
+	void				   *mutex;			///< Mutex for locking the MII bus.
+	//struct bt_phy_device   *phy_map[32];	///< List of all phys on the bus.
+	//BT_u32					phy_mask;
 };
 
 BT_ERROR BT_RegisterMiiBus(BT_HANDLE hMII, struct bt_mii_bus *bus);
-BT_ERROR BT_ConnectPHY(BT_HANDLE hMAC, BT_u32 ulAddress);
+BT_ERROR BT_ConnectPHY(BT_HANDLE hMac, BT_u32 ulAddress);
 
 /*
  *	Kernel Internal PHY access API.

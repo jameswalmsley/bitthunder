@@ -114,8 +114,6 @@ BT_ERROR bt_phy_generic_init(struct bt_phy_device *phy) {
 
 	BT_u16 val = bt_phy_read(phy, BT_PHY_MII_BMSR, &Error);
 
-
-
 	if(val & BT_PHY_BMSR_AUTONEG_ABILITY) {
 		phy->supported |= BT_PHY_SUPPORTED_Autoneg;
 	}
@@ -142,7 +140,19 @@ BT_ERROR bt_phy_generic_init(struct bt_phy_device *phy) {
 			phy->supported |= BT_PHY_SUPPORTED_1000baseT_Half;
 	}
 
-	phy->advertising = phy->supported;
+	phy->advertising = phy->supported & ~phy->advertising_mask;
+
+	val = bt_phy_read(phy, BT_PHY_MII_CTRL1000, &Error);
+	// Update the advertising flags on the PHY.
+	if(phy->advertising_mask & BT_PHY_SUPPORTED_1000baseT_Half) {
+		val &= ~BT_PHY_CTRL1000_1000HALF;
+	}
+
+	if(phy->advertising_mask & BT_PHY_SUPPORTED_1000baseT_Full) {
+		val &= ~BT_PHY_CTRL1000_1000FULL;
+	}
+
+	bt_phy_write(phy, BT_PHY_MII_CTRL1000, val);
 
 	return BT_ERR_NONE;
 }
@@ -272,6 +282,8 @@ no_node:
 
 BT_ERROR BT_ConnectPHY(BT_HANDLE hMAC, BT_u32 ulAddress) {
 
+	BT_ERROR Error = BT_ERR_NONE;
+
 	struct bt_list_head *bus_pos;
 	bt_list_for_each(bus_pos, &g_mii_busses) {
 		struct bt_mii_bus *bus = bt_container_of(bus_pos, struct bt_mii_bus, item);
@@ -286,7 +298,9 @@ BT_ERROR BT_ConnectPHY(BT_HANDLE hMAC, BT_u32 ulAddress) {
 					if(phy->phy_id == ulAddress) {
 						if(!phy->active_mac) {
 							phy->active_mac = hMAC;
-							phy->eState = PHY_STARTING;	// Signal that this PHY can be brought online and the state machine can leave idle.
+							phy->eState = BT_PHY_STARTING;	// Signal that this PHY can be brought online and the state machine can leave idle.
+							BT_NET_IF *netif = BT_GetNetifFromHandle(phy->active_mac, &Error);
+							netif->phy = phy;
 							return BT_ERR_NONE;
 						}
 					}
@@ -301,56 +315,77 @@ BT_ERROR BT_ConnectPHY(BT_HANDLE hMAC, BT_u32 ulAddress) {
 
 static BT_BOOL phy_sm(struct bt_phy_device *phy) {
 
+	BT_ERROR Error = BT_ERR_NONE;
 	BT_BOOL clock_again = BT_FALSE;
 
 	switch(phy->eState) {
 
-	case PHY_DOWN:					// NOP
+	case BT_PHY_DOWN:					// NOP
 		phy_read_status(phy);
 		if(phy->link) {
-			phy->eState = PHY_CHANGELINK;
+			phy->eState = BT_PHY_CHANGELINK;
 			clock_again = BT_TRUE;
 		}
 		break;
 
-	case PHY_STARTING:				// Initialise the PHY and move into PHY_DOWN.
+	case BT_PHY_STARTING:				// Initialise the PHY and move into PHY_DOWN.
 	{
 		phy_init(phy);
-		phy->eState = PHY_DOWN;
+		phy->eState = BT_PHY_RENEGOTIATE;
 		clock_again = BT_TRUE;
 		break;
 	}
 
-	case PHY_UP:					// NOP : link_state -> state
+	case BT_PHY_UP:						// NOP : link_state -> state
+	{
 		// Read the PHY status register, any change in the link?
 		phy_read_status(phy);
 
 		if(!phy->link) {
-			phy->eState = PHY_CHANGELINK;
+			phy->eState = BT_PHY_CHANGELINK;
 			clock_again = BT_TRUE;
 		}
 
 		break;
+	}
 
-	case PHY_CHANGELINK: {
+	case BT_PHY_RENEGOTIATE:
+	{
+		phy_init(phy);
+
+		BT_u16 bmcr = bt_phy_read(phy, BT_PHY_MII_BMCR, &Error);
+		bmcr |= BT_PHY_BMCR_RESET;
+		bt_phy_write(phy, BT_PHY_MII_BMCR, bmcr);
+
+		phy->eState = BT_PHY_DOWN;
+		clock_again = BT_TRUE;
+		break;
+	}
+
+	case BT_PHY_CHANGELINK:
+	{
 		// Signal to the MAC that speed or link state has changed on the PHY.
 		// This allows the MAC to change its RX/TXD clocks, or stop processing data when PHY is down.
-		// Read the speed!
 
 		const BT_DEV_IF_EMAC *mac_ops = BT_IF_EMAC_OPS(phy->active_mac);
 		mac_ops->adjust_link(phy->active_mac, phy);
 
 		if(phy->link) {
-			phy->eState = PHY_UP;
+			phy->eState = BT_PHY_UP;
 		} else {
-			phy->eState = PHY_DOWN;
+			phy->eState = BT_PHY_DOWN;
 		}
 
+		// Notify the netif and stack of link state change
+		BT_NET_IF *netif = BT_GetNetifFromHandle(phy->active_mac, &Error);
+		bt_netif_adjust_link(netif, phy);
 		break;
 	}
 
-	case PHY_NOLINK:				// NOP : link_state -> state
+	case BT_PHY_NOLINK:				// NOP : link_state -> state
+	{
 		break;
+	}
 
 	default:
 		break;
