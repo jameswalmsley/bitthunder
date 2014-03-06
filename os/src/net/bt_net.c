@@ -59,6 +59,7 @@ BT_ERROR BT_RegisterNetworkInterface(BT_HANDLE hIF) {
 
 	pNetIF->base.hIF = hIF;
 	pNetIF->base.pOps = hIF->h.pIf->oIfs.pDevIF->unConfigIfs.pEMacIF;
+	pNetIF->base.name = pNetIF->netif.name;
 
 	if (pNetIF->base.pOps->pfnEventSubscribe) {
 		pNetIF->base.pOps->pfnEventSubscribe(hIF, net_event_handler,
@@ -85,11 +86,34 @@ BT_ERROR BT_RegisterNetworkInterface(BT_HANDLE hIF) {
 static BT_NETIF_PRIV *find_netif(const BT_i8 *name) {
 	struct bt_list_head *pos;
 	bt_list_for_each(pos, &g_interfaces) {
-		BT_NETIF_PRIV *netif = (BT_NETIF_PRIV *) pos;
+		BT_NETIF_PRIV *netif = bt_container_of(pos, BT_NETIF_PRIV, base);
 		if(netif->base.smFlags & NET_IF_INITIALISED) {
 			if(!strcmp(netif->base.name, name)) {
 				return netif;
 			}
+		}
+	}
+
+	return NULL;
+}
+
+
+BT_u32 BT_GetTotalNetworkInterfaces() {
+	BT_u32 i = 0;
+	struct bt_list_head *pos;
+	bt_list_for_each(pos, &g_interfaces) {
+		i++;
+	}
+	return i;
+}
+
+BT_NET_IF *BT_GetNetifByIndex(BT_u32 index) {
+
+	BT_u32 i = 0;
+	struct bt_list_head *pos;
+	bt_list_for_each(pos, &g_interfaces) {
+		if(i++ == index) {
+			return (BT_NET_IF *) pos;
 		}
 	}
 
@@ -101,6 +125,37 @@ BT_NET_IF *BT_GetNetif(const BT_i8 *name, BT_ERROR *pError) {
 	if(priv) {
 		return &priv->base;
 	}
+	return NULL;
+}
+
+/**
+ *	The PHY management layer calls this function when the PHY detects a change.
+ *
+ **/
+BT_ERROR bt_netif_adjust_link(BT_NET_IF *netif) {
+
+	BT_NETIF_PRIV *pIF = bt_container_of(netif, BT_NETIF_PRIV, base);
+
+	if(!netif->phy) {
+		return BT_ERR_GENERIC;
+	}
+
+	if(!netif->phy->link) {
+		bt_lwip_netif_down(pIF);
+	} else {
+		bt_lwip_netif_up(pIF);
+	}
+}
+
+BT_NET_IF *BT_GetNetifFromHandle(BT_HANDLE hMac, BT_ERROR *pError) {
+	struct bt_list_head *pos;
+	bt_list_for_each(pos, &g_interfaces) {
+		BT_NET_IF *netif = (BT_NET_IF *) pos;
+		if(netif->hIF == hMac) {
+			return netif;
+		}
+	}
+
 	return NULL;
 }
 
@@ -142,6 +197,25 @@ BT_BOOL BT_NetifCompletedDHCP(BT_NET_IF *interface) {
 BT_ERROR BT_NetifGetHostname(BT_NET_IF *interface, char *hostname) {
 	BT_NETIF_PRIV *pIF = bt_container_of(interface, BT_NETIF_PRIV, base);
 	return bt_lwip_netif_get_hostname(pIF, hostname);
+}
+
+BT_ERROR BT_NetifGetLinkState(BT_NET_IF *interface, struct bt_phy_linkstate *linkstate) {
+	linkstate->link = interface->phy->link;
+	linkstate->speed = interface->phy->speed;
+	linkstate->duplex = interface->phy->duplex;
+	linkstate->supported = interface->phy->supported;
+	linkstate->advertising = interface->phy->advertising;
+	linkstate->autoneg = interface->phy->autoneg;
+	return BT_ERR_NONE;
+}
+
+BT_ERROR BT_NetifConfigureLink(BT_NET_IF *interface, struct bt_phy_config *config) {
+	interface->phy->advertising_mask = config->advertising_disable;
+}
+
+BT_ERROR BT_NetifRestartLink(BT_NET_IF *interface) {
+	interface->phy->eState = BT_PHY_RENEGOTIATE;
+	return BT_ERR_NONE;
 }
 
 static void tcpip_init_done(void *arg) {

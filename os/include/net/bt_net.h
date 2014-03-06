@@ -9,7 +9,7 @@ typedef struct _BT_NET_IF {
 	struct bt_list_head		item;
 	const BT_i8 		   *name;
 	BT_HANDLE 				hIF;
-	BT_HANDLE 				hPhy;
+	struct bt_phy_device   *phy;
 	BT_HANDLE 				hTxFifo;
 	BT_u32 					ulFlags;
 
@@ -46,6 +46,25 @@ BT_ERROR BT_NetifSetMacAddress(BT_NET_IF *interface, BT_u8 *hwaddr, BT_u32 ulLen
 
 BT_ERROR BT_NetifSetAddress(BT_NET_IF *interface, BT_IPADDRESS *ip, BT_IPADDRESS *netmask, BT_IPADDRESS *gw);
 BT_ERROR BT_NetifGetAddress(BT_NET_IF *interface, BT_IPADDRESS *ip, BT_IPADDRESS *netmask, BT_IPADDRESS *gw);
+
+/**
+ *	@public
+ *	@brief 	Allows configuration of PHY/Link modes.
+ *
+ *	@param 	[IN] interface	Network interface to be configured.
+ *	@param	[IN] config		Structure containing the configuration flags to be applied.
+ *
+ *	@return	BT_ERR_NONE		On sucessful application of the configuration.
+ **/
+BT_ERROR BT_NetifConfigureLink(BT_NET_IF *interface, struct bt_phy_config *config);
+
+/**
+ *	@brief	Resets the PHY/Link after a reconfiguration.
+ *
+ **/
+BT_ERROR BT_NetifRestartLink(BT_NET_IF *interface);
+
+BT_ERROR BT_NetifGetLinkState(BT_NET_IF *interface, struct bt_phy_linkstate *linkstate);
 
 BT_ERROR BT_StartNetif(BT_NET_IF *interface);
 BT_ERROR BT_StopNetif(BT_NET_IF *interface);
