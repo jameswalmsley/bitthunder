@@ -6,7 +6,7 @@
 #include "slcr.h"
 
 BT_DEF_MODULE_NAME					("zynq-gem")
-BT_DEF_MODULE_DESCRIPTION			("Zynq Gigabit Ethernet Mac driver")
+BT_DEF_MODULE_DESCRIPTION			("Zynq Gigabit Ethernet Controller")
 BT_DEF_MODULE_AUTHOR				("James Walmsley")
 BT_DEF_MODULE_EMAIL					("jwalmsley@riegl.com")
 
