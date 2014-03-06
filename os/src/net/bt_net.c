@@ -60,6 +60,11 @@ BT_ERROR BT_RegisterNetworkInterface(BT_HANDLE hIF) {
 	pNetIF->base.hIF = hIF;
 	pNetIF->base.pOps = hIF->h.pIf->oIfs.pDevIF->unConfigIfs.pEMacIF;
 	pNetIF->base.name = pNetIF->netif.name;
+#ifdef BT_CONFIG_NO_MODULE_STRINGS
+	pNetIF->base.device_name = hIF->h.pIf->oInfo.szpModuleName;
+#else
+	pNetIF->base.device_name = hIF->h.pIf->oInfo.szpDescription;
+#endif
 
 	if (pNetIF->base.pOps->pfnEventSubscribe) {
 		pNetIF->base.pOps->pfnEventSubscribe(hIF, net_event_handler,

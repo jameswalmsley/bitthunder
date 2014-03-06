@@ -8,6 +8,7 @@
 typedef struct _BT_NET_IF {
 	struct bt_list_head		item;
 	const BT_i8 		   *name;
+	const BT_i8			   *device_name;	///< Description string from the device driver.
 	BT_HANDLE 				hIF;
 	struct bt_phy_device   *phy;
 	BT_HANDLE 				hTxFifo;
