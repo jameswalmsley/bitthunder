@@ -58,7 +58,7 @@ BT_ERROR BT_QEISetPositionComparator(BT_HANDLE hQEI, BT_u32 ulChannel, BT_u32 ul
 }
 BT_EXPORT_SYMBOL(BT_QEISetPositionComparator);
 
-BT_u32 BT_QEIGetVelocity(BT_HANDLE hQEI, BT_ERROR *pError) {
+BT_s32 BT_QEIGetVelocity(BT_HANDLE hQEI, BT_ERROR *pError) {
 	if(!isQEIHandle(hQEI)) {
 		// ERR_INVALID_HANDLE_TYPE
 		return (BT_ERROR) -1;

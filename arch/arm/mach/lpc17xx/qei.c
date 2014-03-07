@@ -123,7 +123,7 @@ static BT_ERROR qei_set_position_comparator(BT_HANDLE hQEI, BT_u32 ulChannel, BT
 	return BT_ERR_NONE;
 }
 
-static BT_u32 qei_get_velocity(BT_HANDLE hQEI, BT_ERROR *pError) {
+static BT_s32 qei_get_velocity(BT_HANDLE hQEI, BT_ERROR *pError) {
 	volatile LPC17xx_QEI_REGS *pRegs = hQEI->pRegs;
 
 	if (pError)
@@ -131,7 +131,18 @@ static BT_u32 qei_get_velocity(BT_HANDLE hQEI, BT_ERROR *pError) {
 
 	BT_u32 ulInputClk = BT_LPC17xx_GetPeripheralClock(g_QEI_PERIPHERAL[hQEI->id]);
 
-	return pRegs->QEICAP * (ulInputClk / pRegs->QEILOAD);
+	BT_s32 slVelocity = pRegs->QEICAP * (ulInputClk / pRegs->QEILOAD);
+
+	if (!(pRegs->QEICONF & LPC17xx_QEI_QEICONF_DIRINV))	{
+		if (pRegs->QEISTAT & LPC17xx_QEI_QEISTAT_DIR)
+			slVelocity = -slVelocity;
+	}
+	else {
+		if (!(pRegs->QEISTAT & LPC17xx_QEI_QEISTAT_DIR))
+			slVelocity = -slVelocity;
+	}
+
+	return slVelocity;
 }
 
 

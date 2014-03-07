@@ -36,7 +36,7 @@ typedef struct _BT_DEV_IF_QEI {
 	BT_u32		(*pfnGetPosition)			(BT_HANDLE hQEI, BT_ERROR *pError);
 	BT_ERROR	(*pfnSetMaximumPosition)	(BT_HANDLE hQEI, BT_u32 ulValue);
 	BT_ERROR	(*pfnSetPositionComparator)	(BT_HANDLE hQEI, BT_u32 ulChannel, BT_u32 ulValue);
-	BT_u32 		(*pfnGetVelocity)			(BT_HANDLE hQEI, BT_ERROR *pError);
+	BT_s32 		(*pfnGetVelocity)			(BT_HANDLE hQEI, BT_ERROR *pError);
 	BT_ERROR	(*pfnEnableInterrupt)		(BT_HANDLE hQEI, BT_u32 ulType);
 	BT_ERROR	(*pfnDisableInterrupt)		(BT_HANDLE hQEI, BT_u32 ulType);
 	BT_ERROR	(*pfnClearInterrupt)		(BT_HANDLE hQEI, BT_u32 ulType);
@@ -52,7 +52,7 @@ BT_u32		BT_QEIGetPosition			(BT_HANDLE hQEI, BT_ERROR *pError);
 BT_ERROR	BT_QEISetMaximumPosition	(BT_HANDLE hQEI, BT_u32 ulValue);
 BT_ERROR	BT_QEISetPositionComparator	(BT_HANDLE hQEI, BT_u32 ulChannel, BT_u32 ulValue);
 
-BT_u32		BT_QEIGetVelocity			(BT_HANDLE hQEI, BT_ERROR *pError);
+BT_s32		BT_QEIGetVelocity			(BT_HANDLE hQEI, BT_ERROR *pError);
 
 BT_ERROR	BT_QEIEnableInterrupt		(BT_HANDLE hQEI, BT_u32 ulType);
 BT_ERROR	BT_QEIDisableInterrupt		(BT_HANDLE hQEI, BT_u32 ulType);

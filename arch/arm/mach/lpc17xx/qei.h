@@ -10,6 +10,9 @@ extern const BT_IF_DEVICE BT_LPC17xx_QEI_oDeviceInterface;
 typedef struct _LPC17xx_QEI_REGS {
 	BT_u32 	QEICON;      // 0x000		control register
 	BT_u32 	QEISTAT;     // 0x004       encoder status register
+
+#define	LPC17xx_QEI_QEISTAT_DIR				0x00000001
+
 	BT_u32 	QEICONF;     // 0x008		configuration register
 
 #define	LPC17xx_QEI_QEICONF_DIRINV			0x00000001
