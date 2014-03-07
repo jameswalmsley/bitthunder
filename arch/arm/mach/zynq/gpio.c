@@ -36,7 +36,7 @@ static BT_ERROR gpio_set(BT_HANDLE hGPIO, BT_u32 ulGPIO, BT_BOOL bValue) {
 	/*
 	 *	Create a mask to control the bit.
 	 */
-	BT_u32 ulMask 	= (bValue << ulBit) | ((~1) << (ulBit + 16));
+	BT_u32 ulMask 	= (bValue << ulBit) | ((~(1 << (ulBit + 16))) & 0xffff0000);
 
 	/*while(1) {
 		hGPIO->pRegs->MASK_DATA[ulBank] = ulMask;
@@ -49,9 +49,15 @@ static BT_ERROR gpio_set(BT_HANDLE hGPIO, BT_u32 ulGPIO, BT_BOOL bValue) {
 }
 
 static BT_BOOL gpio_get(BT_HANDLE hGPIO, BT_u32 ulGPIO, BT_ERROR *pError) {
+	BT_u32 ulBank 	= ulGPIO / 32;
+	BT_u32 ulBit	= ulGPIO % 32;
+
 	if(pError) {
 		*pError = BT_ERR_NONE;
 	}
+
+	if (hGPIO->pRegs->DATA_RO[ulBank] & (1 << ulBit)) return BT_TRUE;
+	
 	return BT_FALSE;
 }
 
