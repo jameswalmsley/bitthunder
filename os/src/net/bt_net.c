@@ -205,6 +205,10 @@ BT_ERROR BT_NetifGetHostname(BT_NET_IF *interface, char *hostname) {
 }
 
 BT_ERROR BT_NetifGetLinkState(BT_NET_IF *interface, struct bt_phy_linkstate *linkstate) {
+	if(!interface->phy) {
+		return BT_ERR_GENERIC;
+	}
+
 	linkstate->link = interface->phy->link;
 	linkstate->speed = interface->phy->speed;
 	linkstate->duplex = interface->phy->duplex;
@@ -215,10 +219,17 @@ BT_ERROR BT_NetifGetLinkState(BT_NET_IF *interface, struct bt_phy_linkstate *lin
 }
 
 BT_ERROR BT_NetifConfigureLink(BT_NET_IF *interface, struct bt_phy_config *config) {
+	if(!interface->phy) {
+		return BT_ERR_GENERIC;
+	}
 	interface->phy->advertising_mask = config->advertising_disable;
 }
 
 BT_ERROR BT_NetifRestartLink(BT_NET_IF *interface) {
+	if(!interface->phy) {
+		return BT_ERR_GENERIC;
+	}
+
 	interface->phy->eState = BT_PHY_RENEGOTIATE;
 	return BT_ERR_NONE;
 }
