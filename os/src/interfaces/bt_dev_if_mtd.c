@@ -196,16 +196,29 @@ BT_ERROR BT_MTD_RegisterDevice(BT_HANDLE hDevice, const BT_i8 *szpName, BT_MTD_I
 	BT_RegisterBlockDevice((BT_HANDLE)&mtd->hBlockdev, szpBlockname, &mtd->oBlock);
 
 	// parse information from device tree
+	i = 0;
 #ifdef BT_CONFIG_OF
 	struct bt_device_node *node = bt_of_integrated_get_node(mtd->pDevice);
 	struct bt_list_head *pos;
-	i=0;
 	bt_list_for_each(pos, &node->children) {
 		struct bt_device_node *part_node = (struct bt_device_node *) pos;
 		const char *label = bt_of_get_property(part_node, "label", NULL);
 		BT_u64 size = 0;
 		const BT_be32 *val = bt_of_get_address(part_node, 0, &size, 0);
 		BT_u32 start_address = bt_be32_to_cpu(*val);
+#else
+	const BT_RESOURCE *pResource;
+	do {
+		pResource = BT_GetIntegratedResource(mtd->pDevice, BT_RESOURCE_MEM, i);
+		if(!pResource) {
+			continue;
+		}
+
+		const char *label = pResource->szpName;
+		BT_u32 start_address = pResource->ulStart;
+		BT_u32 end_address = pResource->ulEnd;
+		BT_u32 size = end_address - start_address;
+#endif
 
 		BT_MTD_PART * partition = BT_kMalloc(sizeof(BT_MTD_PART));
 		partition->master = mtd;
@@ -236,7 +249,10 @@ BT_ERROR BT_MTD_RegisterDevice(BT_HANDLE hDevice, const BT_i8 *szpName, BT_MTD_I
 		sprintf(szpBlockname, "%s-block", label);
 		BT_RegisterBlockDevice((BT_HANDLE)&partition->mtd.hBlockdev, szpBlockname, &partition->mtd.oBlock);
 		i++;
+#ifdef BT_CONFIG_OF
 	}
+#else
+	} while(pResource);
 #endif
 	num_mtd_devices++;
 	return Error;
