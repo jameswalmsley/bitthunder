@@ -11,12 +11,12 @@
  *	A union and struct is used to remove redundancy from the in-memory or in-rom objects.
  **/
 typedef struct _BT_RESOURCE {
+	const char 	*szpName;
 	union {
 		struct {
 			BT_u32	ulStart;
 			BT_u32	ulEnd;
 		};
-		const char 	*szpName;
 		void		*pParam;
 		BT_u32		ulConfigFlags;
 	};
