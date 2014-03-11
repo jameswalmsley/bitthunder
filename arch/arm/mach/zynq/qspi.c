@@ -57,7 +57,7 @@ struct _BT_OPAQUE_HANDLE {
 	volatile ZYNQ_QSPI_REGS 			*pRegs;
 	volatile ZYNQ_SLCR_REGS 			*pSLCR;
 
-	BT_SPI_MASTER						spi_master;
+	volatile BT_SPI_MASTER						spi_master;
 
 #if (QSPI_USE_WORKQUEUE)
 	struct workqueue_struct 			*workqueue;
@@ -65,20 +65,20 @@ struct _BT_OPAQUE_HANDLE {
 	struct bt_list_head					queue;
 	BT_u8								queue_state;
 #endif
-	BT_u8								dev_busy;
+	volatile BT_u8						dev_busy;
 
-	BT_i32 								bytes_to_transfer;
-	BT_i32 								bytes_to_receive;
-	const void 							*txbuf;
-	void 								*rxbuf;
+	volatile BT_i32						bytes_to_transfer;
+	volatile BT_i32						bytes_to_receive;
+	volatile const void 			   *txbuf;
+	volatile void 					   *rxbuf;
 
-	BT_u32 								speed_hz;
+	volatile BT_u32 								speed_hz;
 
-	BT_BOOL 							is_dual;
-	BT_BOOL 							done;
-	BT_BOOL 							is_inst;
+	volatile BT_BOOL 							is_dual;
+	volatile BT_BOOL 					done;
+	volatile BT_BOOL 							is_inst;
 
-	BT_u32								irq;
+	volatile BT_u32								irq;
 };
 
 /**
@@ -87,8 +87,8 @@ struct _BT_OPAQUE_HANDLE {
  * @inst_size:          Size of the instruction including address bytes
  **/
 struct qspi_inst_format {
-        BT_u8 opcode;
-        BT_u8 inst_size;
+	volatile BT_u8 opcode;
+	volatile BT_u8 inst_size;
 };
 
 /*
@@ -122,7 +122,8 @@ static struct qspi_inst_format flash_inst[] = {
 };
 
 
-static void qspi_init_hw(BT_HANDLE qspi, int is_dual)
+//static void qspi_init_hw(BT_HANDLE qspi, int is_dual)
+__attribute__((optimize("-O0"))) static void qspi_init_hw(BT_HANDLE qspi, int is_dual)
 {
 	BT_u32 config_reg;
 	qspi->pRegs->ENABLE = ~QSPI_ENABLE_ENABLE_MASK;
@@ -154,7 +155,7 @@ static void qspi_init_hw(BT_HANDLE qspi, int is_dual)
 
 }
 
-static void qspi_copy_read_data(BT_HANDLE qspi, BT_u32 data, BT_u8 size)
+__attribute__((optimize("-O0"))) static void qspi_copy_read_data(BT_HANDLE qspi, BT_u32 data, BT_u8 size)
 {
 	if(qspi->rxbuf)	{
 		data >>= (4 - size) * 8;
@@ -168,7 +169,7 @@ static void qspi_copy_read_data(BT_HANDLE qspi, BT_u32 data, BT_u8 size)
 	}
 }
 
-static void qspi_copy_write_data(BT_HANDLE qspi, BT_u32 *data, BT_u8 size)
+__attribute__((optimize("-O0"))) static void qspi_copy_write_data(BT_HANDLE qspi, BT_u32 *data, BT_u8 size)
 {
 	if(qspi->txbuf) {
 		switch(size) {
@@ -207,7 +208,8 @@ static void qspi_copy_write_data(BT_HANDLE qspi, BT_u32 *data, BT_u8 size)
 	}
 }
 
-static void qspi_chipselect(BT_HANDLE qspi, BT_SPI_DEVICE *pDevice, int is_on)
+
+__attribute__((optimize("-O0"))) static void qspi_chipselect(BT_HANDLE qspi, BT_SPI_DEVICE *pDevice, int is_on)
 {
 	BT_u32 config_reg;
 
@@ -229,7 +231,7 @@ static void qspi_chipselect(BT_HANDLE qspi, BT_SPI_DEVICE *pDevice, int is_on)
 	BT_EnableInterrupt(qspi->irq);
 }
 
-static BT_ERROR qspi_setup_transfer(BT_HANDLE qspi, BT_SPI_DEVICE *pDevice, BT_SPI_TRANSFER * transfer)
+__attribute__((optimize("-O0"))) static BT_ERROR qspi_setup_transfer(BT_HANDLE qspi, BT_SPI_DEVICE *pDevice, BT_SPI_TRANSFER * transfer)
 {
 	BT_u32 config_reg;
 	BT_u32 req_hz;
@@ -305,7 +307,7 @@ static BT_ERROR qspi_setup_transfer(BT_HANDLE qspi, BT_SPI_DEVICE *pDevice, BT_S
 	return BT_ERR_NONE;
 }
 
-static BT_ERROR qspi_setup(BT_HANDLE qspi, BT_SPI_DEVICE *pDevice)
+__attribute__((optimize("-O0"))) static BT_ERROR qspi_setup(BT_HANDLE qspi, BT_SPI_DEVICE *pDevice)
 {
 	if (pDevice->mode & SPI_LSB_FIRST)
 		return BT_ERR_INVALID_VALUE;
@@ -319,7 +321,7 @@ static BT_ERROR qspi_setup(BT_HANDLE qspi, BT_SPI_DEVICE *pDevice)
 	return qspi_setup_transfer(qspi, pDevice, NULL);
 }
 
-static void qspi_fill_tx_fifo(BT_HANDLE qspi)
+__attribute__((optimize("-O0"))) static void qspi_fill_tx_fifo(BT_HANDLE qspi)
 {
 	BT_u32 data = 0;
 
@@ -329,7 +331,7 @@ static void qspi_fill_tx_fifo(BT_HANDLE qspi)
 	}
 }
 
-static BT_ERROR qspi_irq(BT_u32 ulIRQ, void *pParam)
+__attribute__((optimize("-O0"))) static BT_ERROR qspi_irq(BT_u32 ulIRQ, void *pParam)
 {
 	BT_HANDLE qspi = (BT_HANDLE) pParam;
 	BT_u32 intr_status;
@@ -417,7 +419,7 @@ static BT_ERROR qspi_irq(BT_u32 ulIRQ, void *pParam)
 	return BT_ERR_NONE;
 }
 
-static BT_ERROR qspi_cleanup(BT_HANDLE hQspi)
+__attribute__((optimize("-O0"))) static BT_ERROR qspi_cleanup(BT_HANDLE hQspi)
 {
 	hQspi->pRegs->ENABLE = ~QSPI_ENABLE_ENABLE_MASK;
 
@@ -431,7 +433,7 @@ static BT_ERROR qspi_cleanup(BT_HANDLE hQspi)
 	return BT_ERR_NONE;
 }
 
-static BT_i32 qspi_start_transfer(BT_HANDLE qspi, BT_SPI_TRANSFER *transfer)
+__attribute__((optimize("-O0"))) static BT_i32 qspi_start_transfer(BT_HANDLE qspi, BT_SPI_TRANSFER *transfer)
 {
 	BT_u32 config_reg;
 	BT_u32 data;
@@ -625,7 +627,7 @@ static void qspi_work_queue(BT_HANDLE hQspi, struct bt_work_struct * work)
 }
 #endif
 
-BT_ERROR qspi_transfer(BT_HANDLE hQspi, BT_SPI_MESSAGE * message) {
+__attribute__((optimize("-O0"))) BT_ERROR qspi_transfer(BT_HANDLE hQspi, BT_SPI_MESSAGE * message) {
 
 	BT_SPI_TRANSFER * transfer;
 #if	(QSPI_USE_WORKQUEUE)
@@ -806,7 +808,7 @@ static const BT_IF_HANDLE oHandleInterface = {
 	.pfnCleanup = qspi_cleanup,
 };
 
-static BT_HANDLE qspi_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
+__attribute__((optimize("-O0"))) static BT_HANDLE qspi_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
 	BT_ERROR Error = BT_ERR_NONE;
 	BT_HANDLE hQSPI = NULL;
 	BT_u32 mem_start = 0;
