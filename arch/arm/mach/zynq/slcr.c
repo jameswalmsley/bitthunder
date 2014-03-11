@@ -168,6 +168,13 @@ void zynq_slcr_postload_fpga(volatile ZYNQ_SLCR_REGS *pSLCR) {
 	pSLCR->FPGA_RST_CTRL    = 0;	// De-assert AXI interface resets.
 }
 
+BT_u32 zynq_slcr_get_boot_mode() {
+	volatile ZYNQ_SLCR_REGS *pRegs = bt_ioremap((void *) ZYNQ_SLCR, BT_SIZE_4K);
+	BT_u32 boot_mode = pRegs->BOOT_MODE;
+	bt_iounmap(pRegs);
+	return boot_mode;
+}
+
 BT_ERROR zynq_slcr_init() {
 	g_pSLCR = bt_ioremap((void *)ZYNQ_SLCR, BT_SIZE_4K);
 	return BT_ERR_NONE;
