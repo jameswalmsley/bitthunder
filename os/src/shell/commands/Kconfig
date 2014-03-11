@@ -119,6 +119,12 @@ config SHELL_CMD_MEMCAT
 	default n
 	select FILE
 
+config SHELL_CMD_MKDIR
+	bool "mkdir"
+	depends on SHELL
+	default n
+	select FILE
+
 config SHELL_CMD_MOUNT
 	bool "mount"
 	depends on SHELL
