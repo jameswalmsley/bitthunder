@@ -4,25 +4,39 @@
 
 // gpio [nr] [state]
 
+static const char *direction_strings[] = {
+	"BT_GPIO_DIR_UNKNOWN",
+	"BT_GPIO_DIR_HIGH_Z",
+	"BT_GPIO_DIR_INPUT",
+	"BT_GPIO_DIR_OUTPUT",
+	"BT_GPIO_DIR_OPEN_DRAIN",
+	"BT_GPIO_DIR_OPEN_SOURCE",
+};
+
 static int bt_gpio(BT_HANDLE hShell, int argc, char **argv) {
 
+	BT_ERROR Error;
 	BT_HANDLE hStdout = BT_ShellGetStdout(hShell);
 
-	if(argc != 3) {
+	if(argc != 2 && argc != 3) {
 		bt_fprintf(hStdout, "Usage: %s {gpio_nr} {1|0}\n", argv[0]);
 		return -1;
 	}
 
 	BT_u32 gpio 	= strtoul(argv[1], NULL, 10);
-	BT_u32 state 	= strtoul(argv[2], NULL, 10);
+	BT_u32 state = 0;
 
-	if(!state) {
-		state = BT_FALSE;
-	} else {
-		state = BT_TRUE;
+	if(argc == 3) {
+		state = strtoul(argv[2], NULL, 10);
+		state = state ? BT_TRUE : BT_FALSE;
+		BT_GpioSet(gpio, state);
+		return 0;
 	}
 
-	BT_GpioSet(gpio, state);
+	state = BT_GpioGet(gpio, &Error);
+	BT_GPIO_DIRECTION eDirection = BT_GpioGetDirection(gpio, &Error);
+
+	bt_fprintf(hStdout, "GPIO: %d %s (%s)\n", gpio, state ? "BT_TRUE" : "BT_FALSE", direction_strings[eDirection]);
 
 	return 0;
 }
