@@ -52,7 +52,7 @@ static BT_BOOL gpio_get(BT_HANDLE hGPIO, BT_u32 ulGPIO, BT_ERROR *pError) {
 	}
 
 	if (hGPIO->pRegs->DATA_RO[ulBank] & (1 << ulBit)) return BT_TRUE;
-	
+
 	return BT_FALSE;
 }
 
@@ -81,9 +81,24 @@ static BT_ERROR gpio_set_direction(BT_HANDLE hGPIO, BT_u32 ulGPIO, BT_GPIO_DIREC
 }
 
 static BT_GPIO_DIRECTION gpio_get_direction(BT_HANDLE hGPIO, BT_u32 ulGPIO, BT_ERROR *pError) {
+
+	BT_u32 ulBank 	= ulGPIO / 32;
+	BT_u32 ulBit 	= ulGPIO % 32;
+
 	if(pError) {
 		*pError = BT_ERR_NONE;
 	}
+
+	if((hGPIO->pRegs->bank[ulBank].DIRM & (1 << ulBit)) &&
+	   (hGPIO->pRegs->bank[ulBank].OEN  & (1 << ulBit))) {
+		return BT_GPIO_DIR_OUTPUT;
+	}
+
+	if(!(hGPIO->pRegs->bank[ulBank].DIRM & (1 << ulBit)) &&
+	   !(hGPIO->pRegs->bank[ulBank].OEN  & (1 << ulBit))) {
+		return BT_GPIO_DIR_INPUT;
+	}
+
 	return BT_GPIO_DIR_UNKNOWN;
 }
 
@@ -176,7 +191,7 @@ static BT_HANDLE gpio_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErro
 		hGPIO->pRegs->bank[i/32].INT_DIS = 0xFFFFFFFF;
 	}
 
-	Error = BT_EnableInterrupt(pResource->ulStart);
+	//Error = BT_EnableInterrupt(pResource->ulStart);
 
 	Error = BT_RegisterGpioController(base, total, hGPIO);
 	if(Error) {
