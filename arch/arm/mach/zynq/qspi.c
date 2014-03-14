@@ -57,7 +57,7 @@ struct _BT_OPAQUE_HANDLE {
 	volatile ZYNQ_QSPI_REGS 			*pRegs;
 	volatile ZYNQ_SLCR_REGS 			*pSLCR;
 
-	volatile BT_SPI_MASTER						spi_master;
+	BT_SPI_MASTER						spi_master;
 
 #if (QSPI_USE_WORKQUEUE)
 	struct workqueue_struct 			*workqueue;
@@ -65,18 +65,18 @@ struct _BT_OPAQUE_HANDLE {
 	struct bt_list_head					queue;
 	BT_u8								queue_state;
 #endif
-	volatile BT_u8						dev_busy;
+	BT_u8								dev_busy;
 
 	volatile BT_i32						bytes_to_transfer;
 	volatile BT_i32						bytes_to_receive;
-	volatile const void 			   *txbuf;
-	volatile void 					   *rxbuf;
+	const void 			   			   *txbuf;
+	void 					   		   *rxbuf;
 
 	volatile BT_u32 								speed_hz;
 
-	volatile BT_BOOL 							is_dual;
+	BT_BOOL 							is_dual;
 	volatile BT_BOOL 					done;
-	volatile BT_BOOL 							is_inst;
+	BT_BOOL 							is_inst;
 
 	volatile BT_u32								irq;
 };
@@ -122,8 +122,7 @@ static struct qspi_inst_format flash_inst[] = {
 };
 
 
-//static void qspi_init_hw(BT_HANDLE qspi, int is_dual)
-__attribute__((optimize("-O0"))) static void qspi_init_hw(BT_HANDLE qspi, int is_dual)
+static void qspi_init_hw(BT_HANDLE qspi, int is_dual)
 {
 	BT_u32 config_reg;
 	qspi->pRegs->ENABLE = ~QSPI_ENABLE_ENABLE_MASK;
@@ -155,7 +154,7 @@ __attribute__((optimize("-O0"))) static void qspi_init_hw(BT_HANDLE qspi, int is
 
 }
 
-__attribute__((optimize("-O0"))) static void qspi_copy_read_data(BT_HANDLE qspi, BT_u32 data, BT_u8 size)
+static void qspi_copy_read_data(BT_HANDLE qspi, BT_u32 data, BT_u8 size)
 {
 	if(qspi->rxbuf)	{
 		data >>= (4 - size) * 8;
@@ -169,7 +168,7 @@ __attribute__((optimize("-O0"))) static void qspi_copy_read_data(BT_HANDLE qspi,
 	}
 }
 
-__attribute__((optimize("-O0"))) static void qspi_copy_write_data(BT_HANDLE qspi, BT_u32 *data, BT_u8 size)
+static void qspi_copy_write_data(BT_HANDLE qspi, BT_u32 *data, BT_u8 size)
 {
 	if(qspi->txbuf) {
 		switch(size) {
@@ -209,7 +208,7 @@ __attribute__((optimize("-O0"))) static void qspi_copy_write_data(BT_HANDLE qspi
 }
 
 
-__attribute__((optimize("-O0"))) static void qspi_chipselect(BT_HANDLE qspi, BT_SPI_DEVICE *pDevice, int is_on)
+static void qspi_chipselect(BT_HANDLE qspi, BT_SPI_DEVICE *pDevice, int is_on)
 {
 	BT_u32 config_reg;
 
@@ -231,12 +230,12 @@ __attribute__((optimize("-O0"))) static void qspi_chipselect(BT_HANDLE qspi, BT_
 	BT_EnableInterrupt(qspi->irq);
 }
 
-__attribute__((optimize("-O0"))) static BT_ERROR qspi_setup_transfer(BT_HANDLE qspi, BT_SPI_DEVICE *pDevice, BT_SPI_TRANSFER * transfer)
+/*__attribute__((optimize("-O0")))*/ static BT_ERROR qspi_setup_transfer(BT_HANDLE qspi, BT_SPI_DEVICE *pDevice, BT_SPI_TRANSFER *transfer)
 {
 	BT_u32 config_reg;
 	BT_u32 req_hz;
 	BT_u32 baud_rate_val = 0;
-	int update_baud = 0;
+	BT_BOOL update_baud = BT_FALSE;
 
 	req_hz = (transfer) ? transfer->speed_hz : pDevice->max_speed_hz;
 
@@ -273,18 +272,18 @@ __attribute__((optimize("-O0"))) static BT_ERROR qspi_setup_transfer(BT_HANDLE q
 
 		InputClk /= ZYNQ_SLCR_CLK_CTRL_DIVISOR_VAL(qspi->pSLCR->LQSPI_CLK_CTRL);
 
-		while((baud_rate_val < 8) && (InputClk / (2 << baud_rate_val)) > req_hz )
+		while((baud_rate_val < 8) && (InputClk / (2 << baud_rate_val)) > req_hz ) {
 			baud_rate_val++;
+		}
 
 		qspi->speed_hz = req_hz;
-		update_baud = 1;
+		update_baud = BT_TRUE;
 
 		//BT_kPrint("QSPI setup-transfer: Current Frequenzy: %d", InputClk / (2 << baud_rate_val));
 	}
 
-
-
-	BT_DisableInterrupt(qspi->irq);
+	//BT_DisableInterrupt(qspi->irq);
+	BT_kEnterCritical();
 	{
 		config_reg = qspi->pRegs->CONFIG;
 
@@ -302,12 +301,13 @@ __attribute__((optimize("-O0"))) static BT_ERROR qspi_setup_transfer(BT_HANDLE q
 
 		qspi->pRegs->CONFIG = config_reg;
 	}
-	BT_EnableInterrupt(qspi->irq);
+	BT_kExitCritical();
+	//BT_EnableInterrupt(qspi->irq);
 
 	return BT_ERR_NONE;
 }
 
-__attribute__((optimize("-O0"))) static BT_ERROR qspi_setup(BT_HANDLE qspi, BT_SPI_DEVICE *pDevice)
+static BT_ERROR qspi_setup(BT_HANDLE qspi, BT_SPI_DEVICE *pDevice)
 {
 	if (pDevice->mode & SPI_LSB_FIRST)
 		return BT_ERR_INVALID_VALUE;
@@ -321,7 +321,7 @@ __attribute__((optimize("-O0"))) static BT_ERROR qspi_setup(BT_HANDLE qspi, BT_S
 	return qspi_setup_transfer(qspi, pDevice, NULL);
 }
 
-__attribute__((optimize("-O0"))) static void qspi_fill_tx_fifo(BT_HANDLE qspi)
+static void qspi_fill_tx_fifo(BT_HANDLE qspi)
 {
 	BT_u32 data = 0;
 
@@ -331,7 +331,7 @@ __attribute__((optimize("-O0"))) static void qspi_fill_tx_fifo(BT_HANDLE qspi)
 	}
 }
 
-__attribute__((optimize("-O0"))) static BT_ERROR qspi_irq(BT_u32 ulIRQ, void *pParam)
+static BT_ERROR qspi_irq(BT_u32 ulIRQ, void *pParam)
 {
 	BT_HANDLE qspi = (BT_HANDLE) pParam;
 	BT_u32 intr_status;
@@ -419,7 +419,7 @@ __attribute__((optimize("-O0"))) static BT_ERROR qspi_irq(BT_u32 ulIRQ, void *pP
 	return BT_ERR_NONE;
 }
 
-__attribute__((optimize("-O0"))) static BT_ERROR qspi_cleanup(BT_HANDLE hQspi)
+static BT_ERROR qspi_cleanup(BT_HANDLE hQspi)
 {
 	hQspi->pRegs->ENABLE = ~QSPI_ENABLE_ENABLE_MASK;
 
@@ -433,7 +433,7 @@ __attribute__((optimize("-O0"))) static BT_ERROR qspi_cleanup(BT_HANDLE hQspi)
 	return BT_ERR_NONE;
 }
 
-__attribute__((optimize("-O0"))) static BT_i32 qspi_start_transfer(BT_HANDLE qspi, BT_SPI_TRANSFER *transfer)
+static BT_i32 qspi_start_transfer(BT_HANDLE qspi, BT_SPI_TRANSFER *transfer)
 {
 	BT_u32 config_reg;
 	BT_u32 data;
@@ -510,126 +510,127 @@ xfer_start:
 	qspi->pRegs->INT_ENABLE = QSPI_IXR_ALL_MASK;
 
 	/* start the transfer by enabling manual start bit */
-	BT_DisableInterrupt(qspi->irq);
+	//BT_DisableInterrupt(qspi->irq);
+	BT_kEnterCritical();
 	{
-		config_reg = qspi->pRegs->CONFIG | QSPI_CONFIG_MANSRT_MASK;
-		qspi->pRegs->CONFIG = config_reg;
+		qspi->pRegs->CONFIG |= QSPI_CONFIG_MANSRT_MASK;
 	}
-	BT_EnableInterrupt(qspi->irq);
+	BT_kExitCritical();
+	//BT_EnableInterrupt(qspi->irq);
 
 	// wait_for_completion(qspi->done);
 	while(!qspi->done) {}
 	return (transfer->len) - (qspi->bytes_to_transfer);
 }
 
-#if	(QSPI_USE_WORKQUEUE)
-static void qspi_work_queue(BT_HANDLE hQspi, struct bt_work_struct * work)
-{
-#ifdef CONFIG_SPI_XILINX_PS_QSPI_DUAL_STACKED
-	BT_u32 lqspi_cfg_reg;
-#endif
+//#if	(QSPI_USE_WORKQUEUE)
+//static void qspi_work_queue(BT_HANDLE hQspi, struct bt_work_struct * work)
+//{
+//#ifdef CONFIG_SPI_XILINX_PS_QSPI_DUAL_STACKED
+// 	BT_u32 lqspi_cfg_reg;
+//#endif
+//
+// 	BT_DisableInterrupt(hQspi->irq);
+// 	BT_kMutexPend(hQspi->pMutexTransfer,0);
+// 	hQspi->dev_busy = 1;
+//
+// 	/* Check if list is empty or queue is stopped */
+// 	if (bt_list_empty(hQspi->queue) || hQspi->queue_state == QSPI_QUEUE_STOPPED) {
+// 		hQspi->dev_busy = 0;
+// 		BT_kMutexRelease(hQspi->pMutexTransfer);
+// 		BT_EnableInterrupt(hQspi->irq);
+// 		return;
+// 	}
+//
+// 	/* Keep requesting transfer till list is empty */
+// 	while(!bt_list_empty(hQspi->queue)) {
+// 		BT_SPI_MESSAGE 		*msg;
+// 		BT_SPI_DEVICE 		*qspi_dev;
+// 		BT_SPI_TRANSFER		*transfer = NULL;
+// 		unsigned			cs_change = 1;
+// 		int				status = 0;
+//
+// 		msg = bt_container_of(hQspi->queue.next, BT_SPI_MESSAGE, queue);
+// 		bt_list_del_init(&msg->queue);
+// 		BT_kMutexRelease(hQspi->pMutexTransfer);
+// 		BT_EnableInterrupt(hQspi->irq);
+// 		qspi_dev = msg->spi;
+//
+//#ifdef CONFIG_SPI_XILINX_PS_QSPI_DUAL_STACKED
+// 		lqspi_cfg_reg = hQspi->pRegs->LINEAR_CFG;
+// 		if (hQspi->spi_master->flags & SPI_MASTER_U_PAGE)
+// 			lqspi_cfg_reg |= QSPI_LCFG_U_PAGE_MASK;
+// 		else {
+// 			lqspi_cfg_reg &= ~QSPI_LCFG_U_PAGE_MASK;
+// 			hQspi->pRegs->LINEAR_CFG = lqspi_cfg_reg;
+// 		}
+//#endif
+//
+// 		bt_list_for_each_entry(transfer, &msg->transfers, transfer_list) {
+// 			if (transfer->bits_per_word || transfer->speed_hz) {
+// 				status = qspi_setup_transfer(hQspi,transfer);
+// 				if (status < 0)
+// 					break;
+// 			}
+//
+// 			/* Select the chip if required */
+// 			if (cs_change) {
+// 				qspi_chipselect(hQspi, 1);
+// 				hQspi->is_inst = 1;
+// 			}
+//
+// 			cs_change = transfer->cs_change;
+//
+// 			if(!transfer->tx_buf && !transfer->rx_buf && transfer->len) {
+// 				status = -BT_ERR_INVALID_HANDLE;
+// 				break;
+// 			}
+//
+// 			/* Request the transfer */
+// 			if (transfer->len) {
+// 				status = qspi_start_transfer(hQspi, transfer);
+// 				hQspi->is_inst = 0;
+// 			}
+//
+// 			if (status != transfer->len) {
+// 				if (status > 0)
+// 					status = -1;
+// 				break;
+// 			}
+// 			msg->actual_length += status;
+// 			status = 0;
+//
+// 			if (transfer->delay_usecs)
+// 			{/* FIXME: udelay(transfer->delay_usecs); */ }
+//
+// 			if (cs_change)
+// 				/* Deselect the chip */
+// 				qspi_chipselect(hQspi, 0);
+//
+// 			if (transfer->transfer_list.next == &msg->transfers)
+// 				break;
+// 		}
+//
+// 		msg->status = status;
+// 		msg->complete(msg->context);
+//
+// 		qspi_setup_transfer(hQspi, NULL);
+//
+// 		if(!(status == 0 && cs_change))
+// 			qspi_chipselect(hQspi, 0);
+//
+// 		BT_DisableInterrupt(hQspi->irq);
+// 		BT_kMutexPend(hQspi->pMutexTransfer);
+// 	}
+// 	hQspi->dev_busy = 0;
+// 	BT_kMutexRelease(hQspi->pMutexTransfer);
+// 	BT_EnableInterrupt(hQspi->irq);
+//}
+//#endif
 
-	BT_DisableInterrupt(hQspi->irq);
-	BT_kMutexPend(hQspi->pMutexTransfer,0);
-	hQspi->dev_busy = 1;
+BT_ERROR qspi_transfer(BT_HANDLE hQspi, BT_SPI_MESSAGE * message) {
 
-	/* Check if list is empty or queue is stopped */
-	if (bt_list_empty(hQspi->queue) || hQspi->queue_state == QSPI_QUEUE_STOPPED) {
-		hQspi->dev_busy = 0;
-		BT_kMutexRelease(hQspi->pMutexTransfer);
-		BT_EnableInterrupt(hQspi->irq);
-		return;
-	}
-
-	/* Keep requesting transfer till list is empty */
-	while(!bt_list_empty(hQspi->queue)) {
-		BT_SPI_MESSAGE 		*msg;
-		BT_SPI_DEVICE 		*qspi_dev;
-		BT_SPI_TRANSFER		*transfer = NULL;
-		unsigned			cs_change = 1;
-		int				status = 0;
-
-		msg = bt_container_of(hQspi->queue.next, BT_SPI_MESSAGE, queue);
-		bt_list_del_init(&msg->queue);
-		BT_kMutexRelease(hQspi->pMutexTransfer);
-		BT_EnableInterrupt(hQspi->irq);
-		qspi_dev = msg->spi;
-
-#ifdef CONFIG_SPI_XILINX_PS_QSPI_DUAL_STACKED
-		lqspi_cfg_reg = hQspi->pRegs->LINEAR_CFG;
-		if (hQspi->spi_master->flags & SPI_MASTER_U_PAGE)
-			lqspi_cfg_reg |= QSPI_LCFG_U_PAGE_MASK;
-		else {
-			lqspi_cfg_reg &= ~QSPI_LCFG_U_PAGE_MASK;
-			hQspi->pRegs->LINEAR_CFG = lqspi_cfg_reg;
-		}
-#endif
-
-		bt_list_for_each_entry(transfer, &msg->transfers, transfer_list) {
-			if (transfer->bits_per_word || transfer->speed_hz) {
-				status = qspi_setup_transfer(hQspi,transfer);
-				if (status < 0)
-					break;
-			}
-
-			/* Select the chip if required */
-			if (cs_change) {
-				qspi_chipselect(hQspi, 1);
-				hQspi->is_inst = 1;
-			}
-
-			cs_change = transfer->cs_change;
-
-			if(!transfer->tx_buf && !transfer->rx_buf && transfer->len) {
-				status = -BT_ERR_INVALID_HANDLE;
-				break;
-			}
-
-			/* Request the transfer */
-			if (transfer->len) {
-				status = qspi_start_transfer(hQspi, transfer);
-				hQspi->is_inst = 0;
-			}
-
-			if (status != transfer->len) {
-				if (status > 0)
-					status = -1;
-				break;
-			}
-			msg->actual_length += status;
-			status = 0;
-
-			if (transfer->delay_usecs)
-			{/* FIXME: udelay(transfer->delay_usecs); */ }
-
-			if (cs_change)
-				/* Deselect the chip */
-				qspi_chipselect(hQspi, 0);
-
-			if (transfer->transfer_list.next == &msg->transfers)
-				break;
-		}
-
-		msg->status = status;
-		msg->complete(msg->context);
-
-		qspi_setup_transfer(hQspi, NULL);
-
-		if(!(status == 0 && cs_change))
-			qspi_chipselect(hQspi, 0);
-
-		BT_DisableInterrupt(hQspi->irq);
-		BT_kMutexPend(hQspi->pMutexTransfer);
-	}
-	hQspi->dev_busy = 0;
-	BT_kMutexRelease(hQspi->pMutexTransfer);
-	BT_EnableInterrupt(hQspi->irq);
-}
-#endif
-
-__attribute__((optimize("-O0"))) BT_ERROR qspi_transfer(BT_HANDLE hQspi, BT_SPI_MESSAGE * message) {
-
-	BT_SPI_TRANSFER * transfer;
+	BT_SPI_TRANSFER *transfer;
 #if	(QSPI_USE_WORKQUEUE)
 	if(qspi->queue_state == QSPI_QUEUE_STOPPED)
 		return -BT_ERR_INVALID_RESOURCE;
@@ -808,7 +809,7 @@ static const BT_IF_HANDLE oHandleInterface = {
 	.pfnCleanup = qspi_cleanup,
 };
 
-__attribute__((optimize("-O0"))) static BT_HANDLE qspi_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
+static BT_HANDLE qspi_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
 	BT_ERROR Error = BT_ERR_NONE;
 	BT_HANDLE hQSPI = NULL;
 	BT_u32 mem_start = 0;
