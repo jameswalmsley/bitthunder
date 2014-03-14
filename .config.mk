@@ -38,7 +38,7 @@ CC_MACHFLAGS 	:= $(shell echo $(BT_CONFIG_TOOLCHAIN_MACH_FLAGS))
 CC_MFPU			:= $(shell echo $(BT_CONFIG_TOOLCHAIN_MFPU))
 CC_FPU_ABI		:= $(shell echo $(BT_CONFIG_TOOLCHAIN_FPU_ABI))
 
-$(OBJECTS) $(OBJECTS-y): CFLAGS += -Wall -I $(BASE)/lib/include/ -I $(BASE)/arch/arm/include/
+$(OBJECTS) $(OBJECTS-y): CFLAGS += -fstack-usage -Wall -I $(BASE)/lib/include/ -I $(BASE)/arch/arm/include/
 $(OBJECTS) $(OBJECTS-y): CFLAGS += $(CC_TCDEBUGFLAGS)
 $(OBJECTS) $(OBJECTS-y): CFLAGS += -march=$(CC_MARCH)
 $(OBJECTS) $(OBJECTS-y): CFLAGS += -mtune=$(CC_MTUNE) $(CC_TCFLAGS) $(CC_OPTIMISE) $(CC_MFPU) $(CC_FPU_ABI)
