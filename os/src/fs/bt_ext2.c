@@ -145,7 +145,7 @@ static BT_s32 ext2_getc(BT_HANDLE hFile, BT_u32 ulFlags, BT_ERROR *pError) {
 	if(pError) *pError = BT_ERR_NONE;
 	char c = 0;
 	BT_s32 rc = ext2fs_read (&c, 1);
-	if(rc == 0) rc = -1;
+	if(rc <= 0) rc = -1;
 	else rc = c;
 
 	return rc;
