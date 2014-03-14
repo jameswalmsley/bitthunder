@@ -343,13 +343,14 @@ static BT_u32 uart_read(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, void *pB
 	BT_u8 *pucDest = (BT_u8 *) pBuffer;
 	BT_u32 read = 0;
 	volatile ZYNQ_UART_REGS *pRegs = hUart->pRegs;
+	if(pError) *pError = BT_ERR_NONE;
 	switch(hUart->eMode) {
 	case BT_UART_MODE_POLLED:
 	{
 		while(ulSize) {
 			while((pRegs->SR & ZYNQ_UART_SR_RXEMPTY)) {
 				if(ulFlags & BT_FILE_NON_BLOCK) {
-					return 0;
+					return read;
 				}
 				BT_ThreadYield();
 			}
@@ -393,6 +394,7 @@ static BT_u32 uart_write(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const v
 	BT_u32 ulRead = 0;
 	BT_u8 *pucSource = (BT_u8 *) pBuffer;
 	volatile ZYNQ_UART_REGS *pRegs = hUart->pRegs;
+	if(pError) *pError = BT_ERR_NONE;
 	switch(hUart->eMode) {
 	case BT_UART_MODE_POLLED:
 	{
