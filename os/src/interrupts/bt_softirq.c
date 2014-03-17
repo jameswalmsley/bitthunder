@@ -13,7 +13,7 @@ BT_DEF_MODULE_NAME	("SoftIRQ")
 
 static BT_SOFTIRQ 	g_SoftIRQ[BT_CONFIG_INTERRUPTS_SOFTIRQ_MAX];
 static BT_u32 		g_ulPending;
-static BT_HANDLE	g_hMutex;
+static void 	   *g_pvMutex;
 
 BT_ERROR BT_OpenSoftIRQ(BT_u32 ulSoftIRQ, BT_SOFTIRQ_HANDLER pfnHandler, void *pData) {
 	g_SoftIRQ[ulSoftIRQ].pfnHandler = pfnHandler;
@@ -36,7 +36,7 @@ BT_ERROR BT_RaiseSoftIRQ(BT_u32 ulSoftIRQ) {
 BT_ERROR BT_RaiseSoftIRQFromISR(BT_u32 ulSoftIRQ) {
 	if(ulSoftIRQ < BT_CONFIG_SOFTIRQ_MAX) {
 		g_ulPending |= (1 << ulSoftIRQ);
-		BT_ReleaseMutexFromISR(g_hMutex, NULL);
+		BT_kMutexReleaseFromISR(g_pvMutex, NULL);
 		return BT_ERR_NONE;
 	}
 
@@ -50,7 +50,7 @@ static BT_ERROR softirq_dispatcher(BT_HANDLE hThread, void *pParam) {
 	BT_SOFTIRQ *p;
 
 	while(1) {
-		BT_PendMutex(g_hMutex, 0);
+		BT_kMutexPend(g_pvMutex, BT_INFINITE_TIMEOUT);
 
 		ulPending = g_ulPending;
 		if(ulPending) {
@@ -78,12 +78,12 @@ static BT_ERROR bt_softirq_init() {
 	oConfig.ulStackDepth 	= 256;
 	oConfig.ulPriority 		= BT_CONFIG_INTERRUPTS_SOFTIRQ_PRIORITY;
 
-	g_hMutex = BT_CreateMutex(&Error);
-	if(!g_hMutex) {
+	g_pvMutex = BT_kMutexCreate();
+	if(!g_pvMutex) {
 		return BT_ERR_GENERIC;
 	}
 
-	BT_PendMutex(g_hMutex, 0);
+	BT_kMutexPend(g_pvMutex, BT_INFINITE_TIMEOUT);
 
 	BT_CreateThread(softirq_dispatcher, &oConfig, &Error);
 
