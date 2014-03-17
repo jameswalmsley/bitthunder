@@ -17,6 +17,8 @@ typedef struct _bt_kernel_params {
 
 typedef void (*BT_FN_TASK_ENTRY)(void *pParam);
 
+#define 	BT_INFINITE_TIMEOUT 	(-1)
+
 BT_ERROR 	BT_kStartScheduler	(void);
 void 		BT_kStopScheduler	(void);
 void 	   *BT_kTaskCreate		(BT_FN_TASK_ENTRY pfnStartRoutine, const BT_i8 *szpName, BT_THREAD_CONFIG *pConfig, BT_ERROR *pError);
