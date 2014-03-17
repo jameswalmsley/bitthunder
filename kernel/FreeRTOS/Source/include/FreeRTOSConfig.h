@@ -67,6 +67,8 @@
 #ifndef FREERTOS_CONFIG_H
 #define FREERTOS_CONFIG_H
 
+#include <bt_config.h>
+
 /*-----------------------------------------------------------
  * Application specific definitions.
  *
@@ -80,7 +82,12 @@
  *----------------------------------------------------------*/
 
 #define configBITTHUNDER			1
+
+#ifdef BT_CONFIG_KERNEL_FREERTOS_NEWLIB_REENTRANCY_SUPPORT
 #define configUSE_NEWLIB_REENTRANT	1
+#else
+#define configUSE_NEWLIB_REENTRANT	0
+#endif
 
 #define configUSE_PREEMPTION		1
 #define configUSE_IDLE_HOOK			0
