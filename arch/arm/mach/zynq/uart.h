@@ -32,9 +32,33 @@ typedef struct _ZYNQ_UART_REGS {
 #define ZYNQ_UART_CR_RXRES_VAL(x)	((x & ZYNQ_UART_CR_RXRES) 	>> 0)
 
 	BT_u32	MR;						//		0x04  -- Mode Register
+#define ZYNQ_UART_MR_CLKSEL			0x00000001	///< Pre-scalar selection
+#define ZYNQ_UART_MR_CHMODE_L_LOOP	0x00000200	///< Local loop back mode
+#define ZYNQ_UART_MR_CHMODE_NORM	0x00000000	///< Normal mode
+#define ZYNQ_UART_MR_STOPMODE_2_BIT	0x00000080	///< 2 stop bits
+#define ZYNQ_UART_MR_STOPMODE_1_BIT	0x00000000	///< 1 stop bit
+#define ZYNQ_UART_MR_PARITY_NONE	0x00000020	///< No parity mode
+#define ZYNQ_UART_MR_PARITY_MARK	0x00000018	///< Mark parity mode
+#define ZYNQ_UART_MR_PARITY_SPACE	0x00000010	///< Space parity mode
+#define ZYNQ_UART_MR_PARITY_ODD		0x00000008	///< Odd parity mode
+#define ZYNQ_UART_MR_PARITY_EVEN	0x00000000	///< Even parity mode
+#define ZYNQ_UART_MR_CHARLEN_6_BIT	0x00000006	///< 6 bits data
+#define ZYNQ_UART_MR_CHARLEN_7_BIT	0x00000004	///< 7 bits data
+#define ZYNQ_UART_MR_CHARLEN_8_BIT	0x00000000	///< 8 bits data
+
 	BT_u32	IER;					//      0x08  -- Interrupt Enable Register.
 	BT_u32	IDR;					//      0x0C  -- Interrupt Disable Register.
 	BT_u32	IMR;					//      0x10  -- Interrupt Mask register.
+#define ZYNQ_UART_IXR_TOUT			0x00000100		///< RX Timeout error interrupt
+#define ZYNQ_UART_IXR_PARITY		0x00000080		///< Parity error interrupt
+#define ZYNQ_UART_IXR_FRAMING		0x00000040		///< Framing error interrupt
+#define ZYNQ_UART_IXR_OVERRUN		0x00000020		///< Overrun error interrupt
+#define ZYNQ_UART_IXR_TXFULL		0x00000010		///< TX FIFO Full interrupt
+#define ZYNQ_UART_IXR_TXEMPTY		0x00000008		///< TX FIFO empty interrupt
+#define ZYNQ_UART_IXR_RXTRIG		0x00000001		///< RX FIFO trigger interrupt
+#define ZYNQ_UART_IXR_RXFULL		0x00000004		///< RX FIFO full interrupt
+#define ZYNQ_UART_IXR_RXEMPTY		0x00000002		///< RX FIFO empty interrupt
+
 	BT_u32	ISR;					//      0x14  -- Interrupt Status register.
 	BT_u32	BAUDGEN;				//      0x18  -- Baud rate generator.
 	BT_u32	RXTOUT;					//      0x1C  -- RX timeout register.
@@ -75,8 +99,5 @@ typedef struct _ZYNQ_UART_REGS {
 
 	BT_u32	TXTRIG;       			//      0x44  -- TX fifo level trigger register.
 } ZYNQ_UART_REGS;
-
-#define UART0						((ZYNQ_UART_REGS *) 0xE0000000)
-#define UART1						((ZYNQ_UART_REGS *) 0xE0001000)
 
 #endif
