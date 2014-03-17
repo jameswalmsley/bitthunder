@@ -256,7 +256,7 @@ static BT_ERROR net_task(BT_HANDLE hThread, void *pParam) {
 	BT_TaskletHighSchedule(&sm_tasklet);
 
 	while (1) {
-		BT_PendMutex(g_hMutex, 0);
+		BT_PendMutex(g_hMutex, BT_INFINITE_TIMEOUT);
 
 		struct bt_list_head *pos;
 		bt_list_for_each(pos, &g_interfaces) {
@@ -322,7 +322,7 @@ static BT_ERROR bt_net_manager_init() {
 	BT_ERROR Error = BT_ERR_NONE;
 
 	g_hMutex = BT_CreateMutex(&Error);
-	BT_PendMutex(g_hMutex, 0);
+	BT_PendMutex(g_hMutex, BT_INFINITE_TIMEOUT);
 
 	BT_THREAD_CONFIG oThreadConfig = {
 		.ulStackDepth = 256,
