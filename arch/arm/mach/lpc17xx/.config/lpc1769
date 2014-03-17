@@ -30,6 +30,31 @@ config MACH_FLASH_SIZE
 	hex
 	default 0x80000
 	
+config MACH_FLASH_SECTORS
+	int 
+	default 30
+
+config MACH_FLASH1_SECTORS
+	int 
+	default 16
+
+config MACH_FLASH2_SECTORS
+	int 
+	default 14
+	
+config MACH_FLASH1_PAGE_SIZE
+	int 
+	default 4096
+
+config MACH_FLASH2_PAGE_SIZE
+	int 
+	default 32768
+	
+config MACH_PROG_SIZE
+	int
+	default 256
+	
+	
 config MACH_SRAM_START
 	hex
 	default 0x10000000 
