@@ -7,12 +7,12 @@
 #include <bitthunder.h>
 #include <string.h>
 
-#define MAP_LOCK(map)	BT_kMutexPend(map->map_mutex, 0)
+#define MAP_LOCK(map)	BT_kMutexPend(map->map_mutex, BT_INFINITE_TIMEOUT)
 #define MAP_UNLOCK(map)	BT_kMutexRelease(map->map_mutex)
 
 static void *shared_mutex = NULL;	// Mutex required when modifying shared segment lists.
 
-#define SHARED_LOCK()	BT_kMutexPend(shared_mutex, 0)
+#define SHARED_LOCK()	BT_kMutexPend(shared_mutex, BT_INFINITE_TIMEOUT)
 #define SHARED_UNLOCK()	BT_kMutexRelease(shared_mutex)
 
 static struct bt_vm_map kernel_map;	// Kernels VM map.

@@ -70,7 +70,7 @@ void *FF_CreateSemaphore(void) {
 }
 
 void FF_PendSemaphore(void *pSemaphore) {
-	BT_kMutexPend(pSemaphore, 0);
+	BT_kMutexPend(pSemaphore, BT_INFINITE_TIMEOUT);
 }
 
 void FF_ReleaseSemaphore(void *pSemaphore) {
@@ -98,5 +98,3 @@ void FF_Sleep(FF_T_UINT32 TimeMs) {
  *
  *
  **/
-
-

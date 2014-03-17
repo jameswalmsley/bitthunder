@@ -391,7 +391,7 @@ static BT_ERROR qspi_irq(BT_u32 ulIRQ, void *pParam)
 			// do not use mutex inside an ISR!!
 
 			// spin_lock(qspi->config_reg_lock);
-			//BT_kMutexPend(qspi->pMutexConfigReg,0);
+			//BT_kMutexPend(qspi->pMutexConfigReg, BT_INFINITE_TIMEOUT);
 			config_reg = qspi->pRegs->CONFIG;
 			config_reg |= QSPI_CONFIG_MANSRT_MASK;
 			qspi->pRegs->CONFIG = config_reg;
@@ -531,7 +531,7 @@ xfer_start:
 //#endif
 //
 // 	BT_DisableInterrupt(hQspi->irq);
-// 	BT_kMutexPend(hQspi->pMutexTransfer,0);
+// 	BT_kMutexPend(hQspi->pMutexTransfer, BT_INFINITE_TIMEOUT);
 // 	hQspi->dev_busy = 1;
 //
 // 	/* Check if list is empty or queue is stopped */
@@ -651,7 +651,7 @@ BT_ERROR qspi_transfer(BT_HANDLE hQspi, BT_SPI_MESSAGE * message) {
 
 #if	(QSPI_USE_WORKQUEUE)
 	BT_DisableInterrupt(hQspi->irq);
-	BT_kMutexPend(hQspi->pMutexTransfer,0);
+	BT_kMutexPend(hQspi->pMutexTransfer, BT_INFINITE_TIMEOUT);
 	bt_list_add_tail(&message->queue, &qspi->queue);
 	if (!qspi->dev_busy)
 		queue_work(qspi->workqueue, &qspi->work);
@@ -723,7 +723,7 @@ BT_ERROR qspi_transfer(BT_HANDLE hQspi, BT_SPI_MESSAGE * message) {
 static inline int qspi_start_queue(BT_HANDLE hQspi)
 {
 	BT_DisableInterrupt(hQspi->irq);
-	BT_kMutexPend(hQspi->pMutexTransfer);
+	BT_kMutexPend(hQspi->pMutexTransfer, BT_INFINITE_TIMEOUT);
 
 	if (hQspi->queue_state == QSPI_QUEUE_RUNNING || hQspi->dev_busy) {
 		BT_kMutexRelease(hQspi->pMutexTransfer);
@@ -748,14 +748,14 @@ static inline int qspi_stop_queue(BT_HANDLE hQspi)
 		return ret;
 
 	BT_DisableInterrupt(hQspi->irq);
-	BT_kMutexPend(hQspi->pMutexTransfer);
+	BT_kMutexPend(hQspi->pMutexTransfer, BT_INFINITE_TIMEOUT);
 
 	while ((!bt_list_empty(&hQspi->queue) || hQspi->dev_busy) && limit--) {
 		BT_kMutexRelease(hQspi->pMutexTransfer);
 		BT_EnableInterrupt(hQspi->irq);
 		sys_msleep(10);
 		BT_DisableInterrupt(hQspi->irq);
-		BT_kMutexPend(hQspi->pMutexTransfer);
+		BT_kMutexPend(hQspi->pMutexTransfer, BT_INFINITE_TIMEOUT);
 	}
 
 	if (!bt_list_empty(&hQspi->queue) || hQspi->dev_busy)

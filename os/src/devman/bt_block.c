@@ -59,7 +59,7 @@ BT_u32 BT_BlockRead(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *p
 
 	const BT_IF_BLOCK *pOps = blkdev->hBlkDev->h.pIf->oIfs.pDevIF->pBlockIF;
 
-	BT_kMutexPend(blkdev->kMutex, 0);
+	BT_kMutexPend(blkdev->kMutex, BT_INFINITE_TIMEOUT);
 	BT_u32 ret = pOps->pfnReadBlocks(blkdev->hBlkDev, ulAddress, ulBlocks, pBuffer, pError);
 	BT_kMutexRelease(blkdev->kMutex);
 	return ret;
@@ -77,7 +77,7 @@ BT_u32 BT_BlockWrite(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *
 
 	const BT_IF_BLOCK *pOps = blkdev->hBlkDev->h.pIf->oIfs.pDevIF->pBlockIF;
 
-	BT_kMutexPend(blkdev->kMutex, 0);
+	BT_kMutexPend(blkdev->kMutex, BT_INFINITE_TIMEOUT);
 	BT_u32 ret = pOps->pfnWriteBlocks(blkdev->hBlkDev, ulAddress, ulBlocks, pBuffer, pError);
 	BT_kMutexRelease(blkdev->kMutex);
 

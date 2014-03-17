@@ -454,7 +454,7 @@ static BT_ERROR m25p80_erase(BT_HANDLE flash, BT_MTD_ERASE_INFO *instr)
 	addr = instr->addr;
 	len = instr->len;
 
-	BT_kMutexPend(flash->lock, 0);
+	BT_kMutexPend(flash->lock, BT_INFINITE_TIMEOUT);
 	/* whole-chip erase? */
 	if (len == flash->mtd.size) {
 		if (erase_chip(flash) != BT_ERR_NONE) {
@@ -567,7 +567,7 @@ static BT_ERROR m25p80_read_ext(BT_HANDLE flash, BT_u64 from, BT_u32 len, BT_u32
 
 #define OFFSET_16_MB 0x1000000
 
-	BT_kMutexPend(flash->lock, 0);
+	BT_kMutexPend(flash->lock, BT_INFINITE_TIMEOUT);
 
 	while (len) {
 		bank = addr / (OFFSET_16_MB << flash->shift);
@@ -709,7 +709,7 @@ static BT_ERROR m25p80_write_ext(BT_HANDLE flash, BT_u64 to, BT_u32 len, BT_u32 
 
 #define OFFSET_16_MB 0x1000000
 
-	BT_kMutexPend(flash->lock, 0);
+	BT_kMutexPend(flash->lock, BT_INFINITE_TIMEOUT);
 	while (len) {
 		bank = addr / (OFFSET_16_MB << flash->shift);
 		rem_bank_len = ((OFFSET_16_MB << flash->shift) * (bank + 1)) -
@@ -766,7 +766,7 @@ static BT_ERROR sst_write(BT_HANDLE flash, BT_u64 to, BT_u32 len, BT_u32 *retlen
 	t[1].tx_buf = buf;
 	BT_SpiMessageAddTail(&t[1], &m);
 
-	BT_kMutexPend(flash->lock, 0);
+	BT_kMutexPend(flash->lock, BT_INFINITE_TIMEOUT);
 
 	/* Wait until finished previous write command. */
 	ret = wait_till_ready(flash);
@@ -853,7 +853,7 @@ static BT_ERROR m25p80_lock(BT_HANDLE flash, BT_u64 ofs, BT_u64 len)
 	BT_u8 status_old, status_new;
 	BT_ERROR res = BT_ERR_NONE;
 
-	BT_kMutexPend(flash->lock, 0);
+	BT_kMutexPend(flash->lock, BT_INFINITE_TIMEOUT);
 	/* Wait until finished previous command */
 	if (wait_till_ready(flash) != BT_ERR_NONE) {
 		res = BT_ERR_BUSY;
@@ -899,7 +899,7 @@ static BT_ERROR m25p80_unlock(BT_HANDLE flash, BT_u64 ofs, BT_u64 len)
 	BT_u8 status_old, status_new;
 	BT_ERROR res = BT_ERR_NONE;
 
-	BT_kMutexPend(flash->lock, 0);
+	BT_kMutexPend(flash->lock, BT_INFINITE_TIMEOUT);
 
 	/* Wait until finished previous command */
 	if (wait_till_ready(flash) != BT_ERR_NONE) {

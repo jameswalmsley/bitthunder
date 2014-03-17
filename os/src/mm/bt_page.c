@@ -3,7 +3,7 @@
 
 void *g_page_mutex = NULL;
 
-#define BT_PAGE_LOCK()		if(g_page_mutex) BT_kMutexPend(g_page_mutex, 0)
+#define BT_PAGE_LOCK()		if(g_page_mutex) BT_kMutexPend(g_page_mutex, BT_INFINITE_TIMEOUT)
 #define BT_PAGE_UNLOCK()	if(g_page_mutex) BT_kMutexRelease(g_page_mutex)
 
 

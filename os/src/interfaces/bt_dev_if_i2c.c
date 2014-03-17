@@ -18,7 +18,7 @@ static BT_BOOL isI2CHandle(BT_HANDLE hI2C) {
 }
 
 BT_ERROR BT_I2C_LockBus(const BT_I2C_BUS *pBus) {
-	return BT_kMutexPend(pBus->pMutex, 0);
+	return BT_kMutexPend(pBus->pMutex, BT_INFINITE_TIMEOUT);
 }
 
 BT_ERROR BT_I2C_UnlockBus(const BT_I2C_BUS *pBus) {

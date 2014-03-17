@@ -269,7 +269,7 @@ BT_ERROR __BT_SpiSync(BT_SPI_DEVICE *pDevice, BT_SPI_MESSAGE *pMessage, BT_u32 b
 	pMessage->context = &done;
 
 	if (!bus_locked)
-		BT_kMutexPend(pDevice->pMaster->bus_item->bus_mutex,0);
+		BT_kMutexPend(pDevice->pMaster->bus_item->bus_mutex, BT_INFINITE_TIMEOUT);
 
 	status = BT_SpiAsync_locked(pDevice, pMessage);
 
@@ -295,7 +295,7 @@ BT_ERROR BT_SpiSync(BT_SPI_DEVICE *pDevice, BT_SPI_MESSAGE *pMessage)
 BT_ERROR BT_SpiBusLock(BT_SPI_MASTER *pMaster)
 {
 	if(pMaster && pMaster->bus_item->bus_mutex) {
-		BT_kMutexPend(pMaster->bus_item->bus_mutex,0);
+		BT_kMutexPend(pMaster->bus_item->bus_mutex, BT_INFINITE_TIMEOUT);
 		return BT_ERR_NONE;
 	}
 	return BT_ERR_INVALID_HANDLE;

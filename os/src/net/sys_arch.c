@@ -238,7 +238,7 @@ err_t sys_sem_new( sys_sem_t *pxSemaphore, u8_t ucCount ) {
 
 	if( *pxSemaphore != NULL ) {
 		if( ucCount == 0U ) {
-			BT_kMutexPend( *pxSemaphore, 0 );
+			BT_kMutexPend( *pxSemaphore, BT_INFINITE_TIMEOUT );
 		}
 		xReturn = ERR_OK;
 		SYS_STATS_INC_USED( sem );
@@ -290,7 +290,7 @@ u32_t sys_arch_sem_wait( sys_sem_t *pxSemaphore, u32_t ulTimeout ) {
 		}
 	}
 	else {
-		BT_kMutexPend( *pxSemaphore, 0);
+		BT_kMutexPend( *pxSemaphore, BT_INFINITE_TIMEOUT);
 		ulEndTime = BT_GetKernelTick();
 		ulElapsed = ( ulEndTime - ulStartTime );
 
@@ -323,7 +323,7 @@ err_t sys_mutex_new( sys_mutex_t *Mutex ) {
 /** Lock a mutex
  * @param mutex the mutex to lock */
 void sys_mutex_lock( sys_mutex_t *Mutex ) {
-	BT_kMutexPend( *Mutex, 0 );
+	BT_kMutexPend( *Mutex, BT_INFINITE_TIMEOUT );
 }
 
 /** Unlock a mutex
@@ -458,7 +458,7 @@ sys_thread_t sys_thread_new( const char *pcName, void( *pxThread )( void *pvPara
  *      sys_prot_t              -- Previous protection level (not used here)
  *---------------------------------------------------------------------------*/
 sys_prot_t sys_arch_protect( void ) {
-	BT_kMutexPendRecursive(g_pMutex, 0);
+	BT_kMutexPendRecursive(g_pMutex, BT_INFINITE_TIMEOUT);
 
 	return ( sys_prot_t ) 1;
 }

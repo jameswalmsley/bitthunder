@@ -299,7 +299,7 @@ retry:
 		}
 
 		// Wait on transfer complete signal.
-		BT_kMutexPend(hI2C->pMutex, 0);
+		BT_kMutexPend(hI2C->pMutex, BT_INFINITE_TIMEOUT);
 		hI2C->pRegs->INT_DISABLE = 0x000002FF;
 
 		if(hI2C->err_status & INT_MASK_ARB_LOST) {
@@ -386,7 +386,7 @@ static BT_HANDLE i2c_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 		goto err_free_int_out;
 	}
 
-	BT_kMutexPend(hI2C->pMutex, 0);
+	BT_kMutexPend(hI2C->pMutex, BT_INFINITE_TIMEOUT);
 
 	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_BUSID, 0);
 	if(!pResource) {

@@ -18,7 +18,7 @@
 #include <mm/bt_page.h>
 
 
-#define SLAB_LOCK(cache)	if(cache->slab_mutex) BT_kMutexPend(cache->slab_mutex, 0)
+#define SLAB_LOCK(cache)	if(cache->slab_mutex) BT_kMutexPend(cache->slab_mutex, BT_INFINITE_TIMEOUT)
 #define SLAB_UNLOCK(cache)	if(cache->slab_mutex) BT_kMutexRelease(cache->slab_mutex)
 
 #define BT_CACHE_FLAGS_OBJECT		0x00000001	///< Unset if standard allocation cache.
