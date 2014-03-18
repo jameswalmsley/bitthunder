@@ -86,9 +86,9 @@ static void spi_probe_devices(struct spi_bus_item *master) {
 
 		bt_list_add(&pSpiDevice->item, &master->pMaster->spidevices);
 	}
+out:
 #endif
 
-out:
 	BT_kPrint("All spi devices on bus probed");
 }
 
