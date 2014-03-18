@@ -24,29 +24,26 @@ struct _BT_OPAQUE_HANDLE {
 	BT_u32 mode_flags;
 };
 
-static BT_u32 mux_file_write(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer, BT_ERROR *pError) {
-
-	BT_ERROR Error;
+static BT_s32 mux_file_write(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer) {
 
 	struct bt_list_head *pos;
 	bt_list_for_each(pos, &hFile->handles) {
 		struct handle_item *item = (struct handle_item *) pos;
-		BT_Write(item->hHandle, hFile->mode_flags, ulSize, pBuffer, &Error);
-		if(pError && Error) if(!*pError) *pError = Error;
+		BT_s32 ret = BT_Write(item->hHandle, hFile->mode_flags, ulSize, pBuffer);
+		if(ret < 0) {
+			return ret;
+		}
 	}
 
 	return ulSize;
 }
 
-static BT_u32 mux_file_read(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
-
-	BT_ERROR Error;
+static BT_s32 mux_file_read(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer) {
 
 	struct bt_list_head *pos;
 	bt_list_for_each(pos, &hFile->handles) {
 		struct handle_item *item = (struct handle_item *) pos;
-		BT_u32 read = BT_Read(item->hHandle, hFile->mode_flags, ulSize, pBuffer, &Error);
-		if(pError && Error) if(!*pError) *pError = Error;
+		BT_s32 read = BT_Read(item->hHandle, hFile->mode_flags, ulSize, pBuffer);
 		if(read) {
 			return read;
 		}
@@ -61,7 +58,6 @@ static BT_IF_FILE mux_file_ops = {
 };
 
 static BT_u32 mux_cleanup(BT_HANDLE hFile) {
-	// @@AF: TODO
 	return BT_ERR_NONE;
 }
 
