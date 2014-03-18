@@ -23,7 +23,7 @@ static int bt_memcat(BT_HANDLE hShell, int argc, char **argv) {
 		return -1;
 	}
 
-	BT_Write(hFile, 0, length, p, &Error);
+	BT_Write(hFile, 0, length, p);
 
 	BT_CloseHandle(hFile);
 
