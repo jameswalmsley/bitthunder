@@ -116,12 +116,10 @@ static BT_HANDLE safe_open (const char *pathname,BT_u32 flags)
 
 static BT_ERROR safe_read (BT_HANDLE fd, const char *filename,void *buf, BT_u32 count, BT_BOOL verbose)
 {
-	BT_u64 result;
-	BT_ERROR Error;
+	BT_s32 result;
 
-	result = BT_Read(fd, 0, count, buf, &Error);
-
-	if (count != result)
+	result = BT_Read(fd, 0, count, buf);
+	if (result < 0 || count != result)
 	{
 		if (verbose) bt_fprintf (hStdout,"\n");
 		if (result == 0)
@@ -138,11 +136,10 @@ static BT_ERROR safe_read (BT_HANDLE fd, const char *filename,void *buf, BT_u32 
 static BT_ERROR safe_write(BT_HANDLE fd, const char *filename, void *buf, BT_u32 count, BT_BOOL verbose)
 {
 	BT_u64 result;
-	BT_ERROR Error;
 
-	result = BT_Write(fd, 0, count, buf, &Error);
+	result = BT_Write(fd, 0, count, buf);
 
-	if(count != result)
+	if(result < 0 || count != result)
 	{
 		if (verbose) bt_fprintf (hStdout, "\n");
 		if (result == 0)
@@ -615,4 +612,3 @@ BT_SHELL_COMMAND_DEF oCommand = {
 		.szpName	= "flashtool",
 		.pfnCommand = bt_flashtool,
 };
-

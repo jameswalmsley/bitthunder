@@ -30,10 +30,10 @@ static int bt_cp(BT_HANDLE hShell, int argc, char **argv) {
 		goto err_dest_out;
 	}
 
-	BT_u32 read = BT_Read(hSource, 0, BT_CONFIG_SHELL_CMD_CP_BUFFER_SIZE, buffer, &Error);
-	while(read) {
-		BT_Write(hDest, 0, read, buffer, &Error);
-		read = BT_Read(hSource, 0, BT_CONFIG_SHELL_CMD_CP_BUFFER_SIZE, buffer, &Error);
+	BT_s32 read = BT_Read(hSource, 0, BT_CONFIG_SHELL_CMD_CP_BUFFER_SIZE, buffer);
+	while(read > 0) {
+		BT_Write(hDest, 0, read, buffer);
+		read = BT_Read(hSource, 0, BT_CONFIG_SHELL_CMD_CP_BUFFER_SIZE, buffer);
 	}
 
 	BT_kFree(buffer);

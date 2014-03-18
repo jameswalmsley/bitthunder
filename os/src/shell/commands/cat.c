@@ -25,7 +25,7 @@ static int bt_cat(BT_HANDLE hShell, int argc, char **argv) {
 	}
 
 	BT_s32 c;
-	while((c = BT_GetC(hFile, 0, &Error)) >= 0) {
+	while((c = BT_GetC(hFile, 0)) >= 0) {
 		bt_fprintf(hStdout, "%c", c);
 	}
 

@@ -40,7 +40,7 @@ static int bt_load_fpga(BT_HANDLE hShell, int argc, char **argv) {
 
 	BT_kPrint("Loading %s at %08X (%llu bytes)", argv[3], addr, oInode.ullFileSize);
 
-	BT_Read(hFile, 0, oInode.ullFileSize, p, &Error);
+	BT_Read(hFile, 0, oInode.ullFileSize, p);
 
 	BT_kPrint("Load successful");
 
@@ -64,7 +64,7 @@ flush:
 		return -1;
 	}
 
-	BT_Write(hFPGA, 0, length, p, &Error);
+	BT_Write(hFPGA, 0, length, p);
 
 	BT_CloseHandle(hFPGA);
 

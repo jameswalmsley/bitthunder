@@ -30,7 +30,7 @@ static int bt_load_command(BT_HANDLE hShell, int argc, char **argv) {
 
 	void *p = (void *) addr;
 
-	BT_Read(hFile, 0, oInode.ullFileSize, p, &Error);
+	BT_Read(hFile, 0, oInode.ullFileSize, p);
 
 	BT_kPrint("Load successful");
 

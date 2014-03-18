@@ -36,7 +36,7 @@ static int bt_md5sum(BT_HANDLE hShell, int argc, char **argv) {
 		bt_md5_init(&ctx);
 
 		BT_u32 read;
-		while((read = BT_Read(hFile, 0, BUF_SIZE, buffer, &Error))) {
+		while((read = BT_Read(hFile, 0, BUF_SIZE, buffer))) {
 			bt_md5_append(&ctx, buffer, read);
 		}
 
