@@ -435,7 +435,6 @@ static BT_ERROR qspi_cleanup(BT_HANDLE hQspi)
 
 static BT_i32 qspi_start_transfer(BT_HANDLE qspi, BT_SPI_TRANSFER *transfer)
 {
-	BT_u32 config_reg;
 	BT_u32 data;
 	BT_u8 instruction = 0;
 	BT_u8 index;
