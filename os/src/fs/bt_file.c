@@ -41,92 +41,60 @@ static BT_BOOL flagsSupported(BT_HANDLE h, BT_u32 ulFlags) {
 	return BT_TRUE;
 }
 
-BT_u32 BT_Read(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
-
-	BT_ERROR Error;
-
-	if(!isHandleValid(hFile, &Error)) {
-		if(pError) {
-			*pError = Error;
-		}
-		return 0;
-	}
-
-	if(!flagsSupported(hFile, ulFlags)) {
-		if(pError) {
-			*pError = BT_ERR_UNSUPPORTED_FLAG;
-		}
-		return 0;
-	}
-
-	BT_u32 ret = hFile->h.pIf->pFileIF->pfnRead(hFile, ulFlags, ulSize, pBuffer, &Error);
-	if(pError) {
-		*pError = Error;
-	}
-
-	return ret;
-}
-
-BT_u32 BT_Write(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer, BT_ERROR *pError) {
-
-	BT_ERROR Error;
-
-	if(!isHandleValid(hFile, &Error)) {
-		if(pError) {
-			*pError = Error;
-		}
-		return 0;
-	}
-
-	if(!flagsSupported(hFile, ulFlags)) {
-		if(pError) {
-			*pError = BT_ERR_UNSUPPORTED_FLAG;
-		}
-		return 0;
-	}
-
-	BT_u32 ret = hFile->h.pIf->pFileIF->pfnWrite(hFile, ulFlags, ulSize, pBuffer, &Error);
-	if(pError) {
-		*pError = Error;
-	}
-
-	return ret;
-}
-
-BT_s32 BT_GetC(BT_HANDLE hFile, BT_u32 ulFlags, BT_ERROR *pError) {
+BT_s32 BT_Read(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer) {
 
 	BT_ERROR Error = BT_ERR_NONE;
 
-	if(!isHandleValid(hFile, pError)) {
-		return -1;
+	if(!isHandleValid(hFile, &Error)) {
+		return Error;
 	}
 
 	if(!flagsSupported(hFile, ulFlags)) {
-		if(pError) {
-			*pError = BT_ERR_UNSUPPORTED_FLAG;
-		}
-		return -1;
+		return BT_ERR_UNSUPPORTED_FLAG;
+	}
+
+	return hFile->h.pIf->pFileIF->pfnRead(hFile, ulFlags, ulSize, pBuffer);
+}
+
+BT_s32 BT_Write(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer) {
+
+	BT_ERROR Error = BT_ERR_NONE;
+
+	if(!isHandleValid(hFile, &Error)) {
+		return Error;
+	}
+
+	if(!flagsSupported(hFile, ulFlags)) {
+		return BT_ERR_UNSUPPORTED_FLAG;
+	}
+
+	return hFile->h.pIf->pFileIF->pfnWrite(hFile, ulFlags, ulSize, pBuffer);
+}
+
+BT_s32 BT_GetC(BT_HANDLE hFile, BT_u32 ulFlags) {
+
+	BT_ERROR Error = BT_ERR_NONE;
+
+	if(!isHandleValid(hFile, &Error)) {
+		return Error;
+	}
+
+	if(!flagsSupported(hFile, ulFlags)) {
+		return BT_ERR_UNSUPPORTED_FLAG;
 	}
 
 	if(hFile->h.pIf->pFileIF->pfnGetC) {
-
-		BT_s32 ret = hFile->h.pIf->pFileIF->pfnGetC(hFile, ulFlags, &Error);
-		if(pError) {
-			*pError = Error;
-		}
-		return ret;
+		return hFile->h.pIf->pFileIF->pfnGetC(hFile, ulFlags);
 	}
 
-	BT_u8 c;
-	Error = 0;
-	BT_u32 i = hFile->h.pIf->pFileIF->pfnRead(hFile, ulFlags, 1, &c, &Error);
-
-	if(pError) {
-		*pError = Error;
+	BT_u8 c = 0;
+	BT_s32 i = hFile->h.pIf->pFileIF->pfnRead(hFile, ulFlags, 1, &c);
+	if(i < 0) {
+		return i;
 	}
 
-	if(!i) {
-		return -1;
+	if(i != 1) {
+		return BT_ERR_GENERIC;
 	}
 
 	return c;
@@ -148,9 +116,7 @@ BT_ERROR BT_PutC(BT_HANDLE hFile, BT_u32 ulFlags, BT_i8 cData) {
 		return hFile->h.pIf->pFileIF->pfnPutC(hFile, ulFlags, cData);
 	}
 
-	hFile->h.pIf->pFileIF->pfnWrite(hFile, ulFlags, 1, &cData, &Error);
-
-	return Error;
+	return hFile->h.pIf->pFileIF->pfnWrite(hFile, ulFlags, 1, &cData);
 }
 
 BT_ERROR BT_Seek(BT_HANDLE hFile, BT_s64 ulOffset, BT_u32 whence) {
@@ -170,20 +136,27 @@ BT_ERROR BT_Seek(BT_HANDLE hFile, BT_s64 ulOffset, BT_u32 whence) {
 
 BT_u64 BT_Tell(BT_HANDLE hFile, BT_ERROR *pError) {
 
-	if(!isHandleValid(hFile, pError)) {
-		return 0;
+	BT_ERROR Error = BT_ERR_NONE;
+	BT_u64 tell = 0;
+
+	if(!isHandleValid(hFile, &Error)) {
+		goto err_out;
 	}
 
 	if(!hFile->h.pIf->pFileIF->pfnTell) {
-		if(pError) {
-			*pError = BT_ERR_UNSUPPORTED_INTERFACE;
-		}
-		return 0;
+		Error = BT_ERR_UNSUPPORTED_INTERFACE;
+		goto err_out;
 	}
 
-	return hFile->h.pIf->pFileIF->pfnTell(hFile);
-}
+	tell = hFile->h.pIf->pFileIF->pfnTell(hFile, &Error);
 
+err_out:
+	if(pError) {
+		*pError = Error;
+	}
+
+	return tell;
+}
 
 BT_BOOL BT_EOF(BT_HANDLE hFile, BT_ERROR *pError) {
 
@@ -214,7 +187,7 @@ BT_s32 BT_GetS(BT_HANDLE hFile, BT_u32 ulSize, BT_i8 *s) {
 	BT_s32 c = 0;
 
     t = s;
-    while (--ulSize>1 && (c=BT_GetC(hFile, 0, &Error)) != -1 && (c != '\n' && c != '\r')) {
+    while (--ulSize>1 && (c=BT_GetC(hFile, 0)) != -1 && (c != '\n' && c != '\r') && c >= 0) {
         *s++ = c;
 	}
 
