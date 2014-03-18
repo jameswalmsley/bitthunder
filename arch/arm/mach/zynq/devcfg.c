@@ -69,7 +69,7 @@ static void devcfg_reset_pl(BT_HANDLE hDevcfg) {
 /**
  *	This assumes a single write request will be generated.
  **/
-static BT_u32 devcfg_write(BT_HANDLE hDevcfg, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer, BT_ERROR *pError) {
+static BT_s32 devcfg_write(BT_HANDLE hDevcfg, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer) {
 
 	BT_u32 user_count = ulSize;
 
@@ -77,8 +77,7 @@ static BT_u32 devcfg_write(BT_HANDLE hDevcfg, BT_u32 ulFlags, BT_u32 ulSize, con
 	bt_paddr_t kmem = bt_page_alloc_coherent(kmem_size);
 	if(!kmem) {
 		BT_kPrint("xdevcfg: Cannot allocate memory.");
-		*pError = BT_ERR_NO_MEMORY;
-		return 0;
+		return BT_ERR_NO_MEMORY;
 	}
 
 	BT_u8 *buf = (BT_u8 *) bt_phys_to_virt(kmem);
@@ -158,7 +157,7 @@ static BT_u32 devcfg_write(BT_HANDLE hDevcfg, BT_u32 ulFlags, BT_u32 ulSize, con
 }
 
 
-static BT_u32 devcfg_read(BT_HANDLE hDevcfg, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
+static BT_s32 devcfg_read(BT_HANDLE hDevcfg, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer) {
 	return 0;
 }
 
