@@ -4,7 +4,7 @@
 
 
 BT_ERROR 	BT_EnumerateVolumes	(BT_BLKDEV_DESCRIPTOR *blk);
-BT_u32 		BT_VolumeRead		(BT_HANDLE hVolume, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError);
-BT_u32 		BT_VolumeWrite		(BT_HANDLE hVolume, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError);
+BT_s32 		BT_VolumeRead		(BT_HANDLE hVolume, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer);
+BT_s32 		BT_VolumeWrite		(BT_HANDLE hVolume, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer);
 
 #endif

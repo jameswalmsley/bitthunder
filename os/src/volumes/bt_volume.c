@@ -92,7 +92,7 @@ static void init_devfs_node(BT_HANDLE hVolume) {
 BT_ERROR BT_EnumerateVolumes(BT_BLKDEV_DESCRIPTOR *blk) {
 
 	BT_ERROR Error = BT_ERR_NONE;
-
+	BT_s32 ret;
 
 
 	BT_u8 *pMBR = BT_kMalloc(blk->oGeometry.ulBlockSize);
@@ -101,7 +101,13 @@ BT_ERROR BT_EnumerateVolumes(BT_BLKDEV_DESCRIPTOR *blk) {
 		goto err_out;
 	}
 
-	if(BT_BlockRead((BT_HANDLE) &blk->h, 0, 1, pMBR, &Error) != 1) {
+	ret = BT_BlockRead((BT_HANDLE) &blk->h, 0, 1, pMBR);
+	if(ret != 1) {
+		if(ret < 0) {
+			Error = ret;
+		} else {
+			Error = BT_ERR_GENERIC;
+		}
 		goto err_free_out;
 	}
 
@@ -171,26 +177,26 @@ err_out:
 }
 
 
-BT_u32 BT_VolumeRead(BT_HANDLE hVolume, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError) {
+BT_s32 BT_VolumeRead(BT_HANDLE hVolume, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer) {
 
 	if(hVolume->eType == BT_VOLUME_NORMAL) {
-		return BT_BlockRead((BT_HANDLE) hVolume->blkdev, ulAddress, ulBlocks, pBuffer, pError);
+		return BT_BlockRead((BT_HANDLE) hVolume->blkdev, ulAddress, ulBlocks, pBuffer);
 	}
 
 	BT_PARTITION *pPart = (BT_PARTITION *)  hVolume;
 
-	return BT_BlockRead((BT_HANDLE) hVolume->blkdev, ulAddress + pPart->ulBaseAddress, ulBlocks, pBuffer, pError);
+	return BT_BlockRead((BT_HANDLE) hVolume->blkdev, ulAddress + pPart->ulBaseAddress, ulBlocks, pBuffer);
 }
 
-BT_u32 BT_VolumeWrite(BT_HANDLE hVolume, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError) {
+BT_s32 BT_VolumeWrite(BT_HANDLE hVolume, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer) {
 
 	if(hVolume->eType == BT_VOLUME_NORMAL) {
-		return BT_BlockWrite((BT_HANDLE) hVolume->blkdev, ulAddress, ulBlocks, pBuffer, pError);
+		return BT_BlockWrite((BT_HANDLE) hVolume->blkdev, ulAddress, ulBlocks, pBuffer);
 	}
 
 	BT_PARTITION *pPart = (BT_PARTITION *)  hVolume;
 
-	return BT_BlockWrite((BT_HANDLE) hVolume->blkdev, ulAddress + pPart->ulBaseAddress, ulBlocks, pBuffer, pError);
+	return BT_BlockWrite((BT_HANDLE) hVolume->blkdev, ulAddress + pPart->ulBaseAddress, ulBlocks, pBuffer);
 }
 
 static BT_ERROR bt_volume_inode_cleanup(BT_HANDLE hVolume) {
