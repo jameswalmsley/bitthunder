@@ -112,7 +112,7 @@ typedef struct _BT_MTD_INFO {
 	const char *name;
 	int numeraseregions;
 	BT_MTD_ERASE_REGION_INFO *eraseregions;
-  
+
 	BT_HANDLE_HEADER hBlockdev;
 	BT_BLKDEV_DESCRIPTOR oBlock;
 
@@ -142,8 +142,8 @@ void mtd_erase_callback(BT_HANDLE hFlash, BT_MTD_ERASE_INFO *instr);
 
 BT_ERROR BT_MTD_RegisterDevice(BT_HANDLE hDevice, const BT_i8 *szpName, BT_MTD_INFO *mtd);
 BT_ERROR BT_MTD_Erase(BT_HANDLE hMTD, BT_MTD_ERASE_INFO *instr);
-BT_ERROR BT_MTD_Read(BT_HANDLE hMTD, BT_u64 from, BT_u32 len, BT_u32 *retlen, BT_u8 *buf);
-BT_ERROR BT_MTD_Write(BT_HANDLE hMTD, BT_u64 to, BT_u32 len, BT_u32 *retlen, const BT_u8 *buf);
+BT_s32 BT_MTD_Read(BT_HANDLE hMTD, BT_u64 from, BT_u32 len, BT_u8 *buf);
+BT_s32 BT_MTD_Write(BT_HANDLE hMTD, BT_u64 to, BT_u32 len, const BT_u8 *buf);
 BT_ERROR BT_MTD_GetUserInfo(BT_HANDLE hMTD, BT_MTD_USER_INFO * info);
 
 #endif /* BT_MTD_H_ */

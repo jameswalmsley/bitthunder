@@ -19,10 +19,8 @@ typedef struct _BT_MTD_ERASE_INFO {
 
 typedef struct {
 	BT_ERROR	(*pfnErase)		(BT_HANDLE hMtd, BT_MTD_ERASE_INFO *instr);
-	BT_ERROR	(*pfnRead)		(BT_HANDLE hMtd, BT_u64 from, BT_u32 len, BT_u32 *retlen, BT_u8 *buf);
-	BT_ERROR	(*pfnWrite)		(BT_HANDLE hMtd, BT_u64 to, BT_u32 len, BT_u32 *retlen, const BT_u8 *buf);
+	BT_s32		(*pfnRead)		(BT_HANDLE hMtd, BT_u64 address, BT_u32 len, BT_u8 *buf);
+	BT_s32		(*pfnWrite)		(BT_HANDLE hMtd, BT_u64 address, BT_u32 len, const BT_u8 *buf);
 } BT_DEV_IF_MTD;
 
 #endif
-
-

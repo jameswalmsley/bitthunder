@@ -49,32 +49,20 @@ static const BT_DEVFS_OPS mtd_devfs_ops = {
  *
  ********************************************************************************************/
 
-static BT_u32 mtdblock_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount, void *pBuffer, BT_ERROR *pError) {
+static BT_s32 mtdblock_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount, void *pBuffer) {
 	BT_MTD_INFO *mtd = (BT_MTD_INFO *) bt_container_of((BT_HANDLE_HEADER *) hBlock, BT_MTD_INFO, hBlockdev);
-	BT_ERROR ret;
-	BT_u32 retlen = 0;
 
-	if((ret = BT_MTD_Read((BT_HANDLE)mtd,
-							mtd->oBlock.oGeometry.ulBlockSize * ulBlock,
-							mtd->oBlock.oGeometry.ulBlockSize * ulCount,
-							&retlen, pBuffer )) != BT_ERR_NONE) {
-		if(pError)
-			*pError = ret;
-		return 0;
-	}
-
-	if(pError)
-		*pError = BT_ERR_NONE;
-
-	return ulCount;
+	return BT_MTD_Read((BT_HANDLE)mtd,
+					   mtd->oBlock.oGeometry.ulBlockSize * ulBlock,
+					   mtd->oBlock.oGeometry.ulBlockSize * ulCount,
+					   pBuffer);
 }
 
-static BT_u32 mtdblock_blockwrite(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount, void *buf, BT_ERROR *pError) {
+static BT_s32 mtdblock_blockwrite(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount, void *buf) {
 	BT_u8 *pBuffer = (BT_u8 *) buf;
 	BT_MTD_INFO *mtd = (BT_MTD_INFO *) bt_container_of((BT_HANDLE_HEADER *) hBlock, BT_MTD_INFO, hBlockdev);
 	BT_u32 retlen_total = 0;
-	BT_u32 retlen = 0;
-	BT_ERROR ret;
+	BT_s32 ret;
 	BT_u32 pos = ulBlock * mtd->oBlock.oGeometry.ulBlockSize;
 	BT_u32 len = ulCount * mtd->oBlock.oGeometry.ulBlockSize;
 	BT_u8 * write_cache = BT_kMalloc(mtd->erasesize);
@@ -97,15 +85,16 @@ static BT_u32 mtdblock_blockwrite(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCou
 				goto mtd_blockwrite_fail;
 			}
 
-			if((ret = BT_MTD_Write((BT_HANDLE)mtd, sect_start, size, &retlen, pBuffer)) != BT_ERR_NONE){
+			if((ret = BT_MTD_Write((BT_HANDLE)mtd, sect_start, size, pBuffer)) != size){
 				goto mtd_blockwrite_fail;
 			}
-			retlen_total += retlen;
+
+			retlen_total += ret;
 		}
 		else
 		{
 			// read
-			if((ret = BT_MTD_Read((BT_HANDLE)mtd, sect_start, mtd->erasesize, &retlen, write_cache)) != BT_ERR_NONE) {
+			if((ret = BT_MTD_Read((BT_HANDLE)mtd, sect_start, mtd->erasesize, write_cache)) != mtd->erasesize) {
 				goto mtd_blockwrite_fail;
 			}
 
@@ -122,9 +111,10 @@ static BT_u32 mtdblock_blockwrite(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCou
 			}
 
 			// write modified buffer to flash
-			if((ret = BT_MTD_Write((BT_HANDLE)mtd, sect_start, mtd->erasesize, &retlen, write_cache)) != BT_ERR_NONE) {
+			if((ret = BT_MTD_Write((BT_HANDLE)mtd, sect_start, mtd->erasesize, write_cache)) != mtd->erasesize) {
 				goto mtd_blockwrite_fail;
 			}
+
 			retlen_total += size;
 		}
 
@@ -133,21 +123,19 @@ static BT_u32 mtdblock_blockwrite(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCou
 		len -= size;
 	}
 
-	if(pError)
-		*pError = BT_ERR_NONE;
 	BT_kFree(write_cache);
+
 	return ulCount;
 
 mtd_blockwrite_fail:
-	if(pError)
-		*pError = ret;
 	BT_kFree(write_cache);
-	return retlen_total / mtd->oBlock.oGeometry.ulBlockSize;
+
+	return ret;
 }
 
 static const BT_IF_BLOCK mtdblock_blockdev_interface = {
-		mtdblock_blockread,
-		mtdblock_blockwrite,
+	.pfnReadBlocks 	= mtdblock_blockread,
+	.pfnWriteBlocks	= mtdblock_blockwrite,
 };
 
 static const BT_IF_DEVICE oDeviceInterface = {
@@ -291,8 +279,7 @@ void mtd_erase_callback(BT_HANDLE hFlash, BT_MTD_ERASE_INFO *instr)
  * Callers are supposed to pass a callback function and wait for it
  * to be called before writing to the block.
  */
-BT_ERROR BT_MTD_Erase(BT_HANDLE hMTD, BT_MTD_ERASE_INFO *instr)
-{
+BT_ERROR BT_MTD_Erase(BT_HANDLE hMTD, BT_MTD_ERASE_INFO *instr) {
 	BT_MTD_INFO *mtd = (BT_MTD_INFO *) hMTD;
 
 	if(instr->addr > mtd->size || instr->len > mtd->size - instr->addr)
@@ -319,16 +306,19 @@ BT_ERROR BT_MTD_Erase(BT_HANDLE hMTD, BT_MTD_ERASE_INFO *instr)
 }
 
 
-BT_ERROR BT_MTD_Read(BT_HANDLE hMTD, BT_u64 from, BT_u32 len, BT_u32 *retlen, BT_u8 *buf)
-{
+BT_s32 BT_MTD_Read(BT_HANDLE hMTD, BT_u64 from, BT_u32 len, BT_u8 *buf) {
 	BT_MTD_INFO *mtd = (BT_MTD_INFO *) hMTD;
 
 	BT_ERROR retcode;
-	*retlen = 0;
-	if(from < 0 || from > mtd->size || len > mtd->size - from)
+	BT_u32 retlen = 0;
+
+	if(from < 0 || from > mtd->size || len > mtd->size - from) {
 		return BT_ERR_INVALID_VALUE;
-	if(!len)
+	}
+
+	if(!len) {
 		return BT_ERR_NONE;
+	}
 
 	/*
 	 * In the absence of an error, drivers return a non-negative integer
@@ -338,26 +328,21 @@ BT_ERROR BT_MTD_Read(BT_HANDLE hMTD, BT_u64 from, BT_u32 len, BT_u32 *retlen, BT
 
 	if(mtd->isPartition) {
 		BT_MTD_PART * pPart = (BT_MTD_PART *) mtd;
-		return BT_IF_MTD_OPS(pPart->master->hMtd)->pfnRead(pPart->master->hMtd, from + pPart->offset, len, retlen, buf );
+		return BT_IF_MTD_OPS(pPart->master->hMtd)->pfnRead(pPart->master->hMtd, from + pPart->offset, len, buf);
 	}
 
-
-	retcode = BT_IF_MTD_OPS(mtd->hMtd)->pfnRead(mtd->hMtd, from, len, retlen, buf);
-	if(retcode != BT_ERR_NONE)
+	retcode = BT_IF_MTD_OPS(mtd->hMtd)->pfnRead(mtd->hMtd, from, len, buf);
+	if(retcode) {
 		return retcode;
+	}
 
-	//if(mtd->ecc_strength == 0)
-	//	return BT_ERR_GENERIC;
-
-	return retcode;
+	return retlen;
 }
 
 
-BT_ERROR BT_MTD_Write(BT_HANDLE hMTD, BT_u64 to, BT_u32 len, BT_u32 *retlen, const BT_u8 *buf)
-{
+BT_s32 BT_MTD_Write(BT_HANDLE hMTD, BT_u64 to, BT_u32 len, const BT_u8 *buf) {
 	BT_MTD_INFO *mtd = (BT_MTD_INFO *) hMTD;
 
-	*retlen = 0;
 	if(to < 0 || to > mtd->size || len > mtd->size - to)
 		return BT_ERR_INVALID_VALUE;
 	if(!(mtd->flags & BT_MTD_WRITEABLE))
@@ -367,10 +352,10 @@ BT_ERROR BT_MTD_Write(BT_HANDLE hMTD, BT_u64 to, BT_u32 len, BT_u32 *retlen, con
 
 	if(mtd->isPartition) {
 		BT_MTD_PART * pPart = (BT_MTD_PART *) mtd;
-		return BT_IF_MTD_OPS(pPart->master->hMtd)->pfnWrite(pPart->master->hMtd, to + pPart->offset, len, retlen, buf );
+		return BT_IF_MTD_OPS(pPart->master->hMtd)->pfnWrite(pPart->master->hMtd, to + pPart->offset, len, buf);
 	}
 
-	return BT_IF_MTD_OPS(mtd->hMtd)->pfnWrite(mtd->hMtd, to, len, retlen, buf);
+	return BT_IF_MTD_OPS(mtd->hMtd)->pfnWrite(mtd->hMtd, to, len, buf);
 }
 
 static BT_ERROR bt_mtd_cleanup(BT_HANDLE hMTD) {
@@ -385,25 +370,27 @@ static BT_ERROR bt_mtd_cleanup(BT_HANDLE hMTD) {
 	return BT_ERR_NONE;
 }
 
-static BT_u32 mtd_file_write(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer, BT_ERROR *pError) {
+static BT_s32 mtd_file_write(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer) {
 	BT_MTD_INFO *pInfo = (BT_MTD_INFO *) hFile;
-	BT_u32 len = 0;
-	BT_ERROR Error = BT_MTD_Write(hFile, pInfo->offset, ulSize, &len, pBuffer);
-	pInfo->offset += len;
-	*pError = Error;
-	return len;
+	BT_s32 ret = BT_MTD_Write(hFile, pInfo->offset, ulSize, pBuffer);
+	if(ret >= 0) {
+		pInfo->offset += ret;
+	}
+
+	return ret;
 }
 
-static BT_u32 mtd_file_read(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
+static BT_s32 mtd_file_read(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer) {
 	BT_MTD_INFO *pInfo = (BT_MTD_INFO *) hFile;
-	BT_u32 len = 0;
-	BT_ERROR Error = BT_MTD_Read(hFile, pInfo->offset, ulSize, &len, pBuffer);
-	pInfo->offset += len;
-	*pError = Error;
-	return len;
+	BT_s32 ret = BT_MTD_Read(hFile, pInfo->offset, ulSize, pBuffer);
+	if(ret >= 0 ) {
+		pInfo->offset += ret;
+	}
+
+	return ret;
 }
 
-static BT_u64 mtd_file_tell(BT_HANDLE hFile) {
+static BT_u64 mtd_file_tell(BT_HANDLE hFile, BT_ERROR *pError) {
 	BT_MTD_INFO *mtd = (BT_MTD_INFO *) hFile;
 	return mtd->offset;
 }
