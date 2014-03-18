@@ -512,15 +512,15 @@ BT_ERROR BT_Shell(BT_HANDLE hShell) {
 		do {
 			// print prompt
 			if(hShell->bPrintPrompt) {
-				BT_Write(hShell->hStdout, 0, hShell->ulPromptLen, (char *)hShell->szpPrompt, &Error);
+				BT_Write(hShell->hStdout, 0, hShell->ulPromptLen, (char *)hShell->szpPrompt);
 				hShell->bPrintPrompt = 0;
 			}
 			// get next char
-			BT_s32 c = BT_GetC(hShell->hStdin, BT_FILE_NON_BLOCK, &Error);
+			BT_s32 c = BT_GetC(hShell->hStdin, BT_FILE_NON_BLOCK);
 			if(c >= 0) {
 				if(c == '\r' || c == '\n') {
 					// cr or lf detected .. echo cr and lf
-					BT_Write(hShell->hStdout, 0, 2, "\r\n", NULL);
+					BT_Write(hShell->hStdout, 0, 2, "\r\n");
 					// zero terminate command buffer
 					hShell->cStdinBuf[hShell->ulStdinBufCnt] = 0;
 					// execute command
