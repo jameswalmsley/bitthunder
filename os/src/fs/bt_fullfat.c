@@ -50,18 +50,12 @@ static const BT_IF_HANDLE oInodeHandleInterface;
 
 static FF_T_SINT32 fullfat_readblocks(FF_T_UINT8 *pBuffer, FF_T_UINT32 Address, FF_T_UINT32 Count, void *pParam) {
 	BT_FF_MOUNT *pMount = (BT_FF_MOUNT *) pParam;
-	BT_ERROR Error;
-	BT_u32 ulRead = BT_VolumeRead(pMount->hVolume, Address, Count, pBuffer, &Error);
-
-	return (FF_T_SINT32) ulRead;
+	return (FF_T_SINT32) BT_VolumeRead(pMount->hVolume, Address, Count, pBuffer);
 }
 
 static FF_T_SINT32 fullfat_writeblocks(FF_T_UINT8 *pBuffer, FF_T_UINT32 Address, FF_T_UINT32 Count, void *pParam) {
 	BT_FF_MOUNT *pMount = (BT_FF_MOUNT *) pParam;
-	BT_ERROR Error;
-	BT_u32 ulWritten = BT_VolumeWrite(pMount->hVolume, Address, Count, pBuffer, &Error);
-
-	return (FF_T_SINT32) ulWritten;
+	return (FF_T_SINT32) BT_VolumeWrite(pMount->hVolume, Address, Count, pBuffer);
 }
 
 static BT_HANDLE fullfat_mount(BT_HANDLE hFS, BT_HANDLE hVolume, const void *data, BT_ERROR *pError) {
@@ -167,27 +161,22 @@ static BT_ERROR fullfat_file_cleanup(BT_HANDLE hFile) {
 	return BT_ERR_NONE;
 }
 
-static BT_u32 fullfat_read(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
-
+static BT_s32 fullfat_read(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer) {
 	BT_FF_FILE *pFile = (BT_FF_FILE *) hFile;
-
 	FF_T_SINT32 sRead = FF_Read(pFile->pFile, 1, ulSize, (FF_T_UINT8 *) pBuffer);
-	return (BT_u32) sRead;
+	return sRead;
 }
 
-static BT_u32 fullfat_write(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer, BT_ERROR *pError) {
+static BT_s32 fullfat_write(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer) {
 	BT_FF_FILE *pFile = (BT_FF_FILE *) hFile;
-
 	FF_T_SINT32 sWritten = FF_Write(pFile->pFile, 1, ulSize, (FF_T_UINT8 *) pBuffer);
-	return (BT_u32) sWritten;
+	return sWritten;
 }
 
-static BT_s32 fullfat_getc(BT_HANDLE hFile, BT_u32 ulFlags, BT_ERROR *pError) {
+static BT_s32 fullfat_getc(BT_HANDLE hFile, BT_u32 ulFlags) {
 
 	BT_FF_FILE *pFile = (BT_FF_FILE *) hFile;
-
 	FF_T_SINT32 ret = FF_GetC(pFile->pFile);
-
 	return ret;
 }
 
@@ -219,9 +208,11 @@ static BT_ERROR fullfat_seek(BT_HANDLE hFile, BT_s64 ulOffset, BT_u32 whence) {
 	return (BT_ERROR) ret;
 }
 
-static BT_u64 fullfat_tell(BT_HANDLE hFile) {
+static BT_u64 fullfat_tell(BT_HANDLE hFile, BT_ERROR *pError) {
 	BT_FF_FILE *pFile = (BT_FF_FILE *) hFile;
-
+	if(pError) {
+		*pError = BT_ERR_NONE;
+	}
 	return (BT_u64) FF_Tell(pFile->pFile);
 }
 
