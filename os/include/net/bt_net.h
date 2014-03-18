@@ -41,6 +41,7 @@ BT_ERROR BT_RegisterNetworkInterface(BT_HANDLE hIF);
 BT_BOOL BT_isNetworkingReady();
 
 BT_NET_IF *BT_GetNetif(const BT_i8 *name, BT_ERROR *pError);
+BT_NET_IF *BT_GetNetifFromHandle(BT_HANDLE hMac, BT_ERROR *pError);
 
 BT_ERROR BT_NetifGetMacAddress(BT_NET_IF *interface, BT_u8 *hwaddr, BT_u32 ulLength);
 BT_ERROR BT_NetifSetMacAddress(BT_NET_IF *interface, BT_u8 *hwaddr, BT_u32 ulLength);
@@ -71,5 +72,7 @@ BT_ERROR BT_StartNetif(BT_NET_IF *interface);
 BT_ERROR BT_StopNetif(BT_NET_IF *interface);
 
 BT_ERROR BT_NetifGetHostname(BT_NET_IF *interface, char *hostname);
+
+BT_ERROR bt_netif_adjust_link(BT_NET_IF *netif);
 
 #endif

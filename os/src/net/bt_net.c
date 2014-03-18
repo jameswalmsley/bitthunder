@@ -91,7 +91,7 @@ BT_ERROR BT_RegisterNetworkInterface(BT_HANDLE hIF) {
 static BT_NETIF_PRIV *find_netif(const BT_i8 *name) {
 	struct bt_list_head *pos;
 	bt_list_for_each(pos, &g_interfaces) {
-		BT_NETIF_PRIV *netif = bt_container_of(pos, BT_NETIF_PRIV, base);
+		BT_NETIF_PRIV *netif = (BT_NETIF_PRIV *) pos;
 		if(netif->base.smFlags & NET_IF_INITIALISED) {
 			if(!strcmp(netif->base.name, name)) {
 				return netif;
@@ -150,6 +150,8 @@ BT_ERROR bt_netif_adjust_link(BT_NET_IF *netif) {
 	} else {
 		bt_lwip_netif_up(pIF);
 	}
+
+	return BT_ERR_NONE;
 }
 
 BT_NET_IF *BT_GetNetifFromHandle(BT_HANDLE hMac, BT_ERROR *pError) {
@@ -215,6 +217,7 @@ BT_ERROR BT_NetifGetLinkState(BT_NET_IF *interface, struct bt_phy_linkstate *lin
 	linkstate->supported = interface->phy->supported;
 	linkstate->advertising = interface->phy->advertising;
 	linkstate->autoneg = interface->phy->autoneg;
+
 	return BT_ERR_NONE;
 }
 
@@ -222,7 +225,10 @@ BT_ERROR BT_NetifConfigureLink(BT_NET_IF *interface, struct bt_phy_config *confi
 	if(!interface->phy) {
 		return BT_ERR_GENERIC;
 	}
+
 	interface->phy->advertising_mask = config->advertising_disable;
+
+	return BT_ERR_NONE;
 }
 
 BT_ERROR BT_NetifRestartLink(BT_NET_IF *interface) {
@@ -296,7 +302,7 @@ static void net_manager_sm(void *pParam) {
 	bt_list_for_each(pos, &g_interfaces) {
 		BT_NETIF_PRIV *pIF = (BT_NETIF_PRIV*) pos;
 		if (pIF->base.smFlags & NET_IF_ADDED) {
-			pIF->base.hTxFifo = BT_FifoCreate(20, sizeof(void *), 0, &Error);
+			pIF->base.hTxFifo = BT_FifoCreate(20, sizeof(void *), &Error);
 
 			pIF->netif.state = pIF;
 			netifapi_netif_add(&pIF->netif, &ip_addr, &net_mask, &gw_addr, pIF,

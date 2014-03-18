@@ -378,7 +378,7 @@ static BT_BOOL phy_sm(struct bt_phy_device *phy) {
 
 		// Notify the netif and stack of link state change
 		BT_NET_IF *netif = BT_GetNetifFromHandle(phy->active_mac, &Error);
-		bt_netif_adjust_link(netif, phy);
+		bt_netif_adjust_link(netif);
 		break;
 	}
 

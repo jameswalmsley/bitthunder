@@ -164,12 +164,12 @@ int fcntl(int s, int cmd, int val) {
 }
 
 
-static BT_u32 socket_read(BT_HANDLE hSocket, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
-	return 0;
+static BT_s32 socket_read(BT_HANDLE hSocket, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer) {
+	return BT_ERR_GENERIC;
 }
 
-static BT_u32 socket_write(BT_HANDLE hSocket, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer, BT_ERROR *pError) {
-	return 0;
+static BT_s32 socket_write(BT_HANDLE hSocket, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer) {
+	return BT_ERR_GENERIC;
 }
 
 /**

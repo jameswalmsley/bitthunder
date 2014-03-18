@@ -45,7 +45,7 @@ static struct pbuf * read_packet(BT_NET_IF *pIF) {
 	SYS_ARCH_PROTECT(lev);
 
 	if (!BT_FifoIsEmpty(pIF->hTxFifo, &Error)) {
-		BT_FifoRead(pIF->hTxFifo, 1, &pBuf, &Error);
+		BT_FifoRead(pIF->hTxFifo, 1, &pBuf, 0);
 	}
 
 	/* Return to prior interrupt state and return the pbuf pointer. */
@@ -63,8 +63,7 @@ static struct pbuf * read_packet(BT_NET_IF *pIF) {
  */
 static BT_u32 write_packet(BT_NET_IF *pIF, struct pbuf *pBuf) {
 	SYS_ARCH_DECL_PROTECT(lev);
-	BT_u32 ulret;
-	BT_ERROR Error = BT_ERR_NONE;
+	BT_s32 ret;
 
 	/**
 	* This entire function must run within a "critical section" to preserve
@@ -75,11 +74,16 @@ static BT_u32 write_packet(BT_NET_IF *pIF, struct pbuf *pBuf) {
 	//BT_u32 pPointer = (BT_u32)pBuf;
 	void * pPointer = (void*)pBuf;
 
-	ulret = BT_FifoWrite(pIF->hTxFifo, 1, &pPointer, &Error);
+	ret = BT_FifoWrite(pIF->hTxFifo, 1, &pPointer, 0);
 
 	/* Return to prior interrupt state and return the pbuf pointer. */
 	SYS_ARCH_UNPROTECT(lev);
-	return(ulret);
+
+	if(ret < 0) {
+		return 0;
+	}
+
+	return(ret);
 }
 
 /**
