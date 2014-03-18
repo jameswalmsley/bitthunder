@@ -322,22 +322,18 @@ static void sd_manager_sm(void *pData) {
 	}
 }
 
-static BT_u32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount, void *pBuffer, BT_ERROR *pError) {
-
-	//BT_kPrint("SDCARD: BlockRead (%d[%d])", ulBlock, ulCount);
+static BT_s32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount, void *pBuffer) {
 
 	if(!hBlock->pHost->rca) {
-		// Card not initialised!
-		return 0;
+		return BT_ERR_GENERIC;
 	}
 
-	BT_u32 ulRead = 0;
+	BT_s32 slRead = 0;
 	BT_s32 nlRetryCount = 0;
 	BT_u32 ulStatus = 0;
 	BT_u32 ulState = 0;
 
-	while(1)
-	{
+	while(1) {
 		MMC_COMMAND oCommand;
 		oCommand.opcode 		= 13;
 		oCommand.arg 			= hBlock->pHost->rca << 16;
@@ -404,34 +400,28 @@ static BT_u32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount,
 		BT_u32 cmd17_response = oCommand.response[0];
 		if(cmd17_response != 0x900) {	// STATE = transfer, READY_FOR_DATA = set
 			BT_kPrint("SDCARD: Invalid CMD18 response");
-			return 0;
+			return BT_ERR_GENERIC;
 		}
 
-		//BT_kPrint("SDCARD: Read command complete, waiting for data");
-
-		// Read the data.
-
-		ulRead = hBlock->pHost->pOps->pfnRead(hBlock->pHost->hHost, ulCount, pBuffer, pError);
-		if(ulRead == ulCount) break;
+		slRead = hBlock->pHost->pOps->pfnRead(hBlock->pHost->hHost, ulCount, pBuffer);
+		if(slRead == ulCount || slRead < 0) break;
 
 		if(nlRetryCount++ >= 3) {
 			BT_kPrint("SDCARD: read block (%d,%d) fatal error!", ulBlock, ulCount);
+			return BT_ERR_GENERIC;
 			break;
 		} else {
 			BT_kPrint("SDCARD: read block (%d,%d) error, retrying (%d) ... ", ulBlock, ulCount, nlRetryCount);
 		}
 	}
 
-	return ulRead;
+	return slRead;
 }
 
-static BT_u32 sdcard_blockwrite(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount, void *pBuffer, BT_ERROR *pError) {
-
-	//BT_kPrint("SDCARD: BlockWrite (%d,%d)", ulBlock, ulCount);
+static BT_s32 sdcard_blockwrite(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount, void *pBuffer) {
 
 	if(!hBlock->pHost->rca) {
-		// Card not initialised!
-		return 0;
+		return BT_ERR_GENERIC;
 	}
 
 	MMC_COMMAND oCommand;
@@ -445,8 +435,6 @@ static BT_u32 sdcard_blockwrite(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount
 
 	BT_u32 ulStatus = oCommand.response[0];
 	BT_u32 ulState = (ulStatus >> 9) & 0xF;
-
-	//BT_kPrint("SDCARD: Status (%02x)", ulState);
 
 	switch(ulState) {
 
@@ -499,22 +487,16 @@ static BT_u32 sdcard_blockwrite(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount
 
 	BT_u32 cmd25_response = oCommand.response[0];
 	if(cmd25_response != 0x900) {	// STATE = transfer, READY_FOR_DATA = set
-		BT_kPrint("SDCARD: Invalid CMD25 response (0x%08x)",cmd25_response);
-		return 0;
+		BT_kPrint("SDCARD: Invalid CMD25 response (0x%08x)", cmd25_response);
+		return BT_ERR_GENERIC;
 	}
 
-	//BT_kPrint("SDCARD: Write command complete, writing data now");
-
-	// Write the data.
-
-	BT_u32 ulWritten = hBlock->pHost->pOps->pfnWrite(hBlock->pHost->hHost, ulCount, pBuffer, pError);
-
-	return ulWritten;
+	return hBlock->pHost->pOps->pfnWrite(hBlock->pHost->hHost, ulCount, pBuffer);
 }
 
 static const BT_IF_BLOCK sdcard_blockdev_interface = {
-	sdcard_blockread,
-	sdcard_blockwrite,
+	.pfnReadBlocks 	= sdcard_blockread,
+	.pfnWriteBlocks = sdcard_blockwrite,
 };
 
 static BT_ERROR sdcard_blockdev_cleanup(BT_HANDLE hHandle) {

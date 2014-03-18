@@ -213,7 +213,7 @@ static BT_ERROR sdhci_request(BT_HANDLE hSDIO, MMC_COMMAND *pCommand) {
 	return BT_ERR_NONE;
 }
 
-static BT_u32 sdhci_read(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError) {
+static BT_s32 sdhci_read(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer) {
 	register BT_u8 *p = (BT_u8 *) pBuffer;
 
 	BT_u32 ulRead = 0;
@@ -273,10 +273,10 @@ static BT_u32 sdhci_read(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer, BT_ERR
 		}
 	}
 
-	return ulRead;
+	return (BT_s32) ulRead;
 }
 
-static BT_u32 sdhci_write(BT_HANDLE hSDIO, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
+static BT_s32 sdhci_write(BT_HANDLE hSDIO, BT_u32 ulSize, void *pBuffer) {
 	register BT_u8 *p = (BT_u8 *) pBuffer;
 	BT_u32 ulWritten = 0;
 
@@ -311,7 +311,7 @@ static BT_u32 sdhci_write(BT_HANDLE hSDIO, BT_u32 ulSize, void *pBuffer, BT_ERRO
 
 	hSDIO->pRegs->NORMAL_INT_STATUS = NORMAL_INT_TRANSFER_COMPLETE;
 
-	return ulWritten;
+	return (BT_s32) ulWritten;
 }
 
 static BT_ERROR sdhci_event_subscribe(BT_HANDLE hSDIO, BT_MMC_CARD_EVENTRECEIVER pfnReceiver, MMC_HOST *pHost) {

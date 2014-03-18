@@ -42,8 +42,8 @@ typedef struct _BT_MMC_OPS {
 	BT_ERROR	(*pfnSetBlockSize)		(BT_HANDLE hSDIO, BT_u32 ulBlockSize);
 
 	BT_ERROR 	(*pfnRequest)			(BT_HANDLE hSDIO, MMC_COMMAND *pCommand);
-	BT_u32		(*pfnRead)				(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError);
-	BT_u32		(*pfnWrite)				(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError);
+	BT_s32		(*pfnRead)				(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer);
+	BT_s32		(*pfnWrite)				(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer);
 
 	BT_ERROR	(*pfnEnableClock)		(BT_HANDLE hSDIO);
 	BT_ERROR	(*pfnDisableClock)		(BT_HANDLE hSDIO);
