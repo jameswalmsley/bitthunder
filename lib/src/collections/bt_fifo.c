@@ -30,7 +30,7 @@ static BT_BOOL isFifoHandle(BT_HANDLE hFifo) {
 }
 
 
-BT_HANDLE BT_FifoCreate(BT_u32 ulElements, BT_u32 ulElementWidth, BT_u32 ulFlags, BT_ERROR *pError) {
+BT_HANDLE BT_FifoCreate(BT_u32 ulElements, BT_u32 ulElementWidth, BT_ERROR *pError) {
 
 	BT_HANDLE hFifo;
 	BT_ERROR Error = BT_ERR_NONE;
@@ -50,7 +50,6 @@ BT_HANDLE BT_FifoCreate(BT_u32 ulElements, BT_u32 ulElementWidth, BT_u32 ulFlags
 	}
 	hFifo->ulElementWidth = ulElementWidth;
 	hFifo->ulElements     = ulElements;
-	hFifo->ulFlags        = ulFlags;
 
 	return hFifo;
 
@@ -62,21 +61,20 @@ BT_HANDLE BT_FifoCreate(BT_u32 ulElements, BT_u32 ulElementWidth, BT_u32 ulFlags
 		return NULL;
 }
 
-BT_u32 BT_FifoWrite(BT_HANDLE hFifo, BT_u32 ulElements, const void *pData, BT_ERROR *pError) {
+BT_s32 BT_FifoWrite(BT_HANDLE hFifo, BT_u32 ulElements, const void *pData, BT_u32 ulFlags) {
 
 	BT_ERROR Error 		= BT_ERR_NONE;
 	const BT_u8 *pSrc 	= pData;
 	BT_u32 ulWritten 	= 0;
 
 	if(!isFifoHandle(hFifo)) {
-		Error = BT_ERR_INVALID_HANDLE_TYPE;
-		goto err_out;
+		return BT_ERR_INVALID_HANDLE_TYPE;
 	}
 
 	for(ulWritten = 0; ulWritten < ulElements; ulWritten++) {
 		// We should prevent overflow, and block!
-		if (hFifo->ulFlags & BT_FIFO_NONBLOCKING) {
-			if (BT_FifoIsFull(hFifo->oQueue,pError)) {
+		if (ulFlags & BT_FIFO_NONBLOCKING) {
+			if (BT_FifoIsFull(hFifo->oQueue, &Error)) {
 				break;
 			}
 		}
@@ -85,30 +83,24 @@ BT_u32 BT_FifoWrite(BT_HANDLE hFifo, BT_u32 ulElements, const void *pData, BT_ER
 		pSrc += hFifo->ulElementWidth;
 	}
 
-err_out:
-	if(pError) {
-		*pError = Error;
-	}
-
 	return ulWritten;
 }
 
-BT_u32 BT_FifoWriteFromISR(BT_HANDLE hFifo, BT_u32 ulElements, const void *pData, BT_ERROR *pError) {
+BT_s32 BT_FifoWriteFromISR(BT_HANDLE hFifo, BT_u32 ulElements, const void *pData) {
 
-	BT_ERROR Error 		= BT_ERR_NONE;
+	BT_ERROR Error = BT_ERR_NONE;
 	const BT_u8 *pSrc 	= pData;
 	BT_u32 ulWritten 	= 0;
 	BT_BOOL bHigherPriorityTaskWoken;
 
 	if(!isFifoHandle(hFifo)) {
-		Error = BT_ERR_INVALID_HANDLE_TYPE;
-		goto err_out;
+		return BT_ERR_INVALID_HANDLE_TYPE;
 	}
 
 	for(ulWritten = 0; ulWritten < ulElements; ulWritten++) {
 		// We should prevent overflow, and block!
 		if (hFifo->ulFlags & BT_FIFO_NONBLOCKING) {
-			if (BT_FifoIsFull(hFifo->oQueue,pError)) {
+			if (BT_FifoIsFull(hFifo->oQueue, &Error)) {
 				break;
 			}
 		}
@@ -117,29 +109,23 @@ BT_u32 BT_FifoWriteFromISR(BT_HANDLE hFifo, BT_u32 ulElements, const void *pData
 		pSrc += hFifo->ulElementWidth;
 	}
 
-err_out:
-	if(pError) {
-		*pError = Error;
-	}
-
 	return ulWritten;
 }
 
-BT_u32 BT_FifoRead(BT_HANDLE hFifo, BT_u32 ulElements, void *pData, BT_ERROR *pError) {
+BT_s32 BT_FifoRead(BT_HANDLE hFifo, BT_u32 ulElements, void *pData, BT_u32 ulFlags) {
 
 	BT_ERROR Error 	= BT_ERR_NONE;
 	BT_u8 *pSrc 	= pData;
 	BT_u32 ulRead 	= 0;
 
 	if(!isFifoHandle(hFifo)) {
-		Error = BT_ERR_INVALID_HANDLE_TYPE;
-		goto err_out;
+		return BT_ERR_INVALID_HANDLE_TYPE;
 	}
 
 	// Get bytes from RX buffer very quickly.
 	for(ulRead = 0; ulRead < ulElements; ulRead++) {
-		if(BT_FifoIsEmpty(hFifo, pError)) {
-			if (hFifo->ulFlags & BT_FIFO_NONBLOCKING) {
+		if(BT_FifoIsEmpty(hFifo, &Error)) {
+			if (ulFlags & BT_FIFO_NONBLOCKING) {
 				break;
 			}
 		}
@@ -147,15 +133,10 @@ BT_u32 BT_FifoRead(BT_HANDLE hFifo, BT_u32 ulElements, void *pData, BT_ERROR *pE
 		pSrc += hFifo->ulElementWidth;
 	}
 
-err_out:
-	if(pError) {
-		*pError = Error;
-	}
-
 	return ulRead;
 }
 
-BT_u32 BT_FifoReadFromISR(BT_HANDLE hFifo, BT_u32 ulElements, void *pData, BT_ERROR *pError) {
+BT_s32 BT_FifoReadFromISR(BT_HANDLE hFifo, BT_u32 ulElements, void *pData) {
 
 	BT_ERROR Error 	= BT_ERR_NONE;
 	BT_u8 *pSrc 	= pData;
@@ -163,23 +144,17 @@ BT_u32 BT_FifoReadFromISR(BT_HANDLE hFifo, BT_u32 ulElements, void *pData, BT_ER
 	BT_BOOL bHigherPriorityTaskWoken;
 
 	if(!isFifoHandle(hFifo)) {
-		Error = BT_ERR_INVALID_HANDLE_TYPE;
-		goto err_out;
+		return BT_ERR_INVALID_HANDLE_TYPE;
 	}
 
 	for(ulRead = 0; ulRead < ulElements; ulRead++) {
-		if(BT_FifoIsEmpty(hFifo, pError)) {
+		if(BT_FifoIsEmpty(hFifo, &Error)) {
 			if (hFifo->ulFlags & BT_FIFO_NONBLOCKING) {
 				break;
 			}
 		}
 		BT_QueueReceiveFromISR(hFifo->oQueue, pData, &bHigherPriorityTaskWoken);
 		pSrc += hFifo->ulElementWidth;
-	}
-
-err_out:
-	if(pError) {
-		*pError = Error;
 	}
 
 	return ulRead;
@@ -189,7 +164,6 @@ BT_BOOL BT_FifoIsEmpty(BT_HANDLE hFifo, BT_ERROR *pError) {
 
 	BT_ERROR Error = BT_ERR_NONE;
 	BT_u32 messages = 0;
-
 
 	if(!isFifoHandle(hFifo)) {
 		Error = BT_ERR_INVALID_HANDLE_TYPE;
@@ -227,41 +201,26 @@ err_out:
 }
 
 
-BT_u32 BT_FifoFillLevel(BT_HANDLE hFifo, BT_ERROR *pError) {
+BT_s32 BT_FifoFillLevel(BT_HANDLE hFifo) {
 
-	BT_ERROR Error = BT_ERR_NONE;
 	BT_u32 messages = 0;
 
 	if(!isFifoHandle(hFifo)) {
-		Error = BT_ERR_INVALID_HANDLE_TYPE;
-		goto err_out;
+		return BT_ERR_INVALID_HANDLE_TYPE;
 	}
 
 	messages = BT_QueueMessagesWaiting(hFifo->oQueue);
 
-err_out:
-	if(pError) {
-		*pError = Error;
-	}
-
 	return messages;
 }
 
-BT_u32 BT_FifoSize(BT_HANDLE hFifo, BT_ERROR *pError) {
-
-	BT_ERROR Error = BT_ERR_NONE;
+BT_s32 BT_FifoSize(BT_HANDLE hFifo) {
 
 	if(!isFifoHandle(hFifo)) {
-		Error = BT_ERR_INVALID_HANDLE_TYPE;
-		goto err_out;
+		return BT_ERR_INVALID_HANDLE_TYPE;
 	}
 
-err_out:
-	if (pError) {
-		*pError = Error;
-	}
-
-	return Error ? 0 : hFifo->ulElements;
+	return (BT_s32) hFifo->ulElements;
 }
 
 
@@ -269,7 +228,6 @@ static BT_ERROR fifo_cleanup(BT_HANDLE hFifo) {
 	BT_CloseHandle(hFifo->oQueue);
 	return BT_ERR_NONE;
 }
-
 
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
