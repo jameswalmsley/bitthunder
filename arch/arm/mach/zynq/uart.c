@@ -45,7 +45,7 @@ static BT_ERROR uart_irq_handler(BT_u32 ulIRQ, void *pParam) {
 		while(!(hUart->pRegs->SR & ZYNQ_UART_SR_RXEMPTY)) {
 			data = hUart->pRegs->FIFO;
 			BT_u8 ucData = (BT_u8) data;
-			BT_FifoWriteFromISR(hUart->hRxFifo, 1, &ucData, &Error);
+			BT_FifoWriteFromISR(hUart->hRxFifo, 1, &ucData);
 		}
 	}
 
@@ -60,7 +60,7 @@ static BT_ERROR uart_irq_handler(BT_u32 ulIRQ, void *pParam) {
 				}
 
 				BT_u8 ucData;
-				BT_FifoReadFromISR(hUart->hTxFifo, 1, &ucData, &Error);
+				BT_FifoReadFromISR(hUart->hTxFifo, 1, &ucData);
 				hUart->pRegs->FIFO = ucData;
 			}
 		}
@@ -71,7 +71,16 @@ static BT_ERROR uart_irq_handler(BT_u32 ulIRQ, void *pParam) {
 	return Error;
 }
 
+static BT_ERROR uart_disable(BT_HANDLE hUart);
+static BT_ERROR uart_enable(BT_HANDLE hUart);
+
 static BT_ERROR uart_cleanup(BT_HANDLE hUart) {
+
+	uart_disable(hUart);
+	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hUart->pDevice, BT_RESOURCE_IRQ, 0);
+
+	BT_DisableInterrupt(pResource->ulStart);
+	BT_UnregisterInterrupt(pResource->ulStart, uart_irq_handler, hUart);
 
 	// Free any buffers if used.
 	if(hUart->eMode == BT_UART_MODE_BUFFERED) {
@@ -83,15 +92,8 @@ static BT_ERROR uart_cleanup(BT_HANDLE hUart) {
 		}
 	}
 
-	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hUart->pDevice, BT_RESOURCE_IRQ, 0);
-	BT_UnregisterInterrupt(pResource->ulStart, uart_irq_handler, hUart);
-
 	return BT_ERR_NONE;
 }
-
-
-static BT_ERROR uart_disable(BT_HANDLE hUart);
-static BT_ERROR uart_enable(BT_HANDLE hUart);
 
 static BT_ERROR uart_set_baudrate(BT_HANDLE hUart, BT_u32 ulBaudrate) {
 	volatile ZYNQ_UART_REGS *pRegs = hUart->pRegs;
@@ -202,8 +204,8 @@ static BT_ERROR uart_set_config(BT_HANDLE hUart, BT_UART_CONFIG *pConfig) {
 		if(hUart->eMode != BT_UART_MODE_BUFFERED) {
 			if(!hUart->hRxFifo && !hUart->hTxFifo) {
 				hUart->eMode = BT_UART_MODE_BUFFERED;
-				hUart->hRxFifo = BT_FifoCreate(pConfig->ulRxBufferSize, 1, 0, &Error);
-				hUart->hTxFifo = BT_FifoCreate(pConfig->ulTxBufferSize, 1, 0, &Error);
+				hUart->hRxFifo = BT_FifoCreate(pConfig->ulRxBufferSize, 1, &Error);
+				hUart->hTxFifo = BT_FifoCreate(pConfig->ulTxBufferSize, 1, &Error);
 
 				const BT_RESOURCE *pResource = BT_GetIntegratedResource(hUart->pDevice, BT_RESOURCE_IRQ, 0);
 				BT_EnableInterrupt(pResource->ulStart);
@@ -256,8 +258,8 @@ static BT_ERROR uart_get_config(BT_HANDLE hUart, BT_UART_CONFIG *pConfig) {
 	InputClk /= ZYNQ_SLCR_CLK_CTRL_DIVISOR_VAL(pSLCR->UART_CLK_CTRL);
 
 	pConfig->ulBaudrate 	= (InputClk / pRegs->BAUDDIV);		// Clk / Divisor == ~Baudrate
-	pConfig->ulTxBufferSize = BT_FifoSize(hUart->hTxFifo, &Error);
-	pConfig->ulRxBufferSize = BT_FifoSize(hUart->hRxFifo, &Error);
+	pConfig->ulTxBufferSize = BT_FifoSize(hUart->hTxFifo);
+	pConfig->ulRxBufferSize = BT_FifoSize(hUart->hRxFifo);
 	pConfig->ucDataBits 	= 8;
 
 err_out:
@@ -266,10 +268,33 @@ err_out:
 	return Error;
 }
 
+static BT_ERROR uart_flush(BT_HANDLE hUart) {
+	BT_ERROR Error;
+	volatile ZYNQ_UART_REGS *pRegs = hUart->pRegs;
+
+	if(hUart->eMode == BT_UART_MODE_BUFFERED) {
+		// Empty the TX fifo's.
+		while(!BT_FifoIsEmpty(hUart->hTxFifo, &Error)) {
+			BT_ThreadYield();
+		}
+	}
+
+	while((pRegs->SR & ZYNQ_UART_SR_TXACTIVE) || !(pRegs->SR & ZYNQ_UART_SR_TXEMPTY)) {
+		BT_ThreadYield();
+	}
+
+	return BT_ERR_NONE;
+}
+
 static BT_ERROR uart_enable(BT_HANDLE hUart) {
 
+	//uart_flush(hUart);
+	/*while(!(hUart->pRegs->SR & ZYNQ_UART_SR_RXEMPTY)) {
+		volatile BT_u8 data = hUart->pRegs->FIFO;
+	}*/
+
 	hUart->pRegs->CR 	= ZYNQ_UART_CR_TXDIS | ZYNQ_UART_CR_RXDIS;
-	hUart->pRegs->CR 	= ZYNQ_UART_CR_TXRES | ZYNQ_UART_CR_RXRES;
+	hUart->pRegs->CR 	|= ZYNQ_UART_CR_TXRES | ZYNQ_UART_CR_RXRES;
 
 	BT_u32 status = hUart->pRegs->CR;
 
@@ -278,8 +303,17 @@ static BT_ERROR uart_enable(BT_HANDLE hUart) {
 	hUart->pRegs->RXTRIG	= 14;
 	hUart->pRegs->RXTOUT   	= 10;
 
-	hUart->pRegs->IER 	= ZYNQ_UART_IXR_TXEMPTY | ZYNQ_UART_IXR_RXTRIG | ZYNQ_UART_IXR_TOUT;
-	hUart->pRegs->IDR 	= ~(ZYNQ_UART_IXR_TXEMPTY | ZYNQ_UART_IXR_RXTRIG | ZYNQ_UART_IXR_TOUT);
+	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hUart->pDevice, BT_RESOURCE_IRQ, 0);
+
+	if(hUart->eMode == BT_UART_MODE_BUFFERED) {
+		hUart->pRegs->IER 	= ZYNQ_UART_IXR_TXEMPTY | ZYNQ_UART_IXR_RXTRIG | ZYNQ_UART_IXR_TOUT;
+		BT_EnableInterrupt(pResource->ulStart);
+	} else {
+		hUart->pRegs->IDR 	= ZYNQ_UART_IXR_TXEMPTY | ZYNQ_UART_IXR_RXTRIG | ZYNQ_UART_IXR_TOUT;
+		BT_DisableInterrupt(pResource->ulStart);
+	}
+
+
 
 	return BT_ERR_NONE;
 }
@@ -287,19 +321,21 @@ static BT_ERROR uart_enable(BT_HANDLE hUart) {
 static BT_ERROR uart_disable(BT_HANDLE hUart) {
 	volatile ZYNQ_UART_REGS *pRegs = hUart->pRegs;
 
+	hUart->pRegs->IDR = (ZYNQ_UART_IXR_TXEMPTY | ZYNQ_UART_IXR_RXTRIG | ZYNQ_UART_IXR_TOUT);
 	pRegs->CR |= ZYNQ_UART_CR_RXDIS | ZYNQ_UART_CR_TXDIS;
+
+	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hUart->pDevice, BT_RESOURCE_IRQ, 0);
+	BT_DisableInterrupt(pResource->ulStart);
 
 	return BT_ERR_NONE;
 }
 
-static BT_u32 uart_read(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
-
-	BT_ERROR Error = BT_ERR_NONE;
+static BT_s32 uart_read(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer) {
 
 	BT_u8 *pucDest = (BT_u8 *) pBuffer;
-	BT_u32 read = 0;
+	BT_s32 read = 0;
 	volatile ZYNQ_UART_REGS *pRegs = hUart->pRegs;
-	if(pError) *pError = BT_ERR_NONE;
+
 	switch(hUart->eMode) {
 	case BT_UART_MODE_POLLED:
 	{
@@ -320,7 +356,7 @@ static BT_u32 uart_read(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, void *pB
 
 	case BT_UART_MODE_BUFFERED:
 	{
-		read = BT_FifoRead(hUart->hRxFifo, ulSize, pBuffer, &Error);
+		read = BT_FifoRead(hUart->hRxFifo, ulSize, pBuffer, ulFlags);
 		break;
 	}
 
@@ -328,10 +364,12 @@ static BT_u32 uart_read(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, void *pB
 		// ERR, invalid handle configuration.
 		break;
 	}
+
+
 	return read;
 }
 
-static BT_u32 uart_write(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer, BT_ERROR *pError) {
+static BT_s32 uart_write(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer) {
 
 	BT_ERROR Error = BT_ERR_NONE;
 	BT_u32 ulWritten = 0;
@@ -357,7 +395,7 @@ static BT_u32 uart_write(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const v
 		const BT_u8 *pData = (BT_u8 *) pBuffer;
 		do {
 			while(!BT_FifoIsFull(hUart->hTxFifo, &Error)) {
-				BT_FifoWrite(hUart->hTxFifo, 1, pData++, &Error);
+				BT_FifoWrite(hUart->hTxFifo, 1, pData++, 0);
 				ulWritten++;
 				if(ulWritten >= ulSize) {
 					break;
@@ -367,7 +405,7 @@ static BT_u32 uart_write(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const v
 			// Trigger TX
 			while(!BT_FifoIsEmpty(hUart->hTxFifo, &Error) && !(hUart->pRegs->SR & ZYNQ_UART_SR_TXFULL)) {
 				BT_u8 ucData;
-				BT_FifoRead(hUart->hTxFifo, 1, &ucData, &Error);
+				BT_FifoRead(hUart->hTxFifo, 1, &ucData, ulFlags);
 				hUart->pRegs->FIFO = ucData;
 			}
 
@@ -380,7 +418,7 @@ static BT_u32 uart_write(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const v
 				break;
 			}
 
-			BT_FifoWrite(hUart->hTxFifo, 1, pData++, &Error);
+			BT_FifoWrite(hUart->hTxFifo, 1, pData++, 0);
 			ulWritten++;
 
 		} while(ulWritten < ulSize);
@@ -391,29 +429,7 @@ static BT_u32 uart_write(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const v
 		break;
 	}
 
-	if(pError) {
-		*pError = BT_ERR_NONE;
-	}
-
 	return ulWritten;
-}
-
-static BT_ERROR uart_flush(BT_HANDLE hUart) {
-	BT_ERROR Error;
-	volatile ZYNQ_UART_REGS *pRegs = hUart->pRegs;
-
-	if(hUart->eMode == BT_UART_MODE_BUFFERED) {
-		// Empty the TX fifo's.
-		while(!BT_FifoIsEmpty(hUart->hTxFifo, &Error)) {
-			BT_ThreadYield();
-		}
-	}
-
-	while((pRegs->SR & ZYNQ_UART_SR_TXACTIVE) || !(pRegs->SR & ZYNQ_UART_SR_TXEMPTY)) {
-		BT_ThreadYield();
-	}
-
-	return BT_ERR_NONE;
 }
 
 static const BT_DEV_IF_UART oUartConfigInterface = {
@@ -491,6 +507,8 @@ static BT_HANDLE uart_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErro
 	if(Error) {
 		goto err_free_out;
 	}
+
+	uart_disable(hUart);
 
 	Error = BT_EnableInterrupt(pResource->ulStart);
 	if(Error) {
