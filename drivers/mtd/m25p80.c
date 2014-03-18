@@ -120,8 +120,8 @@ struct _BT_OPAQUE_HANDLE {
 	BT_u8			 dummycount;
 
 	BT_ERROR (*_erase) 	(BT_HANDLE flash, BT_MTD_ERASE_INFO *instr);
-	BT_ERROR (*_read) 	(BT_HANDLE flash, BT_u64 from, BT_u32 len, BT_u32 *retlen, BT_u8 *buf);
-	BT_ERROR (*_write) 	(BT_HANDLE flash, BT_u64 to, BT_u32 len, BT_u32 *retlen, const BT_u8 *buf);
+	BT_s32	 (*_read) 	(BT_HANDLE flash, BT_u64 from, BT_u32 len, BT_u8 *buf);
+	BT_s32 	 (*_write) 	(BT_HANDLE flash, BT_u64 to, BT_u32 len, const BT_u8 *buf);
 	BT_ERROR (*_lock) 	(BT_HANDLE flash, BT_u64 ofs, BT_u64 len);
 	BT_ERROR (*_unlock) (BT_HANDLE flash, BT_u64 ofs, BT_u64 len);
 };
@@ -134,8 +134,7 @@ struct _BT_OPAQUE_HANDLE {
  * Read register, returning its value in the location
  * Returns negative if error occurred.
  */
-static inline BT_i32 read_spi_reg(BT_HANDLE flash, BT_u8 code, const char * name)
-{
+static inline BT_i32 read_spi_reg(BT_HANDLE flash, BT_u8 code, const char * name) {
 	BT_ERROR retval;
 	BT_u8 val;
 
@@ -153,8 +152,7 @@ static inline BT_i32 read_spi_reg(BT_HANDLE flash, BT_u8 code, const char * name
  * Return flag status register value.
  * Returns negative if error occurred.
  */
-static BT_i32 read_fsr(BT_HANDLE flash)
-{
+static BT_i32 read_fsr(BT_HANDLE flash) {
 	return read_spi_reg(flash, OPCODE_RDFSR, "FSR");
 }
 
@@ -163,8 +161,7 @@ static BT_i32 read_fsr(BT_HANDLE flash)
  * Return the status register value.
  * Returns negative if error occurred.
  */
-static BT_i32 read_sr(BT_HANDLE flash)
-{
+static BT_i32 read_sr(BT_HANDLE flash) {
 	return read_spi_reg(flash, OPCODE_RDSR, "SR");
 }
 
@@ -172,8 +169,7 @@ static BT_i32 read_sr(BT_HANDLE flash)
  * Write status register 1 byte
  * Returns negative if error occurred.
  */
-static BT_ERROR write_sr(BT_HANDLE flash, BT_u8 val)
-{
+static BT_ERROR write_sr(BT_HANDLE flash, BT_u8 val) {
 	flash->command[0] = OPCODE_WRSR;
 	flash->command[1] = val;
 
@@ -184,8 +180,7 @@ static BT_ERROR write_sr(BT_HANDLE flash, BT_u8 val)
  * Set write enable latch with Write Enable command.
  * Returns negative if error occurred.
  */
-static inline BT_ERROR write_enable(BT_HANDLE flash)
-{
+static inline BT_ERROR write_enable(BT_HANDLE flash) {
 	BT_u8	code = OPCODE_WREN;
 	return BT_SpiWriteThenRead(flash->pSpi, &code, 1, NULL, 0);
 }
@@ -193,8 +188,7 @@ static inline BT_ERROR write_enable(BT_HANDLE flash)
 /*
  * Send write disble instruction to the chip.
  */
-static inline BT_ERROR write_disable(BT_HANDLE flash)
-{
+static inline BT_ERROR write_disable(BT_HANDLE flash) {
 	BT_u8	code = OPCODE_WRDI;
 	return BT_SpiWriteThenRead(flash->pSpi, &code, 1, NULL, 0);
 }
@@ -203,8 +197,7 @@ static inline BT_ERROR write_disable(BT_HANDLE flash)
  * Service routine to read status register until ready, or timeout occurs.
  * Returns non-zero if error.
  */
-static BT_ERROR wait_till_ready(BT_HANDLE flash)
-{
+static BT_ERROR wait_till_ready(BT_HANDLE flash) {
 	int sr, fsr;
 	int retry = 48000;
 
@@ -233,8 +226,7 @@ static BT_ERROR wait_till_ready(BT_HANDLE flash)
 	return BT_ERR_BUSY;
 }
 
-static BT_ERROR poll_till_ready(BT_HANDLE flash)
-{
+static BT_ERROR poll_till_ready(BT_HANDLE flash) {
 	int sr;
 	do {
 		if((sr = read_sr(flash)) < 0)
@@ -246,8 +238,7 @@ static BT_ERROR poll_till_ready(BT_HANDLE flash)
 /*
  * Enable/disable 4-byte addressing mode.
  */
-static BT_ERROR set_4byte(BT_HANDLE flash, BT_u32 jedec_id, BT_u32 enable)
-{
+static BT_ERROR set_4byte(BT_HANDLE flash, BT_u32 jedec_id, BT_u32 enable) {
 	BT_ERROR ret;
 	BT_u8 val;
 
@@ -295,8 +286,7 @@ static BT_ERROR set_4byte(BT_HANDLE flash, BT_u32 jedec_id, BT_u32 enable)
  * Update Extended Address/bank selection Register.
  * Call with flash->lock locked.
  */
-static BT_ERROR write_ear(BT_HANDLE flash, BT_u32 addr)
-{
+static BT_ERROR write_ear(BT_HANDLE flash, BT_u32 addr) {
 	BT_u8 ear;
 	int ret;
 
@@ -333,8 +323,7 @@ static BT_ERROR write_ear(BT_HANDLE flash, BT_u32 addr)
 	return BT_ERR_NONE;
 }
 
-void erase_callback_internal(BT_HANDLE hFlash, BT_MTD_ERASE_INFO * info)
-{
+void erase_callback_internal(BT_HANDLE hFlash, BT_MTD_ERASE_INFO * info) {
 	//unsigned long deadline;
 	int sr;
 	BT_HANDLE flash = hFlash;
@@ -357,8 +346,7 @@ void erase_callback_internal(BT_HANDLE hFlash, BT_MTD_ERASE_INFO * info)
  *
  * Returns 0 if successful, non-zero otherwise.
  */
-static BT_ERROR erase_chip(BT_HANDLE flash)
-{
+static BT_ERROR erase_chip(BT_HANDLE flash) {
 	/* Wait until finished previous write command. */
 	if (wait_till_ready(flash) != BT_ERR_NONE)
 		return BT_ERR_BUSY;
@@ -392,8 +380,7 @@ static BT_ERROR erase_chip(BT_HANDLE flash)
 	return BT_ERR_NONE;
 }
 
-static void m25p_addr2cmd(BT_HANDLE flash, BT_u32 addr, BT_u8 *cmd)
-{
+static void m25p_addr2cmd(BT_HANDLE flash, BT_u32 addr, BT_u8 *cmd) {
 	int i;
 
 	/* opcode is in cmd[0] */
@@ -401,8 +388,7 @@ static void m25p_addr2cmd(BT_HANDLE flash, BT_u32 addr, BT_u8 *cmd)
 		cmd[i] = addr >> (flash->addr_width * 8 - i * 8);
 }
 
-static int m25p_cmdsz(BT_HANDLE flash)
-{
+static int m25p_cmdsz(BT_HANDLE flash) {
 	return 1 + flash->addr_width;
 }
 
@@ -412,8 +398,7 @@ static int m25p_cmdsz(BT_HANDLE flash)
  *
  * Returns 0 if successful, non-zero otherwise.
  */
-static BT_ERROR erase_sector(BT_HANDLE flash, BT_u32 offset)
-{
+static BT_ERROR erase_sector(BT_HANDLE flash, BT_u32 offset) {
 	/* Wait until finished previous write command. */
 	if (wait_till_ready(flash) != BT_ERR_NONE)
 		return BT_ERR_BUSY;
@@ -442,8 +427,7 @@ static BT_ERROR erase_sector(BT_HANDLE flash, BT_u32 offset)
  * Erase an address range on the flash chip.  The address range may extend
  * one or more erase sectors.  Return an error is there is a problem erasing.
  */
-static BT_ERROR m25p80_erase(BT_HANDLE flash, BT_MTD_ERASE_INFO *instr)
-{
+static BT_ERROR m25p80_erase(BT_HANDLE flash, BT_MTD_ERASE_INFO *instr) {
 	BT_MTD_INFO * mtd = &flash->mtd;
 	BT_u32 addr, len, offset;
 	BT_u32 rem = instr->len % mtd->erasesize;
@@ -508,8 +492,7 @@ static BT_ERROR m25p80_erase(BT_HANDLE flash, BT_MTD_ERASE_INFO *instr)
  * Read an address range from the flash chip.  The address range
  * may be any size provided it is within the physical boundaries.
  */
-static BT_ERROR m25p80_read(BT_HANDLE flash, BT_u64 from, BT_u32 len, BT_u32 *retlen, BT_u8 *buf)
-{
+static BT_s32 m25p80_read(BT_HANDLE flash, BT_u64 from, BT_u32 len, BT_u8 *buf) {
 	BT_SPI_TRANSFER t[2];
 	BT_SPI_MESSAGE m;
 
@@ -549,18 +532,15 @@ static BT_ERROR m25p80_read(BT_HANDLE flash, BT_u64 from, BT_u32 len, BT_u32 *re
 	BT_SpiSync(flash->pSpi, &m);
 
 	//*retlen = m.actual_length - m25p_cmdsz(flash) - (flash->fast_read ? 1 : 0);
-	*retlen = m.actual_length - m25p_cmdsz(flash) - flash->dummycount;
-
-	return BT_ERR_NONE;
+	return m.actual_length - m25p_cmdsz(flash) - flash->dummycount;
 }
 
 
-static BT_ERROR m25p80_read_ext(BT_HANDLE flash, BT_u64 from, BT_u32 len, BT_u32 *retlen, BT_u8 *buf)
-{
+static BT_s32 m25p80_read_ext(BT_HANDLE flash, BT_u64 from, BT_u32 len, BT_u8 *buf) {
 	BT_u32 addr = from;
 	BT_u32 offset = from;
 	BT_u32 read_len = 0;
-	BT_u32 actual_len = 0;
+	BT_s32 actual_len = 0;
 	BT_u32 read_count = 0;
 	BT_u32 rem_bank_len = 0;
 	BT_u8 bank = 0;
@@ -590,7 +570,10 @@ static BT_ERROR m25p80_read_ext(BT_HANDLE flash, BT_u64 from, BT_u32 len, BT_u32
 		else
 			read_len = rem_bank_len;
 
-		m25p80_read(flash, offset, read_len, &actual_len, buf);
+		actual_len = m25p80_read(flash, offset, read_len, buf);
+		if(actual_len < 0) {
+			break;
+		}
 
 		addr += actual_len;
 		len -= actual_len;
@@ -598,18 +581,20 @@ static BT_ERROR m25p80_read_ext(BT_HANDLE flash, BT_u64 from, BT_u32 len, BT_u32
 		read_count += actual_len;
 	}
 
-	*retlen = read_count;
-
 	BT_kMutexRelease(flash->lock);
-	return BT_ERR_NONE;
+
+	if(actual_len < 0) {
+		return actual_len;
+	}
+
+	return read_count;
 }
 
-static BT_ERROR mtd_read_wrapper(BT_HANDLE flash, BT_u64 from, BT_u32 len, BT_u32 *retlen, BT_u8 *buf)
-{
+static BT_s32 mtd_read_wrapper(BT_HANDLE flash, BT_u64 from, BT_u32 len, BT_u8 *buf) {
 	if(!flash->_read)
 		return BT_ERR_INVALID_HANDLE;
 
-	return flash->_read(flash, from, len, retlen, buf);
+	return flash->_read(flash, from, len, buf);
 }
 
 /*
@@ -617,11 +602,11 @@ static BT_ERROR mtd_read_wrapper(BT_HANDLE flash, BT_u64 from, BT_u32 len, BT_u3
  * FLASH_PAGESIZE chunks.  The address range may be any size provided
  * it is within the physical boundaries.
  */
-static BT_ERROR m25p80_write(BT_HANDLE flash, BT_u64 to, BT_u32 len, BT_u32 *retlen, const BT_u8 *buf)
-{
+static BT_s32 m25p80_write(BT_HANDLE flash, BT_u64 to, BT_u32 len, const BT_u8 *buf) {
 	BT_u32 page_offset, page_size;
 	BT_SPI_TRANSFER t[2];
 	BT_SPI_MESSAGE m;
+	BT_s32 retlen = 0;
 
 	BT_SpiMessageInit(&m);
 	memset(t, 0, (sizeof t));
@@ -652,7 +637,7 @@ static BT_ERROR m25p80_write(BT_HANDLE flash, BT_u64 to, BT_u32 len, BT_u32 *ret
 
 		BT_SpiSync(flash->pSpi, &m);
 
-		*retlen = m.actual_length - m25p_cmdsz(flash);
+		retlen = m.actual_length - m25p_cmdsz(flash);
 	} else {
 		BT_u32 i;
 
@@ -662,7 +647,7 @@ static BT_ERROR m25p80_write(BT_HANDLE flash, BT_u64 to, BT_u32 len, BT_u32 *ret
 		t[1].len = page_size;
 		BT_SpiSync(flash->pSpi, &m);
 
-		*retlen = m.actual_length - m25p_cmdsz(flash);
+		retlen = m.actual_length - m25p_cmdsz(flash);
 
 		/* write everything in flash->page_size chunks */
 		for (i = page_size; i < len; i += page_size) {
@@ -690,19 +675,18 @@ static BT_ERROR m25p80_write(BT_HANDLE flash, BT_u64 to, BT_u32 len, BT_u32 *ret
 
 			BT_SpiSync(flash->pSpi, &m);
 
-			*retlen += m.actual_length - m25p_cmdsz(flash);
+			retlen += m.actual_length - m25p_cmdsz(flash);
 		}
 	}
 
-	return BT_ERR_NONE;
+	return retlen;
 }
 
-static BT_ERROR m25p80_write_ext(BT_HANDLE flash, BT_u64 to, BT_u32 len, BT_u32 *retlen, const BT_u8 *buf)
-{
+static BT_s32 m25p80_write_ext(BT_HANDLE flash, BT_u64 to, BT_u32 len, const BT_u8 *buf) {
 	BT_u32 addr = to;
 	BT_u32 offset = to;
 	BT_u32 write_len = 0;
-	BT_u32 actual_len = 0;
+	BT_s32 actual_len = 0;
 	BT_u32 write_count = 0;
 	BT_u32 rem_bank_len = 0;
 	BT_u8 bank = 0;
@@ -733,7 +717,10 @@ static BT_ERROR m25p80_write_ext(BT_HANDLE flash, BT_u64 to, BT_u32 len, BT_u32 
 		else
 			write_len = rem_bank_len;
 
-		m25p80_write(flash, offset, write_len, &actual_len, buf);
+		actual_len = m25p80_write(flash, offset, write_len, buf);
+		if(actual_len < 0) {
+			break;
+		}
 
 		addr += actual_len;
 		len -= actual_len;
@@ -741,20 +728,23 @@ static BT_ERROR m25p80_write_ext(BT_HANDLE flash, BT_u64 to, BT_u32 len, BT_u32 
 		write_count += actual_len;
 	}
 
-	*retlen = write_count;
-
 	BT_kMutexRelease(flash->lock);
-	return BT_ERR_NONE;
+
+	if(actual_len < 0) {
+		return actual_len;
+	}
+
+	return write_count;
 }
 
 // TODO: !!!!!!!!!!!!!!!!
-static BT_ERROR sst_write(BT_HANDLE flash, BT_u64 to, BT_u32 len, BT_u32 *retlen, const BT_u8 *buf)
-{
+static BT_s32 sst_write(BT_HANDLE flash, BT_u64 to, BT_u32 len, const BT_u8 *buf) {
 	BT_SPI_TRANSFER t[2];
 	BT_SPI_MESSAGE m;
 	BT_u32 actual;
 	int cmd_sz;
 	BT_ERROR ret = BT_ERR_NONE;
+	BT_u32 retlen = 0;
 
 	BT_SpiMessageInit(&m);
 	memset(t, 0, (sizeof t));
@@ -787,7 +777,7 @@ static BT_ERROR sst_write(BT_HANDLE flash, BT_u64 to, BT_u32 len, BT_u32 *retlen
 		ret = wait_till_ready(flash);
 		if (ret != BT_ERR_NONE)
 			goto time_out;
-		*retlen += m.actual_length - m25p_cmdsz(flash);
+		retlen += m.actual_length - m25p_cmdsz(flash);
 	}
 	to += actual;
 
@@ -806,7 +796,7 @@ static BT_ERROR sst_write(BT_HANDLE flash, BT_u64 to, BT_u32 len, BT_u32 *retlen
 		ret = wait_till_ready(flash);
 		if (ret != BT_ERR_NONE)
 			goto time_out;
-		*retlen += m.actual_length - cmd_sz;
+		retlen += m.actual_length - cmd_sz;
 		cmd_sz = 1;
 		to += 2;
 	}
@@ -828,26 +818,30 @@ static BT_ERROR sst_write(BT_HANDLE flash, BT_u64 to, BT_u32 len, BT_u32 *retlen
 		ret = wait_till_ready(flash);
 		if (ret != BT_ERR_NONE)
 			goto time_out;
-		*retlen += m.actual_length - m25p_cmdsz(flash);
+		retlen += m.actual_length - m25p_cmdsz(flash);
 		write_disable(flash);
 	}
 
 time_out:
 	BT_kMutexRelease(flash->lock);
-	return ret;
+
+	if(ret) {
+		return ret;
+	}
+
+	return retlen;
 }
 
-static BT_ERROR mtd_write_wrapper(BT_HANDLE flash, BT_u64 to, BT_u32 len, BT_u32 *retlen, const BT_u8 *buf)
-{
+static BT_s32 mtd_write_wrapper(BT_HANDLE flash, BT_u64 to, BT_u32 len, const BT_u8 *buf) {
 	if(!flash->_write)
 		return BT_ERR_INVALID_HANDLE;
 
-	return flash->_write(flash, to, len, retlen, buf);
+	return flash->_write(flash, to, len, buf);
 }
 
 
-static BT_ERROR m25p80_lock(BT_HANDLE flash, BT_u64 ofs, BT_u64 len)
-{
+static BT_ERROR m25p80_lock(BT_HANDLE flash, BT_u64 ofs, BT_u64 len) {
+
 	//BT_MTD_INFO *mtd = &flash->mtd;
 	BT_u32 offset = ofs;
 	BT_u8 status_old, status_new;
