@@ -18,9 +18,8 @@
  *
  **/
 typedef struct _BT_IF_BLOCK {
-	BT_u32		(*pfnReadBlocks)	(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount, void *pBuffer, BT_ERROR *pError);
-	BT_u32		(*pfnWriteBlocks)	(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount, void *pBuffer, BT_ERROR *pError);
-	//BT_ERROR	(*pfnRequest)		(BT_HANDLE hBlock, BT_BLOCK_QUEUE *pQueue);
+	BT_s32		(*pfnReadBlocks)	(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount, void *pBuffer);
+	BT_s32		(*pfnWriteBlocks)	(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount, void *pBuffer);
 } BT_IF_BLOCK;
 
 

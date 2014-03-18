@@ -46,13 +46,10 @@ static BT_BOOL isHandleValid(BT_HANDLE hBlock) {
 	return BT_FALSE;
 }
 
-BT_u32 BT_BlockRead(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError) {
+BT_s32 BT_BlockRead(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer) {
 
 	if(!isHandleValid(hBlock)) {
-		if(pError) {
-			*pError = BT_ERR_INVALID_HANDLE;
-		}
-		return 0;
+		return BT_ERR_INVALID_HANDLE;
 	}
 
 	BT_BLKDEV_DESCRIPTOR *blkdev = (BT_BLKDEV_DESCRIPTOR *) hBlock;
@@ -60,17 +57,15 @@ BT_u32 BT_BlockRead(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *p
 	const BT_IF_BLOCK *pOps = blkdev->hBlkDev->h.pIf->oIfs.pDevIF->pBlockIF;
 
 	BT_kMutexPend(blkdev->kMutex, BT_INFINITE_TIMEOUT);
-	BT_u32 ret = pOps->pfnReadBlocks(blkdev->hBlkDev, ulAddress, ulBlocks, pBuffer, pError);
+	BT_s32 ret = pOps->pfnReadBlocks(blkdev->hBlkDev, ulAddress, ulBlocks, pBuffer);
 	BT_kMutexRelease(blkdev->kMutex);
+
 	return ret;
 }
 
-BT_u32 BT_BlockWrite(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError) {
+BT_s32 BT_BlockWrite(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer) {
 	if(!isHandleValid(hBlock)) {
-		if(pError) {
-			*pError = BT_ERR_INVALID_HANDLE;
-		}
-		return 0;
+		return BT_ERR_INVALID_HANDLE;
 	}
 
 	BT_BLKDEV_DESCRIPTOR *blkdev = (BT_BLKDEV_DESCRIPTOR *) hBlock;
@@ -78,7 +73,7 @@ BT_u32 BT_BlockWrite(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *
 	const BT_IF_BLOCK *pOps = blkdev->hBlkDev->h.pIf->oIfs.pDevIF->pBlockIF;
 
 	BT_kMutexPend(blkdev->kMutex, BT_INFINITE_TIMEOUT);
-	BT_u32 ret = pOps->pfnWriteBlocks(blkdev->hBlkDev, ulAddress, ulBlocks, pBuffer, pError);
+	BT_s32 ret = pOps->pfnWriteBlocks(blkdev->hBlkDev, ulAddress, ulBlocks, pBuffer);
 	BT_kMutexRelease(blkdev->kMutex);
 
 	return ret;

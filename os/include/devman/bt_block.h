@@ -30,8 +30,8 @@ typedef struct _BT_BLKDEV_DESCRIPTOR {
 
 BT_ERROR BT_RegisterBlockDevice(BT_HANDLE hDevice, const char *szpName, BT_BLKDEV_DESCRIPTOR *pDescriptor);
 
-BT_u32 BT_BlockRead			(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError);
-BT_u32 BT_BlockWrite		(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError);
+BT_s32 BT_BlockRead			(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer);
+BT_s32 BT_BlockWrite		(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer);
 BT_ERROR BT_GetBlockGeometry(BT_HANDLE hBlock, BT_BLOCK_GEOMETRY *pGeometry);
 BT_HANDLE BT_BlockGetInode	(BT_HANDLE hDevice);
 
