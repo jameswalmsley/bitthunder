@@ -41,7 +41,7 @@ BT_HANDLE BT_GetStderr() {
 static int fgetc(void *stream) {
 	BT_HANDLE h = (BT_HANDLE) stream;
 
-	return BT_GetC(h, 0, NULL);
+	return BT_GetC(h, 0);
 }
 
 static void fputc(int c, void *stream) {
@@ -50,9 +50,9 @@ static void fputc(int c, void *stream) {
 
 	if(c == '\n') {
 		BT_u8 *s = (BT_u8 *) "\r\n";
-		BT_Write(h, 0, 2, s, NULL);
+		BT_Write(h, 0, 2, s);
 	} else {
-		BT_Write(h, 0, 1, &val, NULL);
+		BT_Write(h, 0, 1, &val);
 	}
 }
 
