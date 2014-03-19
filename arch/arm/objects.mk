@@ -50,6 +50,7 @@ BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX_A9)	+= $(BUILD_DIR)arch/arm/comm
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX_A9)	+= $(BUILD_DIR)arch/arm/common/freertos-ca9.o
 else
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX_A9)	+= $(BUILD_DIR)arch/arm/common/freertos-arm.o
+$(BUILD_DIR)arch/arm/common/freertos-arm.o: CFLAGS_REMOVE += -fstack-usage
 endif
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX_M0) += $(BUILD_DIR)arch/arm/common/freertos-m0.o
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX_M3) += $(BUILD_DIR)arch/arm/common/freertos-m3.o
