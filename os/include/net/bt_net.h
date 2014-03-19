@@ -40,8 +40,10 @@ typedef struct _BT_NET_IF {
 BT_ERROR BT_RegisterNetworkInterface(BT_HANDLE hIF);
 BT_BOOL BT_isNetworkingReady();
 
+BT_u32 BT_GetTotalNetworkInterfaces();
 BT_NET_IF *BT_GetNetif(const BT_i8 *name, BT_ERROR *pError);
 BT_NET_IF *BT_GetNetifFromHandle(BT_HANDLE hMac, BT_ERROR *pError);
+BT_NET_IF *BT_GetNetifByIndex(BT_u32 index);
 
 BT_ERROR BT_NetifGetMacAddress(BT_NET_IF *interface, BT_u8 *hwaddr, BT_u32 ulLength);
 BT_ERROR BT_NetifSetMacAddress(BT_NET_IF *interface, BT_u8 *hwaddr, BT_u32 ulLength);
