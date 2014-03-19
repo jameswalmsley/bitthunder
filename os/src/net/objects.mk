@@ -69,6 +69,13 @@ LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/api/netifa
 LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/api/sockets.o
 LWIP_OBJECTS-$(BT_CONFIG_NET_LWIP) += $(BUILD_DIR)os/src/net/lwip/src/api/tcpip.o
 
+# Disable some warnings in lwIP during build.
+# There are some "constant" conditionals hidden within some macros.
+# We "trust" this library at the moment.
+$(BUILD_DIR)os/src/net/lwip/src/core/ipv4/ip.o: CFLAGS_REMOVE += -Wall
+$(BUILD_DIR)os/src/net/lwip/src/core/tcp_out.o: CFLAGS_REMOVE += -Wall
+$(BUILD_DIR)os/src/net/lwip/src/core/dhcp.o: CFLAGS_REMOVE += -Wall
+
 
 $(LWIP_OBJECTS-y): MODULE_NAME="lwIP"
 $(LWIP_OBJECTS-y): CFLAGS += -I $(BASE)os/src/net/lwip/src/include/
