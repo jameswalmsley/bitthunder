@@ -294,6 +294,11 @@ BT_ERROR BT_ShellCommand(BT_HANDLE hShell, const char *cmdline) {
 	input = copy;
 	input = eatspace(input);
 
+	if(!strlen(input)) {
+		BT_kFree(copy);
+		return 0;
+	}
+
 	bIsArg = BT_TRUE;
 
 	char *line = input;
