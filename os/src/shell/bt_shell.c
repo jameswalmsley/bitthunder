@@ -413,7 +413,7 @@ BT_ERROR BT_ShellScript(BT_HANDLE hShell, const BT_i8 *path) {
 	BT_u32 lineno = 0;
 
 
-	BT_u32 linelen;
+	BT_s32 linelen;
 
 	while((linelen = BT_GetS(hFile, 256, line)) > 0) {
 
