@@ -55,7 +55,7 @@ static BT_s32 mtdblock_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCoun
 	return BT_MTD_Read((BT_HANDLE)mtd,
 					   mtd->oBlock.oGeometry.ulBlockSize * ulBlock,
 					   mtd->oBlock.oGeometry.ulBlockSize * ulCount,
-					   pBuffer);
+					   pBuffer) / mtd->oBlock.oGeometry.ulBlockSize;
 }
 
 static BT_s32 mtdblock_blockwrite(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount, void *buf) {
