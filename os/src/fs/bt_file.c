@@ -187,9 +187,13 @@ BT_s32 BT_GetS(BT_HANDLE hFile, BT_u32 ulSize, BT_i8 *s) {
 	BT_s32 c = 0;
 
     t = s;
-    while (--ulSize>1 && (c=BT_GetC(hFile, 0)) != -1 && (c != '\n' && c != '\r') && c >= 0) {
+    while (--ulSize>1 && (c=BT_GetC(hFile, 0)) && (c != '\n' && c != '\r') && c >= 0) {
         *s++ = c;
 	}
+
+    if(c < 0) {
+		return c;
+    }
 
     if (c == '\n' || c == '\r') {
         *s++ = c;
