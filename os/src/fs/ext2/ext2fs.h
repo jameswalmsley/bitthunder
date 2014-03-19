@@ -83,6 +83,12 @@ typedef unsigned char uint8_t;
 #define	EXT2_FILETYPE_DIRECTORY	2
 #define	EXT2_FILETYPE_SYMLINK	7
 
+/* Filetype information as used in inodes.  */
+#define FILETYPE_INO_MASK	0170000
+#define FILETYPE_INO_REG	0100000
+#define FILETYPE_INO_DIRECTORY	0040000
+#define FILETYPE_INO_SYMLINK	0120000
+
 /* Amount of indirect blocks in an inode.  */
 #define INDIRECT_BLOCKS		12
 
@@ -127,4 +133,3 @@ extern int ext2fs_close_dir (void);
 extern int ext2fs_open (char *filename);
 extern int ext2fs_read (char *buf, unsigned len);
 extern int ext2fs_close (void);
-

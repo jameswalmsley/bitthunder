@@ -49,8 +49,7 @@ static const BT_IF_HANDLE oInodeHandleInterface;
 
 static int ext2_readblocks(unsigned char *pBuffer, unsigned int SectorAddress, unsigned int Count, void *pParam) {
 	BT_HANDLE hVolume = (BT_HANDLE)pParam;
-	BT_ERROR Error;
-	BT_u32 ulRead = BT_VolumeRead(hVolume, SectorAddress, Count, pBuffer, &Error);
+	BT_s32 slRead = BT_VolumeRead(hVolume, SectorAddress, Count, pBuffer);
 #if DEBUG
 	int i, j;
 	for(i=0;i<Count;i++) {
@@ -62,7 +61,7 @@ static int ext2_readblocks(unsigned char *pBuffer, unsigned int SectorAddress, u
 		bt_printf("\n");
 	}
 #endif
-	return (int)ulRead;
+	return (int) slRead;
 }
 
 static BT_HANDLE ext2_mount(BT_HANDLE hFS, BT_HANDLE hVolume, const void *data, BT_ERROR *pError) {
@@ -120,29 +119,26 @@ static BT_ERROR ext2_file_cleanup(BT_HANDLE hFile) {
 	return BT_ERR_NONE;
 }
 
-static BT_u32 ext2_read(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
+static BT_s32 ext2_read(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer) {
 	if(!hFile) {
-		if(pError) *pError = BT_ERR_GENERIC;
-		return 0;
+		return BT_ERR_INVALID_HANDLE;
 	}
-	if(pError) *pError = BT_ERR_NONE;
+
 	BT_u32 rc = 0;
 	rc = ext2fs_read (pBuffer, ulSize);
 
 	return rc;
 }
 
-static BT_u32 ext2_write(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer, BT_ERROR *pError) {
-	if(pError) *pError = BT_ERR_GENERIC;
-	return 0;
+static BT_s32 ext2_write(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer) {
+	return BT_ERR_UNIMPLEMENTED;
 }
 
-static BT_s32 ext2_getc(BT_HANDLE hFile, BT_u32 ulFlags, BT_ERROR *pError) {
+static BT_s32 ext2_getc(BT_HANDLE hFile, BT_u32 ulFlags) {
 	if(!hFile) {
-		if(pError) *pError = BT_ERR_GENERIC;
-		return 0;
+		return BT_ERR_INVALID_HANDLE;
 	}
-	if(pError) *pError = BT_ERR_NONE;
+
 	char c = 0;
 	BT_s32 rc = ext2fs_read (&c, 1);
 	if(rc <= 0) rc = -1;
@@ -152,14 +148,14 @@ static BT_s32 ext2_getc(BT_HANDLE hFile, BT_u32 ulFlags, BT_ERROR *pError) {
 }
 
 static BT_ERROR ext2_putc(BT_HANDLE hFile, BT_u32 ulFlags, BT_i8 cData) {
-	return BT_ERR_GENERIC;
+	return BT_ERR_UNIMPLEMENTED;
 }
 
 static BT_ERROR ext2_seek(BT_HANDLE hFile, BT_s64 ulOffset, BT_u32 whence) {
 	return BT_ERR_NONE;
 }
 
-static BT_u64 ext2_tell(BT_HANDLE hFile) {
+static BT_u64 ext2_tell(BT_HANDLE hFile, BT_ERROR *pError) {
 	return 0;
 }
 
