@@ -5,7 +5,7 @@ struct _BT_OPAQUE_HANDLE {
 };
 
 BT_ERROR BT_ReadDir(BT_HANDLE hDir, BT_DIRENT *pDirent) {
-	if(!hDir && hDir->h.pIf->eType != BT_HANDLE_T_DIRECTORY) {
+	if(!hDir && BT_HANDLE_TYPE(hDir) != BT_HANDLE_T_DIRECTORY) {
 		return BT_ERR_INVALID_HANDLE_TYPE;
 	}
 

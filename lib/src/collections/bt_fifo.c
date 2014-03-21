@@ -23,7 +23,7 @@ struct _BT_OPAQUE_HANDLE {
 static const BT_IF_HANDLE oHandleInterface;
 
 static BT_BOOL isFifoHandle(BT_HANDLE hFifo) {
-	if(!hFifo || (hFifo->h.pIf->eType != BT_HANDLE_T_FIFO)) {
+	if(!hFifo || (BT_HANDLE_TYPE(hFifo) != BT_HANDLE_T_FIFO)) {
 		return BT_FALSE;
 	}
 	return BT_TRUE;

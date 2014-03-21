@@ -56,7 +56,7 @@ static BT_ERROR to_absolute_path(BT_i8 *buf, BT_u32 len, const BT_i8 *path, BT_B
 #endif
 
 BT_ERROR BT_RegisterFilesystem(BT_HANDLE hFS) {
-	if(hFS->h.pIf->eType != BT_HANDLE_T_FILESYSTEM) {
+	if(BT_HANDLE_TYPE(hFS) != BT_HANDLE_T_FILESYSTEM) {
 		return BT_ERR_GENERIC;
 	}
 

@@ -15,7 +15,7 @@ struct _BT_OPAQUE_HANDLE {
 };
 
 static BT_BOOL isRtcHandle(BT_HANDLE hRtc) {
-	if(hRtc->h.pIf->eType != BT_HANDLE_T_RTC) {
+	if(BT_HANDLE_TYPE(hRtc) != BT_HANDLE_T_RTC) {
 		return BT_FALSE;
 	}
 	return BT_TRUE;

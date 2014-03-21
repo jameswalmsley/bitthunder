@@ -40,7 +40,7 @@ static const BT_DEVFS_OPS oDevfsOps = {
 };
 
 static BT_BOOL isHandleValid(BT_HANDLE hBlock) {
-	if(hBlock && hBlock->h.pIf->eType == BT_HANDLE_T_BLOCK) {
+	if(hBlock && BT_HANDLE_TYPE(hBlock) == BT_HANDLE_T_BLOCK) {
 		return BT_TRUE;
 	}
 	return BT_FALSE;
