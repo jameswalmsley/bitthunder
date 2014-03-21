@@ -10,15 +10,15 @@
 #	@see		github.com/FullFAT/FullFAT/
 #	@author		James Walmsley	<jwalmsley@riegl.com>
 #
-#	@version	1.5.0 (Fermat)
+#	@version	1.6.0 (BiCEP2 (Gravitational Waves))
 #
 
-DBUILD_VERSION_MAJOR=1
-DBUILD_VERSION_MINOR=5
-DBUILD_VERSION_REVISION=0
+DBUILD_VERSION_MAJOR:=1
+DBUILD_VERSION_MINOR:=6
+DBUILD_VERSION_REVISION:=0
 
-DBUILD_VERSION_NAME=Fermat
-DBUILD_VERSION_DATE=October 2013
+DBUILD_VERSION_NAME:=BiCEP2 (Gravitational Waves)
+DBUILD_VERSION_DATE:=March 2014
 
 #
 #	Get dbuild root directory.
@@ -37,6 +37,8 @@ all: dbuild_entry _all
 #	A top-level configureation file can be found in the project root dir.
 #
 -include $(DBUILD_ROOT)dbuild.config.mk
+
+include $(DBUILD_ROOT).dbuild/defines.mk
 
 #
 #	A config file can be overidden or extended in any sub-directory
