@@ -86,6 +86,36 @@ config OPTIMISE_ULTRA_SPEED
 
 endchoice
 
+
+choice
+	prompt "Warning Level"
+	default WARN_NORMAL
+
+config WARN_NORMAL
+	bool "Normal warnings from compiler"
+
+config WARN_ALL
+	bool "-Wall on compiler"
+
+config WARN_PEDANTIC
+	bool "-Wall --pedantic"
+
+config WARN_ERROR
+	bool "-Wall -Werror"
+
+config WARN_ERROR_PEDANTIC
+	bool "-Wall -Werror --pedantic (For the insane)"
+
+endchoice
+
+config TOOLCHAIN_WARNING
+	string
+	default ""							if WARN_NORMAL
+	default	"-Wall"						if WARN_ALL
+	default "-Wall --pedantic"			if WARN_PEDANTIC
+	default "-Wall -Werror"				if WARN_ERROR
+	default "-Wall -Werror --pedantic" 	if WARN_ERROR_PEDANTIC
+
 config TOOLCHAIN_OPTIMISATION
     string
 	default "-Os" if OPTIMISE_SIZE
