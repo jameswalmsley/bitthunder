@@ -1,5 +1,28 @@
-#ifndef _BT_HANDLES_H_
-#define _BT_HANDLES_H_
+/**
+ *	@brief		Handle Manager
+ *
+ *	Provides Kernel-level Handle management for the BitThunder operating system.
+ *
+ *	@file		bt_handle.h
+ *	@author 	James Walmsley <james@fullfat-fs.co.uk>
+ *	@ingroup	HANDLE
+ *
+ *	@copyright	(c)2012 James Walmsley
+ **/
+/**
+ *	@defgroup	HANDLE	Handle Manager
+ *	@brief		Kernel-level API for managing BT_HANDLE objects.
+ *
+ *	The Handle Manager is used by almost all other modules to create/attach BT_HANDLE
+ *	objects. A HANDLE is a primitive allowing any resource within the system to be
+ *	safely referenced in a type-safe way.
+ *
+ *	The HANDLE (BT_HANDLE) is the most important primitive object (data-structure)
+ *	within the BitThunder operating system. It is used to manage all resources within
+ *	the OS (with the exception of memory), and allow intelligent reporting and cleanup.
+ **/
+#ifndef _BT_HANDLE_H_
+#define _BT_HANDLE_H_
 
 #include "bt_types.h"
 #include "interfaces/bt_interfaces.h"
@@ -37,7 +60,7 @@ typedef struct _BT_HANDLE_HEADER {
 BT_ERROR BT_AttachHandle(BT_HANDLE hProcess, const BT_IF_HANDLE *pIf, BT_HANDLE h);
 
 /**
- *	@brief 	Create and Attach a new BT_HANDLE to currently running process.
+ *	@brief 	Create and Attach a new BT_HANDLE to the currently running process.
  *
  *	This function is really an allocator, and will create a HANDLE object and initialise
  *	it with the required HANDLE interface.
