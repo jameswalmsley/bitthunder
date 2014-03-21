@@ -1,3 +1,26 @@
+/**
+ *	@brief		Memory Manager	- Definitions and Macros
+ *
+ *	Provides a scalable Memory Manager to the BitThunder kernel.
+ *
+ *	@file		bt_mm.h
+ *	@author		James Walmsley	<james@fullfat-fs.co.uk>
+ *	@ingroup	MM
+ *
+ *	@copyright	(c) 2013 James Walmsley
+ **/
+/**
+ *	@defgroup	MM	Memory Manager
+ *	@brief		Kernel-level API for Memory Management.
+ *
+ *	The memory manager in BitThunder differs based on configuration. In its simplest
+ *	form, it provides a basic heap as a linear list. This is a good memory manager
+ *	for small devices like micro-controllers.
+ *
+ *	In its most advanced form the memory manager provides a fully featured page-based
+ *	virtual memory manager. This is a good memory manager for applications replacing
+ *	a monolithic kernel like linux.
+ **/
 #ifndef _BT_MM_H_
 #define _BT_MM_H_
 
