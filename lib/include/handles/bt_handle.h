@@ -16,6 +16,8 @@ typedef struct _BT_HANDLE_HEADER {
 } BT_HANDLE_HEADER;
 
 
+#define BT_HANDLE_TYPE(x)	(x->h.pIf->eType)
+
 BT_ERROR 	BT_AttachHandle(BT_HANDLE hProcess, const BT_IF_HANDLE *pIf, BT_HANDLE h);
 BT_HANDLE 	BT_CreateHandle	(const BT_IF_HANDLE *pIf, BT_u32 ulHandleMemory, BT_ERROR *pError);
 BT_ERROR 	BT_DestroyHandle(BT_HANDLE h);
