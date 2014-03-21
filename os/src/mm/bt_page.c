@@ -12,13 +12,13 @@ struct bt_page {
 	BT_u32	size;
 };
 
-static bt_page_pool default_pool;
+static struct bt_page_pool default_pool;
 
 #ifdef BT_CONFIG_MEM_PAGE_COHERENT_POOL
-static bt_page_pool coherent_pool;
+static struct bt_page_pool coherent_pool;
 #endif
 
-bt_paddr_t bt_page_pool_alloc(bt_page_pool *pool, BT_u32 psize, BT_u32 order) {
+bt_paddr_t bt_page_pool_alloc(struct bt_page_pool *pool, BT_u32 psize, BT_u32 order) {
 
 	struct bt_page *blk = NULL, *tmp;
 	struct bt_list_head *pos;
@@ -85,7 +85,7 @@ bt_paddr_t bt_page_pool_alloc(bt_page_pool *pool, BT_u32 psize, BT_u32 order) {
 	return (bt_paddr_t) bt_virt_to_phys(blk);
 }
 
-void bt_page_pool_free(bt_page_pool *pool, bt_paddr_t paddr, BT_u32 size) {
+void bt_page_pool_free(struct bt_page_pool *pool, bt_paddr_t paddr, BT_u32 size) {
 
 	struct bt_page *blk, *prev;
 	struct bt_list_head *pos;
@@ -130,13 +130,13 @@ void bt_page_pool_free(bt_page_pool *pool, bt_paddr_t paddr, BT_u32 size) {
 	BT_PAGE_UNLOCK();
 }
 
-void bt_page_pool_attach(bt_page_pool *pool, bt_paddr_t paddr, BT_u32 size) {
+void bt_page_pool_attach(struct bt_page_pool *pool, bt_paddr_t paddr, BT_u32 size) {
 	pool->total_size += size;
 	pool->used_size += size;
 	bt_page_pool_free(pool, paddr, size);
 }
 
-BT_ERROR bt_page_pool_reserve(bt_page_pool *pool, bt_paddr_t paddr, BT_u32 psize) {
+BT_ERROR bt_page_pool_reserve(struct bt_page_pool *pool, bt_paddr_t paddr, BT_u32 psize) {
 
 	struct bt_page *blk = NULL, *tmp;
 	struct bt_list_head *pos;
@@ -223,7 +223,7 @@ BT_ERROR bt_page_reserve_coherent(bt_paddr_t paddr, BT_u32 psize) {
 }
 #endif
 
-BT_ERROR bt_page_pool_init(bt_page_pool *pool) {
+BT_ERROR bt_page_pool_init(struct bt_page_pool *pool) {
 	BT_LIST_INIT_HEAD(&pool->page_head);
 	pool->total_size = 0;
 	pool->used_size = 0;
