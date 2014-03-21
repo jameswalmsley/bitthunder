@@ -130,12 +130,12 @@ static BT_ERROR uart_set_baudrate(BT_HANDLE hUart, BT_u32 ulBaudrate) {
 
 	BT_CalculateClockDivider(InputClk, BaudRate, &oDiv);	// Calculate 2 stage divider.
 
-	uart_disable(hUart);
+	//uart_disable(hUart);
 
 	pRegs->BAUDGEN = oDiv.diva_val;							// Apply the calculated divider values.
 	pRegs->BAUDDIV = oDiv.divb_val;
 
-	uart_enable(hUart);
+	//uart_enable(hUart);
 	return BT_ERR_NONE;
 }
 
@@ -176,6 +176,43 @@ static BT_ERROR uart_get_power_state(BT_HANDLE hUart, BT_POWER_STATE *pePowerSta
 static BT_ERROR uart_set_config(BT_HANDLE hUart, BT_UART_CONFIG *pConfig) {
 
 	BT_ERROR Error = BT_ERR_NONE;
+	BT_u32 MR = ZYNQ_UART_MR_CHMODE_NORM;
+
+	
+	if (pConfig->ucStopBits == BT_UART_TWO_STOP_BITS) {
+		MR |= ZYNQ_UART_MR_STOPMODE_2_BIT;
+	}
+	else {
+		MR |= ZYNQ_UART_MR_STOPMODE_1_BIT;
+	}
+
+	if (pConfig->ucParity == BT_UART_PARITY_SPACE) {
+		MR |= ZYNQ_UART_MR_PARITY_SPACE;
+	}
+	else if (pConfig->ucParity == BT_UART_PARITY_MARK) {
+		MR |= ZYNQ_UART_MR_PARITY_MARK;
+	}
+	else if (pConfig->ucParity == BT_UART_PARITY_EVEN) {
+		MR |= ZYNQ_UART_MR_PARITY_EVEN;
+	}
+	else if (pConfig->ucParity == BT_UART_PARITY_ODD) {
+		MR |= ZYNQ_UART_MR_PARITY_ODD;
+	}
+	else {
+		MR |= ZYNQ_UART_MR_PARITY_NONE;
+	}
+
+	if (pConfig->ucDataBits == BT_UART_6_DATABITS) {
+		MR |= ZYNQ_UART_MR_CHARLEN_6_BIT;
+	}
+	else if (pConfig->ucDataBits == BT_UART_7_DATABITS) {
+		MR |= ZYNQ_UART_MR_CHARLEN_7_BIT;
+	}
+	else {
+		MR |= ZYNQ_UART_MR_CHARLEN_8_BIT;
+	}
+		
+	hUart->pRegs->MR = MR;
 
 	uart_set_baudrate(hUart, pConfig->ulBaudrate);
 
@@ -299,7 +336,7 @@ static BT_ERROR uart_enable(BT_HANDLE hUart) {
 	BT_u32 status = hUart->pRegs->CR;
 
 	hUart->pRegs->CR		= (status & ~(ZYNQ_UART_CR_TXDIS | ZYNQ_UART_CR_RXDIS)) | ZYNQ_UART_CR_TXEN | ZYNQ_UART_CR_RXEN | ZYNQ_UART_CR_STPBRK;
-	hUart->pRegs->MR 		= ZYNQ_UART_MR_CHMODE_NORM | ZYNQ_UART_MR_STOPMODE_1_BIT | ZYNQ_UART_MR_PARITY_NONE | ZYNQ_UART_MR_CHARLEN_8_BIT;
+	//hUart->pRegs->MR 		= ZYNQ_UART_MR_CHMODE_NORM | ZYNQ_UART_MR_STOPMODE_1_BIT | ZYNQ_UART_MR_PARITY_NONE | ZYNQ_UART_MR_CHARLEN_8_BIT;
 	hUart->pRegs->RXTRIG	= 14;
 	hUart->pRegs->RXTOUT   	= 10;
 
