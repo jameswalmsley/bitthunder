@@ -5,7 +5,7 @@
 static int bt_cp(BT_HANDLE hShell, int argc, char **argv) {
 
 	BT_HANDLE hStdout = BT_ShellGetStdout(hShell);
-	BT_ERROR Error;
+	BT_ERROR Error = BT_ERR_NONE;
 
 	if(argc != 3) {
 		bt_fprintf(hStdout, "Usage: %s [source] [destination]\n", argv[0]);
@@ -15,7 +15,7 @@ static int bt_cp(BT_HANDLE hShell, int argc, char **argv) {
 	BT_HANDLE hSource = BT_Open(argv[1], BT_GetModeFlags("rb"), &Error);
 	if(!hSource) {
 		bt_fprintf(hStdout, "Cannot open source file: %s\n", argv[1]);
-		return 0;
+		return Error;
 	}
 
 	BT_HANDLE hDest = BT_Open(argv[2], BT_GetModeFlags("wb+"), &Error);
@@ -27,6 +27,7 @@ static int bt_cp(BT_HANDLE hShell, int argc, char **argv) {
 	void *buffer = BT_kMalloc(BT_CONFIG_SHELL_CMD_CP_BUFFER_SIZE);
 	if(!buffer) {
 		bt_fprintf(hStdout, "Cannot allocate buffer for copying.\n");
+		Error = BT_ERR_NO_MEMORY;
 		goto err_dest_out;
 	}
 
@@ -44,7 +45,7 @@ err_dest_out:
 err_source_out:
 	BT_CloseHandle(hSource);
 
-	return 0;
+	return Error;
 }
 
 BT_SHELL_COMMAND_DEF oCommand = {
