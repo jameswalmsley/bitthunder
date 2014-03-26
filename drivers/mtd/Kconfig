@@ -1,8 +1,10 @@
 menu "MTD Devices"
 
 config DRIVERS_MTD
-    bool
+	bool
 	default n
+	select MTD
+	
 
 menu "SPI Flash devices"
 
