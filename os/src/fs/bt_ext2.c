@@ -284,6 +284,7 @@ static const BT_IF_FILE oFileOperations = {
 };
 
 static const BT_IF_FS oFilesystemInterface = {
+	.name		= "ext2",
 	.pfnMount 	= ext2_mount,
 	.pfnUnmount 	= ext2_unmount,
 	.pfnOpen	= ext2_open,
