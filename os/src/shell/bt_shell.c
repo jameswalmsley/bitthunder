@@ -479,7 +479,7 @@ err_out:
 	BT_kFree(line);
 	BT_CloseHandle(hFile);
 
-	return BT_ERR_NONE;
+	return Error;
 }
 
 static const BT_IF_HANDLE oHandleInterface = {
