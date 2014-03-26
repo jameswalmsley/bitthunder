@@ -1,0 +1,9 @@
+BOOT.BIN
+bootgen
+bootgen_line.pyc
+bootthunder.elf.bin
+*.init
+*.S
+*.bin
+*.o
+*.bif
