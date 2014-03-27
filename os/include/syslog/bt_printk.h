@@ -10,8 +10,10 @@
 
 #ifndef BT_CONFIG_SYSLOG_REMOVE_PRINTK
 BT_ERROR BT_kPrint(const char *format, ... );
+#define BT_kDebug(format, args ... )	BT_kPrint("%s : %s(): " format, BT_MODULE_NAME, __func__, ##args )
 #else
 #define BT_kPrint(...)
+#define BT_kDebug(...)
 #endif
 
 #endif
