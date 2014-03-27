@@ -16,17 +16,17 @@ BT_DEF_MODULE_AUTHOR	  	("James Walmsley")
 BT_DEF_MODULE_EMAIL			("james@fullfat-fs.co.uk")
 
 struct _BT_OPAQUE_HANDLE {
-	BT_HANDLE_HEADER 		h;			///< All handles must include a handle header.
-	BT_HANDLE			hStdin;
-	BT_HANDLE			hStdout;
-	const BT_i8 			*szpPrompt;
-	BT_u32	 			ulPromptLen;
-	BT_i32				bPrintPrompt;
-	BT_u32 				ulFlags;
+	BT_HANDLE_HEADER 			h;			///< All handles must include a handle header.
+	BT_HANDLE					hStdin;
+	BT_HANDLE					hStdout;
+	const BT_i8				   *szpPrompt;
+	BT_u32	 					ulPromptLen;
+	BT_i32						bPrintPrompt;
+	BT_u32 						ulFlags;
 	#define BT_CONFIG_SHELL_INPUT_BUFFER_SIZE	256
-	BT_i8 				cStdinBuf[BT_CONFIG_SHELL_INPUT_BUFFER_SIZE];
-	BT_u32 				ulStdinBufCnt;
-	struct _BT_OPAQUE_HANDLE	*pNext;
+	BT_i8 						cStdinBuf[BT_CONFIG_SHELL_INPUT_BUFFER_SIZE];
+	BT_u32 						ulStdinBufCnt;
+	struct _BT_OPAQUE_HANDLE   *pNext;
 };
 
 typedef struct _BT_OPAQUE_HANDLE BT_SHELL;
@@ -254,8 +254,7 @@ BT_HANDLE BT_ShellGetStdin(BT_HANDLE hShell) {
 	return (hShell ? ((BT_SHELL_HANDLE)hShell)->hStdin : NULL);
 }
 
-const char *BT_ShellGetPrompt(BT_HANDLE hShell)
-{
+const char *BT_ShellGetPrompt(BT_HANDLE hShell) {
 	return (hShell ? ((BT_SHELL_HANDLE)hShell)->szpPrompt : NULL);
 }
 
@@ -267,8 +266,7 @@ void BT_ShellUpdatePrompt(BT_HANDLE hShell, const char *szpPrompt)
 	return;
 }
 
-BT_u32 BT_ShellGetFlags(BT_HANDLE hShell)
-{
+BT_u32 BT_ShellGetFlags(BT_HANDLE hShell) {
 	return (hShell ? ((BT_SHELL_HANDLE)hShell)->ulFlags : 0);
 }
 
@@ -546,6 +544,10 @@ BT_ERROR BT_Shell(BT_HANDLE hShell) {
 					if(hShell->ulStdinBufCnt < BT_CONFIG_SHELL_INPUT_BUFFER_SIZE-1) {
 						hShell->cStdinBuf[hShell->ulStdinBufCnt++] = c;
 					}
+				}
+			} else {
+				if(c != BT_ERR_GENERIC) {
+					return c;
 				}
 			}
 		}
