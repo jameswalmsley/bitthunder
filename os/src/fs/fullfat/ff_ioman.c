@@ -555,6 +555,11 @@ FF_T_SINT32 FF_BlockRead(FF_IOMAN *pIoman, FF_T_UINT32 ulSectorLBA, FF_T_UINT32 
 		if(!FF_isERR(slRetVal) && FF_GETERROR(slRetVal) != FF_ERR_DRIVER_BUSY) {
 			break;
 		}
+
+		if(FF_isERR(slRetVal) && FF_GETERROR(slRetVal) == FF_ERR_IOMAN_DRIVER_FATAL_ERROR) {
+			break;
+		}
+
 		FF_Sleep(FF_DRIVER_BUSY_SLEEP);
 	} while (FF_TRUE);
 
@@ -583,6 +588,11 @@ FF_T_SINT32 FF_BlockWrite(FF_IOMAN *pIoman, FF_T_UINT32 ulSectorLBA, FF_T_UINT32
 		if(!FF_isERR(slRetVal) && FF_GETERROR(slRetVal) != FF_ERR_DRIVER_BUSY) {
 			break;
 		}
+
+		if(FF_isERR(slRetVal) && FF_GETERROR(slRetVal) == FF_ERR_IOMAN_DRIVER_FATAL_ERROR) {
+			break;
+		}
+
 		FF_Sleep(FF_DRIVER_BUSY_SLEEP);
 	} while (FF_TRUE);
 
