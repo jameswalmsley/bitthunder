@@ -50,12 +50,22 @@ static const BT_IF_HANDLE oInodeHandleInterface;
 
 static FF_T_SINT32 fullfat_readblocks(FF_T_UINT8 *pBuffer, FF_T_UINT32 Address, FF_T_UINT32 Count, void *pParam) {
 	BT_FF_MOUNT *pMount = (BT_FF_MOUNT *) pParam;
-	return (FF_T_SINT32) BT_VolumeRead(pMount->hVolume, Address, Count, pBuffer);
+	BT_s32 retval = BT_VolumeRead(pMount->hVolume, Address, Count, pBuffer);
+	if(retval < 0) {
+		return FF_ERR_DRIVER_FATAL_ERROR;
+	}
+
+	return retval;
 }
 
 static FF_T_SINT32 fullfat_writeblocks(FF_T_UINT8 *pBuffer, FF_T_UINT32 Address, FF_T_UINT32 Count, void *pParam) {
 	BT_FF_MOUNT *pMount = (BT_FF_MOUNT *) pParam;
-	return (FF_T_SINT32) BT_VolumeWrite(pMount->hVolume, Address, Count, pBuffer);
+	BT_s32 retval = BT_VolumeWrite(pMount->hVolume, Address, Count, pBuffer);
+	if(retval < 0) {
+		return FF_ERR_DRIVER_FATAL_ERROR;
+	}
+
+	return retval;
 }
 
 static BT_HANDLE fullfat_mount(BT_HANDLE hFS, BT_HANDLE hVolume, const void *data, BT_ERROR *pError) {
