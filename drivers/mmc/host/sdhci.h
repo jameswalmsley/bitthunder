@@ -5,7 +5,6 @@
 
 #define SDHCI_FLAGS_ALWAYS_PRESENT				0x00000001		///< Flag to forcibly assume card presence. (E.g. when card detection line is not connected).
 
-
 typedef struct _SDHCI_REGS {
 	BT_u32	SDMA_Address;
 	BT_u16	BLOCK_SIZE;
@@ -85,6 +84,7 @@ typedef struct _SDHCI_REGS {
 	#define NORMAL_INT_ERROR					0x8000
 
 	BT_u16 ERROR_INT_STATUS;
+	#define ERROR_INT_COMMAND_TIMEOUT 			0x0001
 
 	BT_u16	NORMAL_INT_ENABLE;
 	BT_u16	ERROR_INT_ENABLE;

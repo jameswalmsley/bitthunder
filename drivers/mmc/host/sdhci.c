@@ -14,7 +14,7 @@
 #include "../core.h"
 #include "../host.h"
 
-BT_DEF_MODULE_NAME				("Generic SDHCI Controller Driver")
+BT_DEF_MODULE_NAME				("SDHCI Controller")
 BT_DEF_MODULE_DESCRIPTION		("Implements a driver for SDCARD abstraction for SDHCI controllers")
 BT_DEF_MODULE_AUTHOR			("James Walmsley")
 BT_DEF_MODULE_EMAIL				("james@fullfat-fs.co.uk")
@@ -141,9 +141,15 @@ static BT_ERROR sdhci_disable_clock(BT_HANDLE hSDIO) {
 
 static BT_ERROR sdhci_request(BT_HANDLE hSDIO, MMC_COMMAND *pCommand) {
 
+	BT_u32 timeout = 100;
 	// Wait until the the command is not inhibited.
 	while(hSDIO->pRegs->PRESENT_STATE & (STATE_COMMAND_INHIBIT_CMD | STATE_COMMAND_INHIBIT_DAT)) {
+		if(!timeout) {
+			BT_kDebug("CMD|DAT Inhibit timeout.");
+			return BT_ERR_GENERIC;
+		}
 		BT_ThreadYield();
+		timeout--;
 	}
 
 	if(pCommand->bIsData) {
@@ -199,6 +205,11 @@ static BT_ERROR sdhci_request(BT_HANDLE hSDIO, MMC_COMMAND *pCommand) {
 
 	// Wait until the command is complete.
 	while(!(hSDIO->pRegs->NORMAL_INT_STATUS & NORMAL_INT_COMMAND_COMPLETE)) {
+		if(hSDIO->pRegs->ERROR_INT_STATUS & ERROR_INT_COMMAND_TIMEOUT) {
+			hSDIO->pRegs->ERROR_INT_STATUS = ERROR_INT_COMMAND_TIMEOUT;
+			return BT_ERR_GENERIC;
+		}
+
 		BT_ThreadYield();
 	}
 
@@ -217,18 +228,23 @@ static BT_s32 sdhci_read(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer) {
 	register BT_u8 *p = (BT_u8 *) pBuffer;
 
 	BT_u32 ulRead = 0;
+	BT_u32 timeout = 1000;
+
 	while(ulRead < ulBlocks) {
 
 		BT_u32 ulStat = hSDIO->pRegs->NORMAL_INT_STATUS;
+		BT_BOOL bHandled = BT_FALSE;
 
 		if(ulStat) {
 
 			if(ulStat & NORMAL_INT_ERROR) {
+				bHandled = BT_TRUE;
 				hSDIO->pRegs->NORMAL_INT_STATUS = NORMAL_INT_ERROR;
 				break;
 			}
 
 			if(ulStat & NORMAL_INT_BUF_READ_READY) {
+				bHandled = BT_TRUE;
 				hSDIO->pRegs->NORMAL_INT_STATUS = NORMAL_INT_BUF_READ_READY;
 
 				BT_u32 ulSize = 512;
@@ -251,17 +267,28 @@ static BT_s32 sdhci_read(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer) {
 			}
 
 			if(ulStat & NORMAL_INT_BUF_WRITE_READY) {
+				bHandled = BT_TRUE;
 				hSDIO->pRegs->NORMAL_INT_STATUS = NORMAL_INT_BUF_WRITE_READY;
 				break;
 			}
 
 			if(ulStat & NORMAL_INT_TRANSFER_COMPLETE) {
+				bHandled = BT_TRUE;
 				hSDIO->pRegs->NORMAL_INT_STATUS = NORMAL_INT_TRANSFER_COMPLETE;
 				break;
 			}
 		}
 
-		BT_ThreadYield();
+		if(!bHandled) {
+			timeout--;
+			if(!timeout) {
+				return BT_ERR_GENERIC;
+			}
+		} else {
+			timeout = 100;
+		}
+
+		BT_ThreadSleep(1);
 	}
 
 	if(ulRead != ulBlocks) {
