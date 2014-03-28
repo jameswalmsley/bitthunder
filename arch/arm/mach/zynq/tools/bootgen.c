@@ -20,7 +20,7 @@ static char *attributes[] = {
 
 static void init_header(BOOTROM_HEADER *header) {
 	memset(header, 0, sizeof(*header));
-	
+
 	header->width_detect = 0xAA995566;
 	memcpy(header->identification, "XNLX", 4);
 	header->encryption_status = 0;
@@ -38,21 +38,34 @@ static void checksum_header(BOOTROM_HEADER *header) {
 	uint32_t *word = (uint32_t *) &header->width_detect;
 
 	uint32_t sum = 0;
-	   
+
 	for(i = 0; i < 10; i++) {
 		sum += word[i];
 	}
-	
+
 	header->header_checksum = ~sum;
 }
 
 int main(int argc, char **argv) {
 
 	struct stat oStat;
+	struct stat oInitStat;
+
+	if(argc != 3 && argc != 4) {
+		fprintf(stderr, "Usage: bootgen [bootloader_image] [entrypoint] {[init_binary]}\n");
+		return 0;
+	}
 
 	if(stat(argv[1], &oStat)) {
 		fprintf(stderr, "Cannot stat file %s\n", argv[1]);
 		return -1;
+	}
+
+	if(argc == 4) {
+		if(stat(argv[3], &oInitStat)) {
+			fprintf(stderr, "Cannot stat file %s\n", argv[3]);
+			return -1;
+		}
 	}
 
 	uint32_t entry_address = strtoul(argv[2], NULL, 16);
@@ -73,11 +86,28 @@ int main(int argc, char **argv) {
 
 	fread(&hdr->fsbl, 1, oStat.st_size, fp);
 
+	if(argc == 4) {
+		FILE *initf = fopen(argv[3], "rb");
+		if(!initf) {
+			fprintf(stderr, "Cannot open file %s\n", argv[3]);
+			return -1;
+		}
+
+		int size = oInitStat.st_size;
+		if(size > 2048) {
+			fprintf(stderr, "WARNING: Init data exceeds 256 ADDRESS:VALUE pairs, clipping!!!!\n");
+			size = 2048;
+		}
+
+		fread(hdr->reg_init, 1, size, initf);
+	}
+
 	checksum_header(hdr);
 
 	FILE *out = fopen("BOOT.BIN", "wb");
 	fwrite(hdr, 1, sizeof(BOOTROM_HEADER)+oStat.st_size, out);
 	fclose(out);
+	fclose(fp);
 
 	free(hdr);
 

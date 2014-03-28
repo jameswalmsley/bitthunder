@@ -20,6 +20,7 @@ image_name = None
 brace = 0
 late_close_brace = False
 bootloader = None
+init_data = None
 
 item_list = []
 
@@ -27,29 +28,30 @@ for line in file:
     linenum += 1
     if line.strip().startswith("#"):
         continue
-        
+
     if image_name == None and ':' in line:
         image_name = line.split(':')[0].strip()
 
     if '{' in line:
         brace += 1
         line = line.split('{')[1].strip()
-   
+
     if '}' in line:
         line = line.split('}')[0].strip()
         brace -= 1
 
     if len(line) > 0 and brace > 0:
-        image_item = bootgen.parse_line(line.strip(), linenum)        
+        image_item = bootgen.parse_line(line.strip(), linenum)
         item_list.append(image_item)
         if image_item.attribute == "bootloader":
             bootloader = image_item
-
+        if image_item.attribute == "init":
+            init_data = image_item
 
     if late_close_brace == True:
         late_close_brace = False
         brace -= 1
-    
+
 
 for item in item_list:
     bootgen.process_item(item)
@@ -67,5 +69,7 @@ for line in output:
     if "Entry point" in line:
         entry_address = line.split(':')[1].strip()
 
-os.system("./bootgen %s %s" % (bootloader.binfile, entry_address))
-
+if init_data == None:
+    os.system("./bootgen %s %s" % (bootloader.binfile, entry_address))
+else:
+    os.system("./bootgen %s %s %s" % (bootloader.binfile, entry_address, init_data.binfile))
