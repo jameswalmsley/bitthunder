@@ -35,7 +35,9 @@ static int usage(BT_HANDLE hStdout, char **argv) {
 }
 
 static void print_addr(BT_HANDLE hStdout, BT_u32 *p) {
-	bt_fprintf(hStdout, "0x%08x : 0x%08x\n", (BT_u32 ) p, *p);
+	volatile BT_u32 *vaddr = bt_ioremap(p, BT_SIZE_4K);
+	bt_fprintf(hStdout, "0x%08x : 0x%08x\n", (BT_u32 ) p, *vaddr);
+	bt_iounmap(vaddr);
 }
 
 static int bt_iomem(BT_HANDLE hShell, int argc, char **argv) {
