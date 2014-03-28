@@ -84,7 +84,7 @@ static BT_ERROR sdhci_irq_handler(BT_u32 ulIRQ, void *pParam) {
 		if(hSDHCI->pRegs->PRESENT_STATE & STATE_CARD_INSERTED) {
 
 			// Enable the SDHCI clock.
-			hSDHCI->pRegs->CLOCK_CONTROL |=  CLOCK_INTERNAL_ENABLE;
+			hSDHCI->pRegs->CLOCK_CONTROL |=  CLOCK_INTERNAL_ENABLE | CLOCK_SD_ENABLE;
 			//
 			// On insertion, the SD controllers clock is enabled!
 			//
@@ -106,7 +106,11 @@ static BT_ERROR sdhci_irq_handler(BT_u32 ulIRQ, void *pParam) {
 		if(!(hSDHCI->pRegs->PRESENT_STATE & STATE_CARD_INSERTED)) {
 
 			// Disable the SDHCI clock.
-			hSDHCI->pRegs->CLOCK_CONTROL &= ~CLOCK_INTERNAL_ENABLE;
+			if(hSDHCI->ulFlags & SDHCI_FLAGS_ALWAYS_PRESENT) {
+				hSDHCI->pRegs->CLOCK_CONTROL |= CLOCK_INTERNAL_ENABLE | CLOCK_SD_ENABLE;
+			} else {
+				hSDHCI->pRegs->CLOCK_CONTROL &= ~CLOCK_INTERNAL_ENABLE;
+			}
 
 			if(hSDHCI->pfnEventReceiver) {
 				hSDHCI->pfnEventReceiver(hSDHCI->pHost, BT_MMC_CARD_REMOVED, BT_TRUE);
@@ -130,18 +134,27 @@ static BT_ERROR sdhci_cleanup(BT_HANDLE hSDIO) {
 }
 
 static BT_ERROR sdhci_enable_clock(BT_HANDLE hSDIO) {
-	hSDIO->pRegs->CLOCK_CONTROL |= 4;
+	hSDIO->pRegs->CLOCK_CONTROL |= CLOCK_INTERNAL_ENABLE | CLOCK_SD_ENABLE;
+	//BT_kDebug("Clock Enable");
 	return BT_ERR_NONE;
 }
 
 static BT_ERROR sdhci_disable_clock(BT_HANDLE hSDIO) {
 	hSDIO->pRegs->CLOCK_CONTROL &= ~4;
+	BT_kDebug("Clock Disable");
+	return BT_ERR_NONE;
+}
+
+static BT_ERROR sdhci_set_clock(BT_HANDLE hSDIO, BT_u32 ulRate) {
+
 	return BT_ERR_NONE;
 }
 
 static BT_ERROR sdhci_request(BT_HANDLE hSDIO, MMC_COMMAND *pCommand) {
 
-	BT_u32 timeout = 100;
+	//sdhci_enable_clock(hSDIO);
+
+	BT_u32 timeout = 100000;
 	// Wait until the the command is not inhibited.
 	while(hSDIO->pRegs->PRESENT_STATE & (STATE_COMMAND_INHIBIT_CMD | STATE_COMMAND_INHIBIT_DAT)) {
 		if(!timeout) {
@@ -157,8 +170,13 @@ static BT_ERROR sdhci_request(BT_HANDLE hSDIO, MMC_COMMAND *pCommand) {
 		hSDIO->pRegs->BLOCK_COUNT = pCommand->ulBlocks;
 	}
 
-	hSDIO->pRegs->NORMAL_INT_STATUS = 0xFFFF;
-	hSDIO->pRegs->ERROR_INT_STATUS = 0xFFFF;
+	if(hSDIO->pRegs->ERROR_INT_STATUS) {
+		BT_kDebug("Unhandled HOST error (%08x)", hSDIO->pRegs->ERROR_INT_STATUS);
+	}
+
+	hSDIO->pRegs->NORMAL_INT_STATUS = 2;
+	//hSDIO->pRegs->NORMAL_INT_STATUS = 0xFFFF;
+	//hSDIO->pRegs->ERROR_INT_STATUS = 0xFFFF;
 
 	hSDIO->pRegs->ARGUMENT = pCommand->arg;
 
@@ -203,6 +221,7 @@ static BT_ERROR sdhci_request(BT_HANDLE hSDIO, MMC_COMMAND *pCommand) {
 
 	hSDIO->pRegs->COMMAND = cmd_reg;
 
+	timeout = 100000;
 	// Wait until the command is complete.
 	while(!(hSDIO->pRegs->NORMAL_INT_STATUS & NORMAL_INT_COMMAND_COMPLETE)) {
 		if(hSDIO->pRegs->ERROR_INT_STATUS & ERROR_INT_COMMAND_TIMEOUT) {
@@ -210,7 +229,13 @@ static BT_ERROR sdhci_request(BT_HANDLE hSDIO, MMC_COMMAND *pCommand) {
 			return BT_ERR_GENERIC;
 		}
 
+		if(!timeout) {
+			BT_kDebug("Timeout waiting for command complete");
+			return BT_ERR_GENERIC;
+		}
+
 		BT_ThreadYield();
+		//timeout--;
 	}
 
 	// Clear the command complete interrupt status field.
@@ -228,7 +253,7 @@ static BT_s32 sdhci_read(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer) {
 	register BT_u8 *p = (BT_u8 *) pBuffer;
 
 	BT_u32 ulRead = 0;
-	BT_u32 timeout = 1000;
+	BT_u32 timeout = 10000;
 
 	while(ulRead < ulBlocks) {
 
@@ -285,10 +310,10 @@ static BT_s32 sdhci_read(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer) {
 				return BT_ERR_GENERIC;
 			}
 		} else {
-			timeout = 100;
+			timeout = 10000;
 		}
 
-		BT_ThreadSleep(1);
+		BT_ThreadYield();
 	}
 
 	if(ulRead != ulBlocks) {
@@ -337,6 +362,10 @@ static BT_s32 sdhci_write(BT_HANDLE hSDIO, BT_u32 ulSize, void *pBuffer) {
 	}
 
 	hSDIO->pRegs->NORMAL_INT_STATUS = NORMAL_INT_TRANSFER_COMPLETE;
+
+	if(hSDIO->pRegs->NORMAL_INT_STATUS & NORMAL_INT_BUF_READ_READY) {
+		hSDIO->pRegs->NORMAL_INT_STATUS = NORMAL_INT_BUF_READ_READY;
+	}
 
 	return (BT_s32) ulWritten;
 }
@@ -439,7 +468,7 @@ static BT_ERROR sdhci_initialise(BT_HANDLE hSDIO) {
 	// Enable the SDIO clock, and attempt to reset the card if present.
 	BT_u32 reg = hSDIO->pRegs->CLOCK_CONTROL;
 	reg &= 0x00FF;	// Mask out the clock selection freq!
-	reg |= (1 << 8);	// Set SDClk to be base (50mhz / 128 ~400khz).
+	//reg |= (1 << 8);	// Set SDClk to be base (50mhz / 128 ~400khz).
 	reg |= 1;			// Enable internal SDHCI clock.
 	hSDIO->pRegs->CLOCK_CONTROL = reg;
 
@@ -474,6 +503,7 @@ static BT_ERROR sdhci_initialise(BT_HANDLE hSDIO) {
 											| 	NORMAL_INT_CARD_REMOVED
 											| 	NORMAL_INT_COMMAND_COMPLETE
 		                                    |	NORMAL_INT_BUF_READ_READY
+		                                    | 	NORMAL_INT_BUF_WRITE_READY
 		                                    | 	NORMAL_INT_TRANSFER_COMPLETE;
 
 	// Ensure we don't have any card-detection interrupts on init,

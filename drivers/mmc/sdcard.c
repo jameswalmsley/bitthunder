@@ -130,7 +130,7 @@ static void sd_manager_sm(void *pData) {
 
 				Error = pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
 				if(Error) {
-					BT_kDebug("%s: SEND_IF_COND timed out.");
+					BT_kDebug("SEND_IF_COND timed out.");
 					goto next_host;
 				}
 
@@ -383,6 +383,7 @@ static BT_s32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount,
 		oCommand.bCRC 			= BT_TRUE;
 		oCommand.ulResponseType = 48;
 		oCommand.bIsData		= BT_FALSE;
+		oCommand.response[0] 	= 0;
 
 		Error = hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
 		if(Error) {
@@ -418,6 +419,7 @@ static BT_s32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount,
 			oCommand.bCRC 			= BT_TRUE;
 			oCommand.ulResponseType = 48;
 			oCommand.bIsData		= BT_FALSE;
+			oCommand.response[0] 	= 0;
 
 			Error = hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
 			if(Error) {
