@@ -4,6 +4,8 @@
  **/
 #include <bitthunder.h>
 
+BT_DEF_MODULE_NAME	("zynq:sdio")
+
 #include "slcr.h"
 //#include "sdio.h"
 #include "mmc/host.h"
@@ -119,26 +121,28 @@ static BT_HANDLE zynq_sdhci_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR 
 	case 0:
 		bEnabled = (pRegs->SDIO_CLK_CTRL & ZYNQ_SLCR_CLK_CTRL_CLKACT_0);
 		if(bEnabled) {	// Attempt to reset the device!
-			pRegs->SLCR_UNLOCK = 0xDF0D;
+			zynq_slcr_unlock(pRegs);
 			pRegs->SDIO_RST_CTRL |= 0x11;
 			pRegs->SDIO_RST_CTRL &= ~0x11;
-			pRegs->SLCR_LOCK = 0x767B;
+			zynq_slcr_lock(pRegs);
 		}
 		break;
 
 	case 1:
 		bEnabled = (pRegs->SDIO_CLK_CTRL & ZYNQ_SLCR_CLK_CTRL_CLKACT_0);
 		if(bEnabled) {
-			pRegs->SLCR_UNLOCK = 0xDF0D;
+			zynq_slcr_unlock(pRegs);
 			pRegs->SDIO_RST_CTRL |= 0x22;
 			pRegs->SDIO_RST_CTRL &= ~0x22;
-			pRegs->SLCR_LOCK = 0x767B;
+			zynq_slcr_lock(pRegs);
 		}
 		break;
 
 	default:
 		break;
 	}
+
+	bt_iounmap(pRegs);
 
 	if(!bEnabled) {
 		Error = BT_ERR_GENERIC;
