@@ -5,6 +5,11 @@
 #include "bt_if_dir.h"
 #include "bt_if_inode.h"
 
+struct bt_fsinfo {
+	BT_u64	available;
+	BT_u64	total;
+};
+
 typedef struct _BT_IF_FS {
 	BT_u32		ulFlags;
 	#define 	BT_FS_FLAG_NODEV	0x00000001	// No underlying block device is required
@@ -22,6 +27,7 @@ typedef struct _BT_IF_FS {
 	BT_HANDLE	(*pfnGetInode)	(BT_HANDLE hMount, const BT_i8 *szpPath, BT_ERROR *pError);
 	BT_ERROR	(*pfnUnlink)	(BT_HANDLE hMount, const BT_i8 *szpPath);
 	BT_ERROR	(*pfnRename)	(BT_HANDLE hMount, const BT_i8 *szpPathA, const BT_i8 *szpPathB);
+	BT_ERROR	(*pfnInfo)		(BT_HANDLE hMount, struct bt_fsinfo *info);
 } BT_IF_FS;
 
 #endif
