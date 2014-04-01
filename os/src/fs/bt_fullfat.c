@@ -163,6 +163,17 @@ static BT_ERROR fullfat_rename(BT_HANDLE hMount, const BT_i8 *szpPathA, const BT
 	return (BT_ERROR) ffError;
 }
 
+static BT_ERROR fullfat_info(BT_HANDLE hMount, struct bt_fsinfo *fsinfo) {
+
+	BT_FF_MOUNT *pMount = (BT_FF_MOUNT *) hMount;
+	FF_ERROR ffError;
+
+	fsinfo->total 		= FF_GetVolumeSize(pMount->pIoman);
+	fsinfo->available 	= FF_GetFreeSize(pMount->pIoman, &ffError);
+
+	return BT_ERR_NONE;
+}
+
 static BT_ERROR fullfat_file_cleanup(BT_HANDLE hFile) {
 
 	BT_FF_FILE *pFile = (BT_FF_FILE *) hFile;
@@ -392,6 +403,7 @@ static const BT_IF_FS oFilesystemInterface = {
 	.pfnGetInode 	= fullfat_open_inode,
 	.pfnUnlink 		= fullfat_unlink,
 	.pfnRename 		= fullfat_rename,
+	.pfnInfo		= fullfat_info,
 };
 
 static const BT_IF_HANDLE oHandleInterface = {
