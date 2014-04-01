@@ -37,4 +37,8 @@ BT_ERROR BT_Rename(const BT_i8 *szpPathA, const BT_i8 *szpPathB);
 BT_ERROR BT_GetCwd(BT_i8 *buf, BT_u32 len);
 BT_ERROR BT_ChDir(const BT_i8 *path);
 
+BT_MOUNTPOINT *BT_GetMountPoint(const BT_i8 *szpPath);
+BT_MOUNTPOINT *BT_GetNextMountPoint(BT_MOUNTPOINT *pMount);
+BT_ERROR BT_GetMountFSInfo(BT_MOUNTPOINT *pMount, struct bt_fsinfo *fsinfo);
+
 #endif

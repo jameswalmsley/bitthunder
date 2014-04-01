@@ -97,7 +97,7 @@ static BT_MOUNTPOINT *find_mountpoint(const BT_i8 *szpPath, BT_u32 len) {
 	return NULL;
 }
 
-static BT_MOUNTPOINT *GetMountPoint(const BT_i8 *szpPath) {
+BT_MOUNTPOINT *BT_GetMountPoint(const BT_i8 *szpPath) {
 
 	BT_MOUNTPOINT *pTarget = NULL;
 	BT_u32 path_len = strlen(szpPath);
@@ -186,9 +186,10 @@ BT_ERROR BT_Mount(const BT_i8 *src, const BT_i8 *target, const BT_i8 *filesystem
 			return BT_ERR_NO_MEMORY;
 		}
 
-		pMountPoint->hMount = hMount;
-		pMountPoint->pFS = fs;
-		pMountPoint->szpPath = BT_kMalloc(i+1);
+		pMountPoint->hMount 	= hMount;
+		pMountPoint->hVolume 	= NULL;
+		pMountPoint->pFS 		= fs;
+		pMountPoint->szpPath 	= BT_kMalloc(i+1);
 		strncpy(pMountPoint->szpPath, target, i);
 		pMountPoint->szpPath[i] = 0;
 
@@ -198,6 +199,9 @@ BT_ERROR BT_Mount(const BT_i8 *src, const BT_i8 *target, const BT_i8 *filesystem
 	}
 
 	BT_HANDLE hVolume = BT_Open(src, 0, &Error);
+	if(!hVolume) {
+		// -- !
+	}
 
 	if(fs) {
 		const BT_IF_FS *pFs = fs->hFS->h.pIf->oIfs.pFilesystemIF;
@@ -229,6 +233,7 @@ BT_ERROR BT_Mount(const BT_i8 *src, const BT_i8 *target, const BT_i8 *filesystem
 	}
 
 	pMountPoint->hMount 	= hMount;
+	pMountPoint->hVolume	= hVolume;
 	pMountPoint->pFS 		= fs;
 	pMountPoint->szpPath  	= BT_kMalloc(i+1);
 	strncpy(pMountPoint->szpPath, target, i);
@@ -262,32 +267,32 @@ BT_u32 BT_GetModeFlags(const BT_i8 *mode) {
 
 	while(*mode) {
 		switch(*mode) {
-			case 'r':	// Allow Read
-			case 'R':
-				ulModeFlags |= BT_FS_MODE_READ;
-				break;
+		case 'r':	// Allow Read
+		case 'R':
+			ulModeFlags |= BT_FS_MODE_READ;
+			break;
 
-			case 'w':	// Allow Write
+		case 'w':	// Allow Write
 		case 'W':
-				ulModeFlags |= BT_FS_MODE_WRITE;
-				ulModeFlags |= BT_FS_MODE_CREATE;	// Create if not exist.
-				ulModeFlags |= BT_FS_MODE_TRUNCATE;
-				break;
+			ulModeFlags |= BT_FS_MODE_WRITE;
+			ulModeFlags |= BT_FS_MODE_CREATE;	// Create if not exist.
+			ulModeFlags |= BT_FS_MODE_TRUNCATE;
+			break;
 
-			case 'a':	// Append new writes to the end of the file.
-			case 'A':
-				ulModeFlags |= BT_FS_MODE_WRITE;
-				ulModeFlags |= BT_FS_MODE_APPEND;
-				ulModeFlags |= BT_FS_MODE_CREATE;	// Create if not exist.
-				break;
+		case 'a':	// Append new writes to the end of the file.
+		case 'A':
+			ulModeFlags |= BT_FS_MODE_WRITE;
+			ulModeFlags |= BT_FS_MODE_APPEND;
+			ulModeFlags |= BT_FS_MODE_CREATE;	// Create if not exist.
+			break;
 
-			case '+':	// Update the file, don't Append!
-				ulModeFlags |= BT_FS_MODE_READ;	// RW Mode
-				ulModeFlags |= BT_FS_MODE_WRITE;	// RW Mode
-				break;
+		case '+':	// Update the file, don't Append!
+			ulModeFlags |= BT_FS_MODE_READ;		// RW Mode
+			ulModeFlags |= BT_FS_MODE_WRITE;	// RW Mode
+			break;
 
-			default:	// b|B flags not supported (Binary mode is native anyway).
-				break;
+		default:	// b|B flags not supported (Binary mode is native anyway).
+			break;
 		}
 		mode++;
 	}
@@ -314,7 +319,7 @@ BT_HANDLE BT_Open(const BT_i8 *szpPath, BT_u32 mode, BT_ERROR *pError) {
 	}
 #endif
 
-	BT_MOUNTPOINT *pMount = GetMountPoint(absolute_path);
+	BT_MOUNTPOINT *pMount = BT_GetMountPoint(absolute_path);
 	if(!pMount) {
 		Error = BT_ERR_GENERIC;
 		goto err_free_out;
@@ -339,7 +344,7 @@ err_out:
 }
 
 BT_ERROR BT_MkDir(const BT_i8 *szpPath) {
-	BT_MOUNTPOINT *pMount = GetMountPoint(szpPath);
+	BT_MOUNTPOINT *pMount = BT_GetMountPoint(szpPath);
 	if(!pMount) {
 		return BT_ERR_GENERIC;
 	}
@@ -368,7 +373,7 @@ BT_ERROR BT_RmDir(const BT_i8 *szpPath) {
 	}
 #endif
 
-	BT_MOUNTPOINT *pMount = GetMountPoint(absolute_path);
+	BT_MOUNTPOINT *pMount = BT_GetMountPoint(absolute_path);
 	if(!pMount) {
 		Error = BT_ERR_GENERIC;
 		goto err_free_out;
@@ -408,7 +413,7 @@ BT_HANDLE BT_OpenDir(const BT_i8 *szpPath, BT_ERROR *pError) {
 	}
 #endif
 
-	BT_MOUNTPOINT *pMount = GetMountPoint(absolute_path);
+	BT_MOUNTPOINT *pMount = BT_GetMountPoint(absolute_path);
 	if(!pMount) {
 		Error = BT_ERR_GENERIC;
 		goto err_free_out;
@@ -453,7 +458,7 @@ BT_HANDLE BT_GetInode(const BT_i8 *szpPath, BT_ERROR *pError) {
 	}
 #endif
 
-	BT_MOUNTPOINT *pMount = GetMountPoint(absolute_path);
+	BT_MOUNTPOINT *pMount = BT_GetMountPoint(absolute_path);
 	if(!pMount) {
 		Error = BT_ERR_GENERIC;
 		goto err_free_out;
@@ -518,7 +523,7 @@ BT_ERROR BT_Unlink(const BT_i8 *szpPath) {
 	}
 #endif
 
-	BT_MOUNTPOINT *pMount = GetMountPoint(absolute_path);
+	BT_MOUNTPOINT *pMount = BT_GetMountPoint(absolute_path);
 	if(!pMount) {
 		Error = BT_ERR_GENERIC;
 		goto err_free_out;
@@ -539,12 +544,12 @@ err_out:
 }
 
 BT_ERROR BT_Rename(const BT_i8 *szpPathA, const BT_i8 *szpPathB) {
-	BT_MOUNTPOINT *pMountA = GetMountPoint(szpPathA);
+	BT_MOUNTPOINT *pMountA = BT_GetMountPoint(szpPathA);
 	if(!pMountA) {
 		return BT_ERR_GENERIC;
 	}
 
-	BT_MOUNTPOINT *pMountB = GetMountPoint(szpPathB);
+	BT_MOUNTPOINT *pMountB = BT_GetMountPoint(szpPathB);
 	if(!pMountB) {
 		return BT_ERR_GENERIC;
 	}
@@ -602,3 +607,33 @@ BT_ERROR BT_ChDir(const BT_i8 *path) {
 	return BT_ERR_NONE;
 }
 #endif
+
+BT_MOUNTPOINT *BT_GetNextMountPoint(BT_MOUNTPOINT *pMount) {
+	BT_MOUNTPOINT *ret = NULL;
+
+	if(!pMount) {
+		ret = (BT_MOUNTPOINT *) g_mountpoints.next;
+	} else {
+		ret = (BT_MOUNTPOINT *) pMount->item.next;
+	}
+
+	if(ret == (BT_MOUNTPOINT *) &g_mountpoints) {
+		ret = NULL;
+	}
+
+	return ret;
+}
+
+BT_ERROR BT_GetMountFSInfo(BT_MOUNTPOINT *pMount, struct bt_fsinfo *fsinfo) {
+	const BT_IF_FS *pFS = pMount->pFS->hFS->h.pIf->oIfs.pFilesystemIF;
+	if(pFS->pfnInfo) {
+		return pFS->pfnInfo(pMount->hMount, fsinfo);
+	}
+
+	return BT_ERR_UNIMPLEMENTED;
+}
+
+BT_ERROR BT_GetFilesystemInfo(const BT_i8 *szpPath, struct bt_fsinfo *fsinfo) {
+	//BT_MOUNTPOINT *pMount = BT_GetMount
+	return BT_ERR_NONE;
+}
