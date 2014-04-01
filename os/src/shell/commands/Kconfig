@@ -43,6 +43,12 @@ config SHELL_CMD_CP_BUFFER_SIZE
 	depends on SHELL_CMD_CP
 	default 4096
 
+config SHELL_CMD_DF
+	bool "df"
+	depends on SHELL
+	default n
+	select FILE
+
 config SHELL_CMD_ECHO
 	bool "echo"
 	depends on SHELL
