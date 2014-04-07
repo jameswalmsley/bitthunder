@@ -77,7 +77,7 @@ static BT_ERROR i2c_irq_handler(BT_u32 ulIRQ, void *pParam) {
 				} else {
 					hI2C->pRegs->TRANSFER_SIZE = hI2C->p_msg->len;
 					if(!hI2C->bHold) {
-						hI2C->pRegs->CONTROL &= CONTROL_HOLD;
+						hI2C->pRegs->CONTROL &= ~CONTROL_HOLD;
 					}
 				}
 
