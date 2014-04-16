@@ -26,6 +26,7 @@ typedef struct {
 	BT_QEI_SIGNAL_MODE	eSignalMode;
 	BT_QEI_DIRECTION	eDirection;
 	BT_u32				ulVelocityUpdateRate;
+	BT_BOOL				bUseIndexToResetPosition;
 } BT_QEI_CONFIG;
 
 

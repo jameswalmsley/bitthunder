@@ -31,6 +31,7 @@ struct _BT_OPAQUE_HANDLE {
 	LPC17xx_QEI_REGS	   		   *pRegs;
 	const BT_INTEGRATED_DEVICE	   *pDevice;
 	BT_u32							id;
+	BT_BOOL							bUseIndexToResetPosition;
 	struct _QEI_CALLBACK_HANDLE	   *pCallback;
 };
 
@@ -59,7 +60,8 @@ BT_ERROR BT_NVIC_IRQ_47(void) {
 		pCallBack = pCallBack->pNext;
 	}
 
-	pRegs->QEICON = 0x02;
+	if (hQEI->bUseIndexToResetPosition)
+		pRegs->QEICON = LPC17xx_QEI_QEICON_RESPI;
 
 	return 0;
 }
@@ -68,7 +70,7 @@ static void ResetQEI(BT_HANDLE hQEI)
 {
 	volatile LPC17xx_QEI_REGS *pRegs = hQEI->pRegs;
 
-	pRegs->QEICON = 0x0F;
+	pRegs->QEICON = LPC17xx_QEI_QEICON_RESP | LPC17xx_QEI_QEICON_RESV | LPC17xx_QEI_QEICON_RESI;
 	pRegs->QEIIEC = 0x1FFF;
 }
 
@@ -163,6 +165,13 @@ static BT_ERROR qei_setconfig(BT_HANDLE hQEI, BT_QEI_CONFIG *pConfig) {
 	pRegs->QEILOAD = ulInputClk / pConfig->ulVelocityUpdateRate;
 
 	pRegs->FILTER = 5;
+
+	hQEI->bUseIndexToResetPosition = pConfig->bUseIndexToResetPosition;
+
+	if (pConfig->bUseIndexToResetPosition)
+	{
+		pRegs->QEICON = LPC17xx_QEI_QEICON_RESPI;
+	}
 
 	return BT_ERR_NONE;
 }
