@@ -1,5 +1,5 @@
 /**
- *	@brief		Memory Manager - Page Allocator
+ *	@brief		Page Allocator
  *
  *	Provides the Kernel with a simple API for managing PAGE pools.
  *	By default the Kernel will initialise a main PAGE pool. This is used for almost
