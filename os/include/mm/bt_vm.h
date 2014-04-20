@@ -1,8 +1,28 @@
+/**
+ *	@brief	  	Virtual Memory Manager
+ *
+ *	Provides the kernel with a comprehensive API to manage virtual memory mappings.
+ *	The API is used within the kernel to allocate pages, and map them into various regions
+ *	of a process's virtual memory space.
+ *
+ *	The API can also be used to share virtual memory mappings between processes, e.g. a
+ *	shared memory region etc.
+ *	
+ *	@file		bt_vm.h
+ *	@author		James Walmsley <james@fullfat-fs.co.uk>
+ *	@ingroup	MM
+ *
+ *	@copyright	(c) 2013 James Walmsley
+ **/
 #ifndef _BT_VM_H_
 #define _BT_VM_H_
 
 #include <collections/bt_list.h>
 
+/**
+ *	@brief	Used to describe a segment (region) of a virtual memory space.
+ *
+ **/
 struct bt_segment {
 	struct bt_list_head list;
 	struct bt_list_head	shared_list;
@@ -19,6 +39,10 @@ struct bt_segment {
 	#define				BT_SEG_FREE		0x80000000
 };
 
+/**
+ *	@brief	Used to describe a Virtual Memory Map.
+ *
+ **/
 struct bt_vm_map {
 	struct bt_list_head segments;		///< List of segments.
 	BT_u32				refcount;		///< Map reference count.
@@ -58,26 +82,144 @@ struct bt_mmumap {
 #define BT_VMT_DMA         3
 #define BT_VMT_IO          4
 
+/**
+ *	@kernel
+ *	@private
+ *	@brief	Initialises the Virtual Memory Manager
+ *
+ **/
 void bt_vm_init(void);
+
+/**
+ *	@kernel
+ *	@public
+ *	@brief	Creates a virtual memory map.
+ *
+ **/
 struct bt_vm_map *bt_vm_create(void);
+
+/**
+ *	@kernel
+ *	@public
+ *	@brief	Destroy's a virtual memory map, and free's any allocated pages back to the page allocator.
+ *
+ **/
 void bt_vm_destroy(struct bt_vm_map * map);
+
+/**
+ *	@kernel
+ *	@public
+ *	@brief	Get's a pointer to the kernel's virtual memory map.
+ *
+ **/
 struct bt_vm_map *bt_vm_get_kernel_map(void);
+
+/**
+ *	@kernel
+ *	@public
+ *	@brief	Translates the address of the currently active VM map in the MMU.
+ *
+ *	@note This uses the MMU layer to make the translation, and so this API can only translate the active region.
+ **/
 bt_paddr_t bt_vm_translate(bt_vaddr_t addr, BT_u32 size);
+
+/**
+ *	@kernel
+ *	@public
+ *	@brief	Maps a region of memory into the specified virtual memory map.
+ *
+ **/
 bt_vaddr_t bt_vm_map_region(struct bt_vm_map *map, bt_paddr_t pa, bt_vaddr_t va, BT_u32 size, BT_u32 type);
+
+/**
+ *	@kernel
+ *	@public
+ *	@brief	Unmaps a region of memory from the specified virtual memory map.
+ *
+ **/
 void bt_vm_unmap_region(struct bt_vm_map *map, bt_vaddr_t va);
 
 #define BT_VM_ALLOC_ANYWHERE	0x01
+
+/**
+ *	@kernel
+ *	@public
+ *	@brief	Allocates some memory into the specified task's virtual memory map.
+ *
+ **/
 BT_ERROR bt_vm_allocate(struct bt_task *task, void **addr, BT_u32 size, BT_u32 flags);
+
+/**
+ *	@kernel
+ *	@public
+ *	@brief	Free's some memory from the specified task's virtual memory map.
+ *
+ **/
 BT_ERROR bt_vm_free(struct bt_task *task, void *addr);
 
+/**
+ *	@kernel
+ *	@private
+ *	@brief	Create a new PGD map with the MMU driver.
+ *
+ **/
 extern bt_pgd_t bt_mmu_newmap(void);
+
+/**
+ *	@kernel
+ *	@private
+ *	@brief	Kills/cleanup a PGD map from the MMU driver.
+ *
+ **/
 extern void bt_mmu_terminate(bt_pgd_t pgd);
+
+/**
+ *	@kernel
+ *	@private
+ *	@brief	Switch the MMU's active memory map to the specified PGD.
+ *
+ **/
 extern void bt_mmu_switch(bt_pgd_t pgd);
+
+/**
+ *	@kernel
+ *	@private
+ *	@brief	Flush the MMUs translation-lookaside buffers.
+ *
+ **/
 extern void bt_mmu_flush_tlb(void);
+
+/**
+ *	@kernel
+ *	@private
+ *	@brief	Translate a virtual address to a physical address using the specified PGD.
+ *
+ **/
 extern bt_paddr_t bt_mmu_extract(bt_pgd_t pgd, bt_vaddr_t, BT_u32 size);
+
+/**
+ *	@kernel
+ *	@private
+ *	@brief	Initialise the MMU driver for the system.
+ *
+ **/
 extern void bt_mmu_init(struct bt_mmumap *mmumap);
+
+/**
+ *
+ *
+ **/
 extern void bt_mmu_killmap(bt_pgd_t pgd);
+
+/**
+ *	@kernel
+ *	@private
+ *	@brief	Get the MMU driver to apply a virtual memory mapping on the specified PGD.
+ *
+ **/
 extern int bt_mmu_map(bt_pgd_t pgd, bt_paddr_t pa, bt_vaddr_t va, BT_u32 size, int type);
+
+
 extern bt_pgd_t bt_mmu_get_kernel_pgd(void);
 
 #ifndef BT_CONFIG_USE_VIRTUAL_ADDRESSING
