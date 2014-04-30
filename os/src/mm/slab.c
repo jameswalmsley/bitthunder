@@ -16,6 +16,7 @@
 #include <collections/bt_list.h>
 #include <mm/bt_mm.h>
 #include <mm/bt_page.h>
+#include <string.h>
 
 
 #define SLAB_LOCK(cache)	if(cache->slab_mutex) BT_kMutexPend(cache->slab_mutex, BT_INFINITE_TIMEOUT)
@@ -241,6 +242,30 @@ void BT_kFree(void *p) {
 	} else {
 		bt_page_free((BT_PHYS_ADDR) bt_virt_to_phys(tag), tag->size+sizeof(struct MEM_TAG)+sizeof(struct MAGIC_TAG));
 	}
+}
+
+void *BT_kRealloc(void *p, BT_u32 ulSize) {
+
+	void *n = NULL;
+	if((p) && (ulSize)) {
+		n = BT_kMalloc(ulSize);
+		if (n)
+		{
+			struct MEM_TAG *tag = (struct MEM_TAG *) p;
+			tag -= 1;
+			if (ulSize > tag->size)
+				memcpy(n, p, tag->size);
+			else
+				memcpy(n, p, ulSize);
+		}
+	}
+	else if((p) && (!ulSize)) {
+		BT_kFree(p);
+	}
+	else if((!p) && (ulSize)) {
+		n = BT_kMalloc(ulSize);
+	}
+	return n;
 }
 
 BT_ERROR bt_slab_info(struct bt_slab_info *pInfo) {

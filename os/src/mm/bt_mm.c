@@ -31,6 +31,10 @@ void free(void *p) {
 	BT_kFree(p);
 }
 
+void *realloc(void *p, int size) {
+	return BT_kRealloc(p, size);
+}
+
 
 #ifdef BT_CONFIG_KERNEL_FREERTOS
 void *pvPortMalloc(int size) {

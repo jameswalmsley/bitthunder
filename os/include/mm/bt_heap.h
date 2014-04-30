@@ -48,5 +48,12 @@ void *BT_kMalloc(BT_u32 ulSize);
  **/
 void BT_kFree(void *ptr);
 
+/**
+ *	@kernel
+ *	@public
+ * 	@brief	Re-allocates / allocates memory.
+ *
+ **/
+void *BT_kRealloc(void *p, BT_u32 ulSize);
 
 #endif
