@@ -145,10 +145,10 @@ static BT_ERROR sdhci_disable_clock(BT_HANDLE hSDIO) {
 	return BT_ERR_NONE;
 }
 
-static BT_ERROR sdhci_set_clock(BT_HANDLE hSDIO, BT_u32 ulRate) {
+/*static BT_ERROR sdhci_set_clock(BT_HANDLE hSDIO, BT_u32 ulRate) {
 
 	return BT_ERR_NONE;
-}
+}*/
 
 static BT_ERROR sdhci_request(BT_HANDLE hSDIO, MMC_COMMAND *pCommand) {
 
