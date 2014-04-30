@@ -468,7 +468,7 @@ static BT_ERROR sdhci_initialise(BT_HANDLE hSDIO) {
 	// Enable the SDIO clock, and attempt to reset the card if present.
 	BT_u32 reg = hSDIO->pRegs->CLOCK_CONTROL;
 	reg &= 0x00FF;	// Mask out the clock selection freq!
-	//reg |= (1 << 8);	// Set SDClk to be base (50mhz / 128 ~400khz).
+	reg |= (1 << 8);	// Set SDClk to be base (50mhz / 128 ~400khz).
 	reg |= 1;			// Enable internal SDHCI clock.
 	hSDIO->pRegs->CLOCK_CONTROL = reg;
 
