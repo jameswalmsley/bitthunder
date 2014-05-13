@@ -204,6 +204,8 @@ typedef struct {
 	FF_PARTITION	*pPartition;		///< Pointer to a partition description.
 	FF_BUFFER		*pBuffers;			///< Pointer to the first buffer description.
 	void			*pSemaphore;		///< Pointer to a Semaphore object. (For buffer description modifications only!).
+	void			*pDirSemaphore;		///< Pointer to a Semaphore object. (For buffer directory modifications only!).
+	void			*pFATSemaphore;		///< Pointer to a Semaphore object. (For buffer FAT modifications only!).
 #ifdef FF_BLKDEV_USES_SEM
 	void			*pBlkDevSemaphore;	///< Semaphore to guarantee Atomic access to the underlying block device, if required.
 #endif

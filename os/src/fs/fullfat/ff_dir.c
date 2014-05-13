@@ -87,24 +87,26 @@ static void FF_ProcessShortName(FF_T_INT8 *name);
 #endif
 
 void FF_lockDIR(FF_IOMAN *pIoman) {
-	FF_PendSemaphore(pIoman->pSemaphore);	// Use Semaphore to protect DIR modifications.
-	{
-		while((pIoman->Locks & FF_DIR_LOCK)) {
-			FF_ReleaseSemaphore(pIoman->pSemaphore);
-			FF_Yield();						// Keep Releasing and Yielding until we have the DIR protector.
-			FF_PendSemaphore(pIoman->pSemaphore);
-		}
-		pIoman->Locks |= FF_DIR_LOCK;
-	}
-	FF_ReleaseSemaphore(pIoman->pSemaphore);
+	FF_PendSemaphore(pIoman->pDirSemaphore);	// Use Semaphore to protect DIR modifications.
+	//FF_PendSemaphore(pIoman->pSemaphore);	// Use Semaphore to protect DIR modifications.
+	//{
+	//	while((pIoman->Locks & FF_DIR_LOCK)) {
+	//		FF_ReleaseSemaphore(pIoman->pSemaphore);
+	//		FF_Yield();						// Keep Releasing and Yielding until we have the DIR protector.
+	//		FF_PendSemaphore(pIoman->pSemaphore);
+	//	}
+	//	pIoman->Locks |= FF_DIR_LOCK;
+	//}
+	//FF_ReleaseSemaphore(pIoman->pSemaphore);
 }
 
 void FF_unlockDIR(FF_IOMAN *pIoman) {
-	FF_PendSemaphore(pIoman->pSemaphore);
-	{
-		pIoman->Locks &= ~FF_DIR_LOCK;
-	}
-	FF_ReleaseSemaphore(pIoman->pSemaphore);
+	//FF_PendSemaphore(pIoman->pSemaphore);
+	//{
+	//	pIoman->Locks &= ~FF_DIR_LOCK;
+	//}
+	//FF_ReleaseSemaphore(pIoman->pSemaphore);
+	FF_ReleaseSemaphore(pIoman->pDirSemaphore);
 }
 
 static FF_T_UINT8 FF_CreateChkSum(const FF_T_UINT8 *pa_pShortName) {

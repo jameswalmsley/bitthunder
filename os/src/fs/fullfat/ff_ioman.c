@@ -191,6 +191,9 @@ FF_IOMAN *FF_CreateIOMAN(FF_T_UINT8 *pCacheMem, FF_T_UINT32 Size, FF_T_UINT16 Bl
 
 	// Finally create a Semaphore for Buffer Description modifications.
 	pIoman->pSemaphore = FF_CreateSemaphore();
+	// Finally create Semaphores for DIR and FAT.
+	pIoman->pDirSemaphore = FF_CreateSemaphore();
+	pIoman->pFATSemaphore = FF_CreateSemaphore();
 
 #ifdef FF_BLKDEV_USES_SEM
 	pIoman->pBlkDevSemaphore = FF_CreateSemaphore();
@@ -242,6 +245,12 @@ FF_ERROR FF_DestroyIOMAN(FF_IOMAN *pIoman) {
 	// Destroy any Semaphore that was created.
 	if(pIoman->pSemaphore) {
 		FF_DestroySemaphore(pIoman->pSemaphore);
+	}
+	if(pIoman->pDirSemaphore) {
+		FF_DestroySemaphore(pIoman->pDirSemaphore);
+	}
+	if(pIoman->pFATSemaphore) {
+		FF_DestroySemaphore(pIoman->pFATSemaphore);
 	}
 #ifdef FF_BLKDEV_USES_SEM
 	if(pIoman->pBlkDevSemaphore) {

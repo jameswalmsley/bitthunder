@@ -55,24 +55,26 @@
 struct SFatStat fatStat;
 
 void FF_lockFAT(FF_IOMAN *pIoman) {
-	FF_PendSemaphore(pIoman->pSemaphore);	// Use Semaphore to protect FAT modifications.
-	{
-		while((pIoman->Locks & FF_FAT_LOCK)) {
-			FF_ReleaseSemaphore(pIoman->pSemaphore);
-			FF_Yield();						// Keep Releasing and Yielding until we have the Fat protector.
-			FF_PendSemaphore(pIoman->pSemaphore);
-		}
-		pIoman->Locks |= FF_FAT_LOCK;
-	}
-	FF_ReleaseSemaphore(pIoman->pSemaphore);
+	FF_PendSemaphore(pIoman->pFATSemaphore);	// Use Semaphore to protect FAT modifications.
+	//FF_PendSemaphore(pIoman->pSemaphore);	// Use Semaphore to protect FAT modifications.
+	//{
+	//	while((pIoman->Locks & FF_FAT_LOCK)) {
+	//		FF_ReleaseSemaphore(pIoman->pSemaphore);
+	//		FF_Yield();						// Keep Releasing and Yielding until we have the Fat protector.
+	//		FF_PendSemaphore(pIoman->pSemaphore);
+	//	}
+	//	pIoman->Locks |= FF_FAT_LOCK;
+	//}
+	//FF_ReleaseSemaphore(pIoman->pSemaphore);
 }
 
 void FF_unlockFAT(FF_IOMAN *pIoman) {
-	FF_PendSemaphore(pIoman->pSemaphore);
-	{
-		pIoman->Locks &= ~FF_FAT_LOCK;
-	}
-	FF_ReleaseSemaphore(pIoman->pSemaphore);
+	//FF_PendSemaphore(pIoman->pSemaphore);
+	//{
+	//	pIoman->Locks &= ~FF_FAT_LOCK;
+	//}
+	//FF_ReleaseSemaphore(pIoman->pSemaphore);
+	FF_ReleaseSemaphore(pIoman->pFATSemaphore);
 }
 
 /**
