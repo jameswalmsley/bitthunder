@@ -74,3 +74,12 @@ BT_ERROR BT_UartDisable(BT_HANDLE hUart) {
 
 	return BT_IF_UART_OPS(hUart)->pfnDisable(hUart);
 }
+
+BT_ERROR BT_UartGetAvailable(BT_HANDLE hUart, BT_u32 *pTransmit, BT_u32 *pReceive) {
+	if(!isUartHandle(hUart)) {
+		// ERR_INVALID_HANDLE_TYPE
+		return (BT_ERROR) -1;
+	}
+
+	return BT_IF_UART_OPS(hUart)->pfnGetAvailable(hUart, pTransmit, pReceive);
+}

@@ -4,9 +4,10 @@
 #include "bt_types.h"
 
 typedef enum {
-	BT_UART_MODE_POLLED = 0,	///< A really simple, pure polling mode, with thread-yielding.
+	BT_UART_MODE_POLLED = 0,		///< A really simple, pure polling mode, with thread-yielding.
 	//BT_UART_MODE_INTERRUPT,		///< A non-buffered interrupt driven mode.
-	BT_UART_MODE_BUFFERED,		///< A fully buffered interrupt driven mode.
+	BT_UART_MODE_BUFFERED,			///< A fully buffered interrupt driven mode.
+	BT_UART_MODE_SIMPLE_BUFFERED,	///< A simple fully buffered interrupt driven mode.
 } BT_UART_OPERATING_MODE;
 
 typedef enum {
@@ -37,16 +38,17 @@ typedef struct {
 	BT_u8					ucStopBits;
 	BT_u8					ucParity;
 
-	BT_u16					ulRxBufferSize;		///<
-	BT_u16					ulTxBufferSize;		///<
+	BT_u32					ulRxBufferSize;		///<
+	BT_u32					ulTxBufferSize;		///<
 } BT_UART_CONFIG;
 
 typedef struct {
-	BT_ERROR (*pfnSetBaudrate)	(BT_HANDLE hUart, BT_u32 ulBaudrate);
-	BT_ERROR (*pfnSetConfig)	(BT_HANDLE hUart, BT_UART_CONFIG *pConfig);
-	BT_ERROR (*pfnGetConfig)	(BT_HANDLE hUart, BT_UART_CONFIG *pConfig);
-	BT_ERROR (*pfnEnable)		(BT_HANDLE hUart);
-	BT_ERROR (*pfnDisable)		(BT_HANDLE hUart);
+	BT_ERROR (*pfnSetBaudrate)			(BT_HANDLE hUart, BT_u32 ulBaudrate);
+	BT_ERROR (*pfnSetConfig)			(BT_HANDLE hUart, BT_UART_CONFIG *pConfig);
+	BT_ERROR (*pfnGetConfig)			(BT_HANDLE hUart, BT_UART_CONFIG *pConfig);
+	BT_ERROR (*pfnEnable)				(BT_HANDLE hUart);
+	BT_ERROR (*pfnDisable)				(BT_HANDLE hUart);
+	BT_ERROR (*pfnGetAvailable)			(BT_HANDLE hUart, BT_u32 *pTransmit, BT_u32 *pReceive);
 } BT_DEV_IF_UART;
 
 /*
@@ -57,5 +59,6 @@ BT_ERROR BT_UartSetConfiguration	(BT_HANDLE hUart, BT_UART_CONFIG *pConfig);
 BT_ERROR BT_UartGetConfiguration	(BT_HANDLE hUart, BT_UART_CONFIG *pConfig);
 BT_ERROR BT_UartEnable				(BT_HANDLE hUart);
 BT_ERROR BT_UartDisable				(BT_HANDLE hUart);
+BT_ERROR BT_UartGetAvailable		(BT_HANDLE hUart, BT_u32 *pTransmit, BT_u32 *pReceive);
 
 #endif
