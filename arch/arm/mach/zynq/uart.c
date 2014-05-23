@@ -292,7 +292,7 @@ static BT_ERROR uart_set_config(BT_HANDLE hUart, BT_UART_CONFIG *pConfig) {
 	}
 
 	case BT_UART_MODE_BUFFERED: {
-		if(hUart->eMode != BT_UART_MODE_BUFFERED) {
+		/*if(hUart->eMode != BT_UART_MODE_BUFFERED)*/ {
 			if(!hUart->hRxFifo) {
 				hUart->hRxFifo = BT_FifoCreate(pConfig->ulRxBufferSize, 1, &Error);
 			}
@@ -306,7 +306,7 @@ static BT_ERROR uart_set_config(BT_HANDLE hUart, BT_UART_CONFIG *pConfig) {
 	}
 
 	case BT_UART_MODE_SIMPLE_BUFFERED: {
-		if(hUart->eMode != BT_UART_MODE_SIMPLE_BUFFERED) {
+		/*if(hUart->eMode != BT_UART_MODE_SIMPLE_BUFFERED)*/ {
 			hUart->uTxSize = pConfig->ulTxBufferSize;
 			hUart->uRxSize = pConfig->ulRxBufferSize;
 			hUart->uRxBegin = 0;
