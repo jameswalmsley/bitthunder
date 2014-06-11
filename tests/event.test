@@ -1,0 +1,203 @@
+# This file contains a collection of tests for the procedures in the file
+# tclEvent.c, which includes the "update", and "vwait" Tcl
+# commands.  Sourcing this file into Tcl runs the tests and generates
+# output for errors.  No output means no errors were found.
+#
+# Copyright (c) 1995-1997 Sun Microsystems, Inc.
+# Copyright (c) 1998-1999 by Scriptics Corporation.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+
+source [file dirname [info script]]/testing.tcl
+
+needs cmd after eventloop
+testConstraint socket [expr {[info commands socket] ne ""}]
+testConstraint exec [expr {[info commands exec] ne ""}]
+testConstraint signal [expr {[info commands signal] ne ""}]
+
+test event-5.1 {Tcl_BackgroundError, HandleBgErrors procedures} jim {
+    catch {rename bgerror {}}
+    proc bgerror msg {
+	lappend ::x $msg
+    }
+    after idle {error "a simple error"}
+    after idle {open non_existent}
+    after idle {set errorInfo foobar; set errorCode xyzzy}
+    set x {}
+    update idletasks
+    rename bgerror {}
+    set x
+} {{a simple error} {non_existent: No such file or directory}}
+
+test event-7.1 {bgerror / regular} {
+    set errRes {}
+    proc bgerror {err} {
+	global errRes;
+	set errRes $err;
+    }
+    after 0 {error err1}
+    vwait errRes;
+    set errRes;
+} err1
+
+test event-7.2 {bgerror / accumulation} {
+    set errRes {}
+    proc bgerror {err} {
+	global errRes;
+	lappend errRes $err;
+    }
+    after 0 {error err1}
+    after 0 {error err2}
+    after 0 {error err3}
+    update
+    set errRes;
+} {err1 err2 err3}
+
+test event-7.3 {bgerror / accumulation / break} {
+    set errRes {}
+    proc bgerror {err} {
+	global errRes;
+	lappend errRes $err;
+	return -code break "skip!";
+    }
+    after 0 {error err1}
+    after 0 {error err2}
+    after 0 {error err3}
+    update
+    set errRes;
+} err1
+
+# end of bgerror tests
+catch {rename bgerror {}}
+
+
+test event-10.1 {Tcl_Exit procedure} exec {
+    set cmd [list exec [info nameofexecutable] "<<exit 3"]
+    list [catch $cmd msg] [lindex $errorCode 0] \
+        [lindex $errorCode 2]
+} {1 CHILDSTATUS 3}
+
+test event-11.1 {Tcl_VwaitCmd procedure} {
+    list [catch {vwait} msg] $msg
+} {1 {wrong # args: should be "vwait name"}}
+test event-11.2 {Tcl_VwaitCmd procedure} {
+    list [catch {vwait a b} msg] $msg
+} {1 {wrong # args: should be "vwait name"}}
+test event-11.3 {Tcl_VwaitCmd procedure} jim {
+    catch {unset x}
+    set x 1
+    list [catch {vwait x(1)} msg] $msg
+} {1 {can't read "x(1)": variable isn't array}}
+test event-11.4 {Tcl_VwaitCmd procedure} {
+    foreach i [after info] {
+	after cancel $i
+    }
+    after 10; update; # On Mac make sure update won't take long
+    after 100 {set x x-done}
+    after 200 {set y y-done}
+    after 300 {set z z-done}
+    after idle {set q q-done}
+    set x before
+    set y before
+    set z before
+    set q before
+    list [vwait y] $x $y $z $q
+} {{} x-done y-done before q-done}
+
+foreach i [after info] {
+    after cancel $i
+}
+
+test event-11.5 {Tcl_VwaitCmd procedure: round robin scheduling, 2 sources} {jim socket} {
+    set f1 [open test1 w]
+    proc accept {s args} {
+	puts $s foobar
+	close $s
+    }
+    set s1 [socket stream.server 5001]
+    after 200
+    set s2 [socket stream 127.0.0.1:5001]
+    close $s1
+    set x 0
+    set y 0
+    set z 0
+    fileevent $s2 writable { incr z }
+    vwait z
+    fileevent $f1 writable { incr x; if { $y == 3 } { set z done } }
+    fileevent $s2 writable { incr y; if { $x == 3 } { set z done } }
+    vwait z
+    close $f1
+    close $s2
+    file delete test1 test2
+    list $x $y $z
+} {3 3 done}
+
+# Note: This one doesn't really require socket, but mingw32 doesn't have socket and
+#       also doesn't allow file events (select) on non-sockets
+test event-11.6 {Tcl_VwaitCmd procedure: round robin scheduling, same source} {socket} {
+    file delete test1 test2
+    set f1 [open test1 w]
+    set f2 [open test2 w]
+    set x 0
+    set y 0
+    set z 0
+    update
+    fileevent $f1 writable { incr x; if { $y == 3 } { set z done } }
+    fileevent $f2 writable { incr y; if { $x == 3 } { set z done } }
+    vwait z
+    close $f1
+    close $f2
+    file delete test1 test2
+    list $x $y $z
+} {3 3 done}
+
+
+test event-12.1 {Tcl_UpdateCmd procedure} {
+    list [catch {update a b} msg] $msg
+} {1 {wrong # args: should be "update ?idletasks?"}}
+test event-12.3 {Tcl_UpdateCmd procedure} {
+    foreach i [after info] {
+	after cancel $i
+    }
+    after 500 {set x after}
+    after idle {set y after}
+    after idle {set z "after, y = $y"}
+    set x before
+    set y before
+    set z before
+    update idletasks
+    list $x $y $z
+} {before after {after, y = after}}
+test event-12.4 {Tcl_UpdateCmd procedure} {
+    foreach i [after info] {
+	after cancel $i
+    }
+    after 10; update; # On Mac make sure update won't take long
+    after 200 {set x x-done}
+    after 400 {set y y-done}
+    after idle {set z z-done}
+    set x before
+    set y before
+    set z before
+    after 300
+    update
+    list $x $y $z
+} {x-done before z-done}
+
+# cleanup
+foreach i [after info] {
+    after cancel $i
+}
+
+test event-13.1 "vwait/signal" signal {
+    signal handle ALRM
+    list [catch -signal {
+        alarm 0.1
+        # This is just to prevent the vwait from exiting immediately
+        stdin readable { format test }
+        vwait forever
+    } msg] $msg
+} {5 SIGALRM}
+
+testreport
