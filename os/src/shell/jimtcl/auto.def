@@ -1,0 +1,351 @@
+# vim:se syn=tcl:
+#
+
+define JIM_VERSION 75
+
+# Note: modules which support options *must* be included before 'options'
+use cc cc-shared cc-db cc-lib
+use local
+
+options {
+    utf8            => "include support for utf8-encoded strings"
+    lineedit=1      => "disable line editing"
+    references=1    => "disable support for references"
+    math            => "include support for math functions"
+    ipv6            => "include ipv6 support in the aio extension"
+    maintainer      => {enable the [debug] command and JimPanic}
+    full            => "Enable some optional features: ipv6, math, utf8, binary, oo, tree"
+    with-jim-shared shared => "build a shared library instead of a static library"
+    jim-regexp=1    => "prefer POSIX regex if over the the built-in (Tcl-compatible) regex"
+    docs=1          => "don't build or install the documentation"
+    random-hash		=> "randomise hash tables. more secure but hash table results are not predicable"
+    with-jim-ext: {with-ext:"ext1 ext2 ..."} => {
+        Specify additional jim extensions to include.
+        These are enabled by default:
+
+        aio       - ANSI I/O, including open and socket
+        eventloop - after, vwait, update
+        array     - Tcl-compatible array command
+        clock     - Tcl-compatible clock command
+        exec      - Tcl-compatible exec command
+        file      - Tcl-compatible file command
+        glob      - Tcl-compatible glob command
+        history   - Tcl access to interactive history
+        readdir   - Required for glob
+        package   - Package management with the package command
+        load      - Load binary extensions at runtime with load or package
+        posix     - Posix APIs including os.fork, os.wait, pid
+        regexp    - Tcl-compatible regexp, regsub commands
+        signal    - Signal handling
+        stdlib    - Built-in commands including lassign, lambda, alias
+        syslog    - System logging with syslog
+        tclcompat - Tcl compatible read, gets, puts, parray, case, ...
+        namespace - Tcl compatible namespace support
+
+        These are disabled by default:
+
+        oo        - Jim OO extension
+        tree      - OO tree structure, similar to tcllib ::struct::tree
+        binary    - Tcl-compatible 'binary' command
+        readline  - Interface to libreadline
+        rlprompt  - Tcl wrapper around the readline extension
+        mk        - Interface to Metakit
+        tclprefix - Support for the tcl::prefix command
+        sqlite3   - Interface to sqlite3
+        win32     - Interface to win32
+    }
+    with-out-jim-ext: {without-ext:"default|ext1 ext2 ..."} => {
+        Specify jim extensions to exclude.
+        If 'default' is given, the default extensions will not be added.
+    }
+    with-jim-extmod: {with-mod:"ext1 ext2 ..."} => {
+        Specify jim extensions to build as separate modules (either C or Tcl).
+        Note that not all extensions can be built as loadable modules.
+    }
+    # To help out openocd with automake
+    install-jim=1
+}
+
+cc-check-types "long long"
+
+define CCOPTS ""
+define CXXOPTS ""
+if {[cctest -cflags -fno-unwind-tables]} {
+    define-append CCOPTS -fno-unwind-tables
+}
+if {[cctest -cflags -fno-asynchronous-unwind-tables]} {
+    define-append CCOPTS -fno-asynchronous-unwind-tables
+}
+
+cc-check-includes sys/time.h sys/socket.h netinet/in.h arpa/inet.h netdb.h
+cc-check-includes sys/un.h dlfcn.h unistd.h dirent.h crt_externs.h
+
+define LDLIBS ""
+
+# Haiku needs -lnetwork, Solaris needs -lnsl
+if {[cc-check-function-in-lib inet_ntop {nsl network}]} {
+    # This does nothing if no libs are needed
+    cc-with [list -libs [get-define lib_inet_ntop]]
+    define-append LDLIBS [get-define lib_inet_ntop]
+}
+# Solaris needs -lsocket, Windows needs -lwsock32
+if {[cc-check-function-in-lib socket socket]} {
+    define-append LDLIBS [get-define lib_socket]
+}
+
+cc-check-functions ualarm lstat fork vfork system select execvpe
+cc-check-functions backtrace geteuid mkstemp realpath strptime isatty
+cc-check-functions regcomp waitpid sigaction sys_signame sys_siglist isascii
+cc-check-functions syslog opendir readlink sleep usleep pipe getaddrinfo utimes
+cc-check-functions shutdown socketpair isinf isnan
+
+if {[cc-check-functions sysinfo]} {
+    cc-with {-includes sys/sysinfo.h} {
+        cc-check-members "struct sysinfo.uptime"
+    }
+}
+
+cc-check-lfs
+cc-check-functions fseeko ftello
+
+define TCL_LIBRARY [get-define prefix]/lib/jim
+
+lassign [split [get-define host] -] host_cpu host_vendor host_os
+# Scrub revision from the host_os
+regsub -all {[0-9.]} $host_os {} host_os
+
+switch -glob -- $host_os {
+    mingw* {
+        # We provide our own implementation of dlopen for mingw32
+        define-feature dlopen-compat
+        define-feature winconsole
+        define TCL_PLATFORM_OS $host_os
+        define TCL_PLATFORM_PLATFORM windows
+        define TCL_PLATFORM_PATH_SEPARATOR {;}
+    }
+    default {
+        # Note that cygwin is considered a unix platform
+        define TCL_PLATFORM_OS $host_os
+        define TCL_PLATFORM_PLATFORM unix
+        define TCL_PLATFORM_PATH_SEPARATOR :
+    }
+}
+
+# Find some tools
+cc-check-tools ar ranlib strip
+define tclsh [info nameofexecutable]
+
+if {![cc-check-functions _NSGetEnviron]} {
+    msg-checking "Checking environ declared in unistd.h..."
+    if {[cctest -cflags -D_GNU_SOURCE -includes unistd.h -code {char **ep = environ;}]} {
+        define NO_ENVIRON_EXTERN
+        msg-result "yes"
+    } else {
+        msg-result "no"
+    }
+}
+
+# Windows has a mkdir with no permission arg
+cc-check-includes sys/types.h sys/stat.h
+msg-checking "Checking for mkdir with one arg..."
+if {[cctest -includes {sys/types.h sys/stat.h} -code {mkdir("/dummy");}]} {
+    define HAVE_MKDIR_ONE_ARG
+    msg-result yes
+} else {
+    msg-result no
+}
+
+set extra_objs {}
+set jimregexp 0
+
+if {[opt-bool utf8 full]} {
+    msg-result "Enabling UTF-8"
+    define JIM_UTF8
+    incr jimregexp
+} else {
+    define JIM_UTF8 0
+}
+if {[opt-bool maintainer]} {
+    msg-result "Enabling maintainer settings"
+    define JIM_MAINTAINER
+}
+if {[opt-bool math full]} {
+    msg-result "Enabling math functions"
+    define JIM_MATH_FUNCTIONS
+    cc-check-function-in-lib sin m
+    define-append LDLIBS [get-define lib_sin]
+}
+if {[opt-bool ipv6 full]} {
+    msg-result "Enabling IPv6"
+    define JIM_IPV6
+}
+if {[opt-bool lineedit full]} {
+    if {([cc-check-includes termios.h] && [have-feature isatty]) || [have-feature winconsole]} {
+        msg-result "Enabling line editing"
+        define USE_LINENOISE
+        lappend extra_objs linenoise.o
+    }
+}
+if {[opt-bool references]} {
+    msg-result "Enabling references"
+    define JIM_REFERENCES
+}
+if {[opt-bool shared with-jim-shared]} {
+    msg-result "Building shared library"
+} else {
+    msg-result "Building static library"
+    define JIM_STATICLIB
+}
+define LIBSOEXT [format [get-define SH_SOEXTVER] [format %.2f [expr {[get-define JIM_VERSION] / 100.0}]]]
+define JIM_INSTALL [opt-bool install-jim]
+define JIM_DOCS [opt-bool docs]
+define JIM_RANDOMISE_HASH [opt-bool random-hash]
+
+# Attributes of the extensions
+# tcl=Pure Tcl extension
+# static=Can't be built as a module
+# optional=Not selected by default
+# cpp=Is a C++ extension
+global extdb
+dict set extdb attrs {
+    aio       { static }
+    array     {}
+    binary    { tcl }
+    clock     {}
+    eventloop { static }
+    exec      { static }
+    file      {}
+    glob      { tcl }
+    history   {}
+    load      { static }
+    mk        { cpp optional }
+    namespace { static }
+    nshelper  { tcl optional }
+    oo        { tcl }
+    pack      {}
+    package   { static }
+    posix     {}
+    readdir   {}
+    readline  { optional }
+    regexp    {}
+    rlprompt  { tcl optional }
+    sdl       { optional }
+    signal    { static }
+    sqlite3   { optional }
+    stdlib    { tcl static }
+    syslog    {}
+    tclcompat { tcl static }
+    tclprefix {}
+    tree      { tcl }
+    win32     { optional }
+}
+
+# Additional information about certain extensions
+# dep=list of extensions which are required for this extension
+# check=[expr] expression to evaluate to determine if the extension can be used
+# libdep=list of 'define' symbols for dependent libraries
+dict set extdb info {
+    binary   { dep pack }
+    exec     { check {([have-feature vfork] && [have-feature waitpid]) || [have-feature system]} }
+    glob     { dep readdir }
+    load     { check {[have-feature dlopen-compat] || [cc-check-function-in-lib dlopen dl]} libdep lib_dlopen }
+    mk       { check {[check-metakit]} libdep lib_mk }
+    namespace { dep nshelper }
+    posix    { check {[have-feature waitpid]} }
+    readdir  { check {[have-feature opendir]} }
+    readline { check {[cc-check-function-in-lib readline readline]} libdep lib_readline}
+    rlprompt { dep readline }
+    tree     { dep oo }
+    sdl      { check {[cc-check-function-in-lib SDL_SetVideoMode SDL] && [cc-check-function-in-lib rectangleRGBA SDL_gfx]}
+               libdep {lib_SDL_SetVideoMode lib_rectangleRGBA}
+             }
+    signal   { check {[have-feature sigaction] && [have-feature vfork]} }
+    sqlite3  { check {[cc-check-function-in-lib sqlite3_prepare_v2 sqlite3]} libdep lib_sqlite3_prepare_v2 }
+    syslog   { check {[have-feature syslog]} }
+    tree     { dep oo }
+    win32    { check {[have-feature windows]} }
+}
+
+# autosetup cc-check-function-in-library can't handle C++ libraries
+proc check-metakit {} {
+    set found 0
+    msg-checking "Checking for Metakit..."
+    cc-with {-lang c++} {
+        if {[cctest -includes mk4.h -libs -lmk4 -code {c4_Storage dummy();}]} {
+            msg-result ok
+            define lib_mk -lmk4
+            incr found
+        } else {
+            msg-result "not found"
+        }
+    }
+    return $found
+}
+
+# Set up the withinfo array based on what the user selected
+global withinfo
+set withinfo(without) [join [opt-val {without-ext with-out-jim-ext}]]
+set withinfo(ext) [join [opt-val {with-ext with-jim-ext}]]
+set withinfo(mod) [join [opt-val {with-mod with-jim-extmod}]]
+set withinfo(nodefault) 0
+if {$withinfo(without) eq "default"} {
+    set withinfo(without) {}
+    set withinfo(nodefault) 1
+}
+
+# Now go check everything - see autosetup/local.tcl
+array set extinfo [check-extensions]
+
+# Now special checks
+if {[have-feature windows]} {
+    lappend extra_objs jim-win32compat.o
+
+    if {[llength $extinfo(module-c)] && [get-define JIM_STATICLIB]} {
+        user-error "cygwin/mingw require --shared for dynamic modules"
+    }
+}
+
+if {[ext-get-status regexp] in {y m}} {
+    if {![have-feature regcomp]} {
+        # No regcomp means we need to use the built-in version
+        incr jimregexp
+    }
+}
+
+if {$jimregexp || [opt-bool jim-regexp]} {
+    msg-result "Using built-in regexp"
+    define JIM_REGEXP
+
+    # If the built-in regexp overrides the system regcomp, etc.
+    # jim must be built shared so that the correct symbols are found
+    if {[ext-get-status regexp] eq "m" && [get-define JIM_STATICLIB] && [have-feature regcomp]} {
+        user-error "Must use --shared with regexp module and built-in regexp"
+    }
+}
+
+if {[ext-get-status load] eq "n"} {
+    # If we don't have load, no need to support shared objects
+    define SH_LINKFLAGS ""
+}
+
+msg-result "Jim static extensions: [lsort [concat $extinfo(static-tcl) $extinfo(static-c)]]"
+if {[llength $extinfo(module-tcl)]} {
+    msg-result "Jim Tcl extensions: [lsort $extinfo(module-tcl)]"
+}
+if {[llength $extinfo(module-c)]} {
+    msg-result "Jim dynamic extensions: [lsort $extinfo(module-c)]"
+}
+
+define STATIC_EXTS [concat $extinfo(static-c) $extinfo(static-tcl)]
+define C_EXT_OBJS [prefix jim- [suffix .o $extinfo(static-c)]]
+define TCL_EXT_OBJS [suffix .o $extinfo(static-tcl)]
+define C_EXT_SHOBJS [suffix .so $extinfo(module-c)]
+define TCL_EXTS [suffix .tcl $extinfo(module-tcl)]
+define EXTRA_OBJS $extra_objs
+
+make-config-header jim-config.h -auto {HAVE_LONG_LONG* JIM_UTF8} -bare JIM_VERSION -none *
+make-config-header jimautoconf.h -auto {jim_ext_* TCL_PLATFORM_* TCL_LIBRARY USE_* JIM_* _FILE_OFFSET*}
+make-template Makefile.in
+make-template build-jim-ext.in
+
+catch {exec chmod +x build-jim-ext}

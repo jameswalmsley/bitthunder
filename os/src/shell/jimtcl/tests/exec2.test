@@ -1,0 +1,47 @@
+# These tests are design especially for the vfork() implementation
+# of exec where sh -c must be used and thus we must take extra care
+# in quoting arguments to exec.
+
+source [file dirname [info script]]/testing.tcl
+
+needs cmd exec
+
+set d \"
+set s '
+set b \\
+
+array set saveenv [array get env]
+
+test exec2-1.1 "Quoting - Result" {
+	exec echo ${d}double quoted${d} ${s}single quoted${s} ${b}backslash quoted${b}
+} "\"double\ quoted\"\ 'single quoted'\ \\backslash\ quoted\\"
+
+test exec2-1.2 "Quoting - Word Grouping" {
+	string trim [exec echo ${d}double quoted${d} ${s}single quoted${s} ${b}backslash quoted${b} | wc -w]
+} {6}
+
+test exec2-2.1 "Add to exec environment" {
+	set env(TESTENV) "the value"
+	exec printenv | sed -n -e /^TESTENV=/p
+} {TESTENV=the value}
+
+test exec2-2.2 "Remove from exec environment" {
+	set env(TESTENV2) "new value"
+	unset env(TESTENV)
+	exec printenv | sed -n -e /^TESTENV=/p
+} {}
+
+
+test exec2-2.3 "Remove all exec environment" {
+	array unset env *
+	exec printenv | sed -n -e /^TESTENV2=/p
+} {}
+
+test exec2-2.4 "Remove all env var" {
+	unset -nocomplain env
+	exec printenv | sed -n -e /^TESTENV2=/p
+} {}
+
+array set env [array get saveenv]
+
+testreport
