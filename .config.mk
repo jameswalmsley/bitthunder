@@ -18,7 +18,7 @@ PYTHON:=$(BT_CONFIG_DBUILD_PYTHON)
 
 BSP_DIR:=$(subst $(DB_QUOTES),,$(BT_CONFIG_BSP_DIR))
 
-GIT_DESCRIBE:=$(shell git --git-dir=$(BASE).git describe)
+GIT_DESCRIBE:=$(shell git --git-dir=$(BASE).git describe --dirty)
 
 test_dir:
 	echo $(BT_CONFIG_BSP_NAME)
