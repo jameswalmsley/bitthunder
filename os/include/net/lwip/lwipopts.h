@@ -33,7 +33,11 @@
 //*****************************************************************************
 // ---------- Pbuf options ----------
 //*****************************************************************************
+#ifdef BT_CONFIG_MACH_ETH_PAD_SIZE
+#define ETH_PAD_SIZE                    BT_CONFIG_MACH_ETH_PAD_SIZE		// to ensure 32 bit alignment
+#else
 #define ETH_PAD_SIZE                    0		// to ensure 32 bit alignment
+#endif
 
 
 /* Minimal changes to opt.h required for etharp unit tests: */
@@ -48,9 +52,15 @@
 #define DEFAULT_TCP_RECVMBOX_SIZE       10
 #define DEFAULT_ACCEPTMBOX_SIZE         10
 
-#define CHECKSUM_GEN_IP					0
-#define CHECKSUM_GEN_UDP				0
-#define CHECKSUM_GEN_TCP 				0
+#ifdef BT_CONFIG_NET_LWIP_GEN_CHECKSUM
+	#define CHECKSUM_GEN_IP					0
+	#define CHECKSUM_GEN_UDP				0
+	#define CHECKSUM_GEN_TCP 				0
+#else
+	#define CHECKSUM_GEN_IP					1
+	#define CHECKSUM_GEN_UDP				1
+	#define CHECKSUM_GEN_TCP 				1
+#endif
 
 #define MEMP_NUM_PBUF					BT_CONFIG_NET_LWIP_MEMP_NUM_PBUF
 #define MEMP_NUM_RAW_PCB				BT_CONFIG_NET_LWIP_MEMP_NUM_RAW_PCB

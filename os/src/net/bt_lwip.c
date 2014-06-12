@@ -102,6 +102,10 @@ static err_t lwIPif_transmit(struct netif *netif, struct pbuf *p) {
 	BT_NET_IF *pIF = (BT_NET_IF*)netif->state;
 	struct pbuf *q;
 
+	#ifdef BT_CONFIG_MACH_LM3Sxx
+	*((unsigned short *)(p->payload)) = p->tot_len - 16;
+	#endif
+
 	/* Copy data from the pbuf(s) into the TX Fifo. */
 	for(q = p; q != NULL; q = q->next) {
 		pIF->pOps->pfnWrite(pIF->hIF, q->len, q->payload);
@@ -205,10 +209,12 @@ static struct pbuf * lwip_receive(struct netif *netif) {
 
 	/* If a pbuf was allocated, read the packet into the pbuf. */
 	if(p != NULL) {
+		#ifdef BT_CONFIG_MACH_LM3Sxx
 		/* Place the first word into the first pbuf location. */
-		//*(unsigned long *)p->payload = ulTemp;
-		//p->payload = (char *)(p->payload) + 4;
-		//p->len -= 4;
+		*(BT_u32 *)p->payload = ulTemp;
+		p->payload = (BT_s8 *)(p->payload) + 4;
+		p->len -= 4;
+		#endif
 
 		/* Process all but the last buffer in the pbuf chain. */
 		q = p;
@@ -222,9 +228,11 @@ static struct pbuf * lwip_receive(struct netif *netif) {
 			q = q->next;
 		}
 
+		#ifdef BT_CONFIG_MACH_LM3Sxx
 		/* Restore the first pbuf parameters to their original values. */
-		//p->payload = (char *)(p->payload) - 4;
-		//p->len += 4;
+		p->payload = (char *)(p->payload) - 4;
+		p->len += 4;
+		#endif
 
 		/* Adjust the link statistics */
 		LINK_STATS_INC(link.recv);

@@ -1,5 +1,11 @@
 menu "lwIP options"
 
+
+config NET_LWIP_GEN_CHECKSUM
+		bool "offload checksum calculation"
+		default 1
+		depends on NET_LWIP
+
 config NET_LWIP_MEMP_NUM_PBUF
 	   int "Number of memp pbufs, should be high for high throughput"
 	   default 256
