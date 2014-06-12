@@ -33,3 +33,23 @@ BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_SLABTOP)  	+= $(BUILD_DIR)os/src/shell/comma
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_SLEEP)		+= $(BUILD_DIR)os/src/shell/commands/sleep.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_SOURCE)		+= $(BUILD_DIR)os/src/shell/commands/source.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_TFTP)		+= $(BUILD_DIR)os/src/shell/commands/tftp.o
+
+
+# JIMTCL
+JIMTCL_OBJECTS-$(BT_CONFIG_SHELL_JIMTCL)			+= $(BUILD_DIR)os/src/shell/jimtcl/jim.o
+JIMTCL_OBJECTS-$(BT_CONFIG_SHELL_JIMTCL)			+= $(BUILD_DIR)os/src/shell/jimtcl/jim-format.o
+JIMTCL_OBJECTS-$(BT_CONFIG_SHELL_JIMTCL)			+= $(BUILD_DIR)os/src/shell/jimtcl/jim-interactive.o
+JIMTCL_OBJECTS-$(BT_CONFIG_SHELL_JIMTCL)			+= $(BUILD_DIR)os/src/shell/jimtcl/jim-subcmd.o
+#JIMTCL_OBJECTS-$(BT_CONFIG_SHELL_JIMTCL)			+= $(BUILD_DIR)os/src/shell/jimtcl/linenoise.o
+JIMTCL_OBJECTS-$(BT_CONFIG_SHELL_JIMTCL)			+= $(BUILD_DIR)os/src/shell/jimtcl/utf8.o
+JIMTCL_OBJECTS-$(BT_CONFIG_SHELL_JIMTCL)			+= $(BUILD_DIR)os/src/shell/jimtcl/jim-aio.o
+JIMTCL_OBJECTS-$(BT_CONFIG_SHELL_JIMTCL)			+= $(BUILD_DIR)os/src/shell/jimtcl/jim-eventloop.o
+JIMTCL_OBJECTS-$(BT_CONFIG_SHELL_JIMTCL)			+= $(BUILD_DIR)os/src/shell/jimtcl/jim-file.o
+JIMTCL_OBJECTS-$(BT_CONFIG_SHELL_JIMTCL)			+= $(BUILD_DIR)os/src/shell/jimtcl/jim-load.o
+JIMTCL_OBJECTS-$(BT_CONFIG_SHELL_JIMTCL)			+= $(BUILD_DIR)os/src/shell/jimtcl/jim-package.o
+JIMTCL_OBJECTS-$(BT_CONFIG_SHELL_JIMTCL)			+= $(BUILD_DIR)os/src/shell/jimtcl/_stdlib.o
+
+$(JIMTCL_OBJECTS-y): CFLAGS_REMOVE += -nostdlib
+BT_OS_OBJECTS-y += $(JIMTCL_OBJECTS-y)
+
+$(BT_OS_OBJECTS-y): CFLAGS += -I $(BASE)os/src/shell/jimtcl/
