@@ -104,6 +104,19 @@
 		__rodata_end = .;
     } > BT_LINKER_TEXT_SECTION
 
+	.bt.ksymtab : {
+		__bt_ksymtab_start = .;
+		KEEP(SORT(*)(bt.ksymtab*))
+		__bt_ksymtab_end = .;
+	} > BT_LINKER_TEXT_SECTION
+
+	.bt.ksymtab_strings : {
+		__bt_ksymtab_strings_start = .;
+		KEEP(*(.bt.ksymtab_strings))
+		KEEP(*(.bt.ksymtab_strings.*))
+		__bt_ksymtab_strings_end = .;
+	} > BT_LINKER_TEXT_SECTION
+
 	.rodata1 : {
    	    __rodata1_start = .;
 		*(.rodata1)

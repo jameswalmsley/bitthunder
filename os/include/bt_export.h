@@ -3,14 +3,9 @@
 
 
 
-#define BT_EXPORT_SYMBOL(sym)
-
-
-
 
 
 
 
 
 #endif
-

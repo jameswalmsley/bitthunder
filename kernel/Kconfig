@@ -25,3 +25,8 @@ endif
 config KERNEL_TICK_RATE
     int "Kernel Tick Frequency (Hz)"
 	default 1000
+
+config KERNEL_SYMBOLS
+	bool "Generate a Kernel Symbol Table"
+	---help---
+	Allows loading of loadable kernel modules, and debug information.

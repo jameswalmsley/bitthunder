@@ -49,5 +49,34 @@
 		}
 #endif
 
+struct bt_kernel_symbol {
+	void 			*value;
+	const BT_i8 	*name;
+};
+
+#define BT_MODULE_SYMBOL_PREFIX	""
+
+#define __BT_EXPORT_SYMBOL(sym, sec)						\
+	extern typeof(sym) sym;								\
+    static const char __bt_kstrtab_##sym[]				\
+   __attribute__((section(".bt.ksymtab_strings"), aligned(1))) \
+   = BT_MODULE_SYMBOL_PREFIX #sym;	\
+	static const struct bt_kernel_symbol __bt_ksymtab_##sym	\
+	__attribute__((__used__))								\
+	__attribute__((section(".bt.ksymtab" sec), unused))	\
+	= { (void *) &sym, __bt_kstrtab_##sym }
+
+
+#ifdef BT_CONFIG_KERNEL_SYMBOLS
+#define BT_EXPORT_SYMBOL(sym)				__BT_EXPORT_SYMBOL(sym, "")
+#define BT_EXPORT_SYMBOL_GPL(sym)			__BT_EXPORT_SYMBOL(sym, "_gpl")
+#define BT_EXPORT_SYMBOL_BSD(sym)			__BT_EXPORT_SYMBOL(sym, "_bsd")
+#define BT_EXPORT_SYMBOL_PROPRIETARY(sym)	__BT_EXPORT_SYMBOL(sym, "_proprietary")
+#else
+#define BT_EXPORT_SYMBOL(sym)
+#define BT_EXPORT_SYMBOL_GPL(sym)
+#define BT_EXPORT_SYMBOL_BSD(sym)
+#define BT_EXPORT_SYMBOL_PROPRIETARY(sym)
+#endif
 
 #endif
