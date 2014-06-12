@@ -15,18 +15,29 @@ BT_DEF_MODULE_DESCRIPTION	("Kernel Shell subsystem")
 BT_DEF_MODULE_AUTHOR	  	("James Walmsley")
 BT_DEF_MODULE_EMAIL			("james@fullfat-fs.co.uk")
 
+#ifdef BT_CONFIG_SHELL_JIMTCL
+#define JIM_EMBEDDED
+#include <jim.h>
+#endif
+
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER 			h;			///< All handles must include a handle header.
 	BT_HANDLE					hStdin;
 	BT_HANDLE					hStdout;
 	const BT_i8				   *szpPrompt;
-	BT_u32	 					ulPromptLen;
-	BT_i32						bPrintPrompt;
 	BT_u32 						ulFlags;
-	#define BT_CONFIG_SHELL_INPUT_BUFFER_SIZE	256
-	BT_i8 						cStdinBuf[BT_CONFIG_SHELL_INPUT_BUFFER_SIZE];
+	BT_u32	 					ulPromptLen;
 	BT_u32 						ulStdinBufCnt;
+	BT_i32						bPrintPrompt;
+
+#ifndef BT_CONFIG_SHELL_JIMTCL
+	BT_i8 						cStdinBuf[BT_CONFIG_SHELL_INPUT_BUFFER_SIZE];
+	#define BT_CONFIG_SHELL_INPUT_BUFFER_SIZE	256
 	struct _BT_OPAQUE_HANDLE   *pNext;
+#endif
+#ifdef BT_CONFIG_SHELL_JIMTCL
+	Jim_Interp 				   *interp;
+#endif
 };
 
 typedef struct _BT_OPAQUE_HANDLE BT_SHELL;
@@ -53,6 +64,7 @@ static const BT_SHELL_COMMAND *GetShellCommand(const BT_i8 *name) {
 	return NULL;
 }
 
+#ifndef BT_CONFIG_SHELL_JIMTCL
 static char *replace_var(char *input) {
 	char *start = input + 2;
 	char *end = strchr(start, '}');
@@ -245,6 +257,7 @@ static char *replace_expressions(BT_HANDLE hShell, const char *input) {
 
 	return last_replace;
 }
+#endif
 
 BT_HANDLE BT_ShellGetStdout(BT_HANDLE hShell) {
 	return (hShell ? ((BT_SHELL_HANDLE)hShell)->hStdout : NULL);
@@ -274,6 +287,7 @@ BT_ERROR BT_ShellCommand(BT_HANDLE hShell, const char *cmdline) {
 
 	BT_ERROR Error = BT_ERR_NONE;
 
+#ifndef BT_CONFIG_SHELL_JIMTCL
 	BT_u32 ulArguments = 0;
 	BT_u32 bIsArg = BT_FALSE;
 	BT_u32 bIgnoreSpace = BT_FALSE;
@@ -370,6 +384,7 @@ BT_ERROR BT_ShellCommand(BT_HANDLE hShell, const char *cmdline) {
 				bIsArg = BT_FALSE;
 			}
 		}
+
 		input++;
 	}
 
@@ -391,6 +406,7 @@ BT_ERROR BT_ShellCommand(BT_HANDLE hShell, const char *cmdline) {
 executed:
 	BT_kFree(pargs);
 	BT_kFree(copy);
+#endif
 
 	return Error;
 }
@@ -414,8 +430,6 @@ BT_ERROR BT_ShellScript(BT_HANDLE hShell, const BT_i8 *path) {
 	}
 
 	BT_u32 lineno = 0;
-
-
 	BT_s32 linelen;
 
 	while((linelen = BT_GetS(hFile, 256, line)) > 0) {
@@ -500,6 +514,11 @@ BT_HANDLE BT_ShellCreate(BT_HANDLE hStdin, BT_HANDLE hStdout, const BT_i8 *szpPr
 	hShell->ulFlags = ulFlags;
 	hShell->ulStdinBufCnt = 0;
 	hShell->bPrintPrompt = 1;
+	hShell->interp = Jim_CreateInterp();
+	Jim_RegisterCoreCommands(hShell->interp);
+	Jim_stdlibInit(hShell->interp);
+
+	Jim_InteractivePrompt(hShell->interp);
 
 	return hShell;
 
@@ -511,6 +530,7 @@ err_out:
 BT_ERROR BT_Shell(BT_HANDLE hShell) {
 	BT_ERROR Error = BT_ERR_NONE;
 
+#ifndef BT_CONFIG_SHELL_JIMTCL
 	if(hShell) {
 		do {
 			// print prompt
@@ -555,6 +575,7 @@ BT_ERROR BT_Shell(BT_HANDLE hShell) {
 	} else {
 		Error = BT_ERR_GENERIC;
 	}
+#endif
 
 	return Error;
 }

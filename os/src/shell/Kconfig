@@ -5,4 +5,12 @@ config SHELL
 
 source os/src/shell/commands/Kconfig
 
+config SHELL_JIMTCL
+	bool "Use JimTCL"
+	---help---
+	Causes the default kernel shell to be a TCL shell.
+	There is a breakout command (bt) which allows escaping onto the standard BitThunder kernel shell.
+	However the all commands aim to provide equivalent functionality through some well designed
+	TCL bindings.
+
 endmenu
