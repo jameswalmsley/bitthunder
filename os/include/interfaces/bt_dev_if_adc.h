@@ -25,6 +25,7 @@ typedef struct {
 	BT_u32					ulSWAverageCount;		//	do software averaging over count
 	BT_u32					ulActiveChannels;		//	BitMask for every channel
 	BT_u32					ulBufferSize;			//	Buffersize for BUFFERED MODE
+	BT_BOOL					bUseIntReference;		//  Use internal reference;
 } BT_ADC_CONFIG;
 
 
