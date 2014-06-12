@@ -1,7 +1,7 @@
 menu "LM3Sxx_PORTF_0"	
 
 config LM3Sxx_PORTF_0_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
@@ -77,7 +77,7 @@ endmenu
 menu "LM3Sxx_PORTF_1"	
 
 config LM3Sxx_PORTF_1_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
@@ -154,7 +154,7 @@ endmenu
 menu "LM3Sxx_PORTF_2"	
 
 config LM3Sxx_PORTF_2_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
@@ -223,7 +223,7 @@ endmenu
 menu "LM3Sxx_PORTF_3"	
 
 config LM3Sxx_PORTF_3_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
@@ -292,7 +292,7 @@ endmenu
 menu "LM3Sxx_PORTF_4"	
 
 config LM3Sxx_PORTF_4_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
@@ -367,7 +367,7 @@ endmenu
 menu "LM3Sxx_PORTF_5"	
 
 config LM3Sxx_PORTF_5_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice

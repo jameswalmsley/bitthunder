@@ -27,6 +27,12 @@ BT_DEF_MODULE_DESCRIPTION				("Simple SPI device for the LM3Sxx Embedded Platfor
 BT_DEF_MODULE_AUTHOR					("Robert Steinbauer")
 BT_DEF_MODULE_EMAIL						("rsteinbauer@riegl.com")
 
+/*
+ * The modebits configurable by the driver to make the SPI support different
+ * data formats
+ */
+#define MODEBITS                        (SPI_CPOL | SPI_CPHA)
+
 /**
  *	We can define how a handle should look in a SPI driver, probably we only need a
  *	hardware-ID number. (Remember, try to keep HANDLES as low-cost as possible).
@@ -34,10 +40,12 @@ BT_DEF_MODULE_EMAIL						("rsteinbauer@riegl.com")
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER 			h;				///< All handles must include a handle header.
 	LM3Sxx_SPI_REGS	   		   *pRegs;
+
+	BT_SPI_MASTER				spi_master;
+
 	const BT_INTEGRATED_DEVICE *pDevice;
-	BT_SPI_OPERATING_MODE		eMode;			///< Operational mode, i.e. buffered/polling mode.
-	BT_HANDLE		   			hRxFifo;		///< RX fifo - ring buffer.
-	BT_HANDLE		   			hTxFifo;		///< TX fifo - ring buffer.
+
+	BT_u32 						speed_hz;
 };
 
 static BT_HANDLE g_SPI_HANDLES[2] = {
@@ -57,12 +65,6 @@ BT_ERROR BT_NVIC_IRQ_50(void) {
 	return 0;
 }
 
-static BT_ERROR spiDisable(BT_HANDLE hSpi);
-static BT_ERROR spiEnable(BT_HANDLE hSpi);
-
-
-static void ResetSpi(BT_HANDLE hSpi) {
-}
 
 /**
  *	All modules MUST provide a FULL cleanup function. This must cleanup all allocations etc
@@ -70,16 +72,8 @@ static void ResetSpi(BT_HANDLE hSpi) {
  *
  **/
 static BT_ERROR spiCleanup(BT_HANDLE hSpi) {
-	ResetSpi(hSpi);
-
 	// Disable peripheral clock.
 	disableSpiPeripheralClock(hSpi);
-
-	// Free any buffers if used.
-	if(hSpi->eMode == BT_SPI_MODE_BUFFERED) {
-		BT_CloseHandle(hSpi->hTxFifo);
-		BT_CloseHandle(hSpi->hRxFifo);
-	}
 
 	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hSpi->pDevice, BT_RESOURCE_IRQ, 0);
 
@@ -109,7 +103,6 @@ static BT_ERROR spiSetBaudrate(BT_HANDLE hSpi, BT_u32 ulBaudrate) {
 	pRegs->CPSR = ulDivider;
 	pRegs->CR0 |= ((ulInputClk / (ulBaudrate * ulDivider)-1) << 8) & LM3Sxx_SPI_CR0_SCR_MASK;
 
-	spiEnable(hSpi);
 	return BT_ERR_NONE;
 }
 
@@ -218,142 +211,28 @@ static BT_ERROR spiGetPowerState(BT_HANDLE hSpi, BT_POWER_STATE *pePowerState) {
 	return BT_POWER_STATE_ASLEEP;
 }
 
-/**
- *	Complete a full configuration of the SPI.
- **/
-static BT_ERROR spiSetConfig(BT_HANDLE hSpi, BT_SPI_CONFIG *pConfig) {
-	volatile LM3Sxx_SPI_REGS *pRegs = hSpi->pRegs;
-	BT_ERROR Error = BT_ERR_NONE;
-
-	pRegs->CR0 = (pConfig->ucDataBits - 1) & LM3Sxx_SPI_CR0_DSS_MASK;
-	pRegs->CR0 |= pConfig->eCPOL << 6;
-	pRegs->CR0 |= pConfig->eCPHA << 7;
-
-	spiSetBaudrate(hSpi, pConfig->ulBaudrate);
-
-	switch(pConfig->eMode) {
-	case BT_SPI_MODE_POLLED: {
-		if(hSpi->eMode !=  BT_SPI_MODE_POLLED) {
-
-			if(hSpi->hTxFifo) {
-				BT_CloseHandle(hSpi->hTxFifo);
-				hSpi->hTxFifo = NULL;
-			}
-			if(hSpi->hRxFifo) {
-				BT_CloseHandle(hSpi->hRxFifo);
-				hSpi->hRxFifo = NULL;
-			}
-
-			// Disable TX and RX interrupts
-			//@@pRegs->IER &= ~LM3Sxx_SPI_IER_RBRIE;	// Disable the interrupt
-
-			hSpi->eMode = BT_SPI_MODE_POLLED;
-		}
-		break;
-	}
-
-	case BT_SPI_MODE_BUFFERED:
-	{
-		if(hSpi->eMode != BT_SPI_MODE_BUFFERED) {
-			if(!hSpi->hRxFifo && !hSpi->hTxFifo) {
-				hSpi->hRxFifo = BT_FifoCreate(pConfig->ulRxBufferSize, 1, 0, &Error);
-				hSpi->hTxFifo = BT_FifoCreate(pConfig->ulTxBufferSize, 1, 0, &Error);
-
-				//@@pRegs->IER |= LM3Sxx_SPI_IER_RBRIE;	// Enable the interrupt
-				hSpi->eMode = BT_SPI_MODE_BUFFERED;
-			}
-		}
-		break;
-	}
-
-	default:
-		// Unsupported operating mode!
-		break;
-	}
-
-	return BT_ERR_NONE;
+static void spi_chipselect(BT_HANDLE qspi, BT_SPI_DEVICE *pDevice, int is_on)
+{
 }
-
-/**
- *	Get a full configuration of the SPI.
- **/
-static BT_ERROR spiGetConfig(BT_HANDLE hSpi, BT_SPI_CONFIG *pConfig) {
-	volatile LM3Sxx_SPI_REGS *pRegs = hSpi->pRegs;
-
-	BT_ERROR Error = BT_ERR_NONE;
-
-	BT_u32 ulInputClk = BT_LM3Sxx_GetMainFrequency();
-
-	pConfig->ulBaudrate 	= ulInputClk / (pRegs->CPSR * ((pRegs->CR0 & LM3Sxx_SPI_CR0_SCR_MASK) >> 8));		// Clk / Divisor == ~Baudrate
-	pConfig->ucDataBits 	= (pRegs->CR0 & LM3Sxx_SPI_CR0_DSS_MASK) + 1;
-	pConfig->eCPOL			= (pRegs->CR0 & LM3Sxx_SPI_CR0_CPOL);
-	pConfig->eCPHA			= (pRegs->CR0 & LM3Sxx_SPI_CR0_CPHA);
-
-	pConfig->ulTxBufferSize = BT_FifoSize(hSpi->hTxFifo, &Error);
-	pConfig->ulRxBufferSize = BT_FifoSize(hSpi->hRxFifo, &Error);
-
-	pConfig->eMode			= hSpi->eMode;
-
-	return Error;
-}
-
-/**
- *	Make the SPI active (Set the Enable bit).
- **/
-static BT_ERROR spiEnable(BT_HANDLE hSpi) {
-	volatile LM3Sxx_SPI_REGS *pRegs = hSpi->pRegs;
-
-	pRegs->CR1 |= LM3Sxx_SPI_CR1_SSP_ENABLE;
-
-	return BT_ERR_NONE;
-}
-
-/**
- *	Make the SPI inactive (Clear the Enable bit).
- **/
-static BT_ERROR spiDisable(BT_HANDLE hSpi) {
-	volatile LM3Sxx_SPI_REGS *pRegs = hSpi->pRegs;
-
-	pRegs->CR1 &= ~LM3Sxx_SPI_CR1_SSP_ENABLE;
-
-	return BT_ERR_NONE;
-}
-
 
 static BT_ERROR spiRead(BT_HANDLE hSpi, BT_u32 ulFlags, BT_u8 *pucDest, BT_u32 ulSize) {
 	volatile LM3Sxx_SPI_REGS *pRegs = hSpi->pRegs;
 
 	BT_ERROR Error = BT_ERR_NONE;
 
-	switch(hSpi->eMode) {
-	case BT_SPI_MODE_POLLED:
-	{
-		BT_u32 ulSend = ulSize;
-		while(ulSize) {
-			while((pRegs->SR & LM3Sxx_SPI_SR_TNF) && (ulSend)) {
-				pRegs->DR = 0;
-				ulSend--;
-			}
-			while(!(pRegs->SR & LM3Sxx_SPI_SR_RNE)) {
-				BT_ThreadYield();
-			}
-			*pucDest++ = pRegs->DR & 0x0000FFFF;
-			ulSize--;
+	BT_u32 ulSend = ulSize;
+	while(ulSize) {
+		while((pRegs->SR & LM3Sxx_SPI_SR_TNF) && (ulSend)) {
+			pRegs->DR = 0;
+			ulSend--;
 		}
-		break;
+		while(!(pRegs->SR & LM3Sxx_SPI_SR_RNE)) {
+			BT_ThreadYield();
+		}
+		*pucDest++ = pRegs->DR & 0x0000FFFF;
+		ulSize--;
 	}
 
-	case BT_SPI_MODE_BUFFERED:
-	{
-		// Get bytes from RX buffer very quickly.
-		//@@BT_FifoRead(hSpi->hRxFifo, ulSize, pucDest, &Error);
-		break;
-	}
-
-	default:
-		// ERR, invalid handle configuration.
-		break;
-	}
 	return Error;
 }
 
@@ -367,47 +246,168 @@ static BT_ERROR spiWrite(BT_HANDLE hSpi, BT_u32 ulFlags, BT_u8 *pucSource, BT_u3
 
 	BT_ERROR Error = BT_ERR_NONE;
 
-	switch(hSpi->eMode) {
-	case BT_SPI_MODE_POLLED:
-	{
-		while(ulSize) {
-			while(!(pRegs->SR & LM3Sxx_SPI_SR_TNF)) {
-				BT_ThreadYield();
-			}
-			pRegs->DR = *pucSource++;
-			ulSize--;
+	while(ulSize) {
+		while(!(pRegs->SR & LM3Sxx_SPI_SR_TNF)) {
+			BT_ThreadYield();
 		}
-		break;
+		pRegs->DR = *pucSource++;
+		ulSize--;
 	}
 
-	case BT_SPI_MODE_BUFFERED:
-	{
-		//@@BT_FifoWrite(hSpi->hTxFifo, ulSize, pSrc, &Error);
-		//@@pRegs->IER |= LM3Sxx_SPI_IER_THREIE;	// Enable the interrupt
-
-		break;
-	}
-
-	default:
-		break;
-	}
 	return Error;
 }
 
 
+static BT_i32 spi_start_transfer(BT_HANDLE hSpi, BT_SPI_TRANSFER *transfer)
+{
+	if (transfer->tx_buf)
+		spiWrite(hSpi, 0, (BT_u8*)transfer->tx_buf, transfer->len);
+	if (transfer->rx_buf)
+		spiRead(hSpi, 0, transfer->rx_buf, transfer->len);
+
+	return (transfer->len);
+}
+
+/**
+ *	Complete a full configuration of the SPI.
+ **/
+static BT_ERROR spi_setup_transfer(BT_HANDLE hSpi, BT_SPI_DEVICE *pDevice, BT_SPI_TRANSFER * transfer) {
+	volatile LM3Sxx_SPI_REGS *pRegs = hSpi->pRegs;
+
+	BT_u32 req_hz;
+
+	req_hz = (transfer) ? transfer->speed_hz : pDevice->max_speed_hz;
+
+	if(pDevice->mode & ~MODEBITS) {
+		BT_kPrint("spi: unsupported mode bits %x\n",pDevice->mode & ~MODEBITS);
+		return BT_ERR_UNSUPPORTED_FLAG;
+	}
+
+	if(transfer && (transfer->speed_hz == 0)) {
+		req_hz = pDevice->max_speed_hz;
+	}
+
+	/* Set the clock frequency */
+	if(hSpi->speed_hz != req_hz) {
+		hSpi->speed_hz = req_hz;
+		spiSetBaudrate(hSpi, transfer->speed_hz);
+	}
+
+	/* Set the QSPI clock phase and clock polarity */
+	pRegs->CR0 = (transfer->bits_per_word - 1) & LM3Sxx_SPI_CR0_DSS_MASK;
+	if (pDevice->mode & SPI_CPHA)
+		pRegs->CR0 |= LM3Sxx_SPI_CR0_CPHA;
+	if (pDevice->mode & SPI_CPOL)
+		pRegs->CR0 |= LM3Sxx_SPI_CR0_CPOL;
+
+
+
+	return BT_ERR_NONE;
+}
+
+BT_ERROR spi_transfer(BT_HANDLE hSpi, BT_SPI_MESSAGE * message) {
+
+	BT_SPI_TRANSFER * transfer;
+	int status = 0;
+	unsigned			cs_change = 1;
+
+	message->actual_length = 0;
+	message->status = -1;
+
+	/* Check each transfer's parameters */
+	bt_list_for_each_entry(transfer, &message->transfers, transfer_list) {
+		if (!transfer->tx_buf && !transfer->rx_buf && transfer->len)
+			return -BT_ERR_INVALID_RESOURCE;
+	}
+
+	bt_list_for_each_entry(transfer, &message->transfers, transfer_list) {
+		if (transfer->bits_per_word || transfer->speed_hz) {
+			status = spi_setup_transfer(hSpi, message->spi_device, transfer);
+			if (status != BT_ERR_NONE)
+				break;
+		}
+
+		/* Select the chip if required */
+		if (cs_change) {
+			spi_chipselect(hSpi, message->spi_device, 1);
+		}
+
+		cs_change = transfer->cs_change;
+
+		if(!transfer->tx_buf && !transfer->rx_buf && transfer->len) {
+			status = BT_ERR_INVALID_VALUE;
+			break;
+		}
+
+		/* Request the transfer */
+		if (transfer->len) {
+			status = spi_start_transfer(hSpi, transfer);
+		}
+
+		if (status != transfer->len) {
+			//if (status > 0)
+			//	status = -1;
+			break;
+		}
+		message->actual_length += status;
+		status = 0;
+
+		//if (transfer->delay_usecs)
+		//{/* FIXME: udelay(transfer->delay_usecs); */ }
+
+		if (cs_change)
+			/* Deselect the chip */
+			spi_chipselect(hSpi, message->spi_device, 0);
+
+		if (transfer->transfer_list.next == &message->transfers)
+			break;
+	}
+
+	message->status = status;
+	message->complete(message->context);
+
+	spi_setup_transfer(hSpi, message->spi_device, NULL);
+
+	if(!(status == 0 && cs_change))
+		spi_chipselect(hSpi, message->spi_device, 0);
+
+	return BT_ERR_NONE;
+}
+
+static BT_ERROR spi_setup(BT_HANDLE hspi, BT_SPI_DEVICE *pDevice)
+{
+	if (pDevice->mode & SPI_LSB_FIRST)
+		return BT_ERR_INVALID_VALUE;
+
+	if (!pDevice->max_speed_hz)
+		return BT_ERR_INVALID_VALUE;
+
+	if (!pDevice->bits_per_word)
+		pDevice->bits_per_word = 8;
+
+	return spi_setup_transfer(hspi, pDevice, NULL);
+}
+
+
+/**
+ *	Make the SPI active (Set the Enable bit).
+ **/
+static BT_ERROR spi_init_hw(BT_HANDLE hSpi) {
+	volatile LM3Sxx_SPI_REGS *pRegs = hSpi->pRegs;
+
+	pRegs->CR1 |= LM3Sxx_SPI_CR1_SSP_ENABLE;
+
+	return BT_ERR_NONE;
+}
+
 static const BT_DEV_IF_SPI oSpiConfigInterface = {
-	.pfnSetBaudrate		= spiSetBaudrate,											///< SPI setBaudrate implementation.
-	.pfnSetConfig		= spiSetConfig,												///< SPI set config imple.
-	.pfnGetConfig		= spiGetConfig,
-	.pfnEnable			= spiEnable,													///< Enable/disable the device.
-	.pfnDisable			= spiDisable,
-	.pfnRead			= spiRead,
-	.pfnWrite			= spiWrite,
+	.pfnSetup			= spi_setup,
+	.pfnTransfer		= spi_transfer,
 };
 
 static const BT_IF_POWER oPowerInterface = {
-	spiSetPowerState,											///< Pointers to the power state API implementations.
-	spiGetPowerState,											///< This gets the current power state.
+	.pfnSetPowerState	= spiSetPowerState,											///< Pointers to the power state API implementations.
+	.pfnGetPowerState	= spiGetPowerState,											///< This gets the current power state.
 };
 
 static const BT_DEV_IFS oConfigInterface = {
@@ -415,12 +415,11 @@ static const BT_DEV_IFS oConfigInterface = {
 };
 
 const BT_IF_DEVICE BT_LM3Sxx_SPI_oDeviceInterface = {
-	&oPowerInterface,											///< Device does not support powerstate functionality.
-	BT_DEV_IF_T_SPI,											///< Allow configuration through the SPI api.
+	.pPowerIF = &oPowerInterface,											///< Device does not support powerstate functionality.
+	.eConfigType = BT_DEV_IF_T_SPI,
 	.unConfigIfs = {
-		(BT_DEV_INTERFACE) &oSpiConfigInterface,
+		.pSpiIF = &oSpiConfigInterface,
 	},
-	NULL,											///< Provide a Character device interface implementation.
 };
 
 
@@ -450,6 +449,8 @@ static BT_HANDLE spi_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 		goto err_free_out;
 	}
 
+	hSpi->spi_master.bus_num = pResource->ulStart;
+
 	hSpi = BT_CreateHandle(&oHandleInterface, sizeof(struct _BT_OPAQUE_HANDLE), pError);
 	if(!hSpi) {
 		goto err_out;
@@ -469,9 +470,8 @@ static BT_HANDLE spi_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 
 	spiSetPowerState(hSpi, BT_POWER_STATE_AWAKE);
 
-	// Reset all registers to their defaults!
-
-	ResetSpi(hSpi);
+	// Reset all registers to their defaults
+	spi_init_hw(hSpi);
 
 	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_IRQ, 0);
 	if(!pResource) {
@@ -488,10 +488,23 @@ static BT_HANDLE spi_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 
 	Error = BT_EnableInterrupt(pResource->ulStart);
 
+	hSpi->spi_master.pDevice = pDevice;
+
+	hSpi->spi_master.num_chipselect = 0;
+
+	hSpi->spi_master.flags = 0;
+
+	hSpi->speed_hz = 20000000;
+
+	Error = BT_SpiRegisterMaster(hSpi, &hSpi->spi_master);
+	if(Error != BT_ERR_NONE) {
+		goto err_free_out;
+	}
+
 	return hSpi;
 
 err_free_out:
-	BT_kFree(hSpi);
+	BT_DestroyHandle(hSpi);
 
 err_out:
 	if(pError) {

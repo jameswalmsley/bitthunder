@@ -1,12 +1,12 @@
 menu "LM3Sxx_PORTA_0"	
 
 config LM3Sxx_PORTA_0_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
 	prompt "FUNCTION"
-	default LM3Sxx_PORTA_0_GPIO
+	default LM3Sxx_PORTA_0_RXD0
 	depends on !LM3Sxx_PORTA_0_DEFAULT
 
 config LM3Sxx_PORTA_0_GPIO
@@ -69,12 +69,12 @@ endmenu
 menu "LM3Sxx_PORTA_1"	
 
 config LM3Sxx_PORTA_1_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
 	prompt "FUNCTION"
-	default LM3Sxx_PORTA_1_GPIO
+	default LM3Sxx_PORTA_1_TXD0
 	depends on !LM3Sxx_PORTA_1_DEFAULT
 
 config LM3Sxx_PORTA_1_GPIO
@@ -134,12 +134,12 @@ endmenu
 menu "LM3Sxx_PORTA_2"	
 
 config LM3Sxx_PORTA_2_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
 	prompt "FUNCTION"
-	default LM3Sxx_PORTA_2_GPIO
+	default LM3Sxx_PORTA_2_SCK0
 	depends on !LM3Sxx_PORTA_2_DEFAULT
 
 config LM3Sxx_PORTA_2_GPIO
@@ -200,12 +200,12 @@ endmenu
 menu "LM3Sxx_PORTA_3"	
 
 config LM3Sxx_PORTA_3_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
 	prompt "FUNCTION"
-	default LM3Sxx_PORTA_3_GPIO
+	default LM3Sxx_PORTA_3_FSS
 	depends on !LM3Sxx_PORTA_3_DEFAULT
 
 config LM3Sxx_PORTA_3_GPIO
@@ -265,12 +265,12 @@ endmenu
 menu "LM3Sxx_PORTA_4"	
 
 config LM3Sxx_PORTA_4_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
 	prompt "FUNCTION"
-	default LM3Sxx_PORTA_4_GPIO
+	default LM3Sxx_PORTA_4_MISO
 	depends on !LM3Sxx_PORTA_4_DEFAULT
 
 config LM3Sxx_PORTA_4_GPIO
@@ -336,12 +336,12 @@ endmenu
 menu "LM3Sxx_PORTA_5"	
 
 config LM3Sxx_PORTA_5_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
 	prompt "FUNCTION"
-	default LM3Sxx_PORTA_5_GPIO
+	default LM3Sxx_PORTA_5_MOSI
 	depends on !LM3Sxx_PORTA_5_DEFAULT
 
 config LM3Sxx_PORTA_5_GPIO
@@ -405,7 +405,7 @@ endmenu
 menu "LM3Sxx_PORTA_6"	
 
 config LM3Sxx_PORTA_6_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
@@ -487,7 +487,7 @@ endmenu
 menu "LM3Sxx_PORTA_7"	
 
 config LM3Sxx_PORTA_7_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice

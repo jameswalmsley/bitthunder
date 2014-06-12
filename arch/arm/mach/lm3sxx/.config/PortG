@@ -1,7 +1,7 @@
 menu "LM3Sxx_PORTG_0"	
 
 config LM3Sxx_PORTG_0_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
@@ -81,7 +81,7 @@ endmenu
 menu "LM3Sxx_PORTG_1"	
 
 config LM3Sxx_PORTG_1_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
@@ -154,7 +154,7 @@ endmenu
 menu "LM3Sxx_PORTG_7"	
 
 config LM3Sxx_PORTG_7_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice

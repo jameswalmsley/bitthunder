@@ -16,7 +16,7 @@ struct _BT_OPAQUE_HANDLE {
 	volatile LM3Sxx_GPIO_REGS   *pRegs;
 };
 
-static BT_ERROR gpio_irq_handler(BT_u32 ulIRQ, void *pParam) {
+/*static BT_ERROR gpio_irq_handler(BT_u32 ulIRQ, void *pParam) {
 	//BT_HANDLE hGPIO = (BT_HANDLE) pParam;
 
 	//hGPIO->pRegs->bank[0].INT_STAT = 1;		///< Acknowledge the interrupt.
@@ -24,7 +24,7 @@ static BT_ERROR gpio_irq_handler(BT_u32 ulIRQ, void *pParam) {
 	//hGPIO->pRegs->DATA[0] ^= 1 << 12;
 
 	return BT_ERR_NONE;
-}
+}*/
 
 static BT_ERROR gpio_cleanup(BT_HANDLE hGPIO) {
 	return BT_ERR_NONE;
@@ -165,6 +165,11 @@ BT_HANDLE gpio_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError) {
 	}
 
 	//Error = BT_EnableInterrupt(pResource->ulStart);
+
+	LM3Sxx_RCC->RCGC[2] |= LM3Sxx_RCC_RCGC_PORTAEN | LM3Sxx_RCC_RCGC_PORTBEN | LM3Sxx_RCC_RCGC_PORTCEN |
+						   LM3Sxx_RCC_RCGC_PORTDEN | LM3Sxx_RCC_RCGC_PORTEEN | LM3Sxx_RCC_RCGC_PORTFEN |
+						   LM3Sxx_RCC_RCGC_PORTGEN | LM3Sxx_RCC_RCGC_PORTHEN | LM3Sxx_RCC_RCGC_PORTIEN |
+						   LM3Sxx_RCC_RCGC_PORTJEN;
 
 	Error = BT_RegisterGpioController(base, total, hGPIO);
 	if(Error) {

@@ -1,7 +1,7 @@
 menu "LM3Sxx_PORTB_0"	
 
 config LM3Sxx_PORTB_0_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
@@ -79,7 +79,7 @@ endmenu
 menu "LM3Sxx_PORTB_1"	
 
 config LM3Sxx_PORTB_1_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
@@ -158,12 +158,12 @@ endmenu
 menu "LM3Sxx_PORTB_2"	
 
 config LM3Sxx_PORTB_2_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
 	prompt "FUNCTION"
-	default LM3Sxx_PORTB_2_GPIO
+	default LM3Sxx_PORTB_2_SCL0
 	depends on !LM3Sxx_PORTB_2_DEFAULT
 
 config LM3Sxx_PORTB_2_GPIO
@@ -232,12 +232,12 @@ endmenu
 menu "LM3Sxx_PORTB_3"	
 
 config LM3Sxx_PORTB_3_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
 	prompt "FUNCTION"
-	default LM3Sxx_PORTB_3_GPIO
+	default LM3Sxx_PORTB_3_SDA0
 	depends on !LM3Sxx_PORTB_3_DEFAULT
 
 config LM3Sxx_PORTB_3_GPIO
@@ -301,7 +301,7 @@ endmenu
 menu "LM3Sxx_PORTB_4"	
 
 config LM3Sxx_PORTB_4_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
@@ -387,7 +387,7 @@ endmenu
 menu "LM3Sxx_PORTB_5"	
 
 config LM3Sxx_PORTB_5_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
@@ -482,7 +482,7 @@ endmenu
 menu "LM3Sxx_PORTB_6"	
 
 config LM3Sxx_PORTB_6_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
@@ -574,7 +574,7 @@ endmenu
 menu "LM3Sxx_PORTB_7"	
 
 config LM3Sxx_PORTB_7_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice

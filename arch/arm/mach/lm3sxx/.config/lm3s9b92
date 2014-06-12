@@ -4,6 +4,8 @@ config MACH_LM3S9B92
     select HAS_ETHERNET
     select HAS_USB_OTG 
 	select HAS_CAN_0
+	select HAS_QEI_0
+	select HAS_QEI_1
 
 
     select LINKER_MEMORY_DEFINED

@@ -24,6 +24,15 @@ config HAS_ETHERNET
 	bool
 	default n
 	
+config HAS_QEI_0
+	bool
+	default n
+
+config HAS_QEI_1
+	bool
+	default n
+	
+	
 	
 choice
 	prompt "LM3Sxx Chip Variant"
@@ -115,6 +124,15 @@ config MACH_LM3Sxx_TIMER2_BASE
 config MACH_LM3Sxx_TIMER3_BASE
 	hex
 	default 0x40033000
+	
+config MACH_LM3Sxx_QEI0_BASE  
+	hex
+	default 0x4002C000
+
+config MACH_LM3Sxx_QEI1_BASE  
+	hex
+	default 0x4002D000
+	
 
 config MACH_LM3Sxx_TOTAL_GPIOS
 	int
@@ -364,6 +382,11 @@ config MACH_LM3Sxx_MAC_0
 	select MACH_LM3Sxx_MAC
 	depends on HAS_ETHERNET
 
+
+config MACH_ETH_PAD_SIZE
+	int
+	default 2
+	
 endmenu
 
 menu "TIMER devices"
@@ -431,6 +454,38 @@ config MACH_LM3Sxx_PWM_0_INODE_NAME
 	default "pwm0"
 	depends on MACH_LM3Sxx_PWM_0
 endmenu
+
+menu "QEI devices"
+
+config MACH_LM3Sxx_QEI
+	bool
+	default n
+	select QEI
+
+config MACH_LM3Sxx_QEI_0
+    bool "Use QEI(0) peripheral"
+	default n
+	select MACH_LM3Sxx_QEI
+	depends on HAS_QEI_0
+
+config MACH_LM3Sxx_QEI_0_INODE_NAME
+	string "QEI(0) devfs name"
+	default "qei0"
+	depends on MACH_LM3Sxx_QEI_0
+
+config MACH_LM3Sxx_QEI_1
+    bool "Use QEI(1) peripheral"
+	default n
+	select MACH_LM3Sxx_QEI
+	depends on HAS_QEI_1
+
+config MACH_LM3Sxx_QEI_1_INODE_NAME
+	string "QEI(1) devfs name"
+	default "qei1"
+	depends on MACH_LM3Sxx_QEI_1
+		
+endmenu
+
 
 endmenu
 

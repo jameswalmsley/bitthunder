@@ -23,7 +23,17 @@ struct _BT_OPAQUE_HANDLE {
 	LM3Sxx_MAC_REGS   	   	   *pRegs;
 	const BT_INTEGRATED_DEVICE *pDevice;
 	BT_NET_IF_EVENTRECEIVER	    pfnEvent;
+	BT_HANDLE 					hMII;
 };
+
+
+struct _MII_HANDLE {
+	BT_HANDLE_HEADER		h;
+	struct bt_mii_bus		mii;
+};
+
+static const BT_IF_HANDLE oMIIHandleInterface;
+
 
 static BT_HANDLE g_mac_HANDLES[1] = {
 	NULL,
@@ -58,10 +68,81 @@ BT_ERROR BT_NVIC_IRQ_58(void) {
     return BT_ERR_NONE;
 }
 
-static BT_ERROR mac_send_event(BT_HANDLE hMAC, BT_MAC_EVENT eEvent) {
+
+static struct _MII_HANDLE* mii_init(BT_HANDLE hMac, BT_ERROR *pError) {
+	struct _MII_HANDLE *pMII = (struct _MII_HANDLE *) BT_CreateHandle(&oMIIHandleInterface, sizeof(struct _MII_HANDLE), pError);
+	if(!pMII) {
+		if(pError) {
+			*pError = BT_ERR_NO_MEMORY;
+		}
+		return NULL;
+	}
+
+	hMac->hMII = (BT_HANDLE) pMII;
+
+	pMII->mii.hMAC = hMac;
+	pMII->mii.name = "LM3Sxx mac-mii bus";
+
+	return pMII;
+}
+
+static BT_u16 mii_read(BT_HANDLE hMII, BT_u32 phy_id, BT_u32 regnum, BT_ERROR *pError) {
+
+	/*struct _MII_HANDLE *pMII = (struct _MII_HANDLE *) hMII;
+	while(!(pMII->mii.hMAC->pRegs->net_status & NET_STATUS_MGMT_IDLE)) {
+		BT_ThreadYield();
+	}
+
+	BT_u32 reg = (phy_id << 23) & PHY_MAINT_PHY_ADDR;
+	reg |= (regnum << 18) & PHY_MAINT_REG_ADDR;
+	reg |= PHY_MAINT_R_MASK;
+	reg |= 0x40020000;
+
+	pMII->mii.hMAC->pRegs->phy_maint = reg;
+
+	while(!(pMII->mii.hMAC->pRegs->net_status & NET_STATUS_MGMT_IDLE)) {
+		BT_ThreadYield();
+	}
+
+	return pMII->mii.hMAC->pRegs->phy_maint & PHY_MAINT_DATA;*/
+	return 0;
+}
+
+static BT_ERROR mii_write(BT_HANDLE hMII, BT_u32 phy_id, BT_u32 regnum, BT_u16 val) {
+
+	/*struct _MII_HANDLE *pMII = (struct _MII_HANDLE *) hMII;
+	while(!(pMII->mii.hMAC->pRegs->net_status & NET_STATUS_MGMT_IDLE)) {
+		BT_ThreadYield();
+	}
+
+	BT_u32 reg = (phy_id << 23) & PHY_MAINT_PHY_ADDR;
+	reg |= (regnum << 18) & PHY_MAINT_REG_ADDR;
+	reg |= PHY_MAINT_W_MASK;
+	reg |= 0x40020000;
+	reg |= val;
+
+	pMII->mii.hMAC->pRegs->phy_maint = reg;
+
+	while(!(pMII->mii.hMAC->pRegs->net_status & NET_STATUS_MGMT_IDLE)) {
+		BT_ThreadYield();
+	}*/
+
+	return BT_ERR_NONE;
+}
+
+static BT_ERROR mii_reset(BT_HANDLE hMII) {
+	return BT_ERR_NONE;
+}
+
+static BT_ERROR mii_cleanup(BT_HANDLE hMII) {
+	return BT_ERR_NONE;
+}
+
+
+static BT_ERROR mac_send_event(BT_HANDLE hMAC, BT_u32 ulEvent) {
 	volatile LM3Sxx_MAC_REGS *pRegs = hMAC->pRegs;
 
-	switch (eEvent) {
+	switch (ulEvent) {
 	case BT_MAC_RECEIVED: {
 		pRegs->MACIM |= LM3Sxx_MAC_MACIM_RXINT | LM3Sxx_MAC_MACIM_TXEMP;		//@@ST
 		break;
@@ -114,10 +195,10 @@ static BT_u32 mac_dataready(BT_HANDLE hMAC, BT_ERROR *pError) {
 	return 0;
 }
 
-static BT_ERROR mac_read(BT_HANDLE hMAC, BT_u32 ulSize, void *pucDest) {
+static BT_ERROR mac_read(BT_HANDLE hMAC, BT_u32 ulSize, BT_u32 ulPos, void *pucDest) {
 	volatile LM3Sxx_MAC_REGS *pRegs = hMAC->pRegs;
 
-	BT_u32 *pDest = (BT_u32*)pucDest;
+	BT_u32 *pDest = (BT_u32*)pucDest + ulPos;
 
 	BT_u32 i;
 	for (i = 0; i < ulSize; i+=4) {
@@ -150,13 +231,50 @@ static BT_BOOL mac_txfifoready(BT_HANDLE hMAC, BT_ERROR *pError) {
 }
 
 
+static BT_u32  iGather = 0;
+static BT_u32  ulGather = 0;
+
 static BT_ERROR mac_write(BT_HANDLE hMAC, BT_u32 ulSize, void *pucSrc) {
 	volatile LM3Sxx_MAC_REGS *pRegs = hMAC->pRegs;
 
-	BT_u32 *pSrc = (BT_u32*)pucSrc;
+	BT_u32 *pSrc;
+	BT_u8  *pucBuf = (BT_u8 *)pucSrc;
+	BT_u32  iBuf = 0;
+	BT_u8  *pucGather = (unsigned char *)&ulGather;
 
-	while (ulSize--) {
-		 pRegs->MACDATA = *pSrc++;
+	while((iBuf < ulSize) && (iGather != 0)) {
+		/* Copy a byte from the pbuf into the gather buffer. */
+		pucGather[iGather] = pucBuf[iBuf++];
+		/* Increment the gather buffer index modulo 4. */
+		iGather = ((iGather + 1) % 4);
+	}
+
+	/**
+	* If the gather index is 0 and the pbuf index is non-zero,
+	* we have a gather buffer to write into the Tx FIFO.
+	*
+	*/
+	if((iGather == 0) && (iBuf != 0)) {
+		pRegs->MACDATA = ulGather;
+		ulGather = 0;
+	}
+
+	/* Initialze a long pointer into the pbuf for 32-bit access. */
+	pSrc = (unsigned long *)&pucBuf[iBuf];
+
+	BT_u32 ulLen = ulSize/4;
+
+	while (ulLen--) {
+		pRegs->MACDATA = *pSrc++;
+	}
+
+	iBuf += (ulSize/4)*4;
+
+	while(iBuf < ulSize) {
+		/* Copy a byte from the pbuf into the gather buffer. */
+		pucGather[iGather] = pucBuf[iBuf++];
+		/* Increment the gather buffer index modulo 4. */
+		iGather = ((iGather + 1) % 4);
 	}
 
 	return BT_ERR_NONE;
@@ -165,7 +283,12 @@ static BT_ERROR mac_write(BT_HANDLE hMAC, BT_u32 ulSize, void *pucSrc) {
 static BT_ERROR mac_sendframe(BT_HANDLE hMAC) {
 	volatile LM3Sxx_MAC_REGS *pRegs = hMAC->pRegs;
 
+	pRegs->MACDATA = ulGather;
+
 	pRegs->MACTR |= LM3Sxx_MAC_MACTR_NEWTX;
+
+	iGather = 0;
+	ulGather = 0;
 
 	return BT_ERR_NONE;
 }
@@ -193,7 +316,7 @@ static BT_ERROR mac_getaddr(BT_HANDLE hIF, BT_u8 *pucAddr, BT_u32 ulLength) {
 }
 
 /* set MAC hardware address */
-static BT_ERROR mac_setaddr(BT_HANDLE hIF, BT_u8 *pucAddr, BT_u32 ulLength) {
+static BT_ERROR mac_setaddr(BT_HANDLE hIF, const BT_u8 *pucAddr, BT_u32 ulLength) {
 	volatile LM3Sxx_MAC_REGS *pRegs = hIF->pRegs;
     BT_u32 ulTemp;
     BT_u8 *pucTemp = (BT_u8 *)&ulTemp;
@@ -226,6 +349,19 @@ static BT_ERROR mac_init(BT_HANDLE hMAC) {
 	volatile LM3Sxx_MAC_REGS *pRegs = hMAC->pRegs;
 
 	BT_u32 ulTemp;
+
+	BT_ERROR Error = BT_ERR_NONE;
+
+	struct _MII_HANDLE *pMII = mii_init(hMAC, &Error);
+	if(!pMII) {
+		return Error;
+	}
+
+	Error = BT_RegisterMiiBus((BT_HANDLE) pMII, &pMII->mii);
+	if(Error) {
+		return Error;
+	}
+
 
 	/* Do whatever else is needed to initialize interface. */
 	/* Disable all mac Interrupts. */
@@ -391,6 +527,29 @@ static BT_ERROR macGetPowerState(BT_HANDLE hMAC, BT_POWER_STATE *pePowerState) {
  *
  */
 
+static const BT_DEV_IF_MII mii_ops = {
+	.pfnRead 	= mii_read,
+	.pfnWrite 	= mii_write,
+	.pfnReset 	= mii_reset,
+};
+
+static const BT_IF_DEVICE oMIIDeviceIF = {
+	.eConfigType	= BT_DEV_IF_T_MII,
+	.unConfigIfs 	= {
+		.pMiiIF = &mii_ops,
+	},
+};
+
+static const BT_IF_HANDLE oMIIHandleInterface = {
+	BT_MODULE_DEF_INFO,
+	.oIfs = {
+		.pDevIF = &oMIIDeviceIF,
+	},
+	.eType = BT_HANDLE_T_DEVICE,
+	.pfnCleanup = mii_cleanup,
+};
+
+
 static const BT_DEV_IF_EMAC mac_ops = {
 	.ulCapabilities		= BT_NET_IF_CAPABILITIES_ETHERNET | BT_NET_IF_CAPABILITIES_100MBPS,
 	.pfnEventSubscribe	= mac_eventsubscribe,
@@ -400,9 +559,9 @@ static const BT_DEV_IF_EMAC mac_ops = {
 	.pfnGetMTU			= mac_getmtusize,
 	.pfnDataReady		= mac_dataready,
 	.pfnRead			= mac_read,
+	.pfnWrite			= mac_write,
 	.pfnDropFrame		= mac_drop,
 	.pfnTxFifoReady		= mac_txfifoready,
-	.pfnWrite			= mac_write,
 	.pfnSendFrame		= mac_sendframe,
 	.pfnSendEvent		= mac_send_event,
 };
@@ -413,9 +572,9 @@ static const BT_IF_POWER oPowerInterface = {
 };
 
 const BT_IF_DEVICE BT_LM3Sxx_mac_oDeviceInterface = {
-	&oPowerInterface,											///< Device does support powerstate functionality.
-	BT_DEV_IF_T_EMAC,											///< Allow configuration through the mac api.
-	.unConfigIfs = {
+	.pPowerIF		= &oPowerInterface,											///< Device does support powerstate functionality.
+	.eConfigType	= BT_DEV_IF_T_EMAC,											///< Allow configuration through the mac api.
+	.unConfigIfs 	= {
 		.pEMacIF = &mac_ops,
 	},
 };
@@ -478,10 +637,10 @@ static BT_HANDLE mac_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 	}*/
 
 
-	BT_SetInterruptPriority(pResource->ulStart, 12);
+	BT_SetInterruptPriority(pResource->ulStart, 3);
 	Error = BT_EnableInterrupt(pResource->ulStart);
 
-	Error = BT_RegisterNetworkInterface(hMAC, &omacDeviceInterface);
+	Error = BT_RegisterNetworkInterface(hMAC);
 
 	return hMAC;
 

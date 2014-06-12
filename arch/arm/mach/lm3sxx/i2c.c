@@ -222,12 +222,6 @@ static BT_ERROR i2cGetPowerState(BT_HANDLE hI2C, BT_POWER_STATE *pePowerState) {
 	return BT_POWER_STATE_ASLEEP;
 }
 
-static BT_ERROR i2cDisable(BT_HANDLE hI2C) {
-	hI2C->pRegs->LM3Sxx_I2C_MCR = 0x00000000;
-
-	return BT_ERR_NONE;
-}
-
 static BT_ERROR i2cEnable(BT_HANDLE hI2C) {
 	hI2C->pRegs->LM3Sxx_I2C_MCR = LM3Sxx_I2C_MCR_MASTER_MODE;
 
@@ -306,19 +300,22 @@ static BT_ERROR i2cWrite(BT_HANDLE hI2C, BT_u16 usDevice, BT_u8 *pucSource, BT_u
 }
 
 static BT_u32 i2c_master_transfer(BT_HANDLE hI2C, BT_I2C_MESSAGE *msgs, BT_u32 num, BT_ERROR *pError) {
-	if (pError) *pError = BT_ERR_NONE;
-
+	BT_ERROR Error = BT_ERR_NONE;
 	BT_u32 count;
+
 	for(count = 0; count < num; count++, msgs++) {
 		if(msgs->flags & BT_I2C_M_RD) {
-			i2cRead(hI2C, msgs->addr, msgs->buf, msgs->len);
+			Error = i2cRead(hI2C, msgs->addr, msgs->buf, msgs->len);
 		}
 		else {
-			i2cWrite(hI2C, msgs->addr, msgs->buf, msgs->len);
+			Error = i2cWrite(hI2C, msgs->addr, msgs->buf, msgs->len);
 		}
 	}
 
-	return num;
+	if (pError) *pError = Error;
+
+	if (Error == 0) return num;
+	else return 0;
 }
 
 static const BT_IF_POWER oPowerInterface = {

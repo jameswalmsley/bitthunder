@@ -1,7 +1,7 @@
 menu "LM3Sxx_PORTD_0"	
 
 config LM3Sxx_PORTD_0_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
@@ -98,7 +98,7 @@ endmenu
 menu "LM3Sxx_PORTD_1"	
 
 config LM3Sxx_PORTD_1_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
@@ -202,7 +202,7 @@ endmenu
 menu "LM3Sxx_PORTD_2"	
 
 config LM3Sxx_PORTD_2_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
@@ -285,7 +285,7 @@ endmenu
 menu "LM3Sxx_PORTD_3"	
 
 config LM3Sxx_PORTD_3_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
@@ -368,7 +368,7 @@ endmenu
 menu "LM3Sxx_PORTD_4"	
 
 config LM3Sxx_PORTD_4_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
@@ -453,7 +453,7 @@ endmenu
 menu "LM3Sxx_PORTD_5"	
 
 config LM3Sxx_PORTD_5_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
@@ -536,7 +536,7 @@ endmenu
 menu "LM3Sxx_PORTD_6"	
 
 config LM3Sxx_PORTD_6_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
@@ -616,7 +616,7 @@ endmenu
 menu "LM3Sxx_PORTD_7"	
 
 config LM3Sxx_PORTD_7_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice

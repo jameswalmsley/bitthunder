@@ -569,22 +569,9 @@ static BT_u32 file_read(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, void *pB
 	return ulSize;
 }
 
-static BT_u32 file_write(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
+static BT_u32 file_write(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer, BT_ERROR *pError) {
 	*pError = uartWrite(hUart, ulFlags, ulSize, pBuffer);
 	return ulSize;
-}
-
-/**
- *	A driver doesn't have to implement all API's all at once, therefore we left the boring
- *	GETCH/PUTCH interfaces.
- **/
-
-static BT_ERROR uartGetch(BT_HANDLE hUart, BT_u32 ulFlags) {
-	return BT_ERR_NONE;
-}
-
-static BT_ERROR uartPutch(BT_HANDLE hUart, BT_u32 ulFlags, BT_u8 ucData) {
-	return BT_ERR_NONE;
 }
 
 
@@ -602,13 +589,6 @@ static const BT_IF_POWER oPowerInterface = {
 	uartGetPowerState,											///< This gets the current power state.
 };
 
-static const BT_IF_CHARDEV oCharDevInterface = {
-	uartRead,													///< CH device read function.
-	uartWrite,													///< CH device write function.
-	uartGetch,													///< This API wasn't implemented in this driver.
-	uartPutch,													///< :: Therefore the pointer must be NULL for BT to handle.
-};
-
 static const BT_DEV_IFS oConfigInterface = {
 	(BT_DEV_INTERFACE) &oUartConfigInterface,
 };
@@ -619,14 +599,12 @@ const BT_IF_DEVICE BT_LM3Sxx_UART_oDeviceInterface = {
 	.unConfigIfs = {
 		(BT_DEV_INTERFACE) &oUartConfigInterface,
 	},
-	&oCharDevInterface,											///< Provide a Character device interface implementation.
 };
 
 static const BT_IF_FILE oFileInterface = {
 	.pfnRead = file_read,
 	.pfnWrite = file_write,
 };
-
 
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
@@ -642,7 +620,6 @@ static BT_HANDLE uart_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErro
 
 	BT_ERROR Error = BT_ERR_NONE;
 	BT_HANDLE hUart = NULL;
-
 
 	const BT_RESOURCE *pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_ENUM, 0);
 	if(!pResource) {
@@ -696,7 +673,7 @@ static BT_HANDLE uart_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErro
 	return hUart;
 
 err_free_out:
-	BT_kFree(hUart);
+	BT_DestroyHandle(hUart);
 
 err_out:
 	if(pError) {

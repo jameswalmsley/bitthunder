@@ -1,7 +1,7 @@
 menu "LM3Sxx_PORTH_0"	
 
 config LM3Sxx_PORTH_0_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
@@ -73,7 +73,7 @@ endmenu
 menu "LM3Sxx_PORTH_1"	
 
 config LM3Sxx_PORTH_1_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
@@ -142,7 +142,7 @@ endmenu
 menu "LM3Sxx_PORTH_2"	
 
 config LM3Sxx_PORTH_2_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
@@ -212,7 +212,7 @@ endmenu
 menu "LM3Sxx_PORTH_3"	
 
 config LM3Sxx_PORTH_3_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
@@ -281,7 +281,7 @@ endmenu
 menu "LM3Sxx_PORTH_4"	
 
 config LM3Sxx_PORTH_4_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
@@ -348,7 +348,7 @@ endmenu
 menu "LM3Sxx_PORTH_5"	
 
 config LM3Sxx_PORTH_5_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
@@ -414,7 +414,7 @@ endmenu
 menu "LM3Sxx_PORTH_6"	
 
 config LM3Sxx_PORTH_6_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
@@ -484,7 +484,7 @@ endmenu
 menu "LM3Sxx_PORTH_7"	
 
 config LM3Sxx_PORTH_7_DEFAULT
-	bool "disabled"
+	bool "default"
 	default y
 
 choice
