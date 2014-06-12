@@ -120,12 +120,11 @@
    	    __rodata1_start = .;
 		*(.rodata1)
 		*(.rodata1.*)
+		. = ALIGN(8);
 		__rodata1_end = .;
 	} > BT_LINKER_TEXT_SECTION
 
-	. = ALIGN(8);
 	_etext = .;
-
 
 	.sdata2 : {
 		__sdata2_start = .;
@@ -302,7 +301,7 @@ _SDA2_BASE_ = __sdata2_start + ((__sbss2_end - __sdata2_start) / 2 );
 
 /* Generate Stack and Heap definitions */
 
-#if 0
+#if 1
 #ifdef BT_CONFIG_LINKER_BSS_SECTION_SRAM
 _HEAP_SIZE = BT_LINKER_SRAM_START_ADDRESS + BT_LINKER_SRAM_LENGTH - __bss_end - _STACK_SIZE - _IRQ_STACK_SIZE - BT_CONFIG_LINKER_HEAP_DOWN;
 #endif
