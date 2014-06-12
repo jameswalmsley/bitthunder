@@ -38,7 +38,7 @@ static BT_ERROR rtc_cleanup(BT_HANDLE hRtc) {
 	return BT_ERR_NONE;
 }
 
-static BT_ERROR get_time(BT_HANDLE hRtc, struct rtctime *t) {
+static BT_ERROR get_time(BT_HANDLE hRtc, struct bt_rtc_time *t) {
 
 	BT_ERROR Error = BT_ERR_NONE;
 	BT_u8 ucBuffer[8];
@@ -73,7 +73,7 @@ static BT_ERROR get_time(BT_HANDLE hRtc, struct rtctime *t) {
 	return Error;
  }
 
-static BT_ERROR set_time(BT_HANDLE hRtc, struct rtctime *t) {
+static BT_ERROR set_time(BT_HANDLE hRtc, struct bt_rtc_time *t) {
 
 	BT_ERROR Error = BT_ERR_NONE;
 	BT_u8 ucBuffer[8];
@@ -122,7 +122,7 @@ static const BT_IF_HANDLE oHandleInterface = {
 static BT_HANDLE rtc_probe(BT_HANDLE hBus, const BT_DEVICE *pDevice, BT_ERROR *pError) {
 
 	BT_ERROR Error = BT_ERR_NONE;
-	struct rtctime Time;
+	struct bt_rtc_time Time;
 
 	BT_I2C_BUS *pBus = BT_I2C_GetBusObject(hBus);
 

@@ -62,11 +62,13 @@ BT_ERROR BT_RTCRegisterDevice(BT_HANDLE hDevice, BT_RTC_INFO *rtc) {
 	return BT_DeviceRegister(&rtc->node, name);
 }
 
+BT_EXPORT_SYMBOL(BT_RTCRegisterDevice);
+
 /**
  *	@brief	Set Time for the RTC device specified by the BT_HANDLE.
  *
  **/
-BT_ERROR BT_RTCSetTime(BT_HANDLE hRtc, struct rtctime *t) {
+BT_ERROR BT_RTCSetTime(BT_HANDLE hRtc, struct bt_rtc_time *t) {
 
 	BT_RTC_INFO *rtc = (BT_RTC_INFO *) hRtc;
 
@@ -82,7 +84,7 @@ BT_ERROR BT_RTCSetTime(BT_HANDLE hRtc, struct rtctime *t) {
  *	@brief	Get Time from the RTC device specified by the BT_HANDLE.
  *
  **/
-BT_ERROR BT_RTCGetTime(BT_HANDLE hRtc, struct rtctime *t) {
+BT_ERROR BT_RTCGetTime(BT_HANDLE hRtc, struct bt_rtc_time *t) {
 
 	BT_RTC_INFO *rtc = (BT_RTC_INFO *) hRtc;
 

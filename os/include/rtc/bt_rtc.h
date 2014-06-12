@@ -17,7 +17,7 @@ typedef struct _BT_RTC_INFO {
  *	Define the unified API for RTC devices in BitThunder
  */
 BT_ERROR BT_RTCRegisterDevice(BT_HANDLE hDevice, BT_RTC_INFO *rtc);
-BT_ERROR BT_RTCSetTime	(BT_HANDLE hRtc, struct rtctime *t);
-BT_ERROR BT_RTCGetTime	(BT_HANDLE hRtc, struct rtctime *t);
+BT_ERROR BT_RTCSetTime	(BT_HANDLE hRtc, struct bt_rtc_time *t);
+BT_ERROR BT_RTCGetTime	(BT_HANDLE hRtc, struct bt_rtc_time *t);
 
 #endif
