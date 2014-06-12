@@ -13,4 +13,20 @@ config DRIVERS_SDCARD_SDHCI
 	depends on DRIVERS_MMC
 	default n
 
+config DRIVERS_SDCARD_SPI
+    bool "SPI Support"
+	depends on DRIVERS_MMC
+	default n
+	
+config DRIVERS_SDCARD_SPI_CS_GPIO
+    int "GPIO Line to use for chip select"
+	default -1
+	depends on DRIVERS_SDCARD_SPI
+
+config DRIVERS_SDCARD_SPI_DETECT_GPIO
+    int "GPIO Line to use for detecting card"
+	default -1
+	depends on DRIVERS_SDCARD_SPI
+	
+
 endmenu

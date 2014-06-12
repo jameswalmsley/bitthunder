@@ -33,6 +33,7 @@ typedef void (*BT_MMC_CARD_EVENTRECEIVER)(MMC_HOST *pHost, BT_MMC_CARD_EVENT eEv
 
 typedef struct _BT_MMC_OPS {
 	BT_u32 		ulCapabilites1;			///< Primary Capability flags.
+#define	BT_MMC_SPI_MODE			0x00000001
 
 	BT_ERROR 	(*pfnEventSubscribe)	(BT_HANDLE hSDIO, BT_MMC_CARD_EVENTRECEIVER pfnReceiver, MMC_HOST *pHost);
 	BT_BOOL	 	(*pfnIsCardPresent)		(BT_HANDLE hSDIO, BT_ERROR *pError);
@@ -47,6 +48,9 @@ typedef struct _BT_MMC_OPS {
 
 	BT_ERROR	(*pfnEnableClock)		(BT_HANDLE hSDIO);
 	BT_ERROR	(*pfnDisableClock)		(BT_HANDLE hSDIO);
+
+	BT_ERROR	(*pfnSelect)			(BT_HANDLE hSDIO);
+	BT_ERROR	(*pfnDeselect)			(BT_HANDLE hSDIO);
 
 } BT_MMC_OPS;
 
