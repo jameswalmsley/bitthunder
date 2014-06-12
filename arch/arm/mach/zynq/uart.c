@@ -84,7 +84,7 @@ static BT_ERROR uart_irq_handler(BT_u32 ulIRQ, void *pParam) {
 			while(!(hUart->pRegs->SR & ZYNQ_UART_SR_RXEMPTY)) {
 				data = hUart->pRegs->FIFO;
 				BT_u8 ucData = (BT_u8) data;
-				
+
 				if (((hUart->uRxEnd+1) != hUart->uRxBegin) && (!((hUart->uRxEnd == (hUart->uRxSize-1)) && (hUart->uRxBegin == 0)))) {
 					if (++hUart->uRxEnd > (hUart->uRxSize-1)) {
 						hUart->uRxEnd = 0;
@@ -245,7 +245,7 @@ static BT_ERROR uart_set_config(BT_HANDLE hUart, BT_UART_CONFIG *pConfig) {
 			hUart->TxBuffer = NULL;
 		}
 	}
-	
+
 	if (pConfig->ucStopBits == BT_UART_TWO_STOP_BITS) {
 		MR |= ZYNQ_UART_MR_STOPMODE_2_BIT;
 	}
@@ -278,7 +278,7 @@ static BT_ERROR uart_set_config(BT_HANDLE hUart, BT_UART_CONFIG *pConfig) {
 	else {
 		MR |= ZYNQ_UART_MR_CHARLEN_8_BIT;
 	}
-		
+
 	hUart->pRegs->MR = MR;
 
 	uart_set_baudrate(hUart, pConfig->ulBaudrate);
@@ -518,14 +518,14 @@ static BT_s32 uart_read(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, void *pB
 
 	case BT_UART_MODE_POLLED:
 	{
-		while(ulSize) {
-			while((pRegs->SR & ZYNQ_UART_SR_RXEMPTY)) {
-				if(ulFlags & BT_FILE_NON_BLOCK) {
-					return read;
-				}
-				BT_ThreadYield();
+		while((pRegs->SR & ZYNQ_UART_SR_RXEMPTY)) {
+			if(ulFlags & BT_FILE_NON_BLOCK) {
+				return read;
 			}
+			BT_ThreadYield();
+		}
 
+		while(!(pRegs->SR & ZYNQ_UART_SR_RXEMPTY) && ulSize) {
 			*pucDest++ = pRegs->FIFO & 0x000000FF;
 			ulSize--;
 			read++;
@@ -541,17 +541,18 @@ static BT_s32 uart_read(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, void *pB
 
 	case BT_UART_MODE_SIMPLE_BUFFERED:
 	{
-		while(ulSize) {
-			while(hUart->uRxBegin == hUart->uRxEnd) {
-				if(ulFlags & BT_FILE_NON_BLOCK) {
-					return read;
-				}
-				BT_ThreadYield();
+		while(hUart->uRxBegin == hUart->uRxEnd) {
+			if(ulFlags & BT_FILE_NON_BLOCK) {
+				return read;
+			}
+			BT_ThreadYield();
+		}
+
+		while((hUart->uRxBegin != hUart->uRxEnd) && ulSize) {
+			if (++hUart->uRxBegin > (hUart->uRxSize-1)) {
+				hUart->uRxBegin = 0;
 			}
 
-			if (++hUart->uRxBegin > (hUart->uRxSize-1))
-				hUart->uRxBegin = 0;
-			
 			*pucDest++ = hUart->RxBuffer[hUart->uRxBegin];
 			ulSize--;
 			read++;
