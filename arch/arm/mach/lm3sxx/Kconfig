@@ -124,6 +124,15 @@ config MACH_LM3Sxx_TIMER2_BASE
 config MACH_LM3Sxx_TIMER3_BASE
 	hex
 	default 0x40033000
+	
+config MACH_LM3Sxx_QEI0_BASE  
+	hex
+	default 0x4002C000
+
+config MACH_LM3Sxx_QEI1_BASE  
+	hex
+	default 0x4002D000
+	
 
 config MACH_LM3Sxx_QEI0_BASE
 	hex
