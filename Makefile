@@ -29,6 +29,7 @@ BT_CONFIG_BSP_DIR = $(APP_BSP_DIR)
 endif
 
 menuconfig: scripts/mkconfig/mkconfig
+	$(Q)which kconfig-mconf > /dev/null || { echo "You need to compile and install kconfig-frontends: https://github.com/jameswalmsley/kconfig-frontends"; false; }
 	$(Q)CONFIG_=BT_CONFIG_ APP_DIR=$(APP_DIR) kconfig-mconf Kconfig
 	$(Q)scripts/mkconfig/mkconfig ./ > $(BT_CONFIG_BSP_DIR)/bt_bsp_config.h
 	$(Q)cp .config $(BT_CONFIG_BSP_DIR)/.config
