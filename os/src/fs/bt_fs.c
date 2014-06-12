@@ -131,6 +131,7 @@ BT_MOUNTPOINT *BT_GetMountPoint(const BT_i8 *szpPath) {
 
 	return pTarget;
 }
+BT_EXPORT_SYMBOL(BT_GetMountPoint);
 
 BT_ERROR BT_Mount(const BT_i8 *src, const BT_i8 *target, const BT_i8 *filesystem, BT_u32 mountflags, const void *data) {
 	BT_ERROR Error;
@@ -248,6 +249,7 @@ err_unmount_out:
 
 	return Error;
 }
+BT_EXPORT_SYMBOL(BT_Mount);
 
 static const BT_i8 *get_relative_path(BT_MOUNTPOINT *pMount, const BT_i8 *szpPath) {
 	BT_u32 mountlen = strlen(pMount->szpPath);
@@ -299,6 +301,7 @@ BT_u32 BT_GetModeFlags(const BT_i8 *mode) {
 
 	return ulModeFlags;
 }
+BT_EXPORT_SYMBOL(BT_GetModeFlags);
 
 BT_HANDLE BT_Open(const BT_i8 *szpPath, BT_u32 mode, BT_ERROR *pError) {
 
@@ -342,6 +345,7 @@ err_out:
 
 	return h;
 }
+BT_EXPORT_SYMBOL(BT_Open);
 
 BT_ERROR BT_MkDir(const BT_i8 *szpPath) {
 	BT_MOUNTPOINT *pMount = BT_GetMountPoint(szpPath);
@@ -354,6 +358,7 @@ BT_ERROR BT_MkDir(const BT_i8 *szpPath) {
 	const BT_IF_FS *pFS = pMount->pFS->hFS->h.pIf->oIfs.pFilesystemIF;
 	return pFS->pfnMkDir(pMount->hMount, path);
 }
+BT_EXPORT_SYMBOL(BT_MkDir);
 
 BT_ERROR BT_RmDir(const BT_i8 *szpPath) {
 	BT_ERROR Error = BT_ERR_NONE;
@@ -392,6 +397,7 @@ err_out:
 
 	return Error;
 }
+BT_EXPORT_SYMBOL(BT_RmDir);
 
 BT_HANDLE BT_OpenDir(const BT_i8 *szpPath, BT_ERROR *pError) {
 
@@ -437,6 +443,7 @@ err_out:
 
 	return h;
 }
+BT_EXPORT_SYMBOL(BT_OpenDir);
 
 BT_HANDLE BT_GetInode(const BT_i8 *szpPath, BT_ERROR *pError) {
 
@@ -483,6 +490,7 @@ err_out:
 
 	return h;
 }
+BT_EXPORT_SYMBOL(BT_GetInode);
 
 BT_ERROR BT_Remove(const BT_i8 *szpPath) {
 

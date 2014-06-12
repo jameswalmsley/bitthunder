@@ -204,10 +204,12 @@ bt_paddr_t bt_page_alloc_aligned(BT_u32 psize, BT_u32 order) {
 void bt_page_free(bt_paddr_t paddr, BT_u32 psize) {
 	bt_page_pool_free(&default_pool, paddr, psize);
 }
+BT_EXPORT_SYMBOL(bt_page_free);
 
 BT_ERROR bt_page_reserve(bt_paddr_t paddr, BT_u32 psize) {
 	return bt_page_pool_reserve(&default_pool, paddr, psize);
 }
+BT_EXPORT_SYMBOL(bt_page_reserve);
 
 #ifdef BT_CONFIG_MEM_PAGE_COHERENT_POOL
 bt_paddr_t bt_page_alloc_coherent(BT_u32 psize) {
@@ -217,6 +219,7 @@ bt_paddr_t bt_page_alloc_coherent(BT_u32 psize) {
 void bt_page_free_coherent(bt_paddr_t paddr, BT_u32 psize) {
 	bt_page_pool_free(&coherent_pool, paddr, psize);
 }
+BT_EXPORT_SYMBOL(bt_page_free_coherent);
 
 BT_ERROR bt_page_reserve_coherent(bt_paddr_t paddr, BT_u32 psize) {
 	return bt_page_pool_reserve(&coherent_pool, paddr, psize);
