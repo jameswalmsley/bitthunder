@@ -62,6 +62,7 @@ err_out:
 
 	return NULL;
 }
+BT_EXPORT_SYMBOL(BT_FifoCreate);
 
 BT_s32 BT_FifoWrite(BT_HANDLE hFifo, BT_u32 ulElements, const void *pData, BT_u32 ulFlags) {
 
@@ -86,6 +87,7 @@ BT_s32 BT_FifoWrite(BT_HANDLE hFifo, BT_u32 ulElements, const void *pData, BT_u3
 
 	return ulWritten;
 }
+BT_EXPORT_SYMBOL(BT_FifoWrite);
 
 BT_s32 BT_FifoWriteFromISR(BT_HANDLE hFifo, BT_u32 ulElements, const void *pData) {
 
@@ -111,6 +113,7 @@ BT_s32 BT_FifoWriteFromISR(BT_HANDLE hFifo, BT_u32 ulElements, const void *pData
 
 	return ulWritten;
 }
+BT_EXPORT_SYMBOL(BT_FifoWriteFromISR);
 
 BT_s32 BT_FifoRead(BT_HANDLE hFifo, BT_u32 ulElements, void *pData, BT_u32 ulFlags) {
 
@@ -134,6 +137,7 @@ BT_s32 BT_FifoRead(BT_HANDLE hFifo, BT_u32 ulElements, void *pData, BT_u32 ulFla
 
 	return ulRead;
 }
+BT_EXPORT_SYMBOL(BT_FifoRead);
 
 BT_s32 BT_FifoReadFromISR(BT_HANDLE hFifo, BT_u32 ulElements, void *pData) {
 
@@ -158,6 +162,7 @@ BT_s32 BT_FifoReadFromISR(BT_HANDLE hFifo, BT_u32 ulElements, void *pData) {
 
 	return ulRead;
 }
+BT_EXPORT_SYMBOL(BT_FifoReadFromISR);
 
 BT_BOOL BT_FifoIsEmpty(BT_HANDLE hFifo, BT_ERROR *pError) {
 
@@ -178,6 +183,7 @@ err_out:
 
 	return Error ? BT_FALSE : (messages == 0);
 }
+BT_EXPORT_SYMBOL(BT_FifoIsEmpty);
 
 BT_BOOL BT_FifoIsFull(BT_HANDLE hFifo, BT_ERROR *pError) {
 
@@ -198,7 +204,7 @@ err_out:
 
 	return Error ? BT_FALSE : (hFifo->ulElements == messages);
 }
-
+BT_EXPORT_SYMBOL(BT_FifoIsFull);
 
 BT_s32 BT_FifoFillLevel(BT_HANDLE hFifo) {
 
@@ -212,6 +218,7 @@ BT_s32 BT_FifoFillLevel(BT_HANDLE hFifo) {
 
 	return messages;
 }
+BT_EXPORT_SYMBOL(BT_FifoFillLevel);
 
 BT_s32 BT_FifoSize(BT_HANDLE hFifo) {
 
@@ -221,7 +228,7 @@ BT_s32 BT_FifoSize(BT_HANDLE hFifo) {
 
 	return (BT_s32) hFifo->ulElements;
 }
-
+BT_EXPORT_SYMBOL(BT_FifoSize);
 
 static BT_ERROR fifo_cleanup(BT_HANDLE hFifo) {
 	BT_CloseHandle(hFifo->hQueue);
