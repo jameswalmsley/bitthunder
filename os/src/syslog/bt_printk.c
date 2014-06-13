@@ -44,4 +44,5 @@ BT_ERROR BT_kPrint(const char *format, ... ) {
 #endif
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_kPrint);
 #endif
