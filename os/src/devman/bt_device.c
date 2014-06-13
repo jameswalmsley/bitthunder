@@ -29,6 +29,7 @@ BT_u32 BT_GetTotalDevicesByType(BT_DEVICE_TYPE eType) {
 
 	return ulDevices;
 }
+BT_EXPORT_SYMBOL(BT_GetTotalDevicesByType);
 
 const BT_DEVICE *BT_GetDeviceByType(BT_DEVICE_TYPE eType, BT_u32 ulIndex) {
 	BT_u32 size = (BT_u32) ((BT_u32) &__bt_devices_end - (BT_u32) &__bt_devices_start);
@@ -53,7 +54,9 @@ const BT_DEVICE *BT_GetDeviceByType(BT_DEVICE_TYPE eType, BT_u32 ulIndex) {
 
 	return NULL;
 }
+BT_EXPORT_SYMBOL(BT_GetDeviceByType);
 
 const BT_RESOURCE *BT_GetDeviceResource(const BT_DEVICE *pDevice, BT_u32 ulType, BT_u32 ulNum) {
 	return BT_GetResource(pDevice->pResources, pDevice->ulTotalResources, ulType, ulNum);
 }
+BT_EXPORT_SYMBOL(BT_GetDeviceResource);

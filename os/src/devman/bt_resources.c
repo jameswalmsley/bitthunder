@@ -16,3 +16,4 @@ const BT_RESOURCE *BT_GetResource(const BT_RESOURCE *pResources, BT_u32 ulTotalR
 
 	return NULL;
 }
+BT_EXPORT_SYMBOL(BT_GetResource);

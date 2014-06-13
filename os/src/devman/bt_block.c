@@ -62,6 +62,7 @@ BT_s32 BT_BlockRead(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *p
 
 	return ret;
 }
+BT_EXPORT_SYMBOL(BT_BlockRead);
 
 BT_s32 BT_BlockWrite(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer) {
 	if(!isHandleValid(hBlock)) {
@@ -78,6 +79,7 @@ BT_s32 BT_BlockWrite(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *
 
 	return ret;
 }
+BT_EXPORT_SYMBOL(BT_BlockWrite);
 
 BT_ERROR BT_GetBlockGeometry(BT_HANDLE hBlock, BT_BLOCK_GEOMETRY *pGeometry) {
 
@@ -86,6 +88,7 @@ BT_ERROR BT_GetBlockGeometry(BT_HANDLE hBlock, BT_BLOCK_GEOMETRY *pGeometry) {
 
 	return BT_ERR_GENERIC;
 }
+BT_EXPORT_SYMBOL(BT_GetBlockGeometry);
 
 BT_ERROR BT_RegisterBlockDevice(BT_HANDLE hDevice, const BT_i8 *szpName, BT_BLKDEV_DESCRIPTOR *pDescriptor) {
 
@@ -108,6 +111,7 @@ BT_ERROR BT_RegisterBlockDevice(BT_HANDLE hDevice, const BT_i8 *szpName, BT_BLKD
 
 	return Error;
 }
+BT_EXPORT_SYMBOL(BT_RegisterBlockDevice);
 
 /*BT_HANDLE BT_BlockGetInode(BT_HANDLE hDevice) {
 	if(!isHandleValid(hDevice)) {

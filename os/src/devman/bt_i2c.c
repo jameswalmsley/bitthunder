@@ -50,6 +50,7 @@ BT_I2C_BUS *BT_I2C_GetBusByID(BT_u32 ulBusID) {
 
 	return NULL;
 }
+BT_EXPORT_SYMBOL(BT_I2C_GetBusByID);
 
 BT_ERROR BT_I2C_RegisterBus(BT_I2C_BUS *pBus) {
 	if(BT_I2C_GetBusByID(pBus->ulBusID)) {
@@ -67,6 +68,7 @@ BT_ERROR BT_I2C_RegisterBus(BT_I2C_BUS *pBus) {
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_I2C_RegisterBus);
 
 static void i2c_probe_devices(BT_I2C_BUS *pBus) {
 	BT_u32 i;
@@ -130,6 +132,7 @@ static void i2c_sm(void *pData) {
 BT_I2C_BUS *BT_I2C_GetBusObject(BT_HANDLE hBus) {
 	 return (BT_I2C_BUS *) hBus;
 }
+BT_EXPORT_SYMBOL(BT_I2C_GetBusObject);
 
 static BT_TASKLET sm_tasklet = {NULL, BT_TASKLET_IDLE, i2c_sm, NULL};
 

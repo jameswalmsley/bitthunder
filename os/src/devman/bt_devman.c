@@ -42,6 +42,7 @@ BT_MACHINE_DESCRIPTION *BT_GetMachineDescription(BT_ERROR *pError) {
 
 	return	(BT_MACHINE_DESCRIPTION *) &__bt_arch_init_start;
 }
+BT_EXPORT_SYMBOL(BT_GetMachineDescription);
 
 BT_INTEGRATED_DEVICE *BT_GetIntegratedDeviceByName(const BT_i8 *szpName) {
 	BT_u32 size = (BT_u32) ((BT_u32) &__bt_arch_devices_end - (BT_u32) &__bt_arch_devices_start);
@@ -61,6 +62,7 @@ BT_INTEGRATED_DEVICE *BT_GetIntegratedDeviceByName(const BT_i8 *szpName) {
 
 	return NULL;
 }
+BT_EXPORT_SYMBOL(BT_GetIntegratedDeviceByName);
 
 BT_INTEGRATED_DRIVER *BT_GetIntegratedDriverByName(const BT_i8 *szpName) {
 	BT_u32 size = (BT_u32) ((BT_u32) &__bt_arch_drivers_end - (BT_u32) &__bt_arch_drivers_start);
@@ -79,6 +81,7 @@ BT_INTEGRATED_DRIVER *BT_GetIntegratedDriverByName(const BT_i8 *szpName) {
 
 	return NULL;
 }
+BT_EXPORT_SYMBOL(BT_GetIntegratedDriverByName);
 
 BT_u32 BT_GetTotalIntegratedDriversByType(BT_DRIVER_TYPE eType) {
 	BT_u32 total = 0;
@@ -98,6 +101,7 @@ BT_u32 BT_GetTotalIntegratedDriversByType(BT_DRIVER_TYPE eType) {
 
 	return total;
 }
+BT_EXPORT_SYMBOL(BT_GetTotalIntegratedDriversByType);
 
 BT_INTEGRATED_DRIVER *BT_GetIntegratedDriverByType(BT_DRIVER_TYPE eType, BT_u32 i) {
 	BT_u32 size = (BT_u32) ((BT_u32) &__bt_arch_drivers_end - (BT_u32) &__bt_arch_drivers_start);
@@ -117,11 +121,12 @@ BT_INTEGRATED_DRIVER *BT_GetIntegratedDriverByType(BT_DRIVER_TYPE eType, BT_u32 
 
 	return NULL;
 }
+BT_EXPORT_SYMBOL(BT_GetIntegratedDriverByType);
 
 const BT_RESOURCE *BT_GetIntegratedResource(const BT_INTEGRATED_DEVICE *pDevice, BT_u32 ulType, BT_u32 ulNum) {
 	return BT_GetResource(pDevice->pResources, pDevice->ulTotalResources, ulType, ulNum);
 }
-
+BT_EXPORT_SYMBOL(BT_GetIntegratedResource);
 
 BT_ERROR BT_ProbeIntegratedDevices(BT_HANDLE hLogDevice) {
 
@@ -154,7 +159,6 @@ BT_ERROR BT_ProbeIntegratedDevices(BT_HANDLE hLogDevice) {
 	}
 
 #ifdef BT_CONFIG_OF
-
 	BT_kPrint("Probing integrated devices from device tree:");
 
 	struct bt_device_node *root = bt_of_find_node_by_path("/");
@@ -170,3 +174,4 @@ BT_ERROR BT_ProbeIntegratedDevices(BT_HANDLE hLogDevice) {
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_ProbeIntegratedDevices);
