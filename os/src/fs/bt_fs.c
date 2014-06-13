@@ -642,6 +642,10 @@ BT_ERROR BT_GetMountFSInfo(BT_MOUNTPOINT *pMount, struct bt_fsinfo *fsinfo) {
 }
 
 BT_ERROR BT_GetFilesystemInfo(const BT_i8 *szpPath, struct bt_fsinfo *fsinfo) {
-	//BT_MOUNTPOINT *pMount = BT_GetMount
-	return BT_ERR_NONE;
+	BT_MOUNTPOINT *pMount = BT_GetMountPoint(szpPath);
+	if(!pMount) {
+		return BT_ERR_INVALID_VALUE;
+	}
+
+	return BT_GetMountFSInfo(pMount, fsinfo);
 }
