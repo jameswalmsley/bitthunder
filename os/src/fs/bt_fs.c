@@ -71,6 +71,7 @@ BT_ERROR BT_RegisterFilesystem(BT_HANDLE hFS) {
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_RegisterFilesystem);
 
 static BT_FILESYSTEM *getfs(const BT_i8 *name) {
 	struct bt_list_head *pos;
@@ -511,6 +512,7 @@ BT_ERROR BT_Remove(const BT_i8 *szpPath) {
 
 	return BT_Unlink(szpPath);
 }
+BT_EXPORT_SYMBOL(BT_Remove);
 
 BT_ERROR BT_Unlink(const BT_i8 *szpPath) {
 
@@ -550,6 +552,7 @@ err_out:
 
 	return Error;
 }
+BT_EXPORT_SYMBOL(BT_Unlink);
 
 BT_ERROR BT_Rename(const BT_i8 *szpPathA, const BT_i8 *szpPathB) {
 	BT_MOUNTPOINT *pMountA = BT_GetMountPoint(szpPathA);
@@ -572,6 +575,7 @@ BT_ERROR BT_Rename(const BT_i8 *szpPathA, const BT_i8 *szpPathB) {
 	const BT_IF_FS *pFS = pMountA->pFS->hFS->h.pIf->oIfs.pFilesystemIF;
 	return pFS->pfnRename(pMountA->hMount, pathA, pathB);
 }
+BT_EXPORT_SYMBOL(BT_Rename);
 
 #ifdef BT_CONFIG_PROCESS_CWD
 BT_ERROR BT_GetCwd(BT_i8 *buf, BT_u32 len) {
@@ -584,6 +588,7 @@ BT_ERROR BT_GetCwd(BT_i8 *buf, BT_u32 len) {
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_GetCwd);
 
 BT_ERROR BT_ChDir(const BT_i8 *path) {
 	BT_ERROR Error = BT_ERR_NONE;
@@ -614,6 +619,7 @@ BT_ERROR BT_ChDir(const BT_i8 *path) {
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_ChDir);
 #endif
 
 BT_MOUNTPOINT *BT_GetNextMountPoint(BT_MOUNTPOINT *pMount) {
@@ -631,6 +637,7 @@ BT_MOUNTPOINT *BT_GetNextMountPoint(BT_MOUNTPOINT *pMount) {
 
 	return ret;
 }
+BT_EXPORT_SYMBOL(BT_GetNextMountPoint);
 
 BT_ERROR BT_GetMountFSInfo(BT_MOUNTPOINT *pMount, struct bt_fsinfo *fsinfo) {
 	const BT_IF_FS *pFS = pMount->pFS->hFS->h.pIf->oIfs.pFilesystemIF;
@@ -640,6 +647,7 @@ BT_ERROR BT_GetMountFSInfo(BT_MOUNTPOINT *pMount, struct bt_fsinfo *fsinfo) {
 
 	return BT_ERR_UNIMPLEMENTED;
 }
+BT_EXPORT_SYMBOL(BT_GetMountFSInfo);
 
 BT_ERROR BT_GetFilesystemInfo(const BT_i8 *szpPath, struct bt_fsinfo *fsinfo) {
 	BT_MOUNTPOINT *pMount = BT_GetMountPoint(szpPath);
@@ -649,3 +657,4 @@ BT_ERROR BT_GetFilesystemInfo(const BT_i8 *szpPath, struct bt_fsinfo *fsinfo) {
 
 	return BT_GetMountFSInfo(pMount, fsinfo);
 }
+BT_EXPORT_SYMBOL(BT_GetFilesystemInfo);
