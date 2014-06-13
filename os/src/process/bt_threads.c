@@ -85,6 +85,7 @@ BT_HANDLE BT_CreateProcessThread(BT_HANDLE hProcess, BT_FN_THREAD_ENTRY pfnStart
 
 	return hThread;
 }
+BT_EXPORT_SYMBOL(BT_CreateProcessThread);
 
 BT_HANDLE BT_CreateThread(BT_FN_THREAD_ENTRY pfnStartRoutine, BT_THREAD_CONFIG *pConfig, BT_ERROR *pError) {
 
@@ -96,38 +97,46 @@ BT_HANDLE BT_CreateThread(BT_FN_THREAD_ENTRY pfnStartRoutine, BT_THREAD_CONFIG *
 
 	return BT_CreateProcessThread(hProcess, pfnStartRoutine, pConfig, pError);
 }
+BT_EXPORT_SYMBOL(BT_CreateThread);
 
 BT_HANDLE BT_GetThreadHandle() {
 	BT_HANDLE hThread = bt_container_of(curthread, struct _BT_OPAQUE_HANDLE, thread);
 	return hThread;
 }
+BT_EXPORT_SYMBOL(BT_GetThreadHandle);
 
 BT_HANDLE BT_GetThreadProcessHandle(BT_HANDLE hThread) {
 	return hThread->hProcess;
 }
+BT_EXPORT_SYMBOL(BT_GetThreadProcessHandle);
 
 BT_ERROR BT_ThreadSleepUntil(BT_TICK *pulPreviousWakeTime, BT_u32 ulTimeMs) {
 	BT_kTaskDelayUntil(pulPreviousWakeTime, ulTimeMs);
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_ThreadSleepUntil);
 
 BT_ERROR BT_ThreadSleep(BT_u32 ulTimeMs) {
 	BT_kTaskDelay(ulTimeMs);
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_ThreadSleep);
 
 BT_ERROR BT_ThreadYield() {
 	BT_kTaskYield();
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_ThreadYield);
 
 void *BT_GetThreadTag() {
 	return curthread->tag;
 }
+BT_EXPORT_SYMBOL(BT_GetThreadTag);
 
 void BT_SetThreadTag(void *tag) {
 	curthread->tag = tag;
 }
+BT_EXPORT_SYMBOL(BT_SetThreadTag);
 
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,

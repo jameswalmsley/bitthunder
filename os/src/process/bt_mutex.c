@@ -33,6 +33,7 @@ BT_HANDLE BT_CreateMutex(BT_ERROR *pError) {
 
 	return hMutex;
 }
+BT_EXPORT_SYMBOL(BT_CreateMutex);
 
 BT_ERROR BT_PendMutex(BT_HANDLE hMutex, BT_TICK oTimeoutTicks) {
 	return BT_kMutexPend(hMutex->pMutex, oTimeoutTicks);
