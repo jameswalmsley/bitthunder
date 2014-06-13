@@ -58,8 +58,7 @@ static const BT_DEVFS_OPS oDevfsOps = {
 	.pfnOpen = devfs_open,
 };
 
-static BT_u32 BT_PartitionCount(BT_u8 *pBuffer)
-{
+static BT_u32 BT_PartitionCount(BT_u8 *pBuffer) {
 	BT_u32 count = 0;
 	BT_u8 part;
 	// Check PBR or MBR signature
@@ -175,6 +174,7 @@ err_free_out:
 err_out:
 	return Error;
 }
+BT_EXPORT_SYMBOL(BT_EnumerateVolumes);
 
 
 BT_s32 BT_VolumeRead(BT_HANDLE hVolume, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer) {
@@ -187,6 +187,7 @@ BT_s32 BT_VolumeRead(BT_HANDLE hVolume, BT_u32 ulAddress, BT_u32 ulBlocks, void 
 
 	return BT_BlockRead((BT_HANDLE) hVolume->blkdev, ulAddress + pPart->ulBaseAddress, ulBlocks, pBuffer);
 }
+BT_EXPORT_SYMBOL(BT_VolumeRead);
 
 BT_s32 BT_VolumeWrite(BT_HANDLE hVolume, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer) {
 
@@ -198,6 +199,7 @@ BT_s32 BT_VolumeWrite(BT_HANDLE hVolume, BT_u32 ulAddress, BT_u32 ulBlocks, void
 
 	return BT_BlockWrite((BT_HANDLE) hVolume->blkdev, ulAddress + pPart->ulBaseAddress, ulBlocks, pBuffer);
 }
+BT_EXPORT_SYMBOL(BT_VolumeWrite);
 
 static BT_ERROR bt_volume_inode_cleanup(BT_HANDLE hVolume) {
 	hVolume->ulReferenceCount -= 1;
