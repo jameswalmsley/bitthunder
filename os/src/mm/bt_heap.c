@@ -106,6 +106,7 @@ void *BT_kMalloc(BT_u32 ulSize) {
 complete:
 	return p;
 }
+BT_EXPORT_SYMBOL(BT_kMalloc);
 
 
 void BT_kFree(void *p) {
@@ -145,3 +146,4 @@ void BT_kFree(void *p) {
 		pItem->pNextBlock = pBlock;
 	}
 }
+BT_EXPORT_SYMBOL(BT_kFree);

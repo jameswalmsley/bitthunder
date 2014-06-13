@@ -17,6 +17,7 @@ void *BT_Calloc(BT_u32 ulSize) {
 
 	return p;
 }
+BT_EXPORT_SYMBOL(BT_Calloc);
 
 
 /**
@@ -45,4 +46,3 @@ void vPortFree(void *p) {
 	BT_kFree(p);
 }
 #endif
-

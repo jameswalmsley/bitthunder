@@ -84,6 +84,7 @@ bt_paddr_t bt_page_pool_alloc(struct bt_page_pool *pool, BT_u32 psize, BT_u32 or
 
 	return (bt_paddr_t) bt_virt_to_phys(blk);
 }
+BT_EXPORT_SYMBOL(bt_page_pool_alloc);
 
 void bt_page_pool_free(struct bt_page_pool *pool, bt_paddr_t paddr, BT_u32 size) {
 
@@ -129,12 +130,14 @@ void bt_page_pool_free(struct bt_page_pool *pool, bt_paddr_t paddr, BT_u32 size)
 
 	BT_PAGE_UNLOCK();
 }
+BT_EXPORT_SYMBOL(bt_page_pool_free);
 
 void bt_page_pool_attach(struct bt_page_pool *pool, bt_paddr_t paddr, BT_u32 size) {
 	pool->total_size += size;
 	pool->used_size += size;
 	bt_page_pool_free(pool, paddr, size);
 }
+BT_EXPORT_SYMBOL(bt_page_pool_attach);
 
 BT_ERROR bt_page_pool_reserve(struct bt_page_pool *pool, bt_paddr_t paddr, BT_u32 psize) {
 
@@ -192,14 +195,17 @@ BT_ERROR bt_page_pool_reserve(struct bt_page_pool *pool, bt_paddr_t paddr, BT_u3
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(bt_page_pool_reserve);
 
 bt_paddr_t bt_page_alloc(BT_u32 psize) {
 	return bt_page_pool_alloc(&default_pool, psize, 0);
 }
+BT_EXPORT_SYMBOL(bt_page_alloc);
 
 bt_paddr_t bt_page_alloc_aligned(BT_u32 psize, BT_u32 order) {
 	return bt_page_pool_alloc(&default_pool, psize, order);
 }
+BT_EXPORT_SYMBOL(bt_page_alloc_aligned);
 
 void bt_page_free(bt_paddr_t paddr, BT_u32 psize) {
 	bt_page_pool_free(&default_pool, paddr, psize);
@@ -215,6 +221,7 @@ BT_EXPORT_SYMBOL(bt_page_reserve);
 bt_paddr_t bt_page_alloc_coherent(BT_u32 psize) {
 	return bt_page_pool_alloc(&coherent_pool, psize, 0);
 }
+BT_EXPORT_SYMBOL(bt_page_alloc_coherent);
 
 void bt_page_free_coherent(bt_paddr_t paddr, BT_u32 psize) {
 	bt_page_pool_free(&coherent_pool, paddr, psize);
@@ -224,6 +231,7 @@ BT_EXPORT_SYMBOL(bt_page_free_coherent);
 BT_ERROR bt_page_reserve_coherent(bt_paddr_t paddr, BT_u32 psize) {
 	return bt_page_pool_reserve(&coherent_pool, paddr, psize);
 }
+BT_EXPORT_SYMBOL(bt_page_reserve_coherent);
 #endif
 
 BT_ERROR bt_page_pool_init(struct bt_page_pool *pool) {
@@ -232,6 +240,7 @@ BT_ERROR bt_page_pool_init(struct bt_page_pool *pool) {
 	pool->used_size = 0;
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(bt_page_pool_init);
 
 BT_ERROR bt_page_info(struct bt_page_info *pInfo) {
 	pInfo->normal_size = default_pool.total_size;
@@ -245,6 +254,7 @@ BT_ERROR bt_page_info(struct bt_page_info *pInfo) {
 #endif
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(bt_page_info);
 
 extern bt_paddr_t __bt_init_start;
 extern bt_paddr_t __bss_end;

@@ -206,6 +206,7 @@ struct bt_vm_map *bt_vm_create(void) {
 
 	return map;
 }
+BT_EXPORT_SYMBOL(bt_vm_create);
 
 void bt_vm_destroy(struct bt_vm_map *map) {
 	struct bt_segment *seg, *tmp;
@@ -244,6 +245,7 @@ void bt_vm_destroy(struct bt_vm_map *map) {
 
 	// unlock process mapper.
 }
+BT_EXPORT_SYMBOL(bt_vm_destroy);
 
 extern bt_vaddr_t __bt_init_start;
 extern bt_vaddr_t __bss_end;
@@ -292,19 +294,23 @@ void bt_vm_init(void) {
 
 	bt_segment_reserve(&kernel_map, start, len);	// Reserve RAM section.
 }
+BT_EXPORT_SYMBOL(bt_vm_init);
 
 BT_ERROR bt_vm_reference(struct bt_vm_map *map) {
 	map->refcount += 1;
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(bt_vm_reference);
 
 struct bt_vm_map *bt_vm_get_kernel_map(void) {
 	return &kernel_map;
 }
+BT_EXPORT_SYMBOL(bt_vm_get_kernel_map);
 
 bt_paddr_t bt_vm_translate(bt_vaddr_t addr, BT_u32 size) {
 	return bt_mmu_extract(curtask->map->pgd, addr, size);
 }
+BT_EXPORT_SYMBOL(bt_vm_translate);
 
 static BT_u32 type_to_segflags(BT_u32 type) {
 	BT_u32 flags = 0;
@@ -381,6 +387,7 @@ bt_vaddr_t bt_vm_map_region(struct bt_vm_map *map, bt_paddr_t pa, bt_vaddr_t va,
 
 	return seg->addr;
 }
+BT_EXPORT_SYMBOL(bt_vm_map_region);
 
 void bt_vm_unmap_region(struct bt_vm_map *map, bt_vaddr_t va) {
 
@@ -404,6 +411,7 @@ void bt_vm_unmap_region(struct bt_vm_map *map, bt_vaddr_t va) {
 
 	MAP_UNLOCK(map);
 }
+BT_EXPORT_SYMBOL(bt_vm_unmap_region);
 
 static BT_ERROR do_allocate(struct bt_vm_map *map, void **addr, BT_u32 size, BT_u32 flags) {
 	BT_ERROR Error = BT_ERR_NONE;
@@ -476,6 +484,7 @@ err_free_seg:
 BT_ERROR bt_vm_allocate(struct bt_task *task, void **addr, BT_u32 size, BT_u32 flags) {
 	return do_allocate(task->map, addr, size, flags);
 }
+BT_EXPORT_SYMBOL(bt_vm_allocate);
 
 static BT_ERROR do_free(struct bt_vm_map *map, void *addr) {
 	struct bt_segment *seg;
@@ -509,7 +518,7 @@ static BT_ERROR do_free(struct bt_vm_map *map, void *addr) {
 BT_ERROR bt_vm_free(struct bt_task *task, void *addr) {
 	return do_free(task->map, addr);
 }
-
+BT_EXPORT_SYMBOL(bt_vm_free);
 
 static BT_ERROR do_attribute(struct bt_vm_map *map, void *addr, BT_u32 attr) {
 	struct bt_segment *seg;
@@ -595,8 +604,7 @@ static BT_ERROR do_attribute(struct bt_vm_map *map, void *addr, BT_u32 attr) {
 BT_ERROR bt_vm_attribute(struct bt_task *task, void *addr, BT_u32 attr) {
 	return do_attribute(task->map, addr, attr);
 }
-
-
+BT_EXPORT_SYMBOL(bt_vm_attribute);
 
 
 /**
@@ -674,3 +682,4 @@ struct bt_vm_map *bt_vm_duplicate(struct bt_vm_map *orig_map) {
 
 	return new_map;
 }
+BT_EXPORT_SYMBOL(bt_vm_duplicate);

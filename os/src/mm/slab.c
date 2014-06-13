@@ -101,6 +101,7 @@ BT_ERROR BT_CacheInit(BT_CACHE *pCache, BT_u32 ulObjectSize) {
 	pCache->slab_mutex = BT_kMutexCreate();
 	return init_cache(pCache, ulObjectSize);
 }
+BT_EXPORT_SYMBOL(BT_CacheInit);
 
 static BT_CACHE *BT_GetSuitableCache(BT_u32 ulSize) {
 
@@ -158,6 +159,7 @@ void *BT_CacheAlloc(BT_CACHE *pCache) {
 
 	return (void *) p;
 }
+BT_EXPORT_SYMBOL(BT_CacheAlloc);
 
 BT_ERROR BT_CacheFree(BT_CACHE *pCache, void *p) {
 	SLAB_LOCK(pCache);
@@ -166,6 +168,7 @@ BT_ERROR BT_CacheFree(BT_CACHE *pCache, void *p) {
 	SLAB_UNLOCK(pCache);
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_CacheFree);
 
 static void set_magic(struct MAGIC_TAG *tag) {
 	tag->magic_0 = 0xABAD1DEA;
@@ -219,6 +222,7 @@ void *BT_kMalloc(BT_u32 ulSize) {
 
 	return ((void *) (tag + 1));
 }
+BT_EXPORT_SYMBOL(BT_kMalloc);
 
 void BT_kFree(void *p) {
 
@@ -243,6 +247,7 @@ void BT_kFree(void *p) {
 		bt_page_free((BT_PHYS_ADDR) bt_virt_to_phys(tag), tag->size+sizeof(struct MEM_TAG)+sizeof(struct MAGIC_TAG));
 	}
 }
+BT_EXPORT_SYMBOL(BT_kFree);
 
 void *BT_kRealloc(void *p, BT_u32 ulSize) {
 
@@ -267,6 +272,7 @@ void *BT_kRealloc(void *p, BT_u32 ulSize) {
 	}
 	return n;
 }
+BT_EXPORT_SYMBOL(BT_kRealloc);
 
 BT_ERROR bt_slab_info(struct bt_slab_info *pInfo) {
 	BT_u32 i;
@@ -278,6 +284,7 @@ BT_ERROR bt_slab_info(struct bt_slab_info *pInfo) {
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(bt_slab_info);
 
 void bt_initialise_slab() {
 
@@ -291,8 +298,8 @@ void bt_initialise_slab() {
 		pCache->slab_mutex = NULL;
 		i = i << 1;
 	}
-
 }
+BT_EXPORT_SYMBOL(bt_initialise_slab);
 
 void bt_initialise_slab_second_stage() {
 
@@ -306,3 +313,4 @@ void bt_initialise_slab_second_stage() {
 		i = i << 1;
 	}
 }
+BT_EXPORT_SYMBOL(bt_initialise_slab_second_stage);
