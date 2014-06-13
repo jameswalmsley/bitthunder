@@ -262,26 +262,30 @@ static char *replace_expressions(BT_HANDLE hShell, const char *input) {
 BT_HANDLE BT_ShellGetStdout(BT_HANDLE hShell) {
 	return (hShell ? ((BT_SHELL_HANDLE)hShell)->hStdout : NULL);
 }
+BT_EXPORT_SYMBOL(BT_ShellGetStdout);
 
 BT_HANDLE BT_ShellGetStdin(BT_HANDLE hShell) {
 	return (hShell ? ((BT_SHELL_HANDLE)hShell)->hStdin : NULL);
 }
+BT_EXPORT_SYMBOL(BT_ShellGetStdin);
 
 const char *BT_ShellGetPrompt(BT_HANDLE hShell) {
 	return (hShell ? ((BT_SHELL_HANDLE)hShell)->szpPrompt : NULL);
 }
+BT_EXPORT_SYMBOL(BT_ShellGetPrompt);
 
-void BT_ShellUpdatePrompt(BT_HANDLE hShell, const char *szpPrompt)
-{
+void BT_ShellUpdatePrompt(BT_HANDLE hShell, const char *szpPrompt) {
 	if(hShell) {
 		((BT_SHELL_HANDLE)hShell)->szpPrompt = szpPrompt;
 	}
 	return;
 }
+BT_EXPORT_SYMBOL(BT_ShellUpdatePrompt);
 
 BT_u32 BT_ShellGetFlags(BT_HANDLE hShell) {
 	return (hShell ? ((BT_SHELL_HANDLE)hShell)->ulFlags : 0);
 }
+BT_EXPORT_SYMBOL(BT_ShellGetFlags);
 
 BT_ERROR BT_ShellCommand(BT_HANDLE hShell, const char *cmdline) {
 
@@ -410,6 +414,7 @@ executed:
 
 	return Error;
 }
+BT_EXPORT_SYMBOL(BT_ShellCommand);
 
 BT_ERROR BT_ShellScript(BT_HANDLE hShell, const BT_i8 *path) {
 
@@ -493,6 +498,7 @@ err_out:
 
 	return Error;
 }
+BT_EXPORT_SYMBOL(BT_ShellScript);
 
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
@@ -528,6 +534,7 @@ err_out:
 
 	return NULL;
 }
+BT_EXPORT_SYMBOL(BT_ShellCreate);
 
 BT_ERROR BT_Shell(BT_HANDLE hShell) {
 	BT_ERROR Error = BT_ERR_NONE;
@@ -583,3 +590,4 @@ BT_ERROR BT_Shell(BT_HANDLE hShell) {
 
 	return Error;
 }
+BT_EXPORT_SYMBOL(BT_Shell);
