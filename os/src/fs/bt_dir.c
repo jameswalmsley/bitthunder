@@ -11,3 +11,4 @@ BT_ERROR BT_ReadDir(BT_HANDLE hDir, BT_DIRENT *pDirent) {
 
 	return hDir->h.pIf->oIfs.pDirIF->pfnReadDir(hDir, pDirent);
 }
+BT_EXPORT_SYMBOL(BT_ReadDir);

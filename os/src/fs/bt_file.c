@@ -55,6 +55,7 @@ BT_s32 BT_Read(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer) {
 
 	return hFile->h.pIf->pFileIF->pfnRead(hFile, ulFlags, ulSize, pBuffer);
 }
+BT_EXPORT_SYMBOL(BT_Read);
 
 BT_s32 BT_Write(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer) {
 
@@ -70,6 +71,7 @@ BT_s32 BT_Write(BT_HANDLE hFile, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuf
 
 	return hFile->h.pIf->pFileIF->pfnWrite(hFile, ulFlags, ulSize, pBuffer);
 }
+BT_EXPORT_SYMBOL(BT_Write);
 
 BT_s32 BT_GetC(BT_HANDLE hFile, BT_u32 ulFlags) {
 
@@ -99,6 +101,7 @@ BT_s32 BT_GetC(BT_HANDLE hFile, BT_u32 ulFlags) {
 
 	return c;
 }
+BT_EXPORT_SYMBOL(BT_GetC);
 
 BT_ERROR BT_PutC(BT_HANDLE hFile, BT_u32 ulFlags, BT_i8 cData) {
 
@@ -118,6 +121,7 @@ BT_ERROR BT_PutC(BT_HANDLE hFile, BT_u32 ulFlags, BT_i8 cData) {
 
 	return hFile->h.pIf->pFileIF->pfnWrite(hFile, ulFlags, 1, &cData);
 }
+BT_EXPORT_SYMBOL(BT_PutC);
 
 BT_ERROR BT_Seek(BT_HANDLE hFile, BT_s64 ulOffset, BT_u32 whence) {
 
@@ -133,6 +137,7 @@ BT_ERROR BT_Seek(BT_HANDLE hFile, BT_s64 ulOffset, BT_u32 whence) {
 
 	return hFile->h.pIf->pFileIF->pfnSeek(hFile, ulOffset, whence);
 }
+BT_EXPORT_SYMBOL(BT_Seek);
 
 BT_u64 BT_Tell(BT_HANDLE hFile, BT_ERROR *pError) {
 
@@ -157,6 +162,7 @@ err_out:
 
 	return tell;
 }
+BT_EXPORT_SYMBOL(BT_Tell);
 
 BT_BOOL BT_EOF(BT_HANDLE hFile, BT_ERROR *pError) {
 
@@ -173,7 +179,7 @@ BT_BOOL BT_EOF(BT_HANDLE hFile, BT_ERROR *pError) {
 
 	return hFile->h.pIf->pFileIF->pfnEOF(hFile);
 }
-
+BT_EXPORT_SYMBOL(BT_EOF);
 
 BT_s32 BT_GetS(BT_HANDLE hFile, BT_u32 ulSize, BT_i8 *s) {
 
@@ -205,7 +211,7 @@ BT_s32 BT_GetS(BT_HANDLE hFile, BT_u32 ulSize, BT_i8 *s) {
 
     return s - t;
 }
-
+BT_EXPORT_SYMBOL(BT_GetS);
 
 BT_ERROR BT_Flush(BT_HANDLE hFile) {
 	BT_ERROR Error;
@@ -219,3 +225,4 @@ BT_ERROR BT_Flush(BT_HANDLE hFile) {
 
 	return hFile->h.pIf->pFileIF->pfnFlush(hFile);
 }
+BT_EXPORT_SYMBOL(BT_Flush);
