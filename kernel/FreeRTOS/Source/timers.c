@@ -1,68 +1,70 @@
 /*
-    FreeRTOS V7.2.0 - Copyright (C) 2012 Real Time Engineers Ltd.
+    FreeRTOS V8.0.1 - Copyright (C) 2014 Real Time Engineers Ltd.
+    All rights reserved
 
+    VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
 
     ***************************************************************************
      *                                                                       *
-     *    FreeRTOS tutorial books are available in pdf and paperback.        *
-     *    Complete, revised, and edited pdf reference manuals are also       *
-     *    available.                                                         *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that has become a de facto standard.             *
      *                                                                       *
-     *    Purchasing FreeRTOS documentation will not only help you, by       *
-     *    ensuring you get running as quickly as possible and with an        *
-     *    in-depth knowledge of how to use FreeRTOS, it will also help       *
-     *    the FreeRTOS project to continue with its mission of providing     *
-     *    professional grade, cross platform, de facto standard solutions    *
-     *    for microcontrollers - completely free of charge!                  *
+     *    Help yourself get started quickly and support the FreeRTOS         *
+     *    project by purchasing a FreeRTOS tutorial book, reference          *
+     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
      *                                                                       *
-     *    >>> See http://www.FreeRTOS.org/Documentation for details. <<<     *
-     *                                                                       *
-     *    Thank you for using FreeRTOS, and thank you for your support!      *
+     *    Thank you!                                                         *
      *                                                                       *
     ***************************************************************************
-
 
     This file is part of the FreeRTOS distribution.
 
     FreeRTOS is free software; you can redistribute it and/or modify it under
     the terms of the GNU General Public License (version 2) as published by the
-    Free Software Foundation AND MODIFIED BY the FreeRTOS exception.
-    >>>NOTE<<< The modification to the GPL is included to allow you to
-    distribute a combined work that includes FreeRTOS without being obliged to
-    provide the source code for proprietary components outside of the FreeRTOS
-    kernel.  FreeRTOS is distributed in the hope that it will be useful, but
-    WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-    or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-    more details. You should have received a copy of the GNU General Public
-    License and the FreeRTOS license exception along with FreeRTOS; if not it
-    can be viewed here: http://www.freertos.org/a00114.html and also obtained
-    by writing to Richard Barry, contact details for whom are available on the
-    FreeRTOS WEB site.
+    Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
+
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+
+    FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
+    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    link: http://www.freertos.org/a00114.html
 
     1 tab == 4 spaces!
-    
+
     ***************************************************************************
      *                                                                       *
      *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?                                      *
+     *    not run, what could be wrong?"                                     *
      *                                                                       *
      *    http://www.FreeRTOS.org/FAQHelp.html                               *
      *                                                                       *
     ***************************************************************************
 
-    
-    http://www.FreeRTOS.org - Documentation, training, latest information, 
-    license and contact details.
-    
-    http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
-    including FreeRTOS+Trace - an indispensable productivity tool.
+    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
+    license and Real Time Engineers Ltd. contact details.
 
-    Real Time Engineers ltd license FreeRTOS to High Integrity Systems, who sell 
-    the code with commercial support, indemnification, and middleware, under 
-    the OpenRTOS brand: http://www.OpenRTOS.com.  High Integrity Systems also
-    provide a safety engineered and independently SIL3 certified version under 
-    the SafeRTOS brand: http://www.SafeRTOS.com.
+    http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
+    including FreeRTOS+Trace - an indispensable productivity tool, a DOS
+    compatible FAT file system, and our tiny thread aware UDP/IP stack.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
+    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and middleware.
+
+    http://www.SafeRTOS.com - High Integrity Systems also provide a safety
+    engineered and independently SIL3 certified version for use in safety and
+    mission critical applications that require provable dependability.
+
+    1 tab == 4 spaces!
 */
+
+/* Standard includes. */
+#include <stdlib.h>
 
 /* Defining MPU_WRAPPERS_INCLUDED_FROM_API_FILE prevents task.h from redefining
 all the API functions to use the MPU wrappers.  That should only be done when
@@ -74,7 +76,16 @@ task.h is included from an application file. */
 #include "queue.h"
 #include "timers.h"
 
-#undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE
+#if ( INCLUDE_xTimerPendFunctionCall == 1 ) && ( configUSE_TIMERS == 0 )
+	#error configUSE_TIMERS must be set to 1 to make the xTimerPendFunctionCall() function available.
+#endif
+
+/* Lint e961 and e750 are suppressed as a MISRA exception justified because the
+MPU ports require MPU_WRAPPERS_INCLUDED_FROM_API_FILE to be defined for the
+header files above, but not in this file, in order to generate the correct
+privileged Vs unprivileged linkage and placement. */
+#undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE /*lint !e961 !e750. */
+
 
 /* This entire source file will be skipped if the application is not configured
 to include software timer functionality.  This #if is closed at the very bottom
@@ -83,45 +94,83 @@ configUSE_TIMERS is set to 1 in FreeRTOSConfig.h. */
 #if ( configUSE_TIMERS == 1 )
 
 /* Misc definitions. */
-#define tmrNO_DELAY		( portTickType ) 0U
+#define tmrNO_DELAY		( TickType_t ) 0U
 
 /* The definition of the timers themselves. */
 typedef struct tmrTimerControl
 {
-	const signed char		*pcTimerName;		/*<< Text name.  This is not used by the kernel, it is included simply to make debugging easier. */
-	xListItem				xTimerListItem;		/*<< Standard linked list item as used by all kernel features for event management. */
-	portTickType			xTimerPeriodInTicks;/*<< How quickly and often the timer expires. */
-	unsigned portBASE_TYPE	uxAutoReload;		/*<< Set to pdTRUE if the timer should be automatically restarted once expired.  Set to pdFALSE if the timer is, in effect, a one shot timer. */
+	const char				*pcTimerName;		/*<< Text name.  This is not used by the kernel, it is included simply to make debugging easier. */ /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+	ListItem_t				xTimerListItem;		/*<< Standard linked list item as used by all kernel features for event management. */
+	TickType_t				xTimerPeriodInTicks;/*<< How quickly and often the timer expires. */
+	UBaseType_t				uxAutoReload;		/*<< Set to pdTRUE if the timer should be automatically restarted once expired.  Set to pdFALSE if the timer is, in effect, a one-shot timer. */
 	void 					*pvTimerID;			/*<< An ID to identify the timer.  This allows the timer to be identified when the same callback is used for multiple timers. */
-	tmrTIMER_CALLBACK		pxCallbackFunction;	/*<< The function that will be called when the timer expires. */
+	TimerCallbackFunction_t	pxCallbackFunction;	/*<< The function that will be called when the timer expires. */
+	#if( configUSE_TRACE_FACILITY == 1 )
+		UBaseType_t			uxTimerNumber;		/*<< An ID assigned by trace tools such as FreeRTOS+Trace */
+	#endif
 } xTIMER;
 
-/* The definition of messages that can be sent and received on the timer
-queue. */
+/* The old xTIMER name is maintained above then typedefed to the new Timer_t
+name below to enable the use of older kernel aware debuggers. */
+typedef xTIMER Timer_t;
+
+/* The definition of messages that can be sent and received on the timer queue.
+Two types of message can be queued - messages that manipulate a software timer,
+and messages that request the execution of a non-timer related callback.  The
+two message types are defined in two separate structures, xTimerParametersType
+and xCallbackParametersType respectively. */
+typedef struct tmrTimerParameters
+{
+	TickType_t			xMessageValue;		/*<< An optional value used by a subset of commands, for example, when changing the period of a timer. */
+	Timer_t *			pxTimer;			/*<< The timer to which the command will be applied. */
+} TimerParameter_t;
+
+
+typedef struct tmrCallbackParameters
+{
+	PendedFunction_t	pxCallbackFunction;	/* << The callback function to execute. */
+	void *pvParameter1;						/* << The value that will be used as the callback functions first parameter. */
+	uint32_t ulParameter2;					/* << The value that will be used as the callback functions second parameter. */
+} CallbackParameters_t;
+
+/* The structure that contains the two message types, along with an identifier
+that is used to determine which message type is valid. */
 typedef struct tmrTimerQueueMessage
 {
-	portBASE_TYPE			xMessageID;			/*<< The command being sent to the timer service task. */
-	portTickType			xMessageValue;		/*<< An optional value used by a subset of commands, for example, when changing the period of a timer. */
-	xTIMER *				pxTimer;			/*<< The timer to which the command will be applied. */
-} xTIMER_MESSAGE;
+	BaseType_t			xMessageID;			/*<< The command being sent to the timer service task. */
+	union
+	{
+		TimerParameter_t xTimerParameters;
 
+		/* Don't include xCallbackParameters if it is not going to be used as
+		it makes the structure (and therefore the timer queue) larger. */
+		#if ( INCLUDE_xTimerPendFunctionCall == 1 )
+			CallbackParameters_t xCallbackParameters;
+		#endif /* INCLUDE_xTimerPendFunctionCall */
+	} u;
+} DaemonTaskMessage_t;
+
+/*lint -e956 A manual analysis and inspection has been used to determine which
+static variables must be declared volatile. */
 
 /* The list in which active timers are stored.  Timers are referenced in expire
 time order, with the nearest expiry time at the front of the list.  Only the
-timer service task is allowed to access xActiveTimerList. */
-PRIVILEGED_DATA static xList xActiveTimerList1;
-PRIVILEGED_DATA static xList xActiveTimerList2;
-PRIVILEGED_DATA static xList *pxCurrentTimerList;
-PRIVILEGED_DATA static xList *pxOverflowTimerList;
+timer service task is allowed to access these lists. */
+PRIVILEGED_DATA static List_t xActiveTimerList1;
+PRIVILEGED_DATA static List_t xActiveTimerList2;
+PRIVILEGED_DATA static List_t *pxCurrentTimerList;
+PRIVILEGED_DATA static List_t *pxOverflowTimerList;
 
 /* A queue that is used to send commands to the timer service task. */
-PRIVILEGED_DATA static xQueueHandle xTimerQueue = NULL;
+PRIVILEGED_DATA static QueueHandle_t xTimerQueue = NULL;
 
 #if ( INCLUDE_xTimerGetTimerDaemonTaskHandle == 1 )
-	
-	PRIVILEGED_DATA static xTaskHandle xTimerTaskHandle = NULL;
-	
+
+	PRIVILEGED_DATA static TaskHandle_t xTimerTaskHandle = NULL;
+
 #endif
+
+/*lint +e956 */
 
 /*-----------------------------------------------------------*/
 
@@ -148,25 +197,25 @@ static void	prvProcessReceivedCommands( void ) PRIVILEGED_FUNCTION;
  * Insert the timer into either xActiveTimerList1, or xActiveTimerList2,
  * depending on if the expire time causes a timer counter overflow.
  */
-static portBASE_TYPE prvInsertTimerInActiveList( xTIMER *pxTimer, portTickType xNextExpiryTime, portTickType xTimeNow, portTickType xCommandTime ) PRIVILEGED_FUNCTION;
+static BaseType_t prvInsertTimerInActiveList( Timer_t * const pxTimer, const TickType_t xNextExpiryTime, const TickType_t xTimeNow, const TickType_t xCommandTime ) PRIVILEGED_FUNCTION;
 
 /*
  * An active timer has reached its expire time.  Reload the timer if it is an
  * auto reload timer, then call its callback.
  */
-static void prvProcessExpiredTimer( portTickType xNextExpireTime, portTickType xTimeNow ) PRIVILEGED_FUNCTION;
+static void prvProcessExpiredTimer( const TickType_t xNextExpireTime, const TickType_t xTimeNow ) PRIVILEGED_FUNCTION;
 
 /*
  * The tick count has overflowed.  Switch the timer lists after ensuring the
  * current timer list does not still reference some timers.
  */
-static void prvSwitchTimerLists( portTickType xLastTime ) PRIVILEGED_FUNCTION;
+static void prvSwitchTimerLists( void ) PRIVILEGED_FUNCTION;
 
 /*
  * Obtain the current tick count, setting *pxTimerListsWereSwitched to pdTRUE
  * if a tick count overflow occurred since prvSampleTimeNow() was last called.
  */
-static portTickType prvSampleTimeNow( portBASE_TYPE *pxTimerListsWereSwitched ) PRIVILEGED_FUNCTION;
+static TickType_t prvSampleTimeNow( BaseType_t * const pxTimerListsWereSwitched ) PRIVILEGED_FUNCTION;
 
 /*
  * If the timer list contains any active timers then return the expire time of
@@ -174,19 +223,19 @@ static portTickType prvSampleTimeNow( portBASE_TYPE *pxTimerListsWereSwitched ) 
  * timer list does not contain any timers then return 0 and set *pxListWasEmpty
  * to pdTRUE.
  */
-static portTickType prvGetNextExpireTime( portBASE_TYPE *pxListWasEmpty ) PRIVILEGED_FUNCTION;
+static TickType_t prvGetNextExpireTime( BaseType_t * const pxListWasEmpty ) PRIVILEGED_FUNCTION;
 
 /*
  * If a timer has expired, process it.  Otherwise, block the timer service task
  * until either a timer does expire or a command is received.
  */
-static void prvProcessTimerOrBlockTask( portTickType xNextExpireTime, portBASE_TYPE xListWasEmpty ) PRIVILEGED_FUNCTION;
+static void prvProcessTimerOrBlockTask( const TickType_t xNextExpireTime, const BaseType_t xListWasEmpty ) PRIVILEGED_FUNCTION;
 
 /*-----------------------------------------------------------*/
 
-portBASE_TYPE xTimerCreateTimerTask( void )
+BaseType_t xTimerCreateTimerTask( void )
 {
-portBASE_TYPE xReturn = pdFAIL;
+BaseType_t xReturn = pdFAIL;
 
 	/* This function is called when the scheduler is started if
 	configUSE_TIMERS is set to 1.  Check that the infrastructure used by the
@@ -200,14 +249,18 @@ portBASE_TYPE xReturn = pdFAIL;
 		{
 			/* Create the timer task, storing its handle in xTimerTaskHandle so
 			it can be returned by the xTimerGetTimerDaemonTaskHandle() function. */
-			xReturn = xTaskCreate( prvTimerTask, ( const signed char * ) "Tmr Svc", ( unsigned short ) configTIMER_TASK_STACK_DEPTH, NULL, ( ( unsigned portBASE_TYPE ) configTIMER_TASK_PRIORITY ) | portPRIVILEGE_BIT, &xTimerTaskHandle );	
+			xReturn = xTaskCreate( prvTimerTask, "Tmr Svc", ( uint16_t ) configTIMER_TASK_STACK_DEPTH, NULL, ( ( UBaseType_t ) configTIMER_TASK_PRIORITY ) | portPRIVILEGE_BIT, &xTimerTaskHandle );
 		}
 		#else
 		{
 			/* Create the timer task without storing its handle. */
-			xReturn = xTaskCreate( prvTimerTask, ( const signed char * ) "Tmr Svc", ( unsigned short ) configTIMER_TASK_STACK_DEPTH, NULL, ( ( unsigned portBASE_TYPE ) configTIMER_TASK_PRIORITY ) | portPRIVILEGE_BIT, NULL);
+			xReturn = xTaskCreate( prvTimerTask, "Tmr Svc", ( uint16_t ) configTIMER_TASK_STACK_DEPTH, NULL, ( ( UBaseType_t ) configTIMER_TASK_PRIORITY ) | portPRIVILEGE_BIT, NULL);
 		}
 		#endif
+	}
+	else
+	{
+		mtCOVERAGE_TEST_MARKER();
 	}
 
 	configASSERT( xReturn );
@@ -215,25 +268,24 @@ portBASE_TYPE xReturn = pdFAIL;
 }
 /*-----------------------------------------------------------*/
 
-xTimerHandle xTimerCreate( const signed char *pcTimerName, portTickType xTimerPeriodInTicks, unsigned portBASE_TYPE uxAutoReload, void *pvTimerID, tmrTIMER_CALLBACK pxCallbackFunction )
+TimerHandle_t xTimerCreate( const char * const pcTimerName, const TickType_t xTimerPeriodInTicks, const UBaseType_t uxAutoReload, void * const pvTimerID, TimerCallbackFunction_t pxCallbackFunction ) /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
 {
-xTIMER *pxNewTimer;
+Timer_t *pxNewTimer;
 
 	/* Allocate the timer structure. */
-	if( xTimerPeriodInTicks == ( portTickType ) 0U )
+	if( xTimerPeriodInTicks == ( TickType_t ) 0U )
 	{
 		pxNewTimer = NULL;
-		configASSERT( ( xTimerPeriodInTicks > 0 ) );
 	}
 	else
 	{
-		pxNewTimer = ( xTIMER * ) pvPortMalloc( sizeof( xTIMER ) );
+		pxNewTimer = ( Timer_t * ) pvPortMalloc( sizeof( Timer_t ) );
 		if( pxNewTimer != NULL )
 		{
 			/* Ensure the infrastructure used by the timer service task has been
 			created/initialised. */
 			prvCheckForValidListAndQueue();
-	
+
 			/* Initialise the timer structure members using the function parameters. */
 			pxNewTimer->pcTimerName = pcTimerName;
 			pxNewTimer->xTimerPeriodInTicks = xTimerPeriodInTicks;
@@ -241,7 +293,7 @@ xTIMER *pxNewTimer;
 			pxNewTimer->pvTimerID = pvTimerID;
 			pxNewTimer->pxCallbackFunction = pxCallbackFunction;
 			vListInitialiseItem( &( pxNewTimer->xTimerListItem ) );
-			
+
 			traceTIMER_CREATE( pxNewTimer );
 		}
 		else
@@ -249,15 +301,18 @@ xTIMER *pxNewTimer;
 			traceTIMER_CREATE_FAILED();
 		}
 	}
-	
-	return ( xTimerHandle ) pxNewTimer;
+
+	/* 0 is not a valid value for xTimerPeriodInTicks. */
+	configASSERT( ( xTimerPeriodInTicks > 0 ) );
+
+	return ( TimerHandle_t ) pxNewTimer;
 }
 /*-----------------------------------------------------------*/
 
-portBASE_TYPE xTimerGenericCommand( xTimerHandle xTimer, portBASE_TYPE xCommandID, portTickType xOptionalValue, signed portBASE_TYPE *pxHigherPriorityTaskWoken, portTickType xBlockTime )
+BaseType_t xTimerGenericCommand( TimerHandle_t xTimer, const BaseType_t xCommandID, const TickType_t xOptionalValue, BaseType_t * const pxHigherPriorityTaskWoken, const TickType_t xTicksToWait )
 {
-portBASE_TYPE xReturn = pdFAIL;
-xTIMER_MESSAGE xMessage;
+BaseType_t xReturn = pdFAIL;
+DaemonTaskMessage_t xMessage;
 
 	/* Send a message to the timer service task to perform a particular action
 	on a particular timer definition. */
@@ -265,14 +320,14 @@ xTIMER_MESSAGE xMessage;
 	{
 		/* Send a command to the timer service task to start the xTimer timer. */
 		xMessage.xMessageID = xCommandID;
-		xMessage.xMessageValue = xOptionalValue;
-		xMessage.pxTimer = ( xTIMER * ) xTimer;
+		xMessage.u.xTimerParameters.xMessageValue = xOptionalValue;
+		xMessage.u.xTimerParameters.pxTimer = ( Timer_t * ) xTimer;
 
-		if( pxHigherPriorityTaskWoken == NULL )
+		if( xCommandID < tmrFIRST_FROM_ISR_COMMAND )
 		{
 			if( xTaskGetSchedulerState() == taskSCHEDULER_RUNNING )
 			{
-				xReturn = xQueueSendToBack( xTimerQueue, &xMessage, xBlockTime );
+				xReturn = xQueueSendToBack( xTimerQueue, &xMessage, xTicksToWait );
 			}
 			else
 			{
@@ -283,67 +338,83 @@ xTIMER_MESSAGE xMessage;
 		{
 			xReturn = xQueueSendToBackFromISR( xTimerQueue, &xMessage, pxHigherPriorityTaskWoken );
 		}
-		
+
 		traceTIMER_COMMAND_SEND( xTimer, xCommandID, xOptionalValue, xReturn );
 	}
-	
+	else
+	{
+		mtCOVERAGE_TEST_MARKER();
+	}
+
 	return xReturn;
 }
 /*-----------------------------------------------------------*/
 
 #if ( INCLUDE_xTimerGetTimerDaemonTaskHandle == 1 )
 
-	xTaskHandle xTimerGetTimerDaemonTaskHandle( void )
+	TaskHandle_t xTimerGetTimerDaemonTaskHandle( void )
 	{
 		/* If xTimerGetTimerDaemonTaskHandle() is called before the scheduler has been
 		started, then xTimerTaskHandle will be NULL. */
 		configASSERT( ( xTimerTaskHandle != NULL ) );
 		return xTimerTaskHandle;
 	}
-	
+
 #endif
 /*-----------------------------------------------------------*/
 
-static void prvProcessExpiredTimer( portTickType xNextExpireTime, portTickType xTimeNow )
+const char * pcTimerGetTimerName( TimerHandle_t xTimer )
 {
-xTIMER *pxTimer;
-portBASE_TYPE xResult;
+Timer_t *pxTimer = ( Timer_t * ) xTimer;
+
+	return pxTimer->pcTimerName;
+}
+/*-----------------------------------------------------------*/
+
+static void prvProcessExpiredTimer( const TickType_t xNextExpireTime, const TickType_t xTimeNow )
+{
+BaseType_t xResult;
+Timer_t * const pxTimer = ( Timer_t * ) listGET_OWNER_OF_HEAD_ENTRY( pxCurrentTimerList );
 
 	/* Remove the timer from the list of active timers.  A check has already
 	been performed to ensure the list is not empty. */
-	pxTimer = ( xTIMER * ) listGET_OWNER_OF_HEAD_ENTRY( pxCurrentTimerList );
-	vListRemove( &( pxTimer->xTimerListItem ) );
+	( void ) uxListRemove( &( pxTimer->xTimerListItem ) );
 	traceTIMER_EXPIRED( pxTimer );
 
 	/* If the timer is an auto reload timer then calculate the next
 	expiry time and re-insert the timer in the list of active timers. */
-	if( pxTimer->uxAutoReload == ( unsigned portBASE_TYPE ) pdTRUE )
+	if( pxTimer->uxAutoReload == ( UBaseType_t ) pdTRUE )
 	{
-		/* This is the only time a timer is inserted into a list using
-		a time relative to anything other than the current time.  It
-		will therefore be inserted into the correct list relative to
-		the time this task thinks it is now, even if a command to
-		switch lists due to a tick count overflow is already waiting in
-		the timer queue. */
+		/* The timer is inserted into a list using a time relative to anything
+		other than the current time.  It will therefore be inserted into the
+		correct list relative to the time this task thinks it is now. */
 		if( prvInsertTimerInActiveList( pxTimer, ( xNextExpireTime + pxTimer->xTimerPeriodInTicks ), xTimeNow, xNextExpireTime ) == pdTRUE )
 		{
 			/* The timer expired before it was added to the active timer
 			list.  Reload it now.  */
-			xResult = xTimerGenericCommand( pxTimer, tmrCOMMAND_START, xNextExpireTime, NULL, tmrNO_DELAY );
+			xResult = xTimerGenericCommand( pxTimer, tmrCOMMAND_START_DONT_TRACE, xNextExpireTime, NULL, tmrNO_DELAY );
 			configASSERT( xResult );
 			( void ) xResult;
 		}
+		else
+		{
+			mtCOVERAGE_TEST_MARKER();
+		}
+	}
+	else
+	{
+		mtCOVERAGE_TEST_MARKER();
 	}
 
 	/* Call the timer callback. */
-	pxTimer->pxCallbackFunction( ( xTimerHandle ) pxTimer );
+	pxTimer->pxCallbackFunction( ( TimerHandle_t ) pxTimer );
 }
 /*-----------------------------------------------------------*/
 
 static void prvTimerTask( void *pvParameters )
 {
-portTickType xNextExpireTime;
-portBASE_TYPE xListWasEmpty;
+TickType_t xNextExpireTime;
+BaseType_t xListWasEmpty;
 
 	/* Just to avoid compiler warnings. */
 	( void ) pvParameters;
@@ -357,17 +428,17 @@ portBASE_TYPE xListWasEmpty;
 		/* If a timer has expired, process it.  Otherwise, block this task
 		until either a timer does expire, or a command is received. */
 		prvProcessTimerOrBlockTask( xNextExpireTime, xListWasEmpty );
-		
+
 		/* Empty the command queue. */
-		prvProcessReceivedCommands();		
+		prvProcessReceivedCommands();
 	}
 }
 /*-----------------------------------------------------------*/
 
-static void prvProcessTimerOrBlockTask( portTickType xNextExpireTime, portBASE_TYPE xListWasEmpty )
+static void prvProcessTimerOrBlockTask( const TickType_t xNextExpireTime, const BaseType_t xListWasEmpty )
 {
-portTickType xTimeNow;
-portBASE_TYPE xTimerListsWereSwitched;
+TickType_t xTimeNow;
+BaseType_t xTimerListsWereSwitched;
 
 	vTaskSuspendAll();
 	{
@@ -375,14 +446,14 @@ portBASE_TYPE xTimerListsWereSwitched;
 		has expired or not.  If obtaining the time causes the lists to switch
 		then don't process this timer as any timers that remained in the list
 		when the lists were switched will have been processed within the
-		prvSampelTimeNow() function. */
+		prvSampleTimeNow() function. */
 		xTimeNow = prvSampleTimeNow( &xTimerListsWereSwitched );
 		if( xTimerListsWereSwitched == pdFALSE )
 		{
 			/* The tick count has not overflowed, has the timer expired? */
 			if( ( xListWasEmpty == pdFALSE ) && ( xNextExpireTime <= xTimeNow ) )
 			{
-				xTaskResumeAll();
+				( void ) xTaskResumeAll();
 				prvProcessExpiredTimer( xNextExpireTime, xTimeNow );
 			}
 			else
@@ -403,19 +474,23 @@ portBASE_TYPE xTimerListsWereSwitched;
 					to block. */
 					portYIELD_WITHIN_API();
 				}
+				else
+				{
+					mtCOVERAGE_TEST_MARKER();
+				}
 			}
 		}
 		else
 		{
-			xTaskResumeAll();
+			( void ) xTaskResumeAll();
 		}
 	}
 }
 /*-----------------------------------------------------------*/
 
-static portTickType prvGetNextExpireTime( portBASE_TYPE *pxListWasEmpty )
+static TickType_t prvGetNextExpireTime( BaseType_t * const pxListWasEmpty )
 {
-portTickType xNextExpireTime;
+TickType_t xNextExpireTime;
 
 	/* Timers are listed in expiry time order, with the head of the list
 	referencing the task that will expire first.  Obtain the time at which
@@ -432,48 +507,48 @@ portTickType xNextExpireTime;
 	else
 	{
 		/* Ensure the task unblocks when the tick count rolls over. */
-		xNextExpireTime = ( portTickType ) 0U;
+		xNextExpireTime = ( TickType_t ) 0U;
 	}
 
 	return xNextExpireTime;
 }
 /*-----------------------------------------------------------*/
 
-static portTickType prvSampleTimeNow( portBASE_TYPE *pxTimerListsWereSwitched )
+static TickType_t prvSampleTimeNow( BaseType_t * const pxTimerListsWereSwitched )
 {
-portTickType xTimeNow;
-PRIVILEGED_DATA static portTickType xLastTime = ( portTickType ) 0U;
+TickType_t xTimeNow;
+PRIVILEGED_DATA static TickType_t xLastTime = ( TickType_t ) 0U; /*lint !e956 Variable is only accessible to one task. */
 
 	xTimeNow = xTaskGetTickCount();
-	
+
 	if( xTimeNow < xLastTime )
 	{
-		prvSwitchTimerLists( xLastTime );
+		prvSwitchTimerLists();
 		*pxTimerListsWereSwitched = pdTRUE;
 	}
 	else
 	{
 		*pxTimerListsWereSwitched = pdFALSE;
 	}
-	
+
 	xLastTime = xTimeNow;
-	
+
 	return xTimeNow;
 }
 /*-----------------------------------------------------------*/
 
-static portBASE_TYPE prvInsertTimerInActiveList( xTIMER *pxTimer, portTickType xNextExpiryTime, portTickType xTimeNow, portTickType xCommandTime )
+static BaseType_t prvInsertTimerInActiveList( Timer_t * const pxTimer, const TickType_t xNextExpiryTime, const TickType_t xTimeNow, const TickType_t xCommandTime )
 {
-portBASE_TYPE xProcessTimerNow = pdFALSE;
+BaseType_t xProcessTimerNow = pdFALSE;
 
 	listSET_LIST_ITEM_VALUE( &( pxTimer->xTimerListItem ), xNextExpiryTime );
 	listSET_LIST_ITEM_OWNER( &( pxTimer->xTimerListItem ), pxTimer );
-	
+
 	if( xNextExpiryTime <= xTimeNow )
 	{
 		/* Has the expiry time elapsed between the command to start/reset a
 		timer was issued, and the time the command was processed? */
-		if( ( ( portTickType ) ( xTimeNow - xCommandTime ) ) >= pxTimer->xTimerPeriodInTicks )
+		if( ( xTimeNow - xCommandTime ) >= pxTimer->xTimerPeriodInTicks )
 		{
 			/* The time between a command being issued and the command being
 			processed actually exceeds the timers period.  */
@@ -505,87 +580,137 @@ portBASE_TYPE xProcessTimerNow = pdFALSE;
 
 static void	prvProcessReceivedCommands( void )
 {
-xTIMER_MESSAGE xMessage;
-xTIMER *pxTimer;
-portBASE_TYPE xTimerListsWereSwitched, xResult;
-portTickType xTimeNow;
+DaemonTaskMessage_t xMessage;
+Timer_t *pxTimer;
+BaseType_t xTimerListsWereSwitched, xResult;
+TickType_t xTimeNow;
 
-	/* In this case the xTimerListsWereSwitched parameter is not used, but it
-	must be present in the function call. */
-	xTimeNow = prvSampleTimeNow( &xTimerListsWereSwitched );
-
-	while( xQueueReceive( xTimerQueue, &xMessage, tmrNO_DELAY ) != pdFAIL )
+	while( xQueueReceive( xTimerQueue, &xMessage, tmrNO_DELAY ) != pdFAIL ) /*lint !e603 xMessage does not have to be initialised as it is passed out, not in, and it is not used unless xQueueReceive() returns pdTRUE. */
 	{
-		pxTimer = xMessage.pxTimer;
-
-		/* Is the timer already in a list of active timers?  When the command
-		is trmCOMMAND_PROCESS_TIMER_OVERFLOW, the timer will be NULL as the
-		command is to the task rather than to an individual timer. */
-		if( pxTimer != NULL )
+		#if ( INCLUDE_xTimerPendFunctionCall == 1 )
 		{
+			/* Negative commands are pended function calls rather than timer
+			commands. */
+			if( xMessage.xMessageID < 0 )
+			{
+				const CallbackParameters_t * const pxCallback = &( xMessage.u.xCallbackParameters );
+
+				/* The timer uses the xCallbackParameters member to request a
+				callback be executed.  Check the callback is not NULL. */
+				configASSERT( pxCallback );
+
+				/* Call the function. */
+				pxCallback->pxCallbackFunction( pxCallback->pvParameter1, pxCallback->ulParameter2 );
+			}
+			else
+			{
+				mtCOVERAGE_TEST_MARKER();
+			}
+		}
+		#endif /* INCLUDE_xTimerPendFunctionCall */
+
+		/* Commands that are positive are timer commands rather than pended
+		function calls. */
+		if( xMessage.xMessageID >= ( BaseType_t ) 0 )
+		{
+			/* The messages uses the xTimerParameters member to work on a
+			software timer. */
+			pxTimer = xMessage.u.xTimerParameters.pxTimer;
+
 			if( listIS_CONTAINED_WITHIN( NULL, &( pxTimer->xTimerListItem ) ) == pdFALSE )
 			{
 				/* The timer is in a list, remove it. */
-				vListRemove( &( pxTimer->xTimerListItem ) );
+				( void ) uxListRemove( &( pxTimer->xTimerListItem ) );
 			}
-		}
+			else
+			{
+				mtCOVERAGE_TEST_MARKER();
+			}
 
-		traceTIMER_COMMAND_RECEIVED( pxTimer, xMessage.xMessageID, xMessage.xMessageValue );
-		
-		switch( xMessage.xMessageID )
-		{
-			case tmrCOMMAND_START :	
-				/* Start or restart a timer. */
-				if( prvInsertTimerInActiveList( pxTimer,  xMessage.xMessageValue + pxTimer->xTimerPeriodInTicks, xTimeNow, xMessage.xMessageValue ) == pdTRUE )
-				{
-					/* The timer expired before it was added to the active timer
-					list.  Process it now. */
-					pxTimer->pxCallbackFunction( ( xTimerHandle ) pxTimer );
+			traceTIMER_COMMAND_RECEIVED( pxTimer, xMessage.xMessageID, xMessage.u.xTimerParameters.xMessageValue );
 
-					if( pxTimer->uxAutoReload == ( unsigned portBASE_TYPE ) pdTRUE )
+			/* In this case the xTimerListsWereSwitched parameter is not used, but
+			it must be present in the function call.  prvSampleTimeNow() must be
+			called after the message is received from xTimerQueue so there is no
+			possibility of a higher priority task adding a message to the message
+			queue with a time that is ahead of the timer daemon task (because it
+			pre-empted the timer daemon task after the xTimeNow value was set). */
+			xTimeNow = prvSampleTimeNow( &xTimerListsWereSwitched );
+
+			switch( xMessage.xMessageID )
+			{
+				case tmrCOMMAND_START :
+			    case tmrCOMMAND_START_FROM_ISR :
+			    case tmrCOMMAND_RESET :
+			    case tmrCOMMAND_RESET_FROM_ISR :
+				case tmrCOMMAND_START_DONT_TRACE :
+					/* Start or restart a timer. */
+					if( prvInsertTimerInActiveList( pxTimer,  xMessage.u.xTimerParameters.xMessageValue + pxTimer->xTimerPeriodInTicks, xTimeNow, xMessage.u.xTimerParameters.xMessageValue ) == pdTRUE )
 					{
-						xResult = xTimerGenericCommand( pxTimer, tmrCOMMAND_START, xMessage.xMessageValue + pxTimer->xTimerPeriodInTicks, NULL, tmrNO_DELAY );
-						configASSERT( xResult );
-						( void ) xResult;
+						/* The timer expired before it was added to the active
+						timer list.  Process it now. */
+						pxTimer->pxCallbackFunction( ( TimerHandle_t ) pxTimer );
+						traceTIMER_EXPIRED( pxTimer );
+
+						if( pxTimer->uxAutoReload == ( UBaseType_t ) pdTRUE )
+						{
+							xResult = xTimerGenericCommand( pxTimer, tmrCOMMAND_START_DONT_TRACE, xMessage.u.xTimerParameters.xMessageValue + pxTimer->xTimerPeriodInTicks, NULL, tmrNO_DELAY );
+							configASSERT( xResult );
+							( void ) xResult;
+						}
+						else
+						{
+							mtCOVERAGE_TEST_MARKER();
+						}
 					}
-				}
-				break;
+					else
+					{
+						mtCOVERAGE_TEST_MARKER();
+					}
+					break;
 
-			case tmrCOMMAND_STOP :	
-				/* The timer has already been removed from the active list.
-				There is nothing to do here. */
-				break;
+				case tmrCOMMAND_STOP :
+				case tmrCOMMAND_STOP_FROM_ISR :
+					/* The timer has already been removed from the active list.
+					There is nothing to do here. */
+					break;
 
-			case tmrCOMMAND_CHANGE_PERIOD :
-				pxTimer->xTimerPeriodInTicks = xMessage.xMessageValue;
-				configASSERT( ( pxTimer->xTimerPeriodInTicks > 0 ) );
-				prvInsertTimerInActiveList( pxTimer, ( xTimeNow + pxTimer->xTimerPeriodInTicks ), xTimeNow, xTimeNow );
-				break;
+				case tmrCOMMAND_CHANGE_PERIOD :
+				case tmrCOMMAND_CHANGE_PERIOD_FROM_ISR :
+					pxTimer->xTimerPeriodInTicks = xMessage.u.xTimerParameters.xMessageValue;
+					configASSERT( ( pxTimer->xTimerPeriodInTicks > 0 ) );
 
-			case tmrCOMMAND_DELETE :
-				/* The timer has already been removed from the active list,
-				just free up the memory. */
-				vPortFree( pxTimer );
-				break;
+					/* The new period does not really have a reference, and can be
+					longer or shorter than the old one.  The command time is
+					therefore set to the current time, and as the period cannot be
+					zero the next expiry time can only be in the future, meaning
+					(unlike for the xTimerStart() case above) there is no fail case
+					that needs to be handled here. */
+					( void ) prvInsertTimerInActiveList( pxTimer, ( xTimeNow + pxTimer->xTimerPeriodInTicks ), xTimeNow, xTimeNow );
+					break;
 
-			default	:			
-				/* Don't expect to get here. */
-				break;
+				case tmrCOMMAND_DELETE :
+					/* The timer has already been removed from the active list,
+					just free up the memory. */
+					vPortFree( pxTimer );
+					break;
+
+				default	:
+					/* Don't expect to get here. */
+					break;
+			}
 		}
 	}
 }
 /*-----------------------------------------------------------*/
 
-static void prvSwitchTimerLists( portTickType xLastTime )
+static void prvSwitchTimerLists( void )
 {
-portTickType xNextExpireTime, xReloadTime;
-xList *pxTemp;
-xTIMER *pxTimer;
-portBASE_TYPE xResult;
+TickType_t xNextExpireTime, xReloadTime;
+List_t *pxTemp;
+Timer_t *pxTimer;
+BaseType_t xResult;
 
-	/* Remove compiler warnings if configASSERT() is not defined. */
-	( void ) xLastTime;
-	
 	/* The tick count has overflowed.  The timer lists must be switched.
 	If there are any timers still referenced from the current timer list
 	then they must have expired and should be processed before the lists
@@ -595,15 +720,16 @@ portBASE_TYPE xResult;
 		xNextExpireTime = listGET_ITEM_VALUE_OF_HEAD_ENTRY( pxCurrentTimerList );
 
 		/* Remove the timer from the list. */
-		pxTimer = ( xTIMER * ) listGET_OWNER_OF_HEAD_ENTRY( pxCurrentTimerList );
-		vListRemove( &( pxTimer->xTimerListItem ) );
+		pxTimer = ( Timer_t * ) listGET_OWNER_OF_HEAD_ENTRY( pxCurrentTimerList );
+		( void ) uxListRemove( &( pxTimer->xTimerListItem ) );
+		traceTIMER_EXPIRED( pxTimer );
 
 		/* Execute its callback, then send a command to restart the timer if
 		it is an auto-reload timer.  It cannot be restarted here as the lists
 		have not yet been switched. */
-		pxTimer->pxCallbackFunction( ( xTimerHandle ) pxTimer );
+		pxTimer->pxCallbackFunction( ( TimerHandle_t ) pxTimer );
 
-		if( pxTimer->uxAutoReload == ( unsigned portBASE_TYPE ) pdTRUE )
+		if( pxTimer->uxAutoReload == ( UBaseType_t ) pdTRUE )
 		{
 			/* Calculate the reload value, and if the reload value results in
 			the timer going into the same timer list then it has already expired
@@ -620,10 +746,14 @@ portBASE_TYPE xResult;
 			}
 			else
 			{
-				xResult = xTimerGenericCommand( pxTimer, tmrCOMMAND_START, xNextExpireTime, NULL, tmrNO_DELAY );
+				xResult = xTimerGenericCommand( pxTimer, tmrCOMMAND_START_DONT_TRACE, xNextExpireTime, NULL, tmrNO_DELAY );
 				configASSERT( xResult );
 				( void ) xResult;
 			}
+		}
+		else
+		{
+			mtCOVERAGE_TEST_MARKER();
 		}
 	}
 
@@ -646,17 +776,35 @@ static void prvCheckForValidListAndQueue( void )
 			vListInitialise( &xActiveTimerList2 );
 			pxCurrentTimerList = &xActiveTimerList1;
 			pxOverflowTimerList = &xActiveTimerList2;
-			xTimerQueue = xQueueCreate( ( unsigned portBASE_TYPE ) configTIMER_QUEUE_LENGTH, sizeof( xTIMER_MESSAGE ) );
+			xTimerQueue = xQueueCreate( ( UBaseType_t ) configTIMER_QUEUE_LENGTH, sizeof( DaemonTaskMessage_t ) );
+			configASSERT( xTimerQueue );
+
+			#if ( configQUEUE_REGISTRY_SIZE > 0 )
+			{
+				if( xTimerQueue != NULL )
+				{
+					vQueueAddToRegistry( xTimerQueue, "TmrQ" );
+				}
+				else
+				{
+					mtCOVERAGE_TEST_MARKER();
+				}
+			}
+			#endif /* configQUEUE_REGISTRY_SIZE */
+		}
+		else
+		{
+			mtCOVERAGE_TEST_MARKER();
 		}
 	}
 	taskEXIT_CRITICAL();
 }
 /*-----------------------------------------------------------*/
 
-portBASE_TYPE xTimerIsTimerActive( xTimerHandle xTimer )
+BaseType_t xTimerIsTimerActive( TimerHandle_t xTimer )
 {
-portBASE_TYPE xTimerIsInActiveList;
-xTIMER *pxTimer = ( xTIMER * ) xTimer;
+BaseType_t xTimerIsInActiveList;
+Timer_t *pxTimer = ( Timer_t * ) xTimer;
 
 	/* Is the timer in the list of active timers? */
 	taskENTER_CRITICAL();
@@ -664,23 +812,74 @@ xTIMER *pxTimer = ( xTIMER * ) xTimer;
 		/* Checking to see if it is in the NULL list in effect checks to see if
 		it is referenced from either the current or the overflow timer lists in
 		one go, but the logic has to be reversed, hence the '!'. */
-		xTimerIsInActiveList = !( listIS_CONTAINED_WITHIN( NULL, &( pxTimer->xTimerListItem ) ) );
+		xTimerIsInActiveList = ( BaseType_t ) !( listIS_CONTAINED_WITHIN( NULL, &( pxTimer->xTimerListItem ) ) );
 	}
 	taskEXIT_CRITICAL();
 
 	return xTimerIsInActiveList;
-}
+} /*lint !e818 Can't be pointer to const due to the typedef. */
 /*-----------------------------------------------------------*/
 
-void *pvTimerGetTimerID( xTimerHandle xTimer )
+void *pvTimerGetTimerID( const TimerHandle_t xTimer )
 {
-xTIMER *pxTimer = ( xTIMER * ) xTimer;
+Timer_t * const pxTimer = ( Timer_t * ) xTimer;
 
 	return pxTimer->pvTimerID;
 }
+/*-----------------------------------------------------------*/
+
+#if( INCLUDE_xTimerPendFunctionCall == 1 )
+
+	BaseType_t xTimerPendFunctionCallFromISR( PendedFunction_t xFunctionToPend, void *pvParameter1, uint32_t ulParameter2, BaseType_t *pxHigherPriorityTaskWoken )
+	{
+	DaemonTaskMessage_t xMessage;
+	BaseType_t xReturn;
+
+		/* Complete the message with the function parameters and post it to the
+		daemon task. */
+		xMessage.xMessageID = tmrCOMMAND_EXECUTE_CALLBACK_FROM_ISR;
+		xMessage.u.xCallbackParameters.pxCallbackFunction = xFunctionToPend;
+		xMessage.u.xCallbackParameters.pvParameter1 = pvParameter1;
+		xMessage.u.xCallbackParameters.ulParameter2 = ulParameter2;
+
+		xReturn = xQueueSendFromISR( xTimerQueue, &xMessage, pxHigherPriorityTaskWoken );
+		
+		tracePEND_FUNC_CALL_FROM_ISR( xFunctionToPend, pvParameter1, ulParameter2, xReturn );
+
+		return xReturn;
+	}
+
+#endif /* INCLUDE_xTimerPendFunctionCall */
+/*-----------------------------------------------------------*/
+
+#if( INCLUDE_xTimerPendFunctionCall == 1 )
+
+	BaseType_t xTimerPendFunctionCall( PendedFunction_t xFunctionToPend, void *pvParameter1, uint32_t ulParameter2, TickType_t xTicksToWait )
+	{
+	DaemonTaskMessage_t xMessage;
+	BaseType_t xReturn;
+
+		/* Complete the message with the function parameters and post it to the
+		daemon task. */
+		xMessage.xMessageID = tmrCOMMAND_EXECUTE_CALLBACK;
+		xMessage.u.xCallbackParameters.pxCallbackFunction = xFunctionToPend;
+		xMessage.u.xCallbackParameters.pvParameter1 = pvParameter1;
+		xMessage.u.xCallbackParameters.ulParameter2 = ulParameter2;
+
+		xReturn = xQueueSendToBack( xTimerQueue, &xMessage, xTicksToWait );
+
+		tracePEND_FUNC_CALL( xFunctionToPend, pvParameter1, ulParameter2, xReturn );
+		
+		return xReturn;
+	}
+
+#endif /* INCLUDE_xTimerPendFunctionCall */
 /*-----------------------------------------------------------*/
 
 /* This entire source file will be skipped if the application is not configured
 to include software timer functionality.  If you want to include software timer
 functionality then ensure configUSE_TIMERS is set to 1 in FreeRTOSConfig.h. */
 #endif /* configUSE_TIMERS == 1 */
+
+
+
