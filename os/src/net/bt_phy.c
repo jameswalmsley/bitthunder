@@ -103,6 +103,7 @@ BT_ERROR bt_phy_generic_read_status(struct bt_phy_device *phy) {
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(bt_phy_generic_read_status);
 
 BT_ERROR bt_phy_generic_init(struct bt_phy_device *phy) {
 
@@ -156,6 +157,7 @@ BT_ERROR bt_phy_generic_init(struct bt_phy_device *phy) {
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(bt_phy_generic_init);
 
 static BT_ERROR phy_init(struct bt_phy_device *phy) {
 	const BT_DEV_IF_PHY *phy_ops = BT_IF_PHY_OPS(phy->hPHY);
@@ -279,6 +281,7 @@ no_node:
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_RegisterMiiBus);
 
 BT_ERROR BT_ConnectPHY(BT_HANDLE hMAC, BT_u32 ulAddress) {
 
@@ -312,6 +315,7 @@ BT_ERROR BT_ConnectPHY(BT_HANDLE hMAC, BT_u32 ulAddress) {
 
 	return BT_ERR_GENERIC;	// PHY not detected on specified address.
 }
+BT_EXPORT_SYMBOL(BT_ConnectPHY);
 
 static BT_BOOL phy_sm(struct bt_phy_device *phy) {
 
@@ -429,6 +433,7 @@ BT_u16 bt_phy_read(struct bt_phy_device *phy, BT_u32 regnum, BT_ERROR *pError) {
 
 	return reg;
 }
+BT_EXPORT_SYMBOL(bt_phy_read);
 
 BT_ERROR bt_phy_write(struct bt_phy_device *phy, BT_u32 regnum, BT_u16 val) {
 	const BT_DEV_IF_MII *mii_ops = BT_IF_MII_OPS(phy->mii_bus->hMII);
@@ -443,8 +448,9 @@ BT_ERROR bt_phy_write(struct bt_phy_device *phy, BT_u32 regnum, BT_u16 val) {
 
 	return Error;
 }
+BT_EXPORT_SYMBOL(bt_phy_write);
 
-BT_ERROR phy_module_init() {
+static BT_ERROR phy_module_init() {
 
 	BT_ERROR Error = BT_ERR_NONE;
 

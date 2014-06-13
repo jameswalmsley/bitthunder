@@ -9,10 +9,10 @@
 #include "lwip/tcpip.h"
 
 
-BT_DEF_MODULE_NAME("NET IF Manager")
-BT_DEF_MODULE_DESCRIPTION("Network interface manager")
-BT_DEF_MODULE_AUTHOR("Robert Steinbauer")
-BT_DEF_MODULE_EMAIL("rsteinbauer@riegl.co.at")
+BT_DEF_MODULE_NAME			("NET IF Manager")
+BT_DEF_MODULE_DESCRIPTION	("Network interface manager")
+BT_DEF_MODULE_AUTHOR		("Robert Steinbauer")
+BT_DEF_MODULE_EMAIL			("rsteinbauer@riegl.co.at")
 
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;
@@ -87,6 +87,7 @@ BT_ERROR BT_RegisterNetworkInterface(BT_HANDLE hIF) {
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_RegisterNetworkInterface);
 
 static BT_NETIF_PRIV *find_netif(const BT_i8 *name) {
 	struct bt_list_head *pos;
@@ -111,6 +112,7 @@ BT_u32 BT_GetTotalNetworkInterfaces() {
 	}
 	return i;
 }
+BT_EXPORT_SYMBOL(BT_GetTotalNetworkInterfaces);
 
 BT_NET_IF *BT_GetNetifByIndex(BT_u32 index) {
 
@@ -124,6 +126,7 @@ BT_NET_IF *BT_GetNetifByIndex(BT_u32 index) {
 
 	return NULL;
 }
+BT_EXPORT_SYMBOL(BT_GetNetifByIndex);
 
 BT_NET_IF *BT_GetNetif(const BT_i8 *name, BT_ERROR *pError) {
 	BT_NETIF_PRIV *priv = find_netif(name);
@@ -132,6 +135,7 @@ BT_NET_IF *BT_GetNetif(const BT_i8 *name, BT_ERROR *pError) {
 	}
 	return NULL;
 }
+BT_EXPORT_SYMBOL(BT_GetNetif);
 
 /**
  *	The PHY management layer calls this function when the PHY detects a change.
@@ -153,6 +157,7 @@ BT_ERROR bt_netif_adjust_link(BT_NET_IF *netif) {
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(bt_netif_adjust_link);
 
 BT_NET_IF *BT_GetNetifFromHandle(BT_HANDLE hMac, BT_ERROR *pError) {
 	struct bt_list_head *pos;
@@ -165,46 +170,55 @@ BT_NET_IF *BT_GetNetifFromHandle(BT_HANDLE hMac, BT_ERROR *pError) {
 
 	return NULL;
 }
+BT_EXPORT_SYMBOL(BT_GetNetifFromHandle);
 
 BT_ERROR BT_NetifGetMacAddress(BT_NET_IF *interface, BT_u8 *hwaddr, BT_u32 ulLength) {
 	BT_NETIF_PRIV *pIF = bt_container_of(interface, BT_NETIF_PRIV, base);
 	return pIF->base.pOps->pfnGetMACAddr(pIF->base.hIF, hwaddr, ulLength);
 }
+BT_EXPORT_SYMBOL(BT_NetifGetMacAddress);
 
 BT_ERROR BT_NetifSetMacAddress(BT_NET_IF *interface, BT_u8 *hwaddr, BT_u32 ulLength) {
 	BT_NETIF_PRIV *pIF = bt_container_of(interface, BT_NETIF_PRIV, base);
 	return pIF->base.pOps->pfnSetMACAddr(pIF->base.hIF, hwaddr, ulLength);
 }
+BT_EXPORT_SYMBOL(BT_NetifSetMacAddress);
 
 BT_ERROR BT_NetifSetAddress(BT_NET_IF *interface, BT_IPADDRESS *ip, BT_IPADDRESS *netmask, BT_IPADDRESS *gw) {
 	BT_NETIF_PRIV *pIF = bt_container_of(interface, BT_NETIF_PRIV, base);
 	return bt_lwip_netif_set_addr(pIF, ip, netmask, gw);
 }
+BT_EXPORT_SYMBOL(BT_NetifSetAddress);
 
 BT_ERROR BT_NetifGetAddress(BT_NET_IF *interface, BT_IPADDRESS *ip, BT_IPADDRESS *netmask, BT_IPADDRESS *gw) {
 	BT_NETIF_PRIV *pIF = bt_container_of(interface, BT_NETIF_PRIV, base);
 	return bt_lwip_netif_get_addr(pIF, ip, netmask, gw);
 }
+BT_EXPORT_SYMBOL(BT_NetifGetAddress);
 
 BT_ERROR BT_StartNetif(BT_NET_IF *interface) {
 	BT_NETIF_PRIV *pIF = bt_container_of(interface, BT_NETIF_PRIV, base);
 	return bt_lwip_netif_up(pIF);
 }
+BT_EXPORT_SYMBOL(BT_StartNetif);
 
 BT_ERROR BT_StopNetif(BT_NET_IF *interface) {
 	BT_NETIF_PRIV *pIF = bt_container_of(interface, BT_NETIF_PRIV, base);
 	return bt_lwip_netif_down(pIF);
 }
+BT_EXPORT_SYMBOL(BT_StopNetif);
 
 BT_BOOL BT_NetifCompletedDHCP(BT_NET_IF *interface) {
 	BT_NETIF_PRIV *pIF = bt_container_of(interface, BT_NETIF_PRIV, base);
 	return bt_lwip_netif_dhcp_done(pIF);
 }
+BT_EXPORT_SYMBOL(BT_NetifCompletedDHCP);
 
 BT_ERROR BT_NetifGetHostname(BT_NET_IF *interface, char *hostname) {
 	BT_NETIF_PRIV *pIF = bt_container_of(interface, BT_NETIF_PRIV, base);
 	return bt_lwip_netif_get_hostname(pIF, hostname);
 }
+BT_EXPORT_SYMBOL(BT_NetifGetHostname);
 
 BT_ERROR BT_NetifGetLinkState(BT_NET_IF *interface, struct bt_phy_linkstate *linkstate) {
 	if(!interface->phy) {
@@ -220,6 +234,7 @@ BT_ERROR BT_NetifGetLinkState(BT_NET_IF *interface, struct bt_phy_linkstate *lin
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_NetifGetLinkState);
 
 BT_ERROR BT_NetifConfigureLink(BT_NET_IF *interface, struct bt_phy_config *config) {
 	if(!interface->phy) {
@@ -230,6 +245,7 @@ BT_ERROR BT_NetifConfigureLink(BT_NET_IF *interface, struct bt_phy_config *confi
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_NetifConfigureLink);
 
 BT_ERROR BT_NetifRestartLink(BT_NET_IF *interface) {
 	if(!interface->phy) {
@@ -239,6 +255,7 @@ BT_ERROR BT_NetifRestartLink(BT_NET_IF *interface) {
 	interface->phy->eState = BT_PHY_RENEGOTIATE;
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_NetifRestartLink);
 
 static void tcpip_init_done(void *arg) {
 	BT_BOOL *bDone = (BT_BOOL*) arg;
