@@ -30,6 +30,7 @@ BT_ERROR BT_SetSystemTimerHandle(BT_HANDLE hTimer) {
 
 	return BT_ERR_GENERIC;
 }
+BT_EXPORT_SYMBOL(BT_SetSystemTimerHandle);
 
 BT_ERROR BT_SetGlobalTimerHandle(BT_HANDLE hTimer) {
 	if(!g_gTimer) {
@@ -39,10 +40,12 @@ BT_ERROR BT_SetGlobalTimerHandle(BT_HANDLE hTimer) {
 	}
 	return BT_ERR_GENERIC;
 }
+BT_EXPORT_SYMBOL(BT_SetGlobalTimerHandle);
 
 BT_ERROR BT_StopSystemTimer() {
 	return g_Ops->pfnStop(g_hTimer);
 }
+BT_EXPORT_SYMBOL(BT_StopSystemTimer);
 
 BT_u32 BT_GetSystemTimerOffset() {
 	BT_ERROR Error;
@@ -54,6 +57,7 @@ BT_u32 BT_GetSystemTimerOffset() {
 
 	return 0;
 }
+BT_EXPORT_SYMBOL(BT_GetSystemTimerOffset);
 
 BT_u64 BT_GetGlobalTimer() {
 
@@ -65,6 +69,7 @@ BT_u64 BT_GetGlobalTimer() {
 
 	return 0;
 }
+BT_EXPORT_SYMBOL(BT_GetGlobalTimer);
 
 BT_u32 BT_GetGlobalTimerRate() {
 
@@ -76,6 +81,7 @@ BT_u32 BT_GetGlobalTimerRate() {
 
 	return 0;
 }
+BT_EXPORT_SYMBOL(BT_GetGlobalTimerRate);
 
 BT_u32 BT_GetKernelTime() {
 	BT_u32 us = 0;
@@ -92,7 +98,9 @@ BT_u32 BT_GetKernelTime() {
 
 	return us;
 }
+BT_EXPORT_SYMBOL(BT_GetKernelTime);
 
 BT_u32 BT_GetKernelTick() {
 	return BT_kTickCount();
 }
+BT_EXPORT_SYMBOL(BT_GetKernelTick);
