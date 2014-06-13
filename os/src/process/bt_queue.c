@@ -33,35 +33,42 @@ BT_HANDLE BT_CreateQueue(BT_u32 ulElements, BT_u32 ulElementWidth, BT_ERROR *pEr
 
 	return hQueue;
 }
+BT_EXPORT_SYMBOL(BT_CreateQueue);
 
 BT_ERROR BT_QueueSend(BT_HANDLE hQueue, const void *pMessage, BT_TICK oTimeoutTicks) {
 	return BT_kQueueSend(hQueue->pQueue, pMessage, oTimeoutTicks);
 }
+BT_EXPORT_SYMBOL(BT_QueueSend);
 
 BT_ERROR BT_QueueSendFromISR(BT_HANDLE hQueue, const void *pMessage, BT_BOOL *pbHigherPriorityTaskWoken) {
 	return BT_kQueueSendFromISR(hQueue->pQueue, pMessage, pbHigherPriorityTaskWoken);
 }
+BT_EXPORT_SYMBOL(BT_QueueSendFromISR);
 
 BT_ERROR BT_QueueSendToBack(BT_HANDLE hQueue, const void *pMessage, BT_TICK oTimeoutTicks) {
 	return BT_kQueueSendToBack(hQueue->pQueue, pMessage, oTimeoutTicks);
 }
+BT_EXPORT_SYMBOL(BT_QueueSendToBack);
 
 BT_ERROR BT_QueueSendToFront(BT_HANDLE hQueue, const void *pMessage, BT_TICK oTimeoutTicks) {
 	return BT_kQueueSendToFront(hQueue->pQueue, pMessage, oTimeoutTicks);
 }
-
+BT_EXPORT_SYMBOL(BT_QueueSendToFront);
 
 BT_u32 BT_QueueMessagesWaiting(BT_HANDLE hQueue) {
 	return BT_kQueueMessagesWaiting(hQueue->pQueue);
 }
+BT_EXPORT_SYMBOL(BT_QueueMessagesWaiting);
 
 BT_ERROR BT_QueueReceive(BT_HANDLE hQueue, void *pMessage, BT_TICK oTimeoutTicks) {
 	return BT_kQueueReceive(hQueue->pQueue, pMessage, oTimeoutTicks);
 }
+BT_EXPORT_SYMBOL(BT_QueueReceive);
 
 BT_ERROR BT_QueueReceiveFromISR(BT_HANDLE hQueue, void *pMessage, BT_BOOL *pbHigherPriorityTaskWoken) {
 	return BT_kQueueReceiveFromISR(hQueue->pQueue, pMessage, pbHigherPriorityTaskWoken);
 }
+BT_EXPORT_SYMBOL(BT_QueueReceiveFromISR);
 
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
