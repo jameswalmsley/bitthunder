@@ -39,6 +39,7 @@ include $(BASE)os/src/net/objects.mk
 include $(BASE)os/src/rtc/objects.mk
 include $(BASE)os/src/shell/objects.mk
 include $(BASE)os/src/syscall/objects.mk
+include $(BASE)os/src/time/objects.mk
 
 
 include $(BASE)os/src/interfaces/objects.mk

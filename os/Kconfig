@@ -8,6 +8,7 @@ source os/src/mm/Kconfig
 source os/src/shell/Kconfig
 source os/src/syscall/Kconfig
 source os/src/syslog/Kconfig
+source os/src/time/Kconfig
 source os/src/lib/Kconfig
 
 config OF
