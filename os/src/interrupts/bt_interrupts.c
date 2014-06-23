@@ -40,6 +40,7 @@ BT_ERROR BT_RegisterInterruptController(BT_u32 ulBaseIRQ, BT_u32 ulTotalIRQs, BT
 
 	return Error;
 }
+BT_EXPORT_SYMBOL(BT_RegisterInterruptController);
 
 BT_ERROR BT_CleanupInterruptControllers() {
 	BT_u32 i;
@@ -55,7 +56,7 @@ BT_ERROR BT_CleanupInterruptControllers() {
 
 	return BT_ERR_NONE;
 }
-
+BT_EXPORT_SYMBOL(BT_CleanupInterruptControllers);
 
 static BT_INTERRUPT_CONTROLLER *getInterruptController(BT_u32 ulIRQ) {
 	BT_u32 i;
@@ -81,6 +82,7 @@ BT_ERROR BT_RegisterInterrupt(BT_u32 ulIRQ, BT_FN_INTERRUPT_HANDLER pfnHandler, 
 
 	return pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnRegister(pIntc->hIRQ, ulIRQ-pIntc->ulBaseIRQ, pfnHandler, pParam);
 }
+BT_EXPORT_SYMBOL(BT_RegisterInterrupt);
 
 BT_ERROR BT_SetInterruptLabel(BT_u32 ulIRQ, BT_FN_INTERRUPT_HANDLER pfnHandler, void *pParam, const BT_i8 *label) {
 	BT_INTERRUPT_CONTROLLER *pIntc = getInterruptController(ulIRQ);
@@ -90,6 +92,7 @@ BT_ERROR BT_SetInterruptLabel(BT_u32 ulIRQ, BT_FN_INTERRUPT_HANDLER pfnHandler, 
 
 	return pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnSetLabel(pIntc->hIRQ, ulIRQ-pIntc->ulBaseIRQ, pfnHandler, pParam, label);
 }
+BT_EXPORT_SYMBOL(BT_SetInterruptLabel);
 
 const BT_i8 *BT_GetInterruptLabel(BT_u32 ulIRQ) {
 	BT_INTERRUPT_CONTROLLER *pIntc = getInterruptController(ulIRQ);
@@ -99,6 +102,7 @@ const BT_i8 *BT_GetInterruptLabel(BT_u32 ulIRQ) {
 
 	return pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnGetLabel(pIntc->hIRQ, ulIRQ-pIntc->ulBaseIRQ);
 }
+BT_EXPORT_SYMBOL(BT_GetInterruptLabel);
 
 BT_BOOL BT_InterruptRegistered(BT_u32 ulIRQ) {
 	BT_INTERRUPT_CONTROLLER *pIntc = getInterruptController(ulIRQ);
@@ -108,6 +112,7 @@ BT_BOOL BT_InterruptRegistered(BT_u32 ulIRQ) {
 
 	return pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnRegistered(pIntc->hIRQ, ulIRQ-pIntc->ulBaseIRQ);
 }
+BT_EXPORT_SYMBOL(BT_InterruptRegistered);
 
 BT_u32 BT_GetInterruptCount(BT_u32 ulIRQ) {
 	BT_INTERRUPT_CONTROLLER *pIntc = getInterruptController(ulIRQ);
@@ -117,6 +122,7 @@ BT_u32 BT_GetInterruptCount(BT_u32 ulIRQ) {
 
 	return pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnGetCount(pIntc->hIRQ, ulIRQ-pIntc->ulBaseIRQ);
 }
+BT_EXPORT_SYMBOL(BT_GetInterruptCount);
 
 BT_ERROR BT_UnregisterInterrupt(BT_u32 ulIRQ, BT_FN_INTERRUPT_HANDLER pfnHandler, void *pParam) {
 
@@ -133,6 +139,7 @@ BT_ERROR BT_UnregisterInterrupt(BT_u32 ulIRQ, BT_FN_INTERRUPT_HANDLER pfnHandler
 
 	return Error;
 }
+BT_EXPORT_SYMBOL(BT_UnregisterInterrupt);
 
 BT_ERROR BT_SetInterruptPriority(BT_u32 ulIRQ, BT_u32 ulPriority) {
 	const BT_INTERRUPT_CONTROLLER *pIntc = getInterruptController(ulIRQ);
@@ -142,6 +149,7 @@ BT_ERROR BT_SetInterruptPriority(BT_u32 ulIRQ, BT_u32 ulPriority) {
 
 	return pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnSetPriority(pIntc->hIRQ, ulIRQ-pIntc->ulBaseIRQ, ulPriority);
 }
+BT_EXPORT_SYMBOL(BT_SetInterruptPriority);
 
 BT_u32 BT_GetInterruptPriority(BT_u32 ulIRQ, BT_ERROR *pError) {
 	const BT_INTERRUPT_CONTROLLER *pIntc = getInterruptController(ulIRQ);
@@ -154,6 +162,7 @@ BT_u32 BT_GetInterruptPriority(BT_u32 ulIRQ, BT_ERROR *pError) {
 
 	return pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnGetPriority(pIntc->hIRQ, ulIRQ-pIntc->ulBaseIRQ, pError);
 }
+BT_EXPORT_SYMBOL(BT_GetInterruptPriority);
 
 BT_ERROR BT_EnableInterrupt(BT_u32 ulIRQ) {
 	const BT_INTERRUPT_CONTROLLER *pIntc = getInterruptController(ulIRQ);
@@ -162,6 +171,7 @@ BT_ERROR BT_EnableInterrupt(BT_u32 ulIRQ) {
 	}
 	return pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnEnable(pIntc->hIRQ, ulIRQ-pIntc->ulBaseIRQ);
 }
+BT_EXPORT_SYMBOL(BT_EnableInterrupt);
 
 BT_ERROR BT_DisableInterrupt(BT_u32 ulIRQ) {
 	const BT_INTERRUPT_CONTROLLER *pIntc = getInterruptController(ulIRQ);
@@ -170,6 +180,7 @@ BT_ERROR BT_DisableInterrupt(BT_u32 ulIRQ) {
 	}
 	return pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnDisable(pIntc->hIRQ, ulIRQ-pIntc->ulBaseIRQ);
 }
+BT_EXPORT_SYMBOL(BT_DisableInterrupt);
 
 BT_ERROR BT_SetInterruptAffinity(BT_u32 ulIRQ, BT_u32 ulCPU, BT_BOOL bReceive) {
 	const BT_INTERRUPT_CONTROLLER *pIntc = getInterruptController(ulIRQ);
@@ -183,7 +194,7 @@ BT_ERROR BT_SetInterruptAffinity(BT_u32 ulIRQ, BT_u32 ulCPU, BT_BOOL bReceive) {
 
 	return -1;
 }
-
+BT_EXPORT_SYMBOL(BT_SetInterruptAffinity);
 
 BT_ERROR BT_EnableInterrupts() {
 	BT_u32 i;
@@ -193,6 +204,7 @@ BT_ERROR BT_EnableInterrupts() {
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_EnableInterrupts);
 
 BT_ERROR BT_DisableInterrupts() {
 	BT_u32 i;
@@ -202,3 +214,4 @@ BT_ERROR BT_DisableInterrupts() {
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_DisableInterrupts);
