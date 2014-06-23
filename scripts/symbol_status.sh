@@ -14,11 +14,14 @@
 #  @author James Walmsley <james@fullfat-fs.co.uk>
 #
 
-SYMBOLS=$(nm $1 | grep "[bB][tT]" | cut -d " " -f3)
-EXPORTED=$(git grep BT_EXPORT_SYMBOL | cut -d \( -f2 | cut -d \) -f1)
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SYMBOLS=$(readelf --wide -s $1 | grep " GLOBAL " | grep "[bB][tT]" | rev | cut -d " " -f1 | rev | sort)
+EXPORTED=$(git grep BT_EXPORT_SYMBOL | cut -d \( -f2 | cut -d \) -f1 | sort)
+IGNORED=$(cat $DIR/symbol_status.ignore | cut -d : -f1)
 
 for SYMBOL in $SYMBOLS; do
 	FOUND=0
+	IGN=0
 
 	for EXPORT in $EXPORTED; do
 		if [[ $SYMBOL = $EXPORT ]]; then
@@ -26,6 +29,16 @@ for SYMBOL in $SYMBOLS; do
 			break
 		fi
 	done
+
+	for IGNORE in $IGNORED; do
+		if [[ $IGNORE = $SYMBOL ]]; then
+			IGN=1
+		fi
+	done
+
+	if [[ $IGN = "1" ]] ; then
+		continue
+	fi
 
  	if [[ $FOUND = "1" ]] ; then
  		echo "EXPORTED:$SYMBOL"

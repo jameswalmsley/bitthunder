@@ -1,0 +1,13 @@
+__ascii_mbtowc:					# Random symbol from libc
+BT_ARCH_ARM_GIC_IRQHandler:		# Low-level GIC handler for ARM architecture
+__bt_arch_devices_end:			# Device table symbol. (Use API to access).
+__bt_arch_devices_start:		# ^^
+__bt_arch_drivers_end:			# Driver table symbol. (Use API to access).
+__bt_arch_drivers_start:		# ^^
+__bt_arch_init_end:				# Init fn table (module constructor list).
+__bt_arch_init_start:			# ^^
+__bt_devfs_entries_end:			# devfs table
+__bt_devfs_entries_start:		# ^^
+__bt_devices_end:				# Device table
+__bt_devices_start:				# ^^
+bt_do_bug:						# Bug handler, not an API!
