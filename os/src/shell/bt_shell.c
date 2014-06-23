@@ -31,8 +31,8 @@ struct _BT_OPAQUE_HANDLE {
 	BT_i32						bPrintPrompt;
 
 #ifndef BT_CONFIG_SHELL_JIMTCL
-	BT_i8 						cStdinBuf[BT_CONFIG_SHELL_INPUT_BUFFER_SIZE];
 	#define BT_CONFIG_SHELL_INPUT_BUFFER_SIZE	256
+	BT_i8 						cStdinBuf[BT_CONFIG_SHELL_INPUT_BUFFER_SIZE];
 	struct _BT_OPAQUE_HANDLE   *pNext;
 #endif
 #ifdef BT_CONFIG_SHELL_JIMTCL
@@ -514,11 +514,13 @@ BT_HANDLE BT_ShellCreate(BT_HANDLE hStdin, BT_HANDLE hStdout, const BT_i8 *szpPr
 	hShell->ulFlags = ulFlags;
 	hShell->ulStdinBufCnt = 0;
 	hShell->bPrintPrompt = 1;
+
+#ifdef BT_CONFIG_SHELL_JIMTCL
 	hShell->interp = Jim_CreateInterp();
 	Jim_RegisterCoreCommands(hShell->interp);
 	Jim_stdlibInit(hShell->interp);
-
-	Jim_InteractivePrompt(hShell->interp);
+	Jim_clockInit(hShell->interp);
+#endif
 
 	return hShell;
 
@@ -575,6 +577,8 @@ BT_ERROR BT_Shell(BT_HANDLE hShell) {
 	} else {
 		Error = BT_ERR_GENERIC;
 	}
+#else
+	Jim_InteractivePrompt(hShell->interp);
 #endif
 
 	return Error;
