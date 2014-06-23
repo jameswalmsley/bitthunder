@@ -43,6 +43,11 @@ config SHELL_CMD_CP_BUFFER_SIZE
 	depends on SHELL_CMD_CP
 	default 4096
 
+config SHELL_CMD_DATE
+	bool "date"
+	depends on SHELL
+	default n
+
 config SHELL_CMD_DF
 	bool "df"
 	depends on SHELL
