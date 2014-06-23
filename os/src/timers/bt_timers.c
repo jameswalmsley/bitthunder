@@ -79,9 +79,18 @@ BT_u32 BT_GetGlobalTimerRate() {
 
 BT_u32 BT_GetKernelTime() {
 	BT_u32 us = 0;
-	us += (1000 * BT_kTickCount());
+	BT_TICK oTicks = 0;
 
-	return us + BT_GetSystemTimerOffset();
+	BT_kEnterCritical();
+	{
+		us = BT_GetSystemTimerOffset();
+		oTicks = BT_kTickCount();
+	}
+	BT_kExitCritical();
+
+	us += (1000 * oTicks);
+
+	return us;
 }
 
 BT_u32 BT_GetKernelTick() {
