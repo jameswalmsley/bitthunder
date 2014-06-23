@@ -41,7 +41,6 @@ BT_u32 bt_year_days(unsigned int day, unsigned int month, unsigned int year) {
 }
 BT_EXPORT_SYMBOL(bt_year_days);
 
-
 BT_u32 bt_mktime(BT_u32 year0, BT_u32 mon0, BT_u32 day, BT_u32 hour, BT_u32 min, BT_u32 sec) {
 
 	BT_u32 mon = mon0, year = year0;
@@ -58,8 +57,9 @@ BT_u32 bt_mktime(BT_u32 year0, BT_u32 mon0, BT_u32 day, BT_u32 hour, BT_u32 min,
 				) * 60 + min
 		) * 60 + sec;
 }
+BT_EXPORT_SYMBOL(bt_mktime);
 
-void bt_time_to_tm(unsigned long time, struct bt_rtc_time *tm) {
+void bt_time_to_tm(unsigned long time, struct bt_tm *tm) {
 	unsigned int month, year;
 	int days;
 
