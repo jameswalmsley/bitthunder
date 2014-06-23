@@ -19,3 +19,4 @@ BT_u32 BT_GetCpuClockFrequency() {
 
 	return pMachine->pfnGetCpuClockFrequency();
 }
+BT_EXPORT_SYMBOL(BT_GetCpuClockFrequency);
