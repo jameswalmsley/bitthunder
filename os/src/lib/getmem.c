@@ -5,6 +5,7 @@
 #include <bt_types.h>
 #include <bt_config.h>
 #include <lib/getmem.h>
+#include <bt_module.h>
 
 #ifdef BT_CONFIG_BIG_ENDIAN
 BT_le64 bt_cpu_to_le64(BT_u64 u64) {
@@ -23,6 +24,7 @@ BT_le64 bt_cpu_to_le64(BT_u64 u64) {
 
 	return un64.u64;
 }
+BT_EXPORT_SYMBOL(bt_cpu_to_le64);
 
 BT_le32 bt_cpu_to_le32(BT_u32 u32) {
 
@@ -36,6 +38,7 @@ BT_le32 bt_cpu_to_le32(BT_u32 u32) {
 
 	return un32.u32;
 }
+BT_EXPORT_SYMBOL(bt_cpu_to_le32);
 
 BT_le16 bt_cpu_to_le16(BT_u16 u16) {
 
@@ -47,6 +50,7 @@ BT_le16 bt_cpu_to_le16(BT_u16 u16) {
 
 	return un16.u16;
 }
+BT_EXPORT_SYMBOL(bt_cpu_to_le16);
 #endif
 
 #ifdef BT_CONFIG_LITTLE_ENDIAN
@@ -66,6 +70,7 @@ BT_be64 bt_cpu_to_be64(BT_u64 u64) {
 
 	return un64.u64;
 }
+BT_EXPORT_SYMBOL(bt_cpu_to_be64);
 
 BT_be32 bt_cpu_to_be32(BT_u32 u32) {
 
@@ -79,6 +84,7 @@ BT_be32 bt_cpu_to_be32(BT_u32 u32) {
 
 	return un32.u32;
 }
+BT_EXPORT_SYMBOL(bt_cpu_to_be32);
 
 BT_be16 bt_cpu_to_be16(BT_u16 u16) {
 
@@ -90,18 +96,22 @@ BT_be16 bt_cpu_to_be16(BT_u16 u16) {
 
 	return un16.u16;
 }
+BT_EXPORT_SYMBOL(bt_cpu_to_be16);
 
 BT_u64 bt_be64_to_cpu(BT_be64 be64) {
 	return __builtin_bswap64(be64);
 }
+BT_EXPORT_SYMBOL(bt_be64_to_cpu);
 
 BT_u32 bt_be32_to_cpu(BT_be32 be32) {
 	return __builtin_bswap32(be32);
 }
+BT_EXPORT_SYMBOL(bt_be32_to_cpu);
 
 BT_u16 bt_be16_to_cpu(BT_be16 be16) {
 	return __builtin_bswap16(be16);
 }
+BT_EXPORT_SYMBOL(bt_be16_to_cpu);
 #endif
 
 
@@ -117,6 +127,7 @@ BT_u32 BT_GetLongLE(void *pBuffer, BT_u32 ulOffset) {
 
 	return u32.u32;
 }
+BT_EXPORT_SYMBOL(BT_GetLongLE);
 
 BT_u16 BT_GetShortLE(void *pBuffer, BT_u32 ulOffset) {
 	BT_u8 *p = (BT_u8 *) pBuffer;
@@ -128,3 +139,4 @@ BT_u16 BT_GetShortLE(void *pBuffer, BT_u32 ulOffset) {
 
 	return u16.u16;
 }
+BT_EXPORT_SYMBOL(BT_GetShortLE);
