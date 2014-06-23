@@ -170,3 +170,4 @@ int bt_main(BT_u32 machid, const void *fdt) {
 bt_kernel_params *bt_get_kernel_params() {
 	return &g_kernel_params;
 }
+BT_EXPORT_SYMBOL(bt_get_kernel_params);
