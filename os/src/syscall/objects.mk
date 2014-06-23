@@ -8,3 +8,4 @@ BT_OS_OBJECTS-$(BT_CONFIG_SYSCALL) 	+= $(BUILD_DIR)os/src/syscall/calls/write.o
 BT_OS_OBJECTS-$(BT_CONFIG_SYSCALL) 	+= $(BUILD_DIR)os/src/syscall/calls/klog.o
 BT_OS_OBJECTS-$(BT_CONFIG_SYSCALL) 	+= $(BUILD_DIR)os/src/syscall/calls/sleep.o
 BT_OS_OBJECTS-$(BT_CONFIG_SYSCALL) 	+= $(BUILD_DIR)os/src/syscall/calls/gpio.o
+BT_OS_OBJECTS-$(BT_CONFIG_SYSCALL) 	+= $(BUILD_DIR)os/src/syscall/calls/time.o
