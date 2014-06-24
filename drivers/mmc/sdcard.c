@@ -80,7 +80,7 @@ BT_ERROR BT_RegisterSDHostController(BT_HANDLE hHost, const BT_MMC_OPS *pOps) {
 
 	return BT_ERR_NONE;
 }
-
+BT_EXPORT_SYMBOL(BT_RegisterSDHostController);
 
 static void sd_manager_sm(void *pData) {
 
