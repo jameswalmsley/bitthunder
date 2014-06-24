@@ -42,6 +42,8 @@ static const struct syscall_entry syscall_table[] = {
 	/*		8 */	SYSCALL(2, bt_sys_gpioset),
 	/*		9 */	SYSCALL(2, bt_sys_gettimeofday),
 	/*	   10 */	SYSCALL(2, bt_sys_settimeofday),
+	/*	   11 */	SYSCALL(3, bt_sys_execve),
+	/*	   12 */	SYSCALL(0, bt_sys_fork),
 };
 
 #define SYSCALL_TOTAL	(BT_u32) (sizeof(syscall_table)/sizeof(struct syscall_entry))
