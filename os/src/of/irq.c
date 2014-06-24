@@ -25,6 +25,7 @@ struct bt_device_node *bt_of_irq_find_parent(struct bt_device_node *child) {
 
 	return p;
 }
+BT_EXPORT_SYMBOL(bt_of_irq_find_parent);
 
 BT_ERROR bt_of_irq_map_raw(struct bt_device_node *parent, const BT_be32 *intspec, BT_u32 ointsize,
 						   const BT_be32 *addr, struct bt_of_irq *out_irq) {
@@ -163,6 +164,7 @@ fail:
 
 	return BT_ERR_GENERIC;
 }
+BT_EXPORT_SYMBOL(bt_of_irq_map_raw);
 
 BT_ERROR bt_of_irq_map_one(struct bt_device_node *device, BT_u32 index, struct bt_of_irq *out_irq) {
 	BT_u32 intlen, intsize;
@@ -201,6 +203,7 @@ BT_ERROR bt_of_irq_map_one(struct bt_device_node *device, BT_u32 index, struct b
 
 	return retval;
 }
+BT_EXPORT_SYMBOL(bt_of_irq_map_one);
 
 BT_u32 bt_of_irq_parse_and_map(struct bt_device_node *device, BT_u32 index) {
 	struct bt_of_irq oirq;
@@ -211,6 +214,7 @@ BT_u32 bt_of_irq_parse_and_map(struct bt_device_node *device, BT_u32 index) {
 
 	return oirq.specifier[0];
 }
+BT_EXPORT_SYMBOL(bt_of_irq_parse_and_map);
 
 BT_u32 bt_of_irq_to_resource(struct bt_device_node *dev, BT_u32 index, BT_RESOURCE *r) {
 	BT_u32 irq = bt_of_irq_parse_and_map(dev, index);
@@ -222,7 +226,7 @@ BT_u32 bt_of_irq_to_resource(struct bt_device_node *dev, BT_u32 index, BT_RESOUR
 
 	return irq;
 }
-
+BT_EXPORT_SYMBOL(bt_of_irq_to_resource);
 
 BT_u32 bt_of_irq_count(struct bt_device_node *dev) {
 	BT_u32 nr = 0;
@@ -233,6 +237,7 @@ BT_u32 bt_of_irq_count(struct bt_device_node *dev) {
 
 	return nr;
 }
+BT_EXPORT_SYMBOL(bt_of_irq_count);
 
 BT_u32 bt_of_irq_to_resource_table(struct bt_device_node *device, BT_RESOURCE *r, BT_u32 nr_irqs) {
 	BT_u32 i;
@@ -245,3 +250,4 @@ BT_u32 bt_of_irq_to_resource_table(struct bt_device_node *device, BT_RESOURCE *r
 
 	return i;
 }
+BT_EXPORT_SYMBOL(bt_of_irq_to_resource_table);

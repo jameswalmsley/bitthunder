@@ -189,3 +189,4 @@ struct bt_device_node *bt_of_integrated_get_node(const BT_DEVICE *device) {
 
 	return NULL;
 }
+BT_EXPORT_SYMBOL(bt_of_integrated_get_node);

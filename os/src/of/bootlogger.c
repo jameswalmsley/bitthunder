@@ -1,7 +1,6 @@
 #include <bitthunder.h>
 #include <of/bt_of.h>
 
-
 struct bt_device_node *bt_of_get_bootlogger() {
 	struct bt_device_node *root;
 	struct bt_device_node *p;
@@ -24,3 +23,4 @@ struct bt_device_node *bt_of_get_bootlogger() {
 
 	return p;
 }
+BT_EXPORT_SYMBOL(bt_of_get_bootlogger);
