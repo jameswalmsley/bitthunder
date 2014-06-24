@@ -25,6 +25,7 @@ BT_ERROR BT_DacStart(BT_HANDLE hDac) {
 
 	return BT_IF_DAC_OPS(hDac)->pfnStart(hDac);
 }
+BT_EXPORT_SYMBOL(BT_DacStart);
 
 BT_ERROR BT_DacStop(BT_HANDLE hDac) {
 	if(!isDacHandle(hDac)) {
@@ -34,6 +35,7 @@ BT_ERROR BT_DacStop(BT_HANDLE hDac) {
 
 	return BT_IF_DAC_OPS(hDac)->pfnStop(hDac);
 }
+BT_EXPORT_SYMBOL(BT_DacStop);
 
 BT_HANDLE BT_DacRegisterCallback(BT_HANDLE hDac, BT_DAC_CALLBACK pfnCallback, void *pParam, BT_ERROR *pError) {
 	if(!isDacHandle(hDac)) {
@@ -43,6 +45,7 @@ BT_HANDLE BT_DacRegisterCallback(BT_HANDLE hDac, BT_DAC_CALLBACK pfnCallback, vo
 
 	return BT_IF_DAC_OPS(hDac)->pfnRegisterCallback(hDac, pfnCallback, pParam, pError);
 }
+BT_EXPORT_SYMBOL(BT_DacRegisterCallback);
 
 BT_ERROR BT_DacUnregisterCallback(BT_HANDLE hDac, BT_HANDLE hCallback) {
 	if(!isDacHandle(hDac)) {
@@ -52,7 +55,7 @@ BT_ERROR BT_DacUnregisterCallback(BT_HANDLE hDac, BT_HANDLE hCallback) {
 
 	return BT_IF_DAC_OPS(hDac)->pfnUnregisterCallback(hDac, hCallback);
 }
-
+BT_EXPORT_SYMBOL(BT_DacUnregisterCallback);
 
 BT_ERROR BT_DacWrite(BT_HANDLE hDac, BT_u32 ulChannel, BT_u32 ulSize, BT_u32 *pSrc) {
 	if(!isDacHandle(hDac)) {
@@ -62,6 +65,7 @@ BT_ERROR BT_DacWrite(BT_HANDLE hDac, BT_u32 ulChannel, BT_u32 ulSize, BT_u32 *pS
 
 	return BT_IF_DAC_OPS(hDac)->pfnWrite(hDac, ulChannel, ulSize, pSrc);
 }
+BT_EXPORT_SYMBOL(BT_DacWrite);
 
 /**
  *	@brief	Set a Complete TIMER configuration for the TIMER device specified by the BT_HANDLE.
@@ -74,6 +78,7 @@ BT_ERROR BT_DacSetConfiguration(BT_HANDLE hDac, BT_DAC_CONFIG *pConfig) {
 	}
 	return BT_IF_DAC_OPS(hDac)->pfnSetConfig(hDac, pConfig);
 }
+BT_EXPORT_SYMBOL(BT_DacSetConfiguration);
 
 /**
  *	@brief	Get a Complete TIMER configuration for the TIMER device specified by the BT_HANDLE.
@@ -86,3 +91,4 @@ BT_ERROR BT_DacGetConfiguration(BT_HANDLE hDac, BT_DAC_CONFIG *pConfig) {
 	}
 	return BT_IF_DAC_OPS(hDac)->pfnGetConfig(hDac, pConfig);
 }
+BT_EXPORT_SYMBOL(BT_DacGetConfiguration);

@@ -31,7 +31,7 @@ BT_ERROR BT_CanSetBaudrate(BT_HANDLE hCAN, BT_u32 ulBaudrate) {
 
 	return BT_IF_CAN_OPS(hCAN)->pfnSetBaudrate(hCAN, ulBaudrate);
 }
-
+BT_EXPORT_SYMBOL(BT_CanSetBaudrate);
 
 /**
  *	@brief	Set a Complete CAN configuration for the CAN device specified by the BT_HANDLE.
@@ -44,7 +44,7 @@ BT_ERROR BT_CanSetConfiguration(BT_HANDLE hCAN, BT_CAN_CONFIG *pConfig) {
 	}
 	return BT_IF_CAN_OPS(hCAN)->pfnSetConfig(hCAN, pConfig);
 }
-
+BT_EXPORT_SYMBOL(BT_CanSetConfiguration);
 
 /**
  *	@brief	Get a Complete CAN configuration for the CAN device specified by the BT_HANDLE.
@@ -57,6 +57,7 @@ BT_ERROR BT_CanGetConfiguration(BT_HANDLE hCAN, BT_CAN_CONFIG *pConfig) {
 	}
 	return BT_IF_CAN_OPS(hCAN)->pfnGetConfig(hCAN, pConfig);
 }
+BT_EXPORT_SYMBOL(BT_CanGetConfiguration);
 
 BT_ERROR BT_CanEnable(BT_HANDLE hCAN) {
 	if(!isCanHandle(hCAN)) {
@@ -65,6 +66,7 @@ BT_ERROR BT_CanEnable(BT_HANDLE hCAN) {
 	}
 	return BT_IF_CAN_OPS(hCAN)->pfnEnable(hCAN);
 }
+BT_EXPORT_SYMBOL(BT_CanEnable);
 
 BT_ERROR BT_CanDisable(BT_HANDLE hCAN) {
 	if(!isCanHandle(hCAN)) {
@@ -74,6 +76,7 @@ BT_ERROR BT_CanDisable(BT_HANDLE hCAN) {
 
 	return BT_IF_CAN_OPS(hCAN)->pfnDisable(hCAN);
 }
+BT_EXPORT_SYMBOL(BT_CanDisable);
 
 BT_ERROR BT_CanSendMessage(BT_HANDLE hCAN, BT_CAN_MESSAGE *pCanMessage) {
 	if(!isCanHandle(hCAN)) {
@@ -83,6 +86,7 @@ BT_ERROR BT_CanSendMessage(BT_HANDLE hCAN, BT_CAN_MESSAGE *pCanMessage) {
 
 	return BT_IF_CAN_OPS(hCAN)->pfnSendMessage(hCAN, pCanMessage);
 }
+BT_EXPORT_SYMBOL(BT_CanSendMessage);
 
 BT_ERROR BT_CanReadMessage(BT_HANDLE hCAN, BT_CAN_MESSAGE *pCanMessage) {
 	if(!isCanHandle(hCAN)) {
@@ -92,3 +96,4 @@ BT_ERROR BT_CanReadMessage(BT_HANDLE hCAN, BT_CAN_MESSAGE *pCanMessage) {
 
 	return BT_IF_CAN_OPS(hCAN)->pfnReadMessage(hCAN, pCanMessage);
 }
+BT_EXPORT_SYMBOL(BT_CanReadMessage);
