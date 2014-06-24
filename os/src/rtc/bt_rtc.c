@@ -61,7 +61,6 @@ BT_ERROR BT_RTCRegisterDevice(BT_HANDLE hDevice, BT_RTC_INFO *rtc) {
 
 	return BT_DeviceRegister(&rtc->node, name);
 }
-
 BT_EXPORT_SYMBOL(BT_RTCRegisterDevice);
 
 /**
@@ -78,7 +77,7 @@ BT_ERROR BT_RTCSetTime(BT_HANDLE hRtc, struct bt_rtc_time *t) {
 	}
 	return BT_IF_RTC_OPS(rtc->hRtc)->pfnSetTime(rtc->hRtc, t);
 }
-
+BT_EXPORT_SYMBOL(BT_RTCSetTime);
 
 /**
  *	@brief	Get Time from the RTC device specified by the BT_HANDLE.
@@ -94,6 +93,7 @@ BT_ERROR BT_RTCGetTime(BT_HANDLE hRtc, struct bt_rtc_time *t) {
 	}
 	return BT_IF_RTC_OPS(rtc->hRtc)->pfnGetTime(rtc->hRtc, t);
 }
+BT_EXPORT_SYMBOL(BT_RTCGetTime);
 
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
