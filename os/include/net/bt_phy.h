@@ -36,7 +36,7 @@ enum bt_phy_interface_t {
 	BT_PHY_INTERFACE_MODE_RGMII_TXID,
 	BT_PHY_INTERFACE_MODE_RTBI,
 	BT_PHY_INTERFACE_MODE_SMII,
-} bt_phy_interface_t;
+};
 
 struct bt_mii_bus;
 
