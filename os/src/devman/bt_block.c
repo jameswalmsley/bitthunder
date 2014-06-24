@@ -129,6 +129,7 @@ BT_ERROR BT_UnregisterBlockDevice(BT_HANDLE hDevice) {
 	// free memory.
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_UnregisterBlockDevice);
 
 static BT_ERROR bt_blockdev_cleanup(BT_HANDLE hBlockDev) {
 
