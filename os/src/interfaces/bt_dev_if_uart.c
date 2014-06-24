@@ -31,6 +31,7 @@ BT_ERROR BT_UartSetBaudrate(BT_HANDLE hUart, BT_u32 ulBaudrate) {
 
 	return BT_IF_UART_OPS(hUart)->pfnSetBaudrate(hUart, ulBaudrate);
 }
+BT_EXPORT_SYMBOL(BT_UartSetBaudrate);
 
 
 /**
@@ -44,7 +45,7 @@ BT_ERROR BT_UartSetConfiguration(BT_HANDLE hUart, BT_UART_CONFIG *pConfig) {
 	}
 	return BT_IF_UART_OPS(hUart)->pfnSetConfig(hUart, pConfig);
 }
-
+BT_EXPORT_SYMBOL(BT_UartSetConfiguration);
 
 /**
  *	@brief	Get a Complete UART configuration for the UART device specified by the BT_HANDLE.
@@ -57,6 +58,7 @@ BT_ERROR BT_UartGetConfiguration(BT_HANDLE hUart, BT_UART_CONFIG *pConfig) {
 	}
 	return BT_IF_UART_OPS(hUart)->pfnGetConfig(hUart, pConfig);
 }
+BT_EXPORT_SYMBOL(BT_UartGetConfiguration);
 
 BT_ERROR BT_UartEnable(BT_HANDLE hUart) {
 	if(!isUartHandle(hUart)) {
@@ -65,6 +67,7 @@ BT_ERROR BT_UartEnable(BT_HANDLE hUart) {
 	}
 	return BT_IF_UART_OPS(hUart)->pfnEnable(hUart);
 }
+BT_EXPORT_SYMBOL(BT_UartEnable);
 
 BT_ERROR BT_UartDisable(BT_HANDLE hUart) {
 	if(!isUartHandle(hUart)) {
@@ -74,6 +77,7 @@ BT_ERROR BT_UartDisable(BT_HANDLE hUart) {
 
 	return BT_IF_UART_OPS(hUart)->pfnDisable(hUart);
 }
+BT_EXPORT_SYMBOL(BT_UartDisable);
 
 BT_ERROR BT_UartGetAvailable(BT_HANDLE hUart, BT_u32 *pTransmit, BT_u32 *pReceive) {
 	if(!isUartHandle(hUart)) {
@@ -83,3 +87,4 @@ BT_ERROR BT_UartGetAvailable(BT_HANDLE hUart, BT_u32 *pTransmit, BT_u32 *pReceiv
 
 	return BT_IF_UART_OPS(hUart)->pfnGetAvailable(hUart, pTransmit, pReceive);
 }
+BT_EXPORT_SYMBOL(BT_UartGetAvailable);
