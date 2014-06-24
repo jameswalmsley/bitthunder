@@ -156,7 +156,7 @@ int bt_main(BT_u32 machid, const void *fdt) {
 
 	BT_CreateProcess((BT_FN_THREAD_ENTRY) main, "MAIN", &oThreadConfig, &Error);
 
-	BT_kStartScheduler();
+	BT_StartScheduler();
 #else
 	main(0, NULL);
 #endif
