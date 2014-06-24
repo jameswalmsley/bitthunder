@@ -10,6 +10,7 @@
 BT_BOOL BT_ListInitialised(BT_LIST *pL) {
 	return (pL->hListMutex != NULL);
 }
+BT_EXPORT_SYMBOL(BT_ListInitialised);
 
 BT_ERROR BT_ListInit(BT_LIST *pL) {
 	pL->pStart = NULL;
@@ -17,18 +18,22 @@ BT_ERROR BT_ListInit(BT_LIST *pL) {
 	pL->hListMutex = NULL;
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_ListInit);
 
 BT_ERROR BT_ListDestroy(BT_LIST *pL) {
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_ListDestroy);
 
 BT_LIST_ITEM *BT_ListGetHead(BT_LIST *pL) {
 	return pL->pStart;
 }
+BT_EXPORT_SYMBOL(BT_ListGetHead);
 
 BT_LIST_ITEM *BT_ListGetNext(BT_LIST_ITEM *p) {
 	return (BT_LIST_ITEM *) p->pNext;
 }
+BT_EXPORT_SYMBOL(BT_ListGetNext);
 
 BT_ERROR BT_ListAddItem(BT_LIST *pL, BT_LIST_ITEM *p) {
 	BT_LIST_ITEM *pItem = pL->pStart;
@@ -51,6 +56,7 @@ BT_ERROR BT_ListAddItem(BT_LIST *pL, BT_LIST_ITEM *p) {
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_ListAddItem);
 
 BT_ERROR BT_ListRemoveItem(BT_LIST *pL, BT_LIST_ITEM *p) {
 	BT_LIST_ITEM *pItem = pL->pStart;
@@ -69,3 +75,4 @@ BT_ERROR BT_ListRemoveItem(BT_LIST *pL, BT_LIST_ITEM *p) {
 
 	return BT_ERR_GENERIC;
 }
+BT_EXPORT_SYMBOL(BT_ListRemoveItem);
