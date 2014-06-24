@@ -14,10 +14,6 @@ struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;
 };
 
-void BT_IRQHandler(BT_u32 ulIRQ) {
-
-}
-
 BT_ERROR BT_RegisterInterruptController(BT_u32 ulBaseIRQ, BT_u32 ulTotalIRQs, BT_HANDLE hIRQ) {
 
 	BT_ERROR Error = BT_ERR_NONE;
