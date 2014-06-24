@@ -37,91 +37,105 @@ int accept(int s, struct sockaddr *addr, socklen_t *addrlen) {
 
 	return 0;
 }
+BT_EXPORT_SYMBOL(accept);
 
 int bind(int s, const struct sockaddr *name, socklen_t namelen) {
 	BT_HANDLE hSocket = (BT_HANDLE)s;
 
 	return lwip_bind(hSocket->socket, name, namelen);
 }
+BT_EXPORT_SYMBOL(bind);
 
 int shutdown(int s, int how) {
 	BT_HANDLE hSocket = (BT_HANDLE)s;
 
 	return lwip_shutdown(hSocket->socket, how);
-
 }
+BT_EXPORT_SYMBOL(shutdown);
 
-int getpeername (int s, struct sockaddr *name, socklen_t *namelen) {
+int getpeername(int s, struct sockaddr *name, socklen_t *namelen) {
 	BT_HANDLE hSocket = (BT_HANDLE)s;
 
 	return lwip_getpeername(hSocket->socket, name, namelen);
 }
+BT_EXPORT_SYMBOL(getpeername);
 
-int getsockname (int s, struct sockaddr *name, socklen_t *namelen) {
+int getsockname(int s, struct sockaddr *name, socklen_t *namelen) {
 	BT_HANDLE hSocket = (BT_HANDLE)s;
 
 	return lwip_getsockname(hSocket->socket, name, namelen);
 }
+BT_EXPORT_SYMBOL(getsockname);
 
-int getsockopt (int s, int level, int optname, void *optval, socklen_t *optlen) {
+int getsockopt(int s, int level, int optname, void *optval, socklen_t *optlen) {
 	BT_HANDLE hSocket = (BT_HANDLE)s;
 
 	return lwip_getsockopt(hSocket->socket, level, optname, optval, optlen);
 }
+BT_EXPORT_SYMBOL(getsockopt);
 
-int setsockopt (int s, int level, int optname, const void *optval, socklen_t optlen) {
+int setsockopt(int s, int level, int optname, const void *optval, socklen_t optlen) {
 	BT_HANDLE hSocket = (BT_HANDLE)s;
 
 	return lwip_setsockopt(hSocket->socket, level, optname, optval, optlen);
 }
+BT_EXPORT_SYMBOL(setsockopt);
 
 int closesocket(int s) {
 	BT_CloseHandle((BT_HANDLE)s);
 
 	return 0;
 }
+BT_EXPORT_SYMBOL(closesocket);
 
 int connect(int s, const struct sockaddr *name, socklen_t namelen) {
 	BT_HANDLE hSocket = (BT_HANDLE)s;
 
 	return lwip_connect(hSocket->socket, name, namelen);
 }
+BT_EXPORT_SYMBOL(connect);
 
 int listen(int s, int backlog) {
 	BT_HANDLE hSocket = (BT_HANDLE)s;
 
 	return lwip_listen(hSocket->socket, backlog);
 }
+BT_EXPORT_SYMBOL(listen);
 
 int recv(int s, void *mem, size_t len, int flags) {
 	BT_HANDLE hSocket = (BT_HANDLE)s;
 
 	return lwip_recv(hSocket->socket, mem, len, flags);
 }
+BT_EXPORT_SYMBOL(recv);
 
 int read(int s, void *mem, size_t len) {
 	BT_HANDLE hSocket = (BT_HANDLE)s;
 
 	return lwip_read(hSocket->socket, mem, len);
 }
+BT_EXPORT_SYMBOL(read);
 
 int recvfrom(int s, void *mem, size_t len, int flags, struct sockaddr *from, socklen_t *fromlen) {
 	BT_HANDLE hSocket = (BT_HANDLE)s;
 
 	return lwip_recvfrom(hSocket->socket, mem, len, flags, from, fromlen);
 }
+BT_EXPORT_SYMBOL(recvfrom);
 
 int send(int s, const void *dataptr, size_t size, int flags) {
 	BT_HANDLE hSocket = (BT_HANDLE)s;
 
 	return lwip_send(hSocket->socket, dataptr, size, flags);
 }
+BT_EXPORT_SYMBOL(send);
 
 int sendto(int s, const void *dataptr, size_t size, int flags, const struct sockaddr *to, socklen_t tolen) {
 	BT_HANDLE hSocket = (BT_HANDLE)s;
 
 	return lwip_sendto(hSocket->socket, dataptr, size, flags, to, tolen);
 }
+BT_EXPORT_SYMBOL(sendto);
 
 int socket(int domain, int type, int protocol) {
 
@@ -139,29 +153,33 @@ int socket(int domain, int type, int protocol) {
 
 	return (int)hSocket;
 }
+BT_EXPORT_SYMBOL(socket);
 
 int write(int s, const void *dataptr, size_t size) {
 	BT_HANDLE hSocket = (BT_HANDLE)s;
 
 	return lwip_write(hSocket->socket, dataptr, size);
 }
+BT_EXPORT_SYMBOL(write);
 
 int select(int maxfdp1, fd_set *readset, fd_set *writeset, fd_set *exceptset, struct timeval *timeout) {
-
 	return lwip_select(maxfdp1, readset, writeset, exceptset, timeout);
 }
+BT_EXPORT_SYMBOL(select);
 
 int ioctl(int s, long cmd, void *argp)  {
 	BT_HANDLE hSocket = (BT_HANDLE)s;
 
 	return lwip_ioctl(hSocket->socket, cmd, argp);
 }
+BT_EXPORT_SYMBOL(ioctl);
 
 int fcntl(int s, int cmd, int val) {
 	BT_HANDLE hSocket = (BT_HANDLE)s;
 
 	return lwip_fcntl(hSocket->socket, cmd, val);
 }
+BT_EXPORT_SYMBOL(fcntl);
 
 
 static BT_s32 socket_read(BT_HANDLE hSocket, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer) {

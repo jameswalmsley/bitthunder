@@ -14,3 +14,4 @@ BT_ERROR BT_BootCore(BT_u32 ulCoreID, void *address, bt_register_t a, bt_registe
 
 	return BT_ERR_GENERIC;
 }
+BT_EXPORT_SYMBOL(BT_BootCore);

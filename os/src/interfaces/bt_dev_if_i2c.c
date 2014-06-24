@@ -20,10 +20,12 @@ static BT_BOOL isI2CHandle(BT_HANDLE hI2C) {
 BT_ERROR BT_I2C_LockBus(const BT_I2C_BUS *pBus) {
 	return BT_kMutexPend(pBus->pMutex, BT_INFINITE_TIMEOUT);
 }
+BT_EXPORT_SYMBOL(BT_I2C_LockBus);
 
 BT_ERROR BT_I2C_UnlockBus(const BT_I2C_BUS *pBus) {
 	return BT_kMutexRelease(pBus->pMutex);
 }
+BT_EXPORT_SYMBOL(BT_I2C_UnlockBus);
 
 BT_u32 BT_I2C_Transfer(const BT_I2C_BUS *pBus, BT_I2C_MESSAGE *pMessages, BT_u32 ulMessages, BT_ERROR *pError) {
 
@@ -61,7 +63,7 @@ err_out:
 
 	return 0;
 }
-
+BT_EXPORT_SYMBOL(BT_I2C_Transfer);
 
 BT_u32 BT_I2C_MasterSend(BT_I2C_CLIENT *pClient, const BT_u8 *pucSource, BT_u32 ulLength, BT_ERROR *pError) {
 
@@ -75,6 +77,7 @@ BT_u32 BT_I2C_MasterSend(BT_I2C_CLIENT *pClient, const BT_u8 *pucSource, BT_u32 
 
 	return (RetVal == 1) ? ulLength : RetVal;
 }
+BT_EXPORT_SYMBOL(BT_I2C_MasterSend);
 
 BT_u32 BT_I2C_MasterReceive(BT_I2C_CLIENT *pClient, BT_u8 *pucDest, BT_u32 ulLength, BT_ERROR *pError) {
 
@@ -89,3 +92,4 @@ BT_u32 BT_I2C_MasterReceive(BT_I2C_CLIENT *pClient, BT_u8 *pucDest, BT_u32 ulLen
 
 	return (RetVal == 1) ? ulLength : RetVal;
 }
+BT_EXPORT_SYMBOL(BT_I2C_MasterReceive);

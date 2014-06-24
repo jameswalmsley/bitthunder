@@ -20,6 +20,7 @@ BT_ERROR BT_OpenSoftIRQ(BT_u32 ulSoftIRQ, BT_SOFTIRQ_HANDLER pfnHandler, void *p
 	g_SoftIRQ[ulSoftIRQ].pData		= pData;
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_OpenSoftIRQ);
 
 BT_ERROR BT_RaiseSoftIRQ(BT_u32 ulSoftIRQ) {
 
@@ -32,6 +33,7 @@ BT_ERROR BT_RaiseSoftIRQ(BT_u32 ulSoftIRQ) {
 	// Exit Critical Section
 	return Error;
 }
+BT_EXPORT_SYMBOL(BT_RaiseSoftIRQ);
 
 BT_ERROR BT_RaiseSoftIRQFromISR(BT_u32 ulSoftIRQ) {
 	if(ulSoftIRQ < BT_CONFIG_SOFTIRQ_MAX) {
@@ -42,7 +44,7 @@ BT_ERROR BT_RaiseSoftIRQFromISR(BT_u32 ulSoftIRQ) {
 
 	return BT_ERR_GENERIC;
 }
-
+BT_EXPORT_SYMBOL(BT_RaiseSoftIRQFromISR);
 
 static BT_ERROR softirq_dispatcher(BT_HANDLE hThread, void *pParam) {
 

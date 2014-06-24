@@ -63,7 +63,7 @@ struct bt_kernel_symbol {
    = BT_MODULE_SYMBOL_PREFIX #sym;	\
 	static const struct bt_kernel_symbol __bt_ksymtab_##sym	\
 	__attribute__((__used__))								\
-	__attribute__((section(".bt.ksymtab" sec), unused))	\
+	__attribute__((section(".bt.ksymtab." sec), unused))	\
 	= { (void *) &sym, __bt_kstrtab_##sym }
 
 

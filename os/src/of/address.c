@@ -120,6 +120,7 @@ const BT_be32 *bt_of_get_address(struct bt_device_node *dev, int index, BT_u64 *
 
 	return NULL;
 }
+BT_EXPORT_SYMBOL(bt_of_get_address);
 
 static int bt_of_translate_one(struct bt_device_node *parent, struct bt_of_bus *bus, struct bt_of_bus *pbus, BT_be32 *addr,
 							   BT_u32 na, BT_u32 ns, BT_u32 pna, const char *rprop) {
@@ -156,6 +157,7 @@ static int bt_of_translate_one(struct bt_device_node *parent, struct bt_of_bus *
 finish:
 	return pbus->translate(addr, offset, pna);
 }
+BT_EXPORT_SYMBOL(bt_of_translate_one);
 
 BT_u64 bt_of_translate_address(struct bt_device_node *dev, const BT_be32 *in_addr) {
 	struct bt_device_node *parent = NULL;
@@ -215,6 +217,7 @@ bail:
 
 	return result;
 }
+BT_EXPORT_SYMBOL(bt_of_translate_address);
 
 BT_BOOL bt_of_can_translate_address(struct bt_device_node *dev) {
 	struct bt_device_node *parent;
@@ -232,6 +235,7 @@ BT_BOOL bt_of_can_translate_address(struct bt_device_node *dev) {
 
 	return BT_OF_CHECK_COUNTS(na, ns);
 }
+BT_EXPORT_SYMBOL(bt_of_can_translate_address);
 
 BT_ERROR bt_of_address_to_resource(struct bt_device_node *dev, BT_u32 index, BT_RESOURCE *r) {
 	const BT_be32 *addrp;
@@ -260,3 +264,4 @@ BT_ERROR bt_of_address_to_resource(struct bt_device_node *dev, BT_u32 index, BT_
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(bt_of_address_to_resource);

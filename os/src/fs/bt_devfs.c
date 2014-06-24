@@ -54,6 +54,7 @@ BT_HANDLE BT_DeviceOpen(const char *szpFilename, BT_ERROR *pError) {
 
 	return NULL;
 }
+BT_EXPORT_SYMBOL(BT_DeviceOpen);
 
 #ifdef BT_CONFIG_FS_DEV_DYNAMIC_REGISTRATION
 
@@ -69,6 +70,7 @@ BT_ERROR BT_DeviceRegister(struct bt_devfs_node *node, const char *szpName) {
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_DeviceRegister);
 
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;

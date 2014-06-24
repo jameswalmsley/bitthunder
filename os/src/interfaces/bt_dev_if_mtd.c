@@ -245,6 +245,7 @@ BT_ERROR BT_MTD_RegisterDevice(BT_HANDLE hDevice, const BT_i8 *szpName, BT_MTD_I
 	num_mtd_devices++;
 	return Error;
 }
+BT_EXPORT_SYMBOL(BT_MTD_RegisterDevice);
 
 BT_ERROR BT_MTD_GetUserInfo(BT_HANDLE hMTD, BT_MTD_USER_INFO * info) {
 	BT_MTD_INFO *mtd = (BT_MTD_INFO *) hMTD;
@@ -264,13 +265,15 @@ BT_ERROR BT_MTD_GetUserInfo(BT_HANDLE hMTD, BT_MTD_USER_INFO * info) {
 	}
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_MTD_GetUserInfo);
 
-void mtd_erase_callback(BT_HANDLE hFlash, BT_MTD_ERASE_INFO *instr)
-{
+/*
+void bt_mtd_erase_callback(BT_HANDLE hFlash, BT_MTD_ERASE_INFO *instr) {
 	// TODO: check if part erase is present!!
 	if(instr->callback)
 		instr->callback(hFlash, instr);
 }
+*/
 
 /*
  * Erase is an asynchronous operation.  Device drivers are supposed
@@ -304,7 +307,7 @@ BT_ERROR BT_MTD_Erase(BT_HANDLE hMTD, BT_MTD_ERASE_INFO *instr) {
 
 	return BT_IF_MTD_OPS(mtd->hMtd)->pfnErase(mtd->hMtd, instr);
 }
-
+BT_EXPORT_SYMBOL(BT_MTD_Erase);
 
 BT_s32 BT_MTD_Read(BT_HANDLE hMTD, BT_u64 from, BT_u32 len, BT_u8 *buf) {
 	BT_MTD_INFO *mtd = (BT_MTD_INFO *) hMTD;
@@ -338,7 +341,7 @@ BT_s32 BT_MTD_Read(BT_HANDLE hMTD, BT_u64 from, BT_u32 len, BT_u8 *buf) {
 
 	return retlen;
 }
-
+BT_EXPORT_SYMBOL(BT_MTD_Read);
 
 BT_s32 BT_MTD_Write(BT_HANDLE hMTD, BT_u64 to, BT_u32 len, const BT_u8 *buf) {
 	BT_MTD_INFO *mtd = (BT_MTD_INFO *) hMTD;
@@ -357,6 +360,7 @@ BT_s32 BT_MTD_Write(BT_HANDLE hMTD, BT_u64 to, BT_u32 len, const BT_u8 *buf) {
 
 	return BT_IF_MTD_OPS(mtd->hMtd)->pfnWrite(mtd->hMtd, to, len, buf);
 }
+BT_EXPORT_SYMBOL(BT_MTD_Write);
 
 static BT_ERROR bt_mtd_cleanup(BT_HANDLE hMTD) {
 	BT_MTD_INFO *pInfo = (BT_MTD_INFO *) hMTD;

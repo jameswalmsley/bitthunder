@@ -1,0 +1,100 @@
+__ascii_mbtowc:											# Random symbol from libc
+BT_ARCH_ARM_GIC_IRQHandler:								# Low-level GIC handler for ARM architecture
+__bt_arch_devices_end:									# Device table symbol. (Use API to access).
+__bt_arch_devices_start:								# ^^
+__bt_arch_drivers_end:									# Driver table symbol. (Use API to access).
+__bt_arch_drivers_start:								# ^^
+__bt_arch_init_end:										# Init fn table (module constructor list).
+__bt_arch_init_start:									# ^^
+__bt_devfs_entries_end:									# devfs table
+__bt_devfs_entries_start:								# ^^
+__bt_devices_end:										# Device table
+__bt_devices_start:										# ^^
+bt_do_bug:												# Bug handler, not an API!
+bt_initialise_coherent_pages:							# One time init function.
+BT_InitialiseKernelModules:								# One time init function.
+bt_initialise_pages:									# One time init function.
+bt_initialise_pages_second_stage:						# One time init function.
+__bt_init_start:										# Init table
+BT_kEnterCritical:										# Kernel Wrapper API (internal ono.. to deprecate for FreeRTOS).
+BT_kExitCritical:										# Kernel Wrapper API (internal ono.. to deprecate for FreeRTOS).
+BT_kMutexCreate:										# Kernel Wrapper API (internal ono.. to deprecate for FreeRTOS).
+BT_kMutexDestroy:										# Kernel Wrapper API (internal ono.. to deprecate for FreeRTOS).
+BT_kMutexPend:											# Kernel Wrapper API (internal ono.. to deprecate for FreeRTOS).
+BT_kMutexPendRecursive:									# Kernel Wrapper API (internal ono.. to deprecate for FreeRTOS).
+BT_kMutexRelease:										# Kernel Wrapper API (internal ono.. to deprecate for FreeRTOS).
+BT_kMutexReleaseFromISR:								# Kernel Wrapper API (internal ono.. to deprecate for FreeRTOS).
+BT_kMutexReleaseRecursive:								# Kernel Wrapper API (internal ono.. to deprecate for FreeRTOS).
+BT_kQueueCreate:										# Kernel Wrapper API (internal ono.. to deprecate for FreeRTOS).
+BT_kQueueDestroy:										# Kernel Wrapper API (internal ono.. to deprecate for FreeRTOS).
+BT_kQueueMessagesWaiting:								# Kernel Wrapper API (internal ono.. to deprecate for FreeRTOS).
+BT_kQueueReceive:										# Kernel Wrapper API (internal ono.. to deprecate for FreeRTOS).
+BT_kQueueReceiveFromISR:								# Kernel Wrapper API (internal ono.. to deprecate for FreeRTOS).
+BT_kQueueSend:											# Kernel Wrapper API (internal ono.. to deprecate for FreeRTOS).
+BT_kQueueSendFromISR:									# Kernel Wrapper API (internal ono.. to deprecate for FreeRTOS).
+BT_kQueueSendToBack:									# Kernel Wrapper API (internal ono.. to deprecate for FreeRTOS).
+BT_kRecursiveMutexCreate:								# Kernel Wrapper API (internal ono.. to deprecate for FreeRTOS).
+BT_kSetThreadTag:										# Kernel Wrapper API (internal ono.. to deprecate for FreeRTOS).
+BT_kStartScheduler:										# Kernel Wrapper API (internal ono.. to deprecate for FreeRTOS).
+__bt_ksymtab_end:										# Symbol table
+__bt_ksymtab_start:										# ^^
+__bt_ksymtab_strings_end:								# Symbol strings
+__bt_ksymtab_strings_start:								# ^^
+BT_kTaskCreate:											# Kernel Wrapper API (internal ono.. to deprecate for FreeRTOS).
+BT_kTaskDelay:											# Kernel Wrapper API (internal ono.. to deprecate for FreeRTOS).
+BT_kTaskDelayUntil:										# Kernel Wrapper API (internal ono.. to deprecate for FreeRTOS).
+BT_kTaskDelete:											# Kernel Wrapper API (internal ono.. to deprecate for FreeRTOS).
+BT_kTaskYield:											# Kernel Wrapper API (internal ono.. to deprecate for FreeRTOS).
+BT_kTickCount:											# Kernel Wrapper API (internal ono.. to deprecate for FreeRTOS).
+BT_kGetThreadTag:										# ^^
+BT_kQueueSendToFront:									# ^^
+BT_kStopScheduler:										# ^^
+__bt_loaders_end:										# Loader table
+__bt_loaders_start:										# ^^
+bt_lwip_netif_down:										# Internal lwip wrapper, not used as an API.
+bt_lwip_netif_get_addr:									# ^^
+bt_lwip_netif_get_hostname:								# ^^
+bt_lwip_netif_init:										# ^^
+bt_lwip_netif_set_addr:									# ^^
+bt_lwip_netif_up:										# ^^
+bt_lwip_process:										# ^^
+bt_lwip_netif_dhcp_done:								# ^^
+bt_main:												# Kernel main entry point.
+bt_mmu_flush_tlb:										# Internal MMU interface from the virtual memory manager.
+bt_mmu_get_kernel_pgd:									# ^^
+bt_mmu_get_ttb:											# ^^
+bt_mmu_init:											# ^^
+bt_mmu_map:												# ^^
+bt_mmu_newmap:											# ^^
+bt_mmu_switch:											# ^^
+bt_mmu_switch_ttb:										# ^^
+bt_mmu_extract:											# ^^
+bt_mmu_terminate:										# ^^
+__bt_mmu_table_end:										# MMU table
+__bt_mmu_table_start:									# ^^
+__bt_module_init_end:									# Module init table
+__bt_module_init_start:									# ^^
+bt_of_i2c_populate_device:								# Internal OF helper/init/probe.
+bt_of_init:												# ^^
+bt_of_unflatten_device_tree:							# ^^
+bt_of_integrated_populate:								# ^^
+bt_of_integrated_populate_bus:							# ^^
+bt_of_integrated_populate_device:						# ^^
+bt_of_integrated_probe:									# ^^
+bt_of_mdio_get_node:									# ^^
+bt_of_mdio_populate_device:								# ^^
+bt_of_spi_populate_device:								# ^^
+bt_reset:												# Kernel reset vector.
+__bt_shell_commands_end:								# Shell command table.
+__bt_shell_commands_start:								# ^^
+_bt_start:												# Kernel startup entry.
+_bt_startup_boot:										# ^^
+_bt_startup_init_hook:									# Kernel startup lowest-level platform hook.
+__mbtowc:												# libc symbols.
+_mbtowc_r:												# libc symbols.
+BT_ZYNQ_GetArmPLLFrequency:								# ZYNQ mach layer internal symbol.
+BT_ZYNQ_GetCpu1xFrequency:								# ^^
+BT_ZYNQ_GetCpuFrequency:								# ^^
+BT_ZYNQ_GetDDRPLLFrequency:								# ^^
+BT_ZYNQ_GetIOPLLFrequency:								# ^^
+BT_StartScheduler:										# Internal API only.

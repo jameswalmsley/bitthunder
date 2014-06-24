@@ -17,3 +17,4 @@ const void *bt_of_get_mac_address(struct bt_device_node *device) {
 
 	return NULL;
 }
+BT_EXPORT_SYMBOL(bt_of_get_mac_address);

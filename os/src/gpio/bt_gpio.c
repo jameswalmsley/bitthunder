@@ -46,6 +46,7 @@ BT_ERROR BT_RegisterGpioController(BT_u32 ulBaseGPIO, BT_u32 ulTotalGPIOs, BT_HA
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_RegisterGpioController);
 
 BT_ERROR BT_GpioSet(BT_u32 ulGPIO, BT_BOOL bValue) {
 
@@ -58,6 +59,7 @@ BT_ERROR BT_GpioSet(BT_u32 ulGPIO, BT_BOOL bValue) {
 
 	return BT_IF_GPIO_OPS(hGPIO)->pfnSet(hGPIO, ulGPIO - pGPIO->ulBaseGPIO, bValue);
 }
+BT_EXPORT_SYMBOL(BT_GpioSet);
 
 BT_BOOL BT_GpioGet(BT_u32 ulGPIO, BT_ERROR *pError) {
 	BT_GPIO_CONTROLLER *pGPIO = getGpioController(ulGPIO);
@@ -71,6 +73,7 @@ BT_BOOL BT_GpioGet(BT_u32 ulGPIO, BT_ERROR *pError) {
 	BT_HANDLE hGPIO = pGPIO->hGPIO;
 	return BT_IF_GPIO_OPS(hGPIO)->pfnGet(hGPIO, ulGPIO - pGPIO->ulBaseGPIO, pError);
 }
+BT_EXPORT_SYMBOL(BT_GpioGet);
 
 BT_ERROR BT_GpioSetDirection(BT_u32 ulGPIO, BT_GPIO_DIRECTION eDirection) {
 	BT_GPIO_CONTROLLER *pGPIO = getGpioController(ulGPIO);
@@ -81,6 +84,7 @@ BT_ERROR BT_GpioSetDirection(BT_u32 ulGPIO, BT_GPIO_DIRECTION eDirection) {
 	BT_HANDLE hGPIO = pGPIO->hGPIO;
 	return  BT_IF_GPIO_OPS(hGPIO)->pfnSetDirection(hGPIO, ulGPIO - pGPIO->ulBaseGPIO, eDirection);
 }
+BT_EXPORT_SYMBOL(BT_GpioSetDirection);
 
 BT_GPIO_DIRECTION BT_GpioGetDirection(BT_u32 ulGPIO, BT_ERROR *pError) {
 	BT_GPIO_CONTROLLER *pGPIO = getGpioController(ulGPIO);
@@ -94,6 +98,7 @@ BT_GPIO_DIRECTION BT_GpioGetDirection(BT_u32 ulGPIO, BT_ERROR *pError) {
 	BT_HANDLE hGPIO = pGPIO->hGPIO;
 	return BT_IF_GPIO_OPS(hGPIO)->pfnGetDirection(hGPIO, ulGPIO - pGPIO->ulBaseGPIO, pError);
 }
+BT_EXPORT_SYMBOL(BT_GpioGetDirection);
 
 BT_ERROR BT_GpioEnableInterrupt(BT_u32 ulGPIO) {
 	BT_GPIO_CONTROLLER *pGPIO = getGpioController(ulGPIO);
@@ -104,7 +109,7 @@ BT_ERROR BT_GpioEnableInterrupt(BT_u32 ulGPIO) {
 	BT_HANDLE hGPIO = pGPIO->hGPIO;
 	return BT_IF_GPIO_OPS(hGPIO)->pfnEnableInterrupt(hGPIO, ulGPIO - pGPIO->ulBaseGPIO);
 }
-
+BT_EXPORT_SYMBOL(BT_GpioEnableInterrupt);
 
 BT_ERROR BT_GpioDisableInterrupt(BT_u32 ulGPIO) {
 	BT_GPIO_CONTROLLER *pGPIO = getGpioController(ulGPIO);
@@ -115,3 +120,4 @@ BT_ERROR BT_GpioDisableInterrupt(BT_u32 ulGPIO) {
 	BT_HANDLE hGPIO = pGPIO->hGPIO;
 	return BT_IF_GPIO_OPS(hGPIO)->pfnDisableInterrupt(hGPIO, ulGPIO - pGPIO->ulBaseGPIO);
 }
+BT_EXPORT_SYMBOL(BT_GpioDisableInterrupt);

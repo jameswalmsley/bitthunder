@@ -34,7 +34,7 @@ BT_ERROR BT_TaskletSchedule(BT_TASKLET *pTasklet) {
 
 	return BT_ERR_NONE;
 }
-
+BT_EXPORT_SYMBOL(BT_TaskletSchedule);
 
 BT_ERROR BT_TaskletHighSchedule(BT_TASKLET *pTasklet) {
 
@@ -57,6 +57,7 @@ BT_ERROR BT_TaskletHighSchedule(BT_TASKLET *pTasklet) {
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_TaskletHighSchedule);
 
 static void tasklet_action(struct _BT_SOFTIRQ *pSoftIRQ) {
 

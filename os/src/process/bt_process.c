@@ -70,11 +70,13 @@ BT_HANDLE BT_CreateProcess(BT_FN_THREAD_ENTRY pfnStartRoutine, const BT_i8 *szpN
 
 	return hProcess;
 }
+BT_EXPORT_SYMBOL(BT_CreateProcess);
 
 BT_ERROR BT_DestroyProcess(BT_HANDLE hProcess) {
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_DestroyProcess);
 
 BT_HANDLE BT_GetProcessHandle(void) {
 	if(curthread && curtask) {
@@ -83,16 +85,19 @@ BT_HANDLE BT_GetProcessHandle(void) {
 	}
 	return (BT_HANDLE) &kernel_handle;
 }
+BT_EXPORT_SYMBOL(BT_GetProcessHandle);
 
 BT_HANDLE BT_GetKernelProcessHandle(void) {
 	return (BT_HANDLE) &kernel_handle;
 }
+BT_EXPORT_SYMBOL(BT_GetKernelProcessHandle);
 
 BT_HANDLE BT_GetParentProcessHandle(void) {
 	struct bt_task *task = BT_GetProcessTask(NULL);
 	BT_HANDLE hParent = (BT_HANDLE) bt_container_of(task->parent, struct _BT_OPAQUE_HANDLE, task);
 	return hParent;
 }
+BT_EXPORT_SYMBOL(BT_GetParentProcessHandle);
 
 struct bt_task *BT_GetProcessTask(BT_HANDLE hProcess) {
 	if(hProcess) {
@@ -101,6 +106,7 @@ struct bt_task *BT_GetProcessTask(BT_HANDLE hProcess) {
 
 	return &BT_GetProcessHandle()->task;
 }
+BT_EXPORT_SYMBOL(BT_GetProcessTask);
 
 BT_ERROR BT_GetProcessTime(struct bt_process_time *time, BT_u32 i) {
 	struct bt_list_head *pos;
@@ -123,31 +129,37 @@ BT_ERROR BT_GetProcessTime(struct bt_process_time *time, BT_u32 i) {
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_GetProcessTime);
 
 BT_u32 BT_GetTotalProcesses() {
 	return total_processes;
 }
+BT_EXPORT_SYMBOL(BT_GetTotalProcesses);
 
 BT_ERROR BT_SetProcessFileDescriptor(BT_HANDLE hProcess, BT_u32 i, BT_HANDLE h) {
 	struct bt_task *task = BT_GetProcessTask(hProcess);
 	task->fds[i] = h;
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_SetProcessFileDescriptor);
 
 BT_HANDLE BT_GetProcessFileDescriptor(BT_HANDLE hProcess, BT_u32 i, BT_ERROR *pError) {
 	struct bt_task *task = BT_GetProcessTask(hProcess);
 	return task->fds[i];
 }
+BT_EXPORT_SYMBOL(BT_GetProcessFileDescriptor);
 
 BT_ERROR BT_SetFileDescriptor(BT_u32 i, BT_HANDLE h) {
 	BT_HANDLE hProcess = BT_GetProcessHandle();
 	return BT_SetProcessFileDescriptor(hProcess, i, h);
 }
+BT_EXPORT_SYMBOL(BT_SetFileDescriptor);
 
 BT_HANDLE BT_GetFileDescriptor(BT_u32 i, BT_ERROR *pError) {
 	BT_HANDLE hProcess = BT_GetProcessHandle();
 	return BT_GetProcessFileDescriptor(hProcess, i, pError);
 }
+BT_EXPORT_SYMBOL(BT_GetFileDescriptor);
 
 static BT_s32 task_alloc_fd(struct bt_task *task) {
 	BT_s32 i;
@@ -170,6 +182,7 @@ BT_s32 BT_AllocFileDescriptor() {
 	struct bt_task *task = BT_GetProcessTask(NULL);
 	return task_alloc_fd(task);
 }
+BT_EXPORT_SYMBOL(BT_AllocFileDescriptor);
 
 static BT_ERROR task_free_fd(struct bt_task *task, BT_s32 fd) {
 	if(fd < 0) {
@@ -192,6 +205,7 @@ BT_ERROR BT_FreeFileDescriptor(BT_s32 fd) {
 	struct bt_task *task = BT_GetProcessTask(NULL);
 	return task_free_fd(task, fd);
 }
+BT_EXPORT_SYMBOL(BT_FreeFileDescriptor);
 
 static BT_ERROR bt_process_cleanup(BT_HANDLE hProcess) {
 
@@ -231,3 +245,4 @@ BT_ERROR bt_process_init() {
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(bt_process_init);

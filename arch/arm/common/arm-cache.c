@@ -2,9 +2,7 @@
 #include "pl310.h"
 #include "arm11cpu.h"
 
-
 static volatile PL310_REGS *g_pregs = NULL;
-
 
 /* CP15 operations */
 #define wrcp(rn, v)	__asm__ __volatile__(\
@@ -60,6 +58,7 @@ BT_ERROR BT_L2CacheInvalidateRange(void *addr, BT_u32 len) {
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_L2CacheInvalidateRange);
 
 BT_ERROR BT_L2CacheInvalidateLine(void *addr) {
 	volatile PL310_REGS *pRegs = (PL310_REGS *) g_pregs;
@@ -67,6 +66,7 @@ BT_ERROR BT_L2CacheInvalidateLine(void *addr) {
 	dsb();
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_L2CacheInvalidateLine);
 
 static BT_ERROR BT_L2CacheInvalidate() {
 	register unsigned int L2CCReg;
@@ -309,36 +309,42 @@ BT_ERROR BT_DCacheEnable() {
 	BT_L2CacheEnable();
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_DCacheEnable);
 
 BT_ERROR  BT_DCacheDisable() {
 	BT_L2CacheDisable();
 	BT_L1DCacheDisable();
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_DCacheDisable);
 
 BT_ERROR BT_DCacheFlush() {
 	BT_L1DCacheFlush();
 	BT_L2CacheFlush();
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_DCacheFlush);
 
 BT_ERROR BT_DCacheFlushLine(void *addr) {
 	BT_L1DCacheFlushLine(addr);
 	//BT_L2CacheFlushLine(addr);
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_DCacheFlushLine);
 
 BT_ERROR BT_DCacheInvalidate() {
 	BT_L2CacheInvalidate();
 	BT_L1DCacheInvalidate();
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_DCacheInvalidate);
 
 BT_ERROR BT_DCacheInvalidateLine(void *addr) {
 	BT_L2CacheInvalidateLine(addr);
 	BT_L1DCacheInvalidateLine(addr);
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_DCacheInvalidateLine);
 
 BT_ERROR BT_DCacheInvalidateRange(void *addr, BT_u32 len) {
 	volatile PL310_REGS *pRegs = (PL310_REGS *) g_pregs;
@@ -367,6 +373,7 @@ BT_ERROR BT_DCacheInvalidateRange(void *addr, BT_u32 len) {
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_DCacheInvalidateRange);
 
 static BT_ERROR BT_L1ICacheInvalidate() {
 	wrcp(ARM_CP15_CACHE_SIZE_SEL, 1);
@@ -377,12 +384,14 @@ static BT_ERROR BT_L1ICacheInvalidate() {
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_L1ICacheInvalidate);
 
 BT_ERROR BT_ICacheInvalidate() {
 	BT_L2CacheInvalidate();
 	BT_L1ICacheInvalidate();
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_ICacheInvalidate);
 
 
 BT_ERROR arm_pl310_init() {

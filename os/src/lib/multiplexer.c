@@ -88,6 +88,7 @@ err_out:
 
 	return NULL;
 }
+BT_EXPORT_SYMBOL(BT_CreateMux);
 
 static BT_ERROR mux_attach(BT_HANDLE hMux, BT_HANDLE h, BT_u32 flags) {
 	struct handle_item *item = BT_kMalloc(sizeof(*item));
@@ -114,7 +115,9 @@ BT_ERROR BT_MuxOpen(BT_HANDLE hMux, const BT_i8 *path) {
 
 	return mux_attach(hMux, h, 0);
 }
+BT_EXPORT_SYMBOL(BT_MuxOpen);
 
 BT_ERROR BT_MuxAttach(BT_HANDLE hMux, BT_HANDLE h) {
 	return mux_attach(hMux, h, FLAG_ATTACHED);
 }
+BT_EXPORT_SYMBOL(BT_MuxAttach);

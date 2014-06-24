@@ -37,6 +37,7 @@
 #include <bt_error.h>
 #include <lib/putc.h>
 #include <bt_config.h>
+#include <bt_module.h>
 
 typedef unsigned long size_t;
 typedef long ssize_t;
@@ -430,6 +431,7 @@ number:
 	}
 #undef PCHAR
 }
+BT_EXPORT_SYMBOL(bt_kvprintf);
 
 void
 bt_printf(const char *fmt, ...)
@@ -441,6 +443,7 @@ bt_printf(const char *fmt, ...)
 	bt_kvprintf(fmt, bt_fputc, BT_GetStdout(), 10, ap);
 	va_end(ap);
 }
+BT_EXPORT_SYMBOL(bt_printf);
 
 void
 bt_fprintf(void *stream, const char *fmt, ...)
@@ -452,6 +455,8 @@ bt_fprintf(void *stream, const char *fmt, ...)
 	bt_kvprintf(fmt, bt_fputc, stream, 10, ap);
 	va_end(ap);
 }
+BT_EXPORT_SYMBOL(bt_fprintf);
+
 static void sputchar(int c, void * p) {
 	char ** ptr = p;
 	**ptr = (char)c;
@@ -472,3 +477,4 @@ bt_sprintf(char * s, const char *fmt, ...)
 	*(str) = 0;
 	va_end(ap);
 }
+BT_EXPORT_SYMBOL(bt_sprintf);

@@ -106,7 +106,7 @@
 
 	.bt.ksymtab : {
 		__bt_ksymtab_start = .;
-		KEEP(SORT(*)(bt.ksymtab*))
+		KEEP(SORT(*)(.bt.ksymtab.*))
 		__bt_ksymtab_end = .;
 	} > BT_LINKER_TEXT_SECTION
 

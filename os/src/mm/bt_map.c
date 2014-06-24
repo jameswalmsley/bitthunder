@@ -21,9 +21,11 @@ void *bt_ioremap(void *phys, BT_u32 size) {
 
 	return (void *) mapping + diff;
 }
+BT_EXPORT_SYMBOL(bt_ioremap);
 
 void bt_iounmap(volatile void *iomem) {
 	struct bt_vm_map *map = bt_vm_get_kernel_map();
 	bt_vm_unmap_region(map, (bt_vaddr_t) iomem);
 	return;
 }
+BT_EXPORT_SYMBOL(bt_iounmap);

@@ -58,6 +58,7 @@
 
 #include <hash/bt_md5.h>
 #include <bt_config.h>
+#include <bt_module.h>
 #include <string.h>
 
 #undef BYTE_ORDER	/* 1 = big-endian, -1 = little-endian, 0 = unknown */
@@ -324,6 +325,7 @@ void bt_md5_init(struct bt_md5_context *ctx) {
     ctx->abcd[2] = /*0x98badcfe*/ T_MASK ^ 0x67452301;
     ctx->abcd[3] = 0x10325476;
 }
+BT_EXPORT_SYMBOL(bt_md5_init);
 
 void bt_md5_append(struct bt_md5_context *ctx, const void *pdata, BT_u32 nbytes) {
     const BT_u8 *p = (const BT_u8 *) pdata;
@@ -360,6 +362,7 @@ void bt_md5_append(struct bt_md5_context *ctx, const void *pdata, BT_u32 nbytes)
     if (left)
 		memcpy(ctx->buf, p, left);
 }
+BT_EXPORT_SYMBOL(bt_md5_append);
 
 void bt_md5_finish(struct bt_md5_context *ctx, BT_u8 digest[16]) {
     static const BT_u8 pad[64] = {
@@ -381,6 +384,7 @@ void bt_md5_finish(struct bt_md5_context *ctx, BT_u8 digest[16]) {
     for (i = 0; i < 16; ++i)
 		digest[i] = (BT_u8)(ctx->abcd[i >> 2] >> ((i & 3) << 3));
 }
+BT_EXPORT_SYMBOL(bt_md5_finish);
 
 void bt_md5(const void *data, BT_u32 nbytes, BT_u8 digest[16]) {
 	struct bt_md5_context ctx;
@@ -388,3 +392,4 @@ void bt_md5(const void *data, BT_u32 nbytes, BT_u8 digest[16]) {
 	bt_md5_append(&ctx, data, nbytes);
 	bt_md5_finish(&ctx, digest);
 }
+BT_EXPORT_SYMBOL(bt_md5);

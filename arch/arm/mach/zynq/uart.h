@@ -4,9 +4,6 @@
 #include <bitthunder.h>
 #include <bt_struct.h>
 
-const BT_IF_DEVICE BT_ZYNQ_UART_oDeviceInterface;
-
-
 typedef struct _ZYNQ_UART_REGS {
 	BT_u32 	CR;						//		0x00  -- Control register.
 

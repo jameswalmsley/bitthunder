@@ -95,6 +95,7 @@ BT_ERROR BT_ShellSetEnv(const char *name, const char *value, BT_ENV_TYPE eType) 
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_ShellSetEnv);
 
 BT_ENV_VARIABLE *BT_ShellGetEnv(const char *name) {
 
@@ -107,6 +108,7 @@ BT_ENV_VARIABLE *BT_ShellGetEnv(const char *name) {
 
 	return find_var(name, len);
 }
+BT_EXPORT_SYMBOL(BT_ShellGetEnv);
 
 BT_ENV_VARIABLE *BT_ShellGetStarredEnv(const char *name) {
 	BT_u32 len = strlen(name);
@@ -117,12 +119,13 @@ BT_ENV_VARIABLE *BT_ShellGetStarredEnv(const char *name) {
 
 	return find_starred_var(name, len);
 }
+BT_EXPORT_SYMBOL(BT_ShellGetStarredEnv);
 
 BT_ENV_VARIABLE *BT_ShellGetNextEnv(BT_ENV_VARIABLE *env) {
 	BT_ENV_VARIABLE *ret = NULL;
 
 	if(env == NULL) {
-		ret = (BT_ENV_VARIABLE *)vars.next; 
+		ret = (BT_ENV_VARIABLE *)vars.next;
 	} else {
 		ret = (BT_ENV_VARIABLE *)((struct bt_list_head *)env)->next;
 	}
@@ -131,4 +134,4 @@ BT_ENV_VARIABLE *BT_ShellGetNextEnv(BT_ENV_VARIABLE *env) {
 
 	return ret;
 }
-
+BT_EXPORT_SYMBOL(BT_ShellGetNextEnv);

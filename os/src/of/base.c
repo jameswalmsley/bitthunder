@@ -6,6 +6,7 @@ const void *bt_of_get_fdt() {
 	bt_kernel_params *params = bt_get_kernel_params();
 	return params->fdt;
 }
+BT_EXPORT_SYMBOL(bt_of_get_fdt);
 
 struct bt_device_node *bt_of_node_get(struct bt_device_node *node) {
 	if(node) {
@@ -13,12 +14,14 @@ struct bt_device_node *bt_of_node_get(struct bt_device_node *node) {
 	}
 	return node;
 }
+BT_EXPORT_SYMBOL(bt_of_node_get);
 
 void bt_of_node_put(struct bt_device_node *node) {
 	if(node) {
 		// decrement the ref count
 	}
 }
+BT_EXPORT_SYMBOL(bt_of_node_put);
 
 static struct bt_device_property *__bt_of_find_property(const struct bt_device_node *np, const BT_i8 *name, BT_u32 *lenp) {
 	struct bt_list_head *pos;
@@ -42,11 +45,13 @@ struct bt_device_property *bt_of_find_property(const struct bt_device_node *np, 
 	}
 	return property;
 }
+BT_EXPORT_SYMBOL(bt_of_find_property);
 
 const void *bt_of_get_property(const struct bt_device_node *np, const BT_i8 *name, BT_u32 *lenp) {
 	struct bt_device_property *property = bt_of_find_property(np, name, lenp);
 	return property ? property->value : NULL;
 }
+BT_EXPORT_SYMBOL(bt_of_get_property);
 
 BT_u32 bt_of_n_addr_cells(struct bt_device_node *np) {
 
@@ -65,6 +70,7 @@ BT_u32 bt_of_n_addr_cells(struct bt_device_node *np) {
 
 	return BT_OF_ROOT_NODE_ADDR_CELLS_DEFAULT;
 }
+BT_EXPORT_SYMBOL(bt_of_n_addr_cells);
 
 BT_u32 bt_of_n_size_cells(struct bt_device_node *np) {
 
@@ -83,6 +89,7 @@ BT_u32 bt_of_n_size_cells(struct bt_device_node *np) {
 
 	return BT_OF_ROOT_NODE_SIZE_CELLS_DEFAULT;
 }
+BT_EXPORT_SYMBOL(bt_of_n_size_cells);
 
 struct bt_device_node *bt_of_get_parent(const struct bt_device_node *node) {
 	struct bt_device_node *np;
@@ -95,6 +102,7 @@ struct bt_device_node *bt_of_get_parent(const struct bt_device_node *node) {
 
 	return np;
 }
+BT_EXPORT_SYMBOL(bt_of_get_parent);
 
 BT_BOOL bt_of_is_compatible(struct bt_device_node *device, const BT_i8 *compat) {
 	const char *cp;
@@ -119,7 +127,7 @@ BT_BOOL bt_of_is_compatible(struct bt_device_node *device, const BT_i8 *compat) 
 
 	return 0;
 }
-
+BT_EXPORT_SYMBOL(bt_of_is_compatible);
 
 struct bt_device_node *bt_of_find_node_by_path(const BT_i8 *path) {
 
@@ -136,6 +144,7 @@ struct bt_device_node *bt_of_find_node_by_path(const BT_i8 *path) {
 
 	return node;
 }
+BT_EXPORT_SYMBOL(bt_of_find_node_by_path);
 
 struct bt_device_node *bt_of_find_node_by_phandle(BT_u32 phandle) {
 
@@ -152,3 +161,4 @@ struct bt_device_node *bt_of_find_node_by_phandle(BT_u32 phandle) {
 
 	return NULL;
 }
+BT_EXPORT_SYMBOL(bt_of_find_node_by_phandle);

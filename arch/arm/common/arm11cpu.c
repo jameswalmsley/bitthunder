@@ -1,6 +1,5 @@
 #include <bitthunder.h>
 
-
 BT_u32 BT_GetCoreID() {
 	register BT_u32 retval asm("r0");
 
@@ -9,9 +8,9 @@ BT_u32 BT_GetCoreID() {
 
 	return retval;
 }
+BT_EXPORT_SYMBOL(BT_GetCoreID);
 
 BT_u32 BT_GetTotalCores() {
 	return BT_CONFIG_CPU_CORES;
 }
-
-//BT_u32 BT_SetCoreStartAddress
+BT_EXPORT_SYMBOL(BT_GetTotalCores);

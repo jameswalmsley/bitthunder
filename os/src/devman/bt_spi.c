@@ -134,25 +134,25 @@ BT_ERROR BT_SpiRegisterMaster(BT_HANDLE hMaster, BT_SPI_MASTER *pMaster) {
 
   return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_SpiRegisterMaster);
 
-void BT_SpiMessageInit(BT_SPI_MESSAGE *pMessage)
-{
+void BT_SpiMessageInit(BT_SPI_MESSAGE *pMessage) {
 	memset(pMessage, 0, sizeof *pMessage);
 	BT_LIST_INIT_HEAD(&pMessage->transfers);
 }
+BT_EXPORT_SYMBOL(BT_SpiMessageInit);
 
-void BT_SpiMessageAddTail(BT_SPI_TRANSFER *pTransfer, BT_SPI_MESSAGE *pMessage)
-{
+void BT_SpiMessageAddTail(BT_SPI_TRANSFER *pTransfer, BT_SPI_MESSAGE *pMessage) {
 	bt_list_add_tail(&pTransfer->transfer_list, &pMessage->transfers);
 }
+BT_EXPORT_SYMBOL(BT_SpiMessageAddTail);
 
-void BT_SpiTransferDel(BT_SPI_TRANSFER *pTransfer)
-{
+void BT_SpiTransferDel(BT_SPI_TRANSFER *pTransfer) {
 	bt_list_del(&pTransfer->transfer_list);
 }
+BT_EXPORT_SYMBOL(BT_SpiTransferDel);
 
-BT_ERROR BT_SpiSetup(BT_SPI_DEVICE *pDevice)
-{
+BT_ERROR BT_SpiSetup(BT_SPI_DEVICE *pDevice) {
 	BT_u16 bad_bits;
 	BT_ERROR status = 0;
 
@@ -182,16 +182,14 @@ BT_ERROR BT_SpiSetup(BT_SPI_DEVICE *pDevice)
 				status);
 	return status;
 }
+BT_EXPORT_SYMBOL(BT_SpiSetup);
 
-
-void BT_SpiComplete(void *arg)
-{
+void BT_SpiComplete(void *arg) {
 	*(BT_BOOL*)arg = BT_TRUE;
 }
+BT_EXPORT_SYMBOL(BT_SpiComplete);
 
-
-BT_ERROR __BT_SpiAsync(BT_SPI_DEVICE *pDevice, BT_SPI_MESSAGE *pMessage)
-{
+BT_ERROR __BT_SpiAsync(BT_SPI_DEVICE *pDevice, BT_SPI_MESSAGE *pMessage) {
 	BT_SPI_MASTER *master = pDevice->pMaster;
 	BT_SPI_TRANSFER *xfer;
 
@@ -229,10 +227,9 @@ BT_ERROR __BT_SpiAsync(BT_SPI_DEVICE *pDevice, BT_SPI_MESSAGE *pMessage)
 
 	return BT_IF_SPI_OPS(pDevice->pMaster->bus_item->hMaster)->pfnTransfer(pDevice->pMaster->bus_item->hMaster, pMessage);
 }
+BT_EXPORT_SYMBOL(__BT_SpiAsync);
 
-
-BT_ERROR BT_SpiAsync(BT_SPI_DEVICE *pDevice, BT_SPI_MESSAGE *pMessage)
-{
+BT_ERROR BT_SpiAsync(BT_SPI_DEVICE *pDevice, BT_SPI_MESSAGE *pMessage) {
 	BT_ERROR ret;
 
 	//bt_spin_lock_irqsave(&pDevice->pMaster->bus_item->bus_spinlock,flags);
@@ -245,10 +242,9 @@ BT_ERROR BT_SpiAsync(BT_SPI_DEVICE *pDevice, BT_SPI_MESSAGE *pMessage)
 	//bt_spin_unlock_irqrestore(&pDevice->pMaster->bus_item->bus_spinlock, flags);
 	return ret;
 }
+BT_EXPORT_SYMBOL(BT_SpiAsync);
 
-
-BT_ERROR BT_SpiAsync_locked(BT_SPI_DEVICE *pDevice, BT_SPI_MESSAGE *pMessage)
-{
+BT_ERROR BT_SpiAsync_locked(BT_SPI_DEVICE *pDevice, BT_SPI_MESSAGE *pMessage) {
 	BT_ERROR ret;
 	//bt_spin_lock_irqsave(&pDevice->pMaster->bus_item->bus_spinlock,flags);
 
@@ -258,10 +254,9 @@ BT_ERROR BT_SpiAsync_locked(BT_SPI_DEVICE *pDevice, BT_SPI_MESSAGE *pMessage)
 
 	return ret;
 }
+BT_EXPORT_SYMBOL(BT_SpiAsync_locked);
 
-
-BT_ERROR __BT_SpiSync(BT_SPI_DEVICE *pDevice, BT_SPI_MESSAGE *pMessage, BT_u32 bus_locked)
-{
+BT_ERROR __BT_SpiSync(BT_SPI_DEVICE *pDevice, BT_SPI_MESSAGE *pMessage, BT_u32 bus_locked) {
 	BT_BOOL done = BT_FALSE;
 	BT_ERROR status;
 
@@ -286,32 +281,32 @@ BT_ERROR __BT_SpiSync(BT_SPI_DEVICE *pDevice, BT_SPI_MESSAGE *pMessage, BT_u32 b
 	pMessage->context = NULL;
 	return status;
 }
+BT_EXPORT_SYMBOL(__BT_SpiSync);
 
-BT_ERROR BT_SpiSync(BT_SPI_DEVICE *pDevice, BT_SPI_MESSAGE *pMessage)
-{
+BT_ERROR BT_SpiSync(BT_SPI_DEVICE *pDevice, BT_SPI_MESSAGE *pMessage) {
 	return __BT_SpiSync(pDevice, pMessage, 0);
 }
+BT_EXPORT_SYMBOL(BT_SpiSync);
 
-BT_ERROR BT_SpiBusLock(BT_SPI_MASTER *pMaster)
-{
+BT_ERROR BT_SpiBusLock(BT_SPI_MASTER *pMaster) {
 	if(pMaster && pMaster->bus_item->bus_mutex) {
 		BT_kMutexPend(pMaster->bus_item->bus_mutex, BT_INFINITE_TIMEOUT);
 		return BT_ERR_NONE;
 	}
 	return BT_ERR_INVALID_HANDLE;
 }
+BT_EXPORT_SYMBOL(BT_SpiBusLock);
 
-BT_ERROR BT_SpiBusUnlock(BT_SPI_MASTER *pMaster)
-{
+BT_ERROR BT_SpiBusUnlock(BT_SPI_MASTER *pMaster) {
 	if(pMaster && pMaster->bus_item->bus_mutex) {
 		BT_kMutexRelease(pMaster->bus_item->bus_mutex);
 		return BT_ERR_NONE;
 	}
 	return BT_ERR_INVALID_HANDLE;
 }
+BT_EXPORT_SYMBOL(BT_SpiBusUnlock);
 
-BT_ERROR BT_SpiWrite(BT_SPI_DEVICE *pDevice, const void *buf, BT_u32 len)
-{
+BT_ERROR BT_SpiWrite(BT_SPI_DEVICE *pDevice, const void *buf, BT_u32 len) {
 	BT_SPI_TRANSFER t = {
 			.tx_buf	= buf,
 			.len	= len,
@@ -322,9 +317,9 @@ BT_ERROR BT_SpiWrite(BT_SPI_DEVICE *pDevice, const void *buf, BT_u32 len)
 	BT_SpiMessageAddTail(&t,&m);
 	return BT_SpiSync(pDevice, &m);
 }
+BT_EXPORT_SYMBOL(BT_SpiWrite);
 
-BT_ERROR BT_SpiRead(BT_SPI_DEVICE *pDevice, void *buf, BT_u32 len)
-{
+BT_ERROR BT_SpiRead(BT_SPI_DEVICE *pDevice, void *buf, BT_u32 len) {
 	BT_SPI_TRANSFER t = {
 			.rx_buf	= buf,
 			.len	= len,
@@ -335,9 +330,9 @@ BT_ERROR BT_SpiRead(BT_SPI_DEVICE *pDevice, void *buf, BT_u32 len)
 	BT_SpiMessageAddTail(&t, &m);
 	return BT_SpiSync(pDevice, &m);
 }
+BT_EXPORT_SYMBOL(BT_SpiRead);
 
-BT_ERROR BT_SpiWriteThenRead(BT_SPI_DEVICE *pDevice, const void *txbuf, BT_u32 n_tx, void *rxbuf, BT_u32 n_rx)
-{
+BT_ERROR BT_SpiWriteThenRead(BT_SPI_DEVICE *pDevice, const void *txbuf, BT_u32 n_tx, void *rxbuf, BT_u32 n_rx) {
 	BT_ERROR status;
 	BT_SPI_MESSAGE message;
 	BT_SPI_TRANSFER x[2];
@@ -371,3 +366,4 @@ BT_ERROR BT_SpiWriteThenRead(BT_SPI_DEVICE *pDevice, const void *txbuf, BT_u32 n
 
 	return status;
 }
+BT_EXPORT_SYMBOL(BT_SpiWriteThenRead);

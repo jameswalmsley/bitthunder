@@ -35,3 +35,4 @@ BT_ERROR BT_CalculateClockDivider(BT_u32 clkin, BT_u32 clkout, BT_DIVIDER_PARAMS
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_CalculateClockDivider);
