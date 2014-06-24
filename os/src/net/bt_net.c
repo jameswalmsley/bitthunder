@@ -338,6 +338,7 @@ static void net_manager_sm(void *pParam) {
 BT_BOOL BT_isNetworkingReady() {
 	return g_bDone;
 }
+BT_EXPORT_SYMBOL(BT_isNetworkingReady);
 
 static BT_TASKLET sm_tasklet = { NULL, BT_TASKLET_IDLE, net_manager_sm, NULL };
 
