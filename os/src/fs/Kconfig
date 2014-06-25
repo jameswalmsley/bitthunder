@@ -17,6 +17,8 @@ config FS_DEV_DYNAMIC_REGISTRATION
 config FS_FULLFAT
     bool "FAT filesystem support (FullFAT)"
 	select FS
+	select BLOCK
+	select VOLUME
 	default n
 
 menu "FullFAT Configuration"
@@ -47,6 +49,8 @@ endmenu
 config FS_EXT2
     bool "Ext2 filesystem support (Read Only)"
 	select FS
+	select BLOCK
+	select VOLUME
 	default n
 
 endmenu
