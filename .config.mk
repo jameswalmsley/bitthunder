@@ -2,9 +2,7 @@
 #	Automated build configuration switches.
 #
 
-include $(BASE).config
-
-CONFIG_:=BT_CONFIG_
+-include $(BASE).config
 
 ARCH		:=$(subst $(DB_QUOTES),,$(BT_CONFIG_ARCH))
 SUBARCH		:=$(subst $(DB_QUOTES),,$(BT_CONFIG_SUBARCH))
@@ -16,18 +14,11 @@ include $(BASE)lib/objects.mk
 
 PYTHON:=$(BT_CONFIG_DBUILD_PYTHON)
 
-BSP_DIR:=$(subst $(DB_QUOTES),,$(BT_CONFIG_BSP_DIR))
-
 GIT_DESCRIBE:=$(shell git --git-dir=$(BASE).git describe --dirty)
 
-test_dir:
-	echo $(BT_CONFIG_BSP_NAME)
-	echo $(BT_CONFIG_BSP_DIR)
-
-test_git:
-	echo $(GIT_DESCRIBE)
-
-include $(BASE)$(BSP_DIR)/objects.mk
+ifneq ($(PROJECT_DIR),)
+-include $(PROJECT_DIR)objects.mk
+endif
 
 CC_MARCH 		:= $(subst $(DB_QUOTES),,$(BT_CONFIG_ARCH_ARM_FAMILY))
 CC_MTUNE		:= $(subst $(DB_QUOTES),,$(BT_CONFIG_TOOLCHAIN_CPU))

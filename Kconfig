@@ -171,11 +171,6 @@ menu "System Architecture"
 source "arch/Kconfig"
 endmenu
 
-menu "BSP Setup"
-source "$APP_BSP_DIR/Kconfig"
-endmenu
-
-
 menu "OS Features"
 depends on OS
 source "os/Kconfig"

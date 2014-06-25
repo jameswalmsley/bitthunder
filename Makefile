@@ -2,46 +2,39 @@
 #	BitThunder Top-Level Makefile
 #
 
-MAKEFLAGS += -rR --no-print-directory
+BASE:=$(shell pwd)/
+BUILD_BASE:=$(BASE)
+MODULE_NAME:="BitThunder"
 
--include .config
+TARGETS:=vmthunder.img
+TARGET_DEPS:=vmthunder.elf
 
-Q=@
+BUILD_DIR:=$(shell pwd)/build/
 
-all:
+all: .config
+CONFIG_:=BT_CONFIG_
+CONFIG_HEADER_NAME:="bt_bsp_config.h"
+CONFIG_HEADER_PATH:=$(BASE)lib/include/
+include $(BASE).dbuild/dbuild.mk
 
-ifeq ($(BT_CONFIG_CONFIGURED),y)
-ifeq ($(BT_CONFIG_BSP_DIR),)
-	$(Q)echo "BSP has not configured BT_CONFIG_BSP_DIR"
-else
-all: scripts/mkconfig/mkconfig
-	$(Q)echo " Building BitThunder for $(BT_CONFIG_BSP_NAME)"
-	$(Q)$(MAKE) -C $(BT_CONFIG_BSP_DIR)
-endif
-else
-all:
-	$(Q)make .config
-endif
+all: vmthunder.elf vmthunder.list vmthunder.img vmthunder.syms
+	$(Q)$(SIZE) vmthunder.elf
 
+.config:
+	$(Q)$(MAKE) menuconfig
 
-ifneq ($(APP_BSP_DIR),)
-BT_CONFIG_BSP_DIR = $(APP_BSP_DIR)
-endif
+vmthunder.img: vmthunder.elf
+	$(Q)$(PRETTY) IMAGE $(MODULE_NAME) $@
+	$(Q)$(OBJCOPY) vmthunder.elf -O binary $@
 
-menuconfig: scripts/mkconfig/mkconfig
-	$(Q)which kconfig-mconf > /dev/null || { echo "You need to compile and install kconfig-frontends: https://github.com/jameswalmsley/kconfig-frontends"; false; }
-	$(Q)CONFIG_=BT_CONFIG_ APP_DIR=$(APP_DIR) kconfig-mconf Kconfig
-	$(Q)scripts/mkconfig/mkconfig ./ > $$(grep BT_CONFIG_BSP_DIR .config | cut -f2 -d\")/bt_bsp_config.h
-	$(Q)cp .config $$(grep BT_CONFIG_BSP_DIR .config | cut -f2 -d\")/.config
+vmthunder.elf: $(OBJECTS)
+	$(Q)$(PRETTY) --dbuild "LD" $(MODULE_NAME) $@
+	$(Q)$(CC) -march=$(CC_MARCH) -mtune=$(CC_MTUNE) $(CC_TCFLAGS) $(CC_MACHFLAGS) $(CC_MFPU) $(CC_FPU_ABI) -o $@ -T $(LINKER_SCRIPT) -Wl,-Map=kernel.map -Wl,--gc-sections $(OBJECTS) -nostdlib $(LDLIBS) -lc -lm -lgcc
 
+vmthunder.list: vmthunder.elf
+	$(Q)$(PRETTY) LIST $(MODULE_NAME) $@
+	$(Q)$(OBJDUMP) -D -S vmthunder.elf > $@
 
-scripts/mkconfig/mkconfig: scripts/mkconfig/mkconfig.c
-	$(Q)gcc scripts/mkconfig/mkconfig.c scripts/mkconfig/cfgparser.c scripts/mkconfig/cfgdefine.c -o scripts/mkconfig/mkconfig
-
-ifneq ($(BT_CONFIG_BSP_DIR),)
-clean:
-	$(Q)echo " Cleaning $(BT_CONFIG_BSP_NAME) Board Support Package"
-	$(Q)$(MAKE) -C $(BT_CONFIG_BSP_DIR) clean
-endif
-
-.PHONY: menuconfig
+vmthunder.syms: vmthunder.elf
+	$(Q)$(PRETTY) SYMS $(MODULE_NAME) $@
+	$(Q)$(OBJDUMP) -t vmthunder.elf > $@

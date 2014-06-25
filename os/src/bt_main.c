@@ -171,3 +171,11 @@ bt_kernel_params *bt_get_kernel_params() {
 	return &g_kernel_params;
 }
 BT_EXPORT_SYMBOL(bt_get_kernel_params);
+
+
+__BT_WEAK int main(int argc, char **argv) {
+	while(1) {
+		BT_kPrint("Welcome to BitThunder");
+		BT_ThreadSleep(1000);
+	}
+}
