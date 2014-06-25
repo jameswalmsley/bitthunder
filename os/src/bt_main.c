@@ -174,6 +174,47 @@ BT_EXPORT_SYMBOL(bt_get_kernel_params);
 
 
 __BT_WEAK int main(int argc, char **argv) {
+
+	BT_ERROR Error = BT_ERR_NONE;
+	BT_HANDLE hUart = NULL;
+	const BT_INTEGRATED_DRIVER *pDriver = NULL;
+
+	BT_MACHINE_DESCRIPTION *pMachine = BT_GetMachineDescription(&Error);
+	if(pMachine->szpName) {
+		Error = 0;
+	}
+
+	if (pMachine->pBootLogger) {
+		pDriver = BT_GetIntegratedDriverByName(pMachine->pBootLogger->name);
+		if(pDriver) {
+			hUart = pDriver->pfnProbe(pMachine->pBootLogger, &Error);
+		}
+	}
+
+#ifdef BT_CONFIG_OF
+	if(!hUart) {
+		struct bt_device_node *logger = bt_of_get_bootlogger();
+		pDriver = BT_GetIntegratedDriverByName(logger->dev.name);
+		if(pDriver) {
+			hUart = pDriver->pfnProbe(&logger->dev, &Error);
+		}
+	}
+#endif
+
+	BT_UART_CONFIG oConfig;
+	BT_SetPowerState(hUart, BT_POWER_STATE_AWAKE);
+
+	oConfig.eMode			= BT_UART_MODE_POLLED;
+	oConfig.ucDataBits		= BT_UART_8_DATABITS;
+	oConfig.ucStopBits		= BT_UART_ONE_STOP_BIT;
+	oConfig.ucParity		= BT_UART_PARITY_NONE;
+	oConfig.ulBaudrate		= 115200;
+
+	BT_UartSetConfiguration(hUart, &oConfig);
+
+	BT_UartEnable(hUart);
+	BT_SetStdout(hUart);
+
 	while(1) {
 		BT_kPrint("Welcome to BitThunder");
 		BT_ThreadSleep(1000);
