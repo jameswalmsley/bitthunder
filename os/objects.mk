@@ -72,6 +72,9 @@ OBJECTS += $(BT_OS_OBJECTS)
 
 APP=$(BUILD_DIR)application/
 -include $(APP_DIR)/objects.mk
+ifeq ($(PROJECT_CONFIG),y)
+-include $(PROJECT_DIR)/objects.mk
+endif
 
 objs += $(objs-y)
 
@@ -90,8 +93,12 @@ $(TARGET_DEPS): $(LINKER_SCRIPTS)
 $(LINKER_SCRIPTS):$(BASE)os/include/btlinker_config.h
 $(LINKER_SCRIPTS):$(BASE)os/include/bitthunder.lds.h
 $(LINKER_SCRIPTS):$(BASE)lib/include/bt_config.h
-$(LINKER_SCRIPTS):$(BASE)lib/include/bt_bsp_config.h
 
+ifneq ($(PROJECT_CONFIG), y)
+$(LINKER_SCRIPTS):$(BASE)lib/include/bt_bsp_config.h
+else
+$(LINKER_SCRIPTS):$(PROJECT_DIR)/include/bt_bsp_config.h
+endif
 
 $(LINKER_SCRIPTS): CFLAGS=-I $(BASE)lib/include/ -I $(BASE)arch/$(ARCH)/include/ -I $(BASE)os/include/
 

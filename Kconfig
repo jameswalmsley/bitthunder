@@ -17,6 +17,16 @@ config APP_DIR
 	default "scripts" if !APP_CONFIG
     option env="APP_DIR"
 
+config PROJECT_CONFIG
+	bool
+	option env="PROJECT_CONFIG"
+	default n
+
+config PROJECT_DIR
+	string
+	default "scripts" if !APP_CONFIG
+	option env="PROJECT_DIR"
+
 config APP_BSP_CONFIG
     bool
 	option env="APP_BSP_CONFIG"
@@ -187,5 +197,11 @@ endmenu
 if APP_CONFIG
 menu "Application Configuration"
 source "$APP_DIR/Kconfig"
+endmenu
+endif
+
+if PROJECT_CONFIG
+menu "Project Configuration"
+source "$PROJECT_DIR/Kconfig"
 endmenu
 endif
