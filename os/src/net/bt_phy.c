@@ -241,7 +241,7 @@ no_node:
 						 */
 
 						struct bt_device_node *phy_device = NULL;
-
+#ifdef BT_CONFIG_OF
 						struct bt_device_node *dev = bt_of_integrated_get_node(bus->pDevice);	// Cast out to device tree if available.
 						if(dev) {
 							struct bt_list_head *pos;
@@ -255,6 +255,7 @@ no_node:
 							}
 
 						}
+#endif
 
 						const BT_DEVICE *phy_legacy_device = phy_device ? &phy_device->dev : NULL;
 
