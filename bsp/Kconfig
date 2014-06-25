@@ -1,3 +1,0 @@
-if ARCH_ARM
-source bsp/arm/Kconfig
-endif
