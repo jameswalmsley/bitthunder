@@ -40,7 +40,12 @@
 #define BT_PAGE_TRUNC(x)	((x) & ~BT_PAGE_MASK)					// Round down to nearest PAGE alignment
 #define BT_PAGE_ALIGN(x)	(((x) + BT_PAGE_MASK) & ~BT_PAGE_MASK)	// Round up to nearest PAGE alignment
 
+#ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
 #define bt_phys_to_virt(phys_addr)	(bt_vaddr_t) ((bt_vaddr_t) (phys_addr) - BT_CONFIG_RAM_PHYS + BT_CONFIG_RAM_VIRT)
 #define bt_virt_to_phys(virt_addr)	(bt_paddr_t) ((bt_paddr_t) (virt_addr) - BT_CONFIG_RAM_VIRT + BT_CONFIG_RAM_PHYS)
+#else
+#define bt_phys_to_virt(phys_addr)	(phys_addr)
+#define bt_virt_to_phys(virt_addr)	(virt_addr)
+#endif
 
 #endif
