@@ -23,7 +23,7 @@ TEMP_TARGETS=$(filter-out $(AR_TARGETS), $(TARGETS))
 KERN_TARGETS=$(filter %.img, $(TEMP_TARGETS))
 RI_TARGETS=$(filter-out $(KERN_TARGETS), $(TEMP_TARGETS))
 
-$(RI_TARGETS): $(OBJECTS) 
+$(RI_TARGETS): $(OBJECTS)
 ifeq ($(DBUILD_VERBOSE_CMD), 0)
 	$(Q)$(PRETTY) --dbuild "LD" $(MODULE_NAME) $@
 endif
@@ -137,3 +137,9 @@ endif
 	@mkdir -p $(dir $@)
 	$(Q)$(CC) -E -P $(CFLAGS) $< -o $@
 	$(POST_CC)
+
+
+test_dir:
+	@echo $(BUILD_DIR)
+	@echo $(BASE)
+	@echo $(LINKER_SCRIPTS)
