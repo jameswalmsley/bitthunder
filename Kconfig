@@ -66,7 +66,9 @@ config HOST_OTHER
 endchoice
 
 config TOOLCHAIN
-    string "Toolchain prefix"
+	string "Toolchain prefix"
+	default "/opt/btdk/bin/arm-eabi-bt-"
+
 
 choice
 	prompt "Optimisation Level"
