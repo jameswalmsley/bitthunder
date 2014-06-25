@@ -40,26 +40,26 @@ $(PROJECT_DIR).config:
 endif
 
 all: $(PROJECT_DIR)/vmthunder.elf $(PROJECT_DIR)/vmthunder.list $(PROJECT_DIR)/vmthunder.img $(PROJECT_DIR)/vmthunder.syms
-	$(Q)$(SIZE) vmthunder.elf
+	$(Q)$(SIZE) $(PROJECT_DIR)/vmthunder.elf
 
 test:
 	echo $(PROJECT_DIR)
 
-$(PROJECT_DIR)/vmthunder.img: vmthunder.elf
+$(PROJECT_DIR)/vmthunder.img: $(PROJECT_DIR)/vmthunder.elf
 	$(Q)$(PRETTY) IMAGE $(MODULE_NAME) $@
-	$(Q)$(OBJCOPY) vmthunder.elf -O binary $@
+	$(Q)$(OBJCOPY) $(PROJECT_DIR)/vmthunder.elf -O binary $@
 
 $(PROJECT_DIR)/vmthunder.elf: $(OBJECTS) $(LINKER_SCRIPTS)
 	$(Q)$(PRETTY) --dbuild "LD" $(MODULE_NAME) $@
-	$(Q)$(CC) -march=$(CC_MARCH) -mtune=$(CC_MTUNE) $(CC_TCFLAGS) $(CC_MACHFLAGS) $(CC_MFPU) $(CC_FPU_ABI) -o $@ -T $(LINKER_SCRIPT) -Wl,-Map=kernel.map -Wl,--gc-sections $(OBJECTS) -nostdlib $(LDLIBS) -lc -lm -lgcc
+	$(Q)$(CC) -march=$(CC_MARCH) -mtune=$(CC_MTUNE) $(CC_TCFLAGS) $(CC_MACHFLAGS) $(CC_MFPU) $(CC_FPU_ABI) -o $@ -T $(LINKER_SCRIPT) -Wl,-Map=$(PROJECT_DIR)/vmthunder.map -Wl,--gc-sections $(OBJECTS) -nostdlib $(LDLIBS) -lc -lm -lgcc
 
-$(PROJECT_DIR)/vmthunder.list: vmthunder.elf
+$(PROJECT_DIR)/vmthunder.list: $(PROJECT_DIR)/vmthunder.elf
 	$(Q)$(PRETTY) LIST $(MODULE_NAME) $@
-	$(Q)$(OBJDUMP) -D -S vmthunder.elf > $@
+	$(Q)$(OBJDUMP) -D -S $(PROJECT_DIR)/vmthunder.elf > $@
 
-$(PROJECT_DIR)/vmthunder.syms: vmthunder.elf
+$(PROJECT_DIR)/vmthunder.syms: $(PROJECT_DIR)/vmthunder.elf
 	$(Q)$(PRETTY) SYMS $(MODULE_NAME) $@
-	$(Q)$(OBJDUMP) -t vmthunder.elf > $@
+	$(Q)$(OBJDUMP) -t $(PROJECT_DIR)/vmthunder.elf > $@
 
 ifeq ($(PROJECT_CONFIG), y)
 $(OBJECTS) $(OBJECTS-y): $(PROJECT_DIR)/.config

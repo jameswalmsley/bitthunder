@@ -17,7 +17,7 @@
 
 static bt_kernel_params g_kernel_params = { NULL };
 
-extern int main(int argc, char **argv);
+int main(int argc, char **argv);
 
 void bt_do_bug(void *pc) {
 #ifndef BT_CONFIG_KERNEL_NONE
