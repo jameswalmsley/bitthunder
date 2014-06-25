@@ -1,0 +1,7 @@
+menu "Time"
+
+config TIME_CLOCK_SOURCE
+	   string "Real Time Clock Source device"
+	   default "/dev/rtc0"
+
+endmenu
