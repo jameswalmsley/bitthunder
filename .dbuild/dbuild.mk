@@ -148,11 +148,11 @@ else
 endif
 
 menuconfig: $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig
-	$(Q)which kconfig-mconf > /dev/null || { echo "You need to compile and install kconfig-frontends: https://github.com/jameswalmsley/kconfig-frontends"; false; }
-	$(Q)cd $(BASE) && CONFIG_=$(CONFIG_) APP_DIR=$(APP_DIR) PROJECT_DIR=$(PROJECT_DIR) kconfig-mconf Kconfig
-	$(Q)$(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig ./ > $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME)
-ifneq ($(CONFIG_PATH),$(DBUILD_ROOT))
-	$(Q)cp $(BASE).config $(CONFIG_PATH)/.config
+	which kconfig-mconf > /dev/null || { echo "You need to compile and install kconfig-frontends: https://github.com/jameswalmsley/kconfig-frontends"; false; }
+	cd $(BASE) && CONFIG_=$(CONFIG_) APP_DIR=$(APP_DIR) PROJECT_DIR=$(PROJECT_DIR) kconfig-mconf Kconfig
+	$(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig $(BASE) > $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME)
+ifneq ($(CONFIG_PATH),$(BASE))
+	cp $(BASE).config $(CONFIG_PATH)/.config
 endif
 
 .PHONY: menuconfig
