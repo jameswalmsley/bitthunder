@@ -76,3 +76,8 @@ project.init:
 
 mrproper:
 	$(Q)rm -rf $(BASE).config $(BASE)lib/include/bt_bsp_config.h
+
+
+clean: clean_images
+clean_images:
+	$(Q)rm $(PRM_FLAGS) $(PROJECT_DIR)/vmthunder.elf $(PROJECT_DIR)/vmthunder.img $(PROJECT_DIR)/vmthunder.elf $(PROJECT_DIR)/vmthunder.list $(PROJECT_DIR)/vmthunder.map $(PROJECT_DIR)/vmthunder.syms $(PRM_PIPE)

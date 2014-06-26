@@ -105,10 +105,10 @@ LDFLAGS 	+= $(ADD_LDFLAGS)
 #	We should eventually integrate this with KConfig or something nice.
 #
 .config.mk:
-	@touch .config.mk
+#	@touch .config.mk
 
 objects.mk:
-	@touch objects.mk
+#	@touch objects.mk
 
 $(TARGETS) $(TARGET_DEPS): .config.mk
 
