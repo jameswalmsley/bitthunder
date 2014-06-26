@@ -102,3 +102,23 @@ After configuration the following files will be generated:
 
     $(PROJECT_DIR)/include/bt_bsp_config.h
     $(PROJECT_DIR)/.config
+
+### objects.mk
+
+In a project, the objects.mk file lists the project objects that need to be additionally built
+and linked into the kernel.
+
+### Kconfig
+
+Its possible for a project to hook into the Kernel configuration system. Simply add any configuration
+options to this file, and they will appear under "Project Options" on the menuconfig system.
+
+### main.c
+
+To begin with this file is blank. Booting the BitThunder kernel by default will cause it to only print
+
+    Welcome to BitThunder
+
+repeatedly on the boot-logger device (boot console).
+
+To override this behaviour, you simply need to create a function called main().
