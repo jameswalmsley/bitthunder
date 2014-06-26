@@ -32,11 +32,11 @@ include $(BASE).dbuild/dbuild.mk
 
 ifeq ($(PROJECT_CONFIG), y)
 $(PROJECT_DIR)/.config:
-	$(Q)echo " >>>> No .config file found, run make menuconfig"
+	$(Q)echo " >>>> No .config file found, run make menuconfig"; false;
 	echo $@
 else
 $(PROJECT_DIR).config:
-	$(Q)echo " >>>> No .config file found, run make menuconfig"
+	$(Q)echo " >>>> No .config file found, run make menuconfig"; false;
 endif
 
 all: $(PROJECT_DIR)/vmthunder.elf $(PROJECT_DIR)/vmthunder.list $(PROJECT_DIR)/vmthunder.img $(PROJECT_DIR)/vmthunder.syms
@@ -44,6 +44,8 @@ all: $(PROJECT_DIR)/vmthunder.elf $(PROJECT_DIR)/vmthunder.list $(PROJECT_DIR)/v
 
 test:
 	@echo $(BASE)
+	@echo $(PROJECT_DIR)
+	@echo $(PROJECT_CONFIG)
 
 $(PROJECT_DIR)/vmthunder.img: $(PROJECT_DIR)/vmthunder.elf
 	$(Q)$(PRETTY) IMAGE $(MODULE_NAME) $@
@@ -69,14 +71,29 @@ endif
 
 project.init:
 	$(Q)touch $(PROJECT_DIR)/Kconfig
+	$(Q)touch $(PROJECT_DIR)/objects.mk
+	$(Q)touch $(PROJECT_DIR)/README.md
+	$(Q)touch $(PROJECT_DIR)/main.c
 	-$(Q)mkdir $(PROJECT_DIR)/include
 	$(Q)echo "PROJECT_CONFIG=y" > $(PROJECT_DIR)/Makefile
 	$(Q)echo "PROJECT_DIR=$(PROJECT_DIR)" >> $(PROJECT_DIR)/Makefile
 	$(Q)echo "include $(shell $(RELPATH) $(BASE) $(PROJECT_DIR))/Makefile" >> $(PROJECT_DIR)/Makefile
 
-mrproper:
-	$(Q)rm -rf $(BASE).config $(BASE)lib/include/bt_bsp_config.h
+project.git.init:
+	-$(Q)cd $(PROJECT_DIR) && git init .
+	-$(Q)cd $(PROJECT_DIR) && git submodule add git://github.com/jameswalmsley/bitthunder.git bitthunder
+	$(Q)touch $(PROJECT_DIR)/Kconfig
+	$(Q)touch $(PROJECT_DIR)/objects.mk
+	$(Q)touch $(PROJECT_DIR)/README.md
+	$(Q)touch $(PROJECT_DIR)/main.c
+	-$(Q)mkdir $(PROJECT_DIR)/include
+	$(Q)echo "export PROJECT_CONFIG=y" > $(PROJECT_DIR)/Makefile
+	$(Q)echo "export PROJECT_DIR=$(PROJECT_DIR)" >> $(PROJECT_DIR)/Makefile
+	$(Q)echo "include bitthunder/Makefile" >> $(PROJECT_DIR)/Makefile
 
+mrproper:
+	$(Q)rm $(PRM_FLAGS) $(BASE).config $(BASE)lib/include/bt_bsp_config.h $(PRM_PIPE)
+	$(Q)rm $(PRM_FLAGS) $(PROJECT_DIR)/.config $(PROJECT_DIR)/include/bt_bsp_config.h $(PRM_PIPE)
 
 clean: clean_images
 clean_images:
