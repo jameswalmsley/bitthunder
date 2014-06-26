@@ -214,7 +214,7 @@ config ARCH_ARM_FULL_INIT
 
 config ARCH_ARM_THUMB
 	bool "Compile with thumb"
-	default y
+	default n
 
 config ARCH_ARM_THUMB_INTERWORK
 	bool
