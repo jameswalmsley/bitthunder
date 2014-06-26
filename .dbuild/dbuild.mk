@@ -149,6 +149,10 @@ endif
 
 menuconfig: $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig
 	which kconfig-mconf > /dev/null || { echo "You need to compile and install kconfig-frontends: https://github.com/jameswalmsley/kconfig-frontends"; false; }
+ifneq ($(CONFIG_PATH),$(BASE))
+	touch $(CONFIG_PATH)/.config
+	cp $(CONFIG_PATH)/.config $(BASE).config
+endif
 	cd $(BASE) && CONFIG_=$(CONFIG_) APP_DIR=$(APP_DIR) PROJECT_DIR=$(PROJECT_DIR) kconfig-mconf Kconfig
 	$(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig $(BASE) > $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME)
 ifneq ($(CONFIG_PATH),$(BASE))
