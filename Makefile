@@ -2,7 +2,7 @@
 #	BitThunder Top-Level Makefile
 #
 
-BASE:=$(shell pwd)/
+BASE:=$(dir $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST)))
 BUILD_BASE:=$(BASE)
 MODULE_NAME:="BitThunder"
 
@@ -18,13 +18,13 @@ TARGET_DEPS:=$(PROJECT_DIR)/vmthunder.elf
 
 
 CONFIG_:=BT_CONFIG_
-CONFIG_HEADER_NAME:="bt_bsp_config.h"
+CONFIG_HEADER_NAME:=bt_bsp_config.h
 
 ifneq ($(PROJECT_CONFIG), y)
 CONFIG_HEADER_PATH:=$(BASE)lib/include/
 #CONFIG_PATH:=$(shell pwd)
 else
-CONFIG_HEADER_PATH:=$(PROJECT_DIR)/include/
+CONFIG_HEADER_PATH:=$(PROJECT_DIR)/include
 CONFIG_PATH:=$(PROJECT_DIR)
 endif
 
@@ -43,7 +43,7 @@ all: $(PROJECT_DIR)/vmthunder.elf $(PROJECT_DIR)/vmthunder.list $(PROJECT_DIR)/v
 	$(Q)$(SIZE) $(PROJECT_DIR)/vmthunder.elf
 
 test:
-	echo $(PROJECT_DIR)
+	@echo $(BASE)
 
 $(PROJECT_DIR)/vmthunder.img: $(PROJECT_DIR)/vmthunder.elf
 	$(Q)$(PRETTY) IMAGE $(MODULE_NAME) $@
@@ -69,7 +69,10 @@ endif
 
 project.init:
 	$(Q)touch $(PROJECT_DIR)/Kconfig
-	$(Q)mkdir $(PROJECT_DIR)/include
+	-$(Q)mkdir $(PROJECT_DIR)/include
+	$(Q)echo "PROJECT_CONFIG=y" > $(PROJECT_DIR)/Makefile
+	$(Q)echo "PROJECT_DIR=$(PROJECT_DIR)" >> $(PROJECT_DIR)/Makefile
+	$(Q)echo "include $(shell $(RELPATH) $(BASE) $(PROJECT_DIR))/Makefile" >> $(PROJECT_DIR)/Makefile
 
 mrproper:
 	$(Q)rm -rf $(BASE).config $(BASE)lib/include/bt_bsp_config.h
