@@ -105,10 +105,10 @@ LDFLAGS 	+= $(ADD_LDFLAGS)
 #	We should eventually integrate this with KConfig or something nice.
 #
 .config.mk:
-	@touch .config.mk
+#	@touch .config.mk
 
 objects.mk:
-	@touch objects.mk
+#	@touch objects.mk
 
 $(TARGETS) $(TARGET_DEPS): .config.mk
 
@@ -148,11 +148,14 @@ else
 endif
 
 menuconfig: $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig
-	$(Q)CONFIG_=$(CONFIG_) APP_DIR=$(APP_DIR) kconfig-mconf Kconfig
-	$(Q)$(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig ./ > $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME)
-ifneq ($(CONFIG_PATH),$(DBUILD_ROOT))
-	$(Q)cp .config $(CONFIG_PATH)/.config
+	which kconfig-mconf > /dev/null || { echo "You need to compile and install kconfig-frontends: https://github.com/jameswalmsley/kconfig-frontends"; false; }
+	cd $(BASE) && CONFIG_=$(CONFIG_) APP_DIR=$(APP_DIR) PROJECT_DIR=$(PROJECT_DIR) kconfig-mconf Kconfig
+	$(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig $(BASE) > $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME)
+ifneq ($(CONFIG_PATH),$(BASE))
+	cp $(BASE).config $(CONFIG_PATH)/.config
 endif
+
+.PHONY: menuconfig
 
 $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig: $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig.c
 	$(Q)gcc $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig.c $(DBUILD_ROOT).dbuild/scripts/mkconfig/cfgparser.c $(DBUILD_ROOT).dbuild/scripts/mkconfig/cfgdefine.c -o $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig

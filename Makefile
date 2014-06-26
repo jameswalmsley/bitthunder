@@ -2,46 +2,99 @@
 #	BitThunder Top-Level Makefile
 #
 
-MAKEFLAGS += -rR --no-print-directory
+BASE:=$(dir $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST)))
+BUILD_BASE:=$(BASE)
+MODULE_NAME:="BitThunder"
 
--include .config
-
-Q=@
-
-all:
-
-ifeq ($(BT_CONFIG_CONFIGURED),y)
-ifeq ($(BT_CONFIG_BSP_DIR),)
-	$(Q)echo "BSP has not configured BT_CONFIG_BSP_DIR"
+ifeq ($(PROJECT_CONFIG), y)
+BUILD_DIR:=$(PROJECT_DIR)/build/
 else
-all: scripts/mkconfig/mkconfig
-	$(Q)echo " Building BitThunder for $(BT_CONFIG_BSP_NAME)"
-	$(Q)$(MAKE) -C $(BT_CONFIG_BSP_DIR)
+BUILD_DIR:=$(shell pwd)/build/
+PROJECT_DIR:=./
 endif
+
+TARGETS:=$(PROJECT_DIR)/vmthunder.img
+TARGET_DEPS:=$(PROJECT_DIR)/vmthunder.elf
+
+
+CONFIG_:=BT_CONFIG_
+CONFIG_HEADER_NAME:=bt_bsp_config.h
+
+ifneq ($(PROJECT_CONFIG), y)
+CONFIG_HEADER_PATH:=$(BASE)lib/include/
+#CONFIG_PATH:=$(shell pwd)
 else
-all:
-	$(Q)make .config
+CONFIG_HEADER_PATH:=$(PROJECT_DIR)/include
+CONFIG_PATH:=$(PROJECT_DIR)
 endif
 
+include $(BASE).dbuild/dbuild.mk
 
-ifneq ($(APP_BSP_DIR),)
-BT_CONFIG_BSP_DIR = $(APP_BSP_DIR)
+ifeq ($(PROJECT_CONFIG), y)
+$(PROJECT_DIR)/.config:
+	$(Q)echo " >>>> No .config file found, run make menuconfig"; false;
+	echo $@
+else
+$(PROJECT_DIR).config:
+	$(Q)echo " >>>> No .config file found, run make menuconfig"; false;
 endif
 
-menuconfig: scripts/mkconfig/mkconfig
-	$(Q)which kconfig-mconf > /dev/null || { echo "You need to compile and install kconfig-frontends: https://github.com/jameswalmsley/kconfig-frontends"; false; }
-	$(Q)CONFIG_=BT_CONFIG_ APP_DIR=$(APP_DIR) kconfig-mconf Kconfig
-	$(Q)scripts/mkconfig/mkconfig ./ > $$(grep BT_CONFIG_BSP_DIR .config | cut -f2 -d\")/bt_bsp_config.h
-	$(Q)cp .config $$(grep BT_CONFIG_BSP_DIR .config | cut -f2 -d\")/.config
+all: $(PROJECT_DIR)/vmthunder.elf $(PROJECT_DIR)/vmthunder.list $(PROJECT_DIR)/vmthunder.img $(PROJECT_DIR)/vmthunder.syms
+	$(Q)$(SIZE) $(PROJECT_DIR)/vmthunder.elf
 
+test:
+	@echo $(BASE)
+	@echo $(PROJECT_DIR)
+	@echo $(PROJECT_CONFIG)
 
-scripts/mkconfig/mkconfig: scripts/mkconfig/mkconfig.c
-	$(Q)gcc scripts/mkconfig/mkconfig.c scripts/mkconfig/cfgparser.c scripts/mkconfig/cfgdefine.c -o scripts/mkconfig/mkconfig
+$(PROJECT_DIR)/vmthunder.img: $(PROJECT_DIR)/vmthunder.elf
+	$(Q)$(PRETTY) IMAGE $(MODULE_NAME) $@
+	$(Q)$(OBJCOPY) $(PROJECT_DIR)/vmthunder.elf -O binary $@
 
-ifneq ($(BT_CONFIG_BSP_DIR),)
-clean:
-	$(Q)echo " Cleaning $(BT_CONFIG_BSP_NAME) Board Support Package"
-	$(Q)$(MAKE) -C $(BT_CONFIG_BSP_DIR) clean
+$(PROJECT_DIR)/vmthunder.elf: $(OBJECTS) $(LINKER_SCRIPTS)
+	$(Q)$(PRETTY) --dbuild "LD" $(MODULE_NAME) $@
+	$(Q)$(CC) -march=$(CC_MARCH) -mtune=$(CC_MTUNE) $(CC_TCFLAGS) $(CC_MACHFLAGS) $(CC_MFPU) $(CC_FPU_ABI) -o $@ -T $(LINKER_SCRIPT) -Wl,-Map=$(PROJECT_DIR)/vmthunder.map -Wl,--gc-sections $(OBJECTS) -nostdlib $(LDLIBS) -lc -lm -lgcc
+
+$(PROJECT_DIR)/vmthunder.list: $(PROJECT_DIR)/vmthunder.elf
+	$(Q)$(PRETTY) LIST $(MODULE_NAME) $@
+	$(Q)$(OBJDUMP) -D -S $(PROJECT_DIR)/vmthunder.elf > $@
+
+$(PROJECT_DIR)/vmthunder.syms: $(PROJECT_DIR)/vmthunder.elf
+	$(Q)$(PRETTY) SYMS $(MODULE_NAME) $@
+	$(Q)$(OBJDUMP) -t $(PROJECT_DIR)/vmthunder.elf > $@
+
+ifeq ($(PROJECT_CONFIG), y)
+$(OBJECTS) $(OBJECTS-y): $(PROJECT_DIR)/.config
+else
+$(OBJECTS) $(OBJECTS-y): $(PROJECT_DIR).config
 endif
 
-.PHONY: menuconfig
+project.init:
+	$(Q)touch $(PROJECT_DIR)/Kconfig
+	$(Q)touch $(PROJECT_DIR)/objects.mk
+	$(Q)touch $(PROJECT_DIR)/README.md
+	$(Q)touch $(PROJECT_DIR)/main.c
+	-$(Q)mkdir $(PROJECT_DIR)/include
+	$(Q)echo "PROJECT_CONFIG=y" > $(PROJECT_DIR)/Makefile
+	$(Q)echo "PROJECT_DIR=$(PROJECT_DIR)" >> $(PROJECT_DIR)/Makefile
+	$(Q)echo "include $(shell $(RELPATH) $(BASE) $(PROJECT_DIR))/Makefile" >> $(PROJECT_DIR)/Makefile
+
+project.git.init:
+	-$(Q)cd $(PROJECT_DIR) && git init .
+	-$(Q)cd $(PROJECT_DIR) && git submodule add git://github.com/jameswalmsley/bitthunder.git bitthunder
+	$(Q)touch $(PROJECT_DIR)/Kconfig
+	$(Q)touch $(PROJECT_DIR)/objects.mk
+	$(Q)touch $(PROJECT_DIR)/README.md
+	$(Q)touch $(PROJECT_DIR)/main.c
+	-$(Q)mkdir $(PROJECT_DIR)/include
+	$(Q)echo "export PROJECT_CONFIG=y" > $(PROJECT_DIR)/Makefile
+	$(Q)echo "export PROJECT_DIR=$(PROJECT_DIR)" >> $(PROJECT_DIR)/Makefile
+	$(Q)echo "include bitthunder/Makefile" >> $(PROJECT_DIR)/Makefile
+
+mrproper:
+	$(Q)rm $(PRM_FLAGS) $(BASE).config $(BASE)lib/include/bt_bsp_config.h $(PRM_PIPE)
+	$(Q)rm $(PRM_FLAGS) $(PROJECT_DIR)/.config $(PROJECT_DIR)/include/bt_bsp_config.h $(PRM_PIPE)
+
+clean: clean_images
+clean_images:
+	$(Q)rm $(PRM_FLAGS) $(PROJECT_DIR)/vmthunder.elf $(PROJECT_DIR)/vmthunder.img $(PROJECT_DIR)/vmthunder.elf $(PROJECT_DIR)/vmthunder.list $(PROJECT_DIR)/vmthunder.map $(PROJECT_DIR)/vmthunder.syms $(PRM_PIPE)

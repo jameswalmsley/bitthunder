@@ -2,6 +2,7 @@ ifeq ($(PYTHON),)
 PYTHON := python
 endif
 
+RELPATH		:= $(PYTHON) $(DBUILD_ROOT).dbuild/relpath.py
 PRETTY 		:= $(PYTHON) $(DBUILD_ROOT).dbuild/pretty/pretty.py
 PRETTIFY	:= $(PYTHON) $(DBUILD_ROOT).dbuild/pretty/prettify.py
 PCP			:= $(PYTHON) $(DBUILD_ROOT).dbuild/pretty/prettycp.py --dbuild "CP"
@@ -11,7 +12,7 @@ PRM			:= $(PRETTIFY) --dbuild "RM"
 PCHMOD		:= $(PYTHON) $(DBUILD_ROOT).dbuild/pretty/prettychmod.py
 PRETTYSAMBA	:= $(PYTHON) $(DBUILD_ROOT).dbuild/pretty/prettysamba.py
 PRETTYLINUX := $(PYTHON) $(DBUILD_ROOT).dbuild/pretty/prettylinux.py
-ifndef PRETTY_SUBKBUILD 
+ifndef PRETTY_SUBKBUILD
   PRETTY_SUBKBUILD := $(PRETTYLINUX)
 endif
 ifndef PRETTY_SUBGENERIC

@@ -2,7 +2,6 @@
  *	BitThunder Kernel Entry for ARM architectures.
  */
 
-#include <bt_config.h>
 #include <btlinker_config.h>
 #include <asm/assembly.h>
 
@@ -544,7 +543,7 @@ _bt_syscall_return:
 #endif
 	// Return for SVC handler
 	subs	pc, lr, #0
-	
+
 /*
  *************************************************************************
  *

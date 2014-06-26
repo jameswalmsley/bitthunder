@@ -11,6 +11,7 @@ build
 .config.old
 bt_bsp_config.h
 scripts/mkconfig/mkconfig
+.dbuild/scripts/mkconfig/mkconfig
 
 # TeX Intermediates
 doc/*.aux
