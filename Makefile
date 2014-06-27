@@ -36,8 +36,12 @@ $(PROJECT_DIR)/.config:
 	$(Q)echo " ******************************************************"
 	@false;
 
-all: $(PROJECT_DIR)/vmthunder.elf $(PROJECT_DIR)/vmthunder.list $(PROJECT_DIR)/vmthunder.img $(PROJECT_DIR)/vmthunder.syms
+all: $(PROJECT_DIR)/vmthunder.elf $(PROJECT_DIR)/vmthunder.img $(PROJECT_DIR)/vmthunder.syms
 	$(Q)$(SIZE) $(PROJECT_DIR)/vmthunder.elf
+
+ifeq ($(BT_CONFIG_BUILD_DISASSEMBLE), y)
+all: $(PROJECT_DIR)/vmthunder.list
+endif
 
 test:
 	@echo $(BASE)
@@ -55,7 +59,11 @@ $(PROJECT_DIR)/vmthunder.elf: $(OBJECTS) $(LINKER_SCRIPTS)
 
 $(PROJECT_DIR)/vmthunder.list: $(PROJECT_DIR)/vmthunder.elf
 	$(Q)$(PRETTY) LIST $(MODULE_NAME) $@
+ifeq ($(BT_CONFIG_BUILD_DISASSEMBLE_SOURCE), y)
 	$(Q)$(OBJDUMP) -D -S $(PROJECT_DIR)/vmthunder.elf > $@
+else
+	$(Q)$(OBJDUMP) -D $(PROJECT_DIR)/vmthunder.elf > $@
+endif
 
 $(PROJECT_DIR)/vmthunder.syms: $(PROJECT_DIR)/vmthunder.elf
 	$(Q)$(PRETTY) SYMS $(MODULE_NAME) $@

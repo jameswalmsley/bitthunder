@@ -185,6 +185,15 @@ config BUILD_GC_UNUSED
 	   ---help---
 	   Asks the linker to always remove unused data/code from the kernel.
 
+config BUILD_DISASSEMBLE
+	   bool "Create Assembly listing"
+	   default y
+
+config BUILD_DISASSEMBLE_SOURCE
+	   bool "Source code in listing"
+	   depends on BUILD_DISASSEMBLE
+	   default n
+
 endmenu
 
 endmenu
