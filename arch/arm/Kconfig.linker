@@ -63,43 +63,43 @@ config LINKER_MACH_BSS_SECTION_IN_RAM
 	default n
 
 config LINKER_SECTION_FLASH
-    bool "Flash / ROM Section" if !LINKER_MEMORY_DEFINED
+    bool "Flash / ROM Section"
     default LINKER_MACH_FLASH if LINKER_MEMORY_DEFINED
 	default n
 
 config LINKER_FLASH_START_ADDRESS
-    hex "Flash start address (physical)" if !LINKER_MEMORY_DEFINED
+    hex "Flash start address (physical)"
 	default MACH_FLASH_START if LINKER_MEMORY_DEFINED
 	default 0x0
 	depends on LINKER_SECTION_FLASH
 
 config LINKER_FLASH_LENGTH
-    hex "Flash length (bytes)" if !LINKER_MEMORY_DEFINED
+    hex "Flash length (bytes)"
 	default MACH_FLASH_SIZE if LINKER_MEMORY_DEFINED
 	default 0x0
 	depends on LINKER_SECTION_FLASH
-	
+
 config LINKER_FLASH_RESERVED
 	hex "Reserve Flash Memory for e.g. bootloader"
 	default 0x0
 
 config LINKER_SECTION_SRAM
-    bool "SRAM / On-chip-memory section" if !LINKER_MEMORY_DEFINED
+    bool "SRAM / On-chip-memory section"
 	default LINKER_MACH_SRAM if LINKER_MEMORY_DEFINED
 	default n
 
 config LINKER_SRAM_START_ADDRESS
-    hex "SRAM begin address (physical)" if !LINKER_MEMORY_DEFINED
+    hex "SRAM begin address (physical)"
 	default MACH_SRAM_START if LINKER_MEMORY_DEFINED
 	default 0x0
 	depends on LINKER_SECTION_SRAM
 
 config LINKER_SRAM_LENGTH
-    hex "SRAM length" if !LINKER_MEMORY_DEFINED
+    hex "SRAM length"
 	default MACH_SRAM_SIZE if LINKER_MEMORY_DEFINED
 	default 0x0
 	depends on LINKER_SECTION_SRAM
-	
+
 config LINKER_SRAM_RESERVED
 	hex "Reserve SRAM Memory for e.g. bootloader"
 	default 0x0
@@ -107,21 +107,21 @@ config LINKER_SRAM_RESERVED
 config LINKER_HEAP_DOWN
 	hex "Move HEAP down by xx bytes"
 	default 0x0
-	
+
 
 config LINKER_SECTION_RAM
-    bool "RAM (external DDR) section" if !LINKER_MEMORY_DEFINED
+    bool "RAM (external DDR) section"
     default LINKER_MACH_RAM if LINKER_MEMORY_DEFINED
 	default n
 
 config LINKER_RAM_START_ADDRESS
-    hex "RAM start address (physical)" if !LINKER_MEMORY_DEFINED
+    hex "RAM start address (physical)"
 	default MACH_RAM_START if LINKER_MEMORY_DEFINED
 	default 0x0
 	depends on LINKER_SECTION_RAM
 
 config LINKER_RAM_LENGTH
-    hex "RAM length" if !LINKER_MEMORY_DEFINED
+    hex "RAM length"
 	default MACH_RAM_SIZE if LINKER_MEMORY_DEFINED
 	default 0x0
 	depends on LINKER_SECTION_RAM
@@ -199,7 +199,7 @@ choice LINKER_BSS_SECTION
 config LINKER_BSS_SECTION_FLASH
     bool "Flash"
 	depends on LINKER_SECTION_FLASH
-	
+
 config LINKER_BSS_SECTION_SRAM
     bool "SRAM"
 	depends on LINKER_SECTION_SRAM
@@ -211,7 +211,7 @@ config LINKER_BSS_SECTION_RAM
 endchoice
 
 config LINKER_STACK_SIZE
-    hex "Inital Stack Size" if !LINKER_MEMORY_DEFINED
+    hex "Inital Stack Size"
 	default 0x100
 
 config ARCH_ARM_IRQ_STACK
@@ -219,6 +219,6 @@ config ARCH_ARM_IRQ_STACK
 	default n
 
 config LINKER_IRQ_STACK_SIZE
-	hex "IRQ Stack Size" if!LINKER_MEMORY_DEFINED
+	hex "IRQ Stack Size"
 	default 0x0 if!ARCH_ARM_IRQ_STACK
 	default 0x100
