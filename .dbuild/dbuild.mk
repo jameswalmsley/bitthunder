@@ -154,6 +154,7 @@ ifneq ($(CONFIG_PATH),$(BASE))
 	cp $(CONFIG_PATH)/.config $(BASE).config
 endif
 	cd $(BASE) && CONFIG_=$(CONFIG_) APP_DIR=$(APP_DIR) PROJECT_DIR=$(PROJECT_DIR) kconfig-mconf Kconfig
+	@mkdir -p $(CONFIG_HEADER_PATH)
 	$(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig $(BASE) > $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME)
 ifneq ($(CONFIG_PATH),$(BASE))
 	cp $(BASE).config $(CONFIG_PATH)/.config
