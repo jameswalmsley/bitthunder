@@ -30,13 +30,11 @@ endif
 
 include $(BASE).dbuild/dbuild.mk
 
-ifeq ($(PROJECT_CONFIG), y)
 $(PROJECT_DIR)/.config:
-	$(Q)echo " >>>> No .config file found, run make menuconfig"; false;
-else
-$(PROJECT_DIR).config:
-	$(Q)echo " >>>> No .config file found, run make menuconfig"; false;
-endif
+	$(Q)echo " ******************************************************"
+	$(Q)echo "   >>>> No .config file found, run make menuconfig"
+	$(Q)echo " ******************************************************"
+	@false;
 
 all: $(PROJECT_DIR)/vmthunder.elf $(PROJECT_DIR)/vmthunder.list $(PROJECT_DIR)/vmthunder.img $(PROJECT_DIR)/vmthunder.syms
 	$(Q)$(SIZE) $(PROJECT_DIR)/vmthunder.elf
@@ -63,11 +61,7 @@ $(PROJECT_DIR)/vmthunder.syms: $(PROJECT_DIR)/vmthunder.elf
 	$(Q)$(PRETTY) SYMS $(MODULE_NAME) $@
 	$(Q)$(OBJDUMP) -t $(PROJECT_DIR)/vmthunder.elf > $@
 
-ifeq ($(PROJECT_CONFIG), y)
 $(OBJECTS) $(OBJECTS-y): $(PROJECT_DIR)/.config
-else
-$(OBJECTS) $(OBJECTS-y): $(PROJECT_DIR).config
-endif
 
 project.init:
 	$(Q)touch $(PROJECT_DIR)/Kconfig
@@ -92,8 +86,11 @@ project.git.init:
 	$(Q)echo "include bitthunder/Makefile" >> $(PROJECT_DIR)/Makefile
 
 mrproper:
+ifneq ($(PROJECT_CONFIG),y)
 	$(Q)rm $(PRM_FLAGS) $(BASE).config $(BASE)lib/include/bt_bsp_config.h $(PRM_PIPE)
+else
 	$(Q)rm $(PRM_FLAGS) $(PROJECT_DIR)/.config $(PROJECT_DIR)/include/bt_bsp_config.h $(PRM_PIPE)
+endif
 
 clean: clean_images
 clean_images:
