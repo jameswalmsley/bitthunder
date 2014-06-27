@@ -11,3 +11,7 @@ info.toolchain:
 
 info.subdirs:
 	@echo $(SUBDIRS)
+
+info.flags:
+	@echo "LDFLAGS   : " $(LDFLAGS)
+	@echo "CFLAGS    : " $(CFLAGS)
