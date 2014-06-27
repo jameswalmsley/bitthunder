@@ -10,7 +10,7 @@ ifeq ($(PROJECT_CONFIG), y)
 BUILD_DIR:=$(PROJECT_DIR)/build/
 else
 BUILD_DIR:=$(shell pwd)/build/
-PROJECT_DIR:=./
+PROJECT_DIR:=$(shell pwd)
 endif
 
 TARGETS:=$(PROJECT_DIR)/vmthunder.img
@@ -22,6 +22,7 @@ CONFIG_HEADER_NAME:=bt_bsp_config.h
 
 ifneq ($(PROJECT_CONFIG), y)
 CONFIG_HEADER_PATH:=$(BASE)lib/include/
+CONFIG_PATH:=$(BASE)
 else
 CONFIG_HEADER_PATH:=$(PROJECT_DIR)/include
 CONFIG_PATH:=$(PROJECT_DIR)
