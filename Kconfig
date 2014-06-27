@@ -173,6 +173,18 @@ endchoice
 
 menu "Build Configuration"
 
+config BUILD_NOSTDLIB
+	   bool "Disable stdlib linking"
+	   default n
+	   ---help---
+	   Should be enabled for a pure standalone kernel.
+
+config BUILD_GC_UNUSED
+	   bool "Removed unused code/data"
+	   default y
+	   ---help---
+	   Asks the linker to always remove unused data/code from the kernel.
+
 endmenu
 
 endmenu

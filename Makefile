@@ -22,7 +22,6 @@ CONFIG_HEADER_NAME:=bt_bsp_config.h
 
 ifneq ($(PROJECT_CONFIG), y)
 CONFIG_HEADER_PATH:=$(BASE)lib/include/
-#CONFIG_PATH:=$(shell pwd)
 else
 CONFIG_HEADER_PATH:=$(PROJECT_DIR)/include
 CONFIG_PATH:=$(PROJECT_DIR)
@@ -33,7 +32,6 @@ include $(BASE).dbuild/dbuild.mk
 ifeq ($(PROJECT_CONFIG), y)
 $(PROJECT_DIR)/.config:
 	$(Q)echo " >>>> No .config file found, run make menuconfig"; false;
-	echo $@
 else
 $(PROJECT_DIR).config:
 	$(Q)echo " >>>> No .config file found, run make menuconfig"; false;
@@ -46,6 +44,7 @@ test:
 	@echo $(BASE)
 	@echo $(PROJECT_DIR)
 	@echo $(PROJECT_CONFIG)
+	@echo $(LDFLAGS)
 
 $(PROJECT_DIR)/vmthunder.img: $(PROJECT_DIR)/vmthunder.elf
 	$(Q)$(PRETTY) IMAGE $(MODULE_NAME) $@
@@ -53,7 +52,7 @@ $(PROJECT_DIR)/vmthunder.img: $(PROJECT_DIR)/vmthunder.elf
 
 $(PROJECT_DIR)/vmthunder.elf: $(OBJECTS) $(LINKER_SCRIPTS)
 	$(Q)$(PRETTY) --dbuild "LD" $(MODULE_NAME) $@
-	$(Q)$(CC) -march=$(CC_MARCH) -mtune=$(CC_MTUNE) $(CC_TCFLAGS) $(CC_MACHFLAGS) $(CC_MFPU) $(CC_FPU_ABI) -o $@ -T $(LINKER_SCRIPT) -Wl,-Map=$(PROJECT_DIR)/vmthunder.map -Wl,--gc-sections $(OBJECTS) -nostdlib $(LDLIBS) -lc -lm -lgcc
+	$(Q)$(CC) -march=$(CC_MARCH) -mtune=$(CC_MTUNE) $(CC_TCFLAGS) $(CC_MACHFLAGS) $(CC_MFPU) $(CC_FPU_ABI) -o $@ -T $(LINKER_SCRIPT) -Wl,-Map=$(PROJECT_DIR)/vmthunder.map $(OBJECTS) $(LDFLAGS) $(LDLIBS) -lm -lc -lgcc
 
 $(PROJECT_DIR)/vmthunder.list: $(PROJECT_DIR)/vmthunder.elf
 	$(Q)$(PRETTY) LIST $(MODULE_NAME) $@

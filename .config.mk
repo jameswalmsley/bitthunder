@@ -48,3 +48,14 @@ $(OBJECTS) $(OBJECTS-y): CFLAGS += -I $(BASE)os/src/net/lwip/src/include/ -I $(B
 ifeq ($(PROJECT_CONFIG),y)
 $(LINKER_SCRIPTS): CFLAGS += -I $(PROJECT_DIR)/include/
 endif
+
+#
+#	Link configuration.
+#
+ifeq ($(BT_CONFIG_BUILD_NOSTDLIB), y)
+LDFLAGS += -nostdlib
+endif
+
+ifeq ($(BT_CONFIG_BUILD_GC_UNUSED), y)
+LDFLAGS += -Wl,--gc-sections
+endif
