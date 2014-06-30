@@ -20,7 +20,7 @@
 	 *
 	 */
 _bt_vector_table:
-.rept 2
+
 	ldr pc, =(BT_LINKER_KERNEL_ENTRY + 0x80)	// Reset vector
 	ldr	pc, [pc, #24]						// undefined instruction vector
 	ldr pc, [pc, #24]						// SVC handler
@@ -42,7 +42,35 @@ _bt_vector_table:
 	.word	BT_ARCH_ARM_GIC_IRQHandler
 #endif
 	.word	fiq
-.endr
+	.word 	0
+	.word	1
+	.word	2
+	.word	3
+	.word	4
+_bt_vector_second_table:
+	ldr pc, =(BT_LINKER_KERNEL_ENTRY + 0x80)	// Reset vector
+	ldr	pc, [pc, #24]						// undefined instruction vector
+	ldr pc, [pc, #24]						// SVC handler
+	ldr pc, [pc, #24]						// Prefetch abort handler
+	ldr pc, [pc, #24]						// Data abort handler
+	ldr pc, [pc, #24]						// Historical Handler - Was invalid address from the old 26-bit ARM CPUs
+	ldr pc, [pc, #24]						// IRQ handler
+	ldr pc, [pc, #24]						// FIQ handler
+
+	.word 	bt_reset
+	.word	undefined
+	.word	_bt_syscall_entry
+	.word	prefetch
+	.word	data
+	.word	hang
+#ifndef BT_CONFIG_KERNEL_NONE
+	.word 	vFreeRTOS_IRQInterrupt
+#else
+	.word	BT_ARCH_ARM_GIC_IRQHandler
+#endif
+	.word	fiq
+
+
 _bt_vector_table_end:
 
 bt_reset:
@@ -56,7 +84,7 @@ bt_reset:
 	mov r7,	r1	// Save the architecture ID.	// According to ARM abi, r7 and r8 must be preserved by a function if used.
 	mov r8, r2	// Save the fdt pointer.
 
-	ldr		r0, =__bt_init_start + ((_bt_vector_table_end-_bt_vector_table)/2)		// Set-up Initial kernel stack
+	ldr		r0, =_bt_vector_second_table
 	mcr		p15, 0, r0, c12, c0, 0		// Set the VBAR (Vector base address register).
 
 	/*
@@ -414,7 +442,10 @@ undefined:
 	b 	undefined
 
 prefetch:
-	b 	prefetch
+	mrc p15, 0, r0, c5, c0, 0	// Fault status code
+	mrc p15, 0, r1, c6, c0, 0	// Fault address
+prefetch_loop:
+	b 	prefetch_loop
 
 data:
 	mov r0, lr
