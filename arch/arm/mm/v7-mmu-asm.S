@@ -3,6 +3,8 @@
 .globl bt_mmu_get_ttb
 bt_mmu_get_ttb:
 	mrc p15, 0, r0, c2, c0, 0
+	ldr r1, =0x3FFF
+	bic r0, r0, r1
 	mov	pc, lr
 
 .globl bt_mmu_switch_ttb
