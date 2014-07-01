@@ -10,15 +10,16 @@
     } > BT_LINKER_INIT_SECTION
 #endif
 
-    .bt_init : {							// This is the kernel HEAD section.
+    .init : {							// This is the kernel HEAD section.
 		__bt_init_start = .;
 		KEEP(*(.bt.init))
 		KEEP(*(.bt.init.vectors))
 		KEEP(*(.bt.init.vectors.*))
+		KEEP(*(.init))
 		__bt_init_end = .;
     } > BT_LINKER_INIT_SECTION
 
-	.bt.arch.init : {
+       .bt.arch.init : {
 	    __bt_arch_init_start = .;
 		KEEP(*(.bt.arch.init))
 		KEEP(*(.bt.arch.init.*))
