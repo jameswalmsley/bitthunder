@@ -43,6 +43,9 @@ ifeq ($(BT_CONFIG_BUILD_DISASSEMBLE), y)
 all: $(PROJECT_DIR)/vmthunder.list
 endif
 
+list: $(PROJECT_DIR)/vmthunder.list
+.PHONY: list
+
 test:
 	@echo $(BASE)
 	@echo $(PROJECT_DIR)
