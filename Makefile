@@ -81,7 +81,7 @@ project.init:
 	$(Q)touch $(PROJECT_DIR)/main.c
 	-$(Q)mkdir $(PROJECT_DIR)/include
 	$(Q)echo "PROJECT_CONFIG=y" > $(PROJECT_DIR)/Makefile
-	$(Q)echo "PROJECT_DIR=$(PROJECT_DIR)" >> $(PROJECT_DIR)/Makefile
+	$(Q)echo "PROJECT_DIR=\$$(shell pwd)" >> $(PROJECT_DIR)/Makefile
 	$(Q)echo "include $(shell $(RELPATH) $(BASE) $(PROJECT_DIR))/Makefile" >> $(PROJECT_DIR)/Makefile
 
 project.git.init:
@@ -93,7 +93,7 @@ project.git.init:
 	$(Q)touch $(PROJECT_DIR)/main.c
 	-$(Q)mkdir $(PROJECT_DIR)/include
 	$(Q)echo "export PROJECT_CONFIG=y" > $(PROJECT_DIR)/Makefile
-	$(Q)echo "export PROJECT_DIR=$(PROJECT_DIR)" >> $(PROJECT_DIR)/Makefile
+	$(Q)echo "export PROJECT_DIR=\$$(shell pwd)" >> $(PROJECT_DIR)/Makefile
 	$(Q)echo "include bitthunder/Makefile" >> $(PROJECT_DIR)/Makefile
 
 mrproper:
