@@ -1376,8 +1376,9 @@ static BT_HANDLE mtd_probe(BT_SPI_DEVICE *spi, const BT_DEVICE *pDevice, BT_ERRO
 	if (info->addr_width)
 		flash->addr_width = info->addr_width;
 	else {
-		/* enable 4-byte addressing if the device exceeds 16MiB */
 
+		/* enable 4-byte addressing if the device exceeds 16MiB */
+		/* this is not done for zynq with qspi n25q256a as then booting (bootrom) is not possible
 		if (flash->mtd.size > 0x1000000) {
 			flash->addr_width = 4;
 			if(set_4byte(flash, info->jedec_id, 1) != BT_ERR_NONE) {
@@ -1385,6 +1386,7 @@ static BT_HANDLE mtd_probe(BT_SPI_DEVICE *spi, const BT_DEVICE *pDevice, BT_ERRO
 				flash->addr_width = 3;
 			}
 		} else
+		*/
 			flash->addr_width = 3;
 	}
 
