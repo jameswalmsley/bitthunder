@@ -7,17 +7,17 @@
 typedef BT_u32 socklen_t;
 /* members are in network byte order */
 struct sockaddr_in {
-	BT_u8 sin_len;
-	BT_u8 sin_family;
-	BT_u8 sin_port;
-	struct in_addr sin_addr;
-	BT_u8 sin_zero[8];
+	BT_u8 			sin_len;
+	BT_u8 			sin_family;
+	BT_u16 			sin_port;
+	struct in_addr 	sin_addr;
+	BT_u8 			sin_zero[8];
 };
 
 struct sockaddr {
-	BT_u8 sa_len;
-	BT_u8 sa_family;
-	BT_u8 sa_data[14];
+	BT_u8 			sa_len;
+	BT_u8 			sa_family;
+	BT_u8 			sa_data[14];
 };
 
 /* Socket protocol types (TCP/UDP/RAW) */
