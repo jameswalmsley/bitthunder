@@ -24,7 +24,7 @@ config PROJECT_CONFIG
 
 config PROJECT_DIR
 	string
-	default "scripts" if !APP_CONFIG
+	default "scripts" if !PROJECT_CONFIG
 	option env="PROJECT_DIR"
 
 config APP_BSP_CONFIG
