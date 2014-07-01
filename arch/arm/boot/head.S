@@ -5,30 +5,26 @@
 #include <btlinker_config.h>
 #include <asm/assembly.h>
 
-.section .init
+.section .bt.init					// The HEAD of the kernel is placed by the .bt.init section.
 .globl bt_reset
 
 .extern __bt_mmu_table_start
 .extern bt_do_bug
 
-.set MMUCRVAL,	0b01000000000101	/* Enable IDC, and MMU */
-
 	/*
 	 *	This defines the ARM vector table, it is repeated twice, so that it may be used on initial
 	 *	boot-up from address 0x0, but also a trampoline can be injected within the space of
      * 	the first copy of the table for starting other processors.
-	 *
 	 */
 _bt_vector_table:
-
 	ldr pc, =(BT_LINKER_KERNEL_ENTRY + 0x80)	// Reset vector
-	ldr	pc, [pc, #24]						// undefined instruction vector
-	ldr pc, [pc, #24]						// SVC handler
-	ldr pc, [pc, #24]						// Prefetch abort handler
-	ldr pc, [pc, #24]						// Data abort handler
-	ldr pc, [pc, #24]						// Historical Handler - Was invalid address from the old 26-bit ARM CPUs
-	ldr pc, [pc, #24]						// IRQ handler
-	ldr pc, [pc, #24]						// FIQ handler
+	ldr	pc, [pc, #24]							// undefined instruction vector
+	ldr pc, [pc, #24]							// SVC handler
+	ldr pc, [pc, #24]							// Prefetch abort handler
+	ldr pc, [pc, #24]							// Data abort handler
+	ldr pc, [pc, #24]							// Historical Handler - Was invalid address from the old 26-bit ARM CPUs
+	ldr pc, [pc, #24]							// IRQ handler
+	ldr pc, [pc, #24]							// FIQ handler
 
 	.word 	bt_reset
 	.word	undefined
@@ -42,20 +38,18 @@ _bt_vector_table:
 	.word	BT_ARCH_ARM_GIC_IRQHandler
 #endif
 	.word	fiq
-	.word 	0
-	.word	1
-	.word	2
-	.word	3
-	.word	4
+
+	.align	5									// Guarantee that 2nd table falls on a 32byte boundary.
+
 _bt_vector_second_table:
 	ldr pc, =(BT_LINKER_KERNEL_ENTRY + 0x80)	// Reset vector
-	ldr	pc, [pc, #24]						// undefined instruction vector
-	ldr pc, [pc, #24]						// SVC handler
-	ldr pc, [pc, #24]						// Prefetch abort handler
-	ldr pc, [pc, #24]						// Data abort handler
-	ldr pc, [pc, #24]						// Historical Handler - Was invalid address from the old 26-bit ARM CPUs
-	ldr pc, [pc, #24]						// IRQ handler
-	ldr pc, [pc, #24]						// FIQ handler
+	ldr	pc, [pc, #24]							// undefined instruction vector
+	ldr pc, [pc, #24]							// SVC handler
+	ldr pc, [pc, #24]							// Prefetch abort handler
+	ldr pc, [pc, #24]							// Data abort handler
+	ldr pc, [pc, #24]							// Historical Handler - Was invalid address from the old 26-bit ARM CPUs
+	ldr pc, [pc, #24]							// IRQ handler
+	ldr pc, [pc, #24]							// FIQ handler
 
 	.word 	bt_reset
 	.word	undefined
@@ -69,14 +63,12 @@ _bt_vector_second_table:
 	.word	BT_ARCH_ARM_GIC_IRQHandler
 #endif
 	.word	fiq
-
-
 _bt_vector_table_end:
 
 bt_reset:
 	/*
-		Disable the IRQs as soon as possible, just in-case the boot-loader was naughty!
-	*/
+	 * Disable the IRQs as soon as possible, just in-case the boot-loader was naughty!
+	 */
 	mrs	r9,cpsr
 	orr	r9,r9,#0x80
 	msr	cpsr_c,r9
@@ -85,7 +77,7 @@ bt_reset:
 	mov r8, r2	// Save the fdt pointer.
 
 	ldr		r0, =_bt_vector_second_table
-	mcr		p15, 0, r0, c12, c0, 0		// Set the VBAR (Vector base address register).
+	mcr		p15, 0, r0, c12, c0, 0				// Set the VBAR (Vector base address register).
 
 	/*
 	 *	Setup the initial kernel boot process stack pointer.
@@ -99,7 +91,6 @@ bt_reset:
 	/*
 	 *	Enable the snoop control unit.
 	 */
-
 	stmdb sp!, {r7}					// Preserve r7
 
 	ldr	r7, =0xf8f00000
@@ -209,6 +200,8 @@ Sync:	ldr	r1, [r0]
 
 #define CACHED_MEM		0x00015de6
 #define UNCACHED_MEM 	0x00000c02
+
+.set MMUCRVAL,	0b01000000000101	/* Enable IDC, and MMU */
 
 #ifndef BT_CONFIG_USE_VIRTUAL_ADDRESSING
 	/*
