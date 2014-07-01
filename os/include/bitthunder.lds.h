@@ -6,18 +6,16 @@
 
 #ifdef BT_CONFIG_OF
     .padding (NOLOAD) : {
-		. += 0x8000;			// reserve 32kb for fdt when using device tree support.
-
+		. += 0x8000;						// reserve 32kb for fdt when using device tree support.
     } > BT_LINKER_INIT_SECTION
 #endif
 
-    .init : {
+    .bt_init : {							// This is the kernel HEAD section.
 		__bt_init_start = .;
-		KEEP(*(.init))
-		KEEP(*(.init.*))
 		KEEP(*(.bt.init))
 		KEEP(*(.bt.init.vectors))
 		KEEP(*(.bt.init.vectors.*))
+		__bt_init_end = .;
     } > BT_LINKER_INIT_SECTION
 
 	.bt.arch.init : {
@@ -346,7 +344,6 @@ _HEAP_SIZE = BT_LINKER_RAM_ADDRESS + BT_CONFIG_LINKER_RAM_LENGTH - __bss_end - _
 	/*
 	 *	This symbol should always be defined at the very end of the entire kernel image.
 	 */
-
 .eof (NOLOAD) : {
 	__absolute_end = .;
 } > BT_LINKER_BSS_SECTION
