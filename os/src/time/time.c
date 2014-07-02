@@ -45,7 +45,7 @@ BT_u32 bt_mktime(BT_u32 year0, BT_u32 mon0, BT_u32 day, BT_u32 hour, BT_u32 min,
 
 	BT_u32 mon = mon0, year = year0;
 
-	if((BT_s32) (mon -=2)) {
+	if(0 >= (BT_s32) (mon -=2)) {
 		mon += 12;
 		year -= 1;
 	}
@@ -102,7 +102,7 @@ BT_EXPORT_SYMBOL(bt_time_to_tm);
 
 BT_ERROR bt_gettimeofday(struct bt_timeval *tv, struct bt_timezone *tz) {
 
-	BT_TICK oTicks = BT_GetKernelTick() - g_systime.sys_ticks;	///< Kernel ticks since sync.
+	BT_TICK oTicks = 0;
 	BT_u32 seconds = 0;
 	BT_u32 usecs = 0;
 
@@ -116,6 +116,22 @@ BT_ERROR bt_gettimeofday(struct bt_timeval *tv, struct bt_timezone *tz) {
 	while(usecs >= 1000) {
 		oTicks += 1;
 		usecs -= 1000;
+	}
+
+	oTicks -= g_systime.sys_ticks;
+	if (usecs >= g_systime.sys_ticks_us)
+	{
+		usecs -= g_systime.sys_ticks_us;
+	}
+	else
+	{
+		if (oTicks)
+		{
+			oTicks -= 1;
+			usecs = 1000 - (g_systime.sys_ticks_us - usecs);
+		}
+		else
+			usecs = 0;
 	}
 
 	seconds = oTicks / 1000;
