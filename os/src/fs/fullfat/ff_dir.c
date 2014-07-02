@@ -1910,8 +1910,8 @@ FF_ERROR FF_PutEntry(FF_IOMAN *pIoman, FF_T_UINT16 Entry, FF_T_UINT32 DirCluster
 			FF_putLong(EntryBuffer,  FF_FAT_DIRENT_FILESIZE,  pDirent->Filesize);
 #ifdef FF_TIME_SUPPORT
 			FF_GetSystemTime(&pDirent->AccessedTime);	///< Date of Last Access.
-			FF_PlaceTime(EntryBuffer, FF_FAT_DIRENT_LASTACC_DATE, &pDirent->AccessedTime);
-			FF_PlaceDate(EntryBuffer, FF_FAT_DIRENT_LASTACC_DATE, &pDirent->AccessedTime);	// Last accessed date.
+			pDirent->ModifiedTime = pDirent->AccessedTime;
+			FF_PlaceDate(EntryBuffer, FF_FAT_DIRENT_LASTACC_DATE, &pDirent->AccessedTime);
 			FF_PlaceTime(EntryBuffer, FF_FAT_DIRENT_CREATE_TIME,  &pDirent->CreateTime);
 			FF_PlaceDate(EntryBuffer, FF_FAT_DIRENT_CREATE_DATE,  &pDirent->CreateTime);
 			FF_PlaceTime(EntryBuffer, FF_FAT_DIRENT_LASTMOD_TIME, &pDirent->ModifiedTime);
@@ -2466,6 +2466,7 @@ FF_ERROR FF_CreateDirent(FF_IOMAN *pIoman, FF_T_UINT32 DirCluster, FF_DIRENT *pD
 				FF_GetSystemTime(&pDirent->CreateTime);		///< Date and Time Created.
 				pDirent->ModifiedTime = pDirent->CreateTime;	///< Date and Time Modified.
 				pDirent->AccessedTime = pDirent->CreateTime;	///< Date of Last Access.
+	  			FF_PlaceDate(EntryBuffer, FF_FAT_DIRENT_LASTACC_DATE, &pDirent->AccessedTime);
 				FF_PlaceTime(EntryBuffer, FF_FAT_DIRENT_CREATE_TIME, &pDirent->CreateTime);
 				FF_PlaceDate(EntryBuffer, FF_FAT_DIRENT_CREATE_DATE, &pDirent->CreateTime);
 				FF_PlaceTime(EntryBuffer, FF_FAT_DIRENT_LASTMOD_TIME, &pDirent->ModifiedTime);

@@ -53,6 +53,9 @@
  **/
 
 #ifdef	FF_TIME_SUPPORT
+
+#include <bitthunder.h>
+
 /**
  *	@public
  *	@brief	Populates an FF_SYSTEMTIME object with the current time from the system.
@@ -67,12 +70,20 @@
  **/
 FF_T_SINT32	FF_GetSystemTime(FF_SYSTEMTIME *pTime) {
 
-	pTime->Hour		= 0;
-	pTime->Minute	= 0;
-	pTime->Second	= 0;
-	pTime->Day		= 0;
-	pTime->Month	= 0;
-	pTime->Year		= 0;
+	struct bt_rtc_time time;
+	struct bt_timeval tv;
+
+	bt_gettimeofday(&tv, NULL);
+	bt_time_to_tm(tv.tv_sec, &time);
+	time.tm_year += 1900;
+	time.tm_mon += 1;
+
+	pTime->Hour		= time.tm_hour;
+	pTime->Minute	= time.tm_min;
+	pTime->Second	= time.tm_sec;
+	pTime->Day		= time.tm_mday;
+	pTime->Month	= time.tm_mon;
+	pTime->Year		= time.tm_year;
 
 	return 0;
 }
