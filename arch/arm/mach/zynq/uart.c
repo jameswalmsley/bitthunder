@@ -480,28 +480,16 @@ static BT_ERROR uart_disable(BT_HANDLE hUart) {
 
 static BT_ERROR uart_get_available(BT_HANDLE hUart, BT_u32 *pTransmit, BT_u32 *pReceive) {
 
-	if (pTransmit) {
-		*pTransmit = 0;
-	}
+	if (hUart->eMode == BT_UART_MODE_SIMPLE_BUFFERED) {
+		if (hUart->uTxEnd >= hUart->uTxBegin)
+			*pTransmit = hUart->uTxSize - hUart->uTxEnd + hUart->uTxBegin - 1;
+		else
+			*pTransmit = hUart->uTxBegin - hUart->uTxEnd - 1;
 
-	if (pReceive) {
-		*pReceive = 0;
-	}
-
-	if (hUart->eMode == BT_UART_MODE_SIMPLE_BUFFERED)
-	{
-		if (pTransmit) {
-			if (hUart->uTxEnd >= hUart->uTxBegin)
-				*pTransmit = hUart->uTxSize - hUart->uTxEnd + hUart->uTxBegin - 1;
-			else
-				*pTransmit = hUart->uTxBegin - hUart->uTxEnd - 1;
-		}
-		if (pReceive) {
-			if (hUart->uRxEnd >= hUart->uRxBegin)
-				*pReceive = hUart->uRxEnd - hUart->uRxBegin;
-			else
-				*pReceive = hUart->uRxSize - hUart->uRxBegin + hUart->uRxEnd;
-		}
+		if (hUart->uRxEnd >= hUart->uRxBegin)
+			*pReceive = hUart->uRxEnd - hUart->uRxBegin;
+		else
+			*pReceive = hUart->uRxSize - hUart->uRxBegin + hUart->uRxEnd;
 	}
 
 	return BT_ERR_NONE;
