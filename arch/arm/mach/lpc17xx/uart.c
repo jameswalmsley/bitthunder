@@ -539,6 +539,29 @@ static BT_ERROR uartDisable(BT_HANDLE hUart) {
 	return BT_ERR_NONE;
 }
 
+static BT_ERROR uartGetAvailable(BT_HANDLE hUart, BT_u32 *pTransmit, BT_u32 *pReceive) {
+	switch(hUart->eMode) {
+	case BT_UART_MODE_POLLED:
+	{
+		if(!(hUart->pRegs->LSR & LPC17xx_UART_LSR_RDR)) *pTransmit = 1;
+		if((hUart->pRegs->LSR & LPC17xx_UART_LSR_THRE)) *pReceive = 1;
+		break;
+	}
+
+	case BT_UART_MODE_BUFFERED:
+	{
+		*pTransmit = BT_FifoGetAvailable(hUart->hTxFifo);
+		*pReceive = BT_FifoGetAvailable(hUart->hRxFifo);
+		break;
+	}
+
+	default:
+		return BT_ERR_GENERIC;
+
+	}
+
+	return BT_ERR_NONE;
+}
 
 static BT_ERROR uartRead(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, BT_u8 *pucDest) {
 	volatile LPC17xx_UART_REGS *pRegs = hUart->pRegs;
@@ -633,11 +656,12 @@ static BT_u32 file_write(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const v
 
 
 static const BT_DEV_IF_UART oUartConfigInterface = {
-	uartSetBaudrate,											///< UART setBaudrate implementation.
-	uartSetConfig,												///< UART set config imple.
-	uartGetConfig,
-	uartEnable,													///< Enable/disable the device.
-	uartDisable,
+	.pfnSetBaudrate		= uartSetBaudrate,											///< UART setBaudrate implementation.
+	.pfnSetConfig		= uartSetConfig,												///< UART set config imple.
+	.pfnGetConfig		= uartGetConfig,
+	.pfnEnable			= uartEnable,													///< Enable/disable the device.
+	.pfnDisable			= uartDisable,
+	.pfnGetAvailable	= uartGetAvailable,
 };
 
 static const BT_IF_POWER oPowerInterface = {
@@ -746,4 +770,3 @@ BT_INTEGRATED_DRIVER_DEF uart_driver = {
 	.name 		= "LPC17xx,usart",
 	.pfnProbe	= uart_probe,
 };
-
