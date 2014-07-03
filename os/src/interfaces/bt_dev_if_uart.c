@@ -79,7 +79,18 @@ BT_ERROR BT_UartGetAvailable(BT_HANDLE hUart, BT_u32 *pTransmit, BT_u32 *pReceiv
 		return BT_ERR_INVALID_HANDLE_TYPE;
 	}
 
-	return BT_IF_UART_OPS(hUart)->pfnGetAvailable(hUart, pTransmit, pReceive);
+	BT_u32 tx = 0, rx = 0;
+	BT_ERROR retval = BT_IF_UART_OPS(hUart)->pfnGetAvailable(hUart, &tx, &rx);
+
+	if(pTransmit) {
+		*pTransmit = tx;
+	}
+
+	if(pReceive) {
+		*pReceive = rx;
+	}
+
+	return retval;
 }
 BT_EXPORT_SYMBOL(BT_UartGetAvailable);
 
