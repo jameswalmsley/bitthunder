@@ -84,19 +84,15 @@ BT_u32 BT_GetGlobalTimerRate() {
 BT_EXPORT_SYMBOL(BT_GetGlobalTimerRate);
 
 BT_u32 BT_GetKernelTime() {
-	BT_u32 us = 0;
-	BT_TICK oTicks = 0;
-
-	BT_kEnterCritical();
-	{
+	BT_u32 ulOldTick, ulNewTick;
+	BT_u32 us;
+	do {
+		ulOldTick = BT_kTickCount();
 		us = BT_GetSystemTimerOffset();
-		oTicks = BT_kTickCount();
-	}
-	BT_kExitCritical();
+		ulNewTick = BT_kTickCount();
+	} while (ulNewTick != ulOldTick);
 
-	us += (1000 * oTicks);
-
-	return us;
+	return ((ulOldTick * 1000) + us);
 }
 BT_EXPORT_SYMBOL(BT_GetKernelTime);
 
