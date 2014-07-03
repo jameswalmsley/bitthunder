@@ -50,6 +50,7 @@ BT_s32 BT_FifoReadFromISR(BT_HANDLE hFifo, BT_u32 ulElements, void *pData);
 BT_BOOL BT_FifoIsEmpty(BT_HANDLE hFifo, BT_ERROR *pError);
 BT_BOOL BT_FifoIsFull(BT_HANDLE hFifo, BT_ERROR *pError);
 BT_s32 BT_FifoFillLevel(BT_HANDLE hFifo);
+BT_s32 BT_FifoGetAvailable(BT_HANDLE hFifo);
 BT_s32 BT_FifoSize(BT_HANDLE hFifo);
 
 

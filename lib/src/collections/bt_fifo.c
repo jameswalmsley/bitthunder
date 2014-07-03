@@ -221,6 +221,19 @@ BT_s32 BT_FifoFillLevel(BT_HANDLE hFifo) {
 }
 BT_EXPORT_SYMBOL(BT_FifoFillLevel);
 
+BT_s32 BT_FifoGetAvailable(BT_HANDLE hFifo) {
+	BT_u32 messages = 0;
+
+	if(!isFifoHandle(hFifo)) {
+		return BT_ERR_INVALID_HANDLE_TYPE;
+	}
+
+	messages = BT_QueueMessagesWaiting(hFifo->hQueue);
+
+	return hFifo->ulElements - messages;
+}
+BT_EXPORT_SYMBOL(BT_FifoGetAvailable);
+
 BT_s32 BT_FifoSize(BT_HANDLE hFifo) {
 
 	if(!isFifoHandle(hFifo)) {
