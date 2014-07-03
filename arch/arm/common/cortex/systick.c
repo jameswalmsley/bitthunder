@@ -79,7 +79,7 @@ static BT_ERROR timer_set_frequency(BT_HANDLE hTimer, BT_u32 ulFrequencyHz) {
 }
 
 static BT_u32 timer_get_offset(BT_HANDLE hTimer, BT_ERROR *pError) {
-	return hTimer->pRegs->VALUE;
+	return hTimer->pRegs->LOAD - hTimer->pRegs->VALUE + 1;
 }
 
 static const BT_DEV_IF_SYSTIMER oDeviceOps = {
