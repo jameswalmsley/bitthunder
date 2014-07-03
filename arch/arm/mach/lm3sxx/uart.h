@@ -18,6 +18,7 @@ typedef struct _LM3Sxx_UART_REGS {
 	BT_u32	FR;						//      0x18  -- Flag register
 
 
+#define	LM3Sxx_UART_FR_TXFE				0x00000080
 #define	LM3Sxx_UART_FR_TXFF				0x00000020
 #define LM3Sxx_UART_FR_RXFE				0x00000010  // UART Receive FIFO Empty
 #define	LM3Sxx_UART_FR_BUSY				0x00000008
