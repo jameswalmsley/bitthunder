@@ -6,13 +6,14 @@ BASE:=$(dir $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST)))
 BUILD_BASE:=$(BASE)
 MODULE_NAME:="BitThunder"
 
-ifeq ($(PROJECT_CONFIG), y)
-BUILD_DIR:=$(PROJECT_DIR)/build/
-else
-BUILD_DIR:=$(shell pwd)/build/
+ifndef PROJECT_DIR
 PROJECT_DIR:=$(shell pwd)
+PROJECT_CONFIG:=n
+else
+PROJECT_CONFIG:=y
 endif
 
+BUILD_DIR:=$(PROJECT_DIR)/build/
 TARGETS:=$(PROJECT_DIR)/vmthunder.img
 TARGET_DEPS:=$(PROJECT_DIR)/vmthunder.elf
 
@@ -21,11 +22,11 @@ CONFIG_:=BT_CONFIG_
 CONFIG_HEADER_NAME:=bt_bsp_config.h
 
 ifneq ($(PROJECT_CONFIG), y)
-CONFIG_HEADER_PATH:=$(BASE)lib/include/
-CONFIG_PATH:=$(BASE)
+CONFIG_PATH:=$(PROJECT_DIR)/
+CONFIG_HEADER_PATH:=$(BASE)lib/include
 else
-CONFIG_HEADER_PATH:=$(PROJECT_DIR)/include
 CONFIG_PATH:=$(PROJECT_DIR)
+CONFIG_HEADER_PATH:=$(PROJECT_DIR)/include
 endif
 
 include $(BASE).dbuild/dbuild.mk
@@ -80,7 +81,6 @@ project.init:
 	$(Q)touch $(PROJECT_DIR)/README.md
 	$(Q)touch $(PROJECT_DIR)/main.c
 	-$(Q)mkdir $(PROJECT_DIR)/include
-	$(Q)echo "PROJECT_CONFIG=y" > $(PROJECT_DIR)/Makefile
 	$(Q)echo "PROJECT_DIR=\$$(shell pwd)" >> $(PROJECT_DIR)/Makefile
 	$(Q)echo "include $(shell $(RELPATH) $(BASE) $(PROJECT_DIR))/Makefile" >> $(PROJECT_DIR)/Makefile
 
@@ -92,13 +92,12 @@ project.git.init:
 	$(Q)touch $(PROJECT_DIR)/README.md
 	$(Q)touch $(PROJECT_DIR)/main.c
 	-$(Q)mkdir $(PROJECT_DIR)/include
-	$(Q)echo "export PROJECT_CONFIG=y" > $(PROJECT_DIR)/Makefile
 	$(Q)echo "export PROJECT_DIR=\$$(shell pwd)" >> $(PROJECT_DIR)/Makefile
 	$(Q)echo "include bitthunder/Makefile" >> $(PROJECT_DIR)/Makefile
 
 mrproper:
 ifneq ($(PROJECT_CONFIG),y)
-	$(Q)rm $(PRM_FLAGS) $(BASE).config $(BASE)lib/include/bt_bsp_config.h $(PRM_PIPE)
+	$(Q)rm $(PRM_FLAGS) $(PROJECT_DIR)/.config $(BASE)lib/include/bt_bsp_config.h $(PRM_PIPE)
 else
 	$(Q)rm $(PRM_FLAGS) $(PROJECT_DIR)/.config $(PROJECT_DIR)/include/bt_bsp_config.h $(PRM_PIPE)
 endif
