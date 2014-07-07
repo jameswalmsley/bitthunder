@@ -32,6 +32,8 @@ struct bt_process_time {
 
 #define curtask 	curthread->task
 
+BT_ERROR BT_StartScheduler();
+
 /**
  *	@brief	Create a new process within Kernel-space.
  *
