@@ -30,21 +30,22 @@ extern "C" {
 #define portSTACK_TYPE	unsigned portLONG
 #define portBASE_TYPE	portLONG
 
-#define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS	portConfigureRuntimeTimer
+typedef portSTACK_TYPE StackType_t;
+typedef long BaseType_t;
+typedef unsigned long UBaseType_t;
+
+typedef unsigned long UBaseType_t;
+typedef unsigned long TickType_t;
+
+//#define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS	portConfigureRuntimeTimer
 #define portGET_RUN_TIME_COUNTER_VALUE			portGetRuntimeCounter
 
-#if( configUSE_16_BIT_TICKS == 1 )
-	typedef unsigned portSHORT portTickType;
-	#define portMAX_DELAY ( portTickType ) 0xffff
-#else
-	typedef unsigned portLONG portTickType;
-	#define portMAX_DELAY ( portTickType ) 0xffffffff
-#endif
+#define portMAX_DELAY ( TickType_t ) 0xffffffff
+
 /*-----------------------------------------------------------*/
 
 /* Architecture specifics. */
 #define portSTACK_GROWTH		( -1 )
-#define portTICK_RATE_MS		( ( portTickType ) 1000 / configTICK_RATE_HZ )
 #define portBYTE_ALIGNMENT		8
 #define portNOP()				__asm volatile ( "NOP" );
 /*-----------------------------------------------------------*/
