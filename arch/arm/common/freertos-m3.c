@@ -25,7 +25,7 @@ FreeRTOS.org versions prior to V4.4.0 did not include this definition. */
 
 
 static BT_ERROR tick_isr_handler(BT_u32 ulIRQ, void *pParam) {
-	vTaskIncrementTick();
+	xTaskIncrementTick();
 
 #if configUSE_PREEMPTION == 1
 	vTaskSwitchContext();
@@ -209,7 +209,7 @@ void vFreeRTOS_IRQInterrupt ( void )
 
 	ulDummy = portSET_INTERRUPT_MASK_FROM_ISR();
 	{
-		vTaskIncrementTick();
+		xTaskIncrementTick();
 	}
 	portCLEAR_INTERRUPT_MASK_FROM_ISR( ulDummy );
 
@@ -293,7 +293,7 @@ void BT_NVIC_SysTick_Handler(void)
 
 	ulDummy = portSET_INTERRUPT_MASK_FROM_ISR();
 	{
-		vTaskIncrementTick();
+		xTaskIncrementTick();
 	}
 	portCLEAR_INTERRUPT_MASK_FROM_ISR( ulDummy );
 }

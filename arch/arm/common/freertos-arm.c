@@ -19,7 +19,7 @@ struct _BT_OPAQUE_HANDLE {
 volatile unsigned long ulCriticalNesting = 9999UL;
 
 static BT_ERROR tick_isr_handler(BT_u32 ulIRQ, void *pParam) {
-	vTaskIncrementTick();
+	xTaskIncrementTick();
 
 #if configUSE_PREEMPTION == 1
 	vTaskSwitchContext();
