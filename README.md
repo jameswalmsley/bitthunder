@@ -38,7 +38,9 @@ In order for a feature branch to be accepted into the master, it must:
 In order to initiate the merging process, you must make a merge request. This is easily done on GitHUB
 using the pull request feature. For those working with me on GitLab, simply make a merge request.
 
-Branches are made with a --no-ff merge.
+Branches are made with a --no-ff merge
+
+It MUST be possible to build the kernel using a sensible configuration from any merge-point on the master branch.
 
 ## Stable Master Branch
 
@@ -78,7 +80,7 @@ These are simple:
     cd myproject
 
     # The next command creates an empty project with reference to the base kernel sources.
-    make -C ../bitthunder/ PROJECT_CONFIG=y PROJECT_DIR=$(pwd) project.init
+    make -C ../bitthunder/ PROJECT_DIR=$(pwd) project.init
     make menuconfig
     make
 
@@ -86,7 +88,7 @@ These are simple:
 
     mkdir myproject.git
     cd myproject.git
-    make -C ../bitthunder/ PROJECT_CONFIG=y PROJECT_DIR=$(pwd) project.git.init
+    make -C ../bitthunder/ PROJECT_DIR=$(pwd) project.git.init
 	make menuconfig
     make
 
@@ -107,6 +109,16 @@ After configuration the following files will be generated:
 
 In a project, the objects.mk file lists the project objects that need to be additionally built
 and linked into the kernel.
+
+To add a file to the build process you simply add a line to the objects.mk file:
+
+    objs += $(APP)main.o
+    objs += $(APP)path/to/my/object.o
+    include $(APP)path/to/module/objects.mk
+
+Note you may also use configuration options (as defined in your Kconfig file) to optionally compile objects:
+
+    objs-$(BT_CONFIG_FEATURE_A_SUPPORT) += $(APP)feature_a.o
 
 ### Kconfig
 
