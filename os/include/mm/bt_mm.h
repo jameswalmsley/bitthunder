@@ -44,8 +44,8 @@
 #define bt_phys_to_virt(phys_addr)	(bt_vaddr_t) ((bt_vaddr_t) (phys_addr) - BT_CONFIG_RAM_PHYS + BT_CONFIG_RAM_VIRT)
 #define bt_virt_to_phys(virt_addr)	(bt_paddr_t) ((bt_paddr_t) (virt_addr) - BT_CONFIG_RAM_VIRT + BT_CONFIG_RAM_PHYS)
 #else
-#define bt_phys_to_virt(phys_addr)	(phys_addr)
-#define bt_virt_to_phys(virt_addr)	(virt_addr)
+#define bt_phys_to_virt(phys_addr)	(bt_vaddr_t) (phys_addr)
+#define bt_virt_to_phys(virt_addr)	(bt_paddr_t) (virt_addr)
 #endif
 
 #endif
