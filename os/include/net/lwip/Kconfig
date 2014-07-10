@@ -105,5 +105,15 @@ config NET_LWIP_IP_REASS_MAX_PBUFS
 	   int "Total maximum amount of pbufs waiting to be reassembled."
 	   default	128
 	   depends on NET_LWIP
-
+	   
+config NET_LWIP_TCP_MSS
+	   int "TCP maximum segment size"
+	   default 1500
+	   depends on NET_LWIP
+	   	   
+config NET_LWIP_MEM_SIZE
+	   int "total amount of RAM heap available"
+	   default 16000 	   
+	   depends on NET_LWIP
+	
 endmenu

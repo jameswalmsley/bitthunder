@@ -20,12 +20,15 @@
 #define LWIP_IGMP						BT_CONFIG_USE_IGMP
 #define LWIP_NETIF_HOSTNAME				BT_CONFIG_USE_DHCP
 #define LWIP_DNS						1
+#define DNS_TABLE_SIZE                  2
+#define DNS_MAX_NAME_LENGTH             64
+
 
 #define LWIP_SO_RCVTIMEO				1
 
 
-#define TCP_MSS							1500
-#define MEM_SIZE						16000
+#define TCP_MSS							BT_CONFIG_NET_LWIP_TCP_MSS
+#define MEM_SIZE						BT_CONFIG_NET_LWIP_MEM_SIZE
 #define MEM_ALIGNMENT                   4
 #define TCP_SND_BUF                     (3 * TCP_MSS)
 #define TCP_WND                         (2 * TCP_MSS)
