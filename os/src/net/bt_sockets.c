@@ -183,11 +183,15 @@ BT_EXPORT_SYMBOL(fcntl);
 
 
 static BT_s32 socket_read(BT_HANDLE hSocket, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer) {
-	return BT_ERR_GENERIC;
+
+	return lwip_recv(hSocket->socket, pBuffer, ulSize, ulFlags);
+	//return BT_ERR_GENERIC;
 }
 
 static BT_s32 socket_write(BT_HANDLE hSocket, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer) {
-	return BT_ERR_GENERIC;
+
+	return lwip_send(hSocket->socket, pBuffer, ulSize, ulFlags);
+	//return BT_ERR_GENERIC;
 }
 
 /**
