@@ -32,6 +32,7 @@ static int bt_ls(BT_HANDLE hShell, int argc, char **argv) {
 		}
 
 		bt_fprintf(hStdout, "%s %10llu ", attr, oDirent.ullFileSize);
+		bt_fprintf(hStdout, "%02d.%02d.%04d %02d:%02d ", oDirent.mtime.day, oDirent.mtime.month, oDirent.mtime.year, oDirent.mtime.hour, oDirent.mtime.min);
 		bt_fprintf(hStdout, "%s\n", oDirent.szpName);
 	}
 
