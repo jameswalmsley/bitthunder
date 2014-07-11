@@ -383,7 +383,7 @@ void (* const g_pfnVectors[])(void) = {
 
 void BT_NVIC_Default_Handlr(void);
 void BT_NVIC_Test_Handler(void);
-//#pragma weak BT_NVIC_Reset_Handler		= BT_NVIC_Default_Handler 
+//#pragma weak BT_NVIC_Reset_Handler		= BT_NVIC_Default_Handler
 #pragma weak BT_NVIC_NMI_Handler		= BT_NVIC_Default_Handler
 #pragma weak BT_NVIC_HardFault_Handler	= BT_NVIC_Test_Handler
 #pragma weak BT_NVIC_MemManage_Handler	= BT_NVIC_Default_Handler
@@ -594,6 +594,7 @@ extern unsigned long __bss_start;
 extern unsigned long __bss_end;
 extern unsigned long _estack;
 
+void __attribute__((naked)) bt_reset(void);
 void bt_reset(void) {
 	SCB_REGS * pSCB = SCB;
 
@@ -627,4 +628,3 @@ void bt_reset(void) {
 	while (1)
 		;
 }
-
