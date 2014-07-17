@@ -10,6 +10,12 @@ extern const BT_IF_DEVICE BT_LM3Sxx_ADC_oDeviceInterface;
 
 typedef struct _LM3Sxx_ADC_REGS {
 	BT_u32	ADCACTSS;				// 0x00		active sample sequencer
+
+#define	LM3Sxx_ADC_ADCACTSS_SS0						0x00000001
+#define	LM3Sxx_ADC_ADCACTSS_SS1						0x00000002
+#define	LM3Sxx_ADC_ADCACTSS_SS2						0x00000004
+#define	LM3Sxx_ADC_ADCACTSS_SS3						0x00000008
+
 	BT_u32	ADCRIS;					// 0x04		raw interrupt status
 
 #define	LM3Sxx_ADC_ADCRIS_SS0						0x00000001
@@ -18,7 +24,13 @@ typedef struct _LM3Sxx_ADC_REGS {
 #define	LM3Sxx_ADC_ADCRIS_SS3						0x00000008
 
 	BT_u32	ADCIM;					// 0x08		interrupt mask
-	BT_u32	ADGISC;					// 0x0C		interrupt status and clear
+
+#define	LM3Sxx_ADC_ADCIM_SS0						0x00000001
+#define	LM3Sxx_ADC_ADCIM_SS1						0x00000002
+#define	LM3Sxx_ADC_ADCIM_SS2						0x00000004
+#define	LM3Sxx_ADC_ADCIM_SS3						0x00000008
+
+	BT_u32	ADCISC;					// 0x0C		interrupt status and clear
 	BT_u32	ADCOSTAT;				// 0x10		interrupt enable register
 	BT_u32	ADCEMUX;				// 0x14		interrupt enable register
 	BT_u32	ADCUSTAT;				// 0x18		interrupt enable register

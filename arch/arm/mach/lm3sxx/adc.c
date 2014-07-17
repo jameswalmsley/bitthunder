@@ -23,7 +23,7 @@ struct _BT_OPAQUE_HANDLE {
 	const BT_INTEGRATED_DEVICE *pDevice;
 	BT_ADC_OPERATING_MODE		eMode;			///< Operational mode, i.e. buffered/polling mode.
 	BT_u32						ulSWAverageCount;
-	BT_HANDLE		   			hFifo[8];		///< fifo - ring buffer for every data channel.
+	BT_HANDLE		   			hFifo[17];		///< fifo - ring buffer for every data channel.
 };
 
 static BT_HANDLE g_ADC_HANDLES[2] = {
@@ -34,35 +34,128 @@ static BT_HANDLE g_ADC_HANDLES[2] = {
 static void disableAdcPeripheralClock(BT_HANDLE hAdc);
 
 
-BT_ERROR BT_NVIC_IRQ_38(void) {
-	//BT_HANDLE hAdc = g_ADC_HANDLES[0];
+BT_ERROR BT_NVIC_IRQ_30(void) {
+	BT_HANDLE hAdc = g_ADC_HANDLES[0];
 
-	//volatile LM3Sxx_ADC_REGS *pRegs = hAdc->pRegs;
-	BT_ERROR Error;
+	volatile LM3Sxx_ADC_REGS *pRegs = hAdc->pRegs;
 
-	/*static BT_u32 ulSum[8] = {0};
+	// Read and Clear the interrupt.
+    BT_u32 ulStatus = pRegs->ADCRIS;
+    pRegs->ADCISC = ulStatus;
+
+	static BT_u32 ulSum[8] = {0};
 	static BT_u32 ulAverage;
-
-	//BT_u32 ulActive = pRegs->ADSTAT & 0x000000FF;		// Read ADC will clear the interrupt
 
 	BT_u32 i;
 	for (i = 0; i < 8; i++) {
-		if (ulActive & (0x01<<i))
-			ulSum[i] += ((pRegs->ADData[i] >> 4) & 0xFFF);		
+		ulSum[i] += (pRegs->Sequencer[0].SSFIFO & 0x3FF);
 	}
-	if (ulActive) ulAverage++;
+	ulAverage++;
 	if (ulAverage >= hAdc->ulSWAverageCount) {
 		for (i = 0; i < 8; i++) {
-			if (ulActive & (0x01<<i)) {
-				ulSum[i] /= ulAverage;
-				BT_FifoWrite(hAdc->hFifo[i], 1, &ulSum[i], &Error);
-				ulSum[i] = 0;
-			}
+			ulSum[i] /= ulAverage;
+			BT_FifoWriteFromISR(hAdc->hFifo[i], 1, &ulSum[i]);
+			ulSum[i] = 0;
 		}
 		ulAverage = 0;
-	}*/
+	}
 
-	return Error;
+	pRegs->ADCPSSI |= LM3Sxx_ADC_ADCPSSI_SS1_START;
+
+	return BT_ERR_NONE;
+}
+
+BT_ERROR BT_NVIC_IRQ_31(void) {
+	BT_HANDLE hAdc = g_ADC_HANDLES[0];
+
+	volatile LM3Sxx_ADC_REGS *pRegs = hAdc->pRegs;
+
+    // Read and Clear the interrupt.
+    BT_u32 ulStatus = pRegs->ADCRIS;
+    pRegs->ADCISC = ulStatus;
+
+	static BT_u32 ulSum[4] = {0};
+	static BT_u32 ulAverage;
+
+	BT_u32 i;
+	for (i = 0; i < 4; i++) {
+		ulSum[i] += (pRegs->Sequencer[1].SSFIFO & 0x3FF);
+	}
+	ulAverage++;
+	if (ulAverage >= hAdc->ulSWAverageCount) {
+		for (i = 0; i < 4; i++) {
+			ulSum[i] /= ulAverage;
+			BT_FifoWriteFromISR(hAdc->hFifo[8+i], 1, &ulSum[i]);
+			ulSum[i] = 0;
+		}
+		ulAverage = 0;
+	}
+
+	pRegs->ADCPSSI |= LM3Sxx_ADC_ADCPSSI_SS2_START;
+
+	return BT_ERR_NONE;
+}
+
+BT_ERROR BT_NVIC_IRQ_32(void) {
+	BT_HANDLE hAdc = g_ADC_HANDLES[0];
+
+	volatile LM3Sxx_ADC_REGS *pRegs = hAdc->pRegs;
+
+    // Read and Clear the interrupt.
+    BT_u32 ulStatus = pRegs->ADCRIS;
+    pRegs->ADCISC = ulStatus;
+
+	static BT_u32 ulSum[4] = {0};
+	static BT_u32 ulAverage;
+
+	BT_u32 i;
+	for (i = 0; i < 4; i++) {
+		ulSum[i] += (pRegs->Sequencer[2].SSFIFO & 0x3FF);
+	}
+	ulAverage++;
+	if (ulAverage >= hAdc->ulSWAverageCount) {
+		for (i = 0; i < 4; i++) {
+			ulSum[i] /= ulAverage;
+			BT_FifoWriteFromISR(hAdc->hFifo[12+i], 1, &ulSum[i]);
+			ulSum[i] = 0;
+		}
+		ulAverage = 0;
+	}
+
+	pRegs->ADCPSSI |= LM3Sxx_ADC_ADCPSSI_SS3_START;
+
+	return BT_ERR_NONE;
+}
+
+BT_ERROR BT_NVIC_IRQ_33(void) {
+	BT_HANDLE hAdc = g_ADC_HANDLES[0];
+
+	volatile LM3Sxx_ADC_REGS *pRegs = hAdc->pRegs;
+
+    // Read and Clear the interrupt.
+    BT_u32 ulStatus = pRegs->ADCRIS;
+    pRegs->ADCISC = ulStatus;
+
+	static BT_u32 ulSum[1] = {0};
+	static BT_u32 ulAverage;
+
+	BT_u32 i;
+	for (i = 0; i < 1; i++) {
+		ulSum[i] += (pRegs->Sequencer[3].SSFIFO & 0x3FF);
+	}
+	ulAverage++;
+	if (ulAverage >= hAdc->ulSWAverageCount) {
+		for (i = 0; i < 1; i++) {
+			ulSum[i] /= ulAverage;
+			BT_FifoWriteFromISR(hAdc->hFifo[16+i], 1, &ulSum[i]);
+			ulSum[i] = 0;
+		}
+		ulAverage = 0;
+	}
+
+	pRegs->ADCPSSI |= LM3Sxx_ADC_ADCPSSI_SS0_START;
+
+	return BT_ERR_NONE;
 }
 
 static BT_ERROR adc_cleanup(BT_HANDLE hAdc) {
@@ -72,13 +165,14 @@ static BT_ERROR adc_cleanup(BT_HANDLE hAdc) {
 
 	// Free any buffers if used.
 	BT_u32 i;
-	for (i = 0; i < 8; i++) {
+	for (i = 0; i < 17; i++) {
 		BT_CloseHandle(hAdc->hFifo[i]);
 	}
 
 	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hAdc->pDevice, BT_RESOURCE_IRQ, 0);
 
-	BT_DisableInterrupt(pResource->ulStart);
+	for (i = pResource->ulStart; i <= pResource->ulEnd; i++)
+		BT_DisableInterrupt(i);
 
 	pResource = BT_GetIntegratedResource(hAdc->pDevice, BT_RESOURCE_ENUM, 0);
 
@@ -90,6 +184,7 @@ static BT_ERROR adc_cleanup(BT_HANDLE hAdc) {
 static BT_ERROR adc_setconfig(BT_HANDLE hAdc, BT_ADC_CONFIG *pConfig) {
 	volatile LM3Sxx_ADC_REGS *pRegs = hAdc->pRegs;
 	BT_u32 i, j;
+	BT_ERROR Error = BT_ERR_NONE;
 
 	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hAdc->pDevice, BT_RESOURCE_ENUM, 0);
 
@@ -114,20 +209,31 @@ static BT_ERROR adc_setconfig(BT_HANDLE hAdc, BT_ADC_CONFIG *pConfig) {
 
 	pRegs->ADCACTSS = 0x0000000F;		// Enable all sequencers
 
-	for (i = 0; i < 3; i++) {
+	pRegs->ADCIM &= ~(LM3Sxx_ADC_ADCIM_SS0 | LM3Sxx_ADC_ADCIM_SS1 | LM3Sxx_ADC_ADCIM_SS2 | LM3Sxx_ADC_ADCIM_SS3);	// Disable the interrupt
+
+	BT_u32 ulSequencer[4] = {8,4,4,1};
+
+	BT_u32 ulStart = 0;
+	for (i = 0; i < 4; i++) {
 		pRegs->Sequencer[i].SSMUX = 0;
 		pRegs->Sequencer[i].SSCTL = 0;
-		if (pConfig->eInputMode == BT_ADC_INPUT_MODE_DIFFERENTIAL) {
-			for (j = 0; j < 8; j++)
+		for (j = 0; j < ulSequencer[i]; j++) {
+			if (pConfig->eInputMode == BT_ADC_INPUT_MODE_DIFFERENTIAL) {
 				pRegs->Sequencer[i].SSCTL |= (LM3Sxx_ADC_MUX_SSCTL_DIFF << j*4);
+			}
+			pRegs->Sequencer[i].SSMUX |= ((j+ulStart) << j*4);
 		}
+		ulStart += ulSequencer[i];
+		BT_u32 ulShift = (ulSequencer[i]*4-4);
+		pRegs->Sequencer[i].SSCTL |= (LM3Sxx_ADC_MUX_SSCTL_END) << ulShift;
+		if (i == 3)
+			pRegs->Sequencer[i].SSCTL |= (LM3Sxx_ADC_MUX_SSCTL_TEMP) << ulShift;
+		pRegs->Sequencer[i].SSCTL |= (LM3Sxx_ADC_MUX_SSCTL_INTEN) << ulShift;
 	}
-	pRegs->Sequencer[0].SSCTL = LM3Sxx_ADC_MUX_SSCTL_END << 28;
-	pRegs->Sequencer[1].SSCTL = LM3Sxx_ADC_MUX_SSCTL_END << 16;
-	pRegs->Sequencer[2].SSCTL = LM3Sxx_ADC_MUX_SSCTL_END << 16;
-	pRegs->Sequencer[3].SSCTL = LM3Sxx_ADC_MUX_SSCTL_END << 4;
 
 	hAdc->ulSWAverageCount = pConfig->ulSWAverageCount;
+
+	pRegs->ADCACTSS = (LM3Sxx_ADC_ADCACTSS_SS0 | LM3Sxx_ADC_ADCACTSS_SS1 | LM3Sxx_ADC_ADCACTSS_SS2 | LM3Sxx_ADC_ADCACTSS_SS3);	// Enable the sequencer
 
 	switch(pConfig->eMode) {
 	case BT_UART_MODE_POLLED: {
@@ -141,31 +247,26 @@ static BT_ERROR adc_setconfig(BT_HANDLE hAdc, BT_ADC_CONFIG *pConfig) {
 			hAdc->eMode = BT_ADC_MODE_POLLED;
 		}
 
-		//pRegs->ADINTEN &= ~LM3Sxx_ADC_ADINTEN_ADGINTEN;	// Disable the interrupt
+		pRegs->ADCIM &= ~(LM3Sxx_ADC_ADCIM_SS0 | LM3Sxx_ADC_ADCIM_SS1 | LM3Sxx_ADC_ADCIM_SS2 | LM3Sxx_ADC_ADCIM_SS3);	// Disable the interrupt
 
 		break;
 	}
 
 	case BT_UART_MODE_BUFFERED:
 	{
-		/*pRegs->ADCR &= ~(0x000000FF);
-		pRegs->ADCR	   |= pConfig->ulActiveChannels;
 		if(hAdc->eMode != BT_ADC_MODE_BUFFERED) {
 			BT_u32 i;
-			for (i = 0; i < 8; i++) {
+			for (i = 0; i < 17; i++) {
 				if(!hAdc->hFifo[i]) {
-					hAdc->hFifo[i] = BT_FifoCreate(pConfig->ulBufferSize, 4, BT_FIFO_NONBLOCKING, &Error);
+					hAdc->hFifo[i] = BT_FifoCreate(pConfig->ulBufferSize, 4, 0, &Error);
 				}
 			}
-			//pRegs->ADINTEN |= LM3Sxx_ADC_ADINTEN_ADGINTEN;	// Enable the interrupt
-			for (i = 0; i < 8; i++) {
-				if (pConfig->ulActiveChannels & (0x1<<i)) {
-					pRegs->ADINTEN = 0x1<<i;	// Enable the interrupt
-				}
-			}
+			pRegs->ADCIM 	= (LM3Sxx_ADC_ADCIM_SS0 | LM3Sxx_ADC_ADCIM_SS1 | LM3Sxx_ADC_ADCIM_SS2 | LM3Sxx_ADC_ADCIM_SS3);	// Enable the interrupt
+
+			pRegs->ADCPSSI |= LM3Sxx_ADC_ADCPSSI_SS0_START;
 
 			hAdc->eMode = BT_ADC_MODE_BUFFERED;
-		}*/
+		}
 		break;
 	}
 
@@ -174,7 +275,7 @@ static BT_ERROR adc_setconfig(BT_HANDLE hAdc, BT_ADC_CONFIG *pConfig) {
 		break;
 	}
 
-	return BT_ERR_NONE;
+	return Error;
 }
 
 static BT_ERROR adc_getconfig(BT_HANDLE hAdc, BT_ADC_CONFIG *pConfig) {
@@ -188,25 +289,11 @@ static BT_ERROR adc_getconfig(BT_HANDLE hAdc, BT_ADC_CONFIG *pConfig) {
 
 
 static BT_ERROR adc_start(BT_HANDLE hAdc) {
-	/*volatile LM3Sxx_ADC_REGS *pRegs = hAdc->pRegs;
-
-	pRegs->ADCR |= LM3Sxx_ADC_ADCR_PDN;
-
-	if (hAdc->eMode == BT_ADC_MODE_BUFFERED) {
-		pRegs->ADCR |= LM3Sxx_ADC_ADCR_BURST;
-	}*/
 
 	return BT_ERR_NONE;
 }
 
 static BT_ERROR adc_stop(BT_HANDLE hAdc) {
-	/*volatile LM3Sxx_ADC_REGS *pRegs = hAdc->pRegs;
-
-	pRegs->ADCR &= ~LM3Sxx_ADC_ADCR_PDN;
-
-	if (hAdc->eMode == BT_ADC_MODE_BUFFERED) {
-		pRegs->ADCR &= ~LM3Sxx_ADC_ADCR_BURST;
-	}*/
 
 	return BT_ERR_NONE;
 }
@@ -471,16 +558,16 @@ static BT_HANDLE adc_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 		goto err_free_out;
 	}
 
-	BT_SetInterruptPriority(pResource->ulStart, 1);
-
 /*	On NVIC we don't need to register interrupts, LINKER has patched vector for us
  * Error = BT_RegisterInterrupt(pResource->ulStart, adc_irq_handler, hAdc);
 	if(Error) {
 		goto err_free_out;
 	}*/
 
-	for (i = pResource->ulStart; i < pResource->ulEnd; i++)
+	for (i = pResource->ulStart; i <= pResource->ulEnd; i++) {
+		BT_SetInterruptPriority(i, 1);
 		Error = BT_EnableInterrupt(i);
+	}
 
 	return hAdc;
 
