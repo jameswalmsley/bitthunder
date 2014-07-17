@@ -169,10 +169,17 @@ BT_ERROR BT_GetProcessTime(struct bt_process_time *time, BT_u32 i) {
 		return BT_ERR_GENERIC;
 	}
 
+	BT_u32 ulThreads = 0;
+	bt_list_for_each(pos, &hProcess->task.threads) {
+		ulThreads++;
+	}
+
 	time->hProcess 			= hProcess;
 	time->ullRunTimeCounter = hProcess->task.ullRunTimeCounter;
 	time->ulRunTimePercent 	= ((time->ullRunTimeCounter) / (BT_GetGlobalTimer() / 100));
 	time->name 				= hProcess->task.name;
+	time->ulPID				= hProcess->task.pid;
+	time->ulthreads			= ulThreads;
 
 	return BT_ERR_NONE;
 }
