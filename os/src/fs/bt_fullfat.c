@@ -334,6 +334,18 @@ static BT_ERROR fullfat_read_dir(BT_HANDLE hDir, BT_DIRENT *pDirent) {
 	if(pDir->oDirent.Attrib & FF_FAT_ATTR_DIR) {
 		pDirent->attr |= BT_ATTR_DIR;
 	}
+	if(pDir->oDirent.Attrib & FF_FAT_ATTR_READONLY) {
+		pDirent->attr |= BT_ATTR_READONLY;
+	}
+	if(pDir->oDirent.Attrib & FF_FAT_ATTR_HIDDEN) {
+		pDirent->attr |= BT_ATTR_HIDDEN;
+	}
+	if(pDir->oDirent.Attrib & FF_FAT_ATTR_SYSTEM) {
+		pDirent->attr |= BT_ATTR_SYSTEM;
+	}
+	if(pDir->oDirent.Attrib & FF_FAT_ATTR_ARCHIVE) {
+		pDirent->attr |= BT_ATTR_ARCHIVE;
+	}
 
 	ff_time_to_bt_time(&pDirent->ctime, &pDir->oDirent.CreateTime);
 	ff_time_to_bt_time(&pDirent->atime, &pDir->oDirent.AccessedTime);
