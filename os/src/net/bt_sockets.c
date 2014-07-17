@@ -200,8 +200,9 @@ static BT_s32 socket_write(BT_HANDLE hSocket, BT_u32 ulFlags, BT_u32 ulSize, con
  *
  **/
 static const BT_IF_FILE oFileOperations = {
-	.pfnRead 	= socket_read,
-	.pfnWrite	= socket_write,
+	.ulSupported = MSG_DONTWAIT,
+	.pfnRead 	 = socket_read,
+	.pfnWrite	 = socket_write,
 };
 
 static const BT_IF_HANDLE oHandleInterface = {
