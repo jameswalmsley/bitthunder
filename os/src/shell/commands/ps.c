@@ -3,7 +3,7 @@
 #include <string.h>
 
 struct process_time {
-	BT_u32 ullRuntimeCounter;
+	BT_u64 ullRuntimeCounter;
 };
 
 static int bt_ps(BT_HANDLE hShell, int argc, char **argv) {
@@ -19,7 +19,6 @@ static int bt_ps(BT_HANDLE hShell, int argc, char **argv) {
 		return -1;
 	}
 
-
 	BT_u64 runtime = BT_GetGlobalTimer();
 	for(i = 0; i < total_processes; i++) {
 		BT_GetProcessTime(&oTime, i);
@@ -34,9 +33,17 @@ static int bt_ps(BT_HANDLE hShell, int argc, char **argv) {
 		runtimes[i].ullRuntimeCounter = oTime.ullRunTimeCounter - runtimes[i].ullRuntimeCounter;
 	}
 
-	for(i = 0; i < total_processes; i++) {
-		BT_GetProcessTime(&oTime, i);
-		bt_fprintf(hStdout, "%s : %d%%\n", oTime.name, runtimes[i].ullRuntimeCounter / (runtime / 100));
+	bt_fprintf(hStdout, "PID   Name                              CPU    Threads\n");
+
+	char *pBuf = BT_kMalloc(128);
+	if (pBuf) {
+		for(i = 0; i < total_processes; i++) {
+			BT_GetProcessTime(&oTime, i);
+			BT_u32 ulLen = sprintf(pBuf, "%-6d%-32s%4d%%", oTime.ulPID, oTime.name, (runtimes[i].ullRuntimeCounter / (runtime / 100)));
+			sprintf(pBuf+ulLen, "%11d\n", oTime.ulthreads);
+			bt_fprintf(hStdout, pBuf);
+		}
+		BT_kFree(pBuf);
 	}
 
 	bt_fprintf(hStdout, "Total runtime %d seconds\n", (BT_u32) (BT_GetGlobalTimer() / (BT_u64)BT_GetGlobalTimerRate()));
