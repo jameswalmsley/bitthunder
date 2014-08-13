@@ -19,7 +19,7 @@ struct _BT_OPAQUE_HANDLE {
 volatile unsigned long ulCriticalNesting = 9999UL;
 
 static BT_ERROR tick_isr_handler(BT_u32 ulIRQ, void *pParam) {
-	vTaskIncrementTick();
+	xTaskIncrementTick();
 
 #if configUSE_PREEMPTION == 1
 	vTaskSwitchContext();
@@ -304,7 +304,8 @@ void vFreeRTOS_IRQInterrupt ( void )
 	__asm volatile( "clrex" );
 
 	/* Call the handler provided with the standalone BSP */
-	__asm volatile( "bl  BT_ARCH_ARM_GIC_IRQHandler" );
+	//__asm volatile( "bl  BT_ARCH_ARM_GIC_IRQHandler" );
+	BT_ARCH_ARM_GIC_IRQHandler();
 
 	ulCriticalNesting--;
 
