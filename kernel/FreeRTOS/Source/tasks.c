@@ -2142,6 +2142,17 @@ void vTaskSwitchContext( void )
 		xYieldPending = pdFALSE;
 		traceTASK_SWITCHED_OUT();
 
+		#if ( configBITTHUNDER == 1 )
+			BT_u64 ullTempCounter = BT_GetGlobalTimer();
+			if(curthread) {
+				curthread->ullRunTimeCounter += (BT_u64) (ullTempCounter - ullTaskSwitchedInTime);
+				if(curtask) {
+					curtask->ullRunTimeCounter += (BT_u64) (ullTempCounter - ullTaskSwitchedInTime);
+				}
+			}
+			ullTaskSwitchedInTime = ullTempCounter;
+		#endif
+
 		#if ( configGENERATE_RUN_TIME_STATS == 1 )
 		{
 				#ifdef portALT_GET_RUN_TIME_COUNTER_VALUE
