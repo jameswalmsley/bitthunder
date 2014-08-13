@@ -67,7 +67,7 @@
 #ifndef FREERTOS_CONFIG_H
 #define FREERTOS_CONFIG_H
 
-#include <bt_config.h>
+#include <bitthunder.h>
 
 /*-----------------------------------------------------------
  * Application specific definitions.
@@ -141,5 +141,9 @@ priority values, 0 to 15.  This must correspond to the
 configKERNEL_INTERRUPT_PRIORITY setting.  Here 15 corresponds to the lowest
 NVIC value of 255. */
 #define configLIBRARY_KERNEL_INTERRUPT_PRIORITY	31
+
+#ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
+#define portCLEAN_UP_TCB(pxTCB) ({bt_paddr_t phys = bt_virt_to_phys(pxTCB->pxKernelStack); bt_page_free(phys, BT_PAGE_SIZE);})
+#endif
 
 #endif /* FREERTOS_CONFIG_H */
