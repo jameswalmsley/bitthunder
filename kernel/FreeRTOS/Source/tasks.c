@@ -139,6 +139,12 @@ typedef struct tskTaskControlBlock
 		xMPU_SETTINGS	xMPUSettings;		/*< The MPU settings are defined as part of the port layer.  THIS MUST BE THE SECOND MEMBER OF THE TCB STRUCT. */
 		BaseType_t		xUsingStaticallyAllocatedStack; /* Set to pdTRUE if the stack is a statically allocated array, and pdFALSE if the stack is dynamically allocated. */
 	#endif
+	#if ( configBITTHUNDER == 1 )
+	#ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
+	volatile StackType_t	*pxTopOfKernelStack;
+	volatile StackType_t	*pxKernelStack;
+	#endif
+	#endif
 
 	ListItem_t			xGenericListItem;	/*< The list that the state list item of a task is reference from denotes the state of that task (Ready, Blocked, Suspended ). */
 	ListItem_t			xEventListItem;		/*< Used to reference a task from an event list. */
@@ -563,6 +569,14 @@ StackType_t *pxTopOfStack;
 
 	if( pxNewTCB != NULL )
 	{
+		StackType_t *pxTopOfStack;
+
+		#if (configBITTHUNDER == 1)
+		#ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
+		StackType_t *pxTopOfKernelStack;
+		#endif
+		#endif
+
 		#if( portUSING_MPU_WRAPPERS == 1 )
 			/* Should the task be created in privileged mode? */
 			BaseType_t xRunPrivileged;
@@ -602,6 +616,14 @@ StackType_t *pxTopOfStack;
 
 			/* Check the alignment of the calculated top of stack is correct. */
 			configASSERT( ( ( ( portPOINTER_SIZE_TYPE ) pxTopOfStack & ( portPOINTER_SIZE_TYPE ) portBYTE_ALIGNMENT_MASK ) == 0UL ) );
+			
+			#if (configBITTHUNDER == 1)
+			#ifdef BT_CONfIG_USE_VIRTUAL_ADDRESSSING
+			pxTopOfKernelStack = pxNewTCB->pxKernelStack + ((BT_PAGE_SIZE / sizeof(StackType_t)) - 1);
+			pxTopOfKernelStack = (StackType_t *) (((portPOINTER_SIZE_TYPE) pxTopOfKernelStack) & ((portPOINTER_SIZE_TYPE) ~portBYTE_ALIGNMENT_MASK));
+			pxNewTCB->pxTopOfKernelStack = pxTopOfKernelStack;
+			#endif
+			#endif
 		}
 		#else /* portSTACK_GROWTH */
 		{
@@ -2255,6 +2277,15 @@ void vTaskSwitchContext( void )
 			_impure_ptr = &( pxCurrentTCB->xNewLib_reent );
 		}
 		#endif /* configUSE_NEWLIB_REENTRANT */
+
+		#if (configBITTHUNDER == 1)
+		curthread = (struct bt_thread *) pxCurrentTCB->pxTaskTag;
+		#ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
+		if(curthread) {
+			bt_mmu_switch(curtask->map->pgd);
+		}
+		#endif
+		#endif
 	}
 }
 /*-----------------------------------------------------------*/
@@ -2835,7 +2866,7 @@ static void prvInitialiseTCBVariables( TCB_t * const pxTCB, const char * const p
 UBaseType_t x;
 
 	/* Store the task name in the TCB. */
-	for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) configMAX_TASK_NAME_LEN; x++ )
+	for( x = ( UBaseType_t ) 0; pcName && x < ( UBaseType_t ) configMAX_TASK_NAME_LEN; x++ )
 	{
 		pxTCB->pcTaskName[ x ] = pcName[ x ];
 
@@ -3167,6 +3198,19 @@ TCB_t *pxNewTCB;
 			( void ) memset( pxNewTCB->pxStack, ( int ) tskSTACK_FILL_BYTE, ( size_t ) usStackDepth * sizeof( StackType_t ) );
 		}
 		#endif /* ( ( configCHECK_FOR_STACK_OVERFLOW > 1 ) || ( ( configUSE_TRACE_FACILITY == 1 ) || ( INCLUDE_uxTaskGetStackHighWaterMark == 1 ) ) ) */
+
+		#if (configBITTHUNDER == 1)
+		#ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
+		void *phys_stack = (void *) bt_page_alloc(BT_PAGE_SIZE);	// Allocate a single page for task's kernel stack.
+		pxNewTCB->pxKernelStack = (portSTACK_TYPE *) bt_phys_to_virt(phys_stack);
+		if( pxNewTCB->pxKernelStack == NULL ) {
+			vPortFree(pxNewTCB->pxStack);
+			vPortFree(pxNewTCB);
+		} else {
+			memset( (void *) pxNewTCB->pxKernelStack, (int) tskSTACK_FILL_BYTE, (size_t) BT_PAGE_SIZE);
+		}
+		#endif
+		#endif
 	}
 
 	return pxNewTCB;
