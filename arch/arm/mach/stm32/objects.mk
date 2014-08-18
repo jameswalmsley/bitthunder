@@ -1,11 +1,11 @@
 #
 #	STM32 Platform objects
 #
-MACH_STM32_OBJECTS += $(BUILD_DIR)arch/arm/mach/stm32/stm32.o			# Provides machine description.
-MACH_STM32_OBJECTS += $(BUILD_DIR)arch/arm/mach/stm32/startup.o
-MACH_STM32_OBJECTS += $(BUILD_DIR)arch/arm/mach/stm32/uart.o
-MACH_STM32_OBJECTS += $(BUILD_DIR)arch/arm/mach/stm32/timer.o
-MACH_STM32_OBJECTS += $(BUILD_DIR)arch/arm/mach/stm32/gpio.o
+MACH_STM32_OBJECTS += $(BUILD_DIR)/arch/arm/mach/stm32/stm32.o			# Provides machine description.
+MACH_STM32_OBJECTS += $(BUILD_DIR)/arch/arm/mach/stm32/startup.o
+MACH_STM32_OBJECTS += $(BUILD_DIR)/arch/arm/mach/stm32/uart.o
+MACH_STM32_OBJECTS += $(BUILD_DIR)/arch/arm/mach/stm32/timer.o
+MACH_STM32_OBJECTS += $(BUILD_DIR)/arch/arm/mach/stm32/gpio.o
 
 MACH_STM32_OBJECTS += $(MACH_STM32_OBJECTS-y)
 

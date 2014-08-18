@@ -130,16 +130,10 @@ endif
 #
 #	Auto linker script generation
 #
-$(BUILD_DIR)%.lds: $(BASE)%.lds.S
+$(BUILD_DIR)/%.lds: $(BASE)/%.lds.S
 ifeq ($(DBUILD_VERBOSE_CMD), 0)											# Pretty print on successful compile, but still display errors when they occur.
-	$(Q)$(PRETTY) --dbuild "LDS" $(MODULE_NAME) $(subst $(BUILD_DIR),"",$@)
+	$(Q)$(PRETTY) --dbuild "LDS" $(MODULE_NAME) $(subst $(BUILD_DIR)/,"",$@)
 endif
 	@mkdir -p $(dir $@)
 	$(Q)$(CC) -E -P $(CFLAGS) $< -o $@
 	$(POST_CC)
-
-
-test_dir:
-	@echo $(BUILD_DIR)
-	@echo $(BASE)
-	@echo $(LINKER_SCRIPTS)

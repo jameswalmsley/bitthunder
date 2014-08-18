@@ -1,8 +1,8 @@
 #
 #	BitThunder Top-Level Makefile
 #
-
-BASE:=$(dir $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST)))
+BASE_PATH:=$(dir $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST)))
+BASE:=$(patsubst %/,%,$(BASE_PATH))
 BUILD_BASE:=$(BASE)
 MODULE_NAME:="BitThunder"
 
@@ -13,7 +13,7 @@ else
 PROJECT_CONFIG:=y
 endif
 
-BUILD_DIR:=$(PROJECT_DIR)/build/
+BUILD_DIR:=$(PROJECT_DIR)/build
 TARGETS:=$(PROJECT_DIR)/vmthunder.img
 TARGET_DEPS:=$(PROJECT_DIR)/vmthunder.elf
 
@@ -22,14 +22,14 @@ CONFIG_:=BT_CONFIG_
 CONFIG_HEADER_NAME:=bt_bsp_config.h
 
 ifneq ($(PROJECT_CONFIG), y)
-CONFIG_PATH:=$(PROJECT_DIR)/
-CONFIG_HEADER_PATH:=$(BASE)lib/include
+CONFIG_PATH:=$(PROJECT_DIR)
+CONFIG_HEADER_PATH:=$(BASE)/lib/include
 else
 CONFIG_PATH:=$(PROJECT_DIR)
 CONFIG_HEADER_PATH:=$(PROJECT_DIR)/include
 endif
 
-include $(BASE).dbuild/dbuild.mk
+include $(BASE)/.dbuild/dbuild.mk
 
 $(PROJECT_DIR)/.config:
 	$(Q)echo " ******************************************************"
@@ -47,22 +47,16 @@ endif
 list: $(PROJECT_DIR)/vmthunder.list
 .PHONY: list
 
-test:
-	@echo $(BASE)
-	@echo $(PROJECT_DIR)
-	@echo $(PROJECT_CONFIG)
-	@echo $(LDFLAGS)
-
 $(PROJECT_DIR)/vmthunder.img: $(PROJECT_DIR)/vmthunder.elf
-	$(Q)$(PRETTY) IMAGE $(MODULE_NAME) $@
+	$(Q)$(PRETTY) IMAGE $(MODULE_NAME) $(subst $(PROJECT_DIR)/,"",$@)
 	$(Q)$(OBJCOPY) $(PROJECT_DIR)/vmthunder.elf -O binary $@
 
 $(PROJECT_DIR)/vmthunder.elf: $(OBJECTS) $(LINKER_SCRIPTS)
-	$(Q)$(PRETTY) --dbuild "LD" $(MODULE_NAME) $@
+	$(Q)$(PRETTY) --dbuild "LD" $(MODULE_NAME) $(subst $(PROJECT_DIR)/,"",$@)
 	$(Q)$(CC) -march=$(CC_MARCH) -mtune=$(CC_MTUNE) $(CC_TCFLAGS) $(CC_MACHFLAGS) $(CC_MFPU) $(CC_FPU_ABI) -o $@ -T $(LINKER_SCRIPT) -Wl,-Map=$(PROJECT_DIR)/vmthunder.map $(OBJECTS) $(LDFLAGS) $(LDLIBS) -lm -lc -lgcc
 
 $(PROJECT_DIR)/vmthunder.list: $(PROJECT_DIR)/vmthunder.elf
-	$(Q)$(PRETTY) LIST $(MODULE_NAME) $@
+	$(Q)$(PRETTY) LIST $(MODULE_NAME) $(subst $(PROJECT_DIR)/,"",$@)
 ifeq ($(BT_CONFIG_BUILD_DISASSEMBLE_SOURCE), y)
 	$(Q)$(OBJDUMP) -D -S $(PROJECT_DIR)/vmthunder.elf > $@
 else
@@ -70,7 +64,7 @@ else
 endif
 
 $(PROJECT_DIR)/vmthunder.syms: $(PROJECT_DIR)/vmthunder.elf
-	$(Q)$(PRETTY) SYMS $(MODULE_NAME) $@
+	$(Q)$(PRETTY) SYMS $(MODULE_NAME) $(subst $(PROJECT_DIR)/,"",$@)
 	$(Q)$(OBJDUMP) -t $(PROJECT_DIR)/vmthunder.elf > $@
 
 $(OBJECTS) $(OBJECTS-y): $(PROJECT_DIR)/.config
@@ -97,11 +91,11 @@ project.git.init:
 
 mrproper:
 ifneq ($(PROJECT_CONFIG),y)
-	$(Q)rm $(PRM_FLAGS) $(PROJECT_DIR)/.config $(BASE)lib/include/bt_bsp_config.h $(PRM_PIPE)
+	$(Q)rm $(PRM_FLAGS) $(PROJECT_DIR)/.config $(BASE)/lib/include/bt_bsp_config.h $(PRM_PIPE)
 else
 	$(Q)rm $(PRM_FLAGS) $(PROJECT_DIR)/.config $(PROJECT_DIR)/include/bt_bsp_config.h $(PRM_PIPE)
 endif
 
 clean: clean_images
-clean_images:
+clean_images: | dbuild_splash
 	$(Q)rm $(PRM_FLAGS) $(PROJECT_DIR)/vmthunder.elf $(PROJECT_DIR)/vmthunder.img $(PROJECT_DIR)/vmthunder.elf $(PROJECT_DIR)/vmthunder.list $(PROJECT_DIR)/vmthunder.map $(PROJECT_DIR)/vmthunder.syms $(PRM_PIPE)

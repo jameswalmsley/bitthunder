@@ -49,9 +49,9 @@ include $(DBUILD_ROOT).dbuild/defines.mk
 #	Optional Include directive, blue build attempts to build using lists of objects,
 #	targets and subdirs as found in objects.mk and subdirs.mk
 #
--include $(BUILD_BASE).config.mk
-#-include $(BUILD_BASE).config
--include $(BUILD_BASE)objects.mk
+-include $(BUILD_BASE)/.config.mk
+#-include $(BUILD_BASE)/.config
+-include $(BUILD_BASE)/objects.mk
 -include targets.mk
 -include subdirs.mk
 
@@ -151,13 +151,15 @@ menuconfig: $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig
 	which kconfig-mconf > /dev/null || { echo "You need to compile and install kconfig-frontends: https://github.com/jameswalmsley/kconfig-frontends"; false; }
 ifneq ($(CONFIG_PATH),$(BASE))
 	touch $(CONFIG_PATH)/.config
-	cp $(CONFIG_PATH)/.config $(BASE).config
+	-cp $(BASE)/.config $(CONFIG_PATH)/.config.bak
+	cp $(CONFIG_PATH)/.config $(BASE)/.config
 endif
-	cd $(BASE) && CONFIG_=$(CONFIG_) APP_DIR=$(APP_DIR) PROJECT_DIR=$(PROJECT_DIR) kconfig-mconf Kconfig
+	cd $(BASE)/ && CONFIG_=$(CONFIG_) APP_DIR=$(APP_DIR) PROJECT_DIR=$(PROJECT_DIR) kconfig-mconf Kconfig
 	@mkdir -p $(CONFIG_HEADER_PATH)
-	$(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig $(BASE) > $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME)
+	$(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig $(BASE)/ > $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME)
 ifneq ($(CONFIG_PATH),$(BASE))
-	cp $(BASE).config $(CONFIG_PATH)/.config
+	cp $(BASE)/.config $(CONFIG_PATH)/.config
+	-cp $(CONFIG_PATH)/.config.bak $(BASE)/.config
 endif
 
 .PHONY: menuconfig

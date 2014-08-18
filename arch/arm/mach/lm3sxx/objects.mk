@@ -1,18 +1,18 @@
 #
 #	lm3sxx Platform objects
 #
-MACH_lm3sxx_OBJECTS  += $(BUILD_DIR)arch/arm/mach/lm3sxx/lm3sxx.o			# Provides machine description.
-MACH_lm3sxx_OBJECTS += $(BUILD_DIR)arch/arm/mach/lm3sxx/ioconfig.o
-MACH_lm3sxx_OBJECTS  += $(BUILD_DIR)arch/arm/mach/lm3sxx/rcc.o
-MACH_lm3sxx_OBJECTS  += $(BUILD_DIR)arch/arm/mach/lm3sxx/gpio.o
-MACH_lm3sxx_OBJECTS-$(BT_CONFIG_MACH_LM3Sxx_TIMER)    += $(BUILD_DIR)arch/arm/mach/lm3sxx/timer.o
-MACH_lm3sxx_OBJECTS-$(BT_CONFIG_MACH_LM3Sxx_UART)     += $(BUILD_DIR)arch/arm/mach/lm3sxx/uart.o
-MACH_lm3sxx_OBJECTS-$(BT_CONFIG_MACH_LM3Sxx_CAN)      += $(BUILD_DIR)arch/arm/mach/lm3sxx/can.o
-MACH_lm3sxx_OBJECTS-$(BT_CONFIG_MACH_LM3Sxx_SPI)      += $(BUILD_DIR)arch/arm/mach/lm3sxx/spi.o
-MACH_lm3sxx_OBJECTS-$(BT_CONFIG_MACH_LM3Sxx_I2C)      += $(BUILD_DIR)arch/arm/mach/lm3sxx/i2c.o
-MACH_lm3sxx_OBJECTS-$(BT_CONFIG_MACH_LM3Sxx_ADC)      += $(BUILD_DIR)arch/arm/mach/lm3sxx/adc.o
-MACH_lm3sxx_OBJECTS-$(BT_CONFIG_MACH_LM3Sxx_PWM)      += $(BUILD_DIR)arch/arm/mach/lm3sxx/pwm.o
-MACH_lm3sxx_OBJECTS-$(BT_CONFIG_MACH_LM3Sxx_MAC)	  += $(BUILD_DIR)arch/arm/mach/lm3sxx/mac.o
+MACH_lm3sxx_OBJECTS  += $(BUILD_DIR)/arch/arm/mach/lm3sxx/lm3sxx.o			# Provides machine description.
+MACH_lm3sxx_OBJECTS += $(BUILD_DIR)/arch/arm/mach/lm3sxx/ioconfig.o
+MACH_lm3sxx_OBJECTS  += $(BUILD_DIR)/arch/arm/mach/lm3sxx/rcc.o
+MACH_lm3sxx_OBJECTS  += $(BUILD_DIR)/arch/arm/mach/lm3sxx/gpio.o
+MACH_lm3sxx_OBJECTS-$(BT_CONFIG_MACH_LM3Sxx_TIMER)    += $(BUILD_DIR)/arch/arm/mach/lm3sxx/timer.o
+MACH_lm3sxx_OBJECTS-$(BT_CONFIG_MACH_LM3Sxx_UART)     += $(BUILD_DIR)/arch/arm/mach/lm3sxx/uart.o
+MACH_lm3sxx_OBJECTS-$(BT_CONFIG_MACH_LM3Sxx_CAN)      += $(BUILD_DIR)/arch/arm/mach/lm3sxx/can.o
+MACH_lm3sxx_OBJECTS-$(BT_CONFIG_MACH_LM3Sxx_SPI)      += $(BUILD_DIR)/arch/arm/mach/lm3sxx/spi.o
+MACH_lm3sxx_OBJECTS-$(BT_CONFIG_MACH_LM3Sxx_I2C)      += $(BUILD_DIR)/arch/arm/mach/lm3sxx/i2c.o
+MACH_lm3sxx_OBJECTS-$(BT_CONFIG_MACH_LM3Sxx_ADC)      += $(BUILD_DIR)/arch/arm/mach/lm3sxx/adc.o
+MACH_lm3sxx_OBJECTS-$(BT_CONFIG_MACH_LM3Sxx_PWM)      += $(BUILD_DIR)/arch/arm/mach/lm3sxx/pwm.o
+MACH_lm3sxx_OBJECTS-$(BT_CONFIG_MACH_LM3Sxx_MAC)	  += $(BUILD_DIR)/arch/arm/mach/lm3sxx/mac.o
 
 MACH_lm3sxx_OBJECTS += $(MACH_lm3sxx_OBJECTS-y)
 

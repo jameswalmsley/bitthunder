@@ -4,9 +4,9 @@ BUILD_DIR=$(shell pwd)/build/
 
 MODULE_NAME=mkimage
 
-CFLAGS += -I $(BASE)scripts/dtc/libfdt/
+CFLAGS += -I $(BASE)/scripts/dtc/libfdt/
 
-include $(BASE).dbuild/dbuild.mk
+include $(BASE)/.dbuild/dbuild.mk
 
 all: mkimage
 mkimage: $(OBJECTS)

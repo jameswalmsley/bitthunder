@@ -3,7 +3,7 @@
 #
 
 ifneq ($(PROJECT_CONFIG), y)
--include $(BASE).config
+-include $(BASE)/.config
 else
 -include $(PROJECT_DIR)/.config
 endif
@@ -12,13 +12,13 @@ ARCH		:=$(subst $(DB_QUOTES),,$(BT_CONFIG_ARCH))
 SUBARCH		:=$(subst $(DB_QUOTES),,$(BT_CONFIG_SUBARCH))
 TOOLCHAIN	:=$(subst $(DB_QUOTES),,$(BT_CONFIG_TOOLCHAIN))
 
-include $(BASE)kernel/objects.mk
-include $(BASE)os/objects.mk
-include $(BASE)lib/objects.mk
+include $(BASE)/kernel/objects.mk
+include $(BASE)/os/objects.mk
+include $(BASE)/lib/objects.mk
 
 PYTHON:=$(BT_CONFIG_DBUILD_PYTHON)
 
-GIT_DESCRIBE:=$(shell git --git-dir=$(BASE).git describe --dirty)
+GIT_DESCRIBE:=$(shell git --git-dir=$(BASE)/.git describe --dirty)
 
 CC_MARCH 		:= $(subst $(DB_QUOTES),,$(BT_CONFIG_ARCH_ARM_FAMILY))
 CC_MTUNE		:= $(subst $(DB_QUOTES),,$(BT_CONFIG_TOOLCHAIN_CPU))
@@ -37,13 +37,13 @@ $(OBJECTS) $(OBJECTS-y): CFLAGS += -mtune=$(CC_MTUNE) $(CC_TCFLAGS) $(CC_OPTIMIS
 $(OBJECTS) $(OBJECTS-y): CFLAGS += $(CC_MACHFLAGS)
 $(OBJECTS) $(OBJECTS-y): CFLAGS += -D BT_VERSION_SUFFIX="\"$(GIT_DESCRIBE)\""
 
-$(OBJECTS) $(OBJECTS-y): CFLAGS += -nostdlib -fno-builtin -fdata-sections -ffunction-sections
-$(OBJECTS) $(OBJECTS-y): CFLAGS += -I $(BASE)include/
+$(OBJECTS) $(OBJECTS-y): CFLAGS += -nostdlib -fno-builtin -fdata-sections -ffunction-sections -fPIC
+$(OBJECTS) $(OBJECTS-y): CFLAGS += -I $(BASE)/include/
 ifeq ($(PROJECT_CONFIG),y)
 $(OBJECTS) $(OBJECTS-y): CFLAGS += -I $(PROJECT_DIR)/include/
 endif
 
-$(OBJECTS) $(OBJECTS-y): CFLAGS += -I $(BASE)os/src/net/lwip/src/include/ -I $(BASE)os/include/net/lwip/ -I $(BASE)os/src/net/lwip/src/include/ipv4/
+$(OBJECTS) $(OBJECTS-y): CFLAGS += -I $(BASE)/os/src/net/lwip/src/include/ -I $(BASE)/os/include/net/lwip/ -I $(BASE)/os/src/net/lwip/src/include/ipv4/
 
 ifeq ($(PROJECT_CONFIG),y)
 $(LINKER_SCRIPTS): CFLAGS += -I $(PROJECT_DIR)/include/
