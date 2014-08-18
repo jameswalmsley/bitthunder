@@ -89,6 +89,12 @@ project.git.init:
 	$(Q)echo "export PROJECT_DIR=\$$(shell pwd)" >> $(PROJECT_DIR)/Makefile
 	$(Q)echo "include bitthunder/Makefile" >> $(PROJECT_DIR)/Makefile
 
+project.info:
+	@echo "PROJECT_DIR      : $(PROJECT_DIR)"
+	@echo "BUILD_DIR        : $(BUILD_DIR)"
+	@echo "BASE             : $(BASE)"
+	@echo "PROJECT_CONFIG   : $(PROJECT_CONFIG)"
+
 mrproper:
 ifneq ($(PROJECT_CONFIG),y)
 	$(Q)rm $(PRM_FLAGS) $(PROJECT_DIR)/.config $(BASE)/lib/include/bt_bsp_config.h $(PRM_PIPE)
