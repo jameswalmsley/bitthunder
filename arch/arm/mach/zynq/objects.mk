@@ -30,3 +30,23 @@ $(MACH_ZYNQ_OBJECTS): MODULE_NAME="HAL"
 
 
 OBJECTS += $(MACH_ZYNQ_OBJECTS)
+
+#
+#	ZYNQ Platform Specific targets
+#
+BOOT.BIN.info:
+	@echo "ZYNQ FSBL Boot Image generator"
+	@echo "Generates a BOOT.BIN image with the BitThunder vmthunder.img file as the [BOOTLOADER] target."
+	@echo "This allows the Zynq BOOT ROM to load BitThunder (Usually BootThunder) as the main bootloader."
+
+BOOT.BIN: $(PROJECT_DIR)/vmthunder.elf
+	$(Q)cp $(PROJECT_DIR)/vmthunder.elf $(BASE)/arch/arm/mach/zynq/tools/
+	$(Q)echo "the_ROM_image:" 					>  $(BASE)/arch/arm/mach/zynq/tools/temp.bif
+	$(Q)echo "{"								>> $(BASE)/arch/arm/mach/zynq/tools/temp.bif
+	$(Q)echo "	[bootloader]vmthunder.elf"		>> $(BASE)/arch/arm/mach/zynq/tools/temp.bif
+	$(Q)echo "	[init]BOOT.BIN.init"			>> $(BASE)/arch/arm/mach/zynq/tools/temp.bif
+	$(Q)echo "}"								>> $(BASE)/arch/arm/mach/zynq/tools/temp.bif
+	$(Q)touch $(PROJECT_DIR)/BOOT.BIN.init
+	$(Q)cp $(PROJECT_DIR)/BOOT.BIN.init $(BASE)/arch/arm/mach/zynq/tools/
+	$(Q)cd $(BASE)/arch/arm/mach/zynq/tools/ && TOOLCHAIN=$(BT_CONFIG_TOOLCHAIN) python ./bootgen.py temp.bif
+	$(Q)cp $(BASE)/arch/arm/mach/zynq/tools/BOOT.BIN $(PROJECT_DIR)/
