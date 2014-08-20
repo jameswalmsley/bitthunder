@@ -70,8 +70,7 @@ $(BT_OS_OBJECTS): MODULE_NAME="BitThunder"
 
 OBJECTS += $(BT_OS_OBJECTS)
 
-APP=$(BUILD_DIR)/application/
--include $(APP_DIR)/objects.mk
+APP=$(BUILD_DIR)/application
 ifeq ($(PROJECT_CONFIG),y)
 -include $(PROJECT_DIR)/objects.mk
 endif
@@ -82,10 +81,6 @@ APP_OBJS := $(objs)
 #$(patsubst %, $(BUILD_DIR)/application/%, $(objs))
 #$(APP_OBJS): MODULE_NAME="application"
 
-appobjs:
-	@echo including $(APP_DIR)
-	@echo $(APP_OBJS)
-
 OBJECTS += $(APP_OBJS)
 
 $(TARGET_DEPS): $(LINKER_SCRIPTS)
@@ -95,12 +90,15 @@ $(LINKER_SCRIPTS):$(BASE)/os/include/bitthunder.lds.h
 $(LINKER_SCRIPTS):$(BASE)/lib/include/bt_config.h
 
 ifneq ($(PROJECT_CONFIG), y)
-$(LINKER_SCRIPTS):$(BASE)/lib/include/bt_bsp_config.h
+$(LINKER_SCRIPTS):$(BASE)/bt_bsp_config.h
 else
 $(LINKER_SCRIPTS):$(PROJECT_DIR)/include/bt_bsp_config.h
 endif
 
 $(LINKER_SCRIPTS): CFLAGS=-I $(BASE)/lib/include/ -I $(BASE)/arch/$(ARCH)/include/ -I $(BASE)/os/include/
+ifneq ($(PROJECT_CONFIG),y)
+$(LINKER_SCRIPTS): CFLAGS += -I $(BASE)
+endif
 
 linker:
 	@echo $(LINKER_SCRIPTS)

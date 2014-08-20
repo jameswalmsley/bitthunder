@@ -44,7 +44,6 @@ endif
 	$(Q)$(CC) -MD -MP $(filter-out $(CFLAGS_REMOVE), $(CFLAGS)) $< -o $@
 	$(POST_CC)
 
-$(BUILD_DIR)/application/%.o: $(APP_DIR)/%.c
 $(BUILD_DIR)/application/%.o: $(PROJECT_DIR)/%.c
 ifeq ($(DBUILD_VERBOSE_CMD), 0)											# Pretty print on successful compile, but still display errors when they occur.
 	$(Q)$(PRETTY) --dbuild "CC" $(MODULE_NAME) $(subst $(BUILD_DIR)/,"",$@)

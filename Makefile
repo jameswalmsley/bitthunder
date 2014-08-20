@@ -23,7 +23,7 @@ CONFIG_HEADER_NAME:=bt_bsp_config.h
 
 ifneq ($(PROJECT_CONFIG), y)
 CONFIG_PATH:=$(PROJECT_DIR)
-CONFIG_HEADER_PATH:=$(BASE)/lib/include
+CONFIG_HEADER_PATH:=$(BASE)
 else
 CONFIG_PATH:=$(PROJECT_DIR)
 CONFIG_HEADER_PATH:=$(PROJECT_DIR)/include
@@ -97,7 +97,7 @@ project.info:
 
 mrproper:
 ifneq ($(PROJECT_CONFIG),y)
-	$(Q)rm $(PRM_FLAGS) $(PROJECT_DIR)/.config $(BASE)/lib/include/bt_bsp_config.h $(PRM_PIPE)
+	$(Q)rm $(PRM_FLAGS) $(PROJECT_DIR)/.config $(BASE)/bt_bsp_config.h $(PRM_PIPE)
 else
 	$(Q)rm $(PRM_FLAGS) $(PROJECT_DIR)/.config $(PROJECT_DIR)/include/bt_bsp_config.h $(PRM_PIPE)
 endif

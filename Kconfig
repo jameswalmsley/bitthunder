@@ -1,21 +1,9 @@
 #
-#
-
 mainmenu "BitThunder Configuration"
 
 config CONFIGURED
     bool
 	default y
-
-config APP_CONFIG
-    bool
-	option env="APP_CONFIG"
-	default n
-
-config APP_DIR
-    string
-	default "scripts" if !APP_CONFIG
-    option env="APP_DIR"
 
 config PROJECT_CONFIG
 	bool
@@ -26,17 +14,6 @@ config PROJECT_DIR
 	string
 	default "scripts" if !PROJECT_CONFIG
 	option env="PROJECT_DIR"
-
-config APP_BSP_CONFIG
-    bool
-	option env="APP_BSP_CONFIG"
-	default n
-
-config APP_BSP_DIR
-    string
-	default "bsp" if !APP_BSP_CONFIG
-    option env="APP_BSP_DIR"
-
 
 choice
 	prompt "Build OS or Library"
@@ -214,12 +191,6 @@ endmenu
 menu "Kernel Options"
 source kernel/Kconfig
 endmenu
-
-if APP_CONFIG
-menu "Application Configuration"
-source "$APP_DIR/Kconfig"
-endmenu
-endif
 
 if PROJECT_CONFIG
 menu "Project Configuration"
