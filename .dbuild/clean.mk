@@ -21,6 +21,10 @@ ifeq ($(strip $(OBJECTS:.o=.d)),)
 else
 	$(Q)rm $(PRM_FLAGS) $(OBJECTS:.o=.d)	$(PRM_PIPE)
 endif
+ifeq ($(strip $(OBJECTS:.o=.su)),)
+else
+	$(Q)rm $(PRM_FLAGS) $(OBJECTS:.o=.su)	$(PRM_PIPE)
+endif
 ifeq ($(strip $(MODULE_TARGET)),)
 else
 	$(Q)rm $(PRM_FLAGS) $(MODULE_TARGET)	$(PRM_PIPE)
