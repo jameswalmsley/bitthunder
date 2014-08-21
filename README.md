@@ -38,7 +38,7 @@ In order for a feature branch to be accepted into the master, it must:
 In order to initiate the merging process, you must make a merge request. This is easily done on GitHUB
 using the pull request feature. For those working with me on GitLab, simply make a merge request.
 
-Branches are made with a --no-ff merge
+Merges are made with a --no-ff merge so that all commits pertaining to a feature can be easily identified.
 
 It MUST be possible to build the kernel using a sensible configuration from any merge-point on the master branch.
 
@@ -96,6 +96,7 @@ These are simple:
 
 All projects create the following files:
 
+    $(PROJECT_DIR)/Makefile
     $(PROJECT_DIR)/Kconfig
     $(PROJECT_DIR)/objects.mk
     $(PROJECT_DIR)/main.c
@@ -105,6 +106,12 @@ After configuration the following files will be generated:
     $(PROJECT_DIR)/include/bt_bsp_config.h
     $(PROJECT_DIR)/.config
 
+### Makefile
+The project Makefile configures a pair of variables and includes the kernel Makefile.
+
+    PROJECT_DIR    - Is the directory in which the project exists. (Use $(shell pwd)).
+    PROJECT_CONFIG - y (default) causes the config system to include $(PROJECT_DIR)/Kconfig.
+
 ### objects.mk
 
 In a project, the objects.mk file lists the project objects that need to be additionally built
@@ -112,18 +119,22 @@ and linked into the kernel.
 
 To add a file to the build process you simply add a line to the objects.mk file:
 
-    objs += $(APP)main.o
-    objs += $(APP)path/to/my/object.o
-    include $(APP)path/to/module/objects.mk
+    objs += $(APP)/main.o
+    objs += $(APP)/path/to/my/object.o
+    include $(PROJECT_DIR)/path/to/module/objects.mk
 
 Note you may also use configuration options (as defined in your Kconfig file) to optionally compile objects:
 
-    objs-$(BT_CONFIG_FEATURE_A_SUPPORT) += $(APP)feature_a.o
+    objs-$(BT_CONFIG_FEATURE_A_SUPPORT) += $(APP)/feature_a.o
+
+Note $(APP) is essentially the path to $(PROJECT_DIR), but must be used to create the correct Makefile targets.
 
 ### Kconfig
 
 Its possible for a project to hook into the Kernel configuration system. Simply add any configuration
 options to this file, and they will appear under "Project Options" on the menuconfig system.
+
+Note: PROJECT_CONFIG=y must be set in the project Makefile ($(PROJECT_DIR)/Makefile).
 
 ### main.c
 
