@@ -88,3 +88,27 @@ BT_ERROR BT_UartGetAvailable(BT_HANDLE hUart, BT_u32 *pTransmit, BT_u32 *pReceiv
 	return BT_IF_UART_OPS(hUart)->pfnGetAvailable(hUart, pTransmit, pReceive);
 }
 BT_EXPORT_SYMBOL(BT_UartGetAvailable);
+
+void bt_early_printk_init(void) {
+	BT_ERROR Error;
+	BT_MACHINE_DESCRIPTION *pMachine = BT_GetMachineDescription(&Error);
+	if(pMachine->pEarlyConsole && pMachine->pEarlyConsole->pfnInit) {
+		pMachine->pEarlyConsole->pfnInit();
+	}
+}
+
+void bt_early_printk(const BT_u8 *data, BT_u32 ulLength) {
+	BT_ERROR Error;
+	BT_MACHINE_DESCRIPTION *pMachine = BT_GetMachineDescription(&Error);
+	if(pMachine->pEarlyConsole && pMachine->pEarlyConsole->pfnWrite) {
+		pMachine->pEarlyConsole->pfnWrite(data, ulLength);
+	}
+}
+
+void bt_early_printk_cleanup(void) {
+	BT_ERROR Error;
+	BT_MACHINE_DESCRIPTION *pMachine = BT_GetMachineDescription(&Error);
+	if(pMachine->pEarlyConsole && pMachine->pEarlyConsole->pfnCleanup) {
+		pMachine->pEarlyConsole->pfnCleanup();
+	}
+}

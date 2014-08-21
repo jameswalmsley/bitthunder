@@ -61,4 +61,12 @@ BT_ERROR BT_UartEnable				(BT_HANDLE hUart);
 BT_ERROR BT_UartDisable				(BT_HANDLE hUart);
 BT_ERROR BT_UartGetAvailable		(BT_HANDLE hUart, BT_u32 *pTransmit, BT_u32 *pReceive);
 
+typedef struct {
+	void 	(*pfnInit)		();
+	void 	(*pfnWrite)		(const BT_u8 *data, BT_u32 ulLength);
+	void	(*pfnCleanup)	();
+} BT_DEV_IF_EARLY_CONSOLE;
+
+#define BT_EARLY_CONSOLE_DEF	static const BT_ATTRIBUTE_SECTION(".bt.arch.early_console") BT_DEV_IF_EARLY_CONSOLE
+
 #endif

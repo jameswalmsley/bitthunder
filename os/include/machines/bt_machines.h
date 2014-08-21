@@ -37,6 +37,7 @@ typedef struct _BT_MACHINE_DESCRIPTION {
 
 	const BT_INTEGRATED_DEVICE 	   *pBootLogger;			/// Pointer to device supporting chardev if.
 	BT_u32							ulBootUartID;			/// Which instance number to use.
+	BT_DEV_IF_EARLY_CONSOLE 	   *pEarlyConsole;			///< Pointer to basic early console device.
 } BT_MACHINE_DESCRIPTION;
 
 #define BT_MACHINE_START(_arch,_type,_name)				\
