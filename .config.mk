@@ -37,7 +37,7 @@ $(OBJECTS) $(OBJECTS-y): CFLAGS += -mtune=$(CC_MTUNE) $(CC_TCFLAGS) $(CC_OPTIMIS
 $(OBJECTS) $(OBJECTS-y): CFLAGS += $(CC_MACHFLAGS)
 $(OBJECTS) $(OBJECTS-y): CFLAGS += -D BT_VERSION_SUFFIX="\"$(GIT_DESCRIBE)\""
 
-$(OBJECTS) $(OBJECTS-y): CFLAGS += -nostdlib -fno-builtin -fdata-sections -ffunction-sections -fPIC
+$(OBJECTS) $(OBJECTS-y): CFLAGS += -nostdlib -fno-builtin -fdata-sections -ffunction-sections
 $(OBJECTS) $(OBJECTS-y): CFLAGS += -I $(BASE)/include/
 ifeq ($(PROJECT_CONFIG),y)
 $(OBJECTS) $(OBJECTS-y): CFLAGS += -I $(PROJECT_DIR)/include/
