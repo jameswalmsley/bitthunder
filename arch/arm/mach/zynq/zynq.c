@@ -409,4 +409,5 @@ BT_MACHINE_START(ARM, ZYNQ, "Xilinx Embedded Zynq Platform")
 	.pBootLogger				= &oZynq_uart1_device,
 #endif
 #endif
+	.pEarlyConsole				= &oZynq_early_console_device,	///< Provides really early low-level UART output, before memory management etc is available.
 BT_MACHINE_END
