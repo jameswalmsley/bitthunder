@@ -28,6 +28,13 @@ config MAIN_TASK_PRIORITY
     int "Main task stack priority"
 	default 0
 
+config INHERIT_STDIO_FROM_KERNEL
+	bool "Inherit STDIO file descriptors from kernel."
+	default y
+	---help---
+	Leave the stdin/stdout file descriptors used as the boot-logger open before starting
+	the main process. The main process will then inherit these file-descriptors.
+
 menu "Subsystems"
 config BLOCK
     bool "Block device support"

@@ -122,6 +122,7 @@ int bt_main(BT_u32 machid, const void *fdt) {
 
 	BT_UartEnable(hUart);
 
+	BT_SetStdin(hUart);
 	BT_SetStdout(hUart);
 
 	BT_kPrint("%s (%s)", BT_VERSION_STRING, BT_VERSION_NAME);
@@ -142,11 +143,14 @@ int bt_main(BT_u32 machid, const void *fdt) {
 
 	BT_Flush(hUart);
 
+#ifndef BT_CONFIG_INHERIT_STDIO_FROM_KERNEL
+	BT_Setstdin(NULL);
 	BT_SetStdout(NULL);
 
 	if (hUart) {
 		BT_CloseHandle(hUart);
 	}
+#endif
 
 #ifndef BT_CONFIG_KERNEL_NONE
 	BT_THREAD_CONFIG oThreadConfig = {
