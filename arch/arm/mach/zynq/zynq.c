@@ -329,6 +329,69 @@ static BT_ERROR zynq_machine_init(struct _BT_MACHINE_DESCRIPTION *pMachine) {
 	return BT_ERR_NONE;
 }
 
+/**
+ *	This function runs in a super low-level environment, from the OCM.
+ *	It can completely run all over the DDR-RAM space from 0x00100000+
+ *
+ **/
+
+static const char hex_table[16] = {
+	'0',
+	'1',
+	'2',
+	'3',
+	'4',
+	'5',
+	'6',
+	'7',
+	'8',
+	'9',
+	'a',
+	'b',
+	'c',
+	'd',
+	'e',
+	'f',
+};
+
+void bt_zynq_ram_test_error(const BT_i8 *reason, BT_u32 addr) {
+	bt_early_printk(reason, -1);
+	BT_u32 i;
+	for(i = 0; i < 8; i++) {
+		BT_u8 nibble = (addr >> (28 - (4 * i))) & 0xF;
+		bt_early_printk(&hex_table[nibble], 1);
+	}
+
+	bt_early_printk("\n", 1);
+}
+
+void bt_zynq_ram_test() {
+	bt_early_printk_init();
+	bt_early_printk("Low-Level RAM Test.\n", -1);
+
+	BT_u32 i;
+	BT_u32 *p = 0xF0100000;
+	for(i = 0; i < 0x00100000; i++) {
+		p[i] = ~i;
+	}
+
+	for(i = 0; i < 0x00100000; i++) {
+		if(p[i] != ~i) {
+			bt_early_printk("Error: Inconsistent data in memory.\n", -1);
+			BT_u32 addr = (BT_u32)  p + i;
+			bt_early_printk("Address: 0x", -1);
+			for(i = 0; i < 8; i++) {
+				BT_u8 nibble = (addr >> (28 - (4 * i))) & 0xF;
+				bt_early_printk(&hex_table[nibble], 1);
+			}
+			bt_early_printk("\n", 1);
+			break;
+		}
+	}
+}
+
+extern BT_DEV_IF_EARLY_CONSOLE oZynq_early_console_device;
+
 BT_MACHINE_START(ARM, ZYNQ, "Xilinx Embedded Zynq Platform")
 	.pfnMachineInit 			= zynq_machine_init,
 	.pfnGetCpuClockFrequency 	= zynq_get_cpu_clock_frequency,

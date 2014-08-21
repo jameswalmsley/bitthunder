@@ -5,7 +5,7 @@ static volatile ZYNQ_SLCR_REGS *g_pSLCR = NULL;
 
 BT_u32 BT_ZYNQ_GetArmPLLFrequency() {
 
-	volatile ZYNQ_SLCR_REGS *pRegs = g_pSLCR;
+	volatile ZYNQ_SLCR_REGS *pRegs = bt_ioremap((void *) ZYNQ_SLCR, BT_SIZE_4K);
 
 	BT_u32 ctl = pRegs->ARM_PLL_CTRL;
 	BT_BOOL	bBypassed = BT_FALSE;
@@ -20,6 +20,8 @@ BT_u32 BT_ZYNQ_GetArmPLLFrequency() {
 	} else {
 		bBypassed = BT_TRUE;
 	}
+	
+	bt_iounmap(pRegs);
 
 	if(bBypassed) {
 		return BT_CONFIG_MACH_ZYNQ_SYSCLOCK_FREQ;
@@ -36,7 +38,7 @@ BT_u32 BT_ZYNQ_GetArmPLLFrequency() {
 
 BT_u32 BT_ZYNQ_GetIOPLLFrequency() {
 
-	volatile ZYNQ_SLCR_REGS *pRegs = g_pSLCR;
+	volatile ZYNQ_SLCR_REGS *pRegs = bt_ioremap((void *) ZYNQ_SLCR, BT_SIZE_4K);
 
 	BT_u32 ctl = pRegs->IO_PLL_CTRL;
 	BT_BOOL bBypassed = BT_FALSE;
@@ -50,6 +52,8 @@ BT_u32 BT_ZYNQ_GetIOPLLFrequency() {
 	} else {
 		bBypassed = BT_TRUE;
 	}
+	
+	bt_iounmap(pRegs);
 
 	if(bBypassed) {
 		return BT_CONFIG_MACH_ZYNQ_SYSCLOCK_FREQ;
@@ -80,6 +84,8 @@ BT_u32 BT_ZYNQ_GetDDRPLLFrequency() {
 	} else {
 		bBypassed = BT_TRUE;
 	}
+	
+	bt_iounmap(pRegs);
 
 	if(bBypassed) {
 		return BT_CONFIG_MACH_ZYNQ_SYSCLOCK_FREQ;
@@ -95,7 +101,7 @@ BT_u32 BT_ZYNQ_GetDDRPLLFrequency() {
 }
 
 BT_u32 BT_ZYNQ_GetCpuFrequency() {
-	volatile ZYNQ_SLCR_REGS *pRegs = g_pSLCR;
+	volatile ZYNQ_SLCR_REGS *pRegs = bt_ioremap((void *) ZYNQ_SLCR, BT_SIZE_4K);
 
 	BT_u32 	ctl 		= pRegs->ARM_CLK_CTRL;
 	BT_u32 	srcsel 		= ZYNQ_SLCR_CLK_CTRL_SRCSEL_VAL(ctl);
@@ -116,11 +122,13 @@ BT_u32 BT_ZYNQ_GetCpuFrequency() {
 		break;
 
 	default:
+		bt_iounmap(pRegs);
 		return 0;
 	}
 
 	InputClk /= ZYNQ_SLCR_CLK_CTRL_DIVISOR_VAL(pRegs->ARM_CLK_CTRL);
 
+	bt_iounmap(pRegs);
 	return InputClk;
 }
 

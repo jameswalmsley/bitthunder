@@ -45,6 +45,13 @@ config MACH_ZYNQ_USE_STARTUP
 	If this option is not enabled, then you will have to provide your own platform startup hooks
 	to initialise memory etc. (Implement _bt_startup_init_hook() and _bt_startup_boot() functions).
 
+config MACH_ZYNQ_STARTUP_RAM_TEST
+	bool "Test DDR RAM required to start BOOT kernel before relocating"
+	default n
+	---help---
+	Performs a DDR memory test, and places some information on the early debug console in case of errors.
+
+
 config MACH_ZYNQ_STARTUP_PS7INIT
 	bool "Call Xilinx generated ps7_init() and ps7_post_config() functions."
 	default n
