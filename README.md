@@ -128,6 +128,7 @@ Note you may also use configuration options (as defined in your Kconfig file) to
     objs-$(BT_CONFIG_FEATURE_A_SUPPORT) += $(APP)/feature_a.o
 
 Note $(APP) is essentially the path to $(PROJECT_DIR), but must be used to create the correct Makefile targets.
+It should also be noted that application objects.mk files use a slightly different convention.
 
 ### Kconfig
 
@@ -145,3 +146,54 @@ To begin with this file is blank. Booting the BitThunder kernel by default will 
 repeatedly on the boot-logger device (boot console).
 
 To override this behaviour, you simply need to create a function called main().
+
+# Build System
+BitThunder uses a GNU Make based build system called dbuild. (Dark Builder).
+The core of the build-system is found under:
+
+    $(BASE)/.dbuild/
+
+## PATH conventions.
+
+All path variables in dbuild must have a trailing slash appended (for consistency and readability).
+
+    $(BASE)/		- Root folder of the BitThunder kernel.
+    $(PROJECT_DIR)/	- Root of the project based on BitThunder being developed.
+    $(BUILD_DIR)/   - Path where all objects and dependency files will be generated.
+
+The convention was recently changed so that all variables are consistent. You can use some sed rules
+to update old projects easily:
+
+    find . -name "objects.mk" | xargs sed -i 's:$(BASE):$(BASE)/:g'
+    find . -name "objects.mk" | xargs sed -i 's:$(PROJECT_DIR):$(PROJECT_DIR)/:g'
+    find . -name "objects.mk" | xargs sed -i 's:$(BUILD_DIR):$(BUILD_DIR)/:g'
+
+## Variables
+
+    $(ARCH)     - The architecture variant used. e.g. arm/blackfin/mips.
+    $(SUBARCH)  - The machine variant used. e.g. zynq.
+
+These are used in paths of object files etc.
+
+# Kernel Development
+
+## objects.mk files
+
+The build system specifies all objects to be built in the objects.mk files.
+Adding a new object is simple:
+
+    OBJECTS += $(BUILD_DIR)/arch/arm/mach/zynq/myobject.o
+
+You can also use configuration variables like:
+
+    OBJECTS-$(BT_CONFIG_FEATURE_A) += $(BUILD_DIR)/feature_a/feature_a.o
+
+To include another folder in the build system:
+
+    include $(BASE)/drivers/net/objects.mk
+
+You can include other folders based on configuration variables like:
+
+    ifeq($(BT_CONFIG_FEATURE_A),y)
+        include $(BASE)/feature_a/objects.mk
+    endif
