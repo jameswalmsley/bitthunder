@@ -78,6 +78,7 @@ project.init:
 	$(Q)echo "PROJECT_DIR=\$$(shell pwd)" >> $(PROJECT_DIR)/Makefile
 	$(Q)echo "export PROJECT_CONFIG=y" >> $(PROJECT_DIR)/Makefile
 	$(Q)echo "include $(shell $(RELPATH) $(BASE) $(PROJECT_DIR))/Makefile" >> $(PROJECT_DIR)/Makefile
+	$(Q)echo "objs += $(APP)/main.o" >> $(PROJECT_DIR)/objects.mk
 
 project.git.init:
 	-$(Q)cd $(PROJECT_DIR) && git init .
@@ -90,6 +91,7 @@ project.git.init:
 	$(Q)echo "export PROJECT_DIR=\$$(shell pwd)" >> $(PROJECT_DIR)/Makefile
 	$(Q)echo "export PROJECT_CONFIG=y" >> $(PROJECT_DIR)/Makefile
 	$(Q)echo "include bitthunder/Makefile" >> $(PROJECT_DIR)/Makefile
+	$(Q)echo "objs += $(APP)/main.o" >> $(PROJECT_DIR)/objects.mk
 
 project.info:
 	@echo "PROJECT_DIR      : $(PROJECT_DIR)"
