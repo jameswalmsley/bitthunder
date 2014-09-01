@@ -118,6 +118,28 @@ BT_ERROR BT_TimerSetPeriodCount(BT_HANDLE hTimer, BT_u32 ulPeriodCount) {
 }
 BT_EXPORT_SYMBOL(BT_TimerSetPeriodCount);
 
+BT_u32 BT_TimerGetMatch(BT_HANDLE hTimer, BT_u32 ulChannel, BT_ERROR *pError) {
+	if(!isTimerHandle(hTimer)) {
+		// ERR_INVALID_HANDLE_TYPE
+		return (BT_ERROR) -1;
+	}
+
+	return BT_IF_TIMER_OPS(hTimer)->pfnGetMatch(hTimer, ulChannel, pError);
+
+}
+BT_EXPORT_SYMBOL(BT_TimerGetMatch);
+
+BT_ERROR BT_TimerSetMatch(BT_HANDLE hTimer, BT_u32 ulChannel, BT_u32 ulValue) {
+	if(!isTimerHandle(hTimer)) {
+		// ERR_INVALID_HANDLE_TYPE
+		return (BT_ERROR) -1;
+	}
+
+	return BT_IF_TIMER_OPS(hTimer)->pfnSetMatch(hTimer, ulChannel, ulValue);
+
+}
+BT_EXPORT_SYMBOL(BT_TimerSetMatch);
+
 BT_ERROR BT_TimerSetFrequency(BT_HANDLE hTimer, BT_u32 ulFrequencyHz) {
 	if(!isTimerHandle(hTimer)) {
 		// ERR_INVALID_HANDLE_TYPE
