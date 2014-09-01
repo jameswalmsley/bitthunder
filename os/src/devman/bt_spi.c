@@ -28,7 +28,7 @@ struct spi_bus_item {
 
 static void spi_probe_devices(struct spi_bus_item *master) {
 	BT_u32 i;
-	BT_ERROR Error;
+	BT_ERROR Error = BT_ERR_NONE;
 
 	BT_kPrint("spi_probe_devices called");
 
@@ -52,6 +52,7 @@ static void spi_probe_devices(struct spi_bus_item *master) {
 		BT_SPI_DEVICE *pSpiDevice = BT_kMalloc(sizeof(*pSpiDevice));
 		pSpiDevice->pMaster = master->pMaster;
 
+		Error = BT_ERR_NONE;
 		pDriver->pfnSPIProbe(pSpiDevice, pDevice, &Error);
 		if(Error) {
 			BT_kFree(pSpiDevice);
