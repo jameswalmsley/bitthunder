@@ -1,0 +1,16 @@
+menu "DAC Devices"
+
+config DRIVERS_DAC
+    bool
+	default n
+
+menu "I2C DAC's"
+
+config DRIVERS_DAC_I2C_MCP4728
+    bool "MCP4728"
+	select DRIVERS_DAC
+	default n
+endmenu
+
+
+endmenu

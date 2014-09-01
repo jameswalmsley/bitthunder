@@ -8,6 +8,14 @@ ifeq ($(BT_CONFIG_DRIVERS_GPIO), y)
 include $(BASE)/drivers/gpio/objects.mk
 endif
 
+ifeq ($(BT_CONFIG_DRIVERS_DAC), y)
+include $(BASE)drivers/dac/objects.mk
+endif
+
+ifeq ($(BT_CONFIG_DRIVERS_ADC), y)
+include $(BASE)drivers/adc/objects.mk
+endif
+
 ifeq ($(BT_CONFIG_DRIVERS_MMC), y)
 include $(BASE)/drivers/mmc/objects.mk
 endif

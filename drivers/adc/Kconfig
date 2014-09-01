@@ -1,0 +1,16 @@
+menu "ADC Devices"
+
+config DRIVERS_ADC
+    bool
+	default n
+
+menu "SPI ADC's"
+
+config DRIVERS_ADC_SPI_MAX1231
+    bool "MAX1231"
+	select DRIVERS_ADC
+	default n
+endmenu
+
+
+endmenu
