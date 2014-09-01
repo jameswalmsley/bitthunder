@@ -42,6 +42,7 @@ typedef struct _LM3Sxx_RCC_REGS {
 	BT_u32 RCC;
 
 #define	LM3Sxx_RCC_RCC_USESYSDIV			0x00400000
+#define	LM3Sxx_RCC_RCC_USEPWMDIV			0x00100000
 #define	LM3Sxx_RCC_RCC_PWRDN				0x00002000
 #define	LM3Sxx_RCC_RCC_BYPASS				0x00000800
 #define LM3Sxx_RCC_RCC_XTAL_M       		0x000007C0  // Crystal Value
@@ -98,6 +99,8 @@ typedef struct _LM3Sxx_RCC_REGS {
 
 #define	LM3Sxx_RCC_RCGC_ADC0EN				0x00010000
 #define	LM3Sxx_RCC_RCGC_ADC1EN				0x00020000
+
+#define	LM3Sxx_RCC_RCGC_PWM0EN				0x00100000
 
 #define	LM3Sxx_RCC_RCGC_UART0EN				0x00000001
 #define	LM3Sxx_RCC_RCGC_UART1EN				0x00000002
