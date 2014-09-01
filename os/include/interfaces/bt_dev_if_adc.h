@@ -4,6 +4,15 @@
 #include "bt_types.h"
 #include <interrupts/bt_interrupts.h>
 
+typedef struct _BT_ADC_INFO {
+	const BT_DEVICE *pDevice;
+	BT_HANDLE hAdc;
+	struct bt_list_head item;
+	struct bt_devfs_node node;
+	BT_u32 ulReferenceCount;
+} BT_ADC_INFO;
+
+
 typedef void 	 	(*BT_ADC_CALLBACK)					(BT_HANDLE hAdc, void *pParam);
 
 typedef enum {
@@ -49,5 +58,7 @@ BT_HANDLE	BT_AdcRegisterCallback		(BT_HANDLE hAdc, BT_ADC_CALLBACK pfnCallback, 
 BT_ERROR	BT_AdcUnregisterCallback 	(BT_HANDLE hAdc, BT_HANDLE hCallback);
 
 BT_s32		BT_AdcRead					(BT_HANDLE hAdc, BT_u32 ulChannel, BT_u32 ulSize, BT_u32 *pucDest);
+
+BT_ERROR	BT_AdcRegisterDevice		(BT_HANDLE hDevice, BT_ADC_INFO *adc);
 
 #endif
