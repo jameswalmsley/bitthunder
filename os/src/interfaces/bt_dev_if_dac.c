@@ -10,6 +10,26 @@ struct _BT_OPAQUE_HANDLE {
 };
 
 
+static BT_LIST_HEAD(g_dac_devices);
+static BT_u32 g_total_dacs = 0;
+
+static const BT_IF_HANDLE oHandleInterface;
+
+static BT_HANDLE devfs_open(struct bt_devfs_node *node, BT_ERROR *pError) {
+	BT_DAC_INFO *pInfo = (BT_DAC_INFO *) bt_container_of(node, BT_DAC_INFO, node);
+	if(!pInfo->ulReferenceCount) {
+		pInfo->ulReferenceCount += 1;
+		//BT_AttachHandle(NULL, &oHandleInterface, (BT_HANDLE) &pInfo->hDac);
+		return (BT_HANDLE) pInfo->hDac;
+	}
+
+	return NULL;
+}
+
+static const BT_DEVFS_OPS dac_devfs_ops = {
+	.pfnOpen = devfs_open,
+};
+
 static BT_BOOL isDacHandle(BT_HANDLE hDac) {
 	if(!hDac || !BT_IF_DEVICE(hDac) || (BT_IF_DEVICE_TYPE(hDac) != BT_DEV_IF_T_DAC)) {
 		return BT_FALSE;
@@ -92,3 +112,24 @@ BT_ERROR BT_DacGetConfiguration(BT_HANDLE hDac, BT_DAC_CONFIG *pConfig) {
 	return BT_IF_DAC_OPS(hDac)->pfnGetConfig(hDac, pConfig);
 }
 BT_EXPORT_SYMBOL(BT_DacGetConfiguration);
+
+BT_ERROR BT_DacRegisterDevice(BT_HANDLE hDevice, BT_DAC_INFO *dac) {	bt_list_add(&dac->item, &g_dac_devices);
+	dac->node.pOps = &dac_devfs_ops;
+	dac->hDac = hDevice;
+
+	char name[10];
+
+	const BT_RESOURCE *pResource = BT_GetDeviceResource(dac->pDevice, BT_RESOURCE_STRING, 0);
+	if(!pResource) {
+		bt_sprintf(name, "dac%d", g_total_dacs);
+	}
+	else {
+		strncpy(name,  pResource->szpName, 10);
+	}
+	g_total_dacs++;
+
+	BT_kPrint("Registering %s as /dev/%s", dac->pDevice->name, name);
+
+	return BT_DeviceRegister(&dac->node, name);
+}
+BT_EXPORT_SYMBOL(BT_DACRegisterDevice);
