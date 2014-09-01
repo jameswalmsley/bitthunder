@@ -20,7 +20,7 @@ static BT_GPIO_CONTROLLER *getGpioController(BT_u32 ulGPIO) {
 	for(i=0; i < g_ulRegistered; i++) {
 		BT_u32 min, max;
 		min = g_oControllers[i].ulBaseGPIO;
-		max = g_oControllers[i].ulBaseGPIO + g_oControllers[i].ulTotalGPIOs;
+		max = g_oControllers[i].ulBaseGPIO + g_oControllers[i].ulTotalGPIOs - 1;
 
 		if(ulGPIO >= min && ulGPIO <= max) {
 			return &g_oControllers[i];
