@@ -42,10 +42,18 @@ config MACH_LM3Sxx_LM3S9B92
     bool "LM3S9B92"
     select MACH_LM3S9B92
 
+config MACH_LM3Sxx_LM3S9D96
+    bool "LM3S9D96"
+    select MACH_LM3S9D96
+
 endchoice
 
 if MACH_LM3Sxx_LM3S9B92
 source arch/arm/mach/lm3sxx/.config/lm3s9b92
+endif
+
+if MACH_LM3Sxx_LM3S9D96
+source arch/arm/mach/lm3sxx/.config/lm3s9d96
 endif
 
 config MACH_LM3Sxx_GPIO_BASE
@@ -96,7 +104,7 @@ config MACH_LM3Sxx_MAC0_BASE
 	default 0x40048000
 	depends on HAS_ETHERNET
 
-config MACH_LM3Sxx_PWM0_BASE
+config MACH_LM3Sxx_MCPWM0_BASE
 	hex
 	default 0x40028000
 
@@ -146,6 +154,7 @@ config MACH_LM3Sxx_QEI1_BASE
 config MACH_LM3Sxx_TOTAL_GPIOS
 	int
 	default 72 if MACH_LM3Sxx_LM3S9B92
+	default 72 if MACH_LM3Sxx_LM3S9D96
 
 config MAX_IRQ
 	   int
@@ -405,63 +414,105 @@ config MACH_LM3Sxx_TIMER
 	default n
 	select TIMER
 
-config MACH_LM3Sxx_TIMER_0
-    bool "Use TIMER(0) peripheral"
+config MACH_LM3Sxx_TIMER_0_A
+    bool "Use TIMER(0_A) peripheral"
 	default n
 	select MACH_LM3Sxx_TIMER
 
-config MACH_LM3Sxx_TIMER_0_INODE_NAME
-	string "TIMER(0) devfs name"
-	default "timer0"
-	depends on MACH_LM3Sxx_TIMER_0
+config MACH_LM3Sxx_TIMER_0_A_INODE_NAME
+	string "TIMER(0_A) devfs name"
+	default "timer0A"
+	depends on MACH_LM3Sxx_TIMER_0_A
 
-config MACH_LM3Sxx_TIMER_1
-    bool "Use TIMER(1) peripheral"
+config MACH_LM3Sxx_TIMER_0_B
+    bool "Use TIMER(0_B) peripheral"
 	default n
 	select MACH_LM3Sxx_TIMER
 
-config MACH_LM3Sxx_TIMER_1_INODE_NAME
-	string "TIMER(1) devfs name"
-	default "timer1"
-	depends on MACH_LM3Sxx_TIMER_1
+config MACH_LM3Sxx_TIMER_0_B_INODE_NAME
+	string "TIMER(0_B) devfs name"
+	default "timer0B"
+	depends on MACH_LM3Sxx_TIMER_0_B
 
-config MACH_LM3Sxx_TIMER_2
-    bool "Use TIMER(2) peripheral"
+config MACH_LM3Sxx_TIMER_1_A
+    bool "Use TIMER(1_A) peripheral"
 	default n
-		select MACH_LM3Sxx_TIMER
+	select MACH_LM3Sxx_TIMER
 
-config MACH_LM3Sxx_TIMER_2_INODE_NAME
-	string "TIMER(2) devfs name"
-	default "timer2"
-	depends on MACH_LM3Sxx_TIMER_2
+config MACH_LM3Sxx_TIMER_1_A_INODE_NAME
+	string "TIMER(1_A) devfs name"
+	default "timer1A"
+	depends on MACH_LM3Sxx_TIMER_1_A
 
-config MACH_LM3Sxx_TIMER_3
-    bool "Use TIMER(3) peripheral"
+config MACH_LM3Sxx_TIMER_1_B
+    bool "Use TIMER(1_B) peripheral"
 	default n
-		select MACH_LM3Sxx_TIMER
+	select MACH_LM3Sxx_TIMER
 
-config MACH_LM3Sxx_TIMER_3_INODE_NAME
-	string "TIMER(3) devfs name"
-	default "timer3"
-	depends on MACH_LM3Sxx_TIMER_3
+config MACH_LM3Sxx_TIMER_1_B_INODE_NAME
+	string "TIMER(1_B) devfs name"
+	default "timer1B"
+	depends on MACH_LM3Sxx_TIMER_1_B
+
+config MACH_LM3Sxx_TIMER_2_A
+    bool "Use TIMER(2_A) peripheral"
+	default n
+	select MACH_LM3Sxx_TIMER
+
+config MACH_LM3Sxx_TIMER_2_A_INODE_NAME
+	string "TIMER(2_A) devfs name"
+	default "timer2A"
+	depends on MACH_LM3Sxx_TIMER_2_A
+
+config MACH_LM3Sxx_TIMER_2_B
+    bool "Use TIMER(2_B) peripheral"
+	default n
+	select MACH_LM3Sxx_TIMER
+
+config MACH_LM3Sxx_TIMER_2_B_INODE_NAME
+	string "TIMER(2_B) devfs name"
+	default "timer2B"
+	depends on MACH_LM3Sxx_TIMER_2_B
+
+config MACH_LM3Sxx_TIMER_3_A
+    bool "Use TIMER(3_A) peripheral"
+	default n
+	select MACH_LM3Sxx_TIMER
+
+config MACH_LM3Sxx_TIMER_3_A_INODE_NAME
+	string "TIMER(3_A) devfs name"
+	default "timer3A"
+	depends on MACH_LM3Sxx_TIMER_3_A
+	
+config MACH_LM3Sxx_TIMER_3_B
+    bool "Use TIMER(3_B) peripheral"
+	default n
+	select MACH_LM3Sxx_TIMER
+
+config MACH_LM3Sxx_TIMER_3_B_INODE_NAME
+	string "TIMER(3_B) devfs name"
+	default "timer3B"
+	depends on MACH_LM3Sxx_TIMER_3_B
+	
 endmenu
 
-menu "PWM devices"
 
-config MACH_LM3Sxx_PWM
+menu "MCPWM devices"
+
+config MACH_LM3Sxx_MCPWM
 	bool
 	default n
-	select PWM
+	select MCPWM
 
-config MACH_LM3Sxx_PWM_0
-    bool "Use PWM(0) peripheral"
+config MACH_LM3Sxx_MCPWM_0
+    bool "Use MCPWM(0) peripheral"
 	default n
-	select MACH_LM3Sxx_PWM
+	select MACH_LM3Sxx_MCPWM
 
-config MACH_LM3Sxx_PWM_0_INODE_NAME
-	string "PWM(0) devfs name"
-	default "pwm0"
-	depends on MACH_LM3Sxx_PWM_0
+config MACH_LM3Sxx_MCPWM_0_INODE_NAME
+	string "MCPWM(0) devfs name"
+	default "mcpwm0"
+	depends on MACH_LM3Sxx_MCPWM_0
 endmenu
 
 menu "QEI devices"
