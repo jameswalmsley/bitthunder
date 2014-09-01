@@ -224,7 +224,7 @@ static BT_ERROR spiRead(BT_HANDLE hSpi, BT_u32 ulFlags, BT_u8 *pucDest, BT_u32 u
 
 	while(ulSize) {
 		if (pRegs->SR & LM3Sxx_SPI_SR_TNF) {
-			pRegs->DR = 0xFF;
+			pRegs->DR = 0x00;
 			ulSize--;
 		}
 		while ((pRegs->SR & LM3Sxx_SPI_SR_RNE)) {
