@@ -24,13 +24,23 @@ struct _TIMER_CALLBACK_HANDLE {
  **/
 
 struct _BT_OPAQUE_HANDLE {
-	BT_HANDLE_HEADER 		h;			///< All handles must include a handle header.
-	LM3Sxx_TIMER_REGS	   *pRegs;
-	const BT_INTEGRATED_DEVICE   *pDevice;
+	BT_HANDLE_HEADER 					h;			///< All handles must include a handle header.
+	LM3Sxx_TIMER_REGS				   *pRegs;
+	const BT_INTEGRATED_DEVICE   	   *pDevice;
 	struct _TIMER_CALLBACK_HANDLE	   *pCallback;
+	BT_u32								ulId;
+	BT_u16								uLastEventTime;
+	BT_u16								uEventTime;
+	BT_TIMER_MODE						eMode;
+	BT_TIMER_CONFIG_MODE				eConfig;
 };
 
-static BT_HANDLE g_TIMER_HANDLES[4] = {
+static BT_HANDLE g_TIMER_HANDLES[8] = {
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
 	NULL,
 	NULL,
 	NULL,
@@ -40,65 +50,71 @@ static void disableTimerPeripheralClock(BT_HANDLE hTimer);
 
 static const BT_IF_HANDLE oCallbackHandleInterface;
 
-BT_ERROR BT_NVIC_IRQ_17(void) {
-	volatile BT_HANDLE Handle = g_TIMER_HANDLES[0];
-	volatile LM3Sxx_TIMER_REGS *pRegs = Handle->pRegs;
 
-	BT_u32 IRValue = pRegs->TMRMIS;
+BT_ERROR TMRA_Interrupt(BT_HANDLE hTimer) {
+	volatile LM3Sxx_TIMER_REGS *pRegs = hTimer->pRegs;
 
-	pRegs->TMRICR = IRValue;
+	hTimer->pRegs->TMRICR = 0x000001F;
 
-	if (Handle->pCallback)
-		Handle->pCallback->pfnCallback(Handle, Handle->pCallback->pParam);
+	if (hTimer->pCallback)
+		hTimer->pCallback->pfnCallback(hTimer, hTimer->pCallback->pParam);
 
-	return 0;
-}
-
-BT_ERROR BT_NVIC_IRQ_18(void) {
-	volatile BT_HANDLE Handle = g_TIMER_HANDLES[1];
-	volatile LM3Sxx_TIMER_REGS *pRegs = Handle->pRegs;
-
-	BT_u32 IRValue = pRegs->TMRMIS;
-
-	pRegs->TMRICR = IRValue;
-
-	if (Handle->pCallback)
-		Handle->pCallback->pfnCallback(Handle, Handle->pCallback->pParam);
-
-	return 0;
-}
-
-BT_ERROR BT_NVIC_IRQ_19(void) {
-	volatile BT_HANDLE Handle = g_TIMER_HANDLES[2];
-	volatile LM3Sxx_TIMER_REGS *pRegs = Handle->pRegs;
-
-	BT_u32 IRValue = pRegs->TMRMIS;
-
-	pRegs->TMRICR = IRValue;
-
-	if (Handle->pCallback)
-		Handle->pCallback->pfnCallback(Handle, Handle->pCallback->pParam);
-
-	return 0;
-}
-
-BT_ERROR BT_NVIC_IRQ_20(void) {
-	volatile BT_HANDLE Handle = g_TIMER_HANDLES[3];
-	volatile LM3Sxx_TIMER_REGS *pRegs = Handle->pRegs;
-
-	BT_u32 IRValue = pRegs->TMRMIS;
-
-	pRegs->TMRICR = IRValue;
-
-	if (Handle->pCallback)
-		Handle->pCallback->pfnCallback(Handle, Handle->pCallback->pParam);
+	hTimer->uLastEventTime = hTimer->uEventTime;
+	hTimer->uEventTime		= pRegs->TMRTAR;
 
 	return BT_ERR_NONE;
+}
+
+BT_ERROR TMRB_Interrupt(BT_HANDLE hTimer) {
+	volatile LM3Sxx_TIMER_REGS *pRegs = hTimer->pRegs;
+
+	hTimer->pRegs->TMRICR = 0x00000F00;
+
+	if (hTimer->pCallback)
+		hTimer->pCallback->pfnCallback(hTimer, hTimer->pCallback->pParam);
+
+	hTimer->uLastEventTime	= hTimer->uEventTime;
+	hTimer->uEventTime 		= pRegs->TMRTBR;
+
+	return BT_ERR_NONE;
+}
+
+BT_ERROR BT_NVIC_IRQ_35(void) {
+	return TMRA_Interrupt(g_TIMER_HANDLES[0]);
+}
+
+BT_ERROR BT_NVIC_IRQ_36(void) {
+	return TMRB_Interrupt(g_TIMER_HANDLES[1]);
+}
+
+BT_ERROR BT_NVIC_IRQ_37(void) {
+	return TMRA_Interrupt(g_TIMER_HANDLES[2]);
+}
+
+BT_ERROR BT_NVIC_IRQ_38(void) {
+	return TMRB_Interrupt(g_TIMER_HANDLES[3]);
+}
+
+BT_ERROR BT_NVIC_IRQ_39(void) {
+	return TMRA_Interrupt(g_TIMER_HANDLES[4]);
+}
+
+BT_ERROR BT_NVIC_IRQ_40(void) {
+	return TMRB_Interrupt(g_TIMER_HANDLES[5]);
+}
+
+BT_ERROR BT_NVIC_IRQ_51(void) {
+	return TMRA_Interrupt(g_TIMER_HANDLES[6]);
+}
+
+BT_ERROR BT_NVIC_IRQ_52(void) {
+	return TMRB_Interrupt(g_TIMER_HANDLES[7]);
 }
 
 
 static void ResetTimer(BT_HANDLE hTimer) {
 }
+
 
 static BT_ERROR timer_cleanup(BT_HANDLE hTimer) {
 	ResetTimer(hTimer);
@@ -124,8 +140,92 @@ static BT_u32 timer_getinputclock(BT_HANDLE hTimer, BT_ERROR *pError) {
 	return BT_LM3Sxx_GetMainFrequency();
 }
 
-static BT_ERROR timer_setconfig(BT_HANDLE hTimer, void *pConfig) {
-	//volatile LM3Sxx_TIMER_REGS *pRegs = hTimer->pRegs;
+static BT_ERROR timer_setconfig(BT_HANDLE hTimer, BT_TIMER_CONFIG *pConfig) {
+	volatile LM3Sxx_TIMER_REGS *pRegs = hTimer->pRegs;
+
+	volatile BT_u32 *pTMRModeReg;
+
+	if (pConfig->eConfig == BT_TIMER_CONFIG_32BIT_TMR)
+		pRegs->TMRCFG = 0x00000000;
+	else if (pConfig->eConfig == BT_TIMER_CONFIG_32BIT_RTC)
+		pRegs->TMRCFG = 0x00000001;
+	else if (pConfig->eConfig == BT_TIMER_CONFIG_16BIT_TMR)
+		pRegs->TMRCFG = 0x00000004;
+
+	if ((hTimer->ulId % 2) == 0) {
+		pTMRModeReg = &(pRegs->TMRTAMR);
+		pRegs->TMRCTL &= ~LM3Sxx_TIMER_TMRCTL_TMRA_EVENT_MASK;
+		if (pConfig->eEdge == BT_TIMER_EDGE_POSITIVE)
+			pRegs->TMRCTL |= LM3Sxx_TIMER_TMRCTL_TMRA_EVENT_POS_EDGE;
+		else if (pConfig->eEdge == BT_TIMER_EDGE_NEGATIVE)
+			pRegs->TMRCTL |= LM3Sxx_TIMER_TMRCTL_TMRA_EVENT_NEG_EDGE;
+		else if (pConfig->eEdge == BT_TIMER_EDGE_BOTH)
+			pRegs->TMRCTL |= LM3Sxx_TIMER_TMRCTL_TMRA_EVENT_BOTH_EDGES;
+	}
+	else {
+		pTMRModeReg = &(pRegs->TMRTBMR);
+		pRegs->TMRCTL &= ~LM3Sxx_TIMER_TMRCTL_TMRB_EVENT_MASK;
+		if (pConfig->eEdge == BT_TIMER_EDGE_POSITIVE)
+			pRegs->TMRCTL |= LM3Sxx_TIMER_TMRCTL_TMRB_EVENT_POS_EDGE;
+		else if (pConfig->eEdge == BT_TIMER_EDGE_NEGATIVE)
+			pRegs->TMRCTL |= LM3Sxx_TIMER_TMRCTL_TMRB_EVENT_NEG_EDGE;
+		else if (pConfig->eEdge == BT_TIMER_EDGE_BOTH)
+			pRegs->TMRCTL |= LM3Sxx_TIMER_TMRCTL_TMRB_EVENT_BOTH_EDGES;
+	}
+	*pTMRModeReg = 0x00000000;
+	if (pConfig->bWaitOnTrigger)
+		*pTMRModeReg |= 0x00000040;
+	if (pConfig->bInterruptOnMatch)
+		*pTMRModeReg |= 0x00000020;
+	if ((pConfig->eDirection == BT_TIMER_DIRECTION_UP) && (pConfig->eConfig != BT_TIMER_CONFIG_32BIT_RTC))
+		*pTMRModeReg |= 0x00000010;
+
+	if ((hTimer->ulId % 2) == 0) {
+		pRegs->TMRIMR &= ~LM3Sxx_TIMER_TMRIMR_CAPTURE_A_EVENT;
+	}
+	else {
+		pRegs->TMRIMR &= ~LM3Sxx_TIMER_TMRIMR_CAPTURE_B_EVENT;
+	}
+
+	hTimer->eMode = pConfig->eMode;
+	hTimer->eConfig = pConfig->eConfig;
+
+	switch (pConfig->eMode) {
+	case BT_TIMER_MODE_ONESHOT: {
+		*pTMRModeReg |= 0x00000001;
+		break;
+	}
+	case BT_TIMER_MODE_PERIODIC: {
+		*pTMRModeReg |= 0x00000002;
+		break;
+	}
+	case BT_TIMER_MODE_CAPTURE_COUNT: {
+		*pTMRModeReg |= 0x00000003;
+		if ((hTimer->ulId % 2) == 0)
+			pRegs->TMRTAMATCHR = 0x00000000;
+		else
+			pRegs->TMRTBMATCHR = 0x00000000;
+		break;
+	}
+	case BT_TIMER_MODE_CAPTURE_TIME: {
+		*pTMRModeReg |= 0x00000007;
+		if ((hTimer->ulId % 2) == 0) {
+			pRegs->TMRIMR |= LM3Sxx_TIMER_TMRIMR_CAPTURE_A_EVENT;
+		}
+		else {
+			pRegs->TMRIMR |= LM3Sxx_TIMER_TMRIMR_CAPTURE_B_EVENT;
+		}
+		break;
+	}
+	case BT_TIMER_MODE_PWM: {
+		*pTMRModeReg |= 0x0000000A;
+		*pTMRModeReg &= ~0x00000010;
+		break;
+	}
+	default: {
+		break;
+	}
+	}
 
 	return BT_ERR_NONE;
 }
@@ -138,17 +238,23 @@ static BT_ERROR timer_getconfig(BT_HANDLE hTimer, void *pConfig) {
 
 
 static BT_ERROR timer_start(BT_HANDLE hTimer) {
-	//volatile LM3Sxx_TIMER_REGS *pRegs = hTimer->pRegs;
+	volatile LM3Sxx_TIMER_REGS *pRegs = hTimer->pRegs;
 
-	//pRegs->TMRBTCR |= LM3Sxx_TIMER_TMRBTCR_CEn;
+	if ((hTimer->ulId % 2) == 0)
+		pRegs->TMRCTL |= LM3Sxx_TIMER_TMRCTL_TMRA_EN;
+	else
+		pRegs->TMRCTL |= LM3Sxx_TIMER_TMRCTL_TMRB_EN;
 
 	return BT_ERR_NONE;
 }
 
 static BT_ERROR timer_stop(BT_HANDLE hTimer) {
-	//volatile LM3Sxx_TIMER_REGS *pRegs = hTimer->pRegs;
+	volatile LM3Sxx_TIMER_REGS *pRegs = hTimer->pRegs;
 
-	//pRegs->TMRBTCR &= ~LM3Sxx_TIMER_TMRBTCR_CEn;
+	if ((hTimer->ulId % 2) == 0)
+		pRegs->TMRCTL &= ~LM3Sxx_TIMER_TMRCTL_TMRA_EN;
+	else
+		pRegs->TMRCTL &= ~LM3Sxx_TIMER_TMRCTL_TMRB_EN;
 
 	return BT_ERR_NONE;
 }
@@ -195,64 +301,163 @@ static BT_ERROR timer_unregister_callback(BT_HANDLE hTimer, BT_HANDLE hCallback)
 
 
 static BT_u32 timer_get_prescaler(BT_HANDLE hTimer, BT_ERROR *pError) {
-	//volatile LM3Sxx_TIMER_REGS *pRegs = hTimer->pRegs;
+	volatile LM3Sxx_TIMER_REGS *pRegs = hTimer->pRegs;
 
 	if (pError)
 		*pError = BT_ERR_NONE;
 
-	//return pRegs->TMRBPR+1;
+	if ((hTimer->ulId % 2) == 0)
+		return pRegs->TMRTAPR + 1;
+	else
+		return pRegs->TMRTBPR + 1;
 	return 1;
 }
 
 static BT_ERROR timer_set_prescaler(BT_HANDLE hTimer, BT_u32 ulPrescaler) {
-	//volatile LM3Sxx_TIMER_REGS *pRegs = hTimer->pRegs;
+	volatile LM3Sxx_TIMER_REGS *pRegs = hTimer->pRegs;
 
-	//pRegs->TMRBPR = ulPrescaler-1;
+	if ((hTimer->ulId % 2) == 0)
+		pRegs->TMRTAPR = ulPrescaler - 1;
+	else
+		pRegs->TMRTBPR = ulPrescaler - 1;
 
 	return BT_ERR_NONE;
 }
 
 static BT_u32 timer_get_period_count(BT_HANDLE hTimer, BT_ERROR *pError) {
-	//volatile LM3Sxx_TIMER_REGS *pRegs = hTimer->pRegs;
+	volatile LM3Sxx_TIMER_REGS *pRegs = hTimer->pRegs;
 
 	if (pError)
 		*pError= BT_ERR_NONE;
 
-	//return pRegs->TMRBMR3;
-	return 1;
+	if ((hTimer->ulId % 2) == 0)
+		return (pRegs->TMRTAILR + 1) * (pRegs->TMRTAPR + 1);
+	else
+		return (pRegs->TMRTBILR + 1) * (pRegs->TMRTBPR + 1);
 }
 
 static BT_ERROR timer_set_period_count(BT_HANDLE hTimer, BT_u32 ulValue) {
-	//volatile LM3Sxx_TIMER_REGS *pRegs = hTimer->pRegs;
+	volatile LM3Sxx_TIMER_REGS *pRegs = hTimer->pRegs;
 
-	//pRegs->TMRBMR3 = ulValue;
-	//pRegs->TMRBMCR |= LM3Sxx_TIMER_TMRMCR_MR3R;
+	BT_u32 Err, a, b;
+	if (hTimer->eConfig == BT_TIMER_CONFIG_16BIT_TMR) {
+		BT_u32 i, j;
+		Err = 0xFFFFFFFF;
+
+		for (i = 0; i < 256; i++) {
+			BT_u32 ulSub = ulValue / (i+1);
+			if (ulSub >= 65536)
+				continue;
+			BT_u32 ulAbs = ulValue - ulSub * (i+1);
+			if (ulAbs < Err) {
+				Err = ulAbs;
+				a = i;
+				b = ulSub;
+			}
+		}
+	}
+	else {
+		a = 0;
+		b = ulValue;
+	}
+
+	if ((hTimer->ulId % 2) == 0) {
+		pRegs->TMRTAILR = b - 1;
+		pRegs->TMRTAPR = a;
+	}
+	else {
+		pRegs->TMRTBILR = b - 1;
+		pRegs->TMRTBPR = a;
+	}
 
 	return BT_ERR_NONE;
 }
 
-static BT_ERROR timer_enable_reload(BT_HANDLE hTimer) {
-	return BT_ERR_UNIMPLEMENTED;
-}
-
-static BT_ERROR timer_disable_reload(BT_HANDLE hTimer) {
-	return BT_ERR_UNIMPLEMENTED;
-}
-
-static BT_u32 timer_getvalue(BT_HANDLE hTimer, BT_ERROR *pError) {
-	//volatile LM3Sxx_TIMER_REGS *pRegs = hTimer->pRegs;
+static BT_u32 timer_get_match(BT_HANDLE hTimer, BT_u32 ulChannel, BT_ERROR *pError) {
+	volatile LM3Sxx_TIMER_REGS *pRegs = hTimer->pRegs;
 
 	if (pError)
 		*pError= BT_ERR_NONE;
 
-	return 1;
-	//return pRegs->TMRBTC;
+	if ((hTimer->ulId % 2) == 0)
+		return pRegs->TMRTAMATCHR;
+	else
+		return pRegs->TMRTBMATCHR;
+}
+
+static BT_ERROR timer_set_match(BT_HANDLE hTimer, BT_u32 ulChannel, BT_u32 ulValue) {
+	volatile LM3Sxx_TIMER_REGS *pRegs = hTimer->pRegs;
+
+	BT_u32 Err, a, b;
+	if (hTimer->eConfig == BT_TIMER_CONFIG_16BIT_TMR) {
+		BT_u32 i, j;
+		Err = 0xFFFFFFFF;
+
+		for (i = 0; i < 256; i++) {
+			BT_u32 ulSub = ulValue / i;
+			if (ulSub >= 65536)
+				continue;
+			BT_u32 ulAbs = ulValue - ulSub * i;
+			if (ulAbs < Err) {
+				Err = ulAbs;
+				a = i;
+				b = ulSub;
+			}
+		}
+	}
+	else {
+		a = 0;
+		b = ulValue;
+	}
+
+	if ((hTimer->ulId % 2) == 0) {
+		pRegs->TMRTAMATCHR = b;
+		pRegs->TMRTAPMR = a;
+	}
+	else {
+		pRegs->TMRTBMATCHR = b;
+		pRegs->TMRTBPMR = a;
+	}
+
+	return BT_ERR_NONE;
+}
+
+
+static BT_ERROR timer_enable_reload(BT_HANDLE hTimer) {
+
+	return BT_ERR_UNIMPLEMENTED;
+}
+
+static BT_ERROR timer_disable_reload(BT_HANDLE hTimer) {
+
+	return BT_ERR_UNIMPLEMENTED;
+}
+
+static BT_u32 timer_getvalue(BT_HANDLE hTimer, BT_ERROR *pError) {
+	volatile LM3Sxx_TIMER_REGS *pRegs = hTimer->pRegs;
+
+	if (pError)
+		*pError= BT_ERR_NONE;
+
+	if (hTimer->eMode == BT_TIMER_MODE_CAPTURE_TIME) {
+		BT_u16 uResult = (hTimer->uLastEventTime - hTimer->uEventTime);
+		return uResult;
+	}
+	else {
+		if ((hTimer->ulId % 2) == 0)
+			return pRegs->TMRTAR;
+		else
+			return pRegs->TMRTBR;
+	}
 }
 
 static BT_ERROR timer_setvalue(BT_HANDLE hTimer, BT_u32 ulValue) {
-	//volatile LM3Sxx_TIMER_REGS *pRegs = hTimer->pRegs;
+	volatile LM3Sxx_TIMER_REGS *pRegs = hTimer->pRegs;
 
-	//pRegs->TMRBTC = ulValue;
+	if ((hTimer->ulId % 2) == 0)
+		pRegs->TMRTAR = ulValue;
+	else
+		pRegs->TMRTBR = ulValue;
 
 	return BT_ERR_NONE;
 }
@@ -264,19 +469,19 @@ static void enableTimerPeripheralClock(BT_HANDLE hTimer) {
 	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hTimer->pDevice, BT_RESOURCE_ENUM, 0);
 
 	switch(pResource->ulStart) {
-	case 0: {
+	case 0: case 1: {
 		LM3Sxx_RCC->RCGC[1] |= LM3Sxx_RCC_RCGC_TIMER0EN;
 		break;
 	}
-	case 1: {
+	case 2: case 3:{
 		LM3Sxx_RCC->RCGC[1] |= LM3Sxx_RCC_RCGC_TIMER1EN;
 		break;
 	}
-	case 2: {
+	case 4: case 5: {
 		LM3Sxx_RCC->RCGC[1] |= LM3Sxx_RCC_RCGC_TIMER2EN;
 		break;
 	}
-	case 3: {
+	case 6: case 7: {
 		LM3Sxx_RCC->RCGC[1] |= LM3Sxx_RCC_RCGC_TIMER3EN;
 		break;
 	}
@@ -294,19 +499,35 @@ static void disableTimerPeripheralClock(BT_HANDLE hTimer) {
 
 	switch(pResource->ulStart) {
 	case 0: {
-		LM3Sxx_RCC->RCGC[1] &= ~LM3Sxx_RCC_RCGC_TIMER0EN;
+		if (g_TIMER_HANDLES[1] == NULL) LM3Sxx_RCC->RCGC[1] &= ~LM3Sxx_RCC_RCGC_TIMER0EN;
 		break;
 	}
 	case 1: {
-		LM3Sxx_RCC->RCGC[1] &= ~LM3Sxx_RCC_RCGC_TIMER1EN;
+		if (g_TIMER_HANDLES[0] == NULL) LM3Sxx_RCC->RCGC[1] &= ~LM3Sxx_RCC_RCGC_TIMER0EN;
 		break;
 	}
 	case 2: {
-		LM3Sxx_RCC->RCGC[1] &= ~LM3Sxx_RCC_RCGC_TIMER2EN;
+		if (g_TIMER_HANDLES[3] == NULL) LM3Sxx_RCC->RCGC[1] &= ~LM3Sxx_RCC_RCGC_TIMER1EN;
 		break;
 	}
 	case 3: {
-		LM3Sxx_RCC->RCGC[1] &= ~LM3Sxx_RCC_RCGC_TIMER3EN;
+		if (g_TIMER_HANDLES[2] == NULL) LM3Sxx_RCC->RCGC[1] &= ~LM3Sxx_RCC_RCGC_TIMER1EN;
+		break;
+	}
+	case 4: {
+		if (g_TIMER_HANDLES[5] == NULL) LM3Sxx_RCC->RCGC[1] &= ~LM3Sxx_RCC_RCGC_TIMER2EN;
+		break;
+	}
+	case 5: {
+		if (g_TIMER_HANDLES[4] == NULL) LM3Sxx_RCC->RCGC[1] &= ~LM3Sxx_RCC_RCGC_TIMER2EN;
+		break;
+	}
+	case 6: {
+		if (g_TIMER_HANDLES[7] == NULL) LM3Sxx_RCC->RCGC[1] &= ~LM3Sxx_RCC_RCGC_TIMER3EN;
+		break;
+	}
+	case 7: {
+		if (g_TIMER_HANDLES[6] == NULL) LM3Sxx_RCC->RCGC[1] &= ~LM3Sxx_RCC_RCGC_TIMER3EN;
 		break;
 	}
 	default: {
@@ -322,25 +543,25 @@ static BT_BOOL isTimerPeripheralClockEnabled(BT_HANDLE hTimer) {
 	const BT_RESOURCE *pResource = BT_GetIntegratedResource(hTimer->pDevice, BT_RESOURCE_ENUM, 0);
 
 	switch(pResource->ulStart) {
-	case 0: {
+	case 0: case 1: {
 		if(LM3Sxx_RCC->RCGC[1] & LM3Sxx_RCC_RCGC_TIMER0EN) {
 			return BT_TRUE;
 		}
 		break;
 	}
-	case 1: {
+	case 2: case 3: {
 		if(LM3Sxx_RCC->RCGC[1] & LM3Sxx_RCC_RCGC_TIMER1EN) {
 			return BT_TRUE;
 		}
 		break;
 	}
-	case 2: {
+	case 4: case 5: {
 		if(LM3Sxx_RCC->RCGC[1] & LM3Sxx_RCC_RCGC_TIMER2EN) {
 			return BT_TRUE;
 		}
 		break;
 	}
-	case 3: {
+	case 6: case 7: {
 		if(LM3Sxx_RCC->RCGC[1] & LM3Sxx_RCC_RCGC_TIMER3EN) {
 			return BT_TRUE;
 		}
@@ -397,24 +618,25 @@ static BT_ERROR TimerGetPowerState(BT_HANDLE hTimer, BT_POWER_STATE *pePowerStat
  */
 
 static const BT_DEV_IF_TIMER oTimerDeviceInterface= {
-	timer_getinputclock,
-	timer_setconfig,
-	timer_getconfig,
-	timer_start,
-	timer_stop,
-	timer_enable_interrupt,
-	timer_disable_interrupt,
-	NULL,
-	timer_register_callback,
-	timer_unregister_callback,
-	timer_get_prescaler,
-	timer_set_prescaler,
-	timer_get_period_count,
-	timer_set_period_count,
-	timer_enable_reload,
-	timer_disable_reload,
-	timer_getvalue,
-	timer_setvalue,
+	.pfnGetInputClock			= timer_getinputclock,
+	.pfnSetConfig				= timer_setconfig,
+	.pfnGetConfig				= timer_getconfig,
+	.pfnStart					= timer_start,
+	.pfnStop					= timer_stop,
+	.pfnEnableInterrupt			= timer_enable_interrupt,
+	.pfnDisableInterrupt		= timer_disable_interrupt,
+	.pfnRegisterCallback		= timer_register_callback,
+	.pfnUnregisterCallback		= timer_unregister_callback,
+	.pfnGetPrescaler			= timer_get_prescaler,
+	.pfnSetPrescaler			= timer_set_prescaler,
+	.pfnGetPeriodCount			= timer_get_period_count,
+	.pfnSetPeriodCount			= timer_set_period_count,
+	.pfnGetMatch				= timer_get_match,
+	.pfnSetMatch				= timer_set_match,
+	.pfnEnableReload			= timer_enable_reload,
+	.pfnDisableReload			= timer_disable_reload,
+	.pfnGetValue				= timer_getvalue,
+	.pfnSetValue				= timer_setvalue,
 };
 
 static const BT_DEV_IFS oDeviceInterface = {
@@ -474,6 +696,8 @@ static BT_HANDLE timer_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErr
 
 	hTimer->pDevice = pDevice;
 
+	hTimer->ulId = pResource->ulStart;
+
 	pResource = BT_GetIntegratedResource(pDevice, BT_RESOURCE_MEM, 0);
 	if(!pResource) {
 		Error = BT_ERR_NO_MEMORY;
@@ -519,8 +743,8 @@ BT_INTEGRATED_DRIVER_DEF timer_driver = {
 };
 
 
-#ifdef BT_CONFIG_MACH_LM3Sxx_TIMER_0
-static const BT_RESOURCE oLM3Sxx_timer0_resources[] = {
+#ifdef BT_CONFIG_MACH_LM3Sxx_TIMER_0_A
+static const BT_RESOURCE oLM3Sxx_timer0_A_resources[] = {
 	{
 		.ulStart 			= BT_CONFIG_MACH_LM3Sxx_TIMER0_BASE,
 		.ulEnd 				= BT_CONFIG_MACH_LM3Sxx_TIMER0_BASE + BT_SIZE_4K - 1,
@@ -533,28 +757,28 @@ static const BT_RESOURCE oLM3Sxx_timer0_resources[] = {
 	},
 	{
 		.ulStart			= 35,
-		.ulEnd				= 36,
+		.ulEnd				= 35,
 		.ulFlags			= BT_RESOURCE_IRQ,
 	},
 };
 
-static const BT_INTEGRATED_DEVICE oLM3Sxx_timer0_device = {
+static const BT_INTEGRATED_DEVICE oLM3Sxx_timer0_A_device = {
 	.name 					= "LM3Sxx,timer",
-	.ulTotalResources 		= BT_ARRAY_SIZE(oLM3Sxx_timer0_resources),
-	.pResources 			= oLM3Sxx_timer0_resources,
+	.ulTotalResources 		= BT_ARRAY_SIZE(oLM3Sxx_timer0_A_resources),
+	.pResources 			= oLM3Sxx_timer0_A_resources,
 };
 
-const BT_DEVFS_INODE_DEF oLM3Sxx_timer0_inode = {
-	.szpName = "timer0",
-	.pDevice = &oLM3Sxx_timer0_device,
+const BT_DEVFS_INODE_DEF oLM3Sxx_timer0_A_inode = {
+	.szpName = "timer0A",
+	.pDevice = &oLM3Sxx_timer0_A_device,
 };
 #endif
 
-#ifdef BT_CONFIG_MACH_LM3Sxx_TIMER_1
-static const BT_RESOURCE oLM3Sxx_timer1_resources[] = {
+#ifdef BT_CONFIG_MACH_LM3Sxx_TIMER_0_B
+static const BT_RESOURCE oLM3Sxx_timer0_B_resources[] = {
 	{
-		.ulStart 			= BT_CONFIG_MACH_LM3Sxx_TIMER1_BASE,
-		.ulEnd 				= BT_CONFIG_MACH_LM3Sxx_TIMER1_BASE + BT_SIZE_4K - 1,
+		.ulStart 			= BT_CONFIG_MACH_LM3Sxx_TIMER0_BASE,
+		.ulEnd 				= BT_CONFIG_MACH_LM3Sxx_TIMER0_BASE + BT_SIZE_4K - 1,
 		.ulFlags 			= BT_RESOURCE_MEM,
 	},
 	{
@@ -563,29 +787,29 @@ static const BT_RESOURCE oLM3Sxx_timer1_resources[] = {
 		.ulFlags			= BT_RESOURCE_ENUM,
 	},
 	{
-		.ulStart			= 37,
-		.ulEnd				= 38,
+		.ulStart			= 36,
+		.ulEnd				= 36,
 		.ulFlags			= BT_RESOURCE_IRQ,
 	},
 };
 
-static const BT_INTEGRATED_DEVICE oLM3Sxx_timer1_device = {
+static const BT_INTEGRATED_DEVICE oLM3Sxx_timer0_B_device = {
 	.name 					= "LM3Sxx,timer",
-	.ulTotalResources 		= BT_ARRAY_SIZE(oLM3Sxx_timer1_resources),
-	.pResources 			= oLM3Sxx_timer1_resources,
+	.ulTotalResources 		= BT_ARRAY_SIZE(oLM3Sxx_timer0_B_resources),
+	.pResources 			= oLM3Sxx_timer0_B_resources,
 };
 
-const BT_DEVFS_INODE_DEF oLM3Sxx_timer1_inode = {
-	.szpName = "timer1",
-	.pDevice = &oLM3Sxx_timer1_device,
+const BT_DEVFS_INODE_DEF oLM3Sxx_timer0_B_inode = {
+	.szpName = "timer0B",
+	.pDevice = &oLM3Sxx_timer0_B_device,
 };
 #endif
 
-#ifdef BT_CONFIG_MACH_LM3Sxx_TIMER_2
-static const BT_RESOURCE oLM3Sxx_timer2_resources[] = {
+#ifdef BT_CONFIG_MACH_LM3Sxx_TIMER_1_A
+static const BT_RESOURCE oLM3Sxx_timer1_A_resources[] = {
 	{
-		.ulStart 			= BT_CONFIG_MACH_LM3Sxx_TIMER2_BASE,
-		.ulEnd 				= BT_CONFIG_MACH_LM3Sxx_TIMER2_BASE + BT_SIZE_4K - 1,
+		.ulStart 			= BT_CONFIG_MACH_LM3Sxx_TIMER1_BASE,
+		.ulEnd 				= BT_CONFIG_MACH_LM3Sxx_TIMER1_BASE + BT_SIZE_4K - 1,
 		.ulFlags 			= BT_RESOURCE_MEM,
 	},
 	{
@@ -594,29 +818,29 @@ static const BT_RESOURCE oLM3Sxx_timer2_resources[] = {
 		.ulFlags			= BT_RESOURCE_ENUM,
 	},
 	{
-		.ulStart			= 39,
-		.ulEnd				= 40,
+		.ulStart			= 37,
+		.ulEnd				= 37,
 		.ulFlags			= BT_RESOURCE_IRQ,
 	},
 };
 
-static const BT_INTEGRATED_DEVICE oLM3Sxx_timer2_device = {
+static const BT_INTEGRATED_DEVICE oLM3Sxx_timer1_A_device = {
 	.name 					= "LM3Sxx,timer",
-	.ulTotalResources 		= BT_ARRAY_SIZE(oLM3Sxx_timer2_resources),
-	.pResources 			= oLM3Sxx_timer2_resources,
+	.ulTotalResources 		= BT_ARRAY_SIZE(oLM3Sxx_timer1_A_resources),
+	.pResources 			= oLM3Sxx_timer1_A_resources,
 };
 
-const BT_DEVFS_INODE_DEF oLM3Sxx_timer2_inode = {
-	.szpName = "timer2",
-	.pDevice = &oLM3Sxx_timer2_device,
+const BT_DEVFS_INODE_DEF oLM3Sxx_timer1_A_inode = {
+	.szpName = "timer1A",
+	.pDevice = &oLM3Sxx_timer1_A_device,
 };
 #endif
 
-#ifdef BT_CONFIG_MACH_LM3Sxx_TIMER_3
-static const BT_RESOURCE oLM3Sxx_timer3_resources[] = {
+#ifdef BT_CONFIG_MACH_LM3Sxx_TIMER_1_B
+static const BT_RESOURCE oLM3Sxx_timer1_B_resources[] = {
 	{
-		.ulStart 			= BT_CONFIG_MACH_LM3Sxx_TIMER3_BASE,
-		.ulEnd 				= BT_CONFIG_MACH_LM3Sxx_TIMER3_BASE + BT_SIZE_4K - 1,
+		.ulStart 			= BT_CONFIG_MACH_LM3Sxx_TIMER1_BASE,
+		.ulEnd 				= BT_CONFIG_MACH_LM3Sxx_TIMER1_BASE + BT_SIZE_4K - 1,
 		.ulFlags 			= BT_RESOURCE_MEM,
 	},
 	{
@@ -625,20 +849,144 @@ static const BT_RESOURCE oLM3Sxx_timer3_resources[] = {
 		.ulFlags			= BT_RESOURCE_ENUM,
 	},
 	{
+		.ulStart			= 38,
+		.ulEnd				= 38,
+		.ulFlags			= BT_RESOURCE_IRQ,
+	},
+};
+
+static const BT_INTEGRATED_DEVICE oLM3Sxx_timer1_B_device = {
+	.name 					= "LM3Sxx,timer",
+	.ulTotalResources 		= BT_ARRAY_SIZE(oLM3Sxx_timer1_B_resources),
+	.pResources 			= oLM3Sxx_timer1_B_resources,
+};
+
+const BT_DEVFS_INODE_DEF oLM3Sxx_timer1_B_inode = {
+	.szpName = "timer1B",
+	.pDevice = &oLM3Sxx_timer1_B_device,
+};
+#endif
+
+#ifdef BT_CONFIG_MACH_LM3Sxx_TIMER_2_A
+static const BT_RESOURCE oLM3Sxx_timer2_A_resources[] = {
+	{
+		.ulStart 			= BT_CONFIG_MACH_LM3Sxx_TIMER2_BASE,
+		.ulEnd 				= BT_CONFIG_MACH_LM3Sxx_TIMER2_BASE + BT_SIZE_4K - 1,
+		.ulFlags 			= BT_RESOURCE_MEM,
+	},
+	{
+		.ulStart			= 4,
+		.ulEnd				= 4,
+		.ulFlags			= BT_RESOURCE_ENUM,
+	},
+	{
+		.ulStart			= 39,
+		.ulEnd				= 39,
+		.ulFlags			= BT_RESOURCE_IRQ,
+	},
+};
+
+static const BT_INTEGRATED_DEVICE oLM3Sxx_timer2_A_device = {
+	.name 					= "LM3Sxx,timer",
+	.ulTotalResources 		= BT_ARRAY_SIZE(oLM3Sxx_timer2_A_resources),
+	.pResources 			= oLM3Sxx_timer2_A_resources,
+};
+
+const BT_DEVFS_INODE_DEF oLM3Sxx_timer2_A_inode = {
+	.szpName = "timer2A",
+	.pDevice = &oLM3Sxx_timer2_A_device,
+};
+#endif
+
+#ifdef BT_CONFIG_MACH_LM3Sxx_TIMER_2_B
+static const BT_RESOURCE oLM3Sxx_timer2_B_resources[] = {
+	{
+		.ulStart 			= BT_CONFIG_MACH_LM3Sxx_TIMER2_BASE,
+		.ulEnd 				= BT_CONFIG_MACH_LM3Sxx_TIMER2_BASE + BT_SIZE_4K - 1,
+		.ulFlags 			= BT_RESOURCE_MEM,
+	},
+	{
+		.ulStart			= 5,
+		.ulEnd				= 5,
+		.ulFlags			= BT_RESOURCE_ENUM,
+	},
+	{
+		.ulStart			= 40,
+		.ulEnd				= 40,
+		.ulFlags			= BT_RESOURCE_IRQ,
+	},
+};
+
+static const BT_INTEGRATED_DEVICE oLM3Sxx_timer2_B_device = {
+	.name 					= "LM3Sxx,timer",
+	.ulTotalResources 		= BT_ARRAY_SIZE(oLM3Sxx_timer2_B_resources),
+	.pResources 			= oLM3Sxx_timer2_B_resources,
+};
+
+const BT_DEVFS_INODE_DEF oLM3Sxx_timer2_B_inode = {
+	.szpName = "timer2B",
+	.pDevice = &oLM3Sxx_timer2_B_device,
+};
+#endif
+
+#ifdef BT_CONFIG_MACH_LM3Sxx_TIMER_3_A
+static const BT_RESOURCE oLM3Sxx_timer3_A_resources[] = {
+	{
+		.ulStart 			= BT_CONFIG_MACH_LM3Sxx_TIMER3_BASE,
+		.ulEnd 				= BT_CONFIG_MACH_LM3Sxx_TIMER3_BASE + BT_SIZE_4K - 1,
+		.ulFlags 			= BT_RESOURCE_MEM,
+	},
+	{
+		.ulStart			= 6,
+		.ulEnd				= 6,
+		.ulFlags			= BT_RESOURCE_ENUM,
+	},
+	{
 		.ulStart			= 51,
+		.ulEnd				= 51,
+		.ulFlags			= BT_RESOURCE_IRQ,
+	},
+};
+
+static const BT_INTEGRATED_DEVICE oLM3Sxx_timer3_A_device = {
+	.name 					= "LM3Sxx,timer",
+	.ulTotalResources 		= BT_ARRAY_SIZE(oLM3Sxx_timer3_A_resources),
+	.pResources 			= oLM3Sxx_timer3_A_resources,
+};
+
+const BT_DEVFS_INODE_DEF oLM3Sxx_timer3_A_inode = {
+	.szpName = "timer3A",
+	.pDevice = &oLM3Sxx_timer3_A_device,
+};
+#endif
+
+#ifdef BT_CONFIG_MACH_LM3Sxx_TIMER_3_B
+static const BT_RESOURCE oLM3Sxx_timer3_B_resources[] = {
+	{
+		.ulStart 			= BT_CONFIG_MACH_LM3Sxx_TIMER3_BASE,
+		.ulEnd 				= BT_CONFIG_MACH_LM3Sxx_TIMER3_BASE + BT_SIZE_4K - 1,
+		.ulFlags 			= BT_RESOURCE_MEM,
+	},
+	{
+		.ulStart			= 7,
+		.ulEnd				= 7,
+		.ulFlags			= BT_RESOURCE_ENUM,
+	},
+	{
+		.ulStart			= 52,
 		.ulEnd				= 52,
 		.ulFlags			= BT_RESOURCE_IRQ,
 	},
 };
 
-static const BT_INTEGRATED_DEVICE oLM3Sxx_timer3_device = {
+static const BT_INTEGRATED_DEVICE oLM3Sxx_timer3_B_device = {
 	.name 					= "LM3Sxx,timer",
-	.ulTotalResources 		= BT_ARRAY_SIZE(oLM3Sxx_timer3_resources),
-	.pResources 			= oLM3Sxx_timer3_resources,
+	.ulTotalResources 		= BT_ARRAY_SIZE(oLM3Sxx_timer3_B_resources),
+	.pResources 			= oLM3Sxx_timer3_B_resources,
 };
 
-const BT_DEVFS_INODE_DEF oLM3Sxx_timer3_inode = {
-	.szpName = "timer3",
-	.pDevice = &oLM3Sxx_timer3_device,
+const BT_DEVFS_INODE_DEF oLM3Sxx_timer3_B_inode = {
+	.szpName = "timer3B",
+	.pDevice = &oLM3Sxx_timer3_B_device,
 };
 #endif
