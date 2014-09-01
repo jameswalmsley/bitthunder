@@ -43,17 +43,16 @@ static BT_ERROR gpio_write_register(BT_HANDLE hGPIO, BT_u8 reg, BT_u8 val) {
 
 	BT_ERROR Error;
 
+	BT_u8 ucBuf[2];
+	ucBuf[0] = reg;
+	ucBuf[1] = val;
+
 	hGPIO->oMessages[0].addr 	= hGPIO->oClient.addr;
-	hGPIO->oMessages[0].len  	= 1;
-	hGPIO->oMessages[0].buf  	= &reg;
+	hGPIO->oMessages[0].len  	= 2;
+	hGPIO->oMessages[0].buf  	= ucBuf;
 	hGPIO->oMessages[0].flags   = 0;
 
-	hGPIO->oMessages[1].addr 	= hGPIO->oClient.addr;
-	hGPIO->oMessages[1].len		= 1;
-	hGPIO->oMessages[1].buf		= &val;
-	hGPIO->oMessages[1].flags 	= 0;
-
-	BT_I2C_Transfer(hGPIO->oClient.pBus, hGPIO->oMessages, 2, &Error);
+	BT_I2C_Transfer(hGPIO->oClient.pBus, hGPIO->oMessages, 1, &Error);
 
 	return Error;
 }
@@ -67,15 +66,20 @@ static BT_ERROR gpio_cleanup(BT_HANDLE hGPIO) {
 }
 
 static BT_ERROR gpio_set(BT_HANDLE hGPIO, BT_u32 ulGPIO, BT_BOOL bValue) {
-	BT_ERROR Error;
+	BT_ERROR Error = BT_ERR_NONE;
 
-	BT_u8 reg = getreg(ulGPIO);
+	BT_u8 reg = getreg(ulGPIO) + 2;
 	BT_u8 bit = ulGPIO % 8;
+	BT_u8 ucMask = 0x01 << bit;
 
+	BT_u8 val = gpio_read_register(hGPIO, reg, &Error);
+	if (bValue)
+		val |= ucMask;
+	else
+		val &= ~ucMask;
+	Error = gpio_write_register(hGPIO, reg, val);
 
-	BT_u8 val = gpio_write_register(hGPIO, reg, &Error);
-
-	return BT_ERR_NONE;
+	return Error;
 }
 
 static BT_BOOL gpio_get(BT_HANDLE hGPIO, BT_u32 ulGPIO, BT_ERROR *pError) {
@@ -92,11 +96,25 @@ static BT_BOOL gpio_get(BT_HANDLE hGPIO, BT_u32 ulGPIO, BT_ERROR *pError) {
 }
 
 static BT_ERROR gpio_set_direction(BT_HANDLE hGPIO, BT_u32 ulGPIO, BT_GPIO_DIRECTION eDirection) {
-	return BT_ERR_NONE;
+	BT_ERROR Error;
+
+	BT_u8 reg = getreg(ulGPIO) + 0x06;
+	BT_u8 bit = ulGPIO % 8;
+
+	BT_u8 ucMask = 0x01 << bit;
+
+	BT_u8 val = gpio_read_register(hGPIO, reg, &Error);
+	if (eDirection == BT_GPIO_DIR_INPUT)
+		val |= ucMask;
+	else
+		val &= ~ucMask;
+	Error = gpio_write_register(hGPIO, reg, val);
+
+	return Error;
 }
 
 static BT_GPIO_DIRECTION gpio_get_direction(BT_HANDLE hGPIO, BT_u32 ulGPIO, BT_ERROR *pError) {
-	BT_u8 reg = getreg(ulGPIO);
+	BT_u8 reg = getreg(ulGPIO) + 0x06;
 	BT_u8 bit = ulGPIO % 8;
 
 	BT_u8 val = gpio_read_register(hGPIO, reg, pError);
@@ -140,9 +158,11 @@ static const BT_IF_HANDLE oHandleInterface = {
 	},
 };
 
-static BT_HANDLE gpio_probe(const BT_I2C_BUS *pBus, const BT_DEVICE *pDevice, BT_ERROR *pError) {
+static BT_HANDLE gpio_probe(BT_HANDLE hBus, const BT_DEVICE *pDevice, BT_ERROR *pError) {
 
-	BT_ERROR Error = BT_ERR_NONE;
+   	BT_ERROR Error = BT_ERR_NONE;
+
+   	BT_I2C_BUS *pBus = BT_I2C_GetBusObject(hBus);
 
 	BT_HANDLE hGPIO = BT_CreateHandle(&oHandleInterface, sizeof(struct _BT_OPAQUE_HANDLE), pError);
 	if(!hGPIO) {
@@ -152,7 +172,7 @@ static BT_HANDLE gpio_probe(const BT_I2C_BUS *pBus, const BT_DEVICE *pDevice, BT
 
 	hGPIO->oClient.pBus = pBus;
 
-	const BT_RESOURCE *pResource = BT_GetDeviceResource(pDevice, BT_RESOURCE_BUSID, 0);
+	const BT_RESOURCE *pResource = BT_GetDeviceResource(pDevice, BT_RESOURCE_ADDR, 0);
 	if(!pResource) {
 		Error = BT_ERR_INVALID_RESOURCE;
 		goto err_free_out;
