@@ -124,6 +124,7 @@ int bt_main(BT_u32 machid, const void *fdt) {
 
 	BT_SetStdin(hUart);
 	BT_SetStdout(hUart);
+	BT_SetStderr(hUart);
 
 	BT_kPrint("%s (%s)", BT_VERSION_STRING, BT_VERSION_NAME);
 
@@ -146,6 +147,7 @@ int bt_main(BT_u32 machid, const void *fdt) {
 #ifndef BT_CONFIG_INHERIT_STDIO_FROM_KERNEL
 	BT_Setstdin(NULL);
 	BT_SetStdout(NULL);
+	BT_SetStderr(NULL);
 
 	if (hUart) {
 		BT_CloseHandle(hUart);
@@ -179,6 +181,7 @@ BT_EXPORT_SYMBOL(bt_get_kernel_params);
 
 __BT_WEAK int main(int argc, char **argv) {
 
+#ifndef BT_CONFIG_INHERIT_STDIO_FROM_KERNEL
 	BT_ERROR Error = BT_ERR_NONE;
 	BT_HANDLE hUart = NULL;
 	const BT_INTEGRATED_DRIVER *pDriver = NULL;
@@ -218,6 +221,7 @@ __BT_WEAK int main(int argc, char **argv) {
 
 	BT_UartEnable(hUart);
 	BT_SetStdout(hUart);
+#endif
 
 	while(1) {
 		BT_kPrint("Welcome to BitThunder");
