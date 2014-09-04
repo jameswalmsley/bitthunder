@@ -53,8 +53,15 @@ static void threadStartup(void *pParam) {
 static const BT_IF_HANDLE oHandleInterface;
 
 static BT_ERROR thread_cleanup(BT_HANDLE hThread) {
-	bt_list_del(&hThread->h.list);
+	bt_list_del(&hThread->h.item);
+	BT_kTaskDelete(hThread->pKThreadID);	// Schedule thread to be deleted completely.
 	return BT_ERR_NONE;
+}
+
+void bt_thread_cleanup(struct bt_thread *thread) {
+	bt_process_thread_cleanup(thread->task);
+	BT_HANDLE hThread = bt_container_of(curthread, struct _BT_OPAQUE_HANDLE, thread);
+	BT_DestroyHandle(hThread);
 }
 
 BT_HANDLE BT_CreateProcessThread(BT_HANDLE hProcess, BT_FN_THREAD_ENTRY pfnStartRoutine, BT_THREAD_CONFIG *pConfig, BT_ERROR *pError) {
@@ -76,12 +83,10 @@ BT_HANDLE BT_CreateProcessThread(BT_HANDLE hProcess, BT_FN_THREAD_ENTRY pfnStart
 
 	hThread->pKThreadID = BT_kTaskCreate(threadStartup, NULL, &hThread->oConfig, &Error);
 	if(!hThread->pKThreadID) {
+		BT_DetachHandle(hThread);
 		BT_DestroyHandle(hThread);
 		return NULL;
 	}
-
-	struct bt_task *task = BT_GetProcessTask(hProcess);
-	bt_list_add(&hThread->h.list, &task->threads);
 
 	return hThread;
 }
@@ -140,5 +145,7 @@ BT_EXPORT_SYMBOL(BT_SetThreadTag);
 
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
+	.eType 		= BT_HANDLE_T_THREAD,
+	.ulFlags 	= BT_HANDLE_FLAGS_NO_DESTROY,
 	.pfnCleanup = thread_cleanup,
 };
