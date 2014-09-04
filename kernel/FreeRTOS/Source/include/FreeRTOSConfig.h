@@ -143,7 +143,7 @@ NVIC value of 255. */
 #define configLIBRARY_KERNEL_INTERRUPT_PRIORITY	31
 
 #ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
-#define portCLEAN_UP_TCB(pxTCB) ({bt_paddr_t phys = bt_virt_to_phys(pxTCB->pxKernelStack); bt_page_free(phys, BT_PAGE_SIZE);})
+#define portCLEAN_UP_TCB(pxTCB) ({bt_thread_cleanup((struct bt_thread *) pxTCB->pxTaskTag); bt_paddr_t phys = bt_virt_to_phys(pxTCB->pxKernelStack); bt_page_free(phys, BT_PAGE_SIZE);})
 #endif
 
 #endif /* FREERTOS_CONFIG_H */
