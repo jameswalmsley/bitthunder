@@ -33,9 +33,10 @@
  *	Every HANDLE must be derived/based on this structure.
  **/
 typedef struct _BT_HANDLE_HEADER {
-	struct bt_list_head		list;
+	struct bt_list_head		item;
 	const BT_IF_HANDLE	   *pIf;				///< Pointer to the handle interface.
-	BT_u32					ulClaimedMemory;	///< Amount of memory claimed by this handle.
+	BT_u32					ulReferenceCount;	///< The number of times the handle is used.
+	//BT_u32 					ulFlags;			///<
 } BT_HANDLE_HEADER;
 
 #define BT_HANDLE_TYPE(x)	(x->h.pIf->eType)
@@ -107,5 +108,18 @@ BT_ERROR BT_DestroyHandle(BT_HANDLE h);
  *
  **/
 BT_ERROR BT_CloseHandle(BT_HANDLE h);
+
+/**
+ *	@brief	Increment a HANDLE's reference count.
+ *
+ *
+ **/
+BT_ERROR BT_RefHandle(BT_HANDLE h);
+
+ /**
+  *	@brief	Decrement a HANDLE's reference count.
+  *
+  **/
+BT_ERROR BT_UnrefHandle(BT_HANDLE h);
 
 #endif
