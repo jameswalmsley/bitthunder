@@ -47,6 +47,7 @@ BT_HANDLE BT_CreateProcess(BT_FN_THREAD_ENTRY pfnStartRoutine, const BT_i8 *szpN
 	strncpy(hProcess->task.name, szpName, BT_CONFIG_MAX_PROCESS_NAME);
 
 	BT_LIST_INIT_HEAD(&hProcess->task.threads);
+	BT_LIST_INIT_HEAD(&hProcess->task.handles);
 
 #ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
 	hProcess->task.map = bt_vm_create();
@@ -54,7 +55,7 @@ BT_HANDLE BT_CreateProcess(BT_FN_THREAD_ENTRY pfnStartRoutine, const BT_i8 *szpN
 
 	BT_CreateProcessThread(hProcess, pfnStartRoutine, &hProcess->oConfig, pError);
 
-	bt_list_add(&hProcess->h.list, &process_handles);
+	bt_list_add(&hProcess->h.item, &process_handles);
 
 	BT_HANDLE hParent = BT_GetProcessHandle();
 	hProcess->task.parent = &hParent->task;
@@ -78,6 +79,47 @@ BT_HANDLE BT_CreateProcess(BT_FN_THREAD_ENTRY pfnStartRoutine, const BT_i8 *szpN
 BT_EXPORT_SYMBOL(BT_CreateProcess);
 
 BT_ERROR BT_DestroyProcess(BT_HANDLE hProcess) {
+
+	// Kill the process in the scheduler.
+
+	// All sub-processes should be migrated to the parent.
+
+	// If there is no parent, then the sub-processes must also be killed first.
+
+	// Suspend each thread. (Except calling thread).
+	// Close the an open handles.
+	struct bt_list_head *pos;
+	bt_list_for_each(pos, &hProcess->task.threads) {
+		BT_HANDLE h = bt_container_of(pos, struct _BT_OPAQUE_HANDLE, h.item);
+		BT_CloseHandle(h);
+	}
+
+	// Call the vTaskDelete allowing cleanup to occur in IDLE time.
+
+
+	// If currently running process then schedule cleanup and yield.
+	if(BT_GetProcessHandle() == hProcess) {
+		// Schedule for closing in IDLE.
+		return BT_ERR_NONE;
+	}
+
+	BT_u32 i = 0;
+	for(i = 0; i < sizeof(hProcess->task.fds)/sizeof(BT_HANDLE); i++) {
+		BT_SetProcessFileDescriptor(hProcess, i, NULL);	// This will cause the handle to be closed or unreferenced.
+	}
+
+	// Close all open file-descriptors.
+
+	// Close the an open handles.
+	bt_list_for_each(pos, &hProcess->task.handles) {
+		BT_HANDLE h = bt_container_of(pos, struct _BT_OPAQUE_HANDLE, h.item);
+		BT_CloseHandle(h);
+	}
+
+	// Destroy the memory map.
+
+	// Kill
+
 
 	return BT_ERR_NONE;
 }
@@ -236,10 +278,11 @@ BT_ERROR bt_process_init() {
 #ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
 	kernel_handle.task.map = bt_vm_get_kernel_map();
 #endif
-	bt_list_add(&kernel_handle.h.list, &process_handles);
+	bt_list_add(&kernel_handle.h.item, &process_handles);
 	idle_thread.task = &kernel_handle.task;
 
 	BT_LIST_INIT_HEAD(&kernel_handle.task.threads);
+	BT_LIST_INIT_HEAD(&kernel_handle.task.handles);
 
 #ifdef BT_CONFIG_PROCESS_CWD
 	strcpy(kernel_handle.task.cwd, "/");
@@ -253,3 +296,27 @@ BT_ERROR bt_process_init() {
 	return BT_ERR_NONE;
 }
 BT_EXPORT_SYMBOL(bt_process_init);
+
+
+/**
+ *	This is a low-level process cleanup handler.
+ *	It
+ *
+ **/
+void bt_process_thread_cleanup(struct bt_task *task) {
+
+	BT_u32 ulThreads = 0;
+	struct bt_list_head *pos;
+	bt_list_for_each(pos, &task->threads) {
+		ulThreads++;
+	}
+
+	if(ulThreads) {
+		return;
+	}
+
+#ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
+	bt_vm_destroy(task->map);
+#endif
+
+}
