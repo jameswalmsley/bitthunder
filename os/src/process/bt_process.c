@@ -64,9 +64,14 @@ BT_HANDLE BT_CreateProcess(BT_FN_THREAD_ENTRY pfnStartRoutine, const BT_i8 *szpN
 
 	total_processes += 1;
 
-	task_alloc_fd(&hProcess->task);	// stdin
-	task_alloc_fd(&hProcess->task);	// stdout
-	task_alloc_fd(&hProcess->task);	// stderr
+	// Inherit the file-descriptors from the parent.
+	BT_u32 i;
+	for(i = 0; i < (sizeof(hProcess->task.fds)/sizeof(BT_HANDLE)); i++) {
+		BT_RefHandle(hProcess->task.parent->fds[i]);
+	}
+
+	memcpy(hProcess->task.fds, hProcess->task.parent->fds, sizeof(hProcess->task.fds));
+	hProcess->task.free_fd = hProcess->task.parent->free_fd;
 
 	return hProcess;
 }
@@ -138,6 +143,8 @@ BT_EXPORT_SYMBOL(BT_GetTotalProcesses);
 
 BT_ERROR BT_SetProcessFileDescriptor(BT_HANDLE hProcess, BT_u32 i, BT_HANDLE h) {
 	struct bt_task *task = BT_GetProcessTask(hProcess);
+	BT_CloseHandle(task->fds[i]);	// Unreference or close handle used.
+	BT_RefHandle(h);				// Ensure we reference the handle when creating an FD.
 	task->fds[i] = h;
 	return BT_ERR_NONE;
 }
