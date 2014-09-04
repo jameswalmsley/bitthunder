@@ -9,7 +9,9 @@ struct bt_task {
 	BT_i8				name[BT_CONFIG_MAX_PROCESS_NAME+1];
 	BT_u32				pid;
 	struct bt_task 	   *parent;
+#ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
 	struct bt_vm_map   *map;
+#endif
 	struct bt_list_head threads;
 	struct bt_list_head handles;
 	BT_u64 				ullRunTimeCounter;
