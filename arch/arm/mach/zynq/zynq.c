@@ -365,31 +365,6 @@ void bt_zynq_ram_test_error(const BT_i8 *reason, BT_u32 addr) {
 	bt_early_printk("\n", 1);
 }
 
-void bt_zynq_ram_test() {
-	bt_early_printk_init();
-	bt_early_printk("Low-Level RAM Test.\n", -1);
-
-	BT_u32 i;
-	BT_u32 *p = 0xF0100000;
-	for(i = 0; i < 0x00100000; i++) {
-		p[i] = ~i;
-	}
-
-	for(i = 0; i < 0x00100000; i++) {
-		if(p[i] != ~i) {
-			bt_early_printk("Error: Inconsistent data in memory.\n", -1);
-			BT_u32 addr = (BT_u32)  p + i;
-			bt_early_printk("Address: 0x", -1);
-			for(i = 0; i < 8; i++) {
-				BT_u8 nibble = (addr >> (28 - (4 * i))) & 0xF;
-				bt_early_printk(&hex_table[nibble], 1);
-			}
-			bt_early_printk("\n", 1);
-			break;
-		}
-	}
-}
-
 extern BT_DEV_IF_EARLY_CONSOLE oZynq_early_console_device;
 
 BT_MACHINE_START(ARM, ZYNQ, "Xilinx Embedded Zynq Platform")
