@@ -136,8 +136,8 @@ _bt_zynq_ram_test:
 	mcr p15, 0, r0, c12, c0, 0 					// Change VBAR to point to our exception catching table.
 
 	mov 	r0, #0x0 							// i = 0;
-	mov 	r1, #0x00100000 					// i < 0x00100000
-	ldr 	r3, =0x00100000
+	mov 	r1, #BT_CONFIG_MACH_ZYNQ_STARTUP_RAM_TEST_LENGTH 					// i < 0x00100000
+	ldr 	r3, =BT_CONFIG_MACH_ZYNQ_STARTUP_RAM_TEST_BASE
 	mov 	r4, r3
 
 	// load the memory up with an address dependent pattern.
@@ -152,8 +152,8 @@ test_loop:
 
 	// Verify the memory pattern is correct.
 	mov 	r0, #0x0
-	mov 	r1, #0x00100000
-	mov 	r3, #0x00100000
+	mov 	r1, #BT_CONFIG_MACH_ZYNQ_STARTUP_RAM_TEST_LENGTH
+	mov 	r3, #BT_CONFIG_MACH_ZYNQ_STARTUP_RAM_TEST_BASE
 	mov 	r4, r3
 verify_loop:
 	mvn 	r2, r0

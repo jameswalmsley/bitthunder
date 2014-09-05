@@ -51,6 +51,15 @@ config MACH_ZYNQ_STARTUP_RAM_TEST
 	---help---
 	Performs a DDR memory test, and places some information on the early debug console in case of errors.
 
+config MACH_ZYNQ_STARTUP_RAM_TEST_BASE
+	hex "Base address from which to start the RAM test."
+	default 0x00100000
+	depends on MACH_ZYNQ_STARTUP_RAM_TEST
+
+config MACH_ZYNQ_STARTUP_RAM_TEST_LENGTH
+	hex	"Length of RAM test."
+	default 0x00100000
+	depends on MACH_ZYNQ_STARTUP_RAM_TEST
 
 config MACH_ZYNQ_STARTUP_PS7INIT
 	bool "Call Xilinx generated ps7_init() and ps7_post_config() functions."
