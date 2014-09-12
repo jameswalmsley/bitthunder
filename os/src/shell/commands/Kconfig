@@ -179,4 +179,9 @@ config SHELL_CMD_TFTP
 	depends on SHELL
 	default n
 
+config SHELL_CMD_RAMTEST
+	bool "ramtest"
+	depends on SHELL
+	default n
+
 endmenu

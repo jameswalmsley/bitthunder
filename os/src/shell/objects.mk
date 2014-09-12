@@ -34,7 +34,7 @@ BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_SLABTOP)  	+= $(BUILD_DIR)/os/src/shell/comm
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_SLEEP)		+= $(BUILD_DIR)/os/src/shell/commands/sleep.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_SOURCE)		+= $(BUILD_DIR)/os/src/shell/commands/source.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_TFTP)		+= $(BUILD_DIR)/os/src/shell/commands/tftp.o
-
+BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_RAMTEST)	+= $(BUILD_DIR)/os/src/shell/commands/ramtest.o
 
 # JIMTCL
 JIMTCL_OBJECTS-$(BT_CONFIG_SHELL_JIMTCL)			+= $(BUILD_DIR)/os/src/shell/jimtcl/jim.o
