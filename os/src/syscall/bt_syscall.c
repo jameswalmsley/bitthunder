@@ -37,11 +37,12 @@ static const struct syscall_entry syscall_table[] = {
 	/*		3 */	SYSCALL(1, bt_sys_close),
 	/*		4 */	SYSCALL(4, bt_sys_read),
 	/*		5 */	SYSCALL(4, bt_sys_write),
-	/*		6 */ 	SYSCALL(1, bt_sys_klog),
-	/*		7 */	SYSCALL(1, bt_sys_sleep),
-	/*		8 */	SYSCALL(2, bt_sys_gpioset),
-	/*		9 */	SYSCALL(2, bt_sys_gettimeofday),
-	/*	   10 */	SYSCALL(2, bt_sys_settimeofday),
+	/*		6 */ 	SYSCALL(3, bt_sys_lseek),
+	/*		7 */ 	SYSCALL(1, bt_sys_klog),
+	/*		8 */	SYSCALL(1, bt_sys_sleep),
+	/*		9 */	SYSCALL(2, bt_sys_gpioset),
+	/*	   10 */	SYSCALL(2, bt_sys_gettimeofday),
+	/*	   11 */	SYSCALL(2, bt_sys_settimeofday),
 };
 
 #define SYSCALL_TOTAL	(BT_u32) (sizeof(syscall_table)/sizeof(struct syscall_entry))
