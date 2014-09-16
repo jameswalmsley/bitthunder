@@ -7,9 +7,11 @@
  *	Any device that performs file like (streamable or seekable) I/O should implement this interface.
  *	For block devices see the BT_IF_BLOCK interface.
  *
- *	@pfnRead	[REQUIRED]	Reads specified number of bytes from hFile into pBuffer, using behaviour described in ulFlags.
+ *	@pfnRead	[REQUIRED]	Reads upto the specified number of bytes from hFile into pBuffer, using behaviour described in ulFlags.
+ *							If BT_FILE_NON_BLOCK is CLEARED, and there is no data available, then the call to read MUST block until atleast 1 single byte is available.
+ *							If BT_FILE_NON_BLOCK is SET, and there is no data available, then the call must return immediately returning BT_ERR_NO_DATA.
  *
- *	@pfnWrite	[REQUIRED]	Writes specified number of bytes into hFile from pBuffer, using behaviour described in ulFlags.
+ *	@pfnWrite	[REQUIRED]	Writes upto specified number of bytes into hFile from pBuffer, using behaviour described in ulFlags.
  *
  *	@pfnGetC	[OVERRIDE]	Overrides the default GetC implementation (which just calls pfnRead) in case a more efficient
  *							implementation can be provided.
