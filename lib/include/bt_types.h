@@ -6,7 +6,7 @@
 
 #include "bt_arch_types.h"							///< Platform dependent primary types.
 
-typedef BT_u32				BT_ERROR;
+typedef BT_s32				BT_ERROR;
 
 typedef BT_u32				BT_BOOL;
 
