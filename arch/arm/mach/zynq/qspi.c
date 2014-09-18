@@ -627,7 +627,7 @@ xfer_start:
 //}
 //#endif
 
-BT_ERROR qspi_transfer(BT_HANDLE hQspi, BT_SPI_MESSAGE * message) {
+BT_s32 qspi_transfer(BT_HANDLE hQspi, BT_SPI_MESSAGE * message) {
 
 	BT_SPI_TRANSFER *transfer;
 #if	(QSPI_USE_WORKQUEUE)
@@ -644,7 +644,7 @@ BT_ERROR qspi_transfer(BT_HANDLE hQspi, BT_SPI_MESSAGE * message) {
 	/* Check each transfer's parameters */
 	bt_list_for_each_entry(transfer, &message->transfers, transfer_list) {
 		if (!transfer->tx_buf && !transfer->rx_buf && transfer->len)
-			return -BT_ERR_INVALID_RESOURCE;
+			return BT_ERR_INVALID_RESOURCE;
 	}
 
 

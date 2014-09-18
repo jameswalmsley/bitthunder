@@ -76,7 +76,7 @@ typedef struct _BT_SPI_MESSAGE {
 
 typedef struct {
 	BT_ERROR	(*pfnSetup)		(BT_HANDLE hMaster, BT_SPI_DEVICE *pDevice);
-	BT_u32	 	(*pfnTransfer) 	(BT_HANDLE hMaster, BT_SPI_MESSAGE *message);
+	BT_s32	 	(*pfnTransfer) 	(BT_HANDLE hMaster, BT_SPI_MESSAGE *message);
 } BT_DEV_IF_SPI;
 
 /*
