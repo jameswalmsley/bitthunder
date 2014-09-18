@@ -9,6 +9,8 @@
 #include <process/bt_process.h>
 #include <bt_types.h>
 #include <syscall/bt_syscall.h>
+#include <syscall/errno.h>
+#include <errno.h>
 
 /**
  *	Syscall can have upto 6 arguments!
@@ -56,6 +58,8 @@ bt_register_t bt_syscall_handler(bt_register_t a1, bt_register_t a2, bt_register
 	if(nr < SYSCALL_TOTAL) {
 		syscall = &syscall_table[nr];
 		retval = syscall->syscall(a1, a2, a3, a4);
+	} else {
+		errno = EBADF;
 	}
 
 	return retval;
