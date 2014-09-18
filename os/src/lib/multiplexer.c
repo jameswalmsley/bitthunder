@@ -57,7 +57,7 @@ static BT_IF_FILE mux_file_ops = {
 	.pfnRead = mux_file_read,
 };
 
-static BT_u32 mux_cleanup(BT_HANDLE hFile) {
+static BT_ERROR mux_cleanup(BT_HANDLE hFile) {
 	return BT_ERR_NONE;
 }
 
