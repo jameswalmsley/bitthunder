@@ -1,5 +1,6 @@
 #include <bitthunder.h>
 #include <syscall/errno.h>
+#include <errno.h>
 
 struct flag_mask {
 	BT_u32 flag;
@@ -44,7 +45,8 @@ long bt_sys_open(const char *pathname, int flags, int mode) {
 	BT_ERROR Error = BT_ERR_NONE;
 	int fd = (int) BT_AllocFileDescriptor();
 	if(fd < 0) {
-		return -EMFILE;			// Process has reached its open FD limit.
+		errno = EMFILE;
+		return -1;			// Process has reached its open FD limit.
 	}
 
 	BT_u32 bt_flags = convert_flags(flags);
@@ -52,7 +54,8 @@ long bt_sys_open(const char *pathname, int flags, int mode) {
 	BT_HANDLE hFile = BT_Open(pathname, bt_flags, &Error);
 	if(!hFile) {
 		BT_FreeFileDescriptor(fd);
-		return -ENOENT;
+		errno = ENOENT;
+		return -1;
 	}
 
 	BT_SetFileDescriptor(fd, hFile);

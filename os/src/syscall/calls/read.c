@@ -1,5 +1,6 @@
 #include <bitthunder.h>
 #include <syscall/errno.h>
+#include <errno.h>
 
 /**
  *	@brief	POSIX read() call.
@@ -16,7 +17,8 @@ long bt_sys_read(int fd, void *ptr, size_t count) {
 	BT_ERROR Error = BT_ERR_NONE;
 	BT_HANDLE hFile = BT_GetFileDescriptor(fd, &Error);
 	if(!hFile) {
-		return -EBADF;
+		errno = EBADF;
+		return -1;
 	}
 
 	BT_s32 slRead = BT_Read(hFile, 0, count, ptr);
