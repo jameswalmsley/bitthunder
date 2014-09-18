@@ -7,6 +7,7 @@ long bt_sys_open(const BT_i8 *path, BT_u32 flags, BT_ERROR *pError);
 long bt_sys_close(BT_HANDLE h);
 long bt_sys_read(BT_HANDLE h, BT_u32 len, void *pBuffer, BT_ERROR *pError);
 long bt_sys_write(BT_HANDLE h, BT_u32 len, const void *pBuffer, BT_ERROR *pError);
+long bt_sys_lseek(int fd, int offset, int whence);
 long bt_sys_klog(const BT_i8 *path);
 long bt_sys_sleep(BT_u32 ticks);
 long bt_sys_gpioset(BT_u32 flag, BT_BOOL state);
