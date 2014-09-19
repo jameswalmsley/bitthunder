@@ -423,6 +423,13 @@ static BT_ERROR uart_flush(BT_HANDLE hUart) {
 		}
 	}
 	else if(hUart->eMode == BT_UART_MODE_SIMPLE_BUFFERED) {
+		if (hUart->uTxEnd != hUart->uTxBegin)
+		{
+			BT_DisableInterrupt(hUart->ulIRQ);
+			hUart->uTxEnd = hUart->uTxBegin,
+			BT_EnableInterrupt(hUart->ulIRQ);
+		}
+
 		while(hUart->uTxBegin != hUart->uTxEnd) {
 			BT_ThreadYield();
 		}
