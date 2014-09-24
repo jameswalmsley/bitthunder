@@ -1909,8 +1909,8 @@ FF_ERROR FF_PutEntry(FF_IOMAN *pIoman, FF_T_UINT16 Entry, FF_T_UINT32 DirCluster
 			FF_putShort(EntryBuffer, FF_FAT_DIRENT_CLUS_LOW,  (FF_T_UINT16)(pDirent->ObjectCluster));
 			FF_putLong(EntryBuffer,  FF_FAT_DIRENT_FILESIZE,  pDirent->Filesize);
 #ifdef FF_TIME_SUPPORT
-			FF_GetSystemTime(&pDirent->AccessedTime);	///< Date of Last Access.
-			pDirent->ModifiedTime = pDirent->AccessedTime;
+			//FF_GetSystemTime(&pDirent->AccessedTime);	///< Date of Last Access.
+			//pDirent->ModifiedTime = pDirent->AccessedTime;
 			FF_PlaceDate(EntryBuffer, FF_FAT_DIRENT_LASTACC_DATE, &pDirent->AccessedTime);
 			FF_PlaceTime(EntryBuffer, FF_FAT_DIRENT_CREATE_TIME,  &pDirent->CreateTime);
 			FF_PlaceDate(EntryBuffer, FF_FAT_DIRENT_CREATE_DATE,  &pDirent->CreateTime);

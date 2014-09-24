@@ -930,6 +930,10 @@ static FF_ERROR FF_ExtendFile(FF_FILE *pFile, FF_T_UINT32 Size) {
 
 		if(!FF_isERR(Error)) {
 			OriginalEntry.ObjectCluster = pFile->AddrCurrentCluster;
+#ifdef FF_TIME_SUPPORT
+			FF_GetSystemTime(&OriginalEntry.AccessedTime);
+			OriginalEntry.ModifiedTime = OriginalEntry.AccessedTime;
+#endif
 			Error = FF_PutEntry(pIoman, pFile->DirEntry, pFile->DirCluster, &OriginalEntry);
 		}
 
@@ -2255,11 +2259,15 @@ skip_truncate:
 		// Error might be non-zero, but don't forget to remove handle from list
 		// and to free the pFile pointer
 
-		if(!FF_isERR(Error) && ((pFile->Filesize != OriginalEntry.Filesize) || (!pFile->Filesize))) {
+		if(!FF_isERR(Error) && ((pFile->Filesize != OriginalEntry.Filesize) || (!pFile->Filesize) || (pFile->Mode & FF_MODE_WRITE))) {
 			if(!pFile->Filesize) {
 				OriginalEntry.ObjectCluster = 0;
 			}
 			OriginalEntry.Filesize = pFile->Filesize;
+#ifdef FF_TIME_SUPPORT
+			FF_GetSystemTime(&OriginalEntry.AccessedTime);
+			OriginalEntry.ModifiedTime = OriginalEntry.AccessedTime;
+#endif
 			Error = FF_PutEntry(pFile->pIoman, pFile->DirEntry, pFile->DirCluster, &OriginalEntry);
 		}
 	}
