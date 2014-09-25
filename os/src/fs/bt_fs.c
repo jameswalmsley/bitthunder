@@ -658,3 +658,45 @@ BT_ERROR BT_GetFilesystemInfo(const BT_i8 *szpPath, struct bt_fsinfo *fsinfo) {
 	return BT_GetMountFSInfo(pMount, fsinfo);
 }
 BT_EXPORT_SYMBOL(BT_GetFilesystemInfo);
+
+BT_ERROR BT_UTime(const BT_i8 *szpPath, BT_DATETIME *mtime, BT_DATETIME *atime) {
+
+	BT_ERROR 	Error = BT_ERR_NONE;
+
+	BT_i8 *absolute_path = (BT_i8 *) szpPath;
+
+#ifdef BT_CONFIG_PROCESS_CWD
+	absolute_path = BT_kMalloc(BT_PATH_MAX);
+	if(!absolute_path) {
+		Error = BT_ERR_NO_MEMORY;
+		goto err_out;
+	}
+
+	Error = to_absolute_path(absolute_path, BT_PATH_MAX, szpPath, BT_FALSE);
+	if(Error) {
+		goto err_free_out;
+	}
+#endif
+
+	BT_MOUNTPOINT *pMount = BT_GetMountPoint(absolute_path);
+	if(!pMount) {
+		Error = BT_ERR_GENERIC;
+		goto err_free_out;
+	}
+
+	const BT_i8 *path = get_relative_path(pMount, absolute_path);
+
+	const BT_IF_FS *pFS = pMount->pFS->hFS->h.pIf->oIfs.pFilesystemIF;
+	if(pFS->pfnUTime) {
+		Error = pFS->pfnUTime(pMount->hMount, path, mtime, atime);
+	}
+
+err_free_out:
+#ifdef BT_CONFIG_PROCESS_CWD
+	BT_kFree(absolute_path);
+err_out:
+#endif
+
+	return Error;
+}
+BT_EXPORT_SYMBOL(BT_UTime);

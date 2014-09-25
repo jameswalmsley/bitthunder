@@ -28,6 +28,7 @@ typedef struct _BT_IF_FS {
 	BT_ERROR	(*pfnUnlink)	(BT_HANDLE hMount, const BT_i8 *szpPath);
 	BT_ERROR	(*pfnRename)	(BT_HANDLE hMount, const BT_i8 *szpPathA, const BT_i8 *szpPathB);
 	BT_ERROR	(*pfnInfo)		(BT_HANDLE hMount, struct bt_fsinfo *info);
+	BT_ERROR	(*pfnUTime)		(BT_HANDLE hMount, const BT_i8 *szpPath, BT_DATETIME *mtime, BT_DATETIME *atime);
 } BT_IF_FS;
 
 #endif

@@ -133,6 +133,7 @@ static BT_HANDLE fullfat_open(BT_HANDLE hMount, const BT_i8 *szpPath, BT_u32 ulM
 
 	pFile->pFile = FF_Open(pMount->pIoman, szpPath, ulModeFlags, &ffError);
 	if(!pFile->pFile) {
+		BT_DestroyHandle((BT_HANDLE)pFile);
 		return NULL;
 	}
 
@@ -307,6 +308,15 @@ static void ff_time_to_bt_time(BT_DATETIME *bttime, FF_SYSTEMTIME *fftime) {
 	bttime->second 	= (BT_u8) fftime->Second;
 }
 
+static void bt_time_to_ff_time(FF_SYSTEMTIME *fftime, BT_DATETIME *bttime) {
+	fftime->Year 	= (FF_T_UINT16) bttime->year;
+	fftime->Month	= (FF_T_UINT16) bttime->month;
+	fftime->Day		= (FF_T_UINT16) bttime->day;
+	fftime->Hour	= (FF_T_UINT16) bttime->hour;
+	fftime->Minute	= (FF_T_UINT16) bttime->min;
+	fftime->Second	= (FF_T_UINT16) bttime->second;
+}
+
 static BT_ERROR fullfat_read_dir(BT_HANDLE hDir, BT_DIRENT *pDirent) {
 
 	BT_FF_DIR *pDir = (BT_FF_DIR *) hDir;
@@ -374,6 +384,54 @@ static BT_ERROR fullfat_read_inode(BT_HANDLE hInode, BT_INODE *pInode) {
 	return BT_ERR_NONE;
 }
 
+static BT_ERROR fullfat_utime(BT_HANDLE hMount, const BT_i8 *szpPath, BT_DATETIME *mtime, BT_DATETIME *atime) {
+
+	BT_ERROR Error = BT_ERR_NONE;
+	FF_ERROR ffError;
+	BT_FF_FILE *pFile = (BT_FF_FILE *) BT_CreateHandle(&oFileHandleInterface, sizeof(BT_FF_FILE), &Error);
+	if(!pFile) {
+		goto err_out;
+	}
+
+	BT_FF_MOUNT *pMount = (BT_FF_MOUNT *) hMount;
+
+	pFile->pFile = FF_Open(pMount->pIoman, szpPath, BT_GetModeFlags("a"), &ffError);
+	if(!pFile->pFile) {
+		Error = BT_ERR_GENERIC;
+		goto err_free_out;
+	}
+
+	FF_SYSTEMTIME Time;
+
+	if (mtime) {
+		bt_time_to_ff_time(&Time, mtime);
+		ffError = FF_SetFileTime(pFile->pFile, &Time, ETimeMod);
+		if (ffError) {
+			FF_Close(pFile->pFile);
+			Error = BT_ERR_GENERIC;
+			goto err_free_out;
+		}
+	}
+
+	if (atime) {
+		bt_time_to_ff_time(&Time, atime);
+		ffError = FF_SetFileTime(pFile->pFile, &Time, ETimeAccess);
+		if (ffError) {
+			FF_Close(pFile->pFile);
+			Error = BT_ERR_GENERIC;
+			goto err_free_out;
+		}
+	}
+
+	FF_Close(pFile->pFile);
+
+err_free_out:
+	BT_DestroyHandle((BT_HANDLE)pFile);
+
+err_out:
+	return Error;
+}
+
 static const BT_IF_DIR oDirOperations = {
 	.pfnReadDir = fullfat_read_dir,
 };
@@ -404,6 +462,7 @@ static const BT_IF_FS oFilesystemInterface = {
 	.pfnUnlink 		= fullfat_unlink,
 	.pfnRename 		= fullfat_rename,
 	.pfnInfo		= fullfat_info,
+	.pfnUTime		= fullfat_utime,
 };
 
 static const BT_IF_HANDLE oHandleInterface = {

@@ -36,6 +36,7 @@ BT_ERROR BT_Unlink(const BT_i8 *szpPath);
 BT_ERROR BT_Rename(const BT_i8 *szpPathA, const BT_i8 *szpPathB);
 BT_ERROR BT_GetCwd(BT_i8 *buf, BT_u32 len);
 BT_ERROR BT_ChDir(const BT_i8 *path);
+BT_ERROR BT_UTime(const BT_i8 *szpPath, BT_DATETIME *mtime, BT_DATETIME *atime);
 
 BT_MOUNTPOINT *BT_GetMountPoint(const BT_i8 *szpPath);
 BT_MOUNTPOINT *BT_GetNextMountPoint(BT_MOUNTPOINT *pMount);
