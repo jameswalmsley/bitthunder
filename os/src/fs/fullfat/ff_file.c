@@ -1538,6 +1538,8 @@ FF_T_SINT32 FF_Write(FF_FILE *pFile, FF_T_UINT32 ElementSize, FF_T_UINT32 Count,
 		}
 	}
 
+	pFile->ValidFlags |= FF_VALID_FLAG_ONCE_WRITTEN_TO_FILE;
+
 	pIoman = pFile->pIoman;
 
 	nBytesPerCluster = (pIoman->pPartition->SectorsPerCluster * pIoman->BlkSize);
@@ -1812,6 +1814,8 @@ FF_T_SINT32 FF_PutC(FF_FILE *pFile, FF_T_UINT8 pa_cValue) {
 			}
 		}
 	}
+
+	pFile->ValidFlags |= FF_VALID_FLAG_ONCE_WRITTEN_TO_FILE;
 
 	iRelPos = FF_getMinorBlockEntry(pFile->pIoman, pFile->FilePointer, 1);
 
@@ -2259,7 +2263,7 @@ skip_truncate:
 		// Error might be non-zero, but don't forget to remove handle from list
 		// and to free the pFile pointer
 
-		if(!FF_isERR(Error) && ((pFile->Filesize != OriginalEntry.Filesize) || (!pFile->Filesize) || (pFile->Mode & FF_MODE_WRITE))) {
+		if(!FF_isERR(Error) && ((pFile->Filesize != OriginalEntry.Filesize) || (!pFile->Filesize) || (pFile->ValidFlags & FF_VALID_FLAG_ONCE_WRITTEN_TO_FILE))) {
 			if(!pFile->Filesize) {
 				OriginalEntry.ObjectCluster = 0;
 			}
