@@ -128,6 +128,8 @@ int bt_main(BT_u32 machid, const void *fdt) {
 
 	BT_kPrint("%s (%s)", BT_VERSION_STRING, BT_VERSION_NAME);
 
+	BT_kPrint("Command line: %s", g_kernel_params.cmdline);
+
 	BT_kPrint("Start Loading kernel modules...");
 	Error = BT_InitialiseKernelModules(hUart);
 
