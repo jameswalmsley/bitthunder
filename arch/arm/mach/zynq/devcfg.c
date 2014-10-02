@@ -34,6 +34,10 @@ static BT_BOOL g_bInUse = BT_FALSE;
 static BT_ERROR devcfg_cleanup(BT_HANDLE h) {
 	g_bInUse = BT_FALSE;
 
+	while(!(hDevcfg->pRegs->INT_STS & INT_STS_PCFG_DONE)) {
+		BT_ThreadYield();
+	}
+	
 	zynq_slcr_unlock(h->pSLCR);
 	zynq_slcr_postload_fpga(h->pSLCR);
 	zynq_slcr_lock(h->pSLCR);
