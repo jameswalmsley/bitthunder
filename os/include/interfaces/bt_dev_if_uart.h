@@ -49,6 +49,7 @@ typedef struct {
 	BT_ERROR (*pfnEnable)				(BT_HANDLE hUart);
 	BT_ERROR (*pfnDisable)				(BT_HANDLE hUart);
 	BT_ERROR (*pfnGetAvailable)			(BT_HANDLE hUart, BT_u32 *pTransmit, BT_u32 *pReceive);
+	BT_ERROR (*pfnTxBufferClear)		(BT_HANDLE hUart);
 } BT_DEV_IF_UART;
 
 /*
@@ -60,6 +61,7 @@ BT_ERROR BT_UartGetConfiguration	(BT_HANDLE hUart, BT_UART_CONFIG *pConfig);
 BT_ERROR BT_UartEnable				(BT_HANDLE hUart);
 BT_ERROR BT_UartDisable				(BT_HANDLE hUart);
 BT_ERROR BT_UartGetAvailable		(BT_HANDLE hUart, BT_u32 *pTransmit, BT_u32 *pReceive);
+BT_ERROR BT_UartTxBufferClear		(BT_HANDLE hUart);
 
 typedef struct {
 	void 	(*pfnInit)		();

@@ -423,13 +423,6 @@ static BT_ERROR uart_flush(BT_HANDLE hUart) {
 		}
 	}
 	else if(hUart->eMode == BT_UART_MODE_SIMPLE_BUFFERED) {
-		if (hUart->uTxEnd != hUart->uTxBegin)
-		{
-			BT_DisableInterrupt(hUart->ulIRQ);
-			hUart->uTxEnd = hUart->uTxBegin,
-			BT_EnableInterrupt(hUart->ulIRQ);
-		}
-
 		while(hUart->uTxBegin != hUart->uTxEnd) {
 			BT_ThreadYield();
 		}
@@ -674,6 +667,19 @@ static BT_s32 uart_write(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const v
 	return ulWritten;
 }
 
+static BT_ERROR uart_tx_buffer_clear(BT_HANDLE hUart) {
+
+	if(hUart->eMode == BT_UART_MODE_SIMPLE_BUFFERED) {
+		if (hUart->uTxEnd != hUart->uTxBegin) {
+			BT_DisableInterrupt(hUart->ulIRQ);
+			hUart->uTxEnd = hUart->uTxBegin,
+			BT_EnableInterrupt(hUart->ulIRQ);
+		}
+	}
+
+	return BT_ERR_NONE;
+}
+
 static const BT_DEV_IF_UART oUartConfigInterface = {
 	.pfnSetBaudrate = uart_set_baudrate,						///< UART setBaudrate implementation.
 	.pfnSetConfig 	= uart_set_config,							///< UART set config imple.
@@ -681,6 +687,7 @@ static const BT_DEV_IF_UART oUartConfigInterface = {
 	.pfnEnable 		= uart_enable,								///< Enable/disable the device.
 	.pfnDisable 	= uart_disable,
 	.pfnGetAvailable = uart_get_available,
+	.pfnTxBufferClear = uart_tx_buffer_clear,
 };
 
 static const BT_IF_POWER oPowerInterface = {

@@ -89,6 +89,16 @@ BT_ERROR BT_UartGetAvailable(BT_HANDLE hUart, BT_u32 *pTransmit, BT_u32 *pReceiv
 }
 BT_EXPORT_SYMBOL(BT_UartGetAvailable);
 
+BT_ERROR BT_UartTxBufferClear(BT_HANDLE hUart) {
+	if(!isUartHandle(hUart)) {
+		// ERR_INVALID_HANDLE_TYPE
+		return (BT_ERROR) -1;
+	}
+
+	return BT_IF_UART_OPS(hUart)->pfnTxBufferClear(hUart);
+}
+BT_EXPORT_SYMBOL(BT_UartTxBufferClear);
+
 void bt_early_printk_init(void) {
 	BT_ERROR Error;
 	BT_MACHINE_DESCRIPTION *pMachine = BT_GetMachineDescription(&Error);
