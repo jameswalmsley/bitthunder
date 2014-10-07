@@ -52,13 +52,15 @@ static const struct syscall_entry syscall_table[] = {
 bt_register_t bt_syscall_handler(bt_register_t a1, bt_register_t a2, bt_register_t a3, bt_register_t a4,
 								 bt_register_t nr) {
 
-	bt_register_t retval = -1;
+	bt_register_t retval;
+
 	const struct syscall_entry *syscall;
 
 	if(nr < SYSCALL_TOTAL) {
 		syscall = &syscall_table[nr];
 		retval = syscall->syscall(a1, a2, a3, a4);
 	} else {
+		retval = -1;
 		errno = EBADF;
 	}
 
