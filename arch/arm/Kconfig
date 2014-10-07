@@ -90,7 +90,7 @@ config ARCH_ARM_ARMv7_A
  	select ARCH_ARM_BOOT
  	select ARCH_ARM_ARMv7
 
-config ARCH_ARM_FAMILY
+config TOOLCHAIN_ARCH
 	string
 	default "arm"		if ARCH_ARM_ARM7TDMI || ARCH_ARM_ARM926EJS || ARCH_ARM_ARM920T
 	default "armv6"		if ARCH_ARM_ARM11

@@ -20,7 +20,7 @@ PYTHON:=$(BT_CONFIG_DBUILD_PYTHON)
 
 GIT_DESCRIBE:=$(shell git --git-dir=$(BASE)/.git describe --dirty)
 
-CC_MARCH 		:= $(subst $(DB_QUOTES),,$(BT_CONFIG_ARCH_ARM_FAMILY))
+CC_MARCH 		:= $(subst $(DB_QUOTES),,$(BT_CONFIG_TOOLCHAIN_ARCH))
 CC_MTUNE		:= $(subst $(DB_QUOTES),,$(BT_CONFIG_TOOLCHAIN_CPU))
 CC_TCFLAGS		:= $(subst $(DB_QUOTES),,$(BT_CONFIG_TOOLCHAIN_FLAGS))
 CC_TCDEBUGFLAGS := $(subst $(DB_QUOTES),,$(BT_CONFIG_TOOLCHAIN_DEBUG_FLAGS))
@@ -32,8 +32,13 @@ CC_FPU_ABI		:= $(subst $(DB_QUOTES),,$(BT_CONFIG_TOOLCHAIN_FPU_ABI))
 
 $(OBJECTS) $(OBJECTS-y): CFLAGS += -fstack-usage $(CC_WARNING) -I $(BASE)/lib/include/ -I $(BASE)/arch/arm/include/
 $(OBJECTS) $(OBJECTS-y): CFLAGS += $(CC_TCDEBUGFLAGS)
+ifneq ($(CC_MARCH),)
 $(OBJECTS) $(OBJECTS-y): CFLAGS += -march=$(CC_MARCH)
-$(OBJECTS) $(OBJECTS-y): CFLAGS += -mtune=$(CC_MTUNE) $(CC_TCFLAGS) $(CC_OPTIMISE) $(CC_MFPU) $(CC_FPU_ABI)
+endif
+ifneq ($(CC_MTUNE),)
+$(OBJECTS) $(OBJECTS-y): CFLAGS += -mtune=$(CC_MTUNE)
+endif
+$(OBJECTS) $(OBJECTS-y): CFLAGS += $(CC_TCFLAGS) $(CC_OPTIMISE) $(CC_MFPU) $(CC_FPU_ABI)
 $(OBJECTS) $(OBJECTS-y): CFLAGS += $(CC_MACHFLAGS)
 $(OBJECTS) $(OBJECTS-y): CFLAGS += -D BT_VERSION_SUFFIX="\"$(GIT_DESCRIBE)\""
 
@@ -52,6 +57,14 @@ endif
 #
 #	Link configuration.
 #
+ifneq ($(CC_MARCH),)
+LD_LINKER_FLAGS += -march=$(CC_MARCH)
+endif
+
+ifneq ($(CC_MTUNE),)
+LD_LINKER_FLAGS += -mcpu=$(CC_MTUNE)
+endif
+
 ifeq ($(BT_CONFIG_BUILD_NOSTDLIB), y)
 LDFLAGS += -nostdlib
 endif

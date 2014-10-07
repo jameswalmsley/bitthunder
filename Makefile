@@ -53,7 +53,7 @@ $(PROJECT_DIR)/vmthunder.img: $(PROJECT_DIR)/vmthunder.elf
 
 $(PROJECT_DIR)/vmthunder.elf: $(OBJECTS) $(LINKER_SCRIPTS)
 	$(Q)$(PRETTY) --dbuild "LD" $(MODULE_NAME) $(subst $(PROJECT_DIR)/,"",$@)
-	$(Q)$(CC) -march=$(CC_MARCH) -mtune=$(CC_MTUNE) $(CC_TCFLAGS) $(CC_MACHFLAGS) $(CC_MFPU) $(CC_FPU_ABI) -o $@ -T $(LINKER_SCRIPT) -Wl,-Map=$(PROJECT_DIR)/vmthunder.map $(OBJECTS) $(LDFLAGS) $(LDLIBS) -lm -lc -lgcc
+	$(Q)$(CC) $(LD_LINKER_FLAGS) $(CC_TCFLAGS) $(CC_MACHFLAGS) $(CC_MFPU) $(CC_FPU_ABI) -o $@ -T $(LINKER_SCRIPT) -Wl,-Map=$(PROJECT_DIR)/vmthunder.map $(OBJECTS) $(LDFLAGS) $(LDLIBS) -lm -lc -lgcc
 
 $(PROJECT_DIR)/vmthunder.list: $(PROJECT_DIR)/vmthunder.elf
 	$(Q)$(PRETTY) LIST $(MODULE_NAME) $(subst $(PROJECT_DIR)/,"",$@)
