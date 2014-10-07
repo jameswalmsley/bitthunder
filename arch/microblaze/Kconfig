@@ -1,0 +1,38 @@
+config ARCH_MICROBLAZE
+	bool
+	default y
+	select LINKER_MEMORY_DEFINED
+	select LINKER_MACH_RAM
+	select LINKER_MACH_BSS_SECTION_IN_RAM
+	select LINKER_MACH_DATA_SECTION_IN_RAM
+	select LINKER_MACH_INIT_SECTION_IN_RAM
+	select LINKER_MACH_TEXT_SECTION_IN_RAM
+
+config MACH_RAM_START
+	hex
+	default 0x0
+
+config MACH_RAM_SIZE
+	hex
+	default 0x08000000
+
+
+choice
+	prompt "MicroBlaze Endianess"
+	default ARCH_MICROBLAZE_LITTLE_ENDIAN
+
+config ARCH_MICROBLAZE_LITTLE_ENDIAN
+	bool "Little Endian"
+	select LITTLE_ENDIAN
+
+config ARCH_MICROBLAZE_BIG_ENDIAN
+	bool "Big Endian"
+	select BIG_ENDIAN
+
+
+endchoice
+
+
+menu "Memory"
+    source arch/microblaze/Kconfig.linker
+endmenu
