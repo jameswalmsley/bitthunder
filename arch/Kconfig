@@ -12,6 +12,11 @@ config ARCH_ARM
 	---help---
 		The ARM architectures
 
+config ARCH_MICROBLAZE
+	bool "MicroBlaze"
+	---help---
+		The MicroBlaze architecture
+
 config ARCH_PPC
     bool "PPC"
 	---help---
@@ -21,8 +26,9 @@ endchoice
 
 config ARCH
 	string
-	default "arm"	if ARCH_ARM
-	default "ppc"	if ARCH_PPC
+	default "arm"		if ARCH_ARM
+	default "microblaze" 	if ARCH_MICROBLAZE
+	default "ppc"		if ARCH_PPC
 
 config BIG_ENDIAN
     bool
@@ -38,17 +44,8 @@ if ARCH_ARM
 source arch/arm/Kconfig
 endif
 
-#config USE_VIRTUAL_ADDRESSING
-#    depends on HAS_MMU
-#	bool "Virtual Memory Support"
-#	default n
+if ARCH_MICROBLAZE
+source arch/microblaze/Kconfig
+endif
 
-#config RAM_PHYS
-#	depends on HAS_MMU
-#	hex
-#	default (LINKER_RAM_START_ADDRESS)
 
-#config RAM_VIRT
-#    depends on HAS_MMU
-#	hex
-#	default 0xC0000000
