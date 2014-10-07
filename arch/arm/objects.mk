@@ -1,4 +1,11 @@
-#SUB_OBJDIRS += $(BASE)/arch/$(ARCH)/mach/$(SUBARCH)/
+#
+#	Ensure we include the MACH layer for ARM architecture.
+#
+#	The use of MACH (SUBARCH) is really specific to the architecture, e.g. the MicroBlaze port does
+# 	not require it, as the entire architecture is unified.
+#
+include $(BASE)/arch/$(ARCH)/mach/$(SUBARCH)/.config.mk
+include $(BASE)/arch/$(ARCH)/mach/$(SUBARCH)/objects.mk
 
 
 #
