@@ -7,8 +7,7 @@ typedef struct _BT_INTERRUPT_CONTROLLER {
 	BT_u32							ulTotalIRQs;	///< Total IRQ lines.
 } BT_INTERRUPT_CONTROLLER;
 
-static BT_INTERRUPT_CONTROLLER g_oControllers[BT_CONFIG_MAX_INTERRUPT_CONTROLLERS];
-static BT_u32 g_ulRegistered = 0;
+static BT_INTERRUPT_CONTROLLER *g_pController;
 
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;
@@ -22,17 +21,15 @@ BT_ERROR BT_RegisterInterruptController(BT_u32 ulBaseIRQ, BT_u32 ulTotalIRQs, BT
 		return BT_ERR_GENERIC;
 	}
 
-	if(g_ulRegistered >= BT_CONFIG_MAX_INTERRUPT_CONTROLLERS) {
+	if(g_pController) {
 		return -1;	/// Maximum controllers already registered.
 	}
 
-	g_oControllers[g_ulRegistered].hIRQ       	= hIRQ;
+	g_pController->hIRQ       	= hIRQ;
 
 	// Ensure there is no conflict.
-	g_oControllers[g_ulRegistered].ulBaseIRQ 	= ulBaseIRQ;
-	g_oControllers[g_ulRegistered].ulTotalIRQs 	= ulTotalIRQs;
-
-	g_ulRegistered++;
+	g_pController->ulBaseIRQ 	= ulBaseIRQ;
+	g_pController->ulTotalIRQs 	= ulTotalIRQs;
 
 	return Error;
 }
@@ -42,32 +39,14 @@ BT_ERROR BT_CleanupInterruptControllers() {
 	BT_u32 i;
 	BT_ERROR Error;
 
-	for(i=0; i < g_ulRegistered; i++) {
-
-		BT_CloseHandle(g_oControllers[i].hIRQ);
-		if(Error) {
-			//BT_kPrintf("Error cleaning %s", );
-		}
-	}
+	BT_CloseHandle(g_pController->hIRQ);
 
 	return BT_ERR_NONE;
 }
 BT_EXPORT_SYMBOL(BT_CleanupInterruptControllers);
 
 static BT_INTERRUPT_CONTROLLER *getInterruptController(BT_u32 ulIRQ) {
-	BT_u32 i;
-
-	for(i=0; i < g_ulRegistered; i++) {
-		BT_u32 min, max;
-		min = g_oControllers[i].ulBaseIRQ;
-		max = g_oControllers[i].ulBaseIRQ + g_oControllers[i].ulTotalIRQs;
-
-		if(ulIRQ >= min && ulIRQ <= max) {
-			return &g_oControllers[i];
-		}
-	}
-
-	return NULL;
+	return g_pController;
 }
 
 BT_ERROR BT_RegisterInterrupt(BT_u32 ulIRQ, BT_FN_INTERRUPT_HANDLER pfnHandler, void *pParam) {
@@ -193,21 +172,24 @@ BT_ERROR BT_SetInterruptAffinity(BT_u32 ulIRQ, BT_u32 ulCPU, BT_BOOL bReceive) {
 BT_EXPORT_SYMBOL(BT_SetInterruptAffinity);
 
 BT_ERROR BT_EnableInterrupts() {
-	BT_u32 i;
-	for(i = 0; i < BT_CONFIG_MAX_INTERRUPT_CONTROLLERS; i++) {
-		g_oControllers[i].BT_IF_IRQ_OPS(hIRQ)->pfnEnableInterrupts(g_oControllers[i].hIRQ);
-	}
-
+	g_pController->BT_IF_IRQ_OPS(hIRQ)->pfnEnableInterrupts(g_pController->hIRQ);
 	return BT_ERR_NONE;
 }
 BT_EXPORT_SYMBOL(BT_EnableInterrupts);
 
 BT_ERROR BT_DisableInterrupts() {
-	BT_u32 i;
-	for(i = 0; i < BT_CONFIG_MAX_INTERRUPT_CONTROLLERS; i++) {
-		g_oControllers[i].BT_IF_IRQ_OPS(hIRQ)->pfnDisableInterrupts(g_oControllers[i].hIRQ);
-	}
-
+	g_pController->BT_IF_IRQ_OPS(hIRQ)->pfnDisableInterrupts(g_pController->hIRQ);
 	return BT_ERR_NONE;
 }
 BT_EXPORT_SYMBOL(BT_DisableInterrupts);
+
+BT_u32 BT_MaskInterrupts() {
+	return g_pController->BT_IF_IRQ_OPS(hIRQ)->pfnMaskInterrupts(g_pController->hIRQ);
+}
+BT_EXPORT_SYMBOL(BT_MaskInterrupts);
+
+BT_ERROR BT_UnmaskInterrupts(BT_u32 ulNewMaskValue) {
+	g_pController->BT_IF_IRQ_OPS(hIRQ)->pfnUnmaskInterrupts(g_pController->hIRQ, ulNewMaskValue);
+	return BT_ERR_NONE;
+}
+BT_EXPORT_SYMBOL(BT_UnmaskInterrupts);

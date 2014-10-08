@@ -186,32 +186,86 @@ static BT_ERROR gic_setaffinity(BT_HANDLE hGic, BT_u32 ulIRQ, BT_u32 ulCPU, BT_B
 	return BT_ERR_NONE;
 }
 
+#define portUNMASK_VALUE				( 0xFFUL )
+#define configMAX_API_CALL_INTERRUPT_PRIORITY	18
+
+/*#if configUNIQUE_INTERRUPT_PRIORITIES == 16
+	#define portPRIORITY_SHIFT 4
+	#define portMAX_BINARY_POINT_VALUE	3
+#elif configUNIQUE_INTERRUPT_PRIORITIES == 32*/
+	#define portPRIORITY_SHIFT 3
+	#define portMAX_BINARY_POINT_VALUE	2
+/*#elif configUNIQUE_INTERRUPT_PRIORITIES == 64
+	#define portPRIORITY_SHIFT 2
+	#define portMAX_BINARY_POINT_VALUE	1
+#elif configUNIQUE_INTERRUPT_PRIORITIES == 128
+	#define portPRIORITY_SHIFT 1
+	#define portMAX_BINARY_POINT_VALUE	0
+#elif configUNIQUE_INTERRUPT_PRIORITIES == 256
+	#define portPRIORITY_SHIFT 0
+	#define portMAX_BINARY_POINT_VALUE	0
+#else
+	#error Invalid configUNIQUE_INTERRUPT_PRIORITIES setting.  configUNIQUE_INTERRUPT_PRIORITIES must be set to the number of unique priorities implemented by the target hardware
+#endif*/
+
+#define portCPU_IRQ_DISABLE()												\
+	__asm volatile("cpsid i");												\
+	__asm volatile("dsb");													\
+	__asm volatile("isb");													\
+
+#define portCPU_IRQ_ENABLE()												\
+	__asm volatile("cpsie i");												\
+	__asm volatile("dsb");													\
+	__asm volatile("isb");													\
+
+
 static BT_ERROR gic_enable_interrupts(BT_HANDLE hGic) {
 
-	__asm volatile (
-				"STMDB	SP!, {R0}		\n\t"	/* Push R0.					*/
-				"MRS	R0, CPSR		\n\t"	/* Get CPSR.				*/
-				"BIC	R0, R0, #0xC0	\n\t"	/* Enable IRQ, FIQ.			*/
-				"MSR	CPSR, R0		\n\t"	/* Write back modified value.*/
-				"LDMIA	SP!, {R0}" );			/* Pop R0.					*/
+	portCPU_IRQ_ENABLE();
 
-	hGic->pGICD->CTLR |= 1;
-	hGic->pGICC->CTLR |= 1;
+	/*hGic->pGICD->CTLR |= 1;
+	hGic->pGICC->CTLR |= 1;*/
 	return BT_ERR_NONE;
 }
 
 
 static BT_ERROR gic_disable_interrupts(BT_HANDLE hGic) {
-	hGic->pGICC->CTLR &= ~1;
+	/*hGic->pGICC->CTLR &= ~1;*/
 
-	__asm volatile (
-		"STMDB	SP!, {R0}			\n\t"	/* Push R0.						*/
-		"MRS	R0, CPSR			\n\t"	/* Get CPSR.					*/
-		"ORR	R0, R0, #0xC0		\n\t"	/* Disable IRQ, FIQ.			*/
-		"MSR	CPSR, R0			\n\t"	/* Write back modified value.	*/
-		"LDMIA	SP!, {R0}" );				/* Pop R0.						*/
+	portCPU_IRQ_DISABLE();
 
 	return BT_ERR_NONE;
+}
+
+static BT_u32 gic_mask_interrupts(BT_HANDLE hGic) {
+	BT_u32 ulReturn;
+
+	portCPU_IRQ_DISABLE();
+	{
+		if(hGic->pGICC->PMR == (BT_u32) (configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT)) {
+			ulReturn = 1;
+		} else {
+			ulReturn = 0;
+			hGic->pGICC->PMR = (BT_u32) (configMAX_API_CALL_INTERRUPT_PRIORITY << portPRIORITY_SHIFT);
+			__asm volatile("dsb");
+			__asm volatile("isb");
+		}
+	}
+	portCPU_IRQ_ENABLE();
+
+	return ulReturn;
+}
+
+static BT_ERROR gic_unmask_interrupts(BT_HANDLE hGic, BT_u32 ulNewMaskValue) {
+	if(ulNewMaskValue == 0) {
+		portCPU_IRQ_DISABLE();
+		{
+			hGic->pGICC->PMR = portUNMASK_VALUE;
+			__asm volatile("dsb");
+			__asm volatile("isb");
+		}
+		portCPU_IRQ_ENABLE();
+	}
 }
 
 static BT_u32 gic_get_count(BT_HANDLE hGic, BT_u32 ulIRQ) {
@@ -231,6 +285,8 @@ static const BT_DEV_IF_IRQ oDeviceOps = {
 	.pfnSetAffinity			= gic_setaffinity,						///< An option interface, GIC could implement this.
 	.pfnEnableInterrupts	= gic_enable_interrupts,
 	.pfnDisableInterrupts	= gic_disable_interrupts,
+	.pfnMaskInterrupts		= gic_mask_interrupts,
+	.pfnUnmaskInterrupts 	= gic_unmask_interrupts,
 	.pfnGetCount			= gic_get_count,
 };
 

@@ -17,6 +17,8 @@ typedef struct _BT_DEV_IF_IRQ {
 	BT_ERROR		(*pfnSetAffinity)		(BT_HANDLE hIRQ, BT_u32 ulIRQ, BT_u32 ulCPUID, BT_BOOL bReceive);
 	BT_ERROR		(*pfnEnableInterrupts)	(BT_HANDLE hIRQ);
 	BT_ERROR		(*pfnDisableInterrupts)	(BT_HANDLE hIRQ);
+	BT_u32			(*pfnMaskInterrupts)	(BT_HANDLE hIRQ);
+	BT_ERROR 		(*pfnUnmaskInterrupts)	(BT_HANDLE hIRQ, BT_u32 ulNewMaskValue);
 	BT_u32			(*pfnGetCount)			(BT_HANDLE hIRQ, BT_u32 ulIRQ);
 } BT_DEV_IF_IRQ;
 
