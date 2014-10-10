@@ -499,7 +499,10 @@ static BT_s32 uartRead(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, BT_u8 *pu
 	{
 		while(ulSize) {
 			while((pRegs->FR & LM3Sxx_UART_FR_RXFE)) {
-				BT_ThreadYield();
+				if (slRead)
+					return slRead;
+				else
+					BT_ThreadYield();
 			}
 
 			*pucDest++ = pRegs->DR & 0x000000FF;

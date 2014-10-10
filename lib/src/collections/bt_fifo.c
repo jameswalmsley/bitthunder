@@ -131,6 +131,9 @@ BT_s32 BT_FifoRead(BT_HANDLE hFifo, BT_u32 ulElements, void *pData, BT_u32 ulFla
 			if (ulFlags & BT_FIFO_NONBLOCKING) {
 				break;
 			}
+			else if (ulRead) {
+				break;
+			}
 		}
 		BT_QueueReceive(hFifo->hQueue, pData, BT_INFINITE_TIMEOUT);
 		pSrc += hFifo->ulElementWidth;
