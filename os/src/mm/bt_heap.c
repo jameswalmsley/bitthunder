@@ -38,6 +38,7 @@ void *BT_kMalloc(BT_u32 ulSize) {
 	void *p = NULL;
 
 	// CRITICAL SECTION
+	BT_kEnterCritical();
 	{
 
 		/*
@@ -104,6 +105,7 @@ void *BT_kMalloc(BT_u32 ulSize) {
 	// END CRITICAL SECTION.
 
 complete:
+	BT_kExitCritical();
 	return p;
 }
 BT_EXPORT_SYMBOL(BT_kMalloc);
@@ -114,6 +116,8 @@ void BT_kFree(void *p) {
 	if(!p) {
 		return;
 	}
+
+	BT_kEnterCritical();
 
 	pBlock--;	// Pointer should have a HEAP_BLOCK behind it, therefore just decrement the pointer.
 
@@ -145,5 +149,39 @@ void BT_kFree(void *p) {
 	if(pItem != pBlock) {
 		pItem->pNextBlock = pBlock;
 	}
+
+	BT_kExitCritical();
 }
 BT_EXPORT_SYMBOL(BT_kFree);
+
+void *BT_kRealloc(void *p, BT_u32 ulSize) {
+	void *n = NULL;
+
+	// CRITICAL SECTION
+	BT_kEnterCritical();
+	{
+		if((p) && (ulSize)) {
+			n = BT_kMalloc(ulSize);
+			if (n)
+			{
+				BT_HEAP_BLOCK * pOld = (BT_HEAP_BLOCK *)p;
+				pOld--;
+				pOld->ulSize -= sizeof(BT_HEAP_BLOCK);
+				if (ulSize > pOld->ulSize)
+					memcpy(n, p, pOld->ulSize);
+				else
+					memcpy(n, p, ulSize);
+			}
+		}
+		else if((p) && (!ulSize)) {
+			BT_kFree(p);
+		}
+		else if((!p) && (ulSize)) {
+			n = BT_kMalloc(ulSize);
+		}
+	}
+	BT_kExitCritical();
+
+	return n;
+}
+BT_EXPORT_SYMBOL(BT_kRealloc);
