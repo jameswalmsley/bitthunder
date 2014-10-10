@@ -240,7 +240,7 @@ static BT_ERROR adc_setconfig(BT_HANDLE hAdc, BT_ADC_CONFIG *pConfig) {
 		if(hAdc->eMode !=  BT_ADC_MODE_POLLED) {
 
 			BT_u32 i;
-			for (i = 0; i < 8; i++) {
+			for (i = 0; i < 17; i++) {
 				BT_CloseHandle(hAdc->hFifo[i]);
 			}
 
