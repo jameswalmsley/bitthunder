@@ -36,6 +36,7 @@ typedef struct _BT_SPI_DEVICE {
 	BT_SPI_MASTER 	*pMaster;
 	BT_u32			max_speed_hz;
 	BT_u8			chip_select;
+	BT_u16			send_on_read;
 	BT_u8			mode;
 #define SPI_CPHA        0x01                    /* clock phase */
 #define SPI_CPOL        0x02                    /* clock polarity */
@@ -63,6 +64,7 @@ typedef struct _BT_SPI_TRANSFER {
     BT_u8            bits_per_word;
     BT_u16           delay_usecs;
     BT_u32           speed_hz;
+    BT_u16			 send_on_read;
 } BT_SPI_TRANSFER;
 
 typedef struct _BT_SPI_MESSAGE {

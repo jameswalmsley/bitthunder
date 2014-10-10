@@ -221,6 +221,8 @@ BT_ERROR __BT_SpiAsync(BT_SPI_DEVICE *pDevice, BT_SPI_MESSAGE *pMessage) {
 			xfer->bits_per_word = pDevice->bits_per_word;
 		if(!xfer->speed_hz)
 			xfer->speed_hz = pDevice->max_speed_hz;
+		if(!xfer->send_on_read)
+			xfer->send_on_read = pDevice->send_on_read;
 	}
 
 	pMessage->spi_device = pDevice;
