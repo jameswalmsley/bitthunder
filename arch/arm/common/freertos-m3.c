@@ -305,6 +305,9 @@ void vPortYieldFromISR( void )
 {
 	/* Set a PendSV to request a context switch. */
 	*(portNVIC_INT_CTRL) = portNVIC_PENDSVSET;
+
+	__asm volatile ("dsb");
+	__asm volatile ("isb");
 }
 
 void vPortReset( void )
