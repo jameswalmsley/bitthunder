@@ -60,7 +60,7 @@ static BT_ERROR thread_cleanup(BT_HANDLE hThread) {
 
 void bt_thread_cleanup(struct bt_thread *thread) {
 	bt_process_thread_cleanup(thread->task);
-	BT_HANDLE hThread = bt_container_of(curthread, struct _BT_OPAQUE_HANDLE, thread);
+	BT_HANDLE hThread = bt_container_of(thread, struct _BT_OPAQUE_HANDLE, thread);
 	BT_DestroyHandle(hThread);
 }
 
