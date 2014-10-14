@@ -524,7 +524,8 @@ BT_HANDLE BT_ShellCreate(BT_HANDLE hStdin, BT_HANDLE hStdout, const BT_i8 *szpPr
 #ifdef BT_CONFIG_SHELL_JIMTCL
 	hShell->interp = Jim_CreateInterp();
 	Jim_RegisterCoreCommands(hShell->interp);
-	Jim_stdlibInit(hShell->interp);
+	Jim_aioInit(hShell->interp);
+	//Jim_stdlibInit(hShell->interp);
 	Jim_clockInit(hShell->interp);
 #endif
 

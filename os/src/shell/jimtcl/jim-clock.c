@@ -43,10 +43,10 @@ static int clock_cmd_format(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
     }
     t = seconds;
 
-    if (strftime(buf, sizeof(buf), format, localtime(&t)) == 0) {
+    /*@@if (strftime(buf, sizeof(buf), format, localtime(&t)) == 0) {
         Jim_SetResultString(interp, "format string too long", -1);
         return JIM_ERR;
-    }
+    }*/
 
     Jim_SetResultString(interp, buf, -1);
 
@@ -67,11 +67,11 @@ static int clock_cmd_scan(Jim_Interp *interp, int argc, Jim_Obj *const *argv)
     /* Initialise with the current date/time */
     localtime_r(&now, &tm);
 
-    pt = strptime(Jim_String(argv[0]), Jim_String(argv[2]), &tm);
+    /*@@pt = strptime(Jim_String(argv[0]), Jim_String(argv[2]), &tm);
     if (pt == 0 || *pt != 0) {
         Jim_SetResultString(interp, "Failed to parse time according to format", -1);
         return JIM_ERR;
-    }
+    }*/
 
     /* Now convert into a time_t */
     Jim_SetResultInt(interp, mktime(&tm));
@@ -159,8 +159,8 @@ static const jim_subcmd_type clock_command_table[] = {
 
 int Jim_clockInit(Jim_Interp *interp)
 {
-    if (Jim_PackageProvide(interp, "clock", "1.0", JIM_ERRMSG))
-        return JIM_ERR;
+	if (Jim_PackageProvide(interp, "clock", "1.0", JIM_ERRMSG))
+	    return JIM_ERR;
 
     Jim_CreateCommand(interp, "clock", Jim_SubCmdProc, (void *)clock_command_table, NULL);
     return JIM_OK;
