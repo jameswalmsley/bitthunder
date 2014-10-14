@@ -147,7 +147,7 @@ int bt_main(BT_u32 machid, const void *fdt) {
 	BT_Flush(hUart);
 
 #ifndef BT_CONFIG_INHERIT_STDIO_FROM_KERNEL
-	BT_Setstdin(NULL);
+	BT_SetStdin(NULL);
 	BT_SetStdout(NULL);
 	BT_SetStderr(NULL);
 
