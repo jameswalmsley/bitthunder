@@ -30,3 +30,7 @@ doc/*.pdf
 *~
 \#*\#
 .\#*
+# JimTcl
+os/src/shell/jimtcl/__Previews/
+os/src/shell/jimtcl/examples/__Previews/
+os/src/shell/jimtcl/tools/__Previews/
