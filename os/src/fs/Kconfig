@@ -40,6 +40,10 @@ config FS_FULLFAT_ALLOC_DOUBLE
 
 endchoice
 
+config FS_FULLFAT_CACHE_SIZE
+	int "size of block chache"
+	default 8192
+
 config FS_FULLFAT_DRIVER_BUSY_SLEEP
 	int "Driver busy sleep time"
 	default 20

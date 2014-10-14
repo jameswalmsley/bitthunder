@@ -77,13 +77,13 @@ static BT_HANDLE fullfat_mount(BT_HANDLE hFS, BT_HANDLE hVolume, const void *dat
 		return NULL;
 	}
 
-	pMount->pBlockCache = BT_kMalloc(8192);
+	pMount->pBlockCache = BT_kMalloc(BT_CONFIG_FS_FULLFAT_CACHE_SIZE);
 	if(!pMount->pBlockCache) {
 		goto err_block_cache_free_out;
 	}
 
 	pMount->hVolume = hVolume;
-	pMount->pIoman = FF_CreateIOMAN(pMount->pBlockCache, 8192, 512, &ffError);
+	pMount->pIoman = FF_CreateIOMAN(pMount->pBlockCache, BT_CONFIG_FS_FULLFAT_CACHE_SIZE, 512, &ffError);
 	if(!pMount->pIoman) {
 		Error = BT_ERR_GENERIC;
 		goto err_free_out;
