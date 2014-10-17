@@ -12,5 +12,13 @@ config DRIVERS_ADC_SPI_MAX1231
 	default n
 endmenu
 
+menu "I2C ADC's"
+
+config DRIVERS_ADC_I2C_MAX1363
+    bool "MAX1363"
+	select DRIVERS_ADC
+	default n
+endmenu
+
 
 endmenu
