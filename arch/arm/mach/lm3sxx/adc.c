@@ -198,8 +198,10 @@ static BT_ERROR adc_setconfig(BT_HANDLE hAdc, BT_ADC_CONFIG *pConfig) {
 
 	LM3Sxx_RCC->RCGC[0] = (LM3Sxx_RCC->RCGC[0] & ulMask) | (slDivider << ulShift);
 
+	pRegs->ADCSAC = 0;
 	BT_u32 ulAvg = pConfig->ulHWAverageCount;
 	if (ulAvg > 64) ulAvg = 64;
+	ulAvg >>= 1;
 	while (ulAvg) {
 		pRegs->ADCSAC++;
 		ulAvg >>= 1;
@@ -315,37 +317,52 @@ static BT_s32 adc_Read(BT_HANDLE hAdc, BT_u32 ulChannel, BT_u32 ulSize, BT_u32 *
 			for (i = 0; i < hAdc->ulSWAverageCount; i++) {
 				if (ulChannel < 8) {
 					pRegs->ADCPSSI = LM3Sxx_ADC_ADCPSSI_SS0_START;
-					while((pRegs->ADCRIS & LM3Sxx_ADC_ADCRIS_SS0)) {
+					while(!(pRegs->ADCRIS & LM3Sxx_ADC_ADCRIS_SS0)) {
 						BT_ThreadYield();
 					}
-					for (j = 0; j < ulChannel; j++)
-						ulResult = pRegs->Sequencer[0].SSFIFO;
+				    pRegs->ADCISC = pRegs->ADCRIS;
+					for (j = 0; j < 8; j++) {
+						ulResult = pRegs->Sequencer[0].SSFIFO & 0x3FF;
+						if (j == ulChannel)
+							ulSum += ulResult;
+					}
 				}
 				else if (ulChannel < 12) {
 					pRegs->ADCPSSI = LM3Sxx_ADC_ADCPSSI_SS1_START;
-					while((pRegs->ADCRIS & LM3Sxx_ADC_ADCRIS_SS1)) {
+					while(!(pRegs->ADCRIS & LM3Sxx_ADC_ADCRIS_SS1)) {
 						BT_ThreadYield();
 					}
-					for (j = 8; j < ulChannel; j++)
-						ulResult = pRegs->Sequencer[1].SSFIFO;
+					pRegs->ADCISC = pRegs->ADCRIS;
+					for (j = 8; j < 12; j++) {
+						ulResult = pRegs->Sequencer[1].SSFIFO & 0x3FF;
+						if (j == ulChannel)
+							ulSum += ulResult;
+					}
 				}
 				else if (ulChannel < 16) {
 					pRegs->ADCPSSI = LM3Sxx_ADC_ADCPSSI_SS2_START;
-					while((pRegs->ADCRIS & LM3Sxx_ADC_ADCRIS_SS2)) {
+					while(!(pRegs->ADCRIS & LM3Sxx_ADC_ADCRIS_SS2)) {
 						BT_ThreadYield();
 					}
-					for (j = 12; j < ulChannel; j++)
-						ulResult = pRegs->Sequencer[2].SSFIFO;
+					pRegs->ADCISC = pRegs->ADCRIS;
+					for (j = 12; j < 16; j++) {
+						ulResult = pRegs->Sequencer[2].SSFIFO & 0x3FF;
+						if (j == ulChannel)
+							ulSum += ulResult;
+					}
 				}
 				else {
 					pRegs->ADCPSSI = LM3Sxx_ADC_ADCPSSI_SS3_START;
-					while((pRegs->ADCRIS & LM3Sxx_ADC_ADCRIS_SS3)) {
+					while(!(pRegs->ADCRIS & LM3Sxx_ADC_ADCRIS_SS3)) {
 						BT_ThreadYield();
 					}
-					for (j = 16; j < ulChannel; j++)
-						ulResult = pRegs->Sequencer[3].SSFIFO;
+					pRegs->ADCISC = pRegs->ADCRIS;
+					for (j = 16; j < 17; j++) {
+						ulResult = pRegs->Sequencer[3].SSFIFO & 0x3FF;
+						ulSum += ulResult;
+					}
 				}
-				ulSum += ulResult;
+
 			}
 
 			*pucDest++ = ulSum / hAdc->ulSWAverageCount;
