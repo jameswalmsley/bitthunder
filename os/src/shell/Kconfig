@@ -13,4 +13,10 @@ config SHELL_JIMTCL
 	However the all commands aim to provide equivalent functionality through some well designed
 	TCL bindings.
 
+config SHELL_MICROPYTHON
+	bool "Use MicroPython"
+	---help---
+	Enables the use of MicroPython as a kernel shell.
+
+
 endmenu

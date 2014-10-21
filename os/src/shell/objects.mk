@@ -55,3 +55,9 @@ $(JIMTCL_OBJECTS-y): CFLAGS_REMOVE += -nostdlib
 BT_OS_OBJECTS-y += $(JIMTCL_OBJECTS-y)
 
 $(BT_OS_OBJECTS-y): CFLAGS += -I $(BASE)/os/src/shell/jimtcl/
+
+# MicroPython
+ifeq ($(BT_CONFIG_SHELL_MICROPYTHON),y)
+include $(BASE)/os/src/shell/micropython/objects.mk
+endif
+
