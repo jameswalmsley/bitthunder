@@ -130,7 +130,7 @@ to exclude the API function. */
 /* !!!! configMAX_SYSCALL_INTERRUPT_PRIORITY must not be set to zero !!!!
 See http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html. */
 #ifdef BT_CONFIG_MACH_PRIORITY_BITS
-	#define configMAX_SYSCALL_INTERRUPT_PRIORITY 	(0x01 << (8-BT_CONFIG_MACH_PRIORITY_BITS)) /* equivalent to 0xb0, or priority 11. */
+	#define configMAX_SYSCALL_INTERRUPT_PRIORITY 	((0x01 << BT_CONFIG_MACH_PRIORITY_BITS)-1) << (8-BT_CONFIG_MACH_PRIORITY_BITS) /* equivalent to 0xb0, or priority 11. */
 #else
 	#define configMAX_SYSCALL_INTERRUPT_PRIORITY 	32 /* equivalent to 0xb0, or priority 11. */
 #endif
@@ -147,3 +147,4 @@ NVIC value of 255. */
 #endif
 
 #endif /* FREERTOS_CONFIG_H */
+
