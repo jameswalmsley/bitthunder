@@ -557,6 +557,8 @@ static BT_s32 uartWrite(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const BT
 	{
 		slWritten = BT_FifoWrite(hUart->hTxFifo, ulSize, pSrc, 0);
 
+		pRegs->IM &= ~LM3Sxx_UART_INT_TX;	// Disable the interrupt
+
 		while (!BT_FifoIsEmpty(hUart->hTxFifo, &Error) && (!(pRegs->FR & LM3Sxx_UART_FR_TXFF))) {
 			BT_FifoRead(hUart->hTxFifo, 1, &ucData, 0);
 			pRegs->DR = ucData;
@@ -673,6 +675,7 @@ static BT_HANDLE uart_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pErro
 	}*/
 
 
+	BT_SetInterruptPriority(pResource->ulStart, ((0x01 << BT_CONFIG_MACH_PRIORITY_BITS)-1));
 	Error = BT_EnableInterrupt(pResource->ulStart);
 
 	return hUart;

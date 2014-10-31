@@ -582,7 +582,7 @@ static BT_HANDLE adc_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 	}*/
 
 	for (i = pResource->ulStart; i <= pResource->ulEnd; i++) {
-		BT_SetInterruptPriority(i, 1);
+		BT_SetInterruptPriority(i, ((0x01 << BT_CONFIG_MACH_PRIORITY_BITS)-1));
 		Error = BT_EnableInterrupt(i);
 	}
 

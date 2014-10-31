@@ -637,7 +637,7 @@ static BT_HANDLE mac_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 	}*/
 
 
-	BT_SetInterruptPriority(pResource->ulStart, 3);
+	BT_SetInterruptPriority(pResource->ulStart, ((0x01 << BT_CONFIG_MACH_PRIORITY_BITS)-1));
 	Error = BT_EnableInterrupt(pResource->ulStart);
 
 	Error = BT_RegisterNetworkInterface(hMAC);
