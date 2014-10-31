@@ -37,12 +37,19 @@ static int bt_ps(BT_HANDLE hShell, int argc, char **argv) {
 
 	char *pBuf = BT_kMalloc(128);
 	if (pBuf) {
+		float fTotal = 0;
+		BT_u32 nTotal = 0;
 		for(i = 0; i < total_processes; i++) {
 			BT_GetProcessTime(&oTime, i);
-			BT_u32 ulLen = sprintf(pBuf, "%-6d%-32s%4d%%", oTime.ulPID, oTime.name, (runtimes[i].ullRuntimeCounter / (runtime / 100)));
-			sprintf(pBuf+ulLen, "%11d\n", oTime.ulthreads);
+			float fPercentage = ((float)runtimes[i].ullRuntimeCounter / ((float)runtime / 100));
+			BT_u32 ulLen = sprintf(pBuf, "%-6d%-31s%5.1f%%", oTime.ulPID, oTime.name, fPercentage);
+			ulLen += sprintf(pBuf+ulLen, "%11d\n", oTime.ulthreads);
 			bt_fprintf(hStdout, pBuf);
+			fTotal += fPercentage;
+			nTotal += oTime.ulthreads;
 		}
+		sprintf(pBuf, "      TOTAL                          %5.1f%%%11d\n", fTotal, nTotal);
+		bt_fprintf(hStdout, pBuf);
 		BT_kFree(pBuf);
 	}
 
