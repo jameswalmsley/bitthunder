@@ -65,7 +65,7 @@ void BT_NVIC_SysTick_Handler( void );
 void BT_NVIC_SVC_Handler( void ) __attribute__ (( naked ));
 
 
-static unsigned portBASE_TYPE uxCriticalNesting = 0xaaaaaaaa;
+unsigned portBASE_TYPE uxCriticalNesting = 0xaaaaaaaa;
 
 /**
  *	Initialise the stack of a task to look as if a call to
@@ -146,8 +146,8 @@ void vPortStartFirstTask( void )
 
 portBASE_TYPE xPortStartScheduler(void) {
 
-	BT_SetInterruptPriority(14, 31);		//PENDSVC
-	BT_SetInterruptPriority(15, 31);		//SysTick
+	BT_SetInterruptPriority(14, (0x01 << BT_CONFIG_MACH_PRIORITY_BITS)-1);		//PENDSVC
+	BT_SetInterruptPriority(15, (0x01 << BT_CONFIG_MACH_PRIORITY_BITS)-1);		//SysTick
 
 	// Setup Hardware Timer!
 	prvSetupTimerInterrupt();
