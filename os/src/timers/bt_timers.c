@@ -67,7 +67,8 @@ BT_u64 BT_GetGlobalTimer() {
 		return g_gOps->pfnGetValue(g_gTimer, &Error);
 	}
 	else {
-		return (((BT_u64)BT_kTickCount()) << 32);
+		return (((BT_u64)BT_GetKernelTime()) << 32);
+		//return (((BT_u64)BT_kTickCount()) << 32);
 	}
 
 	return 0;
