@@ -31,7 +31,12 @@
 #define MEM_SIZE						BT_CONFIG_NET_LWIP_MEM_SIZE
 #define MEM_ALIGNMENT                   4
 #define TCP_SND_BUF                     (3 * TCP_MSS)
+#ifdef BT_CONFIG_MACH_ETHERNET_BUFFER
+#define TCP_WND                         (BT_CONFIG_MACH_ETHERNET_BUFFER-256)
+#else
 #define TCP_WND                         (2 * TCP_MSS)
+#endif
+
 
 //*****************************************************************************
 // ---------- Pbuf options ----------

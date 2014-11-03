@@ -18,6 +18,10 @@ config MACH_LM3S9D96
 	select LINKER_MACH_BSS_SECTION_IN_SRAM
 		
 
+config MACH_ETHERNET_BUFFER
+	int
+	default 2048
+
 config MACH_FLASH_START
 	hex
 	default 0x0000 
