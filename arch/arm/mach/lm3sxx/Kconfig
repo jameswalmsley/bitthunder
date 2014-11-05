@@ -11,7 +11,7 @@ config MACH_LM3Sxx_SYSCLOCK_IRC_FREQ
 config HAS_CAN_0
 	bool
 	default n
-	
+
 config HAS_CAN_1
 	bool
 	default n
@@ -19,11 +19,11 @@ config HAS_CAN_1
 config HAS_I2C0
 	bool
 	default n
-	
+
 config HAS_ETHERNET
 	bool
 	default n
-	
+
 config HAS_QEI_0
 	bool
 	default n
@@ -31,9 +31,9 @@ config HAS_QEI_0
 config HAS_QEI_1
 	bool
 	default n
-	
-	
-	
+
+
+
 choice
 	prompt "LM3Sxx Chip Variant"
 	default MACH_LM3Sxx_LM3S9B92
@@ -48,111 +48,111 @@ if MACH_LM3Sxx_LM3S9B92
 source arch/arm/mach/lm3sxx/.config/lm3s9b92
 endif
 
-config MACH_LM3Sxx_GPIO_BASE  
+config MACH_LM3Sxx_GPIO_BASE
 	hex
 	default 0x40058000
-	
-config MACH_LM3Sxx_UART0_BASE 
+
+config MACH_LM3Sxx_UART0_BASE
 	hex
 	default 0x4000C000
 
-config MACH_LM3Sxx_UART1_BASE 
+config MACH_LM3Sxx_UART1_BASE
 	hex
 	default 0x4000D000
 
-config MACH_LM3Sxx_UART2_BASE 
+config MACH_LM3Sxx_UART2_BASE
 	hex
 	default 0x4000E000
 
-config MACH_LM3Sxx_SPI0_BASE 
+config MACH_LM3Sxx_SPI0_BASE
 	hex
 	default 0x40008000
 
-config MACH_LM3Sxx_SPI1_BASE 
+config MACH_LM3Sxx_SPI1_BASE
 	hex
 	default 0x40009000
 
-config MACH_LM3Sxx_I2C0_BASE 
+config MACH_LM3Sxx_I2C0_BASE
 	hex
 	default 0x40020000
 
-config MACH_LM3Sxx_I2C1_BASE 
+config MACH_LM3Sxx_I2C1_BASE
 	hex
 	default 0x40021000
 
-config MACH_LM3Sxx_CAN0_BASE  
+config MACH_LM3Sxx_CAN0_BASE
 	hex
 	default 0x40040000
 	depends on HAS_CAN_0
 
-config MACH_LM3Sxx_CAN1_BASE  
+config MACH_LM3Sxx_CAN1_BASE
 	hex
 	default 0x40041000
 	depends on HAS_CAN_1
-	
-	
+
+
 config MACH_LM3Sxx_MAC0_BASE
 	hex
 	default 0x40048000
 	depends on HAS_ETHERNET
 
-config MACH_LM3Sxx_PWM0_BASE  
+config MACH_LM3Sxx_PWM0_BASE
 	hex
 	default 0x40028000
 
-config MACH_LM3Sxx_ADC0_BASE  
+config MACH_LM3Sxx_ADC0_BASE
 	hex
 	default 0x40038000
 
-config MACH_LM3Sxx_ADC1_BASE  
+config MACH_LM3Sxx_ADC1_BASE
 	hex
 	default 0x40039000
-	
+
 
 config MACH_LM3Sxx_TIMER0_BASE
 	hex
 	default 0x40030000
-	
+
 config MACH_LM3Sxx_TIMER1_BASE
 	hex
 	default 0x40031000
-	
+
 config MACH_LM3Sxx_TIMER2_BASE
 	hex
 	default 0x40032000
-	
+
 config MACH_LM3Sxx_TIMER3_BASE
 	hex
 	default 0x40033000
-	
-config MACH_LM3Sxx_QEI0_BASE  
+
+config MACH_LM3Sxx_QEI0_BASE
 	hex
 	default 0x4002C000
 
-config MACH_LM3Sxx_QEI1_BASE  
+config MACH_LM3Sxx_QEI1_BASE
 	hex
 	default 0x4002D000
-	
+
 
 config MACH_LM3Sxx_TOTAL_GPIOS
 	int
-	default 72 if MACH_LM3Sxx_LM3S9B92	
-	
+	default 72 if MACH_LM3Sxx_LM3S9B92
+
 config MAX_IRQ
 	   int
-	   default 70		   
+	   default 70
 
 config ARCH_ARM_SYSTICK_SRC0_DIV
     int
     default 2
-    
-choice 
+
+choice
 	prompt "systick clock source"
 	default LM3Sxx_ARCH_ARM_SYSTICK_PROCESSOR_CLOCK
-	
+
 config LM3Sxx_ARCH_ARM_SYSTICK_PROCESSOR_CLOCK
 	bool "processor clock"
-	
+
 config LM3Sxx_ARCH_ARM_SYSTICK_EXTERNAL_CLOCK
 	bool "external clock"
 
@@ -161,7 +161,7 @@ endchoice
 config ARCH_ARM_SYSTICK_CLKSRC
 	hex
 	default 0x00 if LM3Sxx_ARCH_ARM_SYSTICK_EXTERNAL_CLOCK
-	default 0x04 if LM3Sxx_ARCH_ARM_SYSTICK_PROCESSOR_CLOCK 
+	default 0x04 if LM3Sxx_ARCH_ARM_SYSTICK_PROCESSOR_CLOCK
 
 comment "device specific configuration"
 
@@ -173,7 +173,7 @@ config MACH_LM3Sxx_ADC
 	bool
 	default n
 	select ADC
-	
+
 config MACH_LM3Sxx_ADC_0
     bool "Use ADC(0) peripheral"
 	default n
@@ -193,7 +193,7 @@ config MACH_LM3Sxx_ADC_1_INODE_NAME
 	string "ADC(1) devfs name"
 	default "adc1"
 	depends on MACH_LM3Sxx_ADC_1
-	
+
 endmenu
 
 menu "CAN devices"
@@ -202,12 +202,12 @@ config MACH_LM3Sxx_CAN
 	bool
 	default n
 	select CAN
-	
+
 config MACH_LM3Sxx_CAN_0
     bool "Use CAN(0) peripheral"
 	default n
 	select MACH_LM3Sxx_CAN
-	depends on HAS_CAN_0	
+	depends on HAS_CAN_0
 
 config MACH_LM3Sxx_CAN_0_INODE_NAME
 	string "CAN(0) devfs name"
@@ -218,7 +218,7 @@ config MACH_LM3Sxx_CAN_1
     bool "Use CAN(1) peripheral"
 	default n
 	select MACH_LM3Sxx_CAN
-	depends on HAS_CAN_1	
+	depends on HAS_CAN_1
 
 config MACH_LM3Sxx_CAN_1_INODE_NAME
 	string "CAN(1) devfs name"
@@ -236,7 +236,7 @@ config MACH_LM3Sxx_UART
 config MACH_LM3Sxx_UART_0
     bool "Use UART(0) peripheral"
 	default n
-	select MACH_LM3Sxx_UART	
+	select MACH_LM3Sxx_UART
 
 config MACH_LM3Sxx_UART_0_INODE_NAME
 	string "UART(0) devfs name"
@@ -246,7 +246,7 @@ config MACH_LM3Sxx_UART_0_INODE_NAME
 config MACH_LM3Sxx_UART_1
     bool "Use UART(1) peripheral"
 	default n
-	select MACH_LM3Sxx_UART	
+	select MACH_LM3Sxx_UART
 
 config MACH_LM3Sxx_UART_1_INODE_NAME
 	string "UART(1) devfs name"
@@ -256,7 +256,7 @@ config MACH_LM3Sxx_UART_1_INODE_NAME
 config MACH_LM3Sxx_UART_2
     bool "Use UART(2) peripheral"
 	default n
-	select MACH_LM3Sxx_UART	
+	select MACH_LM3Sxx_UART
 
 config MACH_LM3Sxx_UART_2_INODE_NAME
 	string "UART(2) devfs name"
@@ -311,15 +311,15 @@ config MACH_LM3Sxx_I2C_0_BUSID
 	int "I2C(0) Bus ID"
 	default 0
 	depends on MACH_LM3Sxx_I2C_0
-	
-choice 
+
+choice
 	prompt "Bus Speed"
 	default MACH_LM3Sxx_I2C_0_SPEED_100KHZ
 	depends on MACH_LM3Sxx_I2C_0
-	
+
 config MACH_LM3Sxx_I2C_0_SPEED_100KHZ
 	bool "100kHz"
-	
+
 config MACH_LM3Sxx_I2C_0_SPEED_400KHZ
 	bool "400kHz"
 
@@ -331,7 +331,7 @@ endchoice
 config MACH_LM3Sxx_I2C_0_SPEED
 	int
 	default 0 if MACH_LM3Sxx_I2C_0_SPEED_100KHZ
-	default 1 if MACH_LM3Sxx_I2C_0_SPEED_400KHZ 
+	default 1 if MACH_LM3Sxx_I2C_0_SPEED_400KHZ
 	default 2 if MACH_LM3Sxx_I2C_0_SPEED_1000KHZ
 
 
@@ -344,15 +344,15 @@ config MACH_LM3Sxx_I2C_1_BUSID
 	int "I2C(1) Bus ID"
 	default 1
 	depends on MACH_LM3Sxx_I2C_1
-	
-choice 
+
+choice
 	prompt "Bus Speed"
 	default MACH_LM3Sxx_I2C_1_SPEED_100KHZ
 	depends on MACH_LM3Sxx_I2C_1
-	
+
 config MACH_LM3Sxx_I2C_1_SPEED_100KHZ
 	bool "100kHz"
-	
+
 config MACH_LM3Sxx_I2C_1_SPEED_400KHZ
 	bool "400kHz"
 
@@ -364,7 +364,7 @@ endchoice
 config MACH_LM3Sxx_I2C_1_SPEED
 	int
 	default 0 if MACH_LM3Sxx_I2C_1_SPEED_100KHZ
-	default 1 if MACH_LM3Sxx_I2C_1_SPEED_400KHZ 
+	default 1 if MACH_LM3Sxx_I2C_1_SPEED_400KHZ
 	default 2 if MACH_LM3Sxx_I2C_1_SPEED_1000KHZ
 
 endmenu
@@ -386,7 +386,7 @@ config MACH_LM3Sxx_MAC_0
 config MACH_ETH_PAD_SIZE
 	int
 	default 2
-	
+
 endmenu
 
 menu "TIMER devices"
@@ -483,7 +483,7 @@ config MACH_LM3Sxx_QEI_1_INODE_NAME
 	string "QEI(1) devfs name"
 	default "qei1"
 	depends on MACH_LM3Sxx_QEI_1
-		
+
 endmenu
 
 
@@ -518,4 +518,99 @@ config MACH_LM3Sxx_BOOTLOG_NULL
     bool "/dev/null"
 
 endchoice
-    
+
+menu "CLOCK configuration"
+
+config MACH_LM3Sxx_SYSCLOCK_FREQ
+    int "System clock frequency"
+    default 16000000
+
+choice
+        prompt "Main PLL Clocksource"
+        default MACH_LM3Sxx_MAINPLLCLK_SRC_IRC
+
+config MACH_LM3Sxx_MAINPLLCLK_SRC_IRC
+    bool        "IRC"
+
+config MACH_LM3Sxx_MAINPLLCLK_SRC_OSC
+    bool        "Main OSC"
+
+config MACH_LM3Sxx_MAINPLLCLK_SRC_RTC
+    bool        "RTC_OSC"
+
+endchoice
+
+config MAINPLLCLK_SRC
+    int
+    default 0 if MACH_LM3Sxx_MAINPLLCLK_SRC_IRC
+    default 1 if MACH_LM3Sxx_MAINPLLCLK_SRC_OSC
+    default 2 if MACH_LM3Sxx_MAINPLLCLK_SRC_RTC
+
+config MAINPLLCLK_CTRL
+        hex "MAIN PLLClock Control"
+        default 0x00010018
+    ---help---
+                bits 0..14 describe the multiplier M(Value = M-1)
+                bits 16..23 describe the divider N (Value = N-1).
+                Output frequency = Fin*M*2/N (has to be in the range of 275MHZ to 550MHz)
+
+
+choice
+        prompt "SYSCLK_CTRL"
+        default MACH_LM3Sxx_SYSCLK_CTRL_1
+
+config MACH_LM3Sxx_SYSCLK_CTRL_0
+    bool        "1_20MHz_XTAL"
+
+config MACH_LM3Sxx_SYSCLK_CTRL_1
+    bool        "1_20MHz_OSC"
+
+config MACH_LM3Sxx_SYSCLK_CTRL_2
+    bool        "15_25MHz_XTAL"
+
+config MACH_LM3Sxx_SYSCLK_CTRL_3
+    bool        "15_25MHz_OSC"
+
+endchoice
+
+config SYSCLK_CTRL
+    int
+    default 0  if MACH_LM3Sxx_SYSCLK_CTRL_0
+    default 32 if MACH_LM3Sxx_SYSCLK_CTRL_1
+    default 16 if MACH_LM3Sxx_SYSCLK_CTRL_2
+    default 48 if MACH_LM3Sxx_SYSCLK_CTRL_3
+
+config SYSCLK_DIV
+    int "System clock divider"
+    default 3
+
+choice
+        prompt "USB Clocksource"
+        default MACH_LM3Sxx_USBCLK_SRC_USBPLL
+
+config MACH_LM3Sxx_USBCLK_SRC_USBPLL
+    bool        "USB PLL"
+
+config MACH_LM3Sxx_USBCLK_SRC_MAINPLL
+    bool        "Main PLL"
+
+endchoice
+
+config USBPLLCLK_CTRL
+    hex "USB PLLClock Control"
+    default 0
+    ---help---
+                bits 0..4 describe the multiplier(Value+1) for the output frequency of the PLL(has to be lower than 100MHz).
+                bits 5..6 describe the multiplier((Value+1)*2) for the CCO frequency of the PLL(has to be between 156MHz and 320MHz).
+
+config USBCLK_SRC
+    int
+    default 0 if MACH_LM3Sxx_USBCLK_SRC_USBPLL
+    default 1 if MACH_LM3Sxx_USBCLK_SRC_MAINPLL
+    default 2 if MACH_LM3Sxx_USBPLLCLK_SRC_RTC
+
+config USBCLK_DIV
+    int "USB clock divider"
+    default 10
+
+endmenu

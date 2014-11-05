@@ -219,18 +219,25 @@ static BT_ERROR spiRead(BT_HANDLE hSpi, BT_u32 ulFlags, BT_u8 *pucDest, BT_u32 u
 	volatile LM3Sxx_SPI_REGS *pRegs = hSpi->pRegs;
 
 	BT_ERROR Error = BT_ERR_NONE;
+	volatile BT_u32 ulCount = 0;
+	volatile BT_u32 ulLen = ulSize;
 
-	BT_u32 ulSend = ulSize;
 	while(ulSize) {
-		while((pRegs->SR & LM3Sxx_SPI_SR_TNF) && (ulSend)) {
+		if (pRegs->SR & LM3Sxx_SPI_SR_TNF) {
 			pRegs->DR = 0xFF;
-			ulSend--;
+			ulSize--;
 		}
-		while(!(pRegs->SR & LM3Sxx_SPI_SR_RNE)) {
-			BT_ThreadYield();
+		while ((pRegs->SR & LM3Sxx_SPI_SR_RNE)) {
+			*pucDest++ = (BT_u8)(pRegs->DR & 0xFF);
+			ulCount++;
 		}
-		*pucDest++ = pRegs->DR & 0x0000FFFF;
-		ulSize--;
+	}
+	ulLen -= ulCount;
+	while (ulLen) {
+		if ((pRegs->SR & LM3Sxx_SPI_SR_RNE)) {
+			*pucDest++ = (BT_u8)(pRegs->DR & 0xFF);
+			ulLen--;
+		}
 	}
 
 	return Error;
@@ -246,15 +253,25 @@ static BT_ERROR spiWrite(BT_HANDLE hSpi, BT_u32 ulFlags, BT_u8 *pucSource, BT_u3
 
 	BT_ERROR Error = BT_ERR_NONE;
 	BT_u32 ulDummy;
+	volatile BT_u32 ulCount = 0;
+	volatile BT_u32 ulLen = ulSize;
 
 	while(ulSize) {
-		while(!(pRegs->SR & LM3Sxx_SPI_SR_TNF)) {
-			BT_ThreadYield();
+		if (pRegs->SR & LM3Sxx_SPI_SR_TNF) {
+			pRegs->DR = *pucSource++;
+			ulSize--;
 		}
-		pRegs->DR = *pucSource++;
-		while (!(pRegs->SR & LM3Sxx_SPI_SR_RNE));
+		while ((pRegs->SR & LM3Sxx_SPI_SR_RNE)) {
 			ulDummy = pRegs->DR;
-		ulSize--;
+			ulCount++;
+		}
+	}
+	ulLen -= ulCount;
+	while (ulLen) {
+		if ((pRegs->SR & LM3Sxx_SPI_SR_RNE)) {
+			ulDummy = pRegs->DR;
+			ulLen--;
+		}
 	}
 
 	return Error;
@@ -460,14 +477,14 @@ static BT_HANDLE spi_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 		goto err_free_out;
 	}
 
-	hSpi->spi_master.bus_num = pResource->ulStart;
-
 	hSpi = BT_CreateHandle(&oHandleInterface, sizeof(struct _BT_OPAQUE_HANDLE), pError);
 	if(!hSpi) {
 		goto err_out;
 	}
 
 	g_SPI_HANDLES[pResource->ulStart] = hSpi;
+
+	hSpi->spi_master.bus_num = pResource->ulStart;
 
 	hSpi->pDevice = pDevice;
 

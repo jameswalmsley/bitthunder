@@ -454,7 +454,7 @@ static const BT_INTEGRATED_DEVICE oLM3Sxx_uart0_device = {
 	.pResources 			= oLM3Sxx_uart0_resources,
 };
 
-const BT_DEVFS_INODE_DEF oLM3Sxx_uart0_inode = {
+BT_DEVFS_INODE_DEF oLM3Sxx_uart0_inode = {
 	.szpName = BT_CONFIG_MACH_LM3Sxx_UART_0_INODE_NAME,
 	.pDevice = &oLM3Sxx_uart0_device,
 };
