@@ -319,7 +319,7 @@ static void net_manager_sm(void *pParam) {
 	bt_list_for_each(pos, &g_interfaces) {
 		BT_NETIF_PRIV *pIF = (BT_NETIF_PRIV*) pos;
 		if (pIF->base.smFlags & NET_IF_ADDED) {
-			pIF->base.hTxFifo = BT_FifoCreate(20, sizeof(void *), &Error);
+			pIF->base.hTxFifo = BT_FifoCreate(20, sizeof(void *), 0, &Error);
 
 			pIF->netif.state = pIF;
 			netifapi_netif_add(&pIF->netif, &ip_addr, &net_mask, &gw_addr, pIF,
