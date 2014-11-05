@@ -345,8 +345,8 @@ static BT_ERROR spiGetConfig(BT_HANDLE hSpi, BT_SPI_CONFIG *pConfig) {
 	}
 
 	pConfig->ulBaudrate 	= ulInputClk / (pRegs->CPSR * ((pRegs->CR0 & LPC11xx_SPI_CR0_SCR_MASK) >> 8));		// Clk / Divisor == ~Baudrate
-	pConfig->ulTxBufferSize = BT_FifoSize(hSpi->hTxFifo, &Error);
-	pConfig->ulRxBufferSize = BT_FifoSize(hSpi->hRxFifo, &Error);
+	pConfig->ulTxBufferSize = BT_FifoSize(hSpi->hTxFifo);
+	pConfig->ulRxBufferSize = BT_FifoSize(hSpi->hRxFifo);
 	pConfig->ucDataBits 	= (pRegs->CR0 & LPC11xx_SPI_CR0_DSS_MASK) + 1;
 	pConfig->eCPOL			= (pRegs->CR0 & LPC11xx_SPI_CR0_CPOL);
 	pConfig->eCPHA			= (pRegs->CR0 & LPC11xx_SPI_CR0_CPHA);
@@ -418,7 +418,7 @@ static BT_ERROR spiRead(BT_HANDLE hSpi, BT_u32 ulFlags, BT_u8 *pucDest, BT_u32 u
 	case BT_SPI_MODE_BUFFERED:
 	{
 		// Get bytes from RX buffer very quickly.
-		//@@BT_FifoRead(hSpi->hRxFifo, ulSize, pucDest, &Error);
+		//@@BT_FifoRead(hSpi->hRxFifo, ulSize, pucDest, 0);
 		break;
 	}
 
@@ -454,7 +454,7 @@ static BT_ERROR spiWrite(BT_HANDLE hSpi, BT_u32 ulFlags, BT_u8 *pucSource, BT_u3
 
 	case BT_SPI_MODE_BUFFERED:
 	{
-		//@@BT_FifoWrite(hSpi->hTxFifo, ulSize, pSrc, &Error);
+		//@@BT_FifoWrite(hSpi->hTxFifo, ulSize, pSrc, 0);
 		//@@pRegs->IER |= LPC11xx_SPI_IER_THREIE;	// Enable the interrupt
 
 		break;

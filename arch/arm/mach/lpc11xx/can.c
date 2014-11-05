@@ -145,7 +145,7 @@ void CAN_rx(BT_u8 ucmsg_obj_num) {
 
 	memcpy(oMessage.ucdata, omsg_obj.ucdata, oMessage.ucLength);
 
-	BT_FifoWrite(hCan->hRxFifo, 1, &oMessage, &Error);
+	BT_FifoWriteFromISR(hCan->hRxFifo, 1, &oMessage);
 }
 
 void CAN_tx(BT_u8 ucmsg_obj_num) {
@@ -206,7 +206,7 @@ void CAN_MessageProcess(BT_HANDLE hCan, BT_u8 ucMsgNo ) {
 
 	memcpy(oMessage.ucdata, usBuffer, 8);
 
-	BT_FifoWrite(hCan->hRxFifo, 1, &oMessage, &Error);
+	BT_FifoWriteFromISR(hCan->hRxFifo, 1, &oMessage);
 
 	return;
 }
@@ -554,7 +554,7 @@ static BT_ERROR canRead(BT_HANDLE hCan, BT_CAN_MESSAGE *pCanMessage) {
 	// Get message from RX buffer very quickly.
 	BT_ERROR Error = BT_ERR_NONE;
 
-	BT_FifoRead(hCan->hRxFifo, 1, pCanMessage, &Error);
+	BT_FifoRead(hCan->hRxFifo, 1, pCanMessage, 0);
 
 	return Error;
 }
@@ -566,7 +566,7 @@ static BT_ERROR canWrite(BT_HANDLE hCan, BT_CAN_MESSAGE *pCanMessage) {
 
 	BT_ERROR Error = BT_ERR_NONE;
 
-	BT_FifoWrite(hCan->hTxFifo, 1, pCanMessage, &Error);
+	BT_FifoWrite(hCan->hTxFifo, 1, pCanMessage, 0);
 
 	if (!g_Msg_Queue[0]) {
 		CanTransmit(hCan);
@@ -582,7 +582,7 @@ static void CanTransmit(BT_HANDLE hCan) {
 
 	if (!BT_FifoIsEmpty(hCan->hTxFifo, &Error)) {
 
-		BT_FifoRead(hCan->hTxFifo, 1, &oMessage, &Error);
+		BT_FifoRead(hCan->hTxFifo, 1, &oMessage, 0);
 #ifdef BT_CONFIG_MACH_USE_CAN_ROMDRIVER
 		oMsgObj.ucmsgobj = 2;
 		oMsgObj.uclength = oMessage.ucLength;

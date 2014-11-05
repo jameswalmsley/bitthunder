@@ -3,7 +3,7 @@ comment "LPC11xx Platform Options"
 config MACH_PRIORITY_BITS
 	int
 	default 2
-	
+
 
 config MACH_LPC11xx_SYSCLOCK_IRC_FREQ
 	int
@@ -23,12 +23,12 @@ config HAS_SPI_0
 
 config HAS_SPI_1
 	bool
-	default n	
+	default n
 
 config MACH_LPC11Axx
 	bool
 	default n
-	
+
 config MACH_LPC11Cxx
 	bool
 	default n
@@ -43,32 +43,32 @@ config MACH_LPC11xx_LPC11A02
 
 config MACH_LPC11xx_LPC11A04
     bool "LPC11A04"
-    select MACH_LPC11A04    
+    select MACH_LPC11A04
 
 config MACH_LPC11xx_LPC11A11
     bool "LPC11A11"
-    select MACH_LPC11A11    
+    select MACH_LPC11A11
 
 config MACH_LPC11xx_LPC11A12FHN33
     bool "LPC11A12FHN33"
-    select MACH_LPC11A12FHN33    
+    select MACH_LPC11A12FHN33
 
 config MACH_LPC11xx_LPC11A12FBD48
     bool "LPC11A12FBD48"
     select MACH_LPC11A12FBD48
-    
+
 config MACH_LPC11xx_LPC11A13
     bool "LPC11A13"
-    select MACH_LPC11A13    
-    
+    select MACH_LPC11A13
+
 config MACH_LPC11xx_LPC11A14FHN33
     bool "LPC11A14FHN33"
-    select MACH_LPC11A14FHN33    
+    select MACH_LPC11A14FHN33
 
 config MACH_LPC11xx_LPC11A14FBD48
     bool "LPC11A14FBD48"
-    select MACH_LPC11A14FBD48    
-    
+    select MACH_LPC11A14FBD48
+
 
 config MACH_LPC11xx_LPC11C14
     bool "LPC11C14"
@@ -76,16 +76,16 @@ config MACH_LPC11xx_LPC11C14
 
 config MACH_LPC11xx_LPC11C22
     bool "LPC11C22"
-    select MACH_LPC11C22    
+    select MACH_LPC11C22
 
 config MACH_LPC11xx_LPC11C24
     bool "LPC11C24"
-    select MACH_LPC11C24    
+    select MACH_LPC11C24
 
 config MACH_LPC11xx_LPC11D14
     bool "LPC11D14"
     select MACH_LPC11D14
-    
+
 
 endchoice
 
@@ -147,47 +147,47 @@ source arch/arm/mach/lpc11xx/.config/lpc11d14
 endif
 
 
-config MACH_LPC11xx_GPIO_BASE  
+config MACH_LPC11xx_GPIO_BASE
 	hex
 	default 0x50000000
-	
-config MACH_LPC11xx_UART0_BASE 
+
+config MACH_LPC11xx_UART0_BASE
 	hex
 	default 0x40008000
-	
-config MACH_LPC11xx_CAN0_BASE  
+
+config MACH_LPC11xx_CAN0_BASE
 	hex
 	default 0x40050000
-	
-config MACH_LPC11xx_I2C0_BASE 
+
+config MACH_LPC11xx_I2C0_BASE
 	hex
 	default 0x40000000
-	
-config MACH_LPC11xx_SPI0_BASE 
+
+config MACH_LPC11xx_SPI0_BASE
 	hex
 	default 0x40040000
 
-config MACH_LPC11xx_SPI1_BASE 
+config MACH_LPC11xx_SPI1_BASE
 	hex
 	default 0x40058000
-	
-config MACH_LPC11xx_ADC0_BASE  
+
+config MACH_LPC11xx_ADC0_BASE
 	hex
 	default 0x4001C000
-	
+
 
 config MACH_LPC11xx_TIMER0_BASE
 	hex
 	default 0x4000C000
-	
+
 config MACH_LPC11xx_TIMER1_BASE
 	hex
 	default 0x40010000
-	
+
 config MACH_LPC11xx_TIMER2_BASE
 	hex
 	default 0x40014000
-	
+
 config MACH_LPC11xx_TIMER3_BASE
 	hex
 	default 0x40018000
@@ -199,19 +199,19 @@ config MACH_LPC11xx_TOTAL_GPIOS
 
 config MAX_IRQ
 	   int
-	   default 48		   
+	   default 48
 
 config ARCH_ARM_SYSTICK_SRC0_DIV
     int
     default 2
-    
-choice 
+
+choice
 	prompt "systick clock source"
 	default LPC11xx_ARCH_ARM_SYSTICK_PROCESSOR_CLOCK
-	
+
 config LPC11xx_ARCH_ARM_SYSTICK_PROCESSOR_CLOCK
 	bool "processor clock"
-	
+
 config LPC11xx_ARCH_ARM_SYSTICK_EXTERNAL_CLOCK
 	bool "processor/2 clock"
 
@@ -220,8 +220,8 @@ endchoice
 config ARCH_ARM_SYSTICK_CLKSRC
 	hex
 	default 0x00 if LPC11xx_ARCH_ARM_SYSTICK_EXTERNAL_CLOCK
-	default 0x04 if LPC11xx_ARCH_ARM_SYSTICK_PROCESSOR_CLOCK 
-    
+	default 0x04 if LPC11xx_ARCH_ARM_SYSTICK_PROCESSOR_CLOCK
+
 
 menu "Peripheral Selection"
 
@@ -231,7 +231,7 @@ config MACH_LPC11xx_ADC
 	bool
 	default n
 	select ADC
-	
+
 config MACH_LPC11xx_ADC_0
     bool "Use ADC(0) peripheral"
 	default n
@@ -241,7 +241,7 @@ config MACH_LPC11xx_ADC_0_INODE_NAME
 	string "ADC(0) devfs name"
 	default "adc0"
 	depends on MACH_LPC11xx_ADC_0
-	
+
 endmenu
 
 menu "CAN devices"
@@ -250,18 +250,18 @@ config MACH_LPC11xx_CAN
 	bool
 	default n
 	select CAN
-	
+
 config MACH_LPC11xx_CAN_0
     bool "Use CAN(0) peripheral"
 	default n
 	select MACH_LPC11xx_CAN
-	depends on HAS_CAN_0	
+	depends on HAS_CAN_0
 
 config MACH_LPC11xx_CAN_0_INODE_NAME
 	string "CAN(0) devfs name"
 	default "can0"
 	depends on MACH_LPC11xx_CAN_0
-endmenu	
+endmenu
 
 menu "UART devices"
 
@@ -290,7 +290,7 @@ config MACH_LPC11xx_I2C
 
 config MACH_LPC11xx_I2C_0
     bool "Use I2C(0) peripheral"
-	default n	
+	default n
 	select MACH_LPC11xx_I2C
 
 config MACH_LPC11xx_I2C_0_BUSID
@@ -298,14 +298,14 @@ config MACH_LPC11xx_I2C_0_BUSID
 	default 0
 	depends on MACH_LPC11xx_I2C_0
 
-choice 
+choice
 	prompt "Bus Speed"
 	default MACH_LPC11xx_I2C_0_SPEED_100KHZ
 	depends on MACH_LPC11xx_I2C_0
-	
+
 config MACH_LPC11xx_I2C_0_SPEED_100KHZ
 	bool "100kHz"
-	
+
 config MACH_LPC11xx_I2C_0_SPEED_400KHZ
 	bool "400kHz"
 
@@ -317,7 +317,7 @@ endchoice
 config MACH_LPC11xx_I2C_0_SPEED
 	int
 	default 0 if MACH_LPC11xx_I2C_0_SPEED_100KHZ
-	default 1 if MACH_LPC11xx_I2C_0_SPEED_400KHZ 
+	default 1 if MACH_LPC11xx_I2C_0_SPEED_400KHZ
 	default 2 if MACH_LPC11xx_I2C_0_SPEED_1000KHZ
 
 endmenu
@@ -418,4 +418,96 @@ config MACH_LPC11xx_BOOTLOG_NULL
     bool "/dev/null"
 
 endchoice
-    
+
+
+menu "CLOCK configuration"
+
+config MACH_LPC11xx_SYSCLOCK_FREQ
+    int "System clock frequency"
+    default 12000000
+
+choice
+        prompt "MAINCLK_SRC"
+        default MAINCLK_SRC_IRC
+
+config MAINCLK_SRC_IRC
+    bool        "IRC"
+
+config MAINCLK_SRC_PLL_IN
+    bool        "PLL_In"
+
+config MAINCLK_SRC_WDT
+    bool        "WDT_OSC"
+
+config MAINCLK_SRC_PLL_OUT
+    bool        "PLL_Out"
+
+endchoice
+
+config MAINCLK_SRC
+    int
+    default 0 if MAINCLK_SRC_IRC
+    default 1 if MAINCLK_SRC_PLL_IN
+    default 2 if MAINCLK_SRC_WDT
+    default 3 if MAINCLK_SRC_PLL_OUT
+
+
+choice
+        prompt "SYSCLK_CTRL"
+        default SYSCLK_CTRL_0
+
+config SYSCLK_CTRL_0
+    bool        "NO_BYPASS_1_20MHz"
+
+config SYSCLK_CTRL_1
+    bool        "BYPASS_1_20MHz"
+
+config SYSCLK_CTRL_2
+    bool        "NO_BYPASS_15_25MHz"
+
+config SYSCLK_CTRL_3
+    bool        "BYPASS_15_25MHz"
+
+endchoice
+
+config SYSCLK_CTRL
+    int
+    default 0 if SYSCLK_CTRL_0
+    default 1 if SYSCLK_CTRL_1
+    default 2 if SYSCLK_CTRL_2
+    default 3 if SYSCLK_CTRL_3
+
+
+choice
+        prompt "PLLCLK_SRC"
+        default PLLCLKK_SRC_IRC
+
+config PLLCLKK_SRC_IRC
+    bool        "IRC"
+
+config PLLCLK_SRC_SYS_OSC
+    bool        "SYS_OSC"
+
+endchoice
+
+config PLLCLK_SRC
+    int
+    default 0 if PLLCLKK_SRC_IRC
+    default 1 if PLLCLK_SRC_SYS_OSC
+
+config PLLCLK_CTRL
+    hex "PLLClock Control"
+    default 0
+    ---help---
+                bits 0..4 describe the multiplier(Value+1) for the output frequency of the PLL(has to be lower than 100MHz).
+                bits 5..6 describe the multiplier((Value+1)*2) for the CCO frequency of the PLL(has to be between 156MHz and 320MHz).
+
+config WDTCLK_CTRL
+    hex "Watchdog oscillator"
+    default 20
+
+config SYSCLK_DIV
+    int "System clock divider"
+    default 1
+
+endmenu
