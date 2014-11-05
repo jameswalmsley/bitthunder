@@ -55,6 +55,7 @@ $(BUILD_DIR)/arch/arm/common/freertos-arm.o: CFLAGS_REMOVE += -fstack-usage
 endif
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX_M0) += $(BUILD_DIR)/arch/arm/common/freertos-m0.o
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX_M3) += $(BUILD_DIR)/arch/arm/common/freertos-m3.o
+$(BUILD_DIR)/arch/arm/common/freertos-m0.o: CFLAGS_REMOVE += -fstack-usage
 $(BUILD_DIR)/arch/arm/common/freertos-m3.o: CFLAGS_REMOVE += -fstack-usage
 endif
 
