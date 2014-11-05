@@ -1,8 +1,8 @@
 #ifndef _BT_CONFIG_H_
 #define _BT_CONFIG_H_
 
-#include "bt_arch_config.h"
-#include "bt_bsp_config.h"
+#include <bt_arch_config.h>
+#include <bt_bsp_config.h>
 
 
 
