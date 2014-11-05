@@ -123,6 +123,12 @@ config SHELL_CMD_MD5SUM
 	depends on SHELL
 	default n
 	select FILE
+	
+config SHELL_CMD_MD5SUM_BUFFER_SIZE
+	int "md5sum buffer size"
+	depends on SHELL_CMD_MD5SUM
+	default 4194304
+	
 
 config SHELL_CMD_MEMCAT
 	bool "memcat"

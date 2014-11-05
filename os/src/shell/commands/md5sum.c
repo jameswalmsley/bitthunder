@@ -3,8 +3,6 @@
 #include <hash/bt_md5.h>
 
 
-#define BUF_SIZE	1024*1024*4
-
 static void sprint_digest(char dbuf[33], BT_u8 digest[16]) {
 	BT_u32 i;
 	dbuf[0] = '\0';
@@ -31,12 +29,12 @@ static int bt_md5sum(BT_HANDLE hShell, int argc, char **argv) {
 			return -1;
 		}
 
-		void *buffer = BT_kMalloc(BUF_SIZE);
+		void *buffer = BT_kMalloc(BT_CONFIG_SHELL_CMD_MD5SUM_BUFFER_SIZE);
 		struct bt_md5_context ctx;
 		bt_md5_init(&ctx);
 
 		BT_u32 read;
-		while((read = BT_Read(hFile, 0, BUF_SIZE, buffer))) {
+		while((read = BT_Read(hFile, 0, BT_CONFIG_SHELL_CMD_MD5SUM_BUFFER_SIZE, buffer))) {
 			bt_md5_append(&ctx, buffer, read);
 		}
 
