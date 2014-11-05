@@ -20,8 +20,7 @@ static BT_BOOL isAdcHandle(BT_HANDLE hAdc) {
 
 BT_ERROR BT_AdcStart(BT_HANDLE hAdc) {
 	if(!isAdcHandle(hAdc)) {
-		// ERR_INVALID_HANDLE_TYPE
-		return (BT_ERROR) -1;
+		return BT_ERR_INVALID_HANDLE_TYPE;
 	}
 
 	return BT_IF_ADC_OPS(hAdc)->pfnStart(hAdc);
@@ -30,8 +29,7 @@ BT_EXPORT_SYMBOL(BT_AdcStart);
 
 BT_ERROR BT_AdcStop(BT_HANDLE hAdc) {
 	if(!isAdcHandle(hAdc)) {
-		// ERR_INVALID_HANDLE_TYPE
-		return (BT_ERROR) -1;
+		return BT_ERR_INVALID_HANDLE_TYPE;
 	}
 
 	return BT_IF_ADC_OPS(hAdc)->pfnStop(hAdc);
@@ -40,7 +38,9 @@ BT_EXPORT_SYMBOL(BT_AdcStop);
 
 BT_HANDLE BT_AdcRegisterCallback(BT_HANDLE hAdc, BT_ADC_CALLBACK pfnCallback, void *pParam, BT_ERROR *pError) {
 	if(!isAdcHandle(hAdc)) {
-		// ERR_INVALID_HANDLE_TYPE
+		if (pError) {
+			*pError = BT_ERR_INVALID_HANDLE_TYPE;
+		}
 		return NULL;
 	}
 
@@ -50,18 +50,16 @@ BT_EXPORT_SYMBOL(BT_AdcRegisterCallback);
 
 BT_ERROR BT_AdcUnregisterCallback(BT_HANDLE hAdc, BT_HANDLE hCallback) {
 	if(!isAdcHandle(hAdc)) {
-		// ERR_INVALID_HANDLE_TYPE
-		return (BT_ERROR) -1;
+		return BT_ERR_INVALID_HANDLE_TYPE;
 	}
 
 	return BT_IF_ADC_OPS(hAdc)->pfnUnregisterCallback(hAdc, hCallback);
 }
 BT_EXPORT_SYMBOL(BT_AdcUnregisterCallback);
 
-BT_ERROR BT_AdcRead(BT_HANDLE hAdc, BT_u32 ulChannel, BT_u32 ulSize, BT_u32 *pucDest) {
+BT_s32 BT_AdcRead(BT_HANDLE hAdc, BT_u32 ulChannel, BT_u32 ulSize, BT_u32 *pucDest) {
 	if(!isAdcHandle(hAdc)) {
-		// ERR_INVALID_HANDLE_TYPE
-		return (BT_ERROR) -1;
+		return BT_ERR_INVALID_HANDLE_TYPE;
 	}
 
 	return BT_IF_ADC_OPS(hAdc)->pfnRead(hAdc, ulChannel, ulSize, pucDest);
@@ -74,8 +72,7 @@ BT_EXPORT_SYMBOL(BT_AdcRead);
  **/
 BT_ERROR BT_AdcSetConfiguration(BT_HANDLE hAdc, BT_ADC_CONFIG *pConfig) {
 	if(!isAdcHandle(hAdc)) {
-		// ERR_INVALID_HANDLE_TYPE
-		return (BT_ERROR) -1;
+		return BT_ERR_INVALID_HANDLE_TYPE;
 	}
 	return BT_IF_ADC_OPS(hAdc)->pfnSetConfig(hAdc, pConfig);
 }
@@ -87,8 +84,7 @@ BT_EXPORT_SYMBOL(BT_AdcSetConfiguration);
  **/
 BT_ERROR BT_AdcGetConfiguration(BT_HANDLE hAdc, BT_ADC_CONFIG *pConfig) {
 	if(!isAdcHandle(hAdc)) {
-		// ERR_INVALID_HANDLE_TYPE
-		return (BT_ERROR) -1;
+		return BT_ERR_INVALID_HANDLE_TYPE;
 	}
 	return BT_IF_ADC_OPS(hAdc)->pfnGetConfig(hAdc, pConfig);
 }

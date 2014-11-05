@@ -36,7 +36,7 @@ typedef struct _BT_DEV_IF_ADC {
 	BT_ERROR	(*pfnStop)					(BT_HANDLE hAdc);
 	BT_HANDLE	(*pfnRegisterCallback)		(BT_HANDLE hAdc, BT_ADC_CALLBACK pfnCallback, void *pParam, BT_ERROR *pError);
 	BT_ERROR	(*pfnUnregisterCallback)	(BT_HANDLE hAdc, BT_HANDLE hCallback);
-	BT_ERROR 	(*pfnRead)					(BT_HANDLE hAdc, BT_u32 ulChannel, BT_u32 ulSize, BT_u32 *pucDest);
+	BT_s32	 	(*pfnRead)					(BT_HANDLE hAdc, BT_u32 ulChannel, BT_u32 ulSize, BT_u32 *pucDest);
 } BT_DEV_IF_ADC;
 
 BT_ERROR 	BT_AdcStart					(BT_HANDLE hAdc);
@@ -48,6 +48,6 @@ BT_ERROR 	BT_AdcGetConfiguration		(BT_HANDLE hAdc, BT_ADC_CONFIG *pConfig);
 BT_HANDLE	BT_AdcRegisterCallback		(BT_HANDLE hAdc, BT_ADC_CALLBACK pfnCallback, void *pParam, BT_ERROR *pError);
 BT_ERROR	BT_AdcUnregisterCallback 	(BT_HANDLE hAdc, BT_HANDLE hCallback);
 
-BT_ERROR	BT_AdcRead					(BT_HANDLE hAdc, BT_u32 ulChannel, BT_u32 ulSize, BT_u32 *pucDest);
+BT_s32		BT_AdcRead					(BT_HANDLE hAdc, BT_u32 ulChannel, BT_u32 ulSize, BT_u32 *pucDest);
 
 #endif
