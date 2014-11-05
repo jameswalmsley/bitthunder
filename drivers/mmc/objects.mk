@@ -1,6 +1,6 @@
 MMC_OBJECTS-$(BT_CONFIG_DRIVERS_MMC) += $(BUILD_DIR)/drivers/mmc/sdcard.o
 MMC_OBJECTS-$(BT_CONFIG_DRIVERS_SDCARD_SDHCI) += $(BUILD_DIR)/drivers/mmc/host/sdhci.o
-MMC_OBJECTS-$(BT_CONFIG_DRIVERS_SDCARD_SPI) += $(BUILD_DIR)/drivers/mmc/host/spi.o
+MMC_OBJECTS-$(BT_CONFIG_DRIVERS_SDCARD_SPI) += $(BUILD_DIR)/drivers/mmc/host/sd_spi.o
 
 
 MMC_OBJECTS += $(MMC_OBJECTS-y)
