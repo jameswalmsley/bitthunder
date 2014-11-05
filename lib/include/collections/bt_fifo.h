@@ -21,13 +21,14 @@
  *
  *	@param[IN]			ulElements			Number of elements that the FIFO can hold.
  *	@param[IN]			ulElementWidth		Size of an element in bytes.
+ *	@param[IN]			ulFlags				FIFO behaviour flags.
  *	@param[OUT, OPT]	pError				Error code in case of error, expect BT_ERR_NONE.
  *
  *	@return 	Handle to the created FIFO primitive on success.
  *	@return		NULL on error. In this case pError should contain a valid reason.
  *
  **/
-BT_HANDLE BT_FifoCreate(BT_u32 ulElements, BT_u32 ulElementWidth, BT_ERROR *pError);
+BT_HANDLE BT_FifoCreate(BT_u32 ulElements, BT_u32 ulElementWidth, BT_u32 ulFlags, BT_ERROR *pError);
 
 /**
  *	@brief	Places a number of items into the FIFO.
