@@ -26,3 +26,5 @@ BT_EXPORT_SYMBOL(BT_GetCpuClockFrequency);
 void BT_SystemReset(void) {
 	vPortReset();
 }
+BT_EXPORT_SYMBOL(BT_SystemReset);
+
