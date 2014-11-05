@@ -161,9 +161,13 @@ static void sd_manager_sm(void *pData) {
 
 					oCommand.opcode = 41;				// Send ACMD41
 					oCommand.arg 	= 0x40FF8000;		// Tell card  High Capacity mode is supported, and specify valid voltage windows.
+					if (pHost->pOps->ulCapabilites1 & BT_MMC_SPI_MODE)
+						oCommand.arg 	= 0x40000000;		// Tell card  High Capacity mode is supported
 					oCommand.bCRC	= BT_FALSE;
 					oCommand.ulResponseType = BT_SDCARD_RESPONSE_TYPE_R3;
 					oCommand.bIsData		= 0;
+					if (pHost->pOps->ulCapabilites1 & BT_MMC_SPI_MODE)
+						oCommand.ulResponseType = BT_SDCARD_RESPONSE_TYPE_R1;
 
 					Error = pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
 					if(Error) {
@@ -171,21 +175,24 @@ static void sd_manager_sm(void *pData) {
 						goto next_host;
 					}
 
-					// Check if the card is ready?
-					if (pHost->pOps->ulCapabilites1 & BT_MMC_SPI_MODE) {
-						oCommand.opcode = 58;				// Send CMD58
-						oCommand.arg 	= 0;		// Tell card  High Capacity mode is supported, and specify valid voltage windows.
-						oCommand.bCRC	= BT_FALSE;
-						oCommand.ulResponseType = BT_SDCARD_RESPONSE_TYPE_R3;
-						oCommand.bIsData		= 0;
-
-						pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
-					}
 					BT_u32 card_ready = oCommand.response[0] >> 31;
+					if (pHost->pOps->ulCapabilites1 & BT_MMC_SPI_MODE)
+						card_ready = (oCommand.response[0] == 0x00);
 					if(!card_ready) {
 						continue;
 					}
 					break;
+				}
+
+				// Check if the card is ready?
+				if (pHost->pOps->ulCapabilites1 & BT_MMC_SPI_MODE) {
+					oCommand.opcode = 58;				// Send CMD58
+					oCommand.arg 	= 0;		// Tell card  High Capacity mode is supported, and specify valid voltage windows.
+					oCommand.bCRC	= BT_FALSE;
+					oCommand.ulResponseType = BT_SDCARD_RESPONSE_TYPE_R3;
+					oCommand.bIsData		= 0;
+
+					pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
 				}
 
 				pHost->bSDHC = (oCommand.response[0] >> 30) & 1;
@@ -224,7 +231,7 @@ static void sd_manager_sm(void *pData) {
 				oCommand.arg 			= pHost->rca << 16;
 				oCommand.opcode 		= 10;
 				oCommand.bCRC 			= BT_TRUE;
-				oCommand.ulResponseType = BT_SDCARD_RESPONSE_TYPE_R2;
+				oCommand.ulResponseType = BT_SDCARD_RESPONSE_TYPE_R1_DATA;			//equals to SDIO R2
 				oCommand.bIsData 		= 0;
 				if (pHost->pOps->ulCapabilites1 & BT_MMC_SPI_MODE)
 					oCommand.ulResponseType = BT_SDCARD_RESPONSE_TYPE_R1_DATA;
@@ -234,7 +241,6 @@ static void sd_manager_sm(void *pData) {
 					BT_kDebug("CMD%d timed out.", oCommand.opcode);
 					goto next_host;
 				}
-
 
 				tCID *CID = (tCID*)oCommand.response;
 
@@ -272,7 +278,7 @@ static void sd_manager_sm(void *pData) {
 				oCommand.arg 			= pHost->rca << 16;
 				oCommand.opcode 		= 9;
 				oCommand.bCRC 			= BT_TRUE;
-				oCommand.ulResponseType = BT_SDCARD_RESPONSE_TYPE_R2;
+				oCommand.ulResponseType = BT_SDCARD_RESPONSE_TYPE_R1_DATA;			//equals to SDIO R2
 				oCommand.bIsData 		= 0;
 				if (pHost->pOps->ulCapabilites1 & BT_MMC_SPI_MODE)
 					oCommand.ulResponseType = BT_SDCARD_RESPONSE_TYPE_R1_DATA;
@@ -293,7 +299,7 @@ static void sd_manager_sm(void *pData) {
 					ulBlocks     = CSD->C_Size * ((BT_u32)0x01 << (CSD->C_Size_Mult + 2));
 				}
 				else if (csdversion == 1) {
-					tCSD2_x *CSD = (tCSD1_x*)oCommand.response;
+					tCSD2_x *CSD = (tCSD2_x*)oCommand.response;
 					ulBlockSize  = ((BT_u32)0x01 << (CSD->Read_BL_Len));
 					ulBlocks     = CSD->C_Size * 1024;
 				}
@@ -308,19 +314,20 @@ static void sd_manager_sm(void *pData) {
 					oCommand.ulResponseType = BT_SDCARD_RESPONSE_TYPE_R1b;
 					oCommand.bIsData		= 0;
 
-				Error = pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
-				if(Error) {
-					BT_kDebug("CMD%d timed out.", oCommand.opcode);
-					goto next_host;
-				}
+					Error = pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
+					if(Error) {
+						BT_kDebug("CMD%d timed out.", oCommand.opcode);
+						goto next_host;
+					}
 
-				BT_kDebug("Selected card mmc%d:%04x", pHost->ulHostID, pHost->rca);
+					BT_kDebug("Selected card mmc%d:%04x", pHost->ulHostID, pHost->rca);
 
 					BT_u32 cmd7_response = oCommand.response[0];
 					status = (cmd7_response >> 9) & 0xf;
 
-				if(status != 3 && status !=4) {
-					BT_kDebug("invalid status %i", status);
+					if(status != 3 && status !=4) {
+						BT_kDebug("invalid status %i", status);
+					}
 				}
 
 				if(!pHost->bSDHC) {
@@ -391,10 +398,11 @@ static void sd_manager_sm(void *pData) {
 				char buffer[10];
 				sprintf(buffer, "mmc%d", (int) pHost->ulHostID);
 
-				BT_RegisterBlockDevice(hSD, buffer, &hSD->oDescriptor);
-
 				if (pHost->pOps->pfnDeselect)
 					pHost->pOps->pfnDeselect(pHost->hHost);
+
+				BT_RegisterBlockDevice(hSD, buffer, &hSD->oDescriptor);
+
 			}
 		}
 
@@ -411,6 +419,7 @@ next_host:
 	}
 }
 
+
 static BT_s32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount, void *pBuffer) {
 
 	if ((!hBlock->pHost->rca) && (!(hBlock->pHost->pOps->ulCapabilites1 & BT_MMC_SPI_MODE))) {
@@ -422,12 +431,158 @@ static BT_s32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount,
 	BT_s32 nlRetryCount = 0;
 	BT_u32 ulStatus = 0;
 	BT_u32 ulState = 0;
+	MMC_COMMAND oCommand;
 
 	if (hBlock->pHost->pOps->pfnSelect)
 		hBlock->pHost->pOps->pfnSelect(hBlock->pHost->hHost);
 
 	while(1) {
-		MMC_COMMAND oCommand;
+		if (!(hBlock->pHost->pOps->ulCapabilites1 & BT_MMC_SPI_MODE)) {
+			oCommand.opcode 		= 13;
+			oCommand.arg 			= hBlock->pHost->rca << 16;
+			oCommand.bCRC 			= BT_TRUE;
+			oCommand.ulResponseType = BT_SDCARD_RESPONSE_TYPE_R1;
+			oCommand.bIsData		= BT_FALSE;
+			if (hBlock->pHost->pOps->ulCapabilites1 & BT_MMC_SPI_MODE)
+				oCommand.ulResponseType = BT_SDCARD_RESPONSE_TYPE_R2;
+
+			Error = hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
+			if(Error) {
+				BT_kDebug("CMD%d timed out.", oCommand.opcode);
+				if(nlRetryCount >= 3) {
+					return BT_ERR_GENERIC;
+				}
+			}
+
+			ulStatus = oCommand.response[0];
+			ulState = (ulStatus >> 9) & 0xF;
+
+			switch(ulState) {
+
+			case 4:
+				break;
+
+			case 5:
+				oCommand.opcode = 12;
+				oCommand.arg = 0;
+				oCommand.bCRC = BT_TRUE;
+				oCommand.ulResponseType = BT_SDCARD_RESPONSE_TYPE_R1b;
+				oCommand.bIsData = BT_FALSE;
+
+				Error = hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
+				if(Error) {
+					BT_kDebug("CMD%d timed out.", oCommand.opcode);
+					return Error;
+				}
+
+				oCommand.opcode 		= 13;
+				oCommand.arg 			= hBlock->pHost->rca << 16;
+				oCommand.bCRC 			= BT_TRUE;
+				oCommand.ulResponseType = BT_SDCARD_RESPONSE_TYPE_R1;
+				oCommand.bIsData		= BT_FALSE;
+				if (hBlock->pHost->pOps->ulCapabilites1 & BT_MMC_SPI_MODE)
+					oCommand.ulResponseType = BT_SDCARD_RESPONSE_TYPE_R2;
+
+				Error = hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
+				if(Error) {
+					BT_kDebug("CMD%d timed out.", oCommand.opcode);
+					return Error;
+				}
+
+				ulStatus = oCommand.response[0];
+				ulState = (ulStatus >> 9) & 0xF;
+				break;
+
+
+			default:
+				BT_kDebug("Unknown card state %d", ulState);
+				break;
+			}
+		}
+
+		BT_u32 ulSize = ulBlock;
+		if(!hBlock->pHost->bSDHC) {
+			ulSize *= 512;
+		}
+
+		oCommand.opcode 		= 18;
+		oCommand.bCRC 			= BT_FALSE;
+		oCommand.ulResponseType = BT_SDCARD_RESPONSE_TYPE_R1;
+		oCommand.bIsData 		= BT_TRUE;
+		oCommand.arg 			= ulSize;
+		oCommand.bRead_nWrite	= BT_TRUE;
+		oCommand.ulBlocks		= ulCount;
+
+		if ((hBlock->pHost->pOps->ulCapabilites1 & BT_MMC_SPI_MODE) && (ulCount == 1)) {
+			oCommand.opcode = 17;
+		}
+
+		Error = hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
+		if(Error) {
+			BT_kDebug("CMD%d timed out.", oCommand.opcode);
+			if(nlRetryCount >= 3) {
+				return BT_ERR_GENERIC;
+			}
+		}
+
+		BT_u32 cmd18_response = oCommand.response[0];
+
+		if (hBlock->pHost->pOps->ulCapabilites1 & BT_MMC_SPI_MODE) {
+			if (!(cmd18_response & 0x01))
+				cmd18_response = 0x900;
+		}
+		if(cmd18_response != 0x900) {	// STATE = transfer, READY_FOR_DATA = set
+			BT_kDebug("Invalid CMD18 response");
+			return BT_ERR_GENERIC;
+		}
+
+		slRead = hBlock->pHost->pOps->pfnRead(hBlock->pHost->hHost, ulCount, pBuffer);
+
+		if ((hBlock->pHost->pOps->ulCapabilites1 & BT_MMC_SPI_MODE) && (ulCount != 1)) {
+			oCommand.opcode 		= 12;
+			oCommand.bCRC 			= BT_FALSE;
+			oCommand.ulResponseType = BT_SDCARD_RESPONSE_TYPE_R1b;
+
+			Error = hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
+			if(Error) {
+				BT_kDebug("CMD%d timed out.", oCommand.opcode);
+				if(nlRetryCount >= 3) {
+					return BT_ERR_GENERIC;
+				}
+			}
+		}
+
+		if(slRead == ulCount || slRead < 0) break;
+
+		if(nlRetryCount++ >= 3) {
+			BT_kDebug("(%d,%d) fatal error!", ulBlock, ulCount);
+			return BT_ERR_GENERIC;
+			break;
+		} else {
+			BT_kDebug("read block (%d,%d) error, retrying (%d) ... ", ulBlock, ulCount, nlRetryCount);
+		}
+	}
+
+	if (hBlock->pHost->pOps->pfnDeselect)
+		hBlock->pHost->pOps->pfnDeselect(hBlock->pHost->hHost);
+
+
+	return slRead;
+}
+
+static BT_s32 sdcard_blockwrite(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount, void *pBuffer) {
+
+	BT_ERROR Error = BT_ERR_NONE;
+
+	if ((!hBlock->pHost->rca) && (!(hBlock->pHost->pOps->ulCapabilites1 & BT_MMC_SPI_MODE))) {
+		return BT_ERR_GENERIC;
+	}
+
+	if (hBlock->pHost->pOps->pfnSelect)
+		hBlock->pHost->pOps->pfnSelect(hBlock->pHost->hHost);
+
+	MMC_COMMAND oCommand;
+	if (!(hBlock->pHost->pOps->ulCapabilites1 & BT_MMC_SPI_MODE)) {
 		oCommand.opcode 		= 13;
 		oCommand.arg 			= hBlock->pHost->rca << 16;
 		oCommand.bCRC 			= BT_TRUE;
@@ -439,13 +594,11 @@ static BT_s32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount,
 		Error = hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
 		if(Error) {
 			BT_kDebug("CMD%d timed out.", oCommand.opcode);
-			if(nlRetryCount >= 3) {
-				return BT_ERR_GENERIC;
-			}
+			return Error;
 		}
 
-		ulStatus = oCommand.response[0];
-		ulState = (ulStatus >> 9) & 0xF;
+		BT_u32 ulStatus = oCommand.response[0];
+		BT_u32 ulState = (ulStatus >> 9) & 0xF;
 
 		switch(ulState) {
 
@@ -465,6 +618,9 @@ static BT_s32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount,
 				return Error;
 			}
 
+
+			BT_kDebug("Sent CMD12");
+
 			oCommand.opcode 		= 13;
 			oCommand.arg 			= hBlock->pHost->rca << 16;
 			oCommand.bCRC 			= BT_TRUE;
@@ -479,8 +635,9 @@ static BT_s32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount,
 				return Error;
 			}
 
-			ulStatus = oCommand.response[0];
+			BT_u32 ulStatus = oCommand.response[0];
 			ulState = (ulStatus >> 9) & 0xF;
+
 			break;
 
 
@@ -488,121 +645,6 @@ static BT_s32 sdcard_blockread(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount,
 			BT_kDebug("Unknown card state %d", ulState);
 			break;
 		}
-
-		if(!hBlock->pHost->bSDHC) {
-			ulBlock *= 512;
-		}
-
-		oCommand.opcode 		= 18;
-		oCommand.bCRC 			= BT_FALSE;
-		oCommand.ulResponseType = BT_SDCARD_RESPONSE_TYPE_R1;
-		oCommand.bIsData 		= BT_TRUE;
-		oCommand.arg 			= ulBlock;
-		oCommand.bRead_nWrite	= BT_TRUE;
-		oCommand.ulBlocks		= ulCount;
-
-		Error = hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
-		if(Error) {
-			BT_kDebug("CMD%d timed out.", oCommand.opcode);
-			if(nlRetryCount >= 3) {
-				return BT_ERR_GENERIC;
-			}
-		}
-
-		BT_u32 cmd17_response = oCommand.response[0];
-		if(cmd17_response != 0x900) {	// STATE = transfer, READY_FOR_DATA = set
-			BT_kDebug("Invalid CMD18 response");
-			return BT_ERR_GENERIC;
-		}
-
-		slRead = hBlock->pHost->pOps->pfnRead(hBlock->pHost->hHost, ulCount, pBuffer);
-		if(slRead == ulCount || slRead < 0) break;
-
-		if(nlRetryCount++ >= 3) {
-			BT_kDebug("(%d,%d) fatal error!", ulBlock, ulCount);
-			return BT_ERR_GENERIC;
-			break;
-		} else {
-			BT_kDebug("read block (%d,%d) error, retrying (%d) ... ", ulBlock, ulCount, nlRetryCount);
-		}
-	}
-
-	return slRead;
-}
-
-static BT_s32 sdcard_blockwrite(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount, void *pBuffer) {
-
-	BT_ERROR Error = BT_ERR_NONE;
-
-	if ((!hBlock->pHost->rca) && (!(hBlock->pHost->pOps->ulCapabilites1 & BT_MMC_SPI_MODE))) {
-		return BT_ERR_GENERIC;
-	}
-
-	if (hBlock->pHost->pOps->pfnSelect)
-		hBlock->pHost->pOps->pfnSelect(hBlock->pHost->hHost);
-
-	MMC_COMMAND oCommand;
-	oCommand.opcode 		= 13;
-	oCommand.arg 			= hBlock->pHost->rca << 16;
-	oCommand.bCRC 			= BT_TRUE;
-	oCommand.ulResponseType = BT_SDCARD_RESPONSE_TYPE_R1;
-	oCommand.bIsData		= BT_FALSE;
-	if (hBlock->pHost->pOps->ulCapabilites1 & BT_MMC_SPI_MODE)
-		oCommand.ulResponseType = BT_SDCARD_RESPONSE_TYPE_R2;
-
-	Error = hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
-	if(Error) {
-		BT_kDebug("CMD%d timed out.", oCommand.opcode);
-		return Error;
-	}
-
-	BT_u32 ulStatus = oCommand.response[0];
-	BT_u32 ulState = (ulStatus >> 9) & 0xF;
-
-	switch(ulState) {
-
-	case 4:
-		break;
-
-	case 5:
-		oCommand.opcode = 12;
-		oCommand.arg = 0;
-		oCommand.bCRC = BT_TRUE;
-		oCommand.ulResponseType = BT_SDCARD_RESPONSE_TYPE_R1b;
-		oCommand.bIsData = BT_FALSE;
-
-		Error = hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
-		if(Error) {
-			BT_kDebug("CMD%d timed out.", oCommand.opcode);
-			return Error;
-		}
-
-
-		BT_kDebug("Sent CMD12");
-
-		oCommand.opcode 		= 13;
-		oCommand.arg 			= hBlock->pHost->rca << 16;
-		oCommand.bCRC 			= BT_TRUE;
-		oCommand.ulResponseType = BT_SDCARD_RESPONSE_TYPE_R1;
-		oCommand.bIsData		= BT_FALSE;
-		if (hBlock->pHost->pOps->ulCapabilites1 & BT_MMC_SPI_MODE)
-			oCommand.ulResponseType = BT_SDCARD_RESPONSE_TYPE_R2;
-
-		Error = hBlock->pHost->pOps->pfnRequest(hBlock->pHost->hHost, &oCommand);
-		if(Error) {
-			BT_kDebug("CMD%d timed out.", oCommand.opcode);
-			return Error;
-		}
-
-		BT_u32 ulStatus = oCommand.response[0];
-		ulState = (ulStatus >> 9) & 0xF;
-
-		break;
-
-
-	default:
-		BT_kDebug("Unknown card state %d", ulState);
-		break;
 	}
 
 	if(!hBlock->pHost->bSDHC) {
@@ -624,17 +666,21 @@ static BT_s32 sdcard_blockwrite(BT_HANDLE hBlock, BT_u32 ulBlock, BT_u32 ulCount
 	}
 
 	BT_u32 cmd25_response = oCommand.response[0];
+	if (hBlock->pHost->pOps->ulCapabilites1 & BT_MMC_SPI_MODE) {
+		if (!(cmd25_response & 0x01))
+			cmd25_response = 0x900;
+	}
 	if(cmd25_response != 0x900) {	// STATE = transfer, READY_FOR_DATA = set
 		BT_kDebug("Invalid CMD25 response (0x%08x)", cmd25_response);
 		return BT_ERR_GENERIC;
 	}
 
-	BT_u32 ulWritten = hBlock->pHost->pOps->pfnWrite(hBlock->pHost->hHost, ulCount, pBuffer, pError);
+	BT_s32 slWritten = hBlock->pHost->pOps->pfnWrite(hBlock->pHost->hHost, ulCount, pBuffer);
 
 	if (hBlock->pHost->pOps->pfnDeselect)
 		hBlock->pHost->pOps->pfnDeselect(hBlock->pHost->hHost);
 
-	return ulWritten;
+	return slWritten;
 }
 
 static const BT_IF_BLOCK sdcard_blockdev_interface = {

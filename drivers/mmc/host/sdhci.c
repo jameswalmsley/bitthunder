@@ -215,7 +215,8 @@ static BT_ERROR sdhci_request(BT_HANDLE hSDIO, MMC_COMMAND *pCommand) {
 		break;
 	}
 
-	case BT_SDCARD_RESPONSE_TYPE_R2: {
+	case BT_SDCARD_RESPONSE_TYPE_R2:
+	case BT_SDCARD_RESPONSE_TYPE_R1_DATA: {
 		COMMAND_RESPONSE_SELECT_SET(cmd_reg, 1);
 		break;
 	}

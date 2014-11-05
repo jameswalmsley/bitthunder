@@ -70,7 +70,7 @@ static BT_ERROR spi_request(BT_HANDLE hSDIO, MMC_COMMAND *pCommand) {
     BT_u8 *cp = ucStatus;
 
 	while(!spi_ready(hSDIO)) {
-		BT_ThreadYield();
+		//BT_ThreadYield();
 	}
 
     // Send command packet
@@ -91,8 +91,8 @@ static BT_ERROR spi_request(BT_HANDLE hSDIO, MMC_COMMAND *pCommand) {
     for (i=0;i<16;i++)
     	ucStatus[i] = 0;
     do {
-    	BT_SpiRead(hSDIO->pSpi, (void*)&ucRes, 1);
-    } while ((ucRes == 0xFF) && (--n));
+    	BT_SpiRead(hSDIO->pSpi, (void*)&ucStatus[15], 1);
+    } while ((ucStatus[15] == 0xFF) && (--n));
     switch (pCommand->ulResponseType) {
 		case BT_SDCARD_RESPONSE_TYPE_R1b: {
 			do {
@@ -144,60 +144,106 @@ BT_ERROR spi_deselect(BT_HANDLE hSDIO) {
 }
 
 
-static BT_u32 spi_read(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer, BT_ERROR *pError) {
+static BT_s32 spi_read(BT_HANDLE hSDIO, BT_u32 ulBlocks, void *pBuffer) {
 	register BT_u8 *p = (BT_u8 *) pBuffer;
 
-	BT_u32 ulRead = 0;
-	BT_u8 ucRes;
+	BT_s32 slRead = 0;
+	BT_u8 ucData[2];
 
-	do {
-		BT_SpiRead(hSDIO->pSpi, (void*)&ucRes, 1);
-	} while (ucRes != 0xFE);
+	BT_SPI_MESSAGE m;
+	BT_SpiMessageInit(&m);
 
-	while(ulRead < ulBlocks) {
+	BT_SPI_TRANSFER r = {
+			.rx_buf	= p,
+			.len	= 512,
+	};
 
-		BT_SpiRead(hSDIO->pSpi, p, 512);
-		p += 512;
+	BT_SpiMessageAddTail(&r, &m);
 
-		ulRead++;
+	BT_SPI_TRANSFER r1 = {
+			.rx_buf	= ucData,
+			.len	= 2,
+	};
 
-		BT_ThreadYield();
+	BT_SpiMessageAddTail(&r1, &m);
+
+	while(slRead < ulBlocks) {
+
+		do {
+			BT_SpiRead(hSDIO->pSpi, (void*)&ucData[0], 1);
+		} while (ucData[0] != 0xFE);
+
+		r.rx_buf = p;
+
+		BT_SpiSync(hSDIO->pSpi, &m);
+
+		p += r.len;
+
+		slRead++;
 	}
 
-	BT_SpiRead(hSDIO->pSpi, (void*)&ucRes, 1);
-	BT_SpiRead(hSDIO->pSpi, (void*)&ucRes, 1);
 
-	if(ulRead != ulBlocks) {
+	if(slRead != ulBlocks) {
 		// software reset on data line if an error occurred ...
 	}
 
-	return ulRead;
+	return slRead;
 }
 
-static BT_u32 spi_write(BT_HANDLE hSDIO, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
+static BT_s32 spi_write(BT_HANDLE hSDIO, BT_u32 ulSize, void *pBuffer) {
 	register BT_u8 *p = (BT_u8 *) pBuffer;
 
-	BT_u32 ulWritten = 0;
-	BT_u8 ucToken = 0xFC;
+	BT_u32 slWritten = 0;
+	BT_u8 ucData[3];
+	BT_u32 ulBlockSize = 512;
 
-	while(!spi_ready(hSDIO)) {
-		BT_ThreadYield();
-	}
+	BT_SPI_MESSAGE m;
+	BT_SpiMessageInit(&m);
 
-	while(ulWritten < ulSize) {
-		BT_u32 ulBlockSize = 512;
+	BT_SPI_TRANSFER t = {
+			.tx_buf	= ucData,
+			.len	= 1,
+	};
+	BT_SpiMessageAddTail(&t, &m);
 
-		BT_SpiWrite(hSDIO->pSpi,ucToken, 1);	// Data Token
-		BT_SpiWrite(hSDIO->pSpi, p, ulBlockSize);
+	BT_SPI_TRANSFER t1 = {
+			.tx_buf	= p,
+			.len	= ulBlockSize,
+			};
+	BT_SpiMessageAddTail(&t1, &m);
+
+	BT_SPI_TRANSFER r = {
+			.rx_buf	= ucData,
+			.len	= 3,
+			};
+	BT_SpiMessageAddTail(&r, &m);
+
+	while(slWritten < ulSize) {
+
+		while(!spi_ready(hSDIO)) {
+		}
+
+		ucData[0] = 0xFC;
+		t1.tx_buf = p;
+
+		BT_SpiSync(hSDIO->pSpi, &m);
 
 		p += ulBlockSize;
 
-		ulWritten++;
-	}
-	ucToken = 0xFD;				// Stop Token
-	BT_SpiWrite(hSDIO->pSpi, ucToken, 1);
+		slWritten++;
 
-	return ulWritten;
+		if ((ucData[2] & 0x05) != 0x05)
+			break;
+	}
+
+	while(!spi_ready(hSDIO)) {
+		//BT_ThreadYield();
+	}
+
+	ucData[0] = 0xFD;				// Stop Token
+	BT_SpiWrite(hSDIO->pSpi, &ucData[0], 1);
+
+	return slWritten;
 }
 
 static BT_BOOL spi_is_card_present(BT_HANDLE hSDIO, BT_ERROR *pError) {
