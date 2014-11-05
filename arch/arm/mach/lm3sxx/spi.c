@@ -223,7 +223,7 @@ static BT_ERROR spiRead(BT_HANDLE hSpi, BT_u32 ulFlags, BT_u8 *pucDest, BT_u32 u
 	BT_u32 ulSend = ulSize;
 	while(ulSize) {
 		while((pRegs->SR & LM3Sxx_SPI_SR_TNF) && (ulSend)) {
-			pRegs->DR = 0;
+			pRegs->DR = 0xFF;
 			ulSend--;
 		}
 		while(!(pRegs->SR & LM3Sxx_SPI_SR_RNE)) {
@@ -245,12 +245,15 @@ static BT_ERROR spiWrite(BT_HANDLE hSpi, BT_u32 ulFlags, BT_u8 *pucSource, BT_u3
 	volatile LM3Sxx_SPI_REGS *pRegs = hSpi->pRegs;
 
 	BT_ERROR Error = BT_ERR_NONE;
+	BT_u32 ulDummy;
 
 	while(ulSize) {
 		while(!(pRegs->SR & LM3Sxx_SPI_SR_TNF)) {
 			BT_ThreadYield();
 		}
 		pRegs->DR = *pucSource++;
+		while (!(pRegs->SR & LM3Sxx_SPI_SR_RNE));
+			ulDummy = pRegs->DR;
 		ulSize--;
 	}
 
@@ -274,7 +277,7 @@ static BT_i32 spi_start_transfer(BT_HANDLE hSpi, BT_SPI_TRANSFER *transfer)
 static BT_ERROR spi_setup_transfer(BT_HANDLE hSpi, BT_SPI_DEVICE *pDevice, BT_SPI_TRANSFER * transfer) {
 	volatile LM3Sxx_SPI_REGS *pRegs = hSpi->pRegs;
 
-	BT_u32 req_hz;
+	BT_u32 req_hz, bits;
 
 	req_hz = (transfer) ? transfer->speed_hz : pDevice->max_speed_hz;
 
@@ -287,6 +290,12 @@ static BT_ERROR spi_setup_transfer(BT_HANDLE hSpi, BT_SPI_DEVICE *pDevice, BT_SP
 		req_hz = pDevice->max_speed_hz;
 	}
 
+	bits = (transfer) ? transfer->bits_per_word : pDevice->bits_per_word;
+
+	if(transfer && (transfer->bits_per_word == 0)) {
+		bits = pDevice->bits_per_word;
+	}
+
 	/* Set the clock frequency */
 	if(hSpi->speed_hz != req_hz) {
 		hSpi->speed_hz = req_hz;
@@ -294,7 +303,8 @@ static BT_ERROR spi_setup_transfer(BT_HANDLE hSpi, BT_SPI_DEVICE *pDevice, BT_SP
 	}
 
 	/* Set the QSPI clock phase and clock polarity */
-	pRegs->CR0 = (transfer->bits_per_word - 1) & LM3Sxx_SPI_CR0_DSS_MASK;
+	pRegs->CR0 &= ~LM3Sxx_SPI_CR0_DSS_MASK;
+	pRegs->CR0 |= (bits - 1);
 	if (pDevice->mode & SPI_CPHA)
 		pRegs->CR0 |= LM3Sxx_SPI_CR0_CPHA;
 	if (pDevice->mode & SPI_CPOL)
@@ -396,6 +406,7 @@ static BT_ERROR spi_init_hw(BT_HANDLE hSpi) {
 	volatile LM3Sxx_SPI_REGS *pRegs = hSpi->pRegs;
 
 	pRegs->CR1 |= LM3Sxx_SPI_CR1_SSP_ENABLE;
+	spiSetBaudrate(hSpi, 20000000);
 
 	return BT_ERR_NONE;
 }
@@ -501,6 +512,15 @@ static BT_HANDLE spi_probe(const BT_INTEGRATED_DEVICE *pDevice, BT_ERROR *pError
 		goto err_free_out;
 	}
 
+/*	BT_INTEGRATED_DRIVER *pDriver = BT_GetIntegratedDriverByName("mmc,spi");
+	if(!pDriver) {
+		Error = BT_ERR_GENERIC;
+		goto err_out;
+	}
+
+	return pDriver->pfnProbe(pDevice, pError);*/
+
+
 	return hSpi;
 
 err_free_out:
@@ -537,7 +557,7 @@ static const BT_RESOURCE oLM3Sxx_spi0_resources[] = {
 	},
 };
 
-static const BT_INTEGRATED_DEVICE oLM3Sxx_spi0_device = {
+BT_INTEGRATED_DEVICE_DEF oLM3Sxx_spi0_device = {
 	.name 					= "LM3Sxx,spi",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLM3Sxx_spi0_resources),
 	.pResources 			= oLM3Sxx_spi0_resources,
@@ -550,7 +570,7 @@ const BT_DEVFS_INODE_DEF oLM3Sxx_spi0_inode = {
 #endif
 
 #ifdef BT_CONFIG_MACH_LM3Sxx_SPI_1
-static const BT_RESOURCE oLM3Sxx_spi1_resources[] = {
+BT_RESOURCE oLM3Sxx_spi1_resources[] = {
 	{
 		.ulStart 			= BT_CONFIG_MACH_LM3Sxx_SPI1_BASE,
 		.ulEnd 				= BT_CONFIG_MACH_LM3Sxx_SPI1_BASE + BT_SIZE_4K - 1,
@@ -568,7 +588,7 @@ static const BT_RESOURCE oLM3Sxx_spi1_resources[] = {
 	},
 };
 
-static const BT_INTEGRATED_DEVICE oLM3Sxx_spi1_device = {
+BT_INTEGRATED_DEVICE_DEF oLM3Sxx_spi1_device = {
 	.name 					= "LM3Sxx,spi",
 	.ulTotalResources 		= BT_ARRAY_SIZE(oLM3Sxx_spi1_resources),
 	.pResources 			= oLM3Sxx_spi1_resources,
