@@ -67,11 +67,11 @@ void isr_CAN(BT_HANDLE hCan) {
 
 	if (ulICR & LPC17xx_CAN_ICR_RI) {
 		CanReceive(g_CAN_HANDLES[0], &oMessage);
-		BT_FifoWrite(hCan->hRxFifo, 1, &oMessage, &Error);
+		BT_FifoWriteFromISR(hCan->hRxFifo, 1, &oMessage);
 	}
 	if (ulICR & LPC17xx_CAN_ICR_TI) {
 		while (!BT_FifoIsEmpty(hCan->hTxFifo, &Error) && (canFindFreeBuffer(hCan) != LPC17xx_CAN_NO_FREE_BUFFER)) {
-			BT_FifoRead(hCan->hTxFifo, 1, &oMessage, &Error);
+			BT_FifoReadFromISR(hCan->hTxFifo, 1, &oMessage);
 			CanTransmit(hCan, &oMessage);
 		}
 	}
@@ -370,7 +370,7 @@ static BT_ERROR canRead(BT_HANDLE hCan, BT_CAN_MESSAGE *pCanMessage) {
 	case BT_CAN_MODE_BUFFERED:
 	{
 		// Get bytes from RX buffer very quickly.
-		BT_FifoRead(hCan->hRxFifo, 1, pCanMessage, &Error);
+		BT_FifoRead(hCan->hRxFifo, 1, pCanMessage, 0);
 		break;
 	}
 
@@ -403,12 +403,12 @@ static BT_ERROR canWrite(BT_HANDLE hCan, BT_CAN_MESSAGE *pCanMessage) {
 
 	case BT_CAN_MODE_BUFFERED:
 	{
-		BT_FifoWrite(hCan->hTxFifo, 1, pCanMessage, &Error);
+		BT_FifoWrite(hCan->hTxFifo, 1, pCanMessage, 0);
 
 		pRegs->CANIER &= ~LPC17xx_CAN_IER_TIE;	// Disable the interrupt
 
 		while (!BT_FifoIsEmpty(hCan->hTxFifo, &Error) && (canFindFreeBuffer(hCan) != LPC17xx_CAN_NO_FREE_BUFFER)) {
-			BT_FifoRead(hCan->hTxFifo, 1, &oMessage, &Error);
+			BT_FifoRead(hCan->hTxFifo, 1, &oMessage, 0);
 			CanTransmit(hCan, &oMessage);
 		}
 

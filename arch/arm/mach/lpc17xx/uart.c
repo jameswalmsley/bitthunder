@@ -75,7 +75,7 @@ static void usartRxHandler(BT_HANDLE hUart) {
 	while (pRegs->LSR & LPC17xx_UART_LSR_RDR)
 	{
 		ucData = pRegs->FIFO & 0xFF;
-		BT_FifoWrite(hUart->hRxFifo, 1, &ucData, &Error);
+		BT_FifoWriteFromISR(hUart->hRxFifo, 1, &ucData);
 	}
 }
 
@@ -89,7 +89,7 @@ static void usartTxHandler(BT_HANDLE hUart) {
 	TX_FIFO_LVL[hUart->id] = 0;
 
 	while (!BT_FifoIsEmpty(hUart->hTxFifo, &Error) && (TX_FIFO_LVL[hUart->id] < 16)) {
-		BT_FifoRead(hUart->hTxFifo, 1, &ucData, &Error);
+		BT_FifoReadFromISR(hUart->hTxFifo, 1, &ucData);
 		pRegs->FIFO = ucData;
 		TX_FIFO_LVL[hUart->id]++;
 	}
@@ -503,8 +503,8 @@ static BT_ERROR uartGetConfig(BT_HANDLE hUart, BT_UART_CONFIG *pConfig) {
 	BT_u32 MulVal 	 = (pRegs->FDR >> 4);
 	BT_u32 DivAddVal = (pRegs->FDR & 0x0F);
 	pConfig->ulBaudrate 	= ((InputClk * MulVal) / (16 * Divider * (MulVal + DivAddVal)));		// Clk / Divisor == ~Baudrate
-	pConfig->ulTxBufferSize = BT_FifoSize(hUart->hTxFifo, &Error);
-	pConfig->ulRxBufferSize = BT_FifoSize(hUart->hRxFifo, &Error);
+	pConfig->ulTxBufferSize = BT_FifoSize(hUart->hTxFifo);
+	pConfig->ulRxBufferSize = BT_FifoSize(hUart->hRxFifo);
 	pConfig->ucDataBits 	= (pRegs->LCR & 0x00000003) + 5;
 	pConfig->ucStopBits		= ((pRegs->LCR & 0x00000004) >> 2) + 1;
 	pConfig->ucParity		= (BT_UART_PARITY_MODE)((pRegs->LCR & 0x00000380) >> 3);
@@ -562,10 +562,11 @@ static BT_ERROR uartGetAvailable(BT_HANDLE hUart, BT_u32 *pTransmit, BT_u32 *pRe
 	return BT_ERR_NONE;
 }
 
-static BT_ERROR uartRead(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, BT_u8 *pucDest) {
+static BT_S32 uartRead(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, BT_u8 *pucDest) {
 	volatile LPC17xx_UART_REGS *pRegs = hUart->pRegs;
 
 	BT_ERROR Error = BT_ERR_NONE;
+	BT_s32 slRead = 0;
 
 	switch(hUart->eMode) {
 	case BT_UART_MODE_POLLED:
@@ -577,6 +578,7 @@ static BT_ERROR uartRead(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, BT_u8 *
 
 			*pucDest++ = pRegs->FIFO & 0x000000FF;
 			ulSize--;
+			slRead++;
 		}
 		break;
 	}
@@ -584,7 +586,7 @@ static BT_ERROR uartRead(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, BT_u8 *
 	case BT_UART_MODE_BUFFERED:
 	{
 		// Get bytes from RX buffer very quickly.
-		BT_FifoRead(hUart->hRxFifo, ulSize, pucDest, &Error);
+		slRead = BT_FifoRead(hUart->hRxFifo, ulSize, pucDest, 0);
 		break;
 	}
 
@@ -593,7 +595,7 @@ static BT_ERROR uartRead(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, BT_u8 *
 		break;
 	}
 
-	return Error;
+	return slRead;
 }
 
 /**
@@ -601,12 +603,13 @@ static BT_ERROR uartRead(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, BT_u8 *
  *
  *	Note, this doesn't implement ulFlags specific options yet!
  **/
-static BT_ERROR uartWrite(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const BT_u8 *pucSource) {
+static BT_S32 uartWrite(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const BT_u8 *pucSource) {
 	volatile LPC17xx_UART_REGS *pRegs = hUart->pRegs;
 
 	BT_ERROR Error = BT_ERR_NONE;
 	BT_u8 ucData;
 	BT_u8 *pSrc = (BT_u8*)pucSource;
+	BT_s32 slWritten = 0;
 
 	switch(hUart->eMode) {
 	case BT_UART_MODE_POLLED:
@@ -617,18 +620,19 @@ static BT_ERROR uartWrite(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const 
 			}
 			pRegs->FIFO = *pucSource++;
 			ulSize--;
+			slWritten++;
 		}
 		break;
 	}
 
 	case BT_UART_MODE_BUFFERED:
 	{
-		BT_FifoWrite(hUart->hTxFifo, ulSize, pSrc, &Error);
+		slWritten = BT_FifoWrite(hUart->hTxFifo, ulSize, pSrc, 0);
 
 		pRegs->IER &= ~LPC17xx_UART_IER_THREIE;	// Disable the interrupt
 
 		while (!BT_FifoIsEmpty(hUart->hTxFifo, &Error) && (TX_FIFO_LVL[hUart->id] < 16)) {
-			BT_FifoRead(hUart->hTxFifo, 1, &ucData, &Error);
+			BT_FifoRead(hUart->hTxFifo, 1, &ucData, 0);
 			pRegs->FIFO = ucData;
 			TX_FIFO_LVL[hUart->id]++;
 		}
@@ -640,17 +644,15 @@ static BT_ERROR uartWrite(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const 
 	default:
 		break;
 	}
-	return Error;
+	return slWritten;
 }
 
-static BT_u32 file_read(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer, BT_ERROR *pError) {
-	*pError = uartRead(hUart, ulFlags, ulSize, pBuffer);
-	return ulSize;
+static BT_u32 file_read(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, void *pBuffer) {
+	return uartRead(hUart, ulFlags, ulSize, pBuffer);
 }
 
-static BT_u32 file_write(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer, BT_ERROR *pError) {
-	*pError = uartWrite(hUart, ulFlags, ulSize, pBuffer);
-	return ulSize;
+static BT_u32 file_write(BT_HANDLE hUart, BT_u32 ulFlags, BT_u32 ulSize, const void *pBuffer) {
+	return uartWrite(hUart, ulFlags, ulSize, pBuffer);
 }
 
 

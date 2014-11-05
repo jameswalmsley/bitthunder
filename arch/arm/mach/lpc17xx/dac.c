@@ -91,7 +91,7 @@ static BT_ERROR dac_setconfig(BT_HANDLE hDac, BT_DAC_CONFIG *pConfig) {
 static BT_ERROR dac_getconfig(BT_HANDLE hDac, BT_DAC_CONFIG *pConfig) {
 	BT_ERROR Error = BT_ERR_NONE;
 
-	pConfig->ulBufferSize		= BT_FifoSize(hDac->hFifo[0], &Error);
+	pConfig->ulBufferSize		= BT_FifoSize(hDac->hFifo[0]);
 	pConfig->eMode				= hDac->eMode;
 	pConfig->ulUpdateInterval 	= 0;
 	pConfig->ulResolution		= 10;
@@ -133,7 +133,7 @@ static BT_ERROR dac_Write(BT_HANDLE hDac, BT_u32 ulChannel, BT_u32 ulSize, BT_u3
 	case BT_DAC_MODE_BUFFERED:
 	{
 		// Write bytes to TX buffer very quickly.
-		BT_FifoWrite(hDac->hFifo[ulChannel], ulSize, pSrc, &Error);
+		BT_FifoWrite(hDac->hFifo[ulChannel], ulSize, pSrc, 0);
 		break;
 	}
 

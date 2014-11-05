@@ -56,7 +56,7 @@ BT_ERROR BT_NVIC_IRQ_38(void) {
 		for (i = 0; i < 8; i++) {
 			if (ulActive & (0x01<<i)) {
 				ulSum[i] /= ulAverage;
-				BT_FifoWrite(hAdc->hFifo[i], 1, &ulSum[i], &Error);
+				BT_FifoWriteFromISR(hAdc->hFifo[i], 1, &ulSum[i]);
 				ulSum[i] = 0;
 			}
 		}
@@ -160,7 +160,7 @@ static BT_ERROR adc_setconfig(BT_HANDLE hAdc, BT_ADC_CONFIG *pConfig) {
 static BT_ERROR adc_getconfig(BT_HANDLE hAdc, BT_ADC_CONFIG *pConfig) {
 	BT_ERROR Error = BT_ERR_NONE;
 
-	pConfig->ulBufferSize	= BT_FifoSize(hAdc->hFifo[0], &Error);
+	pConfig->ulBufferSize	= BT_FifoSize(hAdc->hFifo[0]);
 	pConfig->eMode			= hAdc->eMode;
 
 	return BT_ERR_NONE;
@@ -191,10 +191,11 @@ static BT_ERROR adc_stop(BT_HANDLE hAdc) {
 	return BT_ERR_NONE;
 }
 
-static BT_ERROR adc_Read(BT_HANDLE hAdc, BT_u32 ulChannel, BT_u32 ulSize, BT_u32 *pucDest) {
+static BT_s32 adc_Read(BT_HANDLE hAdc, BT_u32 ulChannel, BT_u32 ulSize, BT_u32 *pucDest) {
 	volatile LPC17xx_ADC_REGS *pRegs = hAdc->pRegs;
 
 	BT_ERROR Error = BT_ERR_NONE;
+	BT_s32 slRead = 0;
 
 	switch(hAdc->eMode) {
 	case BT_ADC_MODE_POLLED:
@@ -220,6 +221,7 @@ static BT_ERROR adc_Read(BT_HANDLE hAdc, BT_u32 ulChannel, BT_u32 ulSize, BT_u32
 
 			*pucDest++ = ulSum / hAdc->ulSWAverageCount;
 			ulSize--;
+			slRead++;
 		}
 
 		break;
@@ -228,7 +230,7 @@ static BT_ERROR adc_Read(BT_HANDLE hAdc, BT_u32 ulChannel, BT_u32 ulSize, BT_u32
 	case BT_ADC_MODE_BUFFERED:
 	{
 		// Get bytes from RX buffer very quickly.
-		BT_FifoRead(hAdc->hFifo[ulChannel], ulSize, pucDest, &Error);
+		slRead = BT_FifoRead(hAdc->hFifo[ulChannel], ulSize, pucDest, 0);
 		break;
 	}
 
@@ -236,7 +238,7 @@ static BT_ERROR adc_Read(BT_HANDLE hAdc, BT_u32 ulChannel, BT_u32 ulSize, BT_u32
 		// ERR, invalid handle configuration.
 		break;
 	}
-	return BT_ERR_NONE;
+	return slRead;
 }
 
 /**
