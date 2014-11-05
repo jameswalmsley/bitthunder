@@ -80,8 +80,8 @@ config LM3Sxx_PORTD_0_AD_ENABLE
     
 config LM3Sxx_PORTD_0_AD
     	int
-	default 1 if !LM3Sxx_PORTD_0_AD_ENABLE
-	default 0 if LM3Sxx_PORTD_0_AD_ENABLE
+	default 0 if !LM3Sxx_PORTD_0_AD_ENABLE
+	default 1 if LM3Sxx_PORTD_0_AD_ENABLE
 
 config LM3Sxx_PORTD_0_OPENDRAIN_ENABLE
     bool "OPENDRAIN"
@@ -185,8 +185,8 @@ config LM3Sxx_PORTD_1_AD_ENABLE
     
 config LM3Sxx_PORTD_1_AD
     	int
-	default 1 if !LM3Sxx_PORTD_1_AD_ENABLE
-	default 0 if LM3Sxx_PORTD_1_AD_ENABLE
+	default 0 if !LM3Sxx_PORTD_1_AD_ENABLE
+	default 1 if LM3Sxx_PORTD_1_AD_ENABLE
 
 config LM3Sxx_PORTD_1_OPENDRAIN_ENABLE
 	bool "OPENDRAIN"
@@ -268,8 +268,8 @@ config LM3Sxx_PORTD_2_AD_ENABLE
     
 config LM3Sxx_PORTD_2_AD
     	int
-	default 1 if !LM3Sxx_PORTD_2_AD_ENABLE
-	default 0 if LM3Sxx_PORTD_2_AD_ENABLE
+	default 0 if !LM3Sxx_PORTD_2_AD_ENABLE
+	default 1 if LM3Sxx_PORTD_2_AD_ENABLE
 
 config LM3Sxx_PORTD_2_OPENDRAIN_ENABLE
     	bool "OPENDRAIN"
@@ -351,8 +351,8 @@ config LM3Sxx_PORTD_3_AD_ENABLE
     
 config LM3Sxx_PORTD_3_AD
     	int
-	default 1 if !LM3Sxx_PORTD_3_AD_ENABLE
-	default 0 if LM3Sxx_PORTD_3_AD_ENABLE
+	default 0 if !LM3Sxx_PORTD_3_AD_ENABLE
+	default 1 if LM3Sxx_PORTD_3_AD_ENABLE
 
 config LM3Sxx_PORTD_3_OPENDRAIN_ENABLE
     	bool "OPENDRAIN"
@@ -435,8 +435,8 @@ config LM3Sxx_PORTD_4_AD_ENABLE
     
 config LM3Sxx_PORTD_4_AD
     	int
-	default 1 if !LM3Sxx_PORTD_4_AD_ENABLE
-	default 0 if LM3Sxx_PORTD_4_AD_ENABLE
+	default 0 if !LM3Sxx_PORTD_4_AD_ENABLE
+	default 1 if LM3Sxx_PORTD_4_AD_ENABLE
 
 config LM3Sxx_PORTD_4_OPENDRAIN_ENABLE
     bool "OPENDRAIN"
@@ -519,8 +519,8 @@ config LM3Sxx_PORTD_5_AD_ENABLE
     
 config LM3Sxx_PORTD_5_AD
     	int
-	default 1 if !LM3Sxx_PORTD_5_AD_ENABLE
-	default 0 if LM3Sxx_PORTD_5_AD_ENABLE
+	default 0 if !LM3Sxx_PORTD_5_AD_ENABLE
+	default 1 if LM3Sxx_PORTD_5_AD_ENABLE
 
 config LM3Sxx_PORTD_5_OPENDRAIN_ENABLE
     	bool "OPENDRAIN"
@@ -599,8 +599,8 @@ config LM3Sxx_PORTD_6_AD_ENABLE
     
 config LM3Sxx_PORTD_6_AD
     	int
-	default 1 if !LM3Sxx_PORTD_6_AD_ENABLE
-	default 0 if LM3Sxx_PORTD_6_AD_ENABLE
+	default 0 if !LM3Sxx_PORTD_6_AD_ENABLE
+	default 1 if LM3Sxx_PORTD_6_AD_ENABLE
 
 config LM3Sxx_PORTD_6_OPENDRAIN_ENABLE
     	bool "OPENDRAIN"
@@ -686,8 +686,8 @@ config LM3Sxx_PORTD_7_AD_ENABLE
     
 config LM3Sxx_PORTD_7_AD
     	int
-	default 1 if !LM3Sxx_PORTD_7_AD_ENABLE
-	default 0 if LM3Sxx_PORTD_7_AD_ENABLE
+	default 0 if !LM3Sxx_PORTD_7_AD_ENABLE
+	default 1 if LM3Sxx_PORTD_7_AD_ENABLE
 
 config LM3Sxx_PORTD_7_OPENDRAIN_ENABLE
     	bool "OPENDRAIN"

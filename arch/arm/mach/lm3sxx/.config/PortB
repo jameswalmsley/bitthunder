@@ -60,8 +60,8 @@ config LM3Sxx_PORTB_0_AD_ENABLE
     
 config LM3Sxx_PORTB_0_AD
     	int
-	default 1 if !LM3Sxx_PORTB_0_AD_ENABLE
-	default 0 if LM3Sxx_PORTB_0_AD_ENABLE
+	default 0 if !LM3Sxx_PORTB_0_AD_ENABLE
+	default 1 if LM3Sxx_PORTB_0_AD_ENABLE
 
 
 config LM3Sxx_PORTB_0_OPENDRAIN_ENABLE
@@ -141,8 +141,8 @@ config LM3Sxx_PORTB_1_AD_ENABLE
     
 config LM3Sxx_PORTB_1_AD
     	int
-	default 1 if !LM3Sxx_PORTB_1_AD_ENABLE
-	default 0 if LM3Sxx_PORTB_1_AD_ENABLE
+	default 0 if !LM3Sxx_PORTB_1_AD_ENABLE
+	default 1 if LM3Sxx_PORTB_1_AD_ENABLE
     
 config LM3Sxx_PORTB_1_OPENDRAIN_ENABLE
 	bool "OPENDRAIN"
@@ -368,8 +368,8 @@ config LM3Sxx_PORTB_4_AD_ENABLE
     
 config LM3Sxx_PORTB_4_AD
     	int
-	default 1 if !LM3Sxx_PORTB_4_AD_ENABLE
-	default 0 if LM3Sxx_PORTB_4_AD_ENABLE
+	default 0 if !LM3Sxx_PORTB_4_AD_ENABLE
+	default 1 if LM3Sxx_PORTB_4_AD_ENABLE
 
     
 config LM3Sxx_PORTB_4_OPENDRAIN_ENABLE
@@ -465,8 +465,8 @@ config LM3Sxx_PORTB_5_AD_ENABLE
     
 config LM3Sxx_PORTB_5_AD
     	int
-	default 1 if !LM3Sxx_PORTB_5_AD_ENABLE
-	default 0 if LM3Sxx_PORTB_5_AD_ENABLE
+	default 0 if !LM3Sxx_PORTB_5_AD_ENABLE
+	default 1 if LM3Sxx_PORTB_5_AD_ENABLE
 
 config LM3Sxx_PORTB_5_OPENDRAIN_ENABLE
     	bool "OPENDRAIN"
@@ -557,8 +557,8 @@ config LM3Sxx_PORTB_6_AD_ENABLE
     
 config LM3Sxx_PORTB_6_AD
     	int
-	default 1 if !LM3Sxx_PORTB_6_AD_ENABLE
-	default 0 if LM3Sxx_PORTB_6_AD_ENABLE
+	default 0 if !LM3Sxx_PORTB_6_AD_ENABLE
+	default 1 if LM3Sxx_PORTB_6_AD_ENABLE
 
 config LM3Sxx_PORTB_6_OPENDRAIN_ENABLE
     	bool "OPENDRAIN"

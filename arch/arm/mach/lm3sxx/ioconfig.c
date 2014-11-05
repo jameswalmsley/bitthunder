@@ -37,4 +37,8 @@ void BT_LM3Sxx_SetIOConfig(BT_u32 ulPort, BT_u32 ulPin, BT_u32 ulFunction, BT_u3
 		pRegs->banks[ulPort].AMSEL |= 0x01 << ulPin;
 	}
 
+	pRegs->banks[ulPort].DR2R &= ~(0x01 << ulPin);
+	pRegs->banks[ulPort].DR4R |=  (0x01 << ulPin);
+	pRegs->banks[ulPort].DR8R &= ~(0x01 << ulPin);
+	pRegs->banks[ulPort].SLR  &= ~(0x01 << ulPin);
 }

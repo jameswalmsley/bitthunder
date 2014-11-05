@@ -60,6 +60,12 @@ static BT_ERROR gpio_set_direction(BT_HANDLE hGPIO, BT_u32 ulGPIO, BT_GPIO_DIREC
 
 	BT_LM3Sxx_EnablePeripheral(64+ulBank);
 
+	hGPIO->pRegs->banks[ulBank].DEN  |=  (0x01 << ulBit);
+	hGPIO->pRegs->banks[ulBank].DR2R &= ~(0x01 << ulBit);
+	hGPIO->pRegs->banks[ulBank].DR4R |=  (0x01 << ulBit);
+	hGPIO->pRegs->banks[ulBank].DR8R &= ~(0x01 << ulBit);
+	hGPIO->pRegs->banks[ulBank].SLR  &= ~(0x01 << ulBit);
+
 	switch(eDirection) {
 	case BT_GPIO_DIR_OPEN_DRAIN:
 	case BT_GPIO_DIR_OUTPUT: {

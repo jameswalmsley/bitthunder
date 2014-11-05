@@ -389,8 +389,8 @@ config LM3Sxx_PORTC_5_AD_ENABLE
     
 config LM3Sxx_PORTC_5_AD
     	int
-	default 1 if !LM3Sxx_PORTC_5_AD_ENABLE
-	default 0 if LM3Sxx_PORTC_5_AD_ENABLE
+	default 0 if !LM3Sxx_PORTC_5_AD_ENABLE
+	default 1 if LM3Sxx_PORTC_5_AD_ENABLE
 
 config LM3Sxx_PORTC_5_OPENDRAIN_ENABLE
     	bool "OPENDRAIN"
@@ -485,8 +485,8 @@ config LM3Sxx_PORTC_6_AD_ENABLE
     
 config LM3Sxx_PORTC_6_AD
     	int
-	default 1 if !LM3Sxx_PORTC_6_AD_ENABLE
-	default 0 if LM3Sxx_PORTC_6_AD_ENABLE
+	default 0 if !LM3Sxx_PORTC_6_AD_ENABLE
+	default 1 if LM3Sxx_PORTC_6_AD_ENABLE
 
 config LM3Sxx_PORTC_6_OPENDRAIN_ENABLE
     	bool "OPENDRAIN"
@@ -576,8 +576,8 @@ config LM3Sxx_PORTC_7_AD_ENABLE
     
 config LM3Sxx_PORTC_7_AD
     	int
-	default 1 if !LM3Sxx_PORTC_7_AD_ENABLE
-	default 0 if LM3Sxx_PORTC_7_AD_ENABLE
+	default 0 if !LM3Sxx_PORTC_7_AD_ENABLE
+	default 1 if LM3Sxx_PORTC_7_AD_ENABLE
 
 config LM3Sxx_PORTC_7_OPENDRAIN_ENABLE
     	bool "OPENDRAIN"
