@@ -415,32 +415,6 @@ static BT_ERROR spi_setup(BT_HANDLE hspi, BT_SPI_DEVICE *pDevice)
 	return spi_setup_transfer(hspi, pDevice, NULL);
 }
 
-static BT_ERROR spi_setup(BT_HANDLE hspi, BT_SPI_DEVICE *pDevice)
-{
-	if (pDevice->mode & SPI_LSB_FIRST)
-		return BT_ERR_INVALID_VALUE;
-
-	if (!pDevice->max_speed_hz)
-		return BT_ERR_INVALID_VALUE;
-
-	if (!pDevice->bits_per_word)
-		pDevice->bits_per_word = 8;
-
-	return spi_setup_transfer(hspi, pDevice, NULL);
-}
-
-
-/**
- *	Make the SPI active (Set the Enable bit).
- **/
-static BT_ERROR spi_init_hw(BT_HANDLE hSpi) {
-	volatile LM3Sxx_SPI_REGS *pRegs = hSpi->pRegs;
-
-	pRegs->CR1 |= LM3Sxx_SPI_CR1_SSP_ENABLE;
-
-	return BT_ERR_NONE;
-}
-
 /**
  *	Make the SPI active (Set the Enable bit).
  **/
