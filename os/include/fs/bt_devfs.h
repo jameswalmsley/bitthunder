@@ -14,8 +14,9 @@
 #ifndef _BT_DEVFS_H_
 #define _BT_DEVFS_H_
 
+#include <bt_config.h>
 #include <collections/bt_list.h>
-#include "bt_types.h"
+#include <bt_types.h>
 
 struct bt_devfs_node;
 struct _BT_DEVICE;
