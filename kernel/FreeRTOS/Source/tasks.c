@@ -2193,6 +2193,7 @@ void vTaskSwitchContext( void )
 			structure specific to this task. */
 			_impure_ptr = &( pxCurrentTCB->xNewLib_reent );
 		}
+		#endif /* configUSE_NEWLIB_REENTRANT */
 
 		#if (configBITTHUNDER == 1)
 		curthread = (struct bt_thread *) pxCurrentTCB->pxTaskTag;
@@ -2203,7 +2204,6 @@ void vTaskSwitchContext( void )
 		#endif
 		#endif
 
-		#endif /* configUSE_NEWLIB_REENTRANT */
 	}
 }
 /*-----------------------------------------------------------*/
