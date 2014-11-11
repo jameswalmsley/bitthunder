@@ -13,7 +13,7 @@ long bt_sys_write(int fd, const void *ptr, size_t count) {
 		return -1;
 	}
 
-	BT_s32 slWritten = BT_Write(hFile, 0, count, &Error);
+	BT_s32 slWritten = BT_Write(hFile, 0, count, ptr);
 
 	// Convert return code to POSIX error code.
 
