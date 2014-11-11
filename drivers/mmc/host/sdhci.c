@@ -13,6 +13,7 @@
 #include "sdhci.h"
 #include "../core.h"
 #include "../host.h"
+#include "../sdcard.h"
 
 BT_DEF_MODULE_NAME				("SDHCI Controller")
 BT_DEF_MODULE_DESCRIPTION		("Implements a driver for SDCARD abstraction for SDHCI controllers")
