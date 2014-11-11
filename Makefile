@@ -7,7 +7,7 @@ BUILD_BASE:=$(BASE)
 MODULE_NAME:="BitThunder"
 
 ifndef PROJECT_DIR
-PROJECT_DIR:=$(shell pwd)
+PROJECT_DIR:=$(shell pwd -P)
 PROJECT_CONFIG:=n
 else
 PROJECT_CONFIG:=y
@@ -75,7 +75,7 @@ project.init:
 	$(Q)touch $(PROJECT_DIR)/README.md
 	$(Q)touch $(PROJECT_DIR)/main.c
 	-$(Q)mkdir $(PROJECT_DIR)/include
-	$(Q)echo "PROJECT_DIR=\$$(shell pwd)" >> $(PROJECT_DIR)/Makefile
+	$(Q)echo "export PROJECT_DIR=\$$(shell pwd -P)" >> $(PROJECT_DIR)/Makefile
 	$(Q)echo "export PROJECT_CONFIG=y" >> $(PROJECT_DIR)/Makefile
 	$(Q)echo "include $(shell $(RELPATH) $(BASE) $(PROJECT_DIR))/Makefile" >> $(PROJECT_DIR)/Makefile
 	$(Q)echo "objs += $(APP)/main.o" >> $(PROJECT_DIR)/objects.mk
@@ -88,7 +88,7 @@ project.git.init:
 	$(Q)touch $(PROJECT_DIR)/README.md
 	$(Q)touch $(PROJECT_DIR)/main.c
 	-$(Q)mkdir $(PROJECT_DIR)/include
-	$(Q)echo "export PROJECT_DIR=\$$(shell pwd)" >> $(PROJECT_DIR)/Makefile
+	$(Q)echo "export PROJECT_DIR=\$$(shell pwd -P)" >> $(PROJECT_DIR)/Makefile
 	$(Q)echo "export PROJECT_CONFIG=y" >> $(PROJECT_DIR)/Makefile
 	$(Q)echo "include bitthunder/Makefile" >> $(PROJECT_DIR)/Makefile
 	$(Q)echo "objs += $(APP)/main.o" >> $(PROJECT_DIR)/objects.mk
