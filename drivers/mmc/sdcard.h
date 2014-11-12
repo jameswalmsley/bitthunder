@@ -24,8 +24,6 @@ typedef enum {
 
 typedef struct
 {
-	unsigned :1;
-	unsigned CRC:7;
 	unsigned Month:4;
 	unsigned Year:8;
 	unsigned :4;
@@ -39,8 +37,6 @@ typedef struct
 
 typedef struct
 {
-	unsigned :1;
-	unsigned CRC:7;
 	unsigned :2;
 	unsigned File_Format:2;
 	unsigned Tmp_Write_Protection:1;
@@ -78,8 +74,6 @@ typedef struct
 
 typedef struct
 {
-	unsigned :1;
-	unsigned CRC:7;
 	unsigned :2;
 	unsigned File_Format:2;
 	unsigned Tmp_Write_Protection:1;

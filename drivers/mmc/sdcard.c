@@ -203,6 +203,35 @@ static void sd_manager_sm(void *pData) {
 					BT_kDebug("Non-SDHC card detected");
 				}
 
+
+				// Read the CID register
+				oCommand.arg 			= pHost->rca << 16;
+				oCommand.opcode 		= 2;
+				oCommand.bCRC 			= BT_TRUE;
+				oCommand.ulResponseType = BT_SDCARD_RESPONSE_TYPE_R1_DATA;			//equals to SDIO R2
+				oCommand.bIsData 		= 0;
+				if (pHost->pOps->ulCapabilites1 & BT_MMC_SPI_MODE)
+					oCommand.opcode 		= 10;
+
+				Error = pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
+				if(Error) {
+					BT_kDebug("CMD%d timed out.", oCommand.opcode);
+					goto next_host;
+				}
+
+				tCID *CID = (tCID*)oCommand.response;
+
+				BT_kPrint("SDCARD: Manufacturer ID       : %d\r", CID->MID);
+				BT_kPrint("SDCARD: OEM/Application ID    : %s\r", CID->OID);
+				BT_kPrint("SDCARD: Productname           : %s\r", CID->PNM);
+				BT_kPrint("SDCARD: Product revision      : %d.%d\r", CID->PRVMajor, CID->PRVMinor);
+				BT_kPrint("SDCARD: Product serial number : %d\r", CID->PSN);
+				BT_kPrint("SDCARD: Manufacturing date    : %d.%d\r", CID->Month, CID->Year+2000);
+
+				// We can use the information in the CID register to get things like the CARD S/N etc and manufacturer code.
+				BT_kDebug("CID reg %08x:%08x:%08x:%08x", oCommand.response[3], oCommand.response[2], oCommand.response[1], oCommand.response[0]);
+
+
 				BT_u32 crcError		 = 0;
 				BT_u32 illegal_cmd	 = 0;
 				BT_u32 error	  	 = 0;
@@ -227,32 +256,6 @@ static void sd_manager_sm(void *pData) {
 					ready		 = (oCommand.response[0] >> 8) & 0x1;
 				}
 
-				// Read the CID register
-				oCommand.arg 			= pHost->rca << 16;
-				oCommand.opcode 		= 10;
-				oCommand.bCRC 			= BT_TRUE;
-				oCommand.ulResponseType = BT_SDCARD_RESPONSE_TYPE_R1_DATA;			//equals to SDIO R2
-				oCommand.bIsData 		= 0;
-				if (pHost->pOps->ulCapabilites1 & BT_MMC_SPI_MODE)
-					oCommand.ulResponseType = BT_SDCARD_RESPONSE_TYPE_R1_DATA;
-
-				Error = pHost->pOps->pfnRequest(pHost->hHost, &oCommand);
-				if(Error) {
-					BT_kDebug("CMD%d timed out.", oCommand.opcode);
-					goto next_host;
-				}
-
-				tCID *CID = (tCID*)oCommand.response;
-
-				BT_kPrint("SDCARD: Manufacturer ID       : %d\r", CID->MID);
-				BT_kPrint("SDCARD: OEM/Application ID    : %s\r", CID->OID);
-				BT_kPrint("SDCARD: Productname           : %s\r", CID->PNM);
-				BT_kPrint("SDCARD: Product revision      : %d.%d\r", CID->PRVMajor, CID->PRVMinor);
-				BT_kPrint("SDCARD: Product serial number : %d\r", CID->PSN);
-				BT_kPrint("SDCARD: Manufacturing date    : %d.%d\r", CID->Month, CID->Year+2000);
-
-				// We can use the information in the CID register to get things like the CARD S/N etc and manufacturer code.
-				BT_kDebug("CID reg %08x:%08x:%08x:%08x", oCommand.response[3], oCommand.response[2], oCommand.response[1], oCommand.response[0]);
 
 				if(crcError) {
 					BT_kDebug("CRC Error");
@@ -289,10 +292,18 @@ static void sd_manager_sm(void *pData) {
 					goto next_host;
 				}
 
+				/*
+				 * BLOCKnr = (C_SIZE+1) * MULT
+				 * MULT = 2^(C_SIZE_MULT+2)			.. C_SIZE_MULT is less than 8
+				 * BLOCK_LEN = 2^READ_BL_LEN		.. READ_BL_LEN is less than 12
+				 */
+				
 				BT_u32 ulBlocks = 0;
 				BT_u32 ulBlockSize = 512;
-				BT_u32 csdversion = (oCommand.response[3] >> 30) & 0x3;
-
+				BT_u32 csdversion = 0;
+				
+				csdversion = (oCommand.response[3] >> 22) & 0x3;
+					
 				if (csdversion == 0) {
 					tCSD1_x *CSD = (tCSD1_x*)oCommand.response;
 					ulBlockSize  = ((BT_u32)0x01 << (CSD->Read_BL_Len));
@@ -345,7 +356,7 @@ static void sd_manager_sm(void *pData) {
 				}
 
 				if (pHost->pOps->pfnSetBlockSize)
-					pHost->pOps->pfnSetBlockSize(pHost->hHost, 512);
+					pHost->pOps->pfnSetBlockSize(pHost->hHost, ulBlockSize);
 
 				if (!(pHost->pOps->ulCapabilites1 & BT_MMC_SPI_MODE)) {
 					// Place SDCard into 4-bit mode. (ACMD6).

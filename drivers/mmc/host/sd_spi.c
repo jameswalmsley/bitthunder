@@ -116,7 +116,8 @@ static BT_ERROR spi_request(BT_HANDLE hSDIO, MMC_COMMAND *pCommand) {
 			do {
 				BT_SpiRead(hSDIO->pSpi, (void*)&ucRes, 1);
 			} while (ucRes != 0xFE);
-			BT_SpiRead(hSDIO->pSpi, (void*)&ucStatus[0], 16);
+			BT_SpiRead(hSDIO->pSpi, (void*)&ucStatus[1], 15);
+			BT_SpiRead(hSDIO->pSpi, (void*)&ucRes, 1);
 			BT_SpiRead(hSDIO->pSpi, (void*)&ucRes, 1);
 			BT_SpiRead(hSDIO->pSpi, (void*)&ucRes, 1);
 			break;
