@@ -1,11 +1,67 @@
-/**
- *	Port Macros for Cortex-A9 processor.
- *
- **/
+/*
+    FreeRTOS V8.1.2 - Copyright (C) 2014 Real Time Engineers Ltd.
+    All rights reserved
 
-#ifndef _PORTMACRO_CA9_H_
-#define _PORTMACRO_CA9_H_
+    VISIT http://www.FreeRTOS.org TO ENSURE YOU ARE USING THE LATEST VERSION.
 
+    ***************************************************************************
+     *                                                                       *
+     *    FreeRTOS provides completely free yet professionally developed,    *
+     *    robust, strictly quality controlled, supported, and cross          *
+     *    platform software that has become a de facto standard.             *
+     *                                                                       *
+     *    Help yourself get started quickly and support the FreeRTOS         *
+     *    project by purchasing a FreeRTOS tutorial book, reference          *
+     *    manual, or both from: http://www.FreeRTOS.org/Documentation        *
+     *                                                                       *
+     *    Thank you!                                                         *
+     *                                                                       *
+    ***************************************************************************
+
+    This file is part of the FreeRTOS distribution.
+
+    FreeRTOS is free software; you can redistribute it and/or modify it under
+    the terms of the GNU General Public License (version 2) as published by the
+    Free Software Foundation >>!AND MODIFIED BY!<< the FreeRTOS exception.
+
+    >>!   NOTE: The modification to the GPL is included to allow you to     !<<
+    >>!   distribute a combined work that includes FreeRTOS without being   !<<
+    >>!   obliged to provide the source code for proprietary components     !<<
+    >>!   outside of the FreeRTOS kernel.                                   !<<
+
+    FreeRTOS is distributed in the hope that it will be useful, but WITHOUT ANY
+    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+    FOR A PARTICULAR PURPOSE.  Full license text is available from the following
+    link: http://www.freertos.org/a00114.html
+
+    1 tab == 4 spaces!
+
+    ***************************************************************************
+     *                                                                       *
+     *    Having a problem?  Start by reading the FAQ "My application does   *
+     *    not run, what could be wrong?"                                     *
+     *                                                                       *
+     *    http://www.FreeRTOS.org/FAQHelp.html                               *
+     *                                                                       *
+    ***************************************************************************
+
+    http://www.FreeRTOS.org - Documentation, books, training, latest versions,
+    license and Real Time Engineers Ltd. contact details.
+
+    http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
+    including FreeRTOS+Trace - an indispensable productivity tool, a DOS
+    compatible FAT file system, and our tiny thread aware UDP/IP stack.
+
+    http://www.OpenRTOS.com - Real Time Engineers ltd license FreeRTOS to High
+    Integrity Systems to sell under the OpenRTOS brand.  Low cost OpenRTOS
+    licenses offer ticketed support, indemnification and middleware.
+
+    http://www.SafeRTOS.com - High Integrity Systems also provide a safety
+    engineered and independently SIL3 certified version for use in safety and
+    mission critical applications that require provable dependability.
+
+    1 tab == 4 spaces!
+*/
 
 /*-----------------------------------------------------------
  * Port specific definitions.
@@ -17,27 +73,29 @@
  *-----------------------------------------------------------
  */
 
+ #include <stdint.h>
+
 /* Type definitions. */
 #define portCHAR		char
 #define portFLOAT		float
 #define portDOUBLE		double
 #define portLONG		long
 #define portSHORT		short
-#define portSTACK_TYPE	unsigned long
-#define portBASE_TYPE	portLONG
+#define portSTACK_TYPE	uint32_t
+#define portBASE_TYPE	long
 
-#if( configUSE_16_BIT_TICKS == 1 )
-	typedef unsigned short portTickType;
-	#define portMAX_DELAY ( portTickType ) 0xffff
-#else
-	typedef unsigned long portTickType;
-	#define portMAX_DELAY ( portTickType ) 0xffffffffUL
-#endif
+typedef portSTACK_TYPE StackType_t;
+typedef long BaseType_t;
+typedef unsigned long UBaseType_t;
+
+typedef uint32_t TickType_t;
+#define portMAX_DELAY ( TickType_t ) 0xffffffffUL
+
 /*-----------------------------------------------------------*/
 
 /* Hardware specifics. */
 #define portSTACK_GROWTH			( -1 )
-#define portTICK_RATE_MS			( ( portTickType ) 1000 / configTICK_RATE_HZ )
+#define portTICK_PERIOD_MS			( ( TickType_t ) 1000 / configTICK_RATE_HZ )
 #define portBYTE_ALIGNMENT			8
 
 /*-----------------------------------------------------------*/
@@ -47,7 +105,7 @@
 /* Called at the end of an ISR that can cause a context switch. */
 #define portEND_SWITCHING_ISR( xSwitchRequired )\
 {												\
-extern unsigned long ulPortYieldRequired;		\
+extern uint32_t ulPortYieldRequired;			\
 												\
 	if( xSwitchRequired != pdFALSE )			\
 	{											\
@@ -65,30 +123,18 @@ extern unsigned long ulPortYieldRequired;		\
 
 extern void vPortEnterCritical( void );
 extern void vPortExitCritical( void );
-extern unsigned long ulPortSetInterruptMask( void );
-extern void vPortClearInterruptMask( unsigned long ulNewMaskValue );
+extern uint32_t ulPortSetInterruptMask( void );
+extern void vPortClearInterruptMask( uint32_t ulNewMaskValue );
+extern void vPortInstallFreeRTOSVectorTable( void );
 
 /* These macros do not globally disable/enable interrupts.  They do mask off
 interrupts that have a priority below configMAX_API_CALL_INTERRUPT_PRIORITY. */
 #define portENTER_CRITICAL()		vPortEnterCritical();
 #define portEXIT_CRITICAL()			vPortExitCritical();
-	#define portDISABLE_INTERRUPTS()											\
-		__asm volatile (														\
-			"STMDB	SP!, {R0}		\n\t"	/* Push R0.						*/	\
-			"MRS	R0, CPSR		\n\t"	/* Get CPSR.					*/	\
-			"ORR	R0, R0, #0xC0	\n\t"	/* Disable IRQ, FIQ.			*/	\
-			"MSR	CPSR, R0		\n\t"	/* Write back modified value.	*/	\
-			"LDMIA	SP!, {R0}			" )	/* Pop R0.						*/
-
-	#define portENABLE_INTERRUPTS()												\
-		__asm volatile (														\
-			"STMDB	SP!, {R0}		\n\t"	/* Push R0.						*/	\
-			"MRS	R0, CPSR		\n\t"	/* Get CPSR.					*/	\
-			"BIC	R0, R0, #0xC0	\n\t"	/* Enable IRQ, FIQ.				*/	\
-			"MSR	CPSR, R0		\n\t"	/* Write back modified value.	*/	\
-			"LDMIA	SP!, {R0}			" )	/* Pop R0.						*/
-
-
+#define portDISABLE_INTERRUPTS()	BT_MaskInterrupts()
+#define portENABLE_INTERRUPTS()		BT_UnmaskInterrupts( 0 )
+#define portSET_INTERRUPT_MASK_FROM_ISR()		BT_MaskInterrupts()
+#define portCLEAR_INTERRUPT_MASK_FROM_ISR(x)	BT_UnmaskInterrupts( 0 )
 
 /*-----------------------------------------------------------*/
 
@@ -107,10 +153,14 @@ before any floating point instructions are executed. */
 void vPortTaskUsesFPU( void );
 #define portTASK_USES_FLOATING_POINT() vPortTaskUsesFPU()
 
-#define portLOWEST_INTERRUPT_PRIORITY ( ( ( unsigned long ) configUNIQUE_INTERRUPT_PRIORITIES ) - 1UL )
+#define portLOWEST_INTERRUPT_PRIORITY ( ( ( uint32_t ) configUNIQUE_INTERRUPT_PRIORITIES ) - 1UL )
 #define portLOWEST_USABLE_INTERRUPT_PRIORITY ( portLOWEST_INTERRUPT_PRIORITY - 1UL )
 
 /* Architecture specific optimisations. */
+#ifndef configUSE_PORT_OPTIMISED_TASK_SELECTION
+	#define configUSE_PORT_OPTIMISED_TASK_SELECTION 1
+#endif
+
 #if configUSE_PORT_OPTIMISED_TASK_SELECTION == 1
 
 	/* Store/clear the ready priorities in a bit map. */
@@ -119,15 +169,13 @@ void vPortTaskUsesFPU( void );
 
 	/*-----------------------------------------------------------*/
 
-	#define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities ) uxTopPriority = ( 31 - __clz( uxReadyPriorities ) )
+	#define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities ) uxTopPriority = ( 31 - __builtin_clz( uxReadyPriorities ) )
 
 #endif /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
 
 #ifdef configASSERT
 	void vPortValidateInterruptPriority( void );
 	#define portASSERT_IF_INTERRUPT_PRIORITY_INVALID() 	vPortValidateInterruptPriority()
-#endif
+#endif /* configASSERT */
 
-#define portNOP() __nop()
-
-#endif
+#define portNOP() __asm volatile( "NOP" )

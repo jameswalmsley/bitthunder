@@ -12,7 +12,7 @@
 	PUSH	{R0-R12, R14}
 
 	// Push the critical nesting count
-	LDR		R2, =ulCriticalNesting
+	LDR		R2, ulCriticalNestingConst
 	LDR		R1, [R2]
 	PUSH	{R1}
 
@@ -26,17 +26,14 @@
 #endif
 
 	// Save the stack pointer in the TCB
-	LDR		R0, =pxCurrentTCB
+	LDR		R0, pxCurrentTCBConst
 	LDR		R1, [R0]
 	STR		SP, [R1]
 .endm
 
 .macro portRESTORE_CONTEXT
-	// Switch to system mode
-	CPS		#SYS_MODE
-
 	// Set the SP to point to the stack of the task being restored.
-	LDR		R0, =pxCurrentTCB
+	LDR		R0, pxCurrentTCBConst
 	LDR		R1, [R0]
 	LDR		SP, [R1]
 
@@ -50,7 +47,7 @@
 #endif
 
 	// Restore the critical section nesting depth
-	LDR		R0, =ulCriticalNesting
+	LDR		R0, ulCriticalNestingConst
 	POP		{R1}
 	STR		R1, [R0]
 
@@ -73,15 +70,7 @@ vPortRestoreTaskContext:
 
 .globl vFreeRTOS_IRQInterrupt
 vFreeRTOS_IRQInterrupt:
-
-	portSAVE_CONTEXT
-	BL		BT_ARCH_ARM_GIC_IRQHandler
-	LDR 	r1, =ulPortYieldRequired
-	LDR		r0, [r1]
-	CMP		r0, #0
-	BL		vTaskSwitchContext
-	portRESTORE_CONTEXT
-/*
+	// Return to the interrupted instruction
 	SUB		lr, lr, #4
 
 	//  Push the return address and SPSR
@@ -96,22 +85,26 @@ vFreeRTOS_IRQInterrupt:
 	PUSH	{r0-r4, r12}
 
 	// Increment the nesting counts
-	LDR		r3, =ulPortInterruptNesting
+	LDR		r3, ulPortInterruptNestingConst
 	LDR		r1, [r3]
 	ADD		r4, r1, #1
 	STR		r4, [r3]
 
+	// Ensure bit 2 of SP is cleared.
 	MOV		r2, sp
 	AND		r2, r2, #4
 	SUB		sp, sp, r2
 
 	// Call the interrupt handler
 	PUSH	{r0-r3, lr}
-	BL		BT_ARCH_ARM_GIC_IRQHandler
+	LDR 	r1, vApplicationIRQHandlerConst
+	BLX 	r1
 	POP		{r0-r3, lr}
 	ADD		SP, SP, r2
 
 	//CPSID	i
+	//dsb
+	//isb
 
 	// Restore the nesting count
 	STR		r1, [r3]
@@ -131,7 +124,7 @@ exit_without_switch:
 	POP		{LR}
 	MSR		SPSR_cxsf,	LR
 	POP		{LR}
-	SUBS	PC, LR, #4
+	MOVS	PC, LR
 
 switch_before_exit:
 	MOV		R0, #0
@@ -151,14 +144,22 @@ switch_before_exit:
 	// vTaskSwitchContext() if vTaskSwitchContext() uses LDRD or STRD
 	// instructions, or 8 byte aligned stack allocated data.  LR does not need
 	// saving as a new LR will be loaded by portRESTORE_CONTEXT anyway.
-	BL		vTaskSwitchContext
+	LDR 	R0, vTaskSwitchContextConst
+	BLX 	R0
 
 	// Restore the context of, and branch to, the task selected to execute next.
 	portRESTORE_CONTEXT
-*/
+
 
 .globl vPortYieldProcessor
 vPortYieldProcessor:
 	portSAVE_CONTEXT
 	BL		vTaskSwitchContext
 	portRESTORE_CONTEXT
+
+
+pxCurrentTCBConst: .word pxCurrentTCB
+ulCriticalNestingConst: .word ulCriticalNesting
+vTaskSwitchContextConst: .word vTaskSwitchContext
+ulPortInterruptNestingConst: .word ulPortInterruptNesting
+vApplicationIRQHandlerConst: .word BT_ARCH_ARM_GIC_IRQHandler
