@@ -478,9 +478,15 @@ _bt_syscall_entry:
 	 */
 #ifndef BT_CONFIG_KERNEL_NONE
 	stmdb	sp!, {r4,r5,r6}			// Lets not clobber r4-5.
+#ifndef BT_CONFIG_ARCH_ARM_THUMB
 	ldr		r6, [lr,#-4]			// Instruction behind LR is SWI ($0) instruction.
 	bic		r6, #0xFF000000			// Mask out the opcode, to leave the syscall vector.
-	cmp		r6, #0x00FF0000			// Special yield SWI to break into FreeRTOS!
+	cmp		r6, #0x000000FF			// Special yield SWI to break into FreeRTOS!
+#else
+	ldr 	r6,	[lr,#-2]
+	bic 	r6,	#0xFFFFFF00
+	cmp 	r6, #0xFF
+#endif
 	ldmeqfd	sp!, {r4,r5,r6}			// Restore context for FreeRTOS yield handler.
 	beq		vPortYieldProcessor
 

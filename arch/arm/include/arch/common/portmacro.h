@@ -254,7 +254,7 @@ disagreeing. */
 	extern void vPortYieldFromISR( void );
 	#define portYIELD()					vPortYieldFromISR()
 #else
-	#define portYIELD()					__asm volatile ( "SWI 0x00FF0000" )
+	#define portYIELD()					__asm volatile ( "SVC 0x000000FF" )
 #endif
 
 extern void vPortEnterCritical( void );

@@ -56,7 +56,7 @@ extern unsigned long ulPortYieldRequired;		\
 }
 
 #define portYIELD_FROM_ISR( x ) portEND_SWITCHING_ISR( x )
-#define portYIELD() __asm( "SWI 0x00FF0000" );
+#define portYIELD() __asm volatile ( "SVC 0xff" );
 
 
 /*-----------------------------------------------------------
