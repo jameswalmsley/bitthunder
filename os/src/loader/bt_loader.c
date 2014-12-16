@@ -168,9 +168,9 @@ BT_ERROR BT_ExecImageFile(const BT_i8 *szpPath) {
 	BT_CloseHandle(hInode);
 
 	void *image = BT_kMalloc(oInode.ullFilesize);
-	BT_u32 read = BT_Read(hFile, 0, oInode.ullFilesize, image, &Error);
+	BT_s32 read = BT_Read(hFile, 0, oInode.ullFilesize, image);
 
-	Error = BT_ExecImage(image, read, szpPath); 
+	Error = BT_ExecImage(image, read, szpPath);
 
 	BT_kFree(image);
 	BT_CloseHandle(hFile);
