@@ -66,6 +66,7 @@ BT_ERROR BT_AttachHandle(BT_HANDLE hProcess, const BT_IF_HANDLE *pIf, BT_HANDLE 
  *	This function is really an allocator, and will create a HANDLE object and initialise
  *	it with the required HANDLE interface.
  *
+ *	@param[in]		hProcess		Process handle to attach to, or simply NULL for current process.
  *	@param[in]		pIf				The Handle interface that the HANDLE will use.
  *	@param[in]		ulHandleMemory	The total size of the handle object to be created in bytes.
  *	@param[out,opt]	pError			A BT_ERROR code to provide information about any failure.
@@ -74,7 +75,9 @@ BT_ERROR BT_AttachHandle(BT_HANDLE hProcess, const BT_IF_HANDLE *pIf, BT_HANDLE 
  *	@return NULL on error, check the value of pError.
  *
  **/
-BT_HANDLE BT_CreateHandle(const BT_IF_HANDLE *pIf, BT_u32 ulHandleMemory, BT_ERROR *pError);
+BT_HANDLE BT_CreateHandleAttached(BT_HANDLE hProcess, const BT_IF_HANDLE *pIf, BT_u32 ulHandleMemory, BT_ERROR *pError);
+
+#define BT_CreateHandle(interface, size, error_pointer)	BT_CreateHandleAttached(NULL, interface, size, error_pointer)
 
 /**
  *	@brief	Destroy a BT_HANDLE object, and detach it from any associated process.

@@ -38,12 +38,12 @@ BT_ERROR BT_DetachHandle(BT_HANDLE hProcess, BT_HANDLE h) {
 }
 BT_EXPORT_SYMBOL(BT_DetachHandle);
 
-BT_HANDLE BT_CreateHandle(const BT_IF_HANDLE *pIf, BT_u32 ulHandleMemory, BT_ERROR *pError) {
+BT_HANDLE BT_CreateHandleAttached(BT_HANDLE hProcess, const BT_IF_HANDLE *pIf, BT_u32 ulHandleMemory, BT_ERROR *pError) {
 	BT_HANDLE h = BT_Calloc(ulHandleMemory);
-	BT_AttachHandle(NULL, pIf, h);
+	BT_AttachHandle(hProcess, pIf, h);
 	return h;
 }
-BT_EXPORT_SYMBOL(BT_CreateHandle);
+BT_EXPORT_SYMBOL(BT_CreateHandleAttached);
 
 BT_ERROR BT_DestroyHandle(BT_HANDLE h) {
 	BT_kFree(h);
