@@ -143,6 +143,13 @@ void BT_SetThreadTag(void *tag) {
 }
 BT_EXPORT_SYMBOL(BT_SetThreadTag);
 
+BT_ERROR BT_GetThreadTime(BT_HANDLE hThread, struct bt_thread_time *time) {
+	time->ullRunTimeCounter = hThread->thread.ullRunTimeCounter;
+	time->ulRunTimePercent = time->ullRunTimeCounter / BT_GetGlobalTimer() / 100;
+	time->name = hThread->thread.name;
+	return BT_ERR_NONE;
+}
+
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
 	.eType 		= BT_HANDLE_T_THREAD,

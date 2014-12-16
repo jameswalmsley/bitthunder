@@ -155,13 +155,14 @@ struct bt_task *BT_GetProcessTask(BT_HANDLE hProcess) {
 }
 BT_EXPORT_SYMBOL(BT_GetProcessTask);
 
-BT_ERROR BT_GetProcessTime(struct bt_process_time *time, BT_u32 i) {
+BT_ERROR BT_GetProcessTime(struct bt_process_time *time, BT_u32 pid) {
 	struct bt_list_head *pos;
 	BT_HANDLE hProcess = NULL;
 
 	bt_list_for_each(pos, &process_handles) {
-		if(!i--) {
+		if(!pid--) {
 			hProcess = (BT_HANDLE) pos;
+			break;
 		}
 	}
 
@@ -179,11 +180,43 @@ BT_ERROR BT_GetProcessTime(struct bt_process_time *time, BT_u32 i) {
 	time->ulRunTimePercent 	= ((time->ullRunTimeCounter) / (BT_GetGlobalTimer() / 100));
 	time->name 				= hProcess->task.name;
 	time->ulPID				= hProcess->task.pid;
-	time->ulthreads			= ulThreads;
+	time->ulThreads			= ulThreads;
 
 	return BT_ERR_NONE;
 }
 BT_EXPORT_SYMBOL(BT_GetProcessTime);
+
+BT_ERROR BT_GetProcessThreadTime(struct bt_thread_time *time, BT_u32 pid, BT_u32 tid) {
+	struct bt_list_head *pos;
+	BT_HANDLE hProcess = NULL;
+
+	bt_list_for_each(pos, &process_handles) {
+		if(!pid--) {
+			hProcess = (BT_HANDLE) pos;
+			break;
+		}
+	}
+
+	if(!hProcess) {
+		return BT_ERR_GENERIC;
+	}
+
+	BT_HANDLE hThread = NULL;
+	bt_list_for_each(pos, &hProcess->task.threads) {
+		if(!tid--) {
+			hThread = (BT_HANDLE) pos;
+			break;
+		}
+	}
+
+	if(!hThread) {
+		return BT_ERR_GENERIC;
+	}
+
+	BT_GetThreadTime(hThread, time);
+
+	return BT_ERR_NONE;
+}
 
 BT_u32 BT_GetTotalProcesses() {
 	return total_processes;
