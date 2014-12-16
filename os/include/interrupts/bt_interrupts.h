@@ -34,6 +34,8 @@ BT_ERROR	BT_DisableInterrupt				(BT_u32 ulIRQ);
 BT_u32		BT_GetInterruptCount			(BT_u32 ulIRQ);
 BT_ERROR	BT_EnableInterrupts				();
 BT_ERROR	BT_DisableInterrupts			();
+BT_u32 		BT_MaskInterrupts				();
+BT_ERROR 	BT_UnmaskInterrupts				(BT_u32 ulNewMaskValue);
 BT_u32		BT_GetInterruptCount			();
 BT_s32		BT_GetActiveInterrupt			(BT_ERROR *pError);
 

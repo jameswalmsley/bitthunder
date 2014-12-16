@@ -7,8 +7,7 @@ typedef struct _BT_INTERRUPT_CONTROLLER {
 	BT_u32							ulTotalIRQs;	///< Total IRQ lines.
 } BT_INTERRUPT_CONTROLLER;
 
-static BT_INTERRUPT_CONTROLLER g_oControllers[BT_CONFIG_MAX_INTERRUPT_CONTROLLERS];
-static BT_u32 g_ulRegistered = 0;
+static BT_INTERRUPT_CONTROLLER g_oController = {NULL};
 
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;
@@ -22,17 +21,15 @@ BT_ERROR BT_RegisterInterruptController(BT_u32 ulBaseIRQ, BT_u32 ulTotalIRQs, BT
 		return BT_ERR_GENERIC;
 	}
 
-	if(g_ulRegistered >= BT_CONFIG_MAX_INTERRUPT_CONTROLLERS) {
+	if(g_oController.hIRQ) {
 		return -1;	/// Maximum controllers already registered.
 	}
 
-	g_oControllers[g_ulRegistered].hIRQ       	= hIRQ;
+	g_oController.hIRQ       	= hIRQ;
 
 	// Ensure there is no conflict.
-	g_oControllers[g_ulRegistered].ulBaseIRQ 	= ulBaseIRQ;
-	g_oControllers[g_ulRegistered].ulTotalIRQs 	= ulTotalIRQs;
-
-	g_ulRegistered++;
+	g_oController.ulBaseIRQ 	= ulBaseIRQ;
+	g_oController.ulTotalIRQs 	= ulTotalIRQs;
 
 	return Error;
 }
@@ -42,32 +39,15 @@ BT_ERROR BT_CleanupInterruptControllers() {
 	BT_u32 i;
 	BT_ERROR Error;
 
-	for(i=0; i < g_ulRegistered; i++) {
-
-		BT_CloseHandle(g_oControllers[i].hIRQ);
-		if(Error) {
-			//BT_kPrintf("Error cleaning %s", );
-		}
-	}
+	BT_CloseHandle(g_oController.hIRQ);
+	g_oController.hIRQ = NULL;
 
 	return BT_ERR_NONE;
 }
 BT_EXPORT_SYMBOL(BT_CleanupInterruptControllers);
 
 static BT_INTERRUPT_CONTROLLER *getInterruptController(BT_u32 ulIRQ) {
-	BT_u32 i;
-
-	for(i=0; i < g_ulRegistered; i++) {
-		BT_u32 min, max;
-		min = g_oControllers[i].ulBaseIRQ;
-		max = g_oControllers[i].ulBaseIRQ + g_oControllers[i].ulTotalIRQs;
-
-		if(ulIRQ >= min && ulIRQ <= max) {
-			return &g_oControllers[i];
-		}
-	}
-
-	return NULL;
+	return &g_oController;
 }
 
 BT_ERROR BT_RegisterInterrupt(BT_u32 ulIRQ, BT_FN_INTERRUPT_HANDLER pfnHandler, void *pParam) {
@@ -149,18 +129,15 @@ BT_EXPORT_SYMBOL(BT_SetInterruptPriority);
 
 BT_s32 BT_GetActiveInterrupt(BT_ERROR *pError) {
 
-	BT_u32 i;
+	const BT_INTERRUPT_CONTROLLER *pIntc = &g_oController;
 
-	for(i=0; i < g_ulRegistered; i++) {
-		const BT_INTERRUPT_CONTROLLER *pIntc = &g_oControllers[i];
-
-		BT_s32 slActive = pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnGetActiveInterrupt(pIntc->hIRQ, pError);
-		if (slActive != -1)
-			return g_oControllers[i].ulBaseIRQ + slActive;
+	BT_s32 slActive = pIntc->BT_IF_IRQ_OPS(hIRQ)->pfnGetActiveInterrupt(pIntc->hIRQ, pError);
+	if (slActive >= 0) {
+		return g_oController.ulBaseIRQ + slActive;
 	}
 	return -1;
 }
-
+BT_EXPORT_SYMBOL(BT_GetActiveInterrupt);
 
 BT_u32 BT_GetInterruptPriority(BT_u32 ulIRQ, BT_ERROR *pError) {
 	const BT_INTERRUPT_CONTROLLER *pIntc = getInterruptController(ulIRQ);
@@ -208,21 +185,29 @@ BT_ERROR BT_SetInterruptAffinity(BT_u32 ulIRQ, BT_u32 ulCPU, BT_BOOL bReceive) {
 BT_EXPORT_SYMBOL(BT_SetInterruptAffinity);
 
 BT_ERROR BT_EnableInterrupts() {
-	BT_u32 i;
-	for(i = 0; i < BT_CONFIG_MAX_INTERRUPT_CONTROLLERS; i++) {
-		g_oControllers[i].BT_IF_IRQ_OPS(hIRQ)->pfnEnableInterrupts(g_oControllers[i].hIRQ);
-	}
-
+	g_oController.BT_IF_IRQ_OPS(hIRQ)->pfnEnableInterrupts(g_oController.hIRQ);
 	return BT_ERR_NONE;
 }
 BT_EXPORT_SYMBOL(BT_EnableInterrupts);
 
 BT_ERROR BT_DisableInterrupts() {
-	BT_u32 i;
-	for(i = 0; i < BT_CONFIG_MAX_INTERRUPT_CONTROLLERS; i++) {
-		g_oControllers[i].BT_IF_IRQ_OPS(hIRQ)->pfnDisableInterrupts(g_oControllers[i].hIRQ);
-	}
-
+	g_oController.BT_IF_IRQ_OPS(hIRQ)->pfnDisableInterrupts(g_oController.hIRQ);
 	return BT_ERR_NONE;
 }
 BT_EXPORT_SYMBOL(BT_DisableInterrupts);
+
+BT_u32 BT_MaskInterrupts() {
+	if(g_oController.hIRQ) {
+		return g_oController.BT_IF_IRQ_OPS(hIRQ)->pfnMaskInterrupts(g_oController.hIRQ);
+	}
+	return 0;
+}
+BT_EXPORT_SYMBOL(BT_MaskInterrupts);
+
+BT_ERROR BT_UnmaskInterrupts(BT_u32 ulNewMaskValue) {
+	if(g_oController.hIRQ) {
+		g_oController.BT_IF_IRQ_OPS(hIRQ)->pfnUnmaskInterrupts(g_oController.hIRQ, ulNewMaskValue);
+	}
+	return BT_ERR_NONE;
+}
+BT_EXPORT_SYMBOL(BT_UnmaskInterrupts);
