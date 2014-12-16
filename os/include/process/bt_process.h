@@ -29,9 +29,9 @@ struct bt_process_time {
 	BT_u64 		ullRunTimeCounter;
 	BT_u32 		ulRunTimePercent;
 	BT_HANDLE 	hProcess;
-	BT_u32		ulthreads;
+	BT_u32		ulThreads;
 	BT_u32		ulPID;
-	char 	   *name;
+	const BT_i8 	   *name;
 };
 
 #define curtask 	curthread->task
