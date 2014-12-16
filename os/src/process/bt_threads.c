@@ -67,7 +67,7 @@ void bt_thread_cleanup(struct bt_thread *thread) {
 BT_HANDLE BT_CreateProcessThread(BT_HANDLE hProcess, BT_FN_THREAD_ENTRY pfnStartRoutine, BT_THREAD_CONFIG *pConfig, BT_ERROR *pError) {
 
 	BT_ERROR Error;
-	BT_HANDLE hThread = BT_CreateHandle(&oHandleInterface, sizeof(struct _BT_OPAQUE_HANDLE), pError);
+	BT_HANDLE hThread = BT_CreateHandleAttached(hProcess, &oHandleInterface, sizeof(struct _BT_OPAQUE_HANDLE), pError);
 	if(!hThread) {
 		return NULL;
 	}
