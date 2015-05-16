@@ -99,6 +99,25 @@ project.info:
 	@echo "BASE             : $(BASE)"
 	@echo "PROJECT_CONFIG   : $(PROJECT_CONFIG)"
 
+.PHONY:defconfig
+defconfig:
+ifdef BT_CONFIG_BOARD_DEFCONFIG_FILE
+	@echo "Copying $(ARCH)/mach/$(SUBARCH)/boards/$(BT_CONFIG_BOARD_DEFCONFIG_FILE) to .config"
+	@cp $(BASE)/arch/$(ARCH)/mach/$(SUBARCH)/boards/$(BT_CONFIG_BOARD_DEFCONFIG_FILE) $(BASE)/.config
+else
+	@echo "No default board configuration for $(ARCH)/$(SUBARCH)"
+endif
+
+.PHONY:upconfig
+upconfig:
+ifdef BT_CONFIG_BOARD_DEFCONFIG_FILE
+	@echo "Updating $(ARCH)/mach/$(SUBARCH)/boards/$(BT_CONFIG_BOARD_DEFCONFIG_FILE) from .config"
+	@cp $(BASE)/.config $(BASE)/arch/$(ARCH)/mach/$(SUBARCH)/boards/$(BT_CONFIG_BOARD_DEFCONFIG_FILE)
+else
+	# Print the defconfig error message.
+	@$(MAKE) defconfig
+endif
+
 mrproper:
 ifneq ($(PROJECT_CONFIG),y)
 	$(Q)rm $(PRM_FLAGS) $(PROJECT_DIR)/.config $(BASE)/bt_bsp_config.h $(PRM_PIPE)
