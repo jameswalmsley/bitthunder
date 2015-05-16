@@ -13,6 +13,8 @@ config MACH_BCM2835_PLATFORM
 	select LINKER_MACH_INIT_SECTION_IN_RAM
 	select LINKER_MACH_TEXT_SECTION_IN_RAM
 
+source arch/arm/mach/bcm2835/boards/Kconfig
+
 config MACH_RAM_START
 	hex
 	default 0x8000

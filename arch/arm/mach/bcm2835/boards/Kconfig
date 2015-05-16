@@ -1,0 +1,25 @@
+menu "Board Selection"
+
+comment "BCM2835 Board Selection"
+
+choice
+    prompt "BCM2835 Boards"
+    default BCM2835_RASPBERRYPI_MODEL_A
+
+config BCM2835_RASPBERRYPI_MODEL_A
+    bool "RaspberryPi Model A"
+    ---help---
+        The original RaspberryPi board.
+
+config BCM2835_RASPBERRYPI_MODEL_B
+    bool "RaspberryPi Model B"
+
+endchoice
+
+config BOARD_DEFCONFIG_FILE
+    string
+    default "raspberrypi_model_a.defconfig" if BCM2835_RASPBERRYPI_MODEL_A
+    default "raspberrypi_model_b.defconfig" if BCM2835_RASPBERRYPI_MODEL_B
+
+
+endmenu
