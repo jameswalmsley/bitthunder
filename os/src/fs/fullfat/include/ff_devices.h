@@ -50,84 +50,40 @@
  */
 
 /**
- *	@file		ff_memory.c
- *	@ingroup	MEMORY
- *
- *	@defgroup	MEMORY	FreeRTOS+FAT Memory Access Routines
- *	@brief		Handles memory access in a portable way.
- *
- *	Provides simple, fast, and portable access to memory routines.
- *	These are only used to read data from buffers. That are LITTLE ENDIAN
- *	due to the FAT specification.
- *
- *	These routines may need to be modified to your platform.
- *
+ *	@file		ff_devices.h
  **/
+#ifndef FF_DEVICES_H
+#define FF_DEVICES_H
 
-#include "ff_headers.h"
-
-/*
- * Here below 3 x 2 access functions that allow the code
- * not to worry about the endianness of the MCU.
- */
-
-
-#if( ffconfigINLINE_MEMORY_ACCESS == 0 )
-
-uint8_t FF_getChar( const uint8_t *pBuffer, uint32_t aOffset )
-{
-	return ( uint8_t ) ( pBuffer[ aOffset ] );
-}
-
-uint16_t FF_getShort( const uint8_t *pBuffer, uint32_t aOffset )
-{
-FF_T_UN16 u16;
-
-	pBuffer += aOffset;
-	u16.bytes.u8_1 = pBuffer[ 1 ];
-	u16.bytes.u8_0 = pBuffer[ 0 ];
-
-	return u16.u16;
-}
-
-uint32_t FF_getLong( const uint8_t *pBuffer, uint32_t aOffset )
-{
-FF_T_UN32 u32;
-
-	pBuffer += aOffset;
-	u32.bytes.u8_3 = pBuffer[ 3 ];
-	u32.bytes.u8_2 = pBuffer[ 2 ];
-	u32.bytes.u8_1 = pBuffer[ 1 ];
-	u32.bytes.u8_0 = pBuffer[ 0 ];
-
-	return u32.u32;
-}
-
-void FF_putChar( uint8_t *pBuffer, uint32_t aOffset, uint32_t Value )
-{
-	pBuffer[ aOffset ] = ( uint8_t ) Value;
-}
-
-void FF_putShort( uint8_t *pBuffer, uint32_t aOffset, uint32_t Value )
-{
-FF_T_UN16 u16;
-
-	u16.u16 = ( uint16_t ) Value;
-	pBuffer += aOffset;
-	pBuffer[ 0 ] = u16.bytes.u8_0;
-	pBuffer[ 1 ] = u16.bytes.u8_1;
-}
-
-void FF_putLong( uint8_t *pBuffer, uint32_t aOffset, uint32_t Value )
-{
-FF_T_UN32 u32;
-
-	u32.u32 = Value;
-	pBuffer += aOffset;
-	pBuffer[ 0 ] = u32.bytes.u8_0;
-	pBuffer[ 1 ] = u32.bytes.u8_1;
-	pBuffer[ 2 ] = u32.bytes.u8_2;
-	pBuffer[ 3 ] = u32.bytes.u8_3;
-}
-
+#ifndef PLUS_FAT_H
+	#error this header will be included from "plusfat.h"
 #endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define FF_DEV_NO_DEV		0
+#define FF_DEV_CHAR_DEV		1
+#define FF_DEV_BLOCK_DEV	2
+
+BaseType_t xCheckDevicePath( const char *pcPath );
+
+int FF_Device_Seek( FF_FILE *pxStream, long lOffset, int iWhence );
+
+BaseType_t FF_Device_Open( const char *pcPath, FF_FILE * pxStream );
+
+void FF_Device_Close( FF_FILE * pxStream );
+
+size_t FF_Device_Read( void *pvBuf, size_t lSize, size_t lCount, FF_FILE * pxStream );
+
+size_t FF_Device_Write( const void *pvBuf, size_t lSize, size_t lCount, FF_FILE * pxStream );
+
+
+int FF_Device_GetDirEnt( const char *pcPath, FF_DirEnt_t *pxDirEnt );
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
+#endif /* FF_DEVICES_H */

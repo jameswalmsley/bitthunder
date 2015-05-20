@@ -49,85 +49,47 @@
  *
  */
 
-/**
- *	@file		ff_memory.c
- *	@ingroup	MEMORY
- *
- *	@defgroup	MEMORY	FreeRTOS+FAT Memory Access Routines
- *	@brief		Handles memory access in a portable way.
- *
- *	Provides simple, fast, and portable access to memory routines.
- *	These are only used to read data from buffers. That are LITTLE ENDIAN
- *	due to the FAT specification.
- *
- *	These routines may need to be modified to your platform.
- *
- **/
+#ifndef PLUS_FAT_H
+#define PLUS_FAT_H
 
-#include "ff_headers.h"
+#include <string.h>
 
-/*
- * Here below 3 x 2 access functions that allow the code
- * not to worry about the endianness of the MCU.
- */
+#ifdef	__cplusplus
+extern "C" {
+#endif
 
+//#include "FreeRTOS.h"
+//#include "task.h"
+//#include "semphr.h"
 
-#if( ffconfigINLINE_MEMORY_ACCESS == 0 )
+#include "FreeRTOSFATConfig.h"
+#include "FreeRTOSFATConfigDefaults.h"
+#include "ff_error.h"
+#include "ff_ioman.h"
+#include "ff_fat.h"
+#include "ff_fatdef.h"
+#include "ff_memory.h"
+#include "ff_time.h"
+#include "ff_crc.h"
+#include "ff_file.h"
+#include "ff_dir.h"
+#include "ff_string.h"
+#include "ff_format.h"
+#include "ff_locking.h"
 
-uint8_t FF_getChar( const uint8_t *pBuffer, uint32_t aOffset )
-{
-	return ( uint8_t ) ( pBuffer[ aOffset ] );
-}
+/* See if any older defines with a prefix "FF_" are still defined: */
+#include "ff_old_config_defines.h"
 
-uint16_t FF_getShort( const uint8_t *pBuffer, uint32_t aOffset )
-{
-FF_T_UN16 u16;
+#ifndef configUSE_RECURSIVE_MUTEXES
+	#error configUSE_RECURSIVE_MUTEXES must be set to 1 in FreeRTOSConfig.h
+#else
+	#if( configUSE_RECURSIVE_MUTEXES != 1 )
+		#error configUSE_RECURSIVE_MUTEXES must be set to 1 in FreeRTOSConfig.h
+	#endif
+#endif /* configUSE_RECURSIVE_MUTEXES */
 
-	pBuffer += aOffset;
-	u16.bytes.u8_1 = pBuffer[ 1 ];
-	u16.bytes.u8_0 = pBuffer[ 0 ];
-
-	return u16.u16;
-}
-
-uint32_t FF_getLong( const uint8_t *pBuffer, uint32_t aOffset )
-{
-FF_T_UN32 u32;
-
-	pBuffer += aOffset;
-	u32.bytes.u8_3 = pBuffer[ 3 ];
-	u32.bytes.u8_2 = pBuffer[ 2 ];
-	u32.bytes.u8_1 = pBuffer[ 1 ];
-	u32.bytes.u8_0 = pBuffer[ 0 ];
-
-	return u32.u32;
-}
-
-void FF_putChar( uint8_t *pBuffer, uint32_t aOffset, uint32_t Value )
-{
-	pBuffer[ aOffset ] = ( uint8_t ) Value;
-}
-
-void FF_putShort( uint8_t *pBuffer, uint32_t aOffset, uint32_t Value )
-{
-FF_T_UN16 u16;
-
-	u16.u16 = ( uint16_t ) Value;
-	pBuffer += aOffset;
-	pBuffer[ 0 ] = u16.bytes.u8_0;
-	pBuffer[ 1 ] = u16.bytes.u8_1;
-}
-
-void FF_putLong( uint8_t *pBuffer, uint32_t aOffset, uint32_t Value )
-{
-FF_T_UN32 u32;
-
-	u32.u32 = Value;
-	pBuffer += aOffset;
-	pBuffer[ 0 ] = u32.bytes.u8_0;
-	pBuffer[ 1 ] = u32.bytes.u8_1;
-	pBuffer[ 2 ] = u32.bytes.u8_2;
-	pBuffer[ 3 ] = u32.bytes.u8_3;
-}
+#ifdef	__cplusplus
+}	// extern "C"
+#endif
 
 #endif

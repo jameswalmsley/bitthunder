@@ -1,49 +1,60 @@
-/*****************************************************************************
- *     FullFAT - High Performance, Thread-Safe Embedded FAT File-System      *
- *                                                                           *
- *        Copyright(C) 2009  James Walmsley  <james@fullfat-fs.co.uk>        *
- *        Copyright(C) 2011  Hein Tibosch    <hein_tibosch@yahoo.es>         *
- *                                                                           *
- *    See RESTRICTIONS.TXT for extra restrictions on the use of FullFAT.     *
- *                                                                           *
- *    WARNING : COMMERCIAL PROJECTS MUST COMPLY WITH THE GNU GPL LICENSE.    *
- *                                                                           *
- *  Projects that cannot comply with the GNU GPL terms are legally obliged   *
- *    to seek alternative licensing. Contact James Walmsley for details.     *
- *                                                                           *
- *****************************************************************************
- *           See http://www.fullfat-fs.co.uk/ for more information.          *
- *****************************************************************************
- *  This program is free software: you can redistribute it and/or modify     *
- *  it under the terms of the GNU General Public License as published by     *
- *  the Free Software Foundation, either version 3 of the License, or        *
- *  (at your option) any later version.                                      *
- *                                                                           *
- *  This program is distributed in the hope that it will be useful,          *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of           *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            *
- *  GNU General Public License for more details.                             *
- *                                                                           *
- *  You should have received a copy of the GNU General Public License        *
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.    *
- *                                                                           *
- *  The Copyright of Hein Tibosch on this project recognises his efforts in  *
- *  contributing to this project. The right to license the project under     *
- *  any other terms (other than the GNU GPL license) remains with the        *
- *  original copyright holder (James Walmsley) only.                         *
- *                                                                           *
- *****************************************************************************
- *  Modification/Extensions/Bugfixes/Improvements to FullFAT must be sent to *
- *  James Walmsley for integration into the main development branch.         *
- *****************************************************************************/
+/*
+ * FreeRTOS+FAT Labs Build 150406 (C) 2015 Real Time Engineers ltd.
+ * Authors include James Walmsley, Hein Tibosch and Richard Barry
+ *
+ *******************************************************************************
+ ***** NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ***
+ ***                                                                         ***
+ ***                                                                         ***
+ ***   FREERTOS+FAT IS STILL IN THE LAB:                                     ***
+ ***                                                                         ***
+ ***   This product is functional and is already being used in commercial    ***
+ ***   products.  Be aware however that we are still refining its design,    ***
+ ***   the source code does not yet fully conform to the strict coding and   ***
+ ***   style standards mandated by Real Time Engineers ltd., and the         ***
+ ***   documentation and testing is not necessarily complete.                ***
+ ***                                                                         ***
+ ***   PLEASE REPORT EXPERIENCES USING THE SUPPORT RESOURCES FOUND ON THE    ***
+ ***   URL: http://www.FreeRTOS.org/contact  Active early adopters may, at   ***
+ ***   the sole discretion of Real Time Engineers Ltd., be offered versions  ***
+ ***   under a license other than that described below.                      ***
+ ***                                                                         ***
+ ***                                                                         ***
+ ***** NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ***
+ *******************************************************************************
+ *
+ * - Open source licensing -
+ * While FreeRTOS+FAT is in the lab it is provided only under version two of the
+ * GNU General Public License (GPL) (which is different to the standard FreeRTOS
+ * license).  FreeRTOS+FAT is free to download, use and distribute under the
+ * terms of that license provided the copyright notice and this text are not
+ * altered or removed from the source files.  The GPL V2 text is available on
+ * the gnu.org web site, and on the following
+ * URL: http://www.FreeRTOS.org/gpl-2.0.txt.  Active early adopters may, and
+ * solely at the discretion of Real Time Engineers Ltd., be offered versions
+ * under a license other then the GPL.
+ *
+ * FreeRTOS+FAT is distributed in the hope that it will be useful.  You cannot
+ * use FreeRTOS+FAT unless you agree that you use the software 'as is'.
+ * FreeRTOS+FAT is provided WITHOUT ANY WARRANTY; without even the implied
+ * warranties of NON-INFRINGEMENT, MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE. Real Time Engineers Ltd. disclaims all conditions and terms, be they
+ * implied, expressed, or statutory.
+ *
+ * 1 tab == 4 spaces!
+ *
+ * http://www.FreeRTOS.org
+ * http://www.FreeRTOS.org/plus
+ * http://www.FreeRTOS.org/labs
+ *
+ */
 
 /**
  *	@file		ff_string.c
- *	@author		James Walmsley
  *	@ingroup	STRING
  *
- *	@defgroup	STRING	FullFAT String Library
- *	@brief		Portable String Library for FullFAT
+ *	@defgroup	STRING	FreeRTOS+FAT String Library
+ *	@brief		Portable String Library for FreeRTOS+FAT
  *
  *
  **/
@@ -51,12 +62,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "ff_string.h"
-#include "ff_error.h"
 
-#ifdef FF_UNICODE_SUPPORT
-#include <wchar.h>
-#include <wctype.h>
+#include "ff_headers.h"
+
+#if( ffconfigUNICODE_UTF16_SUPPORT != 0 )
+	#include <wchar.h>
+	#include <wctype.h>
 #endif
 
 /*
@@ -64,409 +75,667 @@
  *	library. Which will be optional. (To allow the use of system specific versions).
  */
 
-#ifdef FF_UNICODE_SUPPORT
-
-void FF_cstrntowcs(FF_T_WCHAR *wcsDest, const FF_T_INT8 *szpSource, FF_T_UINT32 len) {
-	while(*szpSource && len--) {
-		*wcsDest++ = *szpSource++;
+#if( ffconfigUNICODE_UTF16_SUPPORT != 0 )
+	void FF_cstrntowcs( FF_T_WCHAR *wcsDest, const int8_t *szpSource, uint32_t ulLength )
+	{
+		while( ( *szpSource != '\0' )  && ( ulLength-- != 0 ) )
+		{
+			*( wcsDest++ ) = *( szpSource++ );
+		}
+		*wcsDest = '\0';
 	}
-	*wcsDest = '\0';
-}
+#endif /* ffconfigUNICODE_UTF16_SUPPORT */
+/*-----------------------------------------------------------*/
 
-void FF_cstrtowcs(FF_T_WCHAR *wcsDest, const FF_T_INT8 *szpSource) {
-	while(*szpSource) {
-		*wcsDest++ = (FF_T_WCHAR) *szpSource++;
+#if( ffconfigUNICODE_UTF16_SUPPORT != 0 )
+	void FF_cstrtowcs( FF_T_WCHAR *wcsDest, const int8_t *szpSource )
+	{
+		while( *szpSource != '\0' )
+		{
+			*wcsDest++ = ( FF_T_WCHAR ) *( szpSource++ );
+		}
+		*wcsDest = '\0';
 	}
-	*wcsDest = '\0';
-}
+#endif /* ffconfigUNICODE_UTF16_SUPPORT */
+/*-----------------------------------------------------------*/
 
-void FF_wcstocstr(FF_T_INT8 *szpDest, const FF_T_WCHAR *wcsSource) {
-	while(*wcsSource) {
-		*szpDest++ = (FF_T_INT8) *wcsSource++;
+#if( ffconfigUNICODE_UTF16_SUPPORT != 0 )
+	void FF_wcstocstr( int8_t *szpDest, const FF_T_WCHAR *wcsSource )
+	{
+		while( *wcsSource != '\0' )
+		{
+			*szpDest++ = ( int8_t )*( wcsSource++ );
+		}
+		*szpDest = '\0';
 	}
-	*szpDest = '\0';
-}
+#endif /* ffconfigUNICODE_UTF16_SUPPORT */
+/*-----------------------------------------------------------*/
 
-void FF_wcsntocstr(FF_T_INT8 *szpDest, const FF_T_WCHAR *wcsSource, FF_T_UINT32 len) {
-	while(*wcsSource && len--) {
-		*szpDest++ = (FF_T_INT8) *wcsSource++;
+#if( ffconfigUNICODE_UTF16_SUPPORT != 0 )
+	void FF_wcsntocstr( int8_t *szpDest, const FF_T_WCHAR *wcsSource, uint32_t ulLength )
+	{
+		while( ( *wcsSource != '\0' ) && ( ulLength-- != 0 ) )
+		{
+			*( szpDest++ ) = ( int8_t ) *( wcsSource++ );
+		}
+		*szpDest = '\0';
 	}
-	*szpDest = '\0';
-}
+#endif /* ffconfigUNICODE_UTF16_SUPPORT */
+/*-----------------------------------------------------------*/
 
-#endif
+/*-----------------------------------------------------------*/
+
+#if( ffconfigUNICODE_UTF16_SUPPORT != 0 )
+	void FF_toupper( FF_T_WCHAR *string, uint32_t ulLength )
+	{
+	uint32_t i;
+
+		for( i = 0; i < ulLength; i++ )
+		{
+			string[ i ] = towupper( string[ i ] );
+		}
+	}
+	/*-----------------------------------------------------------*/
+
+	void FF_tolower( FF_T_WCHAR *string, uint32_t ulLength )
+	{
+	uint32_t i;
+		for( i = 0; i < ulLength; i++ )
+		{
+			string[ i ] = towlower( string[ i ] );
+		}
+	}
+	/*-----------------------------------------------------------*/
+
+#else	/* ffconfigUNICODE_UTF16_SUPPORT */
+	void FF_toupper( char *string, uint32_t ulLength )
+	{
+	uint32_t i;
+
+		for( i = 0; i < ulLength; i++ )
+		{
+			if( ( string[ i ] >= 'a' ) && ( string[ i ] <= 'z' ) )
+			{
+				string[ i ] -= 32;
+			}
+			if( string[ i ] == '\0' )
+			{
+				break;
+			}
+		}
+	}
+	/*-----------------------------------------------------------*/
+
+	void FF_tolower( char *string, uint32_t ulLength )
+	{
+	uint32_t i;
+
+		for( i = 0; i < ulLength; i++ )
+		{
+			if( ( string[ i ] >= 'A' ) && ( string[ i ] <= 'Z' ) )
+			{
+				string[ i ] += 32;
+			}
+			if( string[ i ] == '\0' )
+			{
+				break;
+			}
+		}
+	}
+	/*-----------------------------------------------------------*/
+
+#endif	/* ffconfigUNICODE_UTF16_SUPPORT */
+
 
 /**
  *	@private
- *	@brief	Converts an ASCII string to lowercase.
- **/
-#ifndef FF_UNICODE_SUPPORT
-/**
- *	@private
- *	@brief	Converts an ASCII string to uppercase.
- **/
-void FF_toupper(FF_T_INT8 *string, FF_T_UINT32 strLen) {
-	FF_T_UINT32 i;
-	for(i = 0; i < strLen; i++) {
-		if(string[i] >= 'a' && string[i] <= 'z')
-			string[i] -= 32;
-		if(string[i] == '\0')
-			break;
-	}
-}
-void FF_tolower(FF_T_INT8 *string, FF_T_UINT32 strLen) {
-	FF_T_UINT32 i;
-	for(i = 0; i < strLen; i++) {
-		if(string[i] >= 'A' && string[i] <= 'Z')
-			string[i] += 32;
-		if(string[i] == '\0')
-			break;
-	}
-}
-
-#else
-void FF_toupper(FF_T_WCHAR *string, FF_T_UINT32 strLen) {
-	FF_T_UINT32 i;
-	for(i = 0; i < strLen; i++) {
-		string[i] = towupper(string[i]);
-	}
-}
-void FF_tolower(FF_T_WCHAR *string, FF_T_UINT32 strLen) {
-	FF_T_UINT32 i;
-	for(i = 0; i < strLen; i++) {
-		string[i] = towlower(string[i]);
-	}
-}
-#endif
-
-
-
-
-/**
- *	@private
- *	@brief	Compares 2 strings for the specified length, and returns FF_TRUE is they are identical
- *			otherwise FF_FALSE is returned.
+ *	@brief	Compares 2 strings for the specified length, and returns pdTRUE is they are identical
+ *			otherwise pdFALSE is returned.
  *
  **/
 
-#ifndef FF_UNICODE_SUPPORT
-FF_T_BOOL FF_strmatch(const FF_T_INT8 *str1, const FF_T_INT8 *str2, FF_T_UINT16 len) {
-	register FF_T_UINT16 i;
-	register FF_T_INT8	char1, char2;
+#if( ffconfigUNICODE_UTF16_SUPPORT == 0 )
+	BaseType_t FF_strmatch( const char *str1, const char *str2, BaseType_t xLength )
+	{
+		register BaseType_t i;
+		register char	char1, char2;
 
-	if(!len) {
-		if(strlen(str1) != strlen(str2)) {
-			return FF_FALSE;
+		if( xLength == 0 )
+		{
+			xLength = strlen( str1 );
+			if( xLength != ( BaseType_t )strlen( str2 ) )
+			{
+				return pdFALSE;
+			}
 		}
-		len = (FF_T_UINT16) strlen(str1);
+
+		for( i = 0; i < xLength; i++ )
+		{
+			char1 = str1[ i ];
+			char2 = str2[ i ];
+			if( ( char1 >= 'A' ) && ( char1 <= 'Z' ) )
+			{
+				char1 += 32;
+			}
+			if( ( char2 >= 'A' ) && ( char2 <= 'Z' ) )
+			{
+				char2 += 32;
+			}
+
+			if( char1 != char2 )
+			{
+				return pdFALSE;
+			}
+		}
+
+		return pdTRUE;
 	}
-
-	for(i = 0; i < len; i++) {
-		char1 = str1[i];
-		char2 = str2[i];
-		if(char1 >= 'A' && char1 <= 'Z') {
-			char1 += 32;
-		}
-		if(char2 >= 'A' && char2 <= 'Z') {
-			char2 += 32;
-		}
-
-		if(char1 != char2) {
-			return FF_FALSE;
-		}
-	}
-
-	return FF_TRUE;
-}
-#else
-
-FF_T_BOOL FF_strmatch(const FF_T_WCHAR *str1, const FF_T_WCHAR *str2, FF_T_UINT16 len) {
-	register FF_T_UINT16 i;
+#else	/* ffconfigUNICODE_UTF16_SUPPORT */
+	BaseType_t FF_strmatch( const FF_T_WCHAR *str1, const FF_T_WCHAR *str2, BaseType_t xLength )
+	{
+	register BaseType_t i;
 	register FF_T_WCHAR	char1, char2;
 
-	if(!len) {
-		if(wcslen(str1) != wcslen(str2)) {
-			return FF_FALSE;
+		if( xLength == 0 )
+		{
+			xLength = wcslen( str1 );
+			if( xLength != wcslen( str2 ) )
+			{
+				return pdFALSE;
+			}
 		}
-		len = (FF_T_UINT16) wcslen(str1);
-	}
 
-	for(i = 0; i < len; i++) {
-		char1 = towlower(str1[i]);
-		char2 = towlower(str2[i]);
-		if(char1 != char2) {
-			return FF_FALSE;
+		for( i = 0; i < xLength; i++ )
+		{
+			char1 = towlower( str1[ i ] );
+			char2 = towlower( str2[ i ] );
+			if( char1 != char2 )
+			{
+				return pdFALSE;
+			}
 		}
-	}
 
-	return FF_TRUE;
-}
-#endif
+		return pdTRUE;
+	}
+#endif	/* ffconfigUNICODE_UTF16_SUPPORT */
 
 /**
  *	@private
  *	@brief	A re-entrant Strtok function. No documentation is provided :P
- *			Use at your own risk. (This is for FullFAT's use only).
+ *			Use at your own risk. (This is for FreeRTOS+FAT's use only).
  **/
 
-#ifndef FF_UNICODE_SUPPORT
-FF_T_INT8 *FF_strtok(const FF_T_INT8 *string, FF_T_INT8 *token, FF_T_UINT16 *tokenNumber, FF_T_BOOL *last, FF_T_UINT16 Length) {
-	FF_T_UINT16 strLen = Length;
-	FF_T_UINT16 i,y, tokenStart, tokenEnd = 0;
+#if( ffconfigUNICODE_UTF16_SUPPORT == 0 )
+	char *FF_strtok( const char *string, char *token, uint16_t *tokenNumber, BaseType_t *last, BaseType_t xLength )
+	{
+		uint16_t i,y, tokenStart, tokenEnd = 0;
 
-	i = 0;
-	y = 0;
+		i = 0;
+		y = 0;
 
-	if(string[i] == '\\' || string[i] == '/') {
-		i++;
-	}
+		if( ( string[ i ] == '\\' ) || ( string[ i ] == '/' ) )
+		{
+			i++;
+		}
 
-	tokenStart = i;
+		tokenStart = i;
 
-	while(i < strLen) {
-		if(string[i] == '\\' || string[i] == '/') {
-			y++;
-			if(y == *tokenNumber) {
-				tokenStart = (FF_T_UINT16)(i + 1);
+		while( i < xLength )
+		{
+			if( ( string[ i ] == '\\' ) || ( string[ i ] == '/' ) )
+			{
+				y++;
+				if( y == *tokenNumber )
+				{
+					tokenStart = ( uint16_t )( i + 1 );
+				}
+				if( y == ( *tokenNumber + 1 ) )
+				{
+					tokenEnd = i;
+					break;
+				}
 			}
-			if(y == (*tokenNumber + 1)) {
-				tokenEnd = i;
+			i++;
+		}
+
+		if( tokenEnd == 0 )
+		{
+			if( *last == pdTRUE )
+			{
+				return NULL;
+			}
+			else
+			{
+				*last = pdTRUE;
+			}
+			tokenEnd = i;
+		}
+		if( ( tokenEnd - tokenStart ) < ffconfigMAX_FILENAME )
+		{
+			memcpy( token, ( string + tokenStart ), ( uint32_t )( tokenEnd - tokenStart ) );
+			token[ tokenEnd - tokenStart ] = '\0';
+		}
+		else
+		{
+			memcpy( token, ( string + tokenStart ), ( uint32_t )( ffconfigMAX_FILENAME ) );
+			token[ ffconfigMAX_FILENAME - 1 ] = '\0';
+		}
+		/*token[tokenEnd - tokenStart] = '\0'; */
+		*tokenNumber += 1;
+
+		return token;
+	}
+#else	/* ffconfigUNICODE_UTF16_SUPPORT */
+	FF_T_WCHAR *FF_strtok( const FF_T_WCHAR *string, FF_T_WCHAR *token, uint16_t *tokenNumber, BaseType_t *last, BaseType_t xLength )
+	{
+		uint16_t i,y, tokenStart, tokenEnd = 0;
+
+		i = 0;
+		y = 0;
+
+		if( ( string[ i ] == '\\' ) || ( string[ i ] == '/' ) )
+		{
+			i++;
+		}
+
+		tokenStart = i;
+
+		while( i < xLength )
+		{
+			if( ( string[ i ] == '\\' ) || ( string[ i ] == '/' ) )
+			{
+				y++;
+				if( y == *tokenNumber )
+				{
+					tokenStart = ( uint16_t ) ( i + 1 );
+				}
+				if( y == ( *tokenNumber + 1 ) )
+				{
+					tokenEnd = i;
+					break;
+				}
+			}
+			i++;
+		}
+
+		if( tokenEnd == 0 )
+		{
+			if( *last == pdTRUE )
+			{
+				return NULL;
+			}
+			else
+			{
+				*last = pdTRUE;
+			}
+			tokenEnd = i;
+		}
+		if( ( tokenEnd - tokenStart ) < ffconfigMAX_FILENAME )
+		{
+			memcpy( token, ( string + tokenStart ), ( uint32_t )( tokenEnd - tokenStart ) * sizeof( FF_T_WCHAR ) );
+			token[ tokenEnd - tokenStart ] = '\0';
+		}
+		else
+		{
+			memcpy( token, ( string + tokenStart ), ( uint32_t )( ffconfigMAX_FILENAME ) * sizeof( FF_T_WCHAR ) );
+			token[ ffconfigMAX_FILENAME - 1 ] = '\0';
+		}
+		/*token[tokenEnd - tokenStart] = '\0'; */
+		*tokenNumber += 1;
+
+		return token;
+	}
+#endif	/* ffconfigUNICODE_UTF16_SUPPORT */
+
+/* UTF-8 Routines */
+
+/*
+   UCS-4 range (hex.)           UTF-8 octet sequence (binary)
+   0000 0000-0000 007F   0xxxxxxx
+   0000 0080-0000 07FF   110xxxxx 10xxxxxx
+   0000 0800-0000 FFFF   1110xxxx 10xxxxxx 10xxxxxx
+
+   0001 0000-001F FFFF   11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+   0020 0000-03FF FFFF   111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx	-- We don't encode these because we won't receive them. (Invalid UNICODE).
+   0400 0000-7FFF FFFF   1111110x 10xxxxxx ... 10xxxxxx					-- We don't encode these because we won't receive them. (Invalid UNICODE).
+*/
+
+#if ( ( ffconfigUNICODE_UTF16_SUPPORT != 0 ) && ( WCHAR_MAX > 0xFFFF ) ) || ( ffconfigUNICODE_UTF8_SUPPORT != 0 )
+	UBaseType_t FF_GetUtf16SequenceLen( uint16_t usLeadChar )
+	{
+	UBaseType_t uxReturn;
+		if( ( usLeadChar & 0xFC00 ) == 0xD800 )
+		{
+			uxReturn = 2;
+		}
+		else
+		{
+			uxReturn = 1;
+		}
+
+		return uxReturn;
+	}	/* FF_GetUtf16SequenceLen() */
+#endif
+/*-----------------------------------------------------------*/
+
+/*
+	Returns the number of UTF-8 units read.
+	Will not exceed ulSize UTF-16 units. (ulSize * 2 bytes).
+*/
+/*
+   UCS-4 range (hex.)           UTF-8 octet sequence (binary)
+   0000 0000-0000 007F   0xxxxxxx
+   0000 0080-0000 07FF   110xxxxx 10xxxxxx
+   0000 0800-0000 FFFF   1110xxxx 10xxxxxx 10xxxxxx
+
+   0001 0000-001F FFFF   11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+   0020 0000-03FF FFFF   111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx	-- We don't encode these because we won't receive them. (Invalid UNICODE).
+   0400 0000-7FFF FFFF   1111110x 10xxxxxx ... 10xxxxxx					-- We don't encode these because we won't receive them. (Invalid UNICODE).
+*/
+#if ( ffconfigUNICODE_UTF8_SUPPORT != 0 )
+	int32_t FF_Utf8ctoUtf16c( uint16_t *utf16Dest, const uint8_t *utf8Source, uint32_t ulSize )
+	{
+	uint32_t ulUtf32char;
+	uint16_t utf16Source = 0;
+	register int32_t lSequenceNumber = 0;
+
+		/* Count number of set bits before a zero. */
+		while( ( ( *utf8Source != '\0' ) & ( 0x80 >> ( lSequenceNumber ) ) ) )
+		{
+			lSequenceNumber++;
+		}
+
+		if( lSequenceNumber == 0UL )
+		{
+			lSequenceNumber++;
+		}
+
+		if( ulSize == 0UL )
+		{
+			/* Returned value becomes an error, with the highest bit set. */
+			lSequenceNumber = FF_ERR_UNICODE_DEST_TOO_SMALL | FF_UTF8CTOUTF16C;
+		}
+		else
+		{
+			switch( lSequenceNumber )
+			{
+			case 1:
+				utf16Source = (uint16_t) *utf8Source;
+				memcpy(utf16Dest,&utf16Source,sizeof(uint16_t));
+				break;
+
+			case 2:
+				utf16Source =(uint16_t) ((*utf8Source & 0x1F) << 6) | ((*(utf8Source + 1) & 0x3F));
+				memcpy(utf16Dest,&utf16Source,sizeof(uint16_t));
+				break;
+
+			case 3:
+				utf16Source =(uint16_t) ((*utf8Source & 0x0F) << 12) | ((*(utf8Source + 1) & 0x3F) << 6) | ((*(utf8Source + 2) & 0x3F));
+				memcpy(utf16Dest,&utf16Source,sizeof(uint16_t));
+				break;
+
+			case 4:
+				if( ulSize < 2 )
+				{
+					/* Returned value becomes an error. */
+					lSequenceNumber = FF_ERR_UNICODE_DEST_TOO_SMALL | FF_UTF8CTOUTF16C;
+				}
+				else
+				{
+					/* Convert to UTF-32 and then into UTF-16 */
+					ulUtf32char = ( uint16_t )
+						( ( *utf8Source & 0x0F ) << 18 ) |
+						( ( *( utf8Source + 1 ) & 0x3F ) << 12 ) |
+						( ( *( utf8Source + 2 ) & 0x3F ) << 6 ) |
+						( ( *( utf8Source + 3 ) & 0x3F ) );
+
+					utf16Source = ( uint16_t ) ( ( ( ulUtf32char - 0x10000 ) & 0xFFC00 ) >> 10 ) | 0xD800;
+					memcpy( utf16Dest, &utf16Source, sizeof( uint16_t ) );
+					utf16Source = ( uint16_t ) ( ( ( ulUtf32char - 0x10000 ) & 0x003FF ) >> 00 ) | 0xDC00;
+					memcpy( utf16Dest + 1, &utf16Source, sizeof( uint16_t ) );
+				}
+				break;
+
+			default:
 				break;
 			}
 		}
-		i++;
-	}
 
-	if(!tokenEnd) {
-		if(*last == FF_TRUE) {
-			return NULL;
-		} else {
-			*last = FF_TRUE;
-		}
-		tokenEnd = i;
-	}
-	if((tokenEnd - tokenStart) < FF_MAX_FILENAME) {
-		memcpy(token, (string + tokenStart), (FF_T_UINT32)(tokenEnd - tokenStart));
-		token[tokenEnd - tokenStart] = '\0';
-	} else {
-		memcpy(token, (string + tokenStart), (FF_T_UINT32)(FF_MAX_FILENAME));
-		token[FF_MAX_FILENAME-1] = '\0';
-	}
-	//token[tokenEnd - tokenStart] = '\0';
-	*tokenNumber += 1;
+		return lSequenceNumber;
+	}	/* FF_Utf8ctoUtf16c() */
+#endif	/* ffconfigUNICODE_UTF8_SUPPORT */
 
-	return token;
-}
+/*-----------------------------------------------------------*/
 
-#else
-FF_T_WCHAR *FF_strtok(const FF_T_WCHAR *string, FF_T_WCHAR *token, FF_T_UINT16 *tokenNumber, FF_T_BOOL *last, FF_T_UINT16 Length) {
-	FF_T_UINT16 strLen = Length;
-	FF_T_UINT16 i,y, tokenStart, tokenEnd = 0;
+/*
+	Returns the number of UTF-8 units required to encode the UTF-16 sequence.
+	Will not exceed ulSize UTF-8 units. (ulSize  * 1 bytes).
+*/
+#if ( ffconfigUNICODE_UTF8_SUPPORT != 0 )
+	int32_t FF_Utf16ctoUtf8c( uint8_t *utf8Dest, const uint16_t *utf16Source, uint32_t ulSize )
+	{
+	uint32_t ulUtf32char;
+	uint16_t ulUtf16char;
+	int32_t lReturn = 0L;
 
-	i = 0;
-	y = 0;
-
-	if(string[i] == '\\' || string[i] == '/') {
-		i++;
-	}
-
-	tokenStart = i;
-
-	while(i < strLen) {
-		if(string[i] == '\\' || string[i] == '/') {
-			y++;
-			if(y == *tokenNumber) {
-				tokenStart = (FF_T_UINT16)(i + 1);
-			}
-			if(y == (*tokenNumber + 1)) {
-				tokenEnd = i;
+		do
+		{
+			if( ulSize == 0UL )
+			{
+				lReturn = FF_ERR_UNICODE_DEST_TOO_SMALL | FF_UTF16CTOUTF8C;
 				break;
 			}
-		}
-		i++;
-	}
+			memcpy( &ulUtf16char, utf16Source, sizeof( uint16_t ) );
 
-	if(!tokenEnd) {
-		if(*last == FF_TRUE) {
-			return NULL;
-		} else {
-			*last = FF_TRUE;
-		}
-		tokenEnd = i;
-	}
-	if((tokenEnd - tokenStart) < FF_MAX_FILENAME) {
-		memcpy(token, (string + tokenStart), (FF_T_UINT32)(tokenEnd - tokenStart) * sizeof(FF_T_WCHAR));
-		token[tokenEnd - tokenStart] = '\0';
-	} else {
-		memcpy(token, (string + tokenStart), (FF_T_UINT32)(FF_MAX_FILENAME) * sizeof(FF_T_WCHAR));
-		token[FF_MAX_FILENAME-1] = '\0';
-	}
-	//token[tokenEnd - tokenStart] = '\0';
-	*tokenNumber += 1;
+			/* A surrogate sequence was encountered. Must transform to UTF32 first. */
+			if( ( ulUtf16char & 0xF800) == 0xD800 )
+			{
+				ulUtf32char = ( ( uint32_t ) ( ulUtf16char & 0x003FF ) << 10 ) + 0x10000;
 
-	return token;
-}
-#endif
+				memcpy( &ulUtf16char, utf16Source + 1, sizeof( uint16_t ) );
+				if( ( ulUtf16char & 0xFC00 ) != 0xDC00 )
+				{
+					/* Invalid UTF-16 sequence. */
+					lReturn = FF_ERR_UNICODE_INVALID_SEQUENCE | FF_UTF16CTOUTF8C;
+					break;
+				}
+				ulUtf32char |= ( ( uint32_t ) ( ulUtf16char & 0x003FF ) );
+			}
+			else
+			{
+				ulUtf32char = ( uint32_t ) ulUtf16char;
+			}
+
+			/* Now convert to the UTF-8 sequence. */
+			/* Single byte UTF-8 sequence. */
+			if( ulUtf32char < 0x00000080 )
+			{
+				*( utf8Dest + 0 ) = ( uint8_t )ulUtf32char;
+				lReturn = 1;
+				break;
+			}
+
+			/* Double byte UTF-8 sequence. */
+			if( ulUtf32char < 0x00000800 )
+			{
+				if( ulSize < 2 )
+				{
+					lReturn = FF_ERR_UNICODE_DEST_TOO_SMALL | FF_UTF16CTOUTF8C;
+				}
+				else
+				{
+					*( utf8Dest + 0 ) = ( uint8_t ) ( 0xC0 | ( ( ulUtf32char >> 6 ) & 0x1F ) );
+					*( utf8Dest + 1 ) = ( uint8_t ) ( 0x80 | ( ( ulUtf32char >> 0 ) & 0x3F ) );
+					lReturn = 2;
+				}
+				break;
+			}
+
+			/* Triple byte UTF-8 sequence. */
+			if( ulUtf32char < 0x00010000 )
+			{
+				if( ulSize < 3 )
+				{
+					lReturn = FF_ERR_UNICODE_DEST_TOO_SMALL | FF_UTF16CTOUTF8C;
+				}
+				else
+				{
+					*( utf8Dest + 0 ) = ( uint8_t ) ( 0xE0 | ( ( ulUtf32char >> 12 ) & 0x0F ) );
+					*( utf8Dest + 1 ) = ( uint8_t ) ( 0x80 | ( ( ulUtf32char >> 6 ) & 0x3F ) );
+					*( utf8Dest + 2 ) = ( uint8_t ) ( 0x80 | ( ( ulUtf32char >> 0 ) & 0x3F ) );
+					lReturn = 3;
+				}
+				break;
+			}
+
+			/* Quadruple byte UTF-8 sequence. */
+			if( ulUtf32char < 0x00200000 )
+			{
+				if( ulSize < 4 )
+				{
+					lReturn = FF_ERR_UNICODE_DEST_TOO_SMALL | FF_UTF16CTOUTF8C;
+				}
+				else
+				{
+					*( utf8Dest + 0 ) = ( uint8_t ) (0xF0 | ( ( ulUtf32char >> 18 ) & 0x07 ) );
+					*( utf8Dest + 1 ) = ( uint8_t ) (0x80 | ( ( ulUtf32char >> 12 ) & 0x3F ) );
+					*( utf8Dest + 2 ) = ( uint8_t ) (0x80 | ( ( ulUtf32char >> 6 ) & 0x3F ) );
+					*( utf8Dest + 3 ) = ( uint8_t ) (0x80 | ( ( ulUtf32char >> 0 ) & 0x3F ) );
+					lReturn = 4;
+				}
+				break;
+			}
+			lReturn = FF_ERR_UNICODE_INVALID_CODE | FF_UTF16CTOUTF8C;	/* Invalid Character */
+		}
+		while( pdFALSE );
+
+		return lReturn;
+	}	/* FF_Utf16ctoUtf8c() */
+#endif	/* ffconfigUNICODE_UTF8_SUPPORT */
+/*-----------------------------------------------------------*/
+
+/* UTF-16 Support Functions */
+
+/* Converts a UTF-32 Character into its equivalent UTF-16 sequence. */
+#if( ffconfigUNICODE_UTF16_SUPPORT != 0 ) && ( WCHAR_MAX > 0xFFFF )
+	int32_t FF_Utf32ctoUtf16c( uint16_t *utf16Dest, uint32_t utf32char, uint32_t ulSize )
+	{
+	int32_t lReturn;
+		/* Check that its a valid UTF-32 wide-char!	*/
+
+		/* This range is not a valid Unicode code point. */
+		if( ( utf32char >= 0xD800 ) && ( utf32char <= 0xDFFF ) )
+		{
+			lReturn = FF_ERR_UNICODE_INVALID_CODE | FF_UTF32CTOUTF16C; /* Invalid character. */
+		}
+		else if( utf32char < 0x10000 )
+		{
+			*utf16Dest = (uint16_t) utf32char; /* Simple conversion! Char comes within UTF-16 space (without surrogates). */
+			lReturn = 1;
+		}
+		else if( ulSize < 2 )
+		{
+			lReturn FF_ERR_UNICODE_DEST_TOO_SMALL | FF_UTF32CTOUTF16C;	/* Not enough UTF-16 units to record this character. */
+		}
+		else if( utf32char < 0x00200000 )
+		{
+			/* Conversion to a UTF-16 Surrogate pair! */
+			/*valueImage = utf32char - 0x10000; */
+			*( utf16Dest + 0 ) = ( uint16_t ) ( ( ( utf32char - 0x10000 ) & 0xFFC00 ) >> 10 ) | 0xD800;
+			*( utf16Dest + 1 ) = ( uint16_t ) ( ( ( utf32char - 0x10000 ) & 0x003FF ) >> 00 ) | 0xDC00;
+
+			lReturn = 2;	/* Surrogate pair encoded value. */
+		}
+		else
+		{
+			/* Invalid Character */
+			lReturn = FF_ERR_UNICODE_INVALID_CODE | FF_UTF32CTOUTF16C;
+		}
+
+		return lReturn;
+	}	/* FF_Utf32ctoUtf16c() */
+#endif /* #if( ffconfigUNICODE_UTF16_SUPPORT != 0 ) && ( WCHAR_MAX > 0xFFFF ) */
+/*-----------------------------------------------------------*/
+
+/* Converts a UTF-16 sequence into its equivalent UTF-32 code point. */
+#if( ffconfigNOT_USED_FOR_NOW != 0 )
+	int32_t FF_Utf16ctoUtf32c( uint32_t *utf32Dest, const uint16_t *utf16Source )
+	{
+	int32_t lReturn;
+
+		/*Not a surrogate sequence. */
+		if( ( *utf16Source & 0xFC00 ) != 0xD800 )
+		{
+			*utf32Dest = ( uint32_t )*utf16Source;
+			lReturn = 1;	/* A single UTF-16 item was used to represent the character. */
+		}
+		else
+		{
+			*utf32Dest = ( ( uint32_t) ( * ( utf16Source + 0 ) & 0x003FF ) << 10 ) + 0x10000;
+			if( ( *(utf16Source + 1) & 0xFC00 ) != 0xDC00 )
+			{
+				lReturn = FF_ERR_UNICODE_INVALID_SEQUENCE | FF_UTF16CTOUTF32C;	/* Invalid UTF-16 sequence. */
+			}
+			else
+			{
+				*utf32Dest |= ( ( uint32_t ) ( *( utf16Source + 1 ) & 0x003FF ) );
+				lReturn = 2;	/* 2 utf-16 units make up the Unicode code-point. */
+			}
+		}
+
+		return lReturn;
+	}	/* FF_Utf16ctoUtf32c() */
+#endif /* ffconfigNOT_USED_FOR_NOW */
+/*-----------------------------------------------------------*/
 
 /*
-	A Wild-Card Comparator Library function, Provided by Adam Fullerton.
-	This can be extended or altered to improve or advance wildCard matching
-	of the FF_FindFirst() and FF_FindNext() API's.
+	Returns the total number of UTF-16 items required to represent
+	the provided UTF-32 string in UTF-16 form.
 */
-#ifdef FF_FINDAPI_ALLOW_WILDCARDS
-/*FF_T_BOOL FF_wildcompare(const FF_T_INT8 *pszWildCard, const FF_T_INT8 *pszString) {
-    // Check to see if the string contains the wild card
-    if (!memchr(pszWildCard, '*', strlen(pszWildCard)))
-    {
-        // if it does not then do a straight string compare
-        if (strcmp(pszWildCard, pszString))
-        {
-            return FF_FALSE;
-        }
-    }
-    else
-    {
-        while ((*pszWildCard)
-        &&     (*pszString))
-        {
-            // Test for the wild card
-            if (*pszWildCard == '*')
-            {
-                // Eat more than one
-                while (*pszWildCard == '*')
-                {
-                    pszWildCard++;
-                }
-                // If there are more chars in the string
-                if (*pszWildCard)
-                {
-                    // Search for the next char
-                    pszString = memchr(pszString, (int)*pszWildCard,  strlen(pszString));
-                    // if it does not exist then the strings don't match
-                    if (!pszString)
-                    {
-                        return FF_FALSE;
-                    }
-
-                }
-                else
-                {
-                    if (*pszWildCard)
-                    {
-                        // continue
-                        break;
-                    }
-                    else
-                    {
-                        return FF_TRUE;
-                    }
-                }
-            }
-            else
-            {
-                // Fail if they don't match
-                if (*pszWildCard != *pszString)
-                {
-                    return FF_FALSE;
-                }
-            }
-            // Bump both pointers
-            pszWildCard++;
-            pszString++;
-        }
-        // fail if different lengths
-        if (*pszWildCard != *pszString)
-        {
-            return FF_FALSE;
-        }
-    }
-
-    return FF_TRUE;
-}*/
 /*
-	This is a better Wild-card compare function, that works perfectly, and is much more efficient.
-	This function was contributed by one of our commercial customers.
+UBaseType_t FF_Utf32GetUtf16Len( const uint32_t *utf32String )
+{
+	UBaseType_t utf16len = 0;
+
+	while( *utf32String )
+	{
+		if( *utf32String++ <= 0xFFFF )
+		{
+			utf16len++;
+		}
+		else
+		{
+			utf16len += 2;
+		}
+	}
+
+	return utf16len;
+}
 */
-#ifdef FF_UNICODE_SUPPORT
-FF_T_BOOL FF_wildcompare(const FF_T_WCHAR *pszWildCard, const FF_T_WCHAR *pszString) {
-    register const FF_T_WCHAR *pszWc 	= NULL;
-	register const FF_T_WCHAR *pszStr 	= NULL;	// Encourage the string pointers to be placed in memory.
-    do {
-        if ( *pszWildCard == '*' ) {
-			while(*(1 + pszWildCard++) == '*'); // Eat up multiple '*''s
-			pszWc = (pszWildCard - 1);
-            pszStr = pszString;
-        }
-		if (*pszWildCard == '?' && !*pszString) {
-			return FF_FALSE;	// False when the string is ended, yet a ? charachter is demanded.
+/*-----------------------------------------------------------*/
+
+
+/* String conversions */
+
+#if( ffconfigNOT_USED_FOR_NOW != 0 )
+	int32_t FF_Utf32stoUtf8s( uint8_t *Utf8String, uint32_t *Utf32String )
+	{
+		int i = 0,y = 0;
+
+		uint16_t utf16buffer[ 2 ];
+
+		while( Utf32String[ i ] != '\0' )
+		{
+			/* Convert to a UTF16 char. */
+			FF_Utf32ctoUtf16c( utf16buffer, Utf32String[ i ], 2 );
+			/* Now convert the UTF16 to UTF8 sequence. */
+			y += FF_Utf16ctoUtf8c( &Utf8String[ y ], utf16buffer, 4 );
+			i++;
 		}
-#ifdef FF_WILDCARD_CASE_INSENSITIVE
-        if (*pszWildCard != '?' && tolower(*pszWildCard) != tolower(*pszString)) {
-#else
-		if (*pszWildCard != '?' && *pszWildCard != *pszString) {
-#endif
-			if (pszWc == NULL) {
-				return FF_FALSE;
-			}
-            pszWildCard = pszWc;
-            pszString = pszStr++;
-        }
 
-		if(!*pszWildCard || !*pszString) {
-			break;
-		}
-    } while ( *pszWildCard++ && *pszString++ );
+		Utf8String[ y ] = '\0';
 
-	while(*pszWildCard == '*') {
-		pszWildCard++;
-	}
-
-	if(!*pszWildCard) {	// WildCard is at the end. (Terminated)
-		return FF_TRUE;	// Therefore this must be a match.
-	}
-
-	return FF_FALSE;	// If not, then return FF_FALSE!
-}
-#else
-FF_T_BOOL FF_wildcompare(const FF_T_INT8 *pszWildCard, const FF_T_INT8 *pszString) {
-    register const FF_T_INT8 *pszWc 	= NULL;
-	register const FF_T_INT8 *pszStr 	= NULL;	// Encourage the string pointers to be placed in memory.
-    do {
-        if ( *pszWildCard == '*' ) {
-			while(*(1 + pszWildCard++) == '*'); // Eat up multiple '*''s
-			pszWc = (pszWildCard - 1);
-            pszStr = pszString;
-        }
-		if (*pszWildCard == '?' && !*pszString) {
-			return FF_FALSE;	// False when the string is ended, yet a ? charachter is demanded.
-		}
-#ifdef FF_WILDCARD_CASE_INSENSITIVE
-        if (*pszWildCard != '?' && tolower((FF_T_INT32)*pszWildCard) != tolower((FF_T_INT32)*pszString)) {
-#else
-		if (*pszWildCard != '?' && *pszWildCard != *pszString) {
-#endif
-			if (pszWc == NULL) {
-				return FF_FALSE;
-			}
-            pszWildCard = pszWc;
-            pszString = pszStr++;
-        }
-
-		if(!*pszWildCard || !*pszString) {
-			break;
-		}
-	} while ( *pszWildCard++ && *pszString++ );
-
-	while(*pszWildCard == '*') {
-		pszWildCard++;
-	}
-
-	if(!*pszWildCard) {	// WildCard is at the end. (Terminated)
-		return FF_TRUE;	// Therefore this must be a match.
-	}
-
-	return FF_FALSE;	// If not, then return FF_FALSE!
-}
-#endif
-
-#endif
+		return 0;
+	}	/* FF_Utf32stoUtf8s() */
+#endif /* ffconfigNOT_USED_FOR_NOW */
+/*-----------------------------------------------------------*/

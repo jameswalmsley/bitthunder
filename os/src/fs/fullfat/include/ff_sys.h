@@ -49,85 +49,106 @@
  *
  */
 
-/**
- *	@file		ff_memory.c
- *	@ingroup	MEMORY
- *
- *	@defgroup	MEMORY	FreeRTOS+FAT Memory Access Routines
- *	@brief		Handles memory access in a portable way.
- *
- *	Provides simple, fast, and portable access to memory routines.
- *	These are only used to read data from buffers. That are LITTLE ENDIAN
- *	due to the FAT specification.
- *
- *	These routines may need to be modified to your platform.
- *
- **/
+/*
+	ff_sys.h
 
-#include "ff_headers.h"
+	This module allow to map several separate file-sub-systems into a root directory
+
+	For instance, a system with 3 sub sytems:
+
+		/flash :  NAND flash driver
+		/ram   :  RAM-disk driver
+		/      :  SD-card driver
+
+	In this example, the SD-card driver handles ALL files and directories which
+	do not match /flash/ * or /ram/ *
+
+	Now for instance a file call "/flash/etc/network.ini"
+	will be stored as "/etc/network.ini" on the NAND drive
+
+	This module along with ff_stdio.c make translations between absolute
+	and relative paths
+*/
+
+#ifndef FF_SYS_H
+#define FF_SYS_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef struct FILE_SUB_SYSTEM
+{
+	char path[16];
+	int pathlen;
+	FF_IOManager_t *pxManager;
+} FF_SubSystem_t;
+
+typedef struct FF_DIR_HANDLER
+{
+	union
+	{
+		struct
+		{
+			unsigned
+				bEndOfDir : 1,
+				bFirstCalled : 1,
+				bIsValid : 1,
+				bAddDotEntries : 2;
+		} bits;
+		unsigned flags;
+	} u;
+	/*
+	 * path will contain the relative path. It will be used when calling +FAT functions
+	 * like FF_FindFirst() / FF_FindNext()
+	 * For instance, for "/flash/etc" path will become "/etc"
+	 */
+	const char *path;
+	FF_IOManager_t *pxManager;	/* will point to handler of this patition */
+	int fsIndex;			/* The index of this entry, where 0 always means: the root system */
+} FF_DirHandler_t;
 
 /*
- * Here below 3 x 2 access functions that allow the code
- * not to worry about the endianness of the MCU.
+ * Initialise (clear) the file system table
+ * This will also called by FF_FS_Add()
  */
+void FF_FS_Init( void );
 
+/*
+ * Add a file system
+ * The path must be absolute, e.g. start with a slash
+ * The second argument is the FF_Disk_t structure that is handling the driver
+ */
+int FF_FS_Add( const char *pcPath, FF_Disk_t *pxDisk );
 
-#if( ffconfigINLINE_MEMORY_ACCESS == 0 )
+/*
+ * Remove a file system
+ * which ws earlier added by ff_fs_ad()
+ */
+void FF_FS_Remove( const char *pcPath );
 
-uint8_t FF_getChar( const uint8_t *pBuffer, uint32_t aOffset )
-{
-	return ( uint8_t ) ( pBuffer[ aOffset ] );
-}
+/*
+ * Internally used by ff_stdio:
+ * The ff_dir_handler helps to iterate through a mounte directory
+ *
+ * FF_FS_Find() will find a ff_dir_handler for a given path
+ */
+int FF_FS_Find( const char *apContext, const char *pcPath, FF_DirHandler_t *pxHandler );
 
-uint16_t FF_getShort( const uint8_t *pBuffer, uint32_t aOffset )
-{
-FF_T_UN16 u16;
+/*
+ * For internal use:
+ * Get the file system information, based on an index
+ */
+int FF_FS_Get( int iIndex, FF_SubSystem_t *pxSystem );
 
-	pBuffer += aOffset;
-	u16.bytes.u8_1 = pBuffer[ 1 ];
-	u16.bytes.u8_0 = pBuffer[ 0 ];
+/*
+ * Returns the number of registered
+ * file systems
+ */
+int FF_FS_Count( void );
 
-	return u16.u16;
-}
-
-uint32_t FF_getLong( const uint8_t *pBuffer, uint32_t aOffset )
-{
-FF_T_UN32 u32;
-
-	pBuffer += aOffset;
-	u32.bytes.u8_3 = pBuffer[ 3 ];
-	u32.bytes.u8_2 = pBuffer[ 2 ];
-	u32.bytes.u8_1 = pBuffer[ 1 ];
-	u32.bytes.u8_0 = pBuffer[ 0 ];
-
-	return u32.u32;
-}
-
-void FF_putChar( uint8_t *pBuffer, uint32_t aOffset, uint32_t Value )
-{
-	pBuffer[ aOffset ] = ( uint8_t ) Value;
-}
-
-void FF_putShort( uint8_t *pBuffer, uint32_t aOffset, uint32_t Value )
-{
-FF_T_UN16 u16;
-
-	u16.u16 = ( uint16_t ) Value;
-	pBuffer += aOffset;
-	pBuffer[ 0 ] = u16.bytes.u8_0;
-	pBuffer[ 1 ] = u16.bytes.u8_1;
-}
-
-void FF_putLong( uint8_t *pBuffer, uint32_t aOffset, uint32_t Value )
-{
-FF_T_UN32 u32;
-
-	u32.u32 = Value;
-	pBuffer += aOffset;
-	pBuffer[ 0 ] = u32.bytes.u8_0;
-	pBuffer[ 1 ] = u32.bytes.u8_1;
-	pBuffer[ 2 ] = u32.bytes.u8_2;
-	pBuffer[ 3 ] = u32.bytes.u8_3;
-}
-
+#ifdef __cplusplus
+} /* extern "C" */
 #endif
+
+#endif /* FF_SYS_H */

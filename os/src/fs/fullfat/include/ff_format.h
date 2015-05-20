@@ -50,84 +50,51 @@
  */
 
 /**
- *	@file		ff_memory.c
- *	@ingroup	MEMORY
- *
- *	@defgroup	MEMORY	FreeRTOS+FAT Memory Access Routines
- *	@brief		Handles memory access in a portable way.
- *
- *	Provides simple, fast, and portable access to memory routines.
- *	These are only used to read data from buffers. That are LITTLE ENDIAN
- *	due to the FAT specification.
- *
- *	These routines may need to be modified to your platform.
+ *	@file		ff_format.c
+ *	@ingroup	FORMAT
  *
  **/
 
-#include "ff_headers.h"
 
-/*
- * Here below 3 x 2 access functions that allow the code
- * not to worry about the endianness of the MCU.
- */
+#ifndef _FF_FORMAT_H_
+#define _FF_FORMAT_H_
+
+#ifdef	__cplusplus
+extern "C" {
+#endif
 
 
-#if( ffconfigINLINE_MEMORY_ACCESS == 0 )
+#ifndef PLUS_FAT_H
+	#error this header will be included from "plusfat.h"
+#endif
 
-uint8_t FF_getChar( const uint8_t *pBuffer, uint32_t aOffset )
-{
-	return ( uint8_t ) ( pBuffer[ aOffset ] );
-}
+/*---------- PROTOTYPES */
+/* PUBLIC (Interfaces): */
 
-uint16_t FF_getShort( const uint8_t *pBuffer, uint32_t aOffset )
-{
-FF_T_UN16 u16;
+typedef enum _FF_SizeType {
+	eSizeIsQuota,    /* Assign a quotum (sum of xSizes is free, all disk space will be allocated) */
+	eSizeIsPercent,  /* Assign a percentage of the available space (sum of xSizes must be <= 100) */
+	eSizeIsSectors,  /* Assign fixed number of sectors (sum of xSizes must be < ulSectorCount) */
+} eSizeType_t;
 
-	pBuffer += aOffset;
-	u16.bytes.u8_1 = pBuffer[ 1 ];
-	u16.bytes.u8_0 = pBuffer[ 0 ];
+typedef struct _FF_PartitionParameters {
+	uint32_t ulSectorCount;     /* Total number of sectors on the disk, including hidden/reserved */
+								/* Must be obtained from the block driver */
+	uint32_t ulHiddenSectors;   /* Keep at least these initial sectors free  */
+	uint32_t ulInterSpace;      /* Number of sectors to keep free between partitions (when 0 -> 2048) */
+	BaseType_t xSizes[ ffconfigMAX_PARTITIONS ];  /* E.g. 80, 20, 0, 0 (see eSizeType) */
+    BaseType_t xPrimaryCount;    /* The number of partitions that must be "primary" */
+	eSizeType_t eSizeType;
+} FF_PartitionParameters_t;
 
-	return u16.u16;
-}
+FF_Error_t FF_Partition( FF_Disk_t *pxDisk, FF_PartitionParameters_t *pParams );
 
-uint32_t FF_getLong( const uint8_t *pBuffer, uint32_t aOffset )
-{
-FF_T_UN32 u32;
+FF_Error_t FF_Format( FF_Disk_t *pxDisk, BaseType_t xPartitionNumber, BaseType_t xPreferFAT16, BaseType_t xSmallClusters );
 
-	pBuffer += aOffset;
-	u32.bytes.u8_3 = pBuffer[ 3 ];
-	u32.bytes.u8_2 = pBuffer[ 2 ];
-	u32.bytes.u8_1 = pBuffer[ 1 ];
-	u32.bytes.u8_0 = pBuffer[ 0 ];
+/* Private : */
 
-	return u32.u32;
-}
-
-void FF_putChar( uint8_t *pBuffer, uint32_t aOffset, uint32_t Value )
-{
-	pBuffer[ aOffset ] = ( uint8_t ) Value;
-}
-
-void FF_putShort( uint8_t *pBuffer, uint32_t aOffset, uint32_t Value )
-{
-FF_T_UN16 u16;
-
-	u16.u16 = ( uint16_t ) Value;
-	pBuffer += aOffset;
-	pBuffer[ 0 ] = u16.bytes.u8_0;
-	pBuffer[ 1 ] = u16.bytes.u8_1;
-}
-
-void FF_putLong( uint8_t *pBuffer, uint32_t aOffset, uint32_t Value )
-{
-FF_T_UN32 u32;
-
-	u32.u32 = Value;
-	pBuffer += aOffset;
-	pBuffer[ 0 ] = u32.bytes.u8_0;
-	pBuffer[ 1 ] = u32.bytes.u8_1;
-	pBuffer[ 2 ] = u32.bytes.u8_2;
-	pBuffer[ 3 ] = u32.bytes.u8_3;
-}
+#ifdef	__cplusplus
+} /* extern "C" */
+#endif
 
 #endif

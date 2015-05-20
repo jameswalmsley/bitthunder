@@ -50,84 +50,62 @@
  */
 
 /**
- *	@file		ff_memory.c
- *	@ingroup	MEMORY
+ *	@file		ff_time.h
+ *	@ingroup	TIME
  *
- *	@defgroup	MEMORY	FreeRTOS+FAT Memory Access Routines
- *	@brief		Handles memory access in a portable way.
- *
- *	Provides simple, fast, and portable access to memory routines.
- *	These are only used to read data from buffers. That are LITTLE ENDIAN
- *	due to the FAT specification.
- *
- *	These routines may need to be modified to your platform.
- *
+ *	Provides a means for receiving the time on any platform.
  **/
 
-#include "ff_headers.h"
+#ifndef _FF_TIME_H_
+#define _FF_TIME_H_
 
-/*
- * Here below 3 x 2 access functions that allow the code
- * not to worry about the endianness of the MCU.
+#include <time.h>
+
+#include "FreeRTOSFATConfig.h"
+
+/* _HT_
+The following declarations and functions may be moved to a common directory?
  */
-
-
-#if( ffconfigINLINE_MEMORY_ACCESS == 0 )
-
-uint8_t FF_getChar( const uint8_t *pBuffer, uint32_t aOffset )
+typedef struct xTIME_STRUCT
 {
-	return ( uint8_t ) ( pBuffer[ aOffset ] );
-}
+	int tm_sec;   /* Seconds */
+	int tm_min;   /* Minutes */
+	int tm_hour;  /* Hour (0--23) */
+	int tm_mday;  /* Day of month (1--31) */
+	int tm_mon;   /* Month (0--11) */
+	int tm_year;  /* Year (calendar year minus 1900) */
+	int tm_wday;  /* Weekday (0--6; Sunday = 0) */
+	int tm_yday;  /* Day of year (0--365) */
+	int tm_isdst; /* 0 if daylight savings time is not in effect) */
+} FF_TimeStruct_t;
 
-uint16_t FF_getShort( const uint8_t *pBuffer, uint32_t aOffset )
+/* Equivalent of time() : returns the number of seconds after 1-1-1970. */
+time_t FreeRTOS_time( time_t *pxTime );
+
+/* Equivalent of mktime() : calculates the number of seconds after 1-1-1970. */
+time_t FreeRTOS_mktime( const FF_TimeStruct_t *pxTimeBuf );
+
+/* Equivalent of gmtime_r() : Fills a 'struct tm'. */
+FF_TimeStruct_t *FreeRTOS_gmtime_r( const time_t *pxTime, FF_TimeStruct_t *pxTimeBuf );
+
+/**
+ *	@public
+ *	@brief	A TIME and DATE object for FreeRTOS+FAT. A FreeRTOS+FAT time driver must populate these values.
+ *
+ **/
+typedef struct
 {
-FF_T_UN16 u16;
+	uint16_t Year;		/* Year	(e.g. 2009). */
+	uint16_t Month;		/* Month	(e.g. 1 = Jan, 12 = Dec). */
+	uint16_t Day;		/* Day	(1 - 31). */
+	uint16_t Hour;		/* Hour	(0 - 23). */
+	uint16_t Minute;	/* Min	(0 - 59). */
+	uint16_t Second;	/* Second	(0 - 59). */
+} FF_SystemTime_t;
 
-	pBuffer += aOffset;
-	u16.bytes.u8_1 = pBuffer[ 1 ];
-	u16.bytes.u8_0 = pBuffer[ 0 ];
+/*---------- PROTOTYPES */
 
-	return u16.u16;
-}
-
-uint32_t FF_getLong( const uint8_t *pBuffer, uint32_t aOffset )
-{
-FF_T_UN32 u32;
-
-	pBuffer += aOffset;
-	u32.bytes.u8_3 = pBuffer[ 3 ];
-	u32.bytes.u8_2 = pBuffer[ 2 ];
-	u32.bytes.u8_1 = pBuffer[ 1 ];
-	u32.bytes.u8_0 = pBuffer[ 0 ];
-
-	return u32.u32;
-}
-
-void FF_putChar( uint8_t *pBuffer, uint32_t aOffset, uint32_t Value )
-{
-	pBuffer[ aOffset ] = ( uint8_t ) Value;
-}
-
-void FF_putShort( uint8_t *pBuffer, uint32_t aOffset, uint32_t Value )
-{
-FF_T_UN16 u16;
-
-	u16.u16 = ( uint16_t ) Value;
-	pBuffer += aOffset;
-	pBuffer[ 0 ] = u16.bytes.u8_0;
-	pBuffer[ 1 ] = u16.bytes.u8_1;
-}
-
-void FF_putLong( uint8_t *pBuffer, uint32_t aOffset, uint32_t Value )
-{
-FF_T_UN32 u32;
-
-	u32.u32 = Value;
-	pBuffer += aOffset;
-	pBuffer[ 0 ] = u32.bytes.u8_0;
-	pBuffer[ 1 ] = u32.bytes.u8_1;
-	pBuffer[ 2 ] = u32.bytes.u8_2;
-	pBuffer[ 3 ] = u32.bytes.u8_3;
-}
+int32_t	FF_GetSystemTime(FF_SystemTime_t *pxTime);
 
 #endif
+

@@ -1,45 +1,56 @@
-/*****************************************************************************
- *     FullFAT - High Performance, Thread-Safe Embedded FAT File-System      *
- *                                                                           *
- *        Copyright(C) 2009  James Walmsley  <james@fullfat-fs.co.uk>        *
- *        Copyright(C) 2011  Hein Tibosch    <hein_tibosch@yahoo.es>         *
- *                                                                           *
- *    See RESTRICTIONS.TXT for extra restrictions on the use of FullFAT.     *
- *                                                                           *
- *    WARNING : COMMERCIAL PROJECTS MUST COMPLY WITH THE GNU GPL LICENSE.    *
- *                                                                           *
- *  Projects that cannot comply with the GNU GPL terms are legally obliged   *
- *    to seek alternative licensing. Contact James Walmsley for details.     *
- *                                                                           *
- *****************************************************************************
- *           See http://www.fullfat-fs.co.uk/ for more information.          *
- *****************************************************************************
- *  This program is free software: you can redistribute it and/or modify     *
- *  it under the terms of the GNU General Public License as published by     *
- *  the Free Software Foundation, either version 3 of the License, or        *
- *  (at your option) any later version.                                      *
- *                                                                           *
- *  This program is distributed in the hope that it will be useful,          *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of           *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            *
- *  GNU General Public License for more details.                             *
- *                                                                           *
- *  You should have received a copy of the GNU General Public License        *
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.    *
- *                                                                           *
- *  The Copyright of Hein Tibosch on this project recognises his efforts in  *
- *  contributing to this project. The right to license the project under     *
- *  any other terms (other than the GNU GPL license) remains with the        *
- *  original copyright holder (James Walmsley) only.                         *
- *                                                                           *
- *****************************************************************************
- *  Modification/Extensions/Bugfixes/Improvements to FullFAT must be sent to *
- *  James Walmsley for integration into the main development branch.         *
- *****************************************************************************/
+/*
+ * FreeRTOS+FAT Labs Build 150406 (C) 2015 Real Time Engineers ltd.
+ * Authors include James Walmsley, Hein Tibosch and Richard Barry
+ *
+ *******************************************************************************
+ ***** NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ***
+ ***                                                                         ***
+ ***                                                                         ***
+ ***   FREERTOS+FAT IS STILL IN THE LAB:                                     ***
+ ***                                                                         ***
+ ***   This product is functional and is already being used in commercial    ***
+ ***   products.  Be aware however that we are still refining its design,    ***
+ ***   the source code does not yet fully conform to the strict coding and   ***
+ ***   style standards mandated by Real Time Engineers ltd., and the         ***
+ ***   documentation and testing is not necessarily complete.                ***
+ ***                                                                         ***
+ ***   PLEASE REPORT EXPERIENCES USING THE SUPPORT RESOURCES FOUND ON THE    ***
+ ***   URL: http://www.FreeRTOS.org/contact  Active early adopters may, at   ***
+ ***   the sole discretion of Real Time Engineers Ltd., be offered versions  ***
+ ***   under a license other than that described below.                      ***
+ ***                                                                         ***
+ ***                                                                         ***
+ ***** NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ***
+ *******************************************************************************
+ *
+ * - Open source licensing -
+ * While FreeRTOS+FAT is in the lab it is provided only under version two of the
+ * GNU General Public License (GPL) (which is different to the standard FreeRTOS
+ * license).  FreeRTOS+FAT is free to download, use and distribute under the
+ * terms of that license provided the copyright notice and this text are not
+ * altered or removed from the source files.  The GPL V2 text is available on
+ * the gnu.org web site, and on the following
+ * URL: http://www.FreeRTOS.org/gpl-2.0.txt.  Active early adopters may, and
+ * solely at the discretion of Real Time Engineers Ltd., be offered versions
+ * under a license other then the GPL.
+ *
+ * FreeRTOS+FAT is distributed in the hope that it will be useful.  You cannot
+ * use FreeRTOS+FAT unless you agree that you use the software 'as is'.
+ * FreeRTOS+FAT is provided WITHOUT ANY WARRANTY; without even the implied
+ * warranties of NON-INFRINGEMENT, MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE. Real Time Engineers Ltd. disclaims all conditions and terms, be they
+ * implied, expressed, or statutory.
+ *
+ * 1 tab == 4 spaces!
+ *
+ * http://www.FreeRTOS.org
+ * http://www.FreeRTOS.org/plus
+ * http://www.FreeRTOS.org/labs
+ *
+ */
 
 /**
  *	@file		ff_crc.c
- *	@author		James Walmsley
  *	@ingroup	CRC
  *
  *	@defgroup	CRC CRC Checksums for Strings
@@ -47,10 +58,10 @@
  *
  **/
 
-#include "ff_crc.h"
+#include "ff_headers.h"
 
-
-/*static*/ const FF_T_UINT32 crc32_table[256] = {
+/*static*/ const uint32_t crc32_table[ 256 ] =
+{
 	0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA, 0x076DC419, 0x706AF48F, 
     0xE963A535, 0x9E6495A3, 0x0EDB8832, 0x79DCB8A4, 0xE0D5E91E, 0x97D2D988, 
     0x09B64C2B, 0x7EB17CBD, 0xE7B82D07, 0x90BF1D91, 0x1DB71064, 0x6AB020F2, 
@@ -96,21 +107,23 @@
     0xB40BBE37, 0xC30C8EA1, 0x5A05DF1B, 0x2D02EF8D
 };
 
-FF_T_UINT32 FF_GetCRC32(FF_T_UINT8 *pbyData, FF_T_UINT32 stLength) {
-
-	register FF_T_UINT32 crc = 0xFFFFFFFF;
-
-	while(stLength--) {
-		crc = ((crc >> 8) & 0x00FFFFFF) ^ crc32_table[(crc^*pbyData++) & 0x000000FF];
+uint32_t FF_GetCRC32( uint8_t *pbyData, uint32_t stLength )
+{
+	
+	register uint32_t crc = 0xFFFFFFFF;
+	
+	while( stLength-- != 0 )
+	{
+		crc = ( ( crc >> 8 ) & 0x00FFFFFF ) ^ crc32_table[ ( crc ^ *( pbyData++ ) ) & 0x000000FF ];
 	}
 
-	return (crc ^ 0xFFFFFFFF);
+	return crc ^ 0xFFFFFFFF;
 }
 
 
 
 
-static const FF_T_UINT8 crc16_table_low[256] = 
+static const uint8_t crc16_table_low[ 256 ] =
 {
     0x000, 0x0c1, 0x081, 0x040, 0x001, 0x0c0, 0x080, 0x041,
     0x001, 0x0c0, 0x080, 0x041, 0x000, 0x0c1, 0x081, 0x040, 
@@ -146,7 +159,7 @@ static const FF_T_UINT8 crc16_table_low[256] =
     0x001, 0x0c0, 0x080, 0x041, 0x000, 0x0c1, 0x081, 0x040,
 };
 
-static const FF_T_UINT8 crc16_table_high[256] = 
+static const uint8_t crc16_table_high[256] = 
 {
     0x000, 0x0c0, 0x0c1, 0x001, 0x0c3, 0x003, 0x002, 0x0c2,
     0x0c6, 0x006, 0x007, 0x0c7, 0x005, 0x0c5, 0x0c4, 0x004,
@@ -193,21 +206,23 @@ static const FF_T_UINT8 crc16_table_high[256] =
  *
  *****************************************************************************/
 
-FF_T_UINT16 FF_GetCRC16(FF_T_UINT8 *pbyData, FF_T_UINT32 stLength) {
-    FF_T_UINT8	bTableValue;
-    FF_T_UINT16 wCRC = 0;
+uint16_t FF_GetCRC16( uint8_t *pbyData, uint32_t stLength )
+{
+    uint8_t	bTableValue;
+    uint16_t wCRC = 0;
 
-    while (stLength--)    {
-        bTableValue = (FF_T_UINT8)((wCRC & 0x00FF) ^ *pbyData++);
-        wCRC = (FF_T_UINT16)(((crc16_table_high[bTableValue]) << 8)
-             + (crc16_table_low[bTableValue] ^ ((wCRC >> 8) & 0x00FF)));
+    while( stLength-- != 0 )
+	{
+        bTableValue = ( uint8_t ) ( (wCRC & 0x00FF ) ^ *pbyData++ );
+        wCRC = ( uint16_t ) ( ( ( crc16_table_high[ bTableValue ] ) << 8 ) +
+             ( crc16_table_low[ bTableValue ] ^ ( ( wCRC >> 8 ) & 0x00FF ) ) );
     }
 
     return wCRC;
 }
 
 
-static const FF_T_UINT8 crc8_table[256] =
+static const uint8_t crc8_table[256] =
 {
     0,   94,  188, 226, 97,  63,  221, 131, 
     194, 156, 126, 32,  163, 253, 31,  65,
@@ -253,11 +268,14 @@ static const FF_T_UINT8 crc8_table[256] =
  *
  *****************************************************************************/
 
-FF_T_UINT8 FF_GetCRC8(FF_T_UINT8 *pbyData, FF_T_UINT32 stLength) {
-    FF_T_UINT8 byCRC = 0, byData;
-    while (stLength--) {
+uint8_t FF_GetCRC8( uint8_t *pbyData, uint32_t stLength )
+{
+    uint8_t byCRC = 0, byData;
+    while( stLength-- != 0 )
+	{
         byData = *pbyData++;
-        byCRC = crc8_table[(byCRC ^ byData)];
+        byCRC = crc8_table[ ( byCRC ^ byData ) ];
     }
+
     return byCRC;
 }

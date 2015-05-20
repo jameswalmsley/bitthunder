@@ -1,91 +1,316 @@
-/*****************************************************************************
- *     FullFAT - High Performance, Thread-Safe Embedded FAT File-System      *
- *                                                                           *
- *        Copyright(C) 2009  James Walmsley  <james@fullfat-fs.co.uk>        *
- *        Copyright(C) 2011  Hein Tibosch    <hein_tibosch@yahoo.es>         *
- *                                                                           *
- *    See RESTRICTIONS.TXT for extra restrictions on the use of FullFAT.     *
- *                                                                           *
- *    WARNING : COMMERCIAL PROJECTS MUST COMPLY WITH THE GNU GPL LICENSE.    *
- *                                                                           *
- *  Projects that cannot comply with the GNU GPL terms are legally obliged   *
- *    to seek alternative licensing. Contact James Walmsley for details.     *
- *                                                                           *
- *****************************************************************************
- *           See http://www.fullfat-fs.co.uk/ for more information.          *
- *****************************************************************************
- *  This program is free software: you can redistribute it and/or modify     *
- *  it under the terms of the GNU General Public License as published by     *
- *  the Free Software Foundation, either version 3 of the License, or        *
- *  (at your option) any later version.                                      *
- *                                                                           *
- *  This program is distributed in the hope that it will be useful,          *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of           *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            *
- *  GNU General Public License for more details.                             *
- *                                                                           *
- *  You should have received a copy of the GNU General Public License        *
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.    *
- *                                                                           *
- *  The Copyright of Hein Tibosch on this project recognises his efforts in  *
- *  contributing to this project. The right to license the project under     *
- *  any other terms (other than the GNU GPL license) remains with the        *
- *  original copyright holder (James Walmsley) only.                         *
- *                                                                           *
- *****************************************************************************
- *  Modification/Extensions/Bugfixes/Improvements to FullFAT must be sent to *
- *  James Walmsley for integration into the main development branch.         *
- *****************************************************************************/
+/*
+ * FreeRTOS+FAT Labs Build 150406 (C) 2015 Real Time Engineers ltd.
+ * Authors include James Walmsley, Hein Tibosch and Richard Barry
+ *
+ *******************************************************************************
+ ***** NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ***
+ ***                                                                         ***
+ ***                                                                         ***
+ ***   FREERTOS+FAT IS STILL IN THE LAB:                                     ***
+ ***                                                                         ***
+ ***   This product is functional and is already being used in commercial    ***
+ ***   products.  Be aware however that we are still refining its design,    ***
+ ***   the source code does not yet fully conform to the strict coding and   ***
+ ***   style standards mandated by Real Time Engineers ltd., and the         ***
+ ***   documentation and testing is not necessarily complete.                ***
+ ***                                                                         ***
+ ***   PLEASE REPORT EXPERIENCES USING THE SUPPORT RESOURCES FOUND ON THE    ***
+ ***   URL: http://www.FreeRTOS.org/contact  Active early adopters may, at   ***
+ ***   the sole discretion of Real Time Engineers Ltd., be offered versions  ***
+ ***   under a license other than that described below.                      ***
+ ***                                                                         ***
+ ***                                                                         ***
+ ***** NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ***
+ *******************************************************************************
+ *
+ * - Open source licensing -
+ * While FreeRTOS+FAT is in the lab it is provided only under version two of the
+ * GNU General Public License (GPL) (which is different to the standard FreeRTOS
+ * license).  FreeRTOS+FAT is free to download, use and distribute under the
+ * terms of that license provided the copyright notice and this text are not
+ * altered or removed from the source files.  The GPL V2 text is available on
+ * the gnu.org web site, and on the following
+ * URL: http://www.FreeRTOS.org/gpl-2.0.txt.  Active early adopters may, and
+ * solely at the discretion of Real Time Engineers Ltd., be offered versions
+ * under a license other then the GPL.
+ *
+ * FreeRTOS+FAT is distributed in the hope that it will be useful.  You cannot
+ * use FreeRTOS+FAT unless you agree that you use the software 'as is'.
+ * FreeRTOS+FAT is provided WITHOUT ANY WARRANTY; without even the implied
+ * warranties of NON-INFRINGEMENT, MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE. Real Time Engineers Ltd. disclaims all conditions and terms, be they
+ * implied, expressed, or statutory.
+ *
+ * 1 tab == 4 spaces!
+ *
+ * http://www.FreeRTOS.org
+ * http://www.FreeRTOS.org/plus
+ * http://www.FreeRTOS.org/labs
+ *
+ */
 
+#include <stdio.h>
+#include <time.h>
+#include <string.h>
+
+#include "FreeRTOS.h"
+#include "task.h"
 
 #include "ff_time.h"
 
-
 /**
  *	@file		ff_time.c
- *	@author		James Walmsley
  *	@ingroup	TIME
  *
  *	@defgroup	TIME Real-Time Clock Interface
- *	@brief		Allows FullFAT to time-stamp files.
+ *	@brief		Allows FreeRTOS+FAT to time-stamp files.
  *
  *	Provides a means for receiving the time on any platform.
  **/
 
-#ifdef	FF_TIME_SUPPORT
-
-#include <bitthunder.h>
-
+#if( ffconfigTIME_SUPPORT != 0 )	/* This if-block spans the rest of the source file. */
 /**
  *	@public
- *	@brief	Populates an FF_SYSTEMTIME object with the current time from the system.
+ *	@brief	Populates an FF_SystemTime_t object with the current time from the system.
  *
  *	The developer must modify this function so that it is suitable for their platform.
  *	The function must return with 0, and if the time is not available all elements of the
- *	FF_SYSTEMTIME object must be zero'd, as in the examples provided.
+ *	FF_SystemTime_t object must be zero'd, as in the examples provided.
  *
- *	@param	pTime	Pointer to an FF_TIME object.
+ *	@param	pxTime	Pointer to an FF_TIME object.
  *
  *	@return	Always returns 0.
  **/
-FF_T_SINT32	FF_GetSystemTime(FF_SYSTEMTIME *pTime) {
 
-	struct bt_rtc_time time;
-	struct bt_timeval tv;
+int32_t	FF_GetSystemTime( FF_SystemTime_t *pxTime )
+{
+	FF_TimeStruct_t xTimeStruct;
 
-	bt_gettimeofday(&tv, NULL);
-	bt_time_to_tm(tv.tv_sec, &time);
-	time.tm_year += 1900;
-	time.tm_mon += 1;
+	/* Fetch the current time. */
+	time_t secs = FreeRTOS_time( NULL );
 
-	pTime->Hour		= time.tm_hour;
-	pTime->Minute	= time.tm_min;
-	pTime->Second	= time.tm_sec;
-	pTime->Day		= time.tm_mday;
-	pTime->Month	= time.tm_mon;
-	pTime->Year		= time.tm_year;
+	/* Fill the fields in 'xTimeStruct'. */
+	FreeRTOS_gmtime_r( &secs, &xTimeStruct );
+
+	pxTime->Hour = xTimeStruct.tm_hour;
+	pxTime->Minute = xTimeStruct.tm_min;
+	pxTime->Second = xTimeStruct.tm_sec;
+	pxTime->Day = xTimeStruct.tm_mday;
+	pxTime->Month = xTimeStruct.tm_mon + 1;
+	pxTime->Year = xTimeStruct.tm_year + 1900;
 
 	return 0;
+}	/* FF_GetSystemTime() */
+/*-----------------------------------------------------------*/
+
+/*
+ * FreeRTOS+FAT
+ * Time conversion functions:
+ *
+ * FF_TimeStruct_t *FreeRTOS_gmtime_r( const time_t *pxTime, FF_TimeStruct_t *pxTimeBuf )
+ * time_t FreeRTOS_mktime(FF_TimeStruct_t *pxTimeBuf)
+*/
+
+#define GMTIME_FIRST_YEAR		( 1970 )
+#define TM_STRUCT_FIRST_YEAR	( 1900 )
+#define SECONDS_PER_MINUTE		( 60 )
+#define MINUTES_PER_HOUR		( 60 )
+#define HOURS_PER_DAY			( 24 )
+#define SECONDS_PER_HOUR		( MINUTES_PER_HOUR * SECONDS_PER_MINUTE )
+#define SECONDS_PER_DAY			( HOURS_PER_DAY * SECONDS_PER_HOUR )
+
+/* The first weekday in 'FF_TimeStruct_t' is Sunday. */
+#define WEEK_DAY_SUNDAY			0
+#define WEEK_DAY_MONNDAY 		1
+#define WEEK_DAY_TUESDAY 		2
+#define WEEK_DAY_WEDNESDAY		3
+#define WEEK_DAY_THURSDAY		4
+#define WEEK_DAY_FRIDAY			5
+#define WEEK_DAY_SATURDAY		6
+
+/* Make a bitmask with a '1' for each 31-day month. */
+#define _MM(month)			( 1u << ( month - 1 ) )
+#define	MASK_LONG_MONTHS	( _MM(1) | _MM(3) | _MM(5) | _MM(7) | _MM(8) | _MM(10) | _MM(12) )
+
+#define DAYS_UNTIL_1970		( ( 1970 * 365 ) + ( 1970 / 4 ) - ( 1970 / 100 ) + ( 1970 / 400 ) )
+#define DAYS_BEFORE_MARCH	( 59 )
+
+static portINLINE int iIsLeapyear( int iYear )
+{
+int iReturn;
+
+	if( ( iYear % 4 ) != 0 )
+	{
+		/* Not a multiple of 4 years. */
+		iReturn = pdFALSE;
+	}
+	else if( ( iYear % 400 ) == 0 )
+	{
+		/* Every 4 centuries there is a leap year */
+		iReturn = pdTRUE;
+	}
+	else if( ( iYear % 100 ) == 0 )
+	{
+		/* Other centuries are not a leap year */
+		iReturn = pdFALSE;
+	}
+	else
+	{
+		/* Otherwise every fourth year. */
+		iReturn = pdTRUE;
+	}
+
+	return iReturn;
 }
 
-#endif
+static portINLINE unsigned long ulDaysPerYear( int iYear )
+{
+int iDays;
+
+	if( iIsLeapyear( iYear ) )
+	{
+		iDays = 366;
+	}
+	else
+	{
+		iDays = 365;
+	}
+
+	return iDays;
+}
+
+static int iDaysPerMonth( int iYear, int iMonth )
+{
+int iDays;
+
+	/* Month is zero-based, 1 is February. */
+	if (iMonth != 1 )
+	{
+		/* 30 or 31 days? */
+		if(  ( MASK_LONG_MONTHS & ( 1u << iMonth ) ) != 0 )
+		{
+			iDays = 31;
+		}
+		else
+		{
+			iDays = 30;
+		}
+	}
+	else if( iIsLeapyear( iYear ) == pdFALSE )
+	{
+		/* February, non leap year. */
+		iDays = 28;
+	}
+	else
+	{
+		/* February, leap year. */
+		iDays = 29;
+	}
+	return iDays;
+}
+
+FF_TimeStruct_t *FreeRTOS_gmtime_r( const time_t *pxTime, FF_TimeStruct_t *pxTimeBuf )
+{
+time_t xTime = *pxTime;
+unsigned long ulDaySeconds, ulDayNumber;
+int iYear = GMTIME_FIRST_YEAR;
+int iMonth;
+
+	/* Clear all fields, some might not get set here. */
+	memset( ( void * )pxTimeBuf, '\0', sizeof( *pxTimeBuf ) );
+
+	/* Seconds since last midnight. */
+	ulDaySeconds = ( unsigned long ) ( xTime % SECONDS_PER_DAY ) ;
+
+	/* Days since 1 Jan 1970. */
+	ulDayNumber = ( unsigned long ) ( xTime / SECONDS_PER_DAY ) ;
+
+	/* Today's HH:MM:SS */
+	pxTimeBuf->tm_hour = ulDaySeconds / SECONDS_PER_HOUR;
+	pxTimeBuf->tm_min = ( ulDaySeconds % SECONDS_PER_HOUR ) / 60;
+	pxTimeBuf->tm_sec = ulDaySeconds % 60;
+
+	/* Today's week day, knowing that 1-1-1970 was a THursday. */
+	pxTimeBuf->tm_wday = ( ulDayNumber + WEEK_DAY_THURSDAY ) % 7;
+
+	for( ; ; )
+	{
+		/* Keep subtracting 365 (or 366) days while possible. */
+		unsigned long ulDays = ulDaysPerYear( iYear );
+		if( ulDayNumber < ulDays )
+		{
+			break;
+		}
+		ulDayNumber -= ulDays;
+		iYear++;
+	}
+	/* Subtract 1900. */
+	pxTimeBuf->tm_year = iYear - TM_STRUCT_FIRST_YEAR;
+
+	/* The day within this year. */
+	pxTimeBuf->tm_yday = ulDayNumber;
+
+	/* Month are counted as 0..11 */
+	iMonth = 0;
+	for( ; ; )
+	{
+		unsigned long ulDays = iDaysPerMonth( iYear, iMonth );
+		/* Keep subtracting 30 (or 28, 29, or 31) days while possible. */
+		if( ulDayNumber < ulDays )
+		{
+			break;
+		}
+		ulDayNumber -= ulDays;
+		iMonth++;
+	}
+	pxTimeBuf->tm_mon = iMonth;
+
+	/* Month days are counted as 1..31 */
+	pxTimeBuf->tm_mday = ulDayNumber + 1;
+
+	return pxTimeBuf;
+}
+
+time_t FreeRTOS_mktime( const FF_TimeStruct_t *pxTimeBuf )
+{
+/* Get year AD. */
+int iYear = 1900 + pxTimeBuf->tm_year;
+/* Get month zero-based. */
+int iMonth = pxTimeBuf->tm_mon;
+uint32_t ulDays;
+uint32_t ulResult;
+
+	ulDays = pxTimeBuf->tm_mday - 1;
+
+	/* Make March the first month. */
+	iMonth -= 2;
+	if( iMonth < 0 )
+	{
+		/* January or February: leap day has yet to come for this year. */
+		iYear--;
+		iMonth += 12;
+	}
+
+	/* Add the number of days past until this month. */
+	ulDays += ( ( 306 * iMonth ) + 5 ) / 10;
+
+	/* Add days past before this year: */
+	ulDays +=
+		+ ( iYear * 365 )		/* Every normal year. */
+		+ ( iYear / 4 )			/* Plus a day for every leap year. */
+		- ( iYear / 100 )		/* Minus the centuries. */
+		+ ( iYear / 400 )		/* Except every fourth century. */
+		- ( DAYS_UNTIL_1970 )	/* Minus the days before 1-1-1970 */
+		+ ( DAYS_BEFORE_MARCH );/* Because 2 months were subtracted. */
+
+	ulResult =
+		( ulDays * SECONDS_PER_DAY ) +
+		( pxTimeBuf->tm_hour * SECONDS_PER_HOUR ) +
+		( pxTimeBuf->tm_min * SECONDS_PER_MINUTE ) +
+		pxTimeBuf->tm_sec;
+
+	return ulResult;
+}
+
+#endif	/* ffconfigTIME_SUPPORT */
+

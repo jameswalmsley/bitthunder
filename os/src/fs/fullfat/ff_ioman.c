@@ -1,1232 +1,1769 @@
-/*****************************************************************************
- *     FullFAT - High Performance, Thread-Safe Embedded FAT File-System      *
- *                                                                           *
- *        Copyright(C) 2009  James Walmsley  <james@fullfat-fs.co.uk>        *
- *        Copyright(C) 2011  Hein Tibosch    <hein_tibosch@yahoo.es>         *
- *                                                                           *
- *    See RESTRICTIONS.TXT for extra restrictions on the use of FullFAT.     *
- *                                                                           *
- *    WARNING : COMMERCIAL PROJECTS MUST COMPLY WITH THE GNU GPL LICENSE.    *
- *                                                                           *
- *  Projects that cannot comply with the GNU GPL terms are legally obliged   *
- *    to seek alternative licensing. Contact James Walmsley for details.     *
- *                                                                           *
- *****************************************************************************
- *           See http://www.fullfat-fs.co.uk/ for more information.          *
- *****************************************************************************
- *  This program is free software: you can redistribute it and/or modify     *
- *  it under the terms of the GNU General Public License as published by     *
- *  the Free Software Foundation, either version 3 of the License, or        *
- *  (at your option) any later version.                                      *
- *                                                                           *
- *  This program is distributed in the hope that it will be useful,          *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of           *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            *
- *  GNU General Public License for more details.                             *
- *                                                                           *
- *  You should have received a copy of the GNU General Public License        *
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.    *
- *                                                                           *
- *  The Copyright of Hein Tibosch on this project recognises his efforts in  *
- *  contributing to this project. The right to license the project under     *
- *  any other terms (other than the GNU GPL license) remains with the        *
- *  original copyright holder (James Walmsley) only.                         *
- *                                                                           *
- *****************************************************************************
- *  Modification/Extensions/Bugfixes/Improvements to FullFAT must be sent to *
- *  James Walmsley for integration into the main development branch.         *
- *****************************************************************************/
+/*
+ * FreeRTOS+FAT Labs Build 150406 (C) 2015 Real Time Engineers ltd.
+ * Authors include James Walmsley, Hein Tibosch and Richard Barry
+ *
+ *******************************************************************************
+ ***** NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ***
+ ***                                                                         ***
+ ***                                                                         ***
+ ***   FREERTOS+FAT IS STILL IN THE LAB:                                     ***
+ ***                                                                         ***
+ ***   This product is functional and is already being used in commercial    ***
+ ***   products.  Be aware however that we are still refining its design,    ***
+ ***   the source code does not yet fully conform to the strict coding and   ***
+ ***   style standards mandated by Real Time Engineers ltd., and the         ***
+ ***   documentation and testing is not necessarily complete.                ***
+ ***                                                                         ***
+ ***   PLEASE REPORT EXPERIENCES USING THE SUPPORT RESOURCES FOUND ON THE    ***
+ ***   URL: http://www.FreeRTOS.org/contact  Active early adopters may, at   ***
+ ***   the sole discretion of Real Time Engineers Ltd., be offered versions  ***
+ ***   under a license other than that described below.                      ***
+ ***                                                                         ***
+ ***                                                                         ***
+ ***** NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ***
+ *******************************************************************************
+ *
+ * - Open source licensing -
+ * While FreeRTOS+FAT is in the lab it is provided only under version two of the
+ * GNU General Public License (GPL) (which is different to the standard FreeRTOS
+ * license).  FreeRTOS+FAT is free to download, use and distribute under the
+ * terms of that license provided the copyright notice and this text are not
+ * altered or removed from the source files.  The GPL V2 text is available on
+ * the gnu.org web site, and on the following
+ * URL: http://www.FreeRTOS.org/gpl-2.0.txt.  Active early adopters may, and
+ * solely at the discretion of Real Time Engineers Ltd., be offered versions
+ * under a license other then the GPL.
+ *
+ * FreeRTOS+FAT is distributed in the hope that it will be useful.  You cannot
+ * use FreeRTOS+FAT unless you agree that you use the software 'as is'.
+ * FreeRTOS+FAT is provided WITHOUT ANY WARRANTY; without even the implied
+ * warranties of NON-INFRINGEMENT, MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE. Real Time Engineers Ltd. disclaims all conditions and terms, be they
+ * implied, expressed, or statutory.
+ *
+ * 1 tab == 4 spaces!
+ *
+ * http://www.FreeRTOS.org
+ * http://www.FreeRTOS.org/plus
+ * http://www.FreeRTOS.org/labs
+ *
+ */
 
 /**
  *	@file		ff_ioman.c
- *	@author		James Walmsley
  *	@ingroup	IOMAN
  *
  *	@defgroup	IOMAN	I/O Manager
- *	@brief		Handles IO buffers for FullFAT safely.
+ *	@brief		Handles IO buffers for FreeRTOS+FAT safely.
  *
- *	Provides a simple static interface to the rest of FullFAT to manage
+ *	Provides a simple static interface to the rest of FreeRTOS+FAT to manage
  *	buffers. It also defines the public interfaces for Creating and
- *	Destroying a FullFAT IO object.
+ *	Destroying a FreeRTOS+FAT IO object.
  **/
 
 #include <time.h>
 #include <string.h>
 
-#include "ff_ioman.h"	// Includes ff_types.h, ff_safety.h, <stdio.h>
-#include "ff_fatdef.h"
-#include "ff_crc.h"
-#include "ff_fat.h"
+#include "ff_headers.h"
 
-static void FF_IOMAN_InitBufferDescriptors(FF_IOMAN *pIoman);
+#define FAT16_SECTOR_COUNT_4085		4085
+#define FAT32_SECTOR_COUNT_65525	65525 /* 65536 clusters */
+
+/* Some values and offsets describing the special sector FS INFO: */
+#define  FS_INFO_SIGNATURE1_0x41615252			0x41615252UL
+#define  FS_INFO_SIGNATURE2_0x61417272			0x61417272UL
+#define  FS_INFO_OFFSET_SIGNATURE1_000			0
+#define  FS_INFO_OFFSET_SIGNATURE2_484			484
+#define  FS_INFO_OFFSET_FREE_COUNT_488			488
+#define  FS_INFO_OFFSET_FREE_CLUSTER_492		492
+
+/* Inspect the PBR (Partition Boot Record) to determine the type of FAT */
+static FF_Error_t prvDetermineFatType( FF_IOManager_t *pxIOManager );
+
+/* Check if a given ID introduces an extended partition. */
+static BaseType_t prvIsExtendedPartition( uint8_t ucPartitionID );
+
+/* Return pdTRUE if the media byte in an MBR is valid. */
+static BaseType_t prvIsValidMedia( uint8_t media );
+
+/* Read the MBR to see what extended partitions have been defined.
+Definitions of extended partitions may be chained.
+Walk down the chain to find all extended partitions. */
+static FF_Error_t FF_ParseExtended( FF_IOManager_t *pxIOManager, uint32_t ulFirstSector, uint32_t ulFirstSize,
+	FF_SPartFound_t *pPartsFound );
+
+static FF_Error_t FF_GetEfiPartitionEntry( FF_IOManager_t *pxIOManager, uint32_t ulPartitionNumber );
+
+static BaseType_t prvHasActiveHandles( FF_IOManager_t *pxIOManager );
+
 
 /**
  *	@public
- *	@brief	Creates an FF_IOMAN object, to initialise FullFAT
+ *	@brief	Creates an FF_IOManager_t object, to initialise FreeRTOS+FAT
  *
- *	@param	pCacheMem		Pointer to a buffer for the cache. (NULL if ok to Malloc).
- *	@param	Size			The size of the provided buffer, or size of the cache to be created. (Must be atleast 2 * BlkSize). Always a multiple of BlkSize.
- *	@param	BlkSize			The block size of devices to be attached. If in doubt use 512.
- *	@param	pError			Pointer to a signed byte for error checking. Can be NULL if not required.
- *	@param	pError			To be checked when a NULL pointer is returned.
+ *	@param	pucCacheMem			Pointer to a buffer for the cache. (NULL if ok to Malloc).
+ *	@param	ulCacheSize			The size of the provided buffer, or size of the cache to be created.
+ *								(Must be at least 2 * ulSectorSize). Always a multiple of ulSectorSize.
+ *	@param	usSectorSize		The block size of devices to be attached. If in doubt use 512.
+ *	@param	pError				Pointer to a signed byte for error checking. Can be NULL if not required.
+ *								To be checked when a NULL pointer is returned.
  *
- *	@return	Returns a pointer to an FF_IOMAN type object. NULL on Error, check the contents of
- *	@return pError
+ *	@Return	Returns a pointer to an FF_IOManager_t type object. NULL on xError, check the contents of
+ *	@Return pError
  **/
-FF_IOMAN *FF_CreateIOMAN(FF_T_UINT8 *pCacheMem, FF_T_UINT32 Size, FF_T_UINT16 BlkSize, FF_ERROR *pError) {
+FF_IOManager_t *FF_CreateIOManger( FF_CreationParameters_t *pxParameters, FF_Error_t *pError )
+{
+FF_IOManager_t *pxIOManager = NULL;
+FF_Error_t xError;
+uint32_t ulCacheSize = pxParameters->ulMemorySize;
+uint32_t usSectorSize = pxParameters->ulSectorSize;
 
-	FF_IOMAN	*pIoman = NULL;
-	FF_T_UINT32 *pLong	= NULL;
-#ifdef FF_HASH_CACHE
-	FF_T_UINT i;
-#endif
-
-	if(pError) {
-		*pError = FF_ERR_NONE;
+	/* Normally:
+	ulSectorSize = 512
+	ulCacheSize = N x ulSectorSize. */
+	if( ( ( usSectorSize % 512 ) != 0 ) || ( usSectorSize == 0 ) )
+	{
+		/* ulSectorSize Size not a multiple of 512 or it is zero*/
+		xError = FF_ERR_IOMAN_BAD_BLKSIZE | FF_CREATEIOMAN;
 	}
+	else if( ( ( ulCacheSize % ( uint32_t ) usSectorSize ) != 0 ) || ( ulCacheSize == 0 ) ||
+			 ( ulCacheSize == ( uint32_t ) usSectorSize ) )
+	{
+		/* The size of the caching memory (ulCacheSize) must now be atleast 2 * ulSectorSize (or a deadlock will occur). */
+		xError = FF_ERR_IOMAN_BAD_MEMSIZE | FF_CREATEIOMAN;
+	}
+	else
+	{
+		pxIOManager = ( FF_IOManager_t * ) ffconfigMALLOC( sizeof( FF_IOManager_t ) );
 
-	if((BlkSize % 512) != 0 || BlkSize == 0) {
-		if(pError) {
-			*pError = FF_ERR_IOMAN_BAD_BLKSIZE | FF_CREATEIOMAN;
+		/* Ensure malloc() succeeded. */
+		if( pxIOManager != NULL )
+		{
+			/* Use memset() to clear every single bit. */
+			memset( pxIOManager, '\0', sizeof( FF_IOManager_t ) );
+			xError = FF_ERR_NONE;
 		}
-		return NULL;	// BlkSize Size not a multiple of 512 > 0
-	}
-
-	if((Size % BlkSize) != 0 || Size == 0 || Size == BlkSize) {  // Size must now be atleast 2 * BlkSize (or a deadlock will occur).
-		if(pError) {
-			*pError = FF_ERR_IOMAN_BAD_MEMSIZE | FF_CREATEIOMAN;
+		else
+		{
+			xError = FF_ERR_NOT_ENOUGH_MEMORY | FF_CREATEIOMAN;
 		}
-		return NULL;	// Memory Size not a multiple of BlkSize > 0
 	}
 
-	pIoman = (FF_IOMAN *) FF_MALLOC(sizeof(FF_IOMAN));
-
-	if(!pIoman) {		// Ensure malloc() succeeded.
-		if(pError) {
-			*pError = FF_ERR_NOT_ENOUGH_MEMORY | FF_CREATEIOMAN;
+	if( FF_isERR( xError ) == pdFALSE )
+	{
+		if( pxParameters->pucCacheMemory != NULL )
+		{
+			/* The caller has provided a piece of memory, use it. */
+			pxIOManager->pucCacheMem = pxParameters->pucCacheMemory;
 		}
-		return NULL;
-	}
-
-	memset (pIoman, '\0', sizeof(FF_IOMAN));
-
-	// This is just a bit-mask, to use a byte to keep track of memory.
-	// pIoman->MemAllocation = 0x00;	// Unset all allocation identifiers.
-	pIoman->pPartition	= (FF_PARTITION  *) FF_MALLOC(sizeof(FF_PARTITION));
-	if(!pIoman->pPartition) {
-		if(pError) {
-			*pError = FF_ERR_NOT_ENOUGH_MEMORY | FF_CREATEIOMAN;
-		}
-		FF_DestroyIOMAN(pIoman);
-		return NULL;
-	}
-	memset (pIoman->pPartition, '\0', sizeof(FF_PARTITION));
-
-	pIoman->MemAllocation |= FF_IOMAN_ALLOC_PART;	// If succeeded, flag that allocation.
-
-#ifdef FF_HASH_CACHE
-	for(i = 0; i < FF_HASH_CACHE_DEPTH; i++) {
-		pIoman->HashCache[i].pHashTable 	= FF_CreateHashTable();
-		pIoman->HashCache[i].ulDirCluster 	= 0;
-		pIoman->HashCache[i].ulMisses		= 100;
-	}
-#endif
-
-	pIoman->pBlkDevice	= (FF_BLK_DEVICE *) FF_MALLOC(sizeof(FF_BLK_DEVICE));
-	if(!pIoman->pBlkDevice) {	// If succeeded, flag that allocation.
-		if(pError) {
-			*pError = FF_ERR_NOT_ENOUGH_MEMORY | FF_CREATEIOMAN;
-		}
-		FF_DestroyIOMAN(pIoman);
-		return NULL;
-	}
-	memset (pIoman->pBlkDevice, '\0', sizeof(FF_BLK_DEVICE));
-	pIoman->MemAllocation |= FF_IOMAN_ALLOC_BLKDEV;
-
-	// Make sure all pointers are NULL
-	// ...have been nulled by previous memset()
-//	pIoman->pBlkDevice->fnReadBlocks = NULL;
-//	pIoman->pBlkDevice->fnWriteBlocks = NULL;
-//	pIoman->pBlkDevice->pParam = NULL;
-
-	// Organise the memory provided, or create our own!
-	if(pCacheMem) {
-		pIoman->pCacheMem = pCacheMem;
-	}else {	// No-Cache buffer provided (malloc)
-		pLong = (FF_T_UINT32 *) FF_MALLOC(Size);
-		pIoman->pCacheMem = (FF_T_UINT8 *) pLong;
-		if(!pIoman->pCacheMem) {
-			if(pError) {
-				*pError = FF_ERR_NOT_ENOUGH_MEMORY | FF_CREATEIOMAN;
+		else
+		{
+			/* No cache buffer provided, call malloc(). */
+			pxIOManager->pucCacheMem = ( uint8_t * ) ffconfigMALLOC( ulCacheSize );
+			if( pxIOManager->pucCacheMem != NULL )
+			{
+				/* Indicate that malloc() was used for pucCacheMem. */
+				pxIOManager->ucFlags |= FF_IOMAN_ALLOC_BUFFERS;
 			}
-			FF_DestroyIOMAN(pIoman);
-			return NULL;
+			else
+			{
+				xError = FF_ERR_NOT_ENOUGH_MEMORY | FF_CREATEIOMAN;
+			}
 		}
-		pIoman->MemAllocation |= FF_IOMAN_ALLOC_BUFFERS;
 
-	}
-	memset (pIoman->pCacheMem, '\0', Size);
-
-	pIoman->BlkSize		 = BlkSize;
-	pIoman->CacheSize	 = (FF_T_UINT16) (Size / BlkSize);
-//	pIoman->FirstFile	 = NULL;
-//	pIoman->Locks		 = 0;
-
-	/*	Malloc() memory for buffer objects. (FullFAT never refers to a buffer directly
-		but uses buffer objects instead. Allows us to provide thread safety.
-	*/
-	pIoman->pBuffers = (FF_BUFFER *) FF_MALLOC(sizeof(FF_BUFFER) * pIoman->CacheSize);
-
-	if(!pIoman->pBuffers) {
-		if(pError) {
-			*pError = FF_ERR_NOT_ENOUGH_MEMORY | FF_CREATEIOMAN;
+		if( pxIOManager->pucCacheMem != NULL )
+		{
+			memset( pxIOManager->pucCacheMem, '\0', ulCacheSize );
 		}
-		FF_DestroyIOMAN(pIoman);
-		return NULL;	// HT added
 	}
-	memset (pIoman->pBuffers, '\0', sizeof(FF_BUFFER) * pIoman->CacheSize);
+	
+	if( FF_isERR( xError ) == pdFALSE )
+	{
+		pxIOManager->usSectorSize = usSectorSize;
+		pxIOManager->usCacheSize = ( uint16_t ) ( ulCacheSize / ( uint32_t ) usSectorSize );
 
-	pIoman->MemAllocation |= FF_IOMAN_ALLOC_BUFDESCR;
-	FF_IOMAN_InitBufferDescriptors(pIoman);
+		/* Malloc() memory for buffer objects. FreeRTOS+FAT never refers to a 
+		buffer directly but uses buffer objects instead. Allows for thread 
+		safety. */
+		pxIOManager->pxBuffers = ( FF_Buffer_t * ) ffconfigMALLOC( sizeof( FF_Buffer_t ) * pxIOManager->usCacheSize );
 
-	// Finally create a Semaphore for Buffer Description modifications.
-	pIoman->pSemaphore = FF_CreateSemaphore();
-	// Finally create Semaphores for DIR and FAT.
-	pIoman->pDirSemaphore = FF_CreateSemaphore();
-	pIoman->pFATSemaphore = FF_CreateSemaphore();
+		if( pxIOManager->pxBuffers != NULL )
+		{
+			/* From now on a call to FF_IOMAN_InitBufferDescriptors will clear 
+			pxBuffers. */
+			pxIOManager->ucFlags |= FF_IOMAN_ALLOC_BUFDESCR;
 
-#ifdef FF_BLKDEV_USES_SEM
-	pIoman->pBlkDevSemaphore = FF_CreateSemaphore();
-#endif
+			FF_IOMAN_InitBufferDescriptors( pxIOManager );
 
-	return pIoman;	// Sucess, return the created object.
-}
+			/* Finally store the semaphore for Buffer Description modifications. */
+			pxIOManager->pvSemaphore = pxParameters->pvSemaphore;
+
+			if( pxParameters->xBlockDeviceIsReentrant != pdFALSE )
+			{
+				pxIOManager->ucFlags |= FF_IOMAN_BLOCK_DEVICE_IS_REENTRANT;
+			}
+
+			pxIOManager->xBlkDevice.fnpReadBlocks	= pxParameters->fnReadBlocks;
+			pxIOManager->xBlkDevice.fnpWriteBlocks	= pxParameters->fnWriteBlocks;
+			pxIOManager->xBlkDevice.pxDisk			= pxParameters->pxDisk;
+		}
+		else
+		{
+			xError = FF_ERR_NOT_ENOUGH_MEMORY | FF_CREATEIOMAN;
+		}
+	}
+
+	if( FF_isERR( xError ) )
+	{
+		if( pxIOManager != NULL )
+		{
+			FF_DeleteIOManager( pxIOManager );
+			pxIOManager = NULL;
+		}
+	}
+
+	if( pError != NULL )
+	{
+		*pError = xError;
+	}
+
+	return pxIOManager;
+}	/* FF_CreateIOManger() */
+/*-----------------------------------------------------------*/
 
 /**
  *	@public
- *	@brief	Destroys an FF_IOMAN object, and frees all assigned memory.
+ *	@brief	Destroys an FF_IOManager_t object, and frees all assigned memory.
  *
- *	@param	pIoman	Pointer to an FF_IOMAN object, as returned from FF_CreateIOMAN.
+ *	@param	pxIOManager	Pointer to an FF_IOManager_t object, as returned from FF_CreateIOManger.
  *
- *	@return	FF_ERR_NONE on sucess, or a documented error code on failure. (FF_ERR_NULL_POINTER)
+ *	@Return	FF_ERR_NONE on sucess, or a documented error code on failure. (FF_ERR_NULL_POINTER)
  *
  **/
-FF_ERROR FF_DestroyIOMAN(FF_IOMAN *pIoman) {
+FF_Error_t FF_DeleteIOManager( FF_IOManager_t *pxIOManager )
+{
+FF_Error_t xError;
 
-#ifdef FF_HASH_CACHE
-	FF_T_UINT32 i;
-#endif
+	/* Ensure no NULL pointer was provided. */
+	if( pxIOManager != NULL )
+	{
+		xError = FF_ERR_NULL_POINTER | FF_DESTROYIOMAN;
+	}
+	else
+	{
+		xError = FF_ERR_NONE;
 
-	// Ensure no NULL pointer was provided.
-	if(!pIoman) {
-		return FF_ERR_NULL_POINTER | FF_DESTROYIOMAN;
+		/* Ensure pxBuffers pointer was allocated. */
+		if( ( pxIOManager->ucFlags & FF_IOMAN_ALLOC_BUFDESCR ) != 0 )
+		{
+			ffconfigFREE( pxIOManager->pxBuffers );
+		}
+
+		/* Ensure pucCacheMem pointer was allocated. */
+		if( ( pxIOManager->ucFlags & FF_IOMAN_ALLOC_BUFFERS ) != 0 )
+		{
+			ffconfigFREE( pxIOManager->pucCacheMem );
+		}
+
+		/* Finally free the FF_IOManager_t object. */
+		ffconfigFREE( pxIOManager );
 	}
 
-	// Ensure pPartition pointer was allocated.
-	if((pIoman->MemAllocation & FF_IOMAN_ALLOC_PART)) {
-		FF_FREE(pIoman->pPartition);
-	}
-
-	// Ensure pBlkDevice pointer was allocated.
-	if((pIoman->MemAllocation & FF_IOMAN_ALLOC_BLKDEV)) {
-		FF_FREE(pIoman->pBlkDevice);
-	}
-
-	// Ensure pBuffers pointer was allocated.
-	if((pIoman->MemAllocation & FF_IOMAN_ALLOC_BUFDESCR)) {
-		FF_FREE(pIoman->pBuffers);
-	}
-
-	// Ensure pCacheMem pointer was allocated.
-	if((pIoman->MemAllocation & FF_IOMAN_ALLOC_BUFFERS)) {
-		FF_FREE(pIoman->pCacheMem);
-	}
-
-	// Destroy any Semaphore that was created.
-	if(pIoman->pSemaphore) {
-		FF_DestroySemaphore(pIoman->pSemaphore);
-	}
-	if(pIoman->pDirSemaphore) {
-		FF_DestroySemaphore(pIoman->pDirSemaphore);
-	}
-	if(pIoman->pFATSemaphore) {
-		FF_DestroySemaphore(pIoman->pFATSemaphore);
-	}
-#ifdef FF_BLKDEV_USES_SEM
-	if(pIoman->pBlkDevSemaphore) {
-		FF_DestroySemaphore(pIoman->pBlkDevSemaphore);
-	}
-#endif
-
-	// Destroy HashCache
-#ifdef FF_HASH_CACHE
-	for(i = 0; i < FF_HASH_CACHE_DEPTH; i++) {
-		FF_DestroyHashTable(pIoman->HashCache[i].pHashTable);
-	}
-#endif
-
-	// Finally free the FF_IOMAN object.
-	FF_FREE(pIoman);
-
-	return FF_ERR_NONE;
-}
+	return xError;
+}	/* FF_DeleteIOManager() */
+/*-----------------------------------------------------------*/
 
 /**
  *	@private
- *	@brief	Initialises Buffer Descriptions as part of the FF_IOMAN object initialisation.
+ *	@brief	Initialises Buffer Descriptions as part of the FF_IOManager_t object initialisation.
  *
- *	@param	pIoman		IOMAN Object.
+ *	@param	pxIOManager		IOMAN Object.
  *
  **/
-static void FF_IOMAN_InitBufferDescriptors(FF_IOMAN *pIoman) {
-	FF_T_UINT16 i;
-	FF_BUFFER *pBuffer = pIoman->pBuffers;
-	pIoman->LastReplaced = 0;
-	// HT : it is assmued that pBuffer was cleared by memset ()
-	for(i = 0; i < pIoman->CacheSize; i++) {
-		pBuffer->pBuffer = (FF_T_UINT8 *)((pIoman->pCacheMem) + (pIoman->BlkSize * i));
-		pBuffer++;
-	}
-}
+void FF_IOMAN_InitBufferDescriptors( FF_IOManager_t *pxIOManager )
+{
+uint8_t *pucBuffer = pxIOManager->pucCacheMem;
+FF_Buffer_t *pxBuffer = pxIOManager->pxBuffers;
+FF_Buffer_t *pxLastBuffer = pxBuffer + pxIOManager->usCacheSize;
 
+	/* Clear the contents of the buffer descriptors. */
+	memset( ( void * ) pxBuffer, '\0', sizeof( FF_Buffer_t ) * pxIOManager->usCacheSize );
+
+	while( pxBuffer < pxLastBuffer )
+	{
+		pxBuffer->pucBuffer = pucBuffer;
+		pxBuffer++;
+		pucBuffer += pxIOManager->usSectorSize;
+	}
+}	/* FF_IOMAN_InitBufferDescriptors() */
+/*-----------------------------------------------------------*/
 
 /**
  *	@private
  *	@brief		Flushes all Write cache buffers with no active Handles.
  *
- *	@param		pIoman	IOMAN Object.
+ *	@param		pxIOManager	IOMAN Object.
  *
- *	@return		FF_ERR_NONE on Success.
+ *	@Return		FF_ERR_NONE on Success.
  **/
-FF_ERROR FF_FlushCache(FF_IOMAN *pIoman) {
+FF_Error_t FF_FlushCache( FF_IOManager_t *pxIOManager )
+{
+BaseType_t xIndex, xIndex2;
+FF_Error_t xError;
 
-	FF_T_UINT16 i,x;
-
-	if(!pIoman) {
-		return FF_ERR_NULL_POINTER | FF_FLUSHCACHE;
-	}
-
-	FF_PendSemaphore(pIoman->pSemaphore);
+	if( pxIOManager == NULL )
 	{
-		for(i = 0; i < pIoman->CacheSize; i++) {
-			if((pIoman->pBuffers + i)->NumHandles == 0 && (pIoman->pBuffers + i)->Modified == FF_TRUE) {
+		xError = FF_ERR_NULL_POINTER | FF_FLUSHCACHE;
+	}
+	else
+	{
+		xError = FF_ERR_NONE;
 
-				FF_BlockWrite(pIoman, (pIoman->pBuffers + i)->Sector, 1, (pIoman->pBuffers + i)->pBuffer, FF_TRUE);
+		FF_PendSemaphore( pxIOManager->pvSemaphore );
+		{
+			for( xIndex = 0; xIndex < pxIOManager->usCacheSize; xIndex++ )
+			{
+				/* If a buffers has no users and if it has been modified... */
+				if( ( pxIOManager->pxBuffers[ xIndex ].usNumHandles == 0 ) && ( pxIOManager->pxBuffers[ xIndex ].bModified == pdTRUE ) )
+				{
+					/* The buffer may be flushed to disk. */
+					FF_BlockWrite( pxIOManager, pxIOManager->pxBuffers[ xIndex ].ulSector, 1, pxIOManager->pxBuffers[ xIndex ].pucBuffer, pdTRUE );
 
-				// Buffer has now been flushed, mark it as a read buffer and unmodified.
-				(pIoman->pBuffers + i)->Mode = FF_MODE_READ;
-				(pIoman->pBuffers + i)->Modified = FF_FALSE;
+					/* Buffer has now been flushed, mark it as a read buffer and unmodified. */
+					pxIOManager->pxBuffers[ xIndex ].ucMode = FF_MODE_READ;
+					pxIOManager->pxBuffers[ xIndex ].bModified = pdFALSE;
 
-				// Search for other buffers that used this sector, and mark them as modified
-				// So that further requests will result in the new sector being fetched.
-				for(x = 0; x < pIoman->CacheSize; x++) {
-					if(x != i) {
-						if((pIoman->pBuffers + x)->Sector == (pIoman->pBuffers + i)->Sector && (pIoman->pBuffers + x)->Mode == FF_MODE_READ) {
-							(pIoman->pBuffers + x)->Modified = FF_TRUE;
+					/* Search for other buffers that used this sector, and mark them as modified
+					So that further requests will result in the new sector being fetched. */
+					for( xIndex2 = 0; xIndex2 < pxIOManager->usCacheSize; xIndex2++ )
+					{
+						if( ( xIndex != xIndex2 ) &&
+							( pxIOManager->pxBuffers[ xIndex2 ].ulSector == pxIOManager->pxBuffers[ xIndex ].ulSector ) &&
+							( pxIOManager->pxBuffers[ xIndex2 ].ucMode == FF_MODE_READ ) )
+						{
+							pxIOManager->pxBuffers[ xIndex2 ].bModified = pdTRUE;
 						}
 					}
 				}
 			}
 		}
+		FF_ReleaseSemaphore( pxIOManager->pvSemaphore );
 	}
-	FF_ReleaseSemaphore(pIoman->pSemaphore);
 
-	return FF_ERR_NONE;
-}
+	return xError;
+}	/* FF_FlushCache() */
+/*-----------------------------------------------------------*/
 
 /*
 	A new version of FF_GetBuffer() with a simple mechanism for timeout
 */
+#define FF_GETBUFFER_SLEEP_TIME 10
+#define FF_GETBUFFER_WAIT_TIME	( 20000 / FF_GETBUFFER_SLEEP_TIME )
 
-#define	FF_GETBUFFER_SLEEP_TIME	10
-#define	FF_GETBUFFER_WAIT_TIME	(20000 / FF_GETBUFFER_SLEEP_TIME)
+FF_Buffer_t *FF_GetBuffer( FF_IOManager_t *pxIOManager, uint32_t ulSector, uint8_t Mode )
+{
+FF_Buffer_t *pxBuffer;
+/* Least Recently Used Buffer */
+FF_Buffer_t *pxRLUBuffer;
+FF_Buffer_t *pxMatchingBuffer = NULL;
+int32_t lRetVal;
+BaseType_t xLoopCount = FF_GETBUFFER_WAIT_TIME;
+const FF_Buffer_t *pxLastBuffer = &( pxIOManager->pxBuffers[ pxIOManager->usCacheSize ] );
 
-FF_BUFFER *FF_GetBuffer(FF_IOMAN *pIoman, FF_T_UINT32 Sector, FF_T_UINT8 Mode) {
-	FF_BUFFER	*pBuffer;
-	FF_BUFFER	*pBufLRU;
-//	FF_BUFFER	*pBufLHITS = NULL;  // Wasn't use anymore?
-	FF_BUFFER	*pBufMatch = NULL;
-	FF_T_SINT32	RetVal;
-	FF_T_INT    LoopCount = FF_GETBUFFER_WAIT_TIME;
+	/* 'pxIOManager->usCacheSize' is bigger than zero and it is a multiple of ulSectorSize. */
 
-	FF_T_INT cacheSize = pIoman->CacheSize;
-	if (cacheSize <= 0) {
-		return NULL;
+	while( pxMatchingBuffer == NULL )
+	{
+		xLoopCount--;
+		if( xLoopCount == 0 )
+		{
+			break;
+		}
+
+		FF_PendSemaphore( pxIOManager->pvSemaphore );
+
+		for( pxBuffer = pxIOManager->pxBuffers; pxBuffer < pxLastBuffer; pxBuffer++ )
+		{
+			if( ( pxBuffer->ulSector == ulSector ) && ( pxBuffer->bValid ) )
+			{
+				pxMatchingBuffer = pxBuffer;
+				/* Don't look further if you found a perfect match. */
+				break;
+			}
+		}
+
+		if( pxMatchingBuffer != NULL )
+		{
+			/* A Match was found process! */
+			if( ( Mode == FF_MODE_READ ) && ( pxMatchingBuffer->ucMode == FF_MODE_READ ) )
+			{
+				pxMatchingBuffer->usNumHandles += 1;
+				pxMatchingBuffer->usPersistance += 1;
+				break;
+			}
+
+			if( pxMatchingBuffer->usNumHandles == 0 )
+			{
+				pxMatchingBuffer->ucMode = ( Mode & FF_MODE_RD_WR );
+				if( ( Mode & FF_MODE_WRITE ) != 0 )
+				{
+					/* This buffer has no attached handles. */
+					pxMatchingBuffer->bModified = pdTRUE;
+				}
+
+				pxMatchingBuffer->usNumHandles = 1;
+				pxMatchingBuffer->usPersistance += 1;
+				break;
+			}
+
+			pxMatchingBuffer = NULL;	/* Sector is already in use, keep yielding until its available! */
+		}
+		else
+		{
+			/* There is no valid buffer now for the desired sector.
+			Find a free buffer and use it for that sector. */
+			pxRLUBuffer = NULL;
+
+			for( pxBuffer = pxIOManager->pxBuffers; pxBuffer < pxLastBuffer; pxBuffer++ )
+			{
+				if( pxBuffer->usNumHandles )
+				{
+					continue;	/* Occupied */
+				}
+
+				pxBuffer->ulLRU += 1;
+
+				if( ( pxRLUBuffer == NULL ) ||
+					( pxBuffer->ulLRU > pxRLUBuffer->ulLRU ) ||
+					( ( pxBuffer->ulLRU == pxRLUBuffer->ulLRU ) && ( pxBuffer->usPersistance > pxRLUBuffer->usPersistance ) ) )
+				{
+					pxRLUBuffer = pxBuffer;
+				}
+			}
+
+			/* A free buffer with the highest value of 'ulLRU' was found: */
+			if( pxRLUBuffer != NULL )
+			{
+				/* Process the suitable candidate. */
+				if( pxRLUBuffer->bModified == pdTRUE )
+				{
+					/* Along with the pdTRUE parameter to indicate semaphore has been claimed already. */
+					lRetVal = FF_BlockWrite( pxIOManager, pxRLUBuffer->ulSector, 1, pxRLUBuffer->pucBuffer, pdTRUE );
+					if( lRetVal < 0 )
+					{
+						/* NULL will be returned because 'pxMatchingBuffer' is still NULL. */
+						break;
+					}
+				}
+
+				if( Mode == FF_MODE_WR_ONLY )
+				{
+					memset( pxRLUBuffer->pucBuffer, '\0', pxIOManager->usSectorSize );
+				}
+				else
+				{
+					lRetVal = FF_BlockRead( pxIOManager, ulSector, 1, pxRLUBuffer->pucBuffer, pdTRUE );
+					if( lRetVal < 0 )
+					{
+						/* 'pxMatchingBuffer' is NULL. */
+						break;
+					}
+				}
+
+				pxRLUBuffer->ucMode = ( Mode & FF_MODE_RD_WR );
+				pxRLUBuffer->usPersistance = 1;
+				pxRLUBuffer->ulLRU = 0;
+				pxRLUBuffer->usNumHandles = 1;
+				pxRLUBuffer->ulSector = ulSector;
+
+				pxRLUBuffer->bModified = ( Mode & FF_MODE_WRITE ) != 0;
+
+				pxRLUBuffer->bValid = pdTRUE;
+				pxMatchingBuffer = pxRLUBuffer;
+				break;
+			} /* if( pxRLUBuffer != NULL ) */
+		} /* else ( pxMatchingBuffer == NULL ) */
+
+		FF_ReleaseSemaphore( pxIOManager->pvSemaphore );
+
+		/* Better to go asleep to give low-priority task a chance to release buffer(s). */
+		FF_Sleep( FF_GETBUFFER_SLEEP_TIME );
+	} /* while( pxMatchingBuffer == NULL ) */
+
+	if( xLoopCount > 0 )
+	{
+		/* If xLoopCount is 0 here, the semaphore was not taken. */
+		FF_ReleaseSemaphore( pxIOManager->pvSemaphore );
 	}
 
-	while(!pBufMatch) {
-		if (!--LoopCount) {
-			//
-			// *pError = FF_ERR_IOMAN_GETBUFFER_TIMEOUT;
-			//
-			return NULL;
-		}
-		FF_PendSemaphore(pIoman->pSemaphore);
-		{
-
-			for(pBuffer = pIoman->pBuffers; pBuffer < pIoman->pBuffers + cacheSize; pBuffer++) {
-				if(pBuffer->Sector == Sector && pBuffer->Valid) {
-					pBufMatch = pBuffer;
-					break;	// Don't look further if you found a perfect match
-				}
-			}
-
-			if(pBufMatch) {
-				// A Match was found process!
-				if(Mode == FF_MODE_READ && pBufMatch->Mode == FF_MODE_READ) {
-					pBufMatch->NumHandles += 1;
-					pBufMatch->Persistance += 1;
-					break;
-				}
-
-				if(pBufMatch->NumHandles == 0) {
-					pBufMatch->Mode = (Mode & FF_MODE_RD_WR);
-					if((Mode & FF_MODE_WRITE) != 0) {	// This buffer has no attached handles.
-						pBufMatch->Modified = FF_TRUE;
-					}
-					pBufMatch->NumHandles = 1;
-					pBufMatch->Persistance += 1;
-					break;
-				}
-
-				pBufMatch = NULL;	// Sector is already in use, keep yielding until its available!
-
-			} else {
-				pBufLRU   = NULL;	// So put them to NULL here
-
-				for(pBuffer = pIoman->pBuffers; pBuffer < pIoman->pBuffers + cacheSize; pBuffer++) {
-					if(pBuffer->NumHandles)
-						continue;  // Occupied
-					pBuffer->LRU += 1;
-
-					if(!pBufLRU) {
-						pBufLRU = pBuffer;
-					}
-
-					if(pBuffer->LRU > pBufLRU->LRU ||
-					   (pBuffer->LRU == pBufLRU->LRU && pBuffer->Persistance > pBufLRU->Persistance)) {
-						pBufLRU = pBuffer;
-					}
-
-				}
-				// Choose a suitable buffer!
-				if(pBufLRU) {
-					// Process the suitable candidate.
-					if(pBufLRU->Modified == FF_TRUE) {
-						// Along with the FF_TRUE parameter to indicate semapahore has been claimed
-
-						RetVal = FF_BlockWrite(pIoman, pBufLRU->Sector, 1, pBufLRU->pBuffer, FF_TRUE);
-						if (RetVal < 0) {
-							pBufMatch = NULL;
-							break;
-						}
-					}
-					if (Mode == FF_MODE_WR_ONLY) {
-						memset (pBufLRU->pBuffer, '\0', pIoman->BlkSize);
-					} else {
-						RetVal = FF_BlockRead(pIoman, Sector, 1, pBufLRU->pBuffer, FF_TRUE);
-						if (RetVal < 0) {
-							pBufMatch = NULL;
-							break;
-						}
-					}
-					pBufLRU->Mode = (Mode & FF_MODE_RD_WR);
-					pBufLRU->Persistance = 1;
-					pBufLRU->LRU = 0;
-					pBufLRU->NumHandles = 1;
-					pBufLRU->Sector = Sector;
-
-					pBufLRU->Modified = (Mode & FF_MODE_WRITE) != 0;
-
-					pBufLRU->Valid = FF_TRUE;
-					pBufMatch = pBufLRU;
-					break;
-				}
-
-			}
-		}
-		FF_ReleaseSemaphore(pIoman->pSemaphore);
-		// Better to go asleep to give low-priority task a chance to release buffer(s)
-		FF_Sleep (FF_GETBUFFER_SLEEP_TIME);
-	}	// while(!pBufMatch)
-	FF_ReleaseSemaphore(pIoman->pSemaphore);
-
-	return pBufMatch;	// Return the Matched Buffer!
-}
-
+	return pxMatchingBuffer;	/* Return the Matched Buffer! */
+}	/* FF_GetBuffer() */
+/*-----------------------------------------------------------*/
 
 /**
  *	@private
  *	@brief	Releases a buffer resource.
  *
- *	@param	pIoman	Pointer to an FF_IOMAN object.
- *	@param	pBuffer	Pointer to an FF_BUFFER object.
+ *	@param	pxIOManager	Pointer to an FF_IOManager_t object.
+ *	@param	pxBuffer	Pointer to an FF_Buffer_t object.
  *
  **/
-FF_ERROR FF_ReleaseBuffer(FF_IOMAN *pIoman, FF_BUFFER *pBuffer) {
-	FF_ERROR Error = FF_ERR_NONE;
+FF_Error_t FF_ReleaseBuffer( FF_IOManager_t *pxIOManager, FF_Buffer_t *pxBuffer )
+{
+	FF_Error_t xError = FF_ERR_NONE;
 
-	// Protect description changes with a semaphore.
-	FF_PendSemaphore(pIoman->pSemaphore);
+	/* Protect description changes with a semaphore. */
+	FF_PendSemaphore( pxIOManager->pvSemaphore );
 	{
-		if (pBuffer->NumHandles) {
-			pBuffer->NumHandles--;
-		} else {
-			//printf ("FF_ReleaseBuffer: buffer not claimed\n");
+		if( pxBuffer->usNumHandles != 0 )
+		{
+			pxBuffer->usNumHandles--;
 		}
-#ifdef FF_CACHE_WRITE_THROUGH
-		if(pBuffer->Modified == FF_TRUE) {
-			Error = FF_BlockWrite(pIoman, pBuffer->Sector, 1, pBuffer->pBuffer, FF_TRUE);
-			if(!FF_isERR(Error)) {				// Ensure if an error occurs its still possible to write the block again.
-				pBuffer->Modified = FF_FALSE;
+		else
+		{
+			/*printf ("FF_ReleaseBuffer: buffer not claimed\n"); */
+		}
+
+#if( ffconfigCACHE_WRITE_THROUGH != 0 )
+		if( pxBuffer->bModified == pdTRUE )
+		{
+			xError = FF_BlockWrite( pxIOManager, pxBuffer->ulSector, 1, pxBuffer->pucBuffer, pdTRUE );
+			if( FF_isERR( xError ) == pdFALSE )
+			{
+				/* Ensure if an error occurs its still possible to write the block again. */
+				pxBuffer->bModified = pdFALSE;
 			}
 		}
 #endif
 	}
-	FF_ReleaseSemaphore(pIoman->pSemaphore);
 
-	return Error;
+	FF_ReleaseSemaphore( pxIOManager->pvSemaphore );
+
+	return xError;
+}	/* FF_ReleaseBuffer() */
+/*-----------------------------------------------------------*/
+
+/* New Interface for FreeRTOS+FAT to read blocks. */
+int32_t FF_BlockRead( FF_IOManager_t *pxIOManager, uint32_t ulSectorLBA, uint32_t ulNumSectors, void *pxBuffer,
+	BaseType_t xSemLocked )
+{
+int32_t slRetVal = 0;
+
+	if( pxIOManager->xPartition.ulTotalSectors != 0ul )
+	{
+		/* At some point while formatting a partition, ulTotalSectors might be unknown.
+		In that case this test will be skipped. */
+		if( ( ulSectorLBA + ulNumSectors ) > ( pxIOManager->xPartition.ulTotalSectors + pxIOManager->xPartition.ulBeginLBA ) )
+		{
+			slRetVal = FF_ERR_IOMAN_OUT_OF_BOUNDS_READ | FF_BLOCKREAD;
+		}
+	}
+
+	if( ( slRetVal == 0ul ) && ( pxIOManager->xBlkDevice.fnpReadBlocks ) )
+	{
+		do
+		{
+			/* Make sure we don't execute a NULL. */
+			if( ( xSemLocked == pdFALSE ) &&
+				( ( pxIOManager->ucFlags & FF_IOMAN_BLOCK_DEVICE_IS_REENTRANT ) == pdFALSE ) )
+			{
+				FF_PendSemaphore( pxIOManager->pvSemaphore );
+			}
+
+			slRetVal = pxIOManager->xBlkDevice.fnpReadBlocks( pxBuffer, ulSectorLBA, ulNumSectors, pxIOManager->xBlkDevice.pxDisk );
+
+			if( ( xSemLocked == pdFALSE ) &&
+				( ( pxIOManager->ucFlags & FF_IOMAN_BLOCK_DEVICE_IS_REENTRANT ) == pdFALSE ) )
+			{
+				FF_ReleaseSemaphore( pxIOManager->pvSemaphore );
+			}
+
+			if( FF_GETERROR( slRetVal ) != FF_ERR_DRIVER_BUSY )
+			{
+				break;
+			}
+
+			FF_Sleep( ffconfigDRIVER_BUSY_SLEEP_MS );
+		} while( pdTRUE );
+	}
+
+	return slRetVal;
+}	/* FF_BlockRead() */
+/*-----------------------------------------------------------*/
+
+int32_t FF_BlockWrite( FF_IOManager_t *pxIOManager, uint32_t ulSectorLBA, uint32_t ulNumSectors, void *pxBuffer,
+	BaseType_t xSemLocked )
+{
+int32_t slRetVal = 0;
+
+	if( pxIOManager->xPartition.ulTotalSectors != 0 )
+	{
+		/* At some point while formatting a partition, ulTotalSectors might be unknown.
+		In that case this test will be skipped. */
+		if( ( ulSectorLBA + ulNumSectors ) > ( pxIOManager->xPartition.ulTotalSectors + pxIOManager->xPartition.ulBeginLBA ) )
+		{
+			slRetVal = FF_ERR_IOMAN_OUT_OF_BOUNDS_WRITE | FF_BLOCKWRITE;
+		}
+	}
+
+	if( ( slRetVal == 0ul ) && ( pxIOManager->xBlkDevice.fnpWriteBlocks != NULL ) )
+	{
+		do
+		{	/* Make sure we don't execute a NULL. */
+
+			if( ( xSemLocked == pdFALSE ) &&
+				( ( pxIOManager->ucFlags & FF_IOMAN_BLOCK_DEVICE_IS_REENTRANT ) == pdFALSE ) )
+			{
+				FF_PendSemaphore( pxIOManager->pvSemaphore );
+			}
+
+			slRetVal = pxIOManager->xBlkDevice.fnpWriteBlocks( pxBuffer, ulSectorLBA, ulNumSectors, pxIOManager->xBlkDevice.pxDisk );
+
+			if( ( xSemLocked == pdFALSE ) &&
+				( ( pxIOManager->ucFlags & FF_IOMAN_BLOCK_DEVICE_IS_REENTRANT ) == pdFALSE ) )
+			{
+				FF_ReleaseSemaphore( pxIOManager->pvSemaphore );
+			}
+
+			if( FF_GETERROR( slRetVal ) != FF_ERR_DRIVER_BUSY )
+			{
+				break;
+			}
+
+			FF_Sleep( ffconfigDRIVER_BUSY_SLEEP_MS );
+		} while( pdTRUE );
+	}
+
+	return slRetVal;
+}	/* FF_BlockWrite() */
+/*-----------------------------------------------------------*/
+
+/*
+ * This global variable is a kind of expert option:
+ * It may be set to one of these values: FF_T_FAT[12,16,32]
+ * just to force the driver to assume a certain FAT type.
+ */
+uint8_t ucAssumeFATType;
+
+/* The history of FAT types:
+ * The Microsoft documents says that the actual type: FAT-12, FAT-16 and FAT-32
+ * of a partition can be found by looking at the total number of data clusters:
+ *
+ * if( clusters < 4085 )
+ *     Assume FAT-12
+ * else if( clusters < 65525 )
+ *     Assume FAT-16
+ * else
+ *     Assume FAT-32
+ *
+ * In practice however, this does not always seem to be a correct assumption.
+ *
+ * The first 12 or 16 bits in the FAT table may also help to determine the
+ * correct FAT-type:
+ *
+ *    FAT-12: ( firstWord & 0x3FF ) == 0x3F8 )
+ *    FAT-16: ( firstWord == 0xFFF8 )
+ */
+
+static FF_Error_t prvDetermineFatType( FF_IOManager_t *pxIOManager )
+{
+FF_Partition_t *pxPartition;
+FF_Buffer_t *pxBuffer;
+uint32_t ulFirstWord = 0ul;
+FF_Error_t xError = FF_ERR_NONE;
+
+	pxPartition = &( pxIOManager->xPartition );
+	if( ucAssumeFATType != 0 )
+	{
+		switch( ucAssumeFATType )
+		{
+		case FF_T_FAT12:
+		case FF_T_FAT16:
+		case FF_T_FAT32:
+			pxPartition->ucType = ucAssumeFATType;
+			break;
+		default:
+			/* An invalid value will be ignored, and the FAT type is determined dynamically. */
+			ucAssumeFATType = 0;
+			break;
+		}
+		xError = FF_ERR_NONE;
+	}
+
+	/* Test again, the value may have become zero now: */
+	if( ucAssumeFATType == 0 )
+	{
+		pxBuffer = FF_GetBuffer( pxIOManager, pxIOManager->xPartition.ulFATBeginLBA, FF_MODE_READ );
+		if( pxBuffer == NULL )
+		{
+			xError = FF_ERR_DEVICE_DRIVER_FAILED | FF_DETERMINEFATTYPE;
+		}
+		else
+		{
+			ulFirstWord = ( uint32_t ) FF_getShort( pxBuffer->pucBuffer, 0x0000 );
+			xError = FF_ReleaseBuffer( pxIOManager, pxBuffer );
+		}
+	}
+
+	if( ( ucAssumeFATType == 0 ) && ( FF_isERR( xError ) == pdFALSE ) )
+	{
+	#if( ffconfigFAT12_SUPPORT != 0 )
+		if( pxPartition->ulNumClusters < FAT16_SECTOR_COUNT_4085 )
+		{
+			/* FAT12 */
+			pxPartition->ucType = FF_T_FAT12;
+			#if( ffconfigFAT_CHECK != 0 )
+			if( ( ulFirstWord & 0x3FF ) != 0x3F8 )
+			{
+				xError = FF_ERR_IOMAN_NOT_FAT_FORMATTED | FF_DETERMINEFATTYPE;
+			}
+			else
+			#endif /* ffconfigFAT_CHECK */
+			{
+				xError = FF_ERR_NONE;
+			}
+		}
+		else
+	#endif /* ffconfigFAT12_SUPPORT */
+
+		if( pxPartition->ulNumClusters < FAT32_SECTOR_COUNT_65525 )
+		{
+			/* FAT 16 */
+			pxPartition->ucType = FF_T_FAT16;
+			#if( ffconfigFAT_CHECK != 0 )
+			{
+				if( ulFirstWord == 0xFFF8 )
+				{
+					xError = FF_ERR_NONE;
+				}
+				else {
+					if( ( ulFirstWord & 0x3FF ) != 0x3F8 )
+					{
+						FF_PRINTF( "Part at %lu is probably a FAT12\n", pxIOManager->xPartition.ulFATBeginLBA );
+					}
+					else
+					{
+						FF_PRINTF( "Partition at %lu has strange FAT data %08lX\n",
+							pxIOManager->xPartition.ulFATBeginLBA, ulFirstWord );
+					}
+					xError = FF_ERR_IOMAN_INVALID_FORMAT | FF_DETERMINEFATTYPE;
+				}
+			}
+			#endif /* ffconfigFAT_CHECK */
+		}
+		else
+		{
+			/* FAT 32! */
+			pxPartition->ucType = FF_T_FAT32;
+	#if( ffconfigFAT_CHECK != 0 )
+			if( ( ( ulFirstWord & 0x0FFFFFF8 ) != 0x0FFFFFF8 ) &&
+				( ( ulFirstWord & 0x0FFFFFF8 ) != 0x0FFFFFF0 ) )
+			{
+				/* _HT_
+				I had an SD-card which worked well in Linux/W32
+				but FreeRTOS+FAT returned me this error
+				So for me I left out this check (just issue a warning for now)
+				*/
+				FF_PRINTF( "prvDetermineFatType: firstWord %08lX\n", ulFirstWord );
+				xError = FF_ERR_NONE; /* FF_ERR_IOMAN_NOT_FAT_FORMATTED; */
+			}
+
+	#endif	/* ffconfigFAT_CHECK */
+			xError = FF_ERR_NONE;
+		}
+	}
+
+	return xError;
+}	/* prvDetermineFatType() */
+/*-----------------------------------------------------------*/
+
+/* Check if ucPartitionID introduces an extended partition. */
+static BaseType_t prvIsExtendedPartition( uint8_t ucPartitionID )
+{
+BaseType_t xResult;
+
+	if( ( ucPartitionID == FF_DOS_EXT_PART ) ||
+		( ucPartitionID == FF_WIN98_EXT_PART ) ||
+		( ucPartitionID == FF_LINUX_EXT_PART ) )
+	{
+		xResult = pdTRUE;
+	}
+	else
+	{
+		xResult = pdFALSE;
+	}
+
+	return xResult;
+}	/* prvIsExtendedPartition() */
+/*-----------------------------------------------------------*/
+
+/* Check if the media byte in an MBR is valid */
+static BaseType_t prvIsValidMedia( uint8_t media )
+{
+BaseType_t xResult;
+	/*
+	 * 0xF8 is the standard value for “fixed” (non-removable) media. For
+	 * removable media, 0xF0 is frequently used. The legal values for this
+	 * field are 0xF0, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFE, and
+	 * 0xFF. The only other important point is that whatever value is put
+	 * in here must also be put in the low byte of the FAT[0] entry. This
+	 * dates back to the old MS-DOS 1.x media determination noted
+	 * earlier and is no longer usually used for anything.
+	 */
+	if( ( 0xf8 <= media ) || ( media == 0xf0 ) )
+	{
+		xResult = pdTRUE;
+	}
+	else
+	{
+		xResult = pdFALSE;
+	}
+
+	return xResult;
+}	/* prvIsValidMedia() */
+/*-----------------------------------------------------------*/
+
+void FF_ReadParts( uint8_t *pucBuffer, FF_Part_t *pxParts )
+{
+BaseType_t xPartNr;
+UBaseType_t uxOffset = FF_FAT_PTBL;
+
+	/* pxParts is expected to be declared as an array of 4 elements:
+		FF_Part_t pxParts[4];
+		FF_ReadParts( pxBuffer->pucBuffer, pxParts );
+	*/
+	for( xPartNr = 0; xPartNr < 4; xPartNr++, uxOffset += 16, pxParts++ )
+	{
+		pxParts->ucActive = FF_getChar( pucBuffer, uxOffset + FF_FAT_PTBL_ACTIVE );
+		pxParts->ucPartitionID = FF_getChar( pucBuffer, uxOffset + FF_FAT_PTBL_ID );
+		pxParts->ulSectorCount = FF_getLong( pucBuffer, uxOffset + FF_FAT_PTBL_SECT_COUNT );
+		pxParts->ulStartLBA = FF_getLong( pucBuffer, uxOffset + FF_FAT_PTBL_LBA );
+	}
 }
+/*-----------------------------------------------------------*/
+
+/*  This function will traverse through a chain of extended partitions. */
+
+/* It is protected against rubbish data by a counter. */
+static FF_Error_t FF_ParseExtended( FF_IOManager_t *pxIOManager, uint32_t ulFirstSector, uint32_t ulFirstSize,
+	FF_SPartFound_t *pPartsFound )
+{
+uint32_t ulThisSector, ulThisSize;
+uint32_t ulSectorSize = pxIOManager->usSectorSize / 512;
+uint32_t prevTotalSectors = pxIOManager->xPartition.ulTotalSectors;
+FF_Buffer_t *pxBuffer = NULL;
+BaseType_t xTryCount = 100;
+BaseType_t xPartNr;
+BaseType_t xExtendedPartNr;
+FF_Error_t xError = FF_ERR_NONE;
+FF_Part_t pxPartitions[ 4 ];
+
+	ulThisSector = ulFirstSector;
+	ulThisSize = ulFirstSize;
+
+	/* Disable sector checking in FF_BlockRead, because the
+	exact disk (partition) parameters are not yet known.
+	Let user driver return an error is appropriate. */
+	pxIOManager->xPartition.ulTotalSectors = 0;
+
+	while( xTryCount-- )
+	{
+		if( ( pxBuffer == NULL ) || ( pxBuffer->ulSector != ulThisSector ) )
+		{
+			/* Moving to a different sector. Release the
+			previous one and allocate a new buffer. */
+			if( pxBuffer != NULL )
+			{
+				xError = FF_ReleaseBuffer( pxIOManager, pxBuffer );
+				pxBuffer = NULL;
+				if( FF_isERR( xError ) )
+				{
+					break;
+				}
+			}
+			FF_PRINTF( "FF_ParseExtended: Read sector %u\n", ( unsigned) ulThisSector );
+			pxBuffer = FF_GetBuffer( pxIOManager, ulThisSector, FF_MODE_READ );
+			if( pxBuffer == NULL )
+			{
+				xError = FF_PARSEEXTENDED | FF_ERR_DEVICE_DRIVER_FAILED; /* | FUNCTION...; */
+				break;
+			}
+		}
+
+		{
+		uint8_t a = FF_getChar( pxBuffer->pucBuffer, FF_FAT_MBR_SIGNATURE + 0 );
+		uint8_t b = FF_getChar( pxBuffer->pucBuffer, FF_FAT_MBR_SIGNATURE + 1 );
+
+			if( ( a != 0x55 ) || ( b != 0xAA ) )
+			{
+				FF_PRINTF( "FF_ParseExtended: No signature %02X,%02X\n", a, b );
+				break;
+			}
+		}
+
+		/* Check for data partition(s),
+		and remember if there is an extended partition */
+
+		FF_ReadParts( pxBuffer->pucBuffer, pxPartitions );
+
+		/* Assume there is no next ext partition. */
+		xExtendedPartNr = -1;
+
+		for( xPartNr = 0; xPartNr < 4; xPartNr++ )
+		{
+		uint32_t ulOffset, ulSize, ulNext;
+			if( pxPartitions[ xPartNr ].ulSectorCount == 0 )
+			{
+				/* Partition is empty */
+				continue;
+			}
+
+			if( prvIsExtendedPartition( pxPartitions[ xPartNr ].ucPartitionID ) )
+			{
+				if( xExtendedPartNr < 0 )
+				{
+					xExtendedPartNr = xPartNr;
+				}
+
+				continue;	/* We'll examine this ext partition later */
+			}
+
+			/* Some sanity checks */
+			ulOffset = pxPartitions[ xPartNr ].ulStartLBA * ulSectorSize;
+			ulSize = pxPartitions[ xPartNr ].ulSectorCount * ulSectorSize;
+			ulNext = ulThisSector + ulOffset;
+			if(
+				/* Is it oversized? */
+				( ulOffset + ulSize > ulThisSize ) ||
+				/* or going backward? */
+				( ulNext < ulFirstSector ) ||
+				/* Or outsize the logical partition? */
+				( ulNext > ulFirstSector + ulFirstSize )
+				)
+			{
+				FF_PRINTF( "Part %d looks insane: ulThisSector %u ulOffset %u ulNext %u\n",
+					( int ) xPartNr, ( unsigned )ulThisSector, ( unsigned )ulOffset, ( unsigned )ulNext );
+				continue;
+			}
+
+			{
+				/* Store this partition for the caller */
+				FF_Part_t *p = &pPartsFound->pxPartitions[ pPartsFound->iCount++ ];
+
+				/* Copy the whole structure */
+				memcpy( p, pxPartitions + xPartNr, sizeof( *p ) );
+
+				/* and make LBA absolute to sector-0. */
+				p->ulStartLBA += ulThisSector;
+				p->bIsExtended = pdTRUE;
+			}
+
+			if( pPartsFound->iCount >= ffconfigMAX_PARTITIONS )
+			{
+				break;
+			}
+
+			xTryCount = 100;
+		}	/* for( xPartNr = 0; xPartNr < 4; xPartNr++ ) */
+
+		if( xExtendedPartNr < 0 )
+		{
+			FF_PRINTF( "No more extended partitions\n" );
+			break;		/* nothing left to do */
+		}
+
+		/* Examine the ulNext extended partition */
+		ulThisSector = ulFirstSector + pxPartitions[ xExtendedPartNr ].ulStartLBA * ulSectorSize;
+		ulThisSize = pxPartitions[ xExtendedPartNr ].ulSectorCount * ulSectorSize;
+	}
+
+	if( pxBuffer != NULL )
+	{
+		FF_Error_t xTempError = FF_ReleaseBuffer( pxIOManager, pxBuffer );
+		if( FF_isERR( xError ) == pdFALSE )
+		{
+			xError = xTempError;
+		}
+	}
+
+	pxIOManager->xPartition.ulTotalSectors = prevTotalSectors;
+
+	return xError;
+}	/* FF_ParseExtended() */
+/*-----------------------------------------------------------*/
 
 /**
  *	@public
- *	@brief	Registers a device driver with FullFAT
+ *	@brief	Searches a disk for all primary and extended/logical partitions
+ *	@brief	Previously called FF_PartitionCount
  *
- *	The device drivers must adhere to the specification provided by
- *	FF_WRITE_BLOCKS and FF_READ_BLOCKS.
+ *	@param	pxIOManager		FF_IOManager_t object.
+ *	@param	pPartsFound		Contains an array of ffconfigMAX_PARTITIONS partitions
  *
- *	@param	pIoman			FF_IOMAN object.
- *	@param	BlkSize			Block Size that the driver deals in. (Minimum 512, larger values must be a multiple of 512).
- *	@param	fnWriteBlocks	Pointer to the Write Blocks to device function, as described by FF_WRITE_BLOCKS.
- *	@param	fnReadBlocks	Pointer to the Read Blocks from device function, as described by FF_READ_BLOCKS.
- *	@param	pParam			Pointer to a parameter for use in the functions.
- *
- *	@return	0 on success, FF_ERR_IOMAN_DEV_ALREADY_REGD if a device was already hooked, FF_ERR_IOMAN_NULL_POINTER if a pIoman object wasn't provided.
+ *	@Return	>=0 Number of partitions found
+ *	@Return	<0 error
  **/
-FF_ERROR FF_RegisterBlkDevice(FF_IOMAN *pIoman, FF_T_UINT16 BlkSize, FF_WRITE_BLOCKS fnWriteBlocks, FF_READ_BLOCKS fnReadBlocks, void *pParam) {
-	if(!pIoman) {	// We can't do anything without an IOMAN object.
-		return FF_ERR_NULL_POINTER | FF_REGISTERBLKDEVICE;
-	}
-
-	if((BlkSize % 512) != 0 || BlkSize == 0) {
-		return FF_ERR_IOMAN_DEV_INVALID_BLKSIZE | FF_REGISTERBLKDEVICE;	// BlkSize Size not a multiple of IOMAN's Expected BlockSize > 0
-	}
-
-	if((BlkSize % pIoman->BlkSize) != 0 || BlkSize == 0) {
-		return FF_ERR_IOMAN_DEV_INVALID_BLKSIZE | FF_REGISTERBLKDEVICE;	// BlkSize Size not a multiple of IOMAN's Expected BlockSize > 0
-	}
-
-	// Ensure that a device cannot be re-registered "mid-flight"
-	// Doing so would corrupt the context of FullFAT
-	if(pIoman->pBlkDevice->fnpReadBlocks) {
-		return FF_ERR_IOMAN_DEV_ALREADY_REGD | FF_REGISTERBLKDEVICE;
-	}
-	if(pIoman->pBlkDevice->fnpWriteBlocks) {
-		return FF_ERR_IOMAN_DEV_ALREADY_REGD | FF_REGISTERBLKDEVICE;
-	}
-	if(pIoman->pBlkDevice->pParam) {
-		return FF_ERR_IOMAN_DEV_ALREADY_REGD | FF_REGISTERBLKDEVICE;
-	}
-
-	// Here we shall just set the values.
-	// FullFAT checks before using any of these values.
-	pIoman->pBlkDevice->devBlkSize		= BlkSize;
-	pIoman->pBlkDevice->fnpReadBlocks	= fnReadBlocks;
-	pIoman->pBlkDevice->fnpWriteBlocks	= fnWriteBlocks;
-	pIoman->pBlkDevice->pParam			= pParam;
-
-	return FF_ERR_NONE;	// Success
-}
-
-/*
-	New Interface for FullFAT to read blocks.
-*/
-
-FF_T_SINT32 FF_BlockRead(FF_IOMAN *pIoman, FF_T_UINT32 ulSectorLBA, FF_T_UINT32 ulNumSectors, void *pBuffer, FF_T_BOOL aSemLocked) {
-	FF_T_SINT32 slRetVal = 0;
-
-	if(pIoman->pPartition->TotalSectors) {
-		if((ulSectorLBA + ulNumSectors) > (pIoman->pPartition->TotalSectors + pIoman->pPartition->BeginLBA)) {
-			return (FF_ERR_IOMAN_OUT_OF_BOUNDS_READ | FF_BLOCKREAD);
-		}
-	}
-
-	if(pIoman->pBlkDevice->fnpReadBlocks) do {	// Make sure we don't execute a NULL.
-#ifdef	FF_BLKDEV_USES_SEM
-		if (!aSemLocked || pIoman->pSemaphore != pIoman->pBlkDevSemaphore)
-			FF_PendSemaphore(pIoman->pBlkDevSemaphore);
-#endif
-		slRetVal = pIoman->pBlkDevice->fnpReadBlocks(pBuffer, ulSectorLBA, ulNumSectors, pIoman->pBlkDevice->pParam);
-#ifdef	FF_BLKDEV_USES_SEM
-		if (!aSemLocked || pIoman->pSemaphore != pIoman->pBlkDevSemaphore)
-			FF_ReleaseSemaphore(pIoman->pBlkDevSemaphore);
-#endif
-		if(!FF_isERR(slRetVal) && FF_GETERROR(slRetVal) != FF_ERR_DRIVER_BUSY) {
-			break;
-		}
-
-		if(FF_isERR(slRetVal) && FF_GETERROR(slRetVal) == FF_ERR_IOMAN_DRIVER_FATAL_ERROR) {
-			break;
-		}
-
-		FF_Sleep(FF_DRIVER_BUSY_SLEEP);
-	} while (FF_TRUE);
-
-	return slRetVal;
-}
-
-FF_T_SINT32 FF_BlockWrite(FF_IOMAN *pIoman, FF_T_UINT32 ulSectorLBA, FF_T_UINT32 ulNumSectors, void *pBuffer, FF_T_BOOL aSemLocked) {
-	FF_T_SINT32 slRetVal = 0;
-
-	if(pIoman->pPartition->TotalSectors) {
-		if((ulSectorLBA + ulNumSectors) > (pIoman->pPartition->TotalSectors + pIoman->pPartition->BeginLBA)) {
-			return (FF_ERR_IOMAN_OUT_OF_BOUNDS_WRITE | FF_BLOCKWRITE);
-		}
-	}
-
-	if(pIoman->pBlkDevice->fnpWriteBlocks) do {	// Make sure we don't execute a NULL.
-#ifdef	FF_BLKDEV_USES_SEM
-		if (!aSemLocked || pIoman->pSemaphore != pIoman->pBlkDevSemaphore)
-			FF_PendSemaphore(pIoman->pBlkDevSemaphore);
-#endif
-		slRetVal = pIoman->pBlkDevice->fnpWriteBlocks(pBuffer, ulSectorLBA, ulNumSectors, pIoman->pBlkDevice->pParam);
-#ifdef	FF_BLKDEV_USES_SEM
-		if (!aSemLocked || pIoman->pSemaphore != pIoman->pBlkDevSemaphore)
-			FF_ReleaseSemaphore(pIoman->pBlkDevSemaphore);
-#endif
-		if(!FF_isERR(slRetVal) && FF_GETERROR(slRetVal) != FF_ERR_DRIVER_BUSY) {
-			break;
-		}
-
-		if(FF_isERR(slRetVal) && FF_GETERROR(slRetVal) == FF_ERR_IOMAN_DRIVER_FATAL_ERROR) {
-			break;
-		}
-
-		FF_Sleep(FF_DRIVER_BUSY_SLEEP);
-	} while (FF_TRUE);
-
-	return slRetVal;
-}
-
-
-/**
- *	@private
- **/
-static FF_ERROR FF_DetermineFatType(FF_IOMAN *pIoman) {
-
-	FF_PARTITION	*pPart;
-	FF_BUFFER		*pBuffer;
-	FF_T_UINT32		testLong;
-	FF_ERROR Error;
-	if(pIoman) {
-		pPart = pIoman->pPartition;
-
-		if(pPart->NumClusters < 4085) {
-			// FAT12
-			pPart->Type = FF_T_FAT12;
-#ifdef FF_FAT_CHECK
-#ifdef FF_FAT12_SUPPORT
-			pBuffer = FF_GetBuffer(pIoman, pIoman->pPartition->FatBeginLBA, FF_MODE_READ);
-			{
-				if(!pBuffer) {
-					return FF_ERR_DEVICE_DRIVER_FAILED | FF_DETERMINEFATTYPE;
-				}
-				testLong = (FF_T_UINT32) FF_getShort(pBuffer->pBuffer, 0x0000);
-			}
-			Error = FF_ReleaseBuffer(pIoman, pBuffer);
-			if(FF_isERR(Error)) {
-				return Error;
-			}
-			if((testLong & 0x3FF) != 0x3F8) {
-				return FF_ERR_IOMAN_NOT_FAT_FORMATTED | FF_DETERMINEFATTYPE;
-			}
-#else
-			return FF_ERR_IOMAN_NOT_FAT_FORMATTED | FF_DETERMINEFATTYPE;
-#endif
-#endif
-#ifdef FF_FAT12_SUPPORT
-			return FF_ERR_NONE;
-#endif
-		} else if(pPart->NumClusters < 65525) {
-			// FAT 16
-			pPart->Type = FF_T_FAT16;
-#ifdef FF_FAT_CHECK
-			pBuffer = FF_GetBuffer(pIoman, pIoman->pPartition->FatBeginLBA, FF_MODE_READ);
-			{
-				if(!pBuffer) {
-					return FF_ERR_DEVICE_DRIVER_FAILED | FF_DETERMINEFATTYPE;
-				}
-				testLong = (FF_T_UINT32) FF_getShort(pBuffer->pBuffer, 0x0000);
-			}
-			Error = FF_ReleaseBuffer(pIoman, pBuffer);
-			if(FF_isERR(Error)) {
-				return Error;
-			}
-
-			if(testLong == 0xFFF8)
-				return FF_ERR_NONE;
-#endif
-		}
-		else {
-			// FAT 32!
-			pPart->Type = FF_T_FAT32;
-#ifdef FF_FAT_CHECK
-			pBuffer = FF_GetBuffer(pIoman, pIoman->pPartition->FatBeginLBA, FF_MODE_READ);
-			{
-				if(!pBuffer) {
-					return FF_ERR_DEVICE_DRIVER_FAILED | FF_DETERMINEFATTYPE;
-				}
-				testLong = FF_getLong(pBuffer->pBuffer, 0x0000);
-			}
-			Error = FF_ReleaseBuffer(pIoman, pBuffer);
-			if(FF_isERR(Error)) {
-				return Error;
-			}
-
-			if((testLong & 0x0FFFFFF8) != 0x0FFFFFF8 && (testLong & 0x0FFFFFF8) != 0x0FFFFFF0) {
-				// HT:
-				// I had an SD-card which worked well in Linux/W32
-				// but FullFAT returned me this error
-				// So for me I left out this check (just issue a warning for now)
-				return FF_ERR_NONE; // FF_ERR_IOMAN_NOT_FAT_FORMATTED;
-			}
-#endif
-			return FF_ERR_NONE;
-		}
-	}
-
-	return FF_ERR_IOMAN_NOT_FAT_FORMATTED | FF_DETERMINEFATTYPE;
-}
-
-static FF_T_SINT8 FF_PartitionCount (FF_T_UINT8 *pBuffer)
+FF_Error_t FF_PartitionSearch( FF_IOManager_t *pxIOManager, FF_SPartFound_t *pPartsFound )
 {
-	FF_T_SINT8 count = 0;
-	FF_T_SINT8 part;
-	// Check PBR or MBR signature
-	if (FF_getChar(pBuffer, FF_FAT_MBR_SIGNATURE) != 0x55 &&
-		FF_getChar(pBuffer, FF_FAT_MBR_SIGNATURE) != 0xAA ) {
-		// No MBR, but is it a PBR ?
-		if (FF_getChar(pBuffer, 0) == 0xEB &&          // PBR Byte 0
-		    FF_getChar(pBuffer, 2) == 0x90 &&          // PBR Byte 2
-		    (FF_getChar(pBuffer, 21) & 0xF0) == 0xF0) {// PBR Byte 21 : Media byte
-			return 1;	// No MBR but PBR exist then only one partition
-		}
-		return 0;   // No MBR and no PBR then no partition found
-	}
-	for (part = 0; part < 4; part++)  {
-		FF_T_UINT8 active = FF_getChar(pBuffer, FF_FAT_PTBL + FF_FAT_PTBL_ACTIVE + (16 * part));
-		FF_T_UINT8 part_id = FF_getChar(pBuffer, FF_FAT_PTBL + FF_FAT_PTBL_ID + (16 * part));
-		// The first sector must be a MBR, then check the partition entry in the MBR
-		if (active != 0x80 && (active != 0 || part_id == 0)) {
+BaseType_t xPartNr;
+FF_Buffer_t *pxBuffer;
+uint8_t *ucDataBuffer;
+BaseType_t isPBR = pdFALSE;
+FF_Error_t xError = FF_ERR_NONE;
+uint32_t prevTotalSectors = pxIOManager->xPartition.ulTotalSectors;
+FF_Part_t pxPartitions[ 4 ];
+
+	memset( pPartsFound, '\0', sizeof( *pPartsFound ) );
+
+	do
+	{
+		pxBuffer = FF_GetBuffer( pxIOManager, 0, FF_MODE_READ );
+		if( pxBuffer == NULL )
+		{
+			xError = FF_ERR_DEVICE_DRIVER_FAILED | FF_PARTITIONSEARCH;
 			break;
 		}
-		count++;
+
+		/* Disable sector checking in FF_BlockRead
+		Let user driver return an error is appropriate. */
+		pxIOManager->xPartition.ulTotalSectors = 0;
+		ucDataBuffer = pxBuffer->pucBuffer;
+
+		/* Check MBR (Master Boot Record) or
+		PBR (Partition Boot Record) signature. */
+		if( ( FF_getChar( ucDataBuffer, FF_FAT_MBR_SIGNATURE ) != 0x55 ) &&
+			( FF_getChar( ucDataBuffer, FF_FAT_MBR_SIGNATURE ) != 0xAA ) )
+		{
+			/* No MBR, but is it a PBR ?
+			Partition Boot Record */
+			if( ( FF_getChar( ucDataBuffer, 0 ) == 0xEB ) && /* PBR Byte 0 */
+				( FF_getChar( ucDataBuffer, 2 ) == 0x90 ) )
+			{
+				/* PBR Byte 2
+				No MBR but PBR exist then there is only one partition
+				Handle this later. */
+				isPBR = pdTRUE;
+			}
+			else
+			{
+				FF_PRINTF( "FF_PartitionSearch: [%02X,%02X] No signature (%02X %02X), no PBR neither\n",
+					FF_getChar( ucDataBuffer, 0 ),
+					FF_getChar( ucDataBuffer, 2 ),
+					FF_getChar( ucDataBuffer, FF_FAT_MBR_SIGNATURE ),
+					FF_getChar( ucDataBuffer, FF_FAT_MBR_SIGNATURE + 1 ) );
+
+				/* No MBR and no PBR then no partition found. */
+				xError = FF_ERR_IOMAN_INVALID_FORMAT | FF_PARTITIONSEARCH;
+				break;
+			}
+		}
+		/* Copy the 4 partition records into 'pxPartitions': */
+		FF_ReadParts( ucDataBuffer, pxPartitions );
+
+		for( xPartNr = 0; ( xPartNr < 4 ) && ( isPBR == pdFALSE ); xPartNr++ )
+		{
+			/*		FF_PRINTF ("FF_Part[%d]: id %02X act %02X Start %6lu Len %6lu (sectors)\n", */
+			/*			xPartNr, pxPartitions[ xPartNr ].ucPartitionID, */
+			/*			pxPartitions[ xPartNr ].ucActive, */
+			/*			pxPartitions[ xPartNr ].ulStartLBA, */
+			/*			pxPartitions[ xPartNr ].ulSectorCount); */
+			if( prvIsExtendedPartition( pxPartitions[ xPartNr ].ucPartitionID ) != pdFALSE )
+			{
+				continue;		/* Do this later */
+			}
+
+			/* The first sector must be a MBR, then check the partition entry in the MBR */
+			if( ( pxPartitions[ xPartNr ].ucActive != 0x80 ) &&
+				( pxPartitions[ xPartNr ].ucActive != 0x00 ) )
+			{
+				if( ( xPartNr == 0 ) &&
+					( FF_getShort( ucDataBuffer, FF_FAT_RESERVED_SECTORS ) != 0 ) &&
+					( FF_getChar( ucDataBuffer, FF_FAT_NUMBER_OF_FATS ) != 0 ) )
+				{
+					isPBR = pdTRUE;
+				}
+				else
+				{
+					xError = FF_ERR_IOMAN_INVALID_FORMAT | FF_PARTITIONSEARCH;
+					break;
+				}
+			}
+			else if( pxPartitions[ xPartNr ].ulSectorCount )
+			{
+				FF_Part_t	*p = &pPartsFound->pxPartitions[ pPartsFound->iCount++ ];
+				*p = pxPartitions[ xPartNr ];
+				p->bIsExtended = 0;
+				if( pPartsFound->iCount >= ffconfigMAX_PARTITIONS )
+				{
+					break;
+				}
+			}
+		}
+		if( FF_isERR( xError ) || ( pPartsFound->iCount >= ffconfigMAX_PARTITIONS ) )
+		{
+			break;
+		}
+		for( xPartNr = 0; xPartNr < 4; xPartNr++ )
+		{
+			if( prvIsExtendedPartition( pxPartitions[ xPartNr ].ucPartitionID ) )
+			{
+				FF_Error_t xError = FF_ParseExtended( pxIOManager, pxPartitions[ xPartNr ].ulStartLBA,
+					pxPartitions[ xPartNr ].ulSectorCount, pPartsFound );
+
+				if( FF_isERR( xError ) || ( pPartsFound->iCount >= ffconfigMAX_PARTITIONS ) )
+				{
+					goto done;
+				}
+			}
+		}
+
+		if( pPartsFound->iCount == 0 )
+		{
+			FF_PRINTF( "FF_Part: no partitions, try as PBR\n" );
+			isPBR = pdTRUE;
+		}
+
+		if( isPBR )
+		{
+			uint8_t media = FF_getChar( ucDataBuffer, FF_FAT_MEDIA_TYPE );
+			FF_Part_t	*p;
+			if( !prvIsValidMedia( media ) )
+			{
+				FF_PRINTF( "FF_Part: Looks like PBR but media %02X\n", media );
+				xError = FF_ERR_IOMAN_NO_MOUNTABLE_PARTITION | FF_PARTITIONSEARCH;
+				goto done;
+			}
+
+			/* This looks like a PBR because it has a valid media type */
+			p = pPartsFound->pxPartitions;
+			p->ulStartLBA = 0;	/* FF_FAT_PTBL_LBA */
+			p->ulSectorCount = ( uint32_t ) FF_getShort( pxBuffer->pucBuffer, FF_FAT_16_TOTAL_SECTORS );
+			if( p->ulSectorCount == 0ul )
+			{
+				p->ulSectorCount = FF_getLong( pxBuffer->pucBuffer, FF_FAT_32_TOTAL_SECTORS );
+			}
+
+			p->ucActive = 0x80;	/* FF_FAT_PTBL_ACTIVE */
+			p->ucPartitionID = 0x0B;	/* FF_FAT_PTBL_ID MSDOS data partition */
+			p->bIsExtended = 0;
+			pPartsFound->iCount = 1;
+		}
+	} while( pdFALSE );
+done:
+	if( pxBuffer )
+	{
+		FF_Error_t xTempError = FF_ReleaseBuffer( pxIOManager, pxBuffer );
+		if( FF_isERR( xError ) == pdFALSE )
+		{
+			xError = xTempError;
+		}
 	}
-	return count;
-}
+
+	pxIOManager->xPartition.ulTotalSectors = prevTotalSectors;
+
+	return FF_isERR( xError ) ? xError : pPartsFound->iCount;
+}	/* FF_PartitionSearch() */
+/*-----------------------------------------------------------*/
 
 /*
 	Mount GPT Partition Tables
 */
-
 #define FF_GPT_HEAD_ENTRY_SIZE			0x54
-#define	FF_GPT_HEAD_TOTAL_ENTRIES		0x50
+#define FF_GPT_HEAD_TOTAL_ENTRIES		0x50
 #define FF_GPT_HEAD_PART_ENTRY_LBA		0x48
 #define FF_GPT_ENTRY_FIRST_SECTOR_LBA	0x20
 #define FF_GPT_HEAD_CRC					0x10
 #define FF_GPT_HEAD_LENGTH				0x0C
 
-static FF_ERROR FF_GetEfiPartitionEntry(FF_IOMAN *pIoman, FF_T_UINT32 ulPartitionNumber) {
-	// Continuing on from FF_MountPartition() pPartition->BeginLBA should be the sector of the GPT Header
-	FF_BUFFER		*pBuffer;
-	FF_PARTITION	*pPart = pIoman->pPartition;
+static FF_Error_t FF_GetEfiPartitionEntry( FF_IOManager_t *pxIOManager, uint32_t ulPartitionNumber )
+{
+/* Continuing on from FF_Mount() pPartition->ulBeginLBA should be the sector of the GPT Header */
+FF_Buffer_t *pxBuffer;
+FF_Partition_t *pxPartition = &( pxIOManager->xPartition );
 
-	FF_T_UINT32		ulBeginGPT;
-	FF_T_UINT32		ulEntrySector;
-	FF_T_UINT32		ulSectorOffset;
-	FF_T_UINT32		ulPartitionEntrySize;
-	FF_T_UINT32		ulGPTHeadCRC, ulGPTCrcCheck, ulGPTHeadLength;
+uint32_t ulBeginGPT;
+uint32_t ulEntrySector;
+uint32_t ulSectorOffset;
+uint32_t ulPartitionEntrySize;
+uint32_t ulGPTHeadCRC, ulGPTCrcCheck, ulGPTHeadLength;
 
-	FF_ERROR Error;
+FF_Error_t xError;
 
-	if(ulPartitionNumber >= 128) {
-		return FF_ERR_IOMAN_INVALID_PARTITION_NUM | FF_GETEFIPARTITIONENTRY;
-	}
-
-	pBuffer = FF_GetBuffer(pIoman, pPart->BeginLBA, FF_MODE_READ);
+	do
 	{
-		if(!pBuffer) {
-			return FF_ERR_DEVICE_DRIVER_FAILED | FF_GETEFIPARTITIONENTRY;
+		if( ulPartitionNumber >= 128 )
+		{
+			xError = FF_ERR_IOMAN_INVALID_PARTITION_NUM | FF_GETEFIPARTITIONENTRY;
+			break;
+		}
+		pxBuffer = FF_GetBuffer( pxIOManager, pxPartition->ulBeginLBA, FF_MODE_READ );
+		if( pxBuffer == NULL )
+		{
+			xError = FF_ERR_DEVICE_DRIVER_FAILED | FF_GETEFIPARTITIONENTRY;
+			break;
 		}
 
-		// Verify this is an EFI header
-		if(memcmp(pBuffer->pBuffer, "EFI PART", 8) != 0) {
-			Error = FF_ReleaseBuffer(pIoman, pBuffer);	// Already returning an error, but this error would override the current one.
-			if(FF_isERR(Error)) {
-				return Error;
+		/* Verify this is an EFI header with the text "EFI PART": */
+		if( memcmp( pxBuffer->pucBuffer, "EFI PART", 8 ) != 0 )
+		{
+			/* Already returning an error, but this error would override the current one. */
+			xError = FF_ReleaseBuffer( pxIOManager, pxBuffer );
+			if( FF_isERR( xError ) == pdFALSE )
+			{
+				xError = FF_ERR_IOMAN_INVALID_FORMAT | FF_GETEFIPARTITIONENTRY;
 			}
-			return FF_ERR_IOMAN_INVALID_FORMAT | FF_GETEFIPARTITIONENTRY;
+			break;
 		}
 
-		ulBeginGPT					= FF_getLong(pBuffer->pBuffer, FF_GPT_HEAD_PART_ENTRY_LBA);
+		ulBeginGPT					= FF_getLong( pxBuffer->pucBuffer, FF_GPT_HEAD_PART_ENTRY_LBA );
+		ulPartitionEntrySize		= FF_getLong( pxBuffer->pucBuffer, FF_GPT_HEAD_ENTRY_SIZE );
+		ulGPTHeadCRC				= FF_getLong( pxBuffer->pucBuffer, FF_GPT_HEAD_CRC );
+		ulGPTHeadLength				= FF_getLong( pxBuffer->pucBuffer, FF_GPT_HEAD_LENGTH );
 
-		ulPartitionEntrySize		= FF_getLong(pBuffer->pBuffer, FF_GPT_HEAD_ENTRY_SIZE);
-		ulGPTHeadCRC				= FF_getLong(pBuffer->pBuffer, FF_GPT_HEAD_CRC);
-		ulGPTHeadLength				= FF_getLong(pBuffer->pBuffer, FF_GPT_HEAD_LENGTH);
+		/* Calculate Head CRC */
+		/* Blank CRC field */
+		FF_putLong( pxBuffer->pucBuffer, FF_GPT_HEAD_CRC, 0x00000000 );
 
-		// Calculate Head CRC
+		/* Calculate CRC */
+		ulGPTCrcCheck = FF_GetCRC32( pxBuffer->pucBuffer, ulGPTHeadLength );
 
-		// Blank CRC field
-		FF_putLong(pBuffer->pBuffer, FF_GPT_HEAD_CRC, 0x00000000);
+		/* Restore The CRC field */
+		FF_putLong( pxBuffer->pucBuffer, FF_GPT_HEAD_CRC, ulGPTHeadCRC );
 
-		// Calculate CRC
-		ulGPTCrcCheck = FF_GetCRC32(pBuffer->pBuffer, ulGPTHeadLength);
-
-		// Restore The CRC field
-		FF_putLong(pBuffer->pBuffer, FF_GPT_HEAD_CRC, ulGPTHeadCRC);
-	}
-	Error = FF_ReleaseBuffer(pIoman, pBuffer);
-	if(FF_isERR(Error)) {
-		return Error;
-	}
-
-	// Check CRC
-	if(ulGPTHeadCRC != ulGPTCrcCheck) {
-		return FF_ERR_IOMAN_GPT_HEADER_CORRUPT | FF_GETEFIPARTITIONENTRY;
-	}
-
-	// Calculate Sector Containing the Partition Entry we want to use.
-
-	ulEntrySector	= ((ulPartitionNumber * ulPartitionEntrySize) / pIoman->BlkSize) + ulBeginGPT;
-	ulSectorOffset	= (ulPartitionNumber % (pIoman->BlkSize / ulPartitionEntrySize)) * ulPartitionEntrySize;
-
-	pBuffer = FF_GetBuffer(pIoman, ulEntrySector, FF_MODE_READ);
-	{
-		if(!pBuffer) {
-			return FF_ERR_DEVICE_DRIVER_FAILED | FF_GETEFIPARTITIONENTRY;
+		xError = FF_ReleaseBuffer( pxIOManager, pxBuffer );
+		if( FF_isERR( xError ) )
+		{
+			break;
 		}
 
-		pPart->BeginLBA = FF_getLong(pBuffer->pBuffer, ulSectorOffset + FF_GPT_ENTRY_FIRST_SECTOR_LBA);
-	}
-	Error = FF_ReleaseBuffer(pIoman, pBuffer);
-	if(FF_isERR(Error)) {
-		return Error;
-	}
+		/* Check CRC */
+		if( ulGPTHeadCRC != ulGPTCrcCheck )
+		{
+			xError = FF_ERR_IOMAN_GPT_HEADER_CORRUPT | FF_GETEFIPARTITIONENTRY;
+			break;
+		}
 
-	if(!pPart->BeginLBA) {
-		return FF_ERR_IOMAN_INVALID_PARTITION_NUM | FF_GETEFIPARTITIONENTRY;
-	}
+		/* Calculate Sector Containing the Partition Entry we want to use. */
+		ulEntrySector = ( ( ulPartitionNumber * ulPartitionEntrySize ) / pxIOManager->usSectorSize ) + ulBeginGPT;
+		ulSectorOffset = ( ulPartitionNumber % ( pxIOManager->usSectorSize / ulPartitionEntrySize ) ) * ulPartitionEntrySize;
 
-	return FF_ERR_NONE;
-}
+		pxBuffer = FF_GetBuffer( pxIOManager, ulEntrySector, FF_MODE_READ );
+		{
+			if( pxBuffer == NULL )
+			{
+				xError = FF_ERR_DEVICE_DRIVER_FAILED | FF_GETEFIPARTITIONENTRY;
+				break;
+			}
+
+			pxPartition->ulBeginLBA = FF_getLong( pxBuffer->pucBuffer, ulSectorOffset + FF_GPT_ENTRY_FIRST_SECTOR_LBA );
+		}
+
+		xError = FF_ReleaseBuffer( pxIOManager, pxBuffer );
+		if( FF_isERR( xError ) == pdFALSE )
+		{
+			if( pxPartition->ulBeginLBA == 0ul )
+			{
+				xError = FF_ERR_IOMAN_INVALID_PARTITION_NUM | FF_GETEFIPARTITIONENTRY;
+			}
+		}
+	}
+	while( pdFALSE );
+
+	return xError;
+}	/* FF_GetEfiPartitionEntry() */
+/*-----------------------------------------------------------*/
 
 /**
  *	@public
- *	@brief	Mounts the Specified partition, the volume specified by the FF_IOMAN object provided.
+ *	@brief	Mounts the Specified partition, the volume specified by the FF_IOManager_t object provided.
  *
  *	The device drivers must adhere to the specification provided by
- *	FF_WRITE_BLOCKS and FF_READ_BLOCKS.
+ *	FF_WriteBlocks_t and FF_ReadBlocks_t.
  *
- *	@param	pIoman			FF_IOMAN object.
- *	@param	PartitionNumber	The primary partition number to be mounted. (0 - 3).
+ *	@param	pxIOManager			FF_IOManager_t object.
+ *	@param	PartitionNumber	The primary or logical partition number to be mounted,
+ *                          ranging between 0 and ffconfigMAX_PARTITIONS-1 (normally 0)
+ *                          Note that FF_PartitionSearch can be called in advance to
+ *                          enumerate all available partitions
  *
- *	@return	0 on success.
- *	@return FF_ERR_NULL_POINTER if a pIoman object wasn't provided.
- *	@return FF_ERR_IOMAN_INVALID_PARTITION_NUM if the partition number is out of range.
- *	@return FF_ERR_IOMAN_NO_MOUNTABLE_PARTITION if no partition was found.
- *	@return FF_ERR_IOMAN_INVALID_FORMAT if the master boot record or partition boot block didn't provide sensible data.
- *	@return FF_ERR_IOMAN_NOT_FAT_FORMATTED if the volume or partition couldn't be determined to be FAT. (@see ff_config.h)
+ *	@Return	0 on success.
+ *	@Return FF_ERR_NULL_POINTER if a pxIOManager object wasn't provided.
+ *	@Return FF_ERR_IOMAN_INVALID_PARTITION_NUM if the partition number is out of range.
+ *	@Return FF_ERR_IOMAN_NO_MOUNTABLE_PARTITION if no partition was found.
+ *	@Return FF_ERR_IOMAN_INVALID_FORMAT if the master boot record or partition boot block didn't provide sensible data.
+ *	@Return FF_ERR_IOMAN_NOT_FAT_FORMATTED if the volume or partition couldn't be determined to be FAT. (@see FreeRTOSFATConfig.h)
  *
  **/
-FF_ERROR FF_MountPartition(FF_IOMAN *pIoman, FF_T_UINT8 PartitionNumber) {
-	FF_PARTITION	*pPart;
-	FF_BUFFER		*pBuffer = 0;
-	FF_ERROR		Error;
+FF_Error_t FF_Mount( FF_Disk_t *pxDisk, BaseType_t xPartitionNumber )
+{
+FF_Partition_t *pxPartition;
+FF_Buffer_t *pxBuffer = 0;
+FF_Error_t xError = FF_ERR_NONE;
+int16_t rootEntryCount;
+FF_IOManager_t *pxIOManager = pxDisk->pxIOManager;
 
-	FF_T_UINT8		ucPartitionType;
-#ifdef FF_HASH_CACHE
-	FF_T_INT        i;
+/* HT TODO: find a method to safely determine the FAT type: 32/16/12 */
+/* other than only counting Clusters */
+/*	UBaseType_t		fat32Indicator = 0; */
+FF_Part_t *pxMyPartition;
+#if( ffconfigHASH_CACHE != 0 )
+	BaseType_t i;
 #endif
-	int partCount;
+FF_Error_t xPartitionCount = 0;
+FF_SPartFound_t partsFound;
+partsFound.iCount = 0;
 
-	if(!pIoman) {
-		return FF_ERR_NULL_POINTER | FF_MOUNTPARTITION;
-	}
-
-	/*if(PartitionNumber > 3) {
-		return FF_ERR_IOMAN_INVALID_PARTITION_NUM;
-	}*/
-
-	pPart = pIoman->pPartition;
-
-	memset (pIoman->pBuffers, '\0', sizeof(FF_BUFFER) * pIoman->CacheSize);
-	memset (pIoman->pCacheMem, '\0', pIoman->BlkSize * pIoman->CacheSize);
-
-#ifdef FF_HASH_CACHE
-	for(i = 0; i < FF_HASH_CACHE_DEPTH; i++) {
-		FF_ClearHashTable(pIoman->HashCache[i].pHashTable);
-	}
-#endif
-
-	FF_IOMAN_InitBufferDescriptors(pIoman);
-	pIoman->FirstFile = 0;
-
-	pBuffer = FF_GetBuffer(pIoman, 0, FF_MODE_READ);
-	if(!pBuffer) {
-		return FF_ERR_DEVICE_DRIVER_FAILED | FF_MOUNTPARTITION;
-	}
-
-	partCount = FF_PartitionCount (pBuffer->pBuffer);
-
-	pPart->BlkSize = FF_getShort(pBuffer->pBuffer, FF_FAT_BYTES_PER_SECTOR);
-
-	if (partCount == 0) { //(pPart->BlkSize % 512) == 0 && pPart->BlkSize > 0) {
-		// Volume is not partitioned (MBR Found)
-		pPart->BeginLBA = 0;
-	} else {
-
-		ucPartitionType = FF_getChar(pBuffer->pBuffer, FF_FAT_PTBL + FF_FAT_PTBL_ID);	// Ensure its not an EFI partition!
-
-		if(ucPartitionType != 0xEE) {
-
-			if(PartitionNumber > 3) {
-				Error = FF_ReleaseBuffer(pIoman, pBuffer);	// Already returning an error, but an error from ReleaseBuf would override it.
-				if(FF_isERR(Error)) {
-					return Error;
-				}
-				return FF_ERR_IOMAN_INVALID_PARTITION_NUM | FF_MOUNTPARTITION;
-			}
-
-			// Primary Partitions to deal with!
-			pPart->BeginLBA = FF_getLong(pBuffer->pBuffer, FF_FAT_PTBL + FF_FAT_PTBL_LBA + (16 * PartitionNumber));
-		}
-		Error = FF_ReleaseBuffer(pIoman, pBuffer);
-		if(FF_isERR(Error)) {
-			return Error;
-		}
-
-		if(ucPartitionType == 0xEE) {
-			pPart->BeginLBA = FF_getLong(pBuffer->pBuffer, FF_FAT_PTBL + FF_FAT_PTBL_LBA);
-			Error = FF_GetEfiPartitionEntry(pIoman, PartitionNumber);
-
-			if(FF_isERR(Error)) {
-				return Error;
-			}
-		}
-
-		if(!pPart->BeginLBA) {
-			return FF_ERR_IOMAN_NO_MOUNTABLE_PARTITION | FF_MOUNTPARTITION;
-		}
-		// Now we get the Partition sector.
-		pBuffer = FF_GetBuffer(pIoman, pPart->BeginLBA, FF_MODE_READ);
-		if(!pBuffer) {
-			return FF_ERR_DEVICE_DRIVER_FAILED | FF_MOUNTPARTITION;
-		}
-		pPart->BlkSize = FF_getShort(pBuffer->pBuffer, FF_FAT_BYTES_PER_SECTOR);
-		if((pPart->BlkSize % 512) != 0 || pPart->BlkSize == 0) {
-			Error = FF_ReleaseBuffer(pIoman, pBuffer);	// An error here should override the current error, as its likely fatal.
-			if(FF_isERR(Error)) {
-				return Error;
-			}
-			return FF_ERR_IOMAN_INVALID_FORMAT | FF_MOUNTPARTITION;
-		}
-	}
-
-	// Assume FAT16, then we'll adjust if its FAT32
-	pPart->ReservedSectors = FF_getShort(pBuffer->pBuffer, FF_FAT_RESERVED_SECTORS);
-	pPart->FatBeginLBA = pPart->BeginLBA + pPart->ReservedSectors;
-
-	pPart->NumFATS = (FF_T_UINT8) FF_getShort(pBuffer->pBuffer, FF_FAT_NUMBER_OF_FATS);
-	pPart->SectorsPerFAT = (FF_T_UINT32) FF_getShort(pBuffer->pBuffer, FF_FAT_16_SECTORS_PER_FAT);
-
-	pPart->SectorsPerCluster = FF_getChar(pBuffer->pBuffer, FF_FAT_SECTORS_PER_CLUS);
-
-	pPart->BlkFactor = (FF_T_UINT8) (pPart->BlkSize / pIoman->BlkSize);    // Set the BlockFactor (How many real-blocks in a fake block!).
-
-	if(pPart->SectorsPerFAT == 0) {	// FAT32
-		pPart->SectorsPerFAT	= FF_getLong(pBuffer->pBuffer, FF_FAT_32_SECTORS_PER_FAT);
-		pPart->RootDirCluster	= FF_getLong(pBuffer->pBuffer, FF_FAT_ROOT_DIR_CLUSTER);
-		pPart->ClusterBeginLBA	= pPart->BeginLBA + pPart->ReservedSectors + (pPart->NumFATS * pPart->SectorsPerFAT);
-		pPart->TotalSectors		= (FF_T_UINT32) FF_getShort(pBuffer->pBuffer, FF_FAT_16_TOTAL_SECTORS);
-		if(pPart->TotalSectors == 0) {
-			pPart->TotalSectors = FF_getLong(pBuffer->pBuffer, FF_FAT_32_TOTAL_SECTORS);
-		}
-		memcpy (pPart->VolLabel, pBuffer->pBuffer + FF_FAT_32_VOL_LABEL, sizeof pPart->VolLabel);
-	} else {	// FAT16
-		pPart->ClusterBeginLBA	= pPart->BeginLBA + pPart->ReservedSectors + (pPart->NumFATS * pPart->SectorsPerFAT);
-		pPart->TotalSectors		= (FF_T_UINT32) FF_getShort(pBuffer->pBuffer, FF_FAT_16_TOTAL_SECTORS);
-		pPart->RootDirCluster	= 1; // 1st Cluster is RootDir!
-		if(pPart->TotalSectors == 0) {
-			pPart->TotalSectors = FF_getLong(pBuffer->pBuffer, FF_FAT_32_TOTAL_SECTORS);
-		}
-		memcpy (pPart->VolLabel, pBuffer->pBuffer + FF_FAT_16_VOL_LABEL, sizeof pPart->VolLabel);
-	}
-#ifdef FF_WRITE_FREE_COUNT
-	pPart->FSInfoLBA = pPart->BeginLBA + FF_getShort(pBuffer->pBuffer, 48);
-#endif
-
-	Error = FF_ReleaseBuffer(pIoman, pBuffer);	// Release the buffer finally!
-	if(FF_isERR(Error)) {
-		return Error;
-	}
-
-	if(!pPart->BlkSize) {
-		return FF_ERR_IOMAN_INVALID_FORMAT | FF_MOUNTPARTITION;
-	}
-
-	pPart->RootDirSectors	= ((FF_getShort(pBuffer->pBuffer, FF_FAT_ROOT_ENTRY_COUNT) * 32) + pPart->BlkSize - 1) / pPart->BlkSize;
-	pPart->FirstDataSector	= pPart->ClusterBeginLBA + pPart->RootDirSectors;
-	pPart->DataSectors		= pPart->TotalSectors - (pPart->ReservedSectors + (pPart->NumFATS * pPart->SectorsPerFAT) + pPart->RootDirSectors);
-
-	if(!pPart->SectorsPerCluster) {
-		return FF_ERR_IOMAN_INVALID_FORMAT | FF_MOUNTPARTITION;
-	}
-
-	pPart->NumClusters = pPart->DataSectors / pPart->SectorsPerCluster;
-
-	Error = FF_DetermineFatType(pIoman);
-
-	if(FF_isERR(Error)) {
-		return Error;
-	}
-	pPart->PartitionMounted = FF_TRUE;
-	pPart->LastFreeCluster	= 0;
-#ifdef FF_MOUNT_FIND_FREE
-	pPart->LastFreeCluster	= FF_FindFreeCluster(pIoman, &Error);
-	if(FF_isERR(Error)) {
-		 return Error;
-	}
-	pPart->FreeClusterCount = FF_CountFreeClusters(pIoman, &Error);
-	if(FF_isERR(Error)) {
-		 return Error;
-	}
-#else
-	pPart->FreeClusterCount = 0;
-#endif
-
-	return FF_ERR_NONE;
-}
-
-/**
- *	@public
- *	@brief	Unregister a Blockdevice, so that the IOMAN can be re-used for another device.
- *
- *	Any active partitions must be Unmounted first.
- *
- *	@param	pIoman	FF_IOMAN object.
- *
- *	@return	FF_ERR_NONE on success.
- **/
-FF_ERROR FF_UnregisterBlkDevice(FF_IOMAN *pIoman) {
-
-	FF_ERROR RetVal = FF_ERR_NONE;
-
-	if(!pIoman) {
-		return FF_ERR_NULL_POINTER | FF_UNREGISTERBLKDEVICE;
-	}
-
-	FF_PendSemaphore(pIoman->pSemaphore);
+	do
 	{
-		if(pIoman->pPartition->PartitionMounted == FF_FALSE) {
-			pIoman->pBlkDevice->devBlkSize		= 0;
-			pIoman->pBlkDevice->fnpReadBlocks	= NULL;
-			pIoman->pBlkDevice->fnpWriteBlocks	= NULL;
-			pIoman->pBlkDevice->pParam			= NULL;
-		} else {
-			RetVal = FF_ERR_IOMAN_PARTITION_MOUNTED | FF_UNREGISTERBLKDEVICE;
+		if( pxIOManager == NULL )
+		{
+			xError = FF_ERR_NULL_POINTER | FF_MOUNTPARTITION;
+			break;
 		}
-	}
-	FF_ReleaseSemaphore(pIoman->pSemaphore);
 
-	return RetVal;
-}
+		pxPartition = &( pxIOManager->xPartition );
+
+		/* FF_IOMAN_InitBufferDescriptors will clear 'pxBuffers' */
+		memset( pxIOManager->pucCacheMem, '\0', ( size_t ) pxIOManager->usSectorSize * pxIOManager->usCacheSize );
+
+		#if( ffconfigHASH_CACHE != 0 )
+		{
+			memset( pxIOManager->xHashCache, '\0', sizeof( pxIOManager->xHashCache ) );
+			for( i = 0; i < ffconfigHASH_CACHE_DEPTH; i++ )
+			{
+				/* _HT_ Check why did JW put it to 100? */
+				pxIOManager->xHashCache[ i ].ulMisses = 100;
+			}
+		}
+		#endif
+		FF_IOMAN_InitBufferDescriptors( pxIOManager );
+		pxIOManager->FirstFile = 0;
+
+		xPartitionCount = FF_PartitionSearch( pxIOManager, &partsFound );
+		if( FF_isERR( xPartitionCount ) )
+		{
+			xError = xPartitionCount;
+			break;
+		}
+
+		if( xPartitionCount == 0 )
+		{
+			xError = FF_ERR_IOMAN_NO_MOUNTABLE_PARTITION | FF_MOUNTPARTITION;
+			break;
+		}
+
+		if( xPartitionNumber >= xPartitionCount )
+		{
+			xError = FF_ERR_IOMAN_INVALID_PARTITION_NUM | FF_MOUNTPARTITION;
+			break;
+		}
+
+		pxMyPartition = &( partsFound.pxPartitions[ xPartitionNumber ] );
+
+		pxPartition->ulBeginLBA = pxMyPartition->ulStartLBA;
+
+		if( pxMyPartition->ucPartitionID == 0xEE )
+		{
+			xError = FF_GetEfiPartitionEntry( pxIOManager, xPartitionNumber );
+
+			if( FF_isERR( xError ) )
+			{
+				break;
+			}
+		}
+
+		/* Now we get the Partition sector. */
+		pxBuffer = FF_GetBuffer( pxIOManager, pxPartition->ulBeginLBA, FF_MODE_READ );
+		if( pxBuffer == NULL )
+		{
+			xError = FF_ERR_DEVICE_DRIVER_FAILED | FF_MOUNTPARTITION;
+			break;
+		}
+
+		pxPartition->usBlkSize = FF_getShort( pxBuffer->pucBuffer, FF_FAT_BYTES_PER_SECTOR );
+		if( ( ( pxPartition->usBlkSize % 512 ) != 0 ) || ( pxPartition->usBlkSize == 0 ) )
+		{
+			/* An error here should override the current error, as its likely fatal. */
+			xError = FF_ReleaseBuffer( pxIOManager, pxBuffer );
+			if( FF_isERR( xError ) == pdFALSE )
+			{
+				xError = FF_ERR_IOMAN_INVALID_FORMAT | FF_MOUNTPARTITION;
+			}
+			break;
+		}
+
+		/* Assume FAT16, then we'll adjust if its FAT32 */
+		pxPartition->usReservedSectors = FF_getShort( pxBuffer->pucBuffer, FF_FAT_RESERVED_SECTORS );
+		pxPartition->ulFATBeginLBA = pxPartition->ulBeginLBA + pxPartition->usReservedSectors;
+
+		pxPartition->ucNumFATS = ( uint8_t ) FF_getShort( pxBuffer->pucBuffer, FF_FAT_NUMBER_OF_FATS );
+		pxPartition->ulSectorsPerFAT = ( uint32_t ) FF_getShort( pxBuffer->pucBuffer, FF_FAT_16_SECTORS_PER_FAT );
+
+		pxPartition->ulSectorsPerCluster = FF_getChar( pxBuffer->pucBuffer, FF_FAT_SECTORS_PER_CLUS );
+
+		/* Set the BlockFactor (How many real-blocks in a fake block!). */
+		pxPartition->ucBlkFactor = ( uint8_t ) ( pxPartition->usBlkSize / pxIOManager->usSectorSize );
+		pxPartition->ulTotalSectors = ( uint32_t ) FF_getShort( pxBuffer->pucBuffer, FF_FAT_16_TOTAL_SECTORS );
+		if( pxPartition->ulTotalSectors == 0 )
+		{
+			pxPartition->ulTotalSectors = FF_getLong( pxBuffer->pucBuffer, FF_FAT_32_TOTAL_SECTORS );
+		}
+
+		if( pxPartition->ulSectorsPerFAT == 0 )
+		{	/* FAT32 */
+			pxPartition->ulSectorsPerFAT = FF_getLong( pxBuffer->pucBuffer, FF_FAT_32_SECTORS_PER_FAT );
+			pxPartition->ulRootDirCluster = FF_getLong( pxBuffer->pucBuffer, FF_FAT_ROOT_DIR_CLUSTER );
+			memcpy( pxPartition->pcVolumeLabel, pxBuffer->pucBuffer + FF_FAT_32_VOL_LABEL, sizeof( pxPartition->pcVolumeLabel ) );
+		}
+		else
+		{	/* FAT16 */
+			pxPartition->ulRootDirCluster = 1;			/* 1st Cluster is RootDir! */
+			memcpy( pxPartition->pcVolumeLabel, pxBuffer->pucBuffer + FF_FAT_16_VOL_LABEL, sizeof( pxPartition->pcVolumeLabel ) );
+		}
+
+		pxPartition->ulClusterBeginLBA = pxPartition->ulBeginLBA + pxPartition->usReservedSectors + ( pxPartition->ucNumFATS * pxPartition->ulSectorsPerFAT );
+		#if( ffconfigWRITE_FREE_COUNT != 0 )
+		{
+			pxPartition->ulFSInfoLBA = pxPartition->ulBeginLBA + FF_getShort( pxBuffer->pucBuffer, 48 );
+		}
+		#endif
+		FF_ReleaseBuffer( pxIOManager, pxBuffer );	/* Release the buffer finally! */
+		if( pxPartition->usBlkSize == 0 )
+		{
+			xError = FF_ERR_IOMAN_INVALID_FORMAT | FF_MOUNTPARTITION;
+			break;
+		}
+
+		rootEntryCount = FF_getShort( pxBuffer->pucBuffer, FF_FAT_ROOT_ENTRY_COUNT );
+		pxPartition->ulRootDirSectors = ( ( rootEntryCount * 32 ) + pxPartition->usBlkSize - 1 ) / pxPartition->usBlkSize;
+		pxPartition->ulFirstDataSector = pxPartition->ulClusterBeginLBA + pxPartition->ulRootDirSectors;
+		pxPartition->ulDataSectors = pxPartition->ulTotalSectors - ( pxPartition->usReservedSectors + ( pxPartition->ucNumFATS * pxPartition->ulSectorsPerFAT ) + pxPartition->ulRootDirSectors );
+
+		/*
+		 * HT: fat32Indicator not yet used
+		 * As there is so much confusion about the FAT types
+		 * I was thinking of collecting indications for either FAT12, 16 or 32
+		 */
+
+		/*
+		if( FF_getShort( pxBuffer->pucBuffer, FF_FAT_EXT_BOOT_SIGNATURE ) == 0x29 )
+			fat32Indicator++;
+		if( rootEntryCount == 0 )
+			fat32Indicator++;
+		*/
+		if( pxPartition->ulSectorsPerCluster == 0 )
+		{
+			xError = FF_ERR_IOMAN_INVALID_FORMAT | FF_MOUNTPARTITION;
+			break;
+		}
+
+		pxPartition->ulNumClusters = pxPartition->ulDataSectors / pxPartition->ulSectorsPerCluster;
+
+		xError = prvDetermineFatType( pxIOManager );
+		if( FF_isERR( xError ) )
+		{
+			break;
+		}
+
+		if( !rootEntryCount && pxPartition->ucType != FF_T_FAT32 )
+		{
+			FF_PRINTF( "No root dir, must be a FAT32\n" );
+			pxPartition->ucType = FF_T_FAT32;
+		}
+
+		pxPartition->ucPartitionMounted = pdTRUE;
+		pxPartition->ulLastFreeCluster = 0;
+		#if( ffconfigMOUNT_FIND_FREE != 0 )
+		{
+			pxPartition->ulLastFreeCluster = FF_FindFreeCluster( pxIOManager, &xError );
+			if( FF_isERR( xError ) )
+			{
+				if( FF_GETERROR( xError ) == FF_ERR_IOMAN_NOT_ENOUGH_FREE_SPACE )
+				{
+					pxPartition->ulLastFreeCluster = 0;
+				}
+				else
+				{
+					break;
+				}
+			}
+
+			pxPartition->ulFreeClusterCount = FF_CountFreeClusters( pxIOManager, &xError );
+			if( FF_isERR( xError ) )
+			{
+				break;
+			}
+		}
+		#else
+		{
+			pxPartition->ulFreeClusterCount = 0;
+		}
+		#endif	/* ffconfigMOUNT_FIND_FREE */
+	}
+	while( pdFALSE );
+
+	if( FF_isERR( xError ) == pdFALSE )
+	{
+		xError = 0;
+	}
+
+	return xError;
+}	/* FF_Mount() */
+/*-----------------------------------------------------------*/
 
 /**
  *	@private
  *	@brief		Checks the cache for Active Handles
  *
- *	@param		pIoman FF_IOMAN Object.
+ *	@param		pxIOManager FF_IOManager_t Object.
  *
- *	@return		FF_TRUE if an active handle is found, else FF_FALSE.
+ *	@Return		pdTRUE if an active handle is found, else pdFALSE.
  *
  *	@pre		This function must be wrapped with the cache handling semaphore.
  **/
-static FF_T_BOOL FF_ActiveHandles(FF_IOMAN *pIoman) {
-	FF_T_UINT32	i;
-	FF_BUFFER	*pBuffer;
+static BaseType_t prvHasActiveHandles( FF_IOManager_t *pxIOManager )
+{
+BaseType_t xResult;
+FF_Buffer_t *pxBuffer = pxIOManager->pxBuffers;
+FF_Buffer_t *pxLastBuffer = pxBuffer + pxIOManager->usCacheSize;
 
-	for(i = 0; i < pIoman->CacheSize; i++) {
-		pBuffer = (pIoman->pBuffers + i);
-		if(pBuffer->NumHandles) {
-			return FF_TRUE;
+	for( ; ; )
+	{
+		if( pxBuffer->usNumHandles )
+		{
+			xResult = pdTRUE;
+			break;
+		}
+		pxBuffer++;
+		if( pxBuffer == pxLastBuffer )
+		{
+			xResult = pdFALSE;
+			break;
 		}
 	}
 
-	return FF_FALSE;
-}
-
+	return xResult;
+}	/* prvHasActiveHandles() */
+/*-----------------------------------------------------------*/
 
 /**
  *	@public
  *	@brief	Unmounts the active partition.
  *
- *	@param	pIoman	FF_IOMAN Object.
+ *	@param	pxIOManager	FF_IOManager_t Object.
  *
- *	@return FF_ERR_NONE on success.
+ *	@Return FF_ERR_NONE on success.
  **/
-FF_ERROR FF_UnmountPartition(FF_IOMAN *pIoman) {
-	FF_ERROR RetVal = FF_ERR_NONE;
-#ifdef FF_MIRROR_FATS_UMOUNT
-	FF_T_UINT i, y;
-	FF_BUFFER *pBuffer;
-#endif 
+FF_Error_t FF_Unmount( FF_Disk_t *pxDisk )
+{
+FF_Error_t xError = FF_ERR_NONE;
+FF_IOManager_t *pxIOManager;
 
-	if(!pIoman || !pIoman->pPartition) {
-		return FF_ERR_NULL_POINTER | FF_UNMOUNTPARTITION;
-	}
-	if (!pIoman->pPartition->PartitionMounted)
-		return FF_ERR_NONE;
-
-	FF_PendSemaphore(pIoman->pSemaphore);	// Ensure that there are no File Handles
-	{
-		if(!FF_ActiveHandles(pIoman)) {
-			if(pIoman->FirstFile == NULL) {
-				// Release Semaphore to call this function!
-				FF_ReleaseSemaphore(pIoman->pSemaphore);
-				RetVal = FF_FlushCache(pIoman);			// Flush any unwritten sectors to disk.
-				if(FF_isERR(RetVal)) {
-					return RetVal;
-				}
-				// Reclaim Semaphore
-				FF_PendSemaphore(pIoman->pSemaphore);
-				pIoman->pPartition->PartitionMounted = FF_FALSE;
-
-#ifdef FF_MIRROR_FATS_UMOUNT
-				FF_ReleaseSemaphore(pIoman->pSemaphore);
-				for(i = 0; i < pIoman->pPartition->SectorsPerFAT; i++) {
-					 pBuffer = FF_GetBuffer(pIoman, pIoman->pPartition->FatBeginLBA + i, FF_MODE_READ);
-					 if(!pBuffer) {
-						  RetVal = FF_ERR_DEVICE_DRIVER_FAILED | FF_UNMOUNTPARTITION;
-						  break;
-					 }
-					 for(y = 0; y < pIoman->pPartition->NumFATS; y++) {
-						  FF_BlockWrite(pIoman, pIoman->pPartition->FatBeginLBA + (y*pIoman->pPartition->SectorsPerFAT) + i, 1, pBuffer->pBuffer, FF_FALSE);
-					 }					 
-				}
-				FF_PendSemaphore(pIoman->pSemaphore);
+#if( ffconfigMIRROR_FATS_UMOUNT != 0 )
+	UBaseType_t uxIndex, y;
+	FF_Buffer_t	*pxBuffer;
 #endif
-			} else {
-				RetVal = FF_ERR_IOMAN_ACTIVE_HANDLES | FF_UNMOUNTPARTITION;
+
+	if( pxDisk->pxIOManager == NULL )
+	{
+		xError = FF_ERR_NULL_POINTER | FF_UNMOUNTPARTITION;
+	}
+	else if( pxDisk->pxIOManager->xPartition.ucPartitionMounted == 0 )
+	{
+		xError = FF_ERR_NONE;
+	}
+	else
+	{
+		pxIOManager = pxDisk->pxIOManager;
+		FF_PendSemaphore( pxIOManager->pvSemaphore );		/* Ensure that there are no File Handles */
+		{
+			if( prvHasActiveHandles( pxIOManager ) != 0 )
+			{
+				/* Active handles found on the cache. */
+				xError = FF_ERR_IOMAN_ACTIVE_HANDLES | FF_UNMOUNTPARTITION;
 			}
-		} else {
-			RetVal = FF_ERR_IOMAN_ACTIVE_HANDLES | FF_UNMOUNTPARTITION;	// Active handles found on the cache.
+			else if( pxIOManager->FirstFile != NULL )
+			{
+				/* Open files in this partition. */
+				xError = FF_ERR_IOMAN_ACTIVE_HANDLES | FF_UNMOUNTPARTITION;
+			}
+			else
+			{
+				/* Release Semaphore to call this function! */
+				FF_ReleaseSemaphore( pxIOManager->pvSemaphore );
+				/* Flush any unwritten sectors to disk. */
+				xError = FF_FlushCache( pxIOManager );
+				/* Reclaim Semaphore */
+				FF_PendSemaphore( pxIOManager->pvSemaphore );
+
+				if( FF_isERR( xError ) == pdFALSE )
+				{
+					pxIOManager->xPartition.ucPartitionMounted = pdFALSE;
+
+					#if( ffconfigMIRROR_FATS_UMOUNT != 0 )
+					{
+						FF_ReleaseSemaphore( pxIOManager->pvSemaphore );
+						for( uxIndex = 0; uxIndex < pxIOManager->xPartition.ulSectorsPerFAT; uxIndex++ )
+						{
+							pxBuffer = FF_GetBuffer( pxIOManager, pxIOManager->xPartition.ulFATBeginLBA + uxIndex, FF_MODE_READ );
+							if( !pxBuffer )
+							{
+								xError = FF_ERR_DEVICE_DRIVER_FAILED | FF_UNMOUNTPARTITION;
+								break;
+							}
+							for( y = 0; y < pxIOManager->xPartition.ucNumFATS; y++ )
+							{
+								FF_BlockWrite( pxIOManager,
+									pxIOManager->xPartition.ulFATBeginLBA + ( y * pxIOManager->xPartition.ulSectorsPerFAT ) + uxIndex, 1,
+									pxBuffer->pucBuffer, pdFALSE );
+							}
+						}
+						FF_PendSemaphore( pxIOManager->pvSemaphore );
+					}
+					#endif
+				}
+			}
+		}
+		FF_ReleaseSemaphore( pxIOManager->pvSemaphore );
+	}
+
+	return xError;
+}	/* FF_Unmount() */
+/*-----------------------------------------------------------*/
+
+FF_Error_t FF_IncreaseFreeClusters( FF_IOManager_t *pxIOManager, uint32_t Count )
+{
+FF_Error_t xError;
+
+#if( ffconfigWRITE_FREE_COUNT != 0 )
+	FF_Buffer_t	*pxBuffer;
+#endif
+
+	do
+	{
+		/* Open a do {} while( pdFALSE ) loop to allow the use of break statements. */
+		if( pxIOManager->xPartition.ulFreeClusterCount == 0ul )
+		{
+			/* Apparently the number of free clusters has not been calculated yet,
+			or no free cluster was available. Now check it. */
+			pxIOManager->xPartition.ulFreeClusterCount = FF_CountFreeClusters( pxIOManager, &xError );
+			if( FF_isERR( xError ) )
+			{
+				break;
+			}
+		}
+		else
+		{
+			xError = FF_ERR_NONE;
+			pxIOManager->xPartition.ulFreeClusterCount += Count;
+		}
+
+		if( pxIOManager->xPartition.ulLastFreeCluster == 0 )
+		{
+			/* Find the an available cluster. */
+			pxIOManager->xPartition.ulLastFreeCluster = FF_FindFreeCluster( pxIOManager, &xError );
+			if( FF_isERR( xError ) )
+			{
+				break;
+			}
+		}
+
+		#if( ffconfigWRITE_FREE_COUNT != 0 )
+		{
+			/* FAT32 updates the FSINFO sector. */
+			if( pxIOManager->xPartition.ucType == FF_T_FAT32 )
+			{
+				/* Find the FSINFO sector. */
+				pxBuffer = FF_GetBuffer( pxIOManager, pxIOManager->xPartition.ulFSInfoLBA, FF_MODE_WRITE );
+				if( pxBuffer == NULL )
+				{
+					xError = FF_ERR_DEVICE_DRIVER_FAILED | FF_INCREASEFREECLUSTERS;
+				}
+				else
+				{
+				uint32_t ulSignature1;
+				uint32_t ulSignature2;
+
+					ulSignature1 = FF_getLong( pxBuffer->pucBuffer, FS_INFO_OFFSET_SIGNATURE1_000 );
+					ulSignature2 = FF_getLong( pxBuffer->pucBuffer, FS_INFO_OFFSET_SIGNATURE2_484 );
+
+					if( ( ulSignature1 == FS_INFO_SIGNATURE1_0x41615252 ) &&
+						( ulSignature2 == FS_INFO_SIGNATURE2_0x61417272 ) )
+					{
+						/* FSINFO sector magic numbers we're verified. Safe to write. */
+						FF_putLong( pxBuffer->pucBuffer, FS_INFO_OFFSET_FREE_COUNT_488, pxIOManager->xPartition.ulFreeClusterCount );
+						FF_putLong( pxBuffer->pucBuffer, FS_INFO_OFFSET_FREE_CLUSTER_492, pxIOManager->xPartition.ulLastFreeCluster );
+					}
+					xError = FF_ReleaseBuffer( pxIOManager, pxBuffer );
+				}
+			}
+		}
+		#endif
+	}
+	while( pdFALSE );
+
+	return xError;
+}	/* FF_IncreaseFreeClusters() */
+/*-----------------------------------------------------------*/
+
+FF_Error_t FF_DecreaseFreeClusters( FF_IOManager_t *pxIOManager, uint32_t Count )
+{
+FF_Error_t	xError = FF_ERR_NONE;
+#if( ffconfigWRITE_FREE_COUNT != 0 )
+	FF_Buffer_t	*pxBuffer;
+#endif
+
+	if( pxIOManager->xPartition.ulFreeClusterCount == 0ul )
+	{
+		pxIOManager->xPartition.ulFreeClusterCount = FF_CountFreeClusters( pxIOManager, &xError );
+	}
+	else
+	{
+		pxIOManager->xPartition.ulFreeClusterCount -= Count;
+	}
+
+	if( FF_isERR( xError ) == pdFALSE )
+	{
+		if( pxIOManager->xPartition.ulLastFreeCluster == 0 )
+		{
+			pxIOManager->xPartition.ulLastFreeCluster = FF_FindFreeCluster( pxIOManager, &xError );
 		}
 	}
-	FF_ReleaseSemaphore(pIoman->pSemaphore);
+	if( FF_isERR( xError ) == pdFALSE )
+	{
+		#if( ffconfigWRITE_FREE_COUNT != 0 )
+		{
+			/* FAT32 update the FSINFO sector. */
+			if( pxIOManager->xPartition.ucType == FF_T_FAT32 )
+			{
+				/* Find the FSINFO sector. */
+				pxBuffer = FF_GetBuffer( pxIOManager, pxIOManager->xPartition.ulFSInfoLBA, FF_MODE_WRITE );
+				{
+					if( pxBuffer == NULL )
+					{
+						xError = FF_ERR_DEVICE_DRIVER_FAILED | FF_DECREASEFREECLUSTERS;
+					}
+					else
+					{
+						if( ( FF_getLong( pxBuffer->pucBuffer, FS_INFO_OFFSET_SIGNATURE1_000 ) == FS_INFO_SIGNATURE1_0x41615252 ) &&
+							( FF_getLong( pxBuffer->pucBuffer, FS_INFO_OFFSET_SIGNATURE2_484 ) == FS_INFO_SIGNATURE2_0x61417272 ) )
+						{
+							/* FSINFO sector magic nums we're verified. Safe to write. */
+							FF_putLong( pxBuffer->pucBuffer, FS_INFO_OFFSET_FREE_COUNT_488, pxIOManager->xPartition.ulFreeClusterCount );
+							FF_putLong( pxBuffer->pucBuffer, FS_INFO_OFFSET_FREE_CLUSTER_492, pxIOManager->xPartition.ulLastFreeCluster );
+						}
+					}
+				}
 
-	return RetVal;
-}
-
-
-FF_ERROR FF_IncreaseFreeClusters(FF_IOMAN *pIoman, FF_T_UINT32 Count) {
-
-	FF_ERROR Error;
-
-#ifdef FF_WRITE_FREE_COUNT
-	FF_BUFFER *pBuffer;
-#endif
-
-	if(!pIoman->pPartition->FreeClusterCount) {
-		 pIoman->pPartition->FreeClusterCount = FF_CountFreeClusters(pIoman, &Error);
-		 if(FF_isERR(Error)) {
-			  return Error;
-		 }
-	} else {
-		 pIoman->pPartition->FreeClusterCount += Count;
+				xError = FF_ReleaseBuffer( pxIOManager, pxBuffer );
+			}
+		}
+		#endif
 	}
 
-	if(!pIoman->pPartition->LastFreeCluster) {
-		 pIoman->pPartition->LastFreeCluster = FF_FindFreeCluster(pIoman, &Error);
-		 if(FF_isERR(Error)) {
-			  return Error;
-		 }
-	}
-
-#ifdef FF_WRITE_FREE_COUNT
-	// FAT32 update the FSINFO sector.
-	if(pIoman->pPartition->Type == FF_T_FAT32) {
-		 // Find the FSINFO sector.
-		 pBuffer = FF_GetBuffer(pIoman, pIoman->pPartition->FSInfoLBA, FF_MODE_WRITE);
-		 {
-			  if(!pBuffer) {
-					return FF_ERR_DEVICE_DRIVER_FAILED | FF_INCREASEFREECLUSTERS;
-			  }
-
-			  if(FF_getLong(pBuffer->pBuffer, 0) == 0x41615252 && FF_getLong(pBuffer->pBuffer, 484) == 0x61417272) {
-					// FSINFO sector magic nums we're verified. Safe to write.
-					FF_putLong(pBuffer->pBuffer, 488, pIoman->pPartition->FreeClusterCount);
-					FF_putLong(pBuffer->pBuffer, 492, pIoman->pPartition->LastFreeCluster);
-
-			  }
-		 }
-		 Error = FF_ReleaseBuffer(pIoman, pBuffer);
-		 if(FF_isERR(Error)) {
-			 return Error;
-		 }
-	}
-#endif
-
-	return FF_ERR_NONE;
-}
-
-FF_ERROR FF_DecreaseFreeClusters(FF_IOMAN *pIoman, FF_T_UINT32 Count) {
-
-	FF_ERROR Error;
-#ifdef FF_WRITE_FREE_COUNT
-	FF_BUFFER *pBuffer;
-#endif
-
-	if(!pIoman->pPartition->FreeClusterCount) {
-		 pIoman->pPartition->FreeClusterCount = FF_CountFreeClusters(pIoman, &Error);
-		 if(FF_isERR(Error)) {
-			  return Error;
-		 }
-	} else {
-		 pIoman->pPartition->FreeClusterCount -= Count;
-	}
-
-	if(!pIoman->pPartition->LastFreeCluster) {
-		 pIoman->pPartition->LastFreeCluster = FF_FindFreeCluster(pIoman, &Error);
-		 if(FF_isERR(Error)) {
-			  return Error;
-		 }
-	}
-
-#ifdef FF_WRITE_FREE_COUNT
-	// FAT32 update the FSINFO sector.
-	if(pIoman->pPartition->Type == FF_T_FAT32) {
-		 // Find the FSINFO sector.
-		 pBuffer = FF_GetBuffer(pIoman, pIoman->pPartition->FSInfoLBA, FF_MODE_WRITE);
-		 {
-			  if(!pBuffer) {
-					return FF_ERR_DEVICE_DRIVER_FAILED | FF_DECREASEFREECLUSTERS;
-			  }
-
-			  if(FF_getLong(pBuffer->pBuffer, 0) == 0x41615252 && FF_getLong(pBuffer->pBuffer, 484) == 0x61417272) {
-					// FSINFO sector magic nums we're verified. Safe to write.
-					FF_putLong(pBuffer->pBuffer, 488, pIoman->pPartition->FreeClusterCount);
-					FF_putLong(pBuffer->pBuffer, 492, pIoman->pPartition->LastFreeCluster);
-			  }
-		 }
-		 Error = FF_ReleaseBuffer(pIoman, pBuffer);
-		 if(FF_isERR(Error)) {
-			 return Error;
-		 }
-	}
-#endif
-	return FF_ERR_NONE;
-}
-
+	return xError;
+}	/* FF_DecreaseFreeClusters() */
+/*-----------------------------------------------------------*/
 
 /**
  *	@brief	Returns the Block-size of a mounted Partition
@@ -1236,43 +1773,72 @@ FF_ERROR FF_DecreaseFreeClusters(FF_IOMAN *pIoman, FF_T_UINT32 Count) {
  *	knocking sequence for security. After the sector knock, some secure USB
  *	sticks then present a different BlockSize.
  *
- *	@param	pIoman		FF_IOMAN Object returned from FF_CreateIOMAN()
+ *	@param	pxIOManager		FF_IOManager_t Object returned from FF_CreateIOManger()
  *
- *	@return	The blocksize of the partition. A value less than 0 when an error occurs.
- *	@return	Any negative value can be cast to the FF_ERROR type.
+ *	@Return	The blocksize of the partition. A value less than 0 when an error occurs.
+ *	@Return	Any negative value can be cast to the FF_Error_t type.
  **/
-FF_T_SINT32 FF_GetPartitionBlockSize(FF_IOMAN *pIoman) {
-
-	if(pIoman) {
-		return (FF_T_SINT32) pIoman->pPartition->BlkSize;
+int32_t FF_GetPartitionBlockSize( FF_IOManager_t *pxIOManager )
+{
+int32_t lReturn;
+	if( pxIOManager )
+	{
+		lReturn = ( int32_t ) pxIOManager->xPartition.usBlkSize;
+	}
+	else
+	{
+		lReturn = FF_ERR_NULL_POINTER | FF_GETPARTITIONBLOCKSIZE;
 	}
 
-	return FF_ERR_NULL_POINTER | FF_GETPARTITIONBLOCKSIZE;
-}
+	return lReturn;
+}	/* FF_GetPartitionBlockSize() */
+/*-----------------------------------------------------------*/
 
-#ifdef FF_64_NUM_SUPPORT
-/**
- *	@brief	Returns the number of bytes contained within the mounted partition or volume.
- *
- *	@param	pIoman		FF_IOMAN Object returned from FF_CreateIOMAN()
- *
- *	@return The total number of bytes that the mounted partition or volume contains.
- *
- **/
-FF_T_UINT64 FF_GetVolumeSize(FF_IOMAN *pIoman) {
-	if(pIoman) {
-		FF_T_UINT32 TotalClusters = (pIoman->pPartition->DataSectors / pIoman->pPartition->SectorsPerCluster);
-		return (FF_T_UINT64) ((FF_T_UINT64)TotalClusters * (FF_T_UINT64)((FF_T_UINT64)pIoman->pPartition->SectorsPerCluster * (FF_T_UINT64)pIoman->pPartition->BlkSize));
-	}
-	return 0;
-}
+#if( ffconfig64_NUM_SUPPORT != 0 )
+
+	/**
+	 *	@brief	Returns the number of bytes contained within the mounted partition or volume.
+	 *
+	 *	@param	pxIOManager		FF_IOManager_t Object returned from FF_CreateIOManger()
+	 *
+	 *	@Return The total number of bytes that the mounted partition or volume contains.
+	 *
+	 **/
+	uint64_t FF_GetVolumeSize( FF_IOManager_t *pxIOManager )
+	{
+	uint64_t ullResult;
+
+		if( pxIOManager )
+		{
+			uint32_t TotalClusters = ( pxIOManager->xPartition.ulDataSectors / pxIOManager->xPartition.ulSectorsPerCluster );
+			ullResult = ( uint64_t )
+				(
+					( uint64_t ) TotalClusters * ( uint64_t )
+						( ( uint64_t ) pxIOManager->xPartition.ulSectorsPerCluster * ( uint64_t ) pxIOManager->xPartition.usBlkSize )
+				);
+		}
+		else
+		{
+			ullResult = 0ULL;
+		}
+
+		return ullResult;
+	}	/* FF_GetVolumeSize() */
 #else
-FF_T_UINT32 FF_GetVolumeSize(FF_IOMAN *pIoman) {
-	if(pIoman) {
-		FF_T_UINT32 TotalClusters = pIoman->pPartition->DataSectors / pIoman->pPartition->SectorsPerCluster;
-		return (FF_T_UINT32) (TotalClusters * (pIoman->pPartition->SectorsPerCluster * pIoman->pPartition->BlkSize));
-	}
-	return 0;
-}
-#endif
+	uint32_t FF_GetVolumeSize( FF_IOManager_t *pxIOManager )
+	{
+	uint32_t ulResult;
+		if( pxIOManager )
+		{
+			uint32_t	TotalClusters = pxIOManager->xPartition.ulDataSectors / pxIOManager->xPartition.ulSectorsPerCluster;
+			ulResult = ( uint32_t ) ( TotalClusters * ( pxIOManager->xPartition.ulSectorsPerCluster * pxIOManager->xPartition.usBlkSize ) );
+		}
+		else
+		{
+			ulResult = 0UL;
+		}
 
+		return ulResult;
+	}	/* FF_GetVolumeSize() */
+#endif
+/*-----------------------------------------------------------*/

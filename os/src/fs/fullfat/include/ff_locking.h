@@ -50,84 +50,33 @@
  */
 
 /**
- *	@file		ff_memory.c
- *	@ingroup	MEMORY
- *
- *	@defgroup	MEMORY	FreeRTOS+FAT Memory Access Routines
- *	@brief		Handles memory access in a portable way.
- *
- *	Provides simple, fast, and portable access to memory routines.
- *	These are only used to read data from buffers. That are LITTLE ENDIAN
- *	due to the FAT specification.
- *
- *	These routines may need to be modified to your platform.
- *
+ *	@file		ff_locking.h
+ *	@ingroup	LOCKING
  **/
 
-#include "ff_headers.h"
+#ifndef _FF_LOCKING_H_
+#define	_FF_LOCKING_H_
 
-/*
- * Here below 3 x 2 access functions that allow the code
- * not to worry about the endianness of the MCU.
- */
-
-
-#if( ffconfigINLINE_MEMORY_ACCESS == 0 )
-
-uint8_t FF_getChar( const uint8_t *pBuffer, uint32_t aOffset )
-{
-	return ( uint8_t ) ( pBuffer[ aOffset ] );
-}
-
-uint16_t FF_getShort( const uint8_t *pBuffer, uint32_t aOffset )
-{
-FF_T_UN16 u16;
-
-	pBuffer += aOffset;
-	u16.bytes.u8_1 = pBuffer[ 1 ];
-	u16.bytes.u8_0 = pBuffer[ 0 ];
-
-	return u16.u16;
-}
-
-uint32_t FF_getLong( const uint8_t *pBuffer, uint32_t aOffset )
-{
-FF_T_UN32 u32;
-
-	pBuffer += aOffset;
-	u32.bytes.u8_3 = pBuffer[ 3 ];
-	u32.bytes.u8_2 = pBuffer[ 2 ];
-	u32.bytes.u8_1 = pBuffer[ 1 ];
-	u32.bytes.u8_0 = pBuffer[ 0 ];
-
-	return u32.u32;
-}
-
-void FF_putChar( uint8_t *pBuffer, uint32_t aOffset, uint32_t Value )
-{
-	pBuffer[ aOffset ] = ( uint8_t ) Value;
-}
-
-void FF_putShort( uint8_t *pBuffer, uint32_t aOffset, uint32_t Value )
-{
-FF_T_UN16 u16;
-
-	u16.u16 = ( uint16_t ) Value;
-	pBuffer += aOffset;
-	pBuffer[ 0 ] = u16.bytes.u8_0;
-	pBuffer[ 1 ] = u16.bytes.u8_1;
-}
-
-void FF_putLong( uint8_t *pBuffer, uint32_t aOffset, uint32_t Value )
-{
-FF_T_UN32 u32;
-
-	u32.u32 = Value;
-	pBuffer += aOffset;
-	pBuffer[ 0 ] = u32.bytes.u8_0;
-	pBuffer[ 1 ] = u32.bytes.u8_1;
-	pBuffer[ 2 ] = u32.bytes.u8_2;
-	pBuffer[ 3 ] = u32.bytes.u8_3;
-}
-
+#ifdef __cplusplus
+extern "C" {
 #endif
+
+#include <stdlib.h>
+
+/*---------- PROTOTYPES (in order of appearance). */
+
+/* PUBLIC: */
+
+
+/* PRIVATE: */
+void		FF_PendSemaphore		(void *pSemaphore);
+BaseType_t	FF_TrySemaphore         (void *pSemaphore, uint32_t TimeMs);
+void		FF_ReleaseSemaphore		(void *pSemaphore);
+void		FF_Sleep				(uint32_t TimeMs);
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
+#endif	/* _FF_LOCKING_H_ */
+

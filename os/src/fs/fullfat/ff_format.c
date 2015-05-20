@@ -1,337 +1,732 @@
-/*****************************************************************************
- *     FullFAT - High Performance, Thread-Safe Embedded FAT File-System      *
- *                                                                           *
- *        Copyright(C) 2009  James Walmsley  <james@fullfat-fs.co.uk>        *
- *        Copyright(C) 2011  Hein Tibosch    <hein_tibosch@yahoo.es>         *
- *                                                                           *
- *    See RESTRICTIONS.TXT for extra restrictions on the use of FullFAT.     *
- *                                                                           *
- *    WARNING : COMMERCIAL PROJECTS MUST COMPLY WITH THE GNU GPL LICENSE.    *
- *                                                                           *
- *  Projects that cannot comply with the GNU GPL terms are legally obliged   *
- *    to seek alternative licensing. Contact James Walmsley for details.     *
- *                                                                           *
- *****************************************************************************
- *           See http://www.fullfat-fs.co.uk/ for more information.          *
- *****************************************************************************
- *  This program is free software: you can redistribute it and/or modify     *
- *  it under the terms of the GNU General Public License as published by     *
- *  the Free Software Foundation, either version 3 of the License, or        *
- *  (at your option) any later version.                                      *
- *                                                                           *
- *  This program is distributed in the hope that it will be useful,          *
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of           *
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            *
- *  GNU General Public License for more details.                             *
- *                                                                           *
- *  You should have received a copy of the GNU General Public License        *
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.    *
- *                                                                           *
- *  The Copyright of Hein Tibosch on this project recognises his efforts in  *
- *  contributing to this project. The right to license the project under     *
- *  any other terms (other than the GNU GPL license) remains with the        *
- *  original copyright holder (James Walmsley) only.                         *
- *                                                                           *
- *****************************************************************************
- *  Modification/Extensions/Bugfixes/Improvements to FullFAT must be sent to *
- *  James Walmsley for integration into the main development branch.         *
- *****************************************************************************/
+/*
+ * FreeRTOS+FAT Labs Build 150406 (C) 2015 Real Time Engineers ltd.
+ * Authors include James Walmsley, Hein Tibosch and Richard Barry
+ *
+ *******************************************************************************
+ ***** NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ***
+ ***                                                                         ***
+ ***                                                                         ***
+ ***   FREERTOS+FAT IS STILL IN THE LAB:                                     ***
+ ***                                                                         ***
+ ***   This product is functional and is already being used in commercial    ***
+ ***   products.  Be aware however that we are still refining its design,    ***
+ ***   the source code does not yet fully conform to the strict coding and   ***
+ ***   style standards mandated by Real Time Engineers ltd., and the         ***
+ ***   documentation and testing is not necessarily complete.                ***
+ ***                                                                         ***
+ ***   PLEASE REPORT EXPERIENCES USING THE SUPPORT RESOURCES FOUND ON THE    ***
+ ***   URL: http://www.FreeRTOS.org/contact  Active early adopters may, at   ***
+ ***   the sole discretion of Real Time Engineers Ltd., be offered versions  ***
+ ***   under a license other than that described below.                      ***
+ ***                                                                         ***
+ ***                                                                         ***
+ ***** NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ******* NOTE ***
+ *******************************************************************************
+ *
+ * - Open source licensing -
+ * While FreeRTOS+FAT is in the lab it is provided only under version two of the
+ * GNU General Public License (GPL) (which is different to the standard FreeRTOS
+ * license).  FreeRTOS+FAT is free to download, use and distribute under the
+ * terms of that license provided the copyright notice and this text are not
+ * altered or removed from the source files.  The GPL V2 text is available on
+ * the gnu.org web site, and on the following
+ * URL: http://www.FreeRTOS.org/gpl-2.0.txt.  Active early adopters may, and
+ * solely at the discretion of Real Time Engineers Ltd., be offered versions
+ * under a license other then the GPL.
+ *
+ * FreeRTOS+FAT is distributed in the hope that it will be useful.  You cannot
+ * use FreeRTOS+FAT unless you agree that you use the software 'as is'.
+ * FreeRTOS+FAT is provided WITHOUT ANY WARRANTY; without even the implied
+ * warranties of NON-INFRINGEMENT, MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ * PURPOSE. Real Time Engineers Ltd. disclaims all conditions and terms, be they
+ * implied, expressed, or statutory.
+ *
+ * 1 tab == 4 spaces!
+ *
+ * http://www.FreeRTOS.org
+ * http://www.FreeRTOS.org/plus
+ * http://www.FreeRTOS.org/labs
+ *
+ */
 
 /**
  *	@file		ff_format.c
- *	@author		James Walmsley
  *	@ingroup	FORMAT
  *
- *	@defgroup	FORMAT Independent FAT Formatter
- *	@brief		Provides an interface to format a partition with FAT.
- *
- *
+ *	@defgroup	FAT Fat File-System
+ *	@brief		Format a drive, given the number of sectors.
  *
  **/
 
+#include "ff_headers.h"
 
-#include "ff_format.h"
-#include "ff_types.h"
-#include "ff_ioman.h"
-#include "ff_fatdef.h"
+#include <time.h>
+#include <string.h>
 
-static FF_T_SINT8 FF_PartitionCount (FF_T_UINT8 *pBuffer)
+#if defined( __BORLANDC__ )
+	#include "ff_windows.h"
+#else
+	#include "FreeRTOS.h"
+	#include "task.h"	/* For FreeRTOS date/time function */
+#endif
+
+
+/*=========================================================================================== */
+
+#define	OFS_PART_ACTIVE_8             0x000 /* 0x01BE 0x80 if active */
+#define	OFS_PART_START_HEAD_8         0x001 /* 0x01BF */
+#define	OFS_PART_START_SEC_TRACK_16   0x002 /* 0x01C0 */
+#define	OFS_PART_ID_NUMBER_8          0x004 /* 0x01C2 */
+#define	OFS_PART_ENDING_HEAD_8        0x005 /* 0x01C3 */
+#define	OFS_PART_ENDING_SEC_TRACK_16  0x006 /* 0x01C4   = SectorCount - 1 - ulHiddenSectors */
+#define	OFS_PART_STARTING_LBA_32      0x008 /* 0x01C6   = ulHiddenSectors (This is important) */
+#define	OFS_PART_LENGTH_32            0x00C /* 0x01CA   = SectorCount - 1 - ulHiddenSectors */
+
+#define	OFS_PTABLE_MACH_CODE          0x000 /* 0x0000 */
+#define	OFS_PTABLE_PART_0             0x1BE /* 446 */
+#define	OFS_PTABLE_PART_1             0x1CE /* 462 */
+#define	OFS_PTABLE_PART_2             0x1DE /* 478 */
+#define	OFS_PTABLE_PART_3             0x1FE /* 494 */
+#define	OFS_PTABLE_PART_LEN           16
+
+/*=========================================================================================== */
+
+#define	OFS_BPB_jmpBoot_24           0x000 /* uchar jmpBoot[3] "0xEB 0x00 0x90" */
+#define	OFS_BPB_OEMName_64           0x003 /* uchar BS_OEMName[8] "MSWIN4.1" */
+
+#define	OFS_BPB_BytsPerSec_16        0x00B /* Only 512, 1024, 2048 or 4096 */
+#define	OFS_BPB_SecPerClus_8         0x00D /* Only 1, 2, 4, 8, 16, 32, 64, 128 */
+#define	OFS_BPB_ResvdSecCnt_16       0x00E /* ulFATReservedSectors, e.g. 1 (FAT12/16) or 32 (FAT32) */
+
+#define	OFS_BPB_NumFATs_8            0x010 /* 2 recommended */
+#define	OFS_BPB_RootEntCnt_16        0x011 /* ((iFAT16RootSectors * 512) / 32) 512 (FAT12/16) or 0 (FAT32) */
+#define	OFS_BPB_TotSec16_16          0x013 /* xxx (FAT12/16) or 0 (FAT32) */
+#define	OFS_BPB_Media_8              0x015 /* 0xF0 (rem media) also in FAT[0] low byte */
+
+#define	OFS_BPB_FATSz16_16           0x016
+#define	OFS_BPB_SecPerTrk_16         0x018 /* n.a. CF has no tracks */
+#define	OFS_BPB_NumHeads_16          0x01A /* n.a. 1 ? */
+#define	OFS_BPB_HiddSec_32           0x01C /* n.a.	0 for nonparitioned volume */
+#define	OFS_BPB_TotSec32_32          0x020 /* >= 0x10000 */
+
+#define	OFS_BPB_16_DrvNum_8          0x024 /* n.a. */
+#define	OFS_BPB_16_Reserved1_8       0x025 /* n.a. */
+#define	OFS_BPB_16_BootSig_8         0x026 /* n.a. */
+#define	OFS_BPB_16_BS_VolID_32       0x027 /* "unique" number */
+#define	OFS_BPB_16_BS_VolLab_88      0x02B /* "NO NAME    " */
+#define	OFS_BPB_16_FilSysType_64     0x036 /* "FAT12   " */
+
+#define	OFS_BPB_32_FATSz32_32        0x024 /* Only when BPB_FATSz16 = 0 */
+#define	OFS_BPB_32_ExtFlags_16       0x028 /* FAT32 only */
+#define	OFS_BPB_32_FSVer_16          0x02A /* 0:0 */
+#define	OFS_BPB_32_RootClus_32       0x02C /* See 'iFAT32RootClusters' Normally 2 */
+#define	OFS_BPB_32_FSInfo_16         0x030 /* Normally 1 */
+#define	OFS_BPB_32_BkBootSec_16      0x032 /* Normally 6 */
+#define	OFS_BPB_32_Reserved_96       0x034 /* Zeros */
+#define	OFS_BPB_32_DrvNum_8          0x040 /* n.a. */
+#define	OFS_BPB_32_Reserved1_8       0x041 /* n.a. */
+#define	OFS_BPB_32_BootSig_8         0x042 /* n.a. */
+#define	OFS_BPB_32_VolID_32          0x043 /* "unique" number */
+#define	OFS_BPB_32_VolLab_88         0x047 /* "NO NAME    " */
+#define	OFS_BPB_32_FilSysType_64     0x052 /* "FAT12   " */
+
+#define	OFS_FSI_32_LeadSig			0x000 /* With contents 0x41615252 */
+#define	OFS_FSI_32_Reserved1		0x004 /* 480 times 0 */
+#define	OFS_FSI_32_StrucSig			0x1E4 /* With contents 0x61417272 */
+#define	OFS_FSI_32_Free_Count		0x1E8 /* last known free cluster count on the volume, ~0 for unknown */
+#define	OFS_FSI_32_Nxt_Free			0x1EC /* cluster number at which the driver should start looking for free clusters */
+#define	OFS_FSI_32_Reserved2		0x1F0 /* zero's */
+#define	OFS_FSI_32_TrailSig			0x1FC /* 0xAA550000 (little endian) */
+
+#define	Min32 FreeRTOS_min_uint32
+#define RESV_COUNT					32
+#define MIN_CLUSTER_COUNT_FAT32		65525
+#define MIN_CLUSTERS_FAT16 4085 + 1
+
+static portINLINE uint32_t FreeRTOS_min_uint32( uint32_t a, uint32_t b )
 {
-	FF_T_SINT8 count = 0;
-	FF_T_SINT8 part;
-	// Check PBR or MBR signature
-	if (FF_getChar(pBuffer, FF_FAT_MBR_SIGNATURE) != 0x55 &&
-		FF_getChar(pBuffer, FF_FAT_MBR_SIGNATURE) != 0xAA ) {
-		// No MBR, but is it a PBR ?
-		if (FF_getChar(pBuffer, 0) == 0xEB &&          // PBR Byte 0
-		    FF_getChar(pBuffer, 2) == 0x90 &&          // PBR Byte 2
-		    (FF_getChar(pBuffer, 21) & 0xF0) == 0xF0) {// PBR Byte 21 : Media byte
-			return 1;	// No MBR but PBR exist then only one partition
-		}
-		return 0;   // No MBR and no PBR then no partition found
-	}
-	for (part = 0; part < 4; part++)  {
-		FF_T_UINT8 active = FF_getChar(pBuffer, FF_FAT_PTBL + FF_FAT_PTBL_ACTIVE + (16 * part));
-		FF_T_UINT8 part_id = FF_getChar(pBuffer, FF_FAT_PTBL + FF_FAT_PTBL_ID + (16 * part));
-		// The first sector must be a MBR, then check the partition entry in the MBR
-		if (active != 0x80 && (active != 0 || part_id == 0)) {
-			break;
-		}
-		count++;
-	}
-	return count;
+	return a <= b ? a : b;
 }
 
+/*_RB_ Candidate for splitting into multiple functions? */
+FF_Error_t FF_Format( FF_Disk_t *pxDisk, BaseType_t xPartitionNumber, BaseType_t xPreferFAT16, BaseType_t xSmallClusters )
+{
+uint32_t ulHiddenSectors;              /* Space from MBR and partition table */
+const uint32_t ulFSInfo = 1;           /* Sector number of FSINFO structure within the reserved area */
+const uint32_t ulBackupBootSector = 6; /* Sector number of "copy of the boot record" within the reserved area */
+const BaseType_t xFATCount = 2;        /* Number of FAT's */
+uint32_t ulFATReservedSectors = 0;     /* Space between the partition table and FAT table. */
+int32_t iFAT16RootSectors = 0;         /* Number of sectors reserved for root directory (FAT16 only) */
+int32_t iFAT32RootClusters = 0;        /* Initial amount of clusters claimed for root directory (FAT32 only) */
+uint8_t ucFATType = 0;                 /* Either 'FF_T_FAT16' or 'FF_T_FAT32' */
+uint32_t ulVolumeID = 0;               /* A pseudo Volume ID */
 
-FF_ERROR FF_CreatePartitionTable(FF_IOMAN *pIoman, FF_T_UINT32 ulTotalDeviceBlocks, FF_PARTITION_TABLE *pPTable) {
-	FF_BUFFER *pBuffer = FF_GetBuffer(pIoman, 0, FF_MODE_WRITE);
+uint32_t ulSectorsPerFAT = 0;          /* Number of sectors used by a single FAT table */
+uint32_t ulClustersPerFATSector = 0;   /* # of clusters which can be described within a sector (256 or 128) */
+uint32_t ulSectorsPerCluster = 0;      /* Size of a cluster (# of sectors) */
+uint32_t ulUsableDataSectors = 0;      /* Usable data sectors (= SectorCount - (ulHiddenSectors + ulFATReservedSectors)) */
+uint32_t ulUsableDataClusters = 0;     /* equals "ulUsableDataSectors / ulSectorsPerCluster" */
+uint32_t ulNonDataSectors = 0;         /* ulFATReservedSectors + ulHiddenSectors + iFAT16RootSectors */
+uint32_t ulClusterBeginLBA = 0;        /* Sector address of the first data cluster */
+uint32_t ulSectorCount;
+uint8_t *pucSectorBuffer = 0;
+FF_SPartFound_t xPartitionsFound;
+FF_Part_t *pxMyPartition = 0;
+FF_IOManager_t *pxIOManager = pxDisk->pxIOManager;
+
+	FF_PartitionSearch( pxIOManager, &xPartitionsFound );
+	if( xPartitionNumber >= xPartitionsFound.iCount )
 	{
-		if(!pBuffer) {
-			return FF_ERR_DEVICE_DRIVER_FAILED;
+		return FF_ERR_IOMAN_INVALID_PARTITION_NUM | FF_MODULE_FORMAT;
+	}
+
+	pxMyPartition = xPartitionsFound.pxPartitions + xPartitionNumber;
+	ulSectorCount = pxMyPartition->ulSectorCount;
+
+	ulHiddenSectors = pxMyPartition->ulStartLBA;
+
+	if( ( ( xPreferFAT16 == pdFALSE ) && ( ( ulSectorCount - RESV_COUNT ) >= 65536 ) ) ||
+		( ( ulSectorCount - RESV_COUNT ) >= ( 64 * MIN_CLUSTER_COUNT_FAT32 ) ) )
+	{
+		ucFATType = FF_T_FAT32;
+		iFAT32RootClusters = 2;
+		ulFATReservedSectors = RESV_COUNT;
+		iFAT16RootSectors = 0;
+	}
+	else
+	{
+		ucFATType = FF_T_FAT16;
+		iFAT32RootClusters = 0;
+		ulFATReservedSectors = 1u;
+		iFAT16RootSectors = 32; /* to get 512 dir entries */
+	}
+
+	/* Set start sector and length to allow FF_BlockRead/Write */
+	pxIOManager->xPartition.ulTotalSectors = pxMyPartition->ulSectorCount;
+	pxIOManager->xPartition.ulBeginLBA = pxMyPartition->ulStartLBA;
+
+	/* TODO: Find some solution here to get a unique disk ID */
+	ulVolumeID = ( rand() << 16 ) | rand(); /*_RB_ rand() has proven problematic in some environments. */
+
+	/* Sectors within partition which can not be used */
+	ulNonDataSectors = ulFATReservedSectors + iFAT16RootSectors;
+
+	/* A fs dependent constant: */
+	if( ucFATType == FF_T_FAT32 )
+	{
+		/* In FAT32, 4 bytes are needed to store the address (LBA) of a cluster.
+		Each FAT sector of 512 bytes can contain 512 / 4 = 128 entries. */
+		ulClustersPerFATSector = 128u;
+	}
+	else
+	{
+		/* In FAT16, 2 bytes are needed to store the address (LBA) of a cluster.
+		Each FAT sector of 512 bytes can contain 512 / 2 = 256 entries. */
+		ulClustersPerFATSector = 256u;
+	}
+
+	FF_PRINTF( "FF_Format: Secs %lu Rsvd %lu Hidden %lu Root %lu Data %lu\n",
+		ulSectorCount, ulFATReservedSectors, ulHiddenSectors, iFAT16RootSectors, ulSectorCount - ulNonDataSectors );
+
+	/* Either search from small to large or v.v. */
+	if( xSmallClusters != 0 )
+	{
+		/* The caller prefers to have small clusters.
+		Less waste but it can be slower. */
+		ulSectorsPerCluster = 1u;
+	}
+	else
+	{
+		if( ucFATType == FF_T_FAT32 )
+		{
+			ulSectorsPerCluster = 64u;
+		}
+		else
+		{
+			ulSectorsPerCluster = 32u;
+		}
+	}
+
+	for( ;; )
+	{
+		int32_t groupSize;
+		/* Usable sectors */
+		ulUsableDataSectors = ulSectorCount - ulNonDataSectors;
+		/* Each group consists of 'xFATCount' sectors + 'ulClustersPerFATSector' clusters */
+		groupSize = xFATCount + ulClustersPerFATSector * ulSectorsPerCluster;
+		/* This amount of groups will fit: */
+		ulSectorsPerFAT = ( ulUsableDataSectors + groupSize - ulSectorsPerCluster - xFATCount ) / groupSize;
+
+		ulUsableDataClusters = Min32(
+			( uint32_t ) ( ulUsableDataSectors - xFATCount * ulSectorsPerFAT ) / ulSectorsPerCluster,
+			( uint32_t ) ( ulClustersPerFATSector * ulSectorsPerFAT ) );
+		ulUsableDataSectors = ulUsableDataClusters * ulSectorsPerCluster;
+
+		if( ( ucFATType == FF_T_FAT16 ) && ( ulUsableDataClusters >= MIN_CLUSTERS_FAT16 ) && ( ulUsableDataClusters < 65536 ) )
+		{
+			break;
 		}
 
+		if( ( ucFATType == FF_T_FAT32 ) && ( ulUsableDataClusters >= 65536 ) && ( ulUsableDataClusters < 0x0FFFFFEF ) )
+		{
+			break;
+		}
 
+		/* Was this the last test? */
+		if( ( ( xSmallClusters != pdFALSE ) && ( ulSectorsPerCluster == 32 ) ) ||
+			( ( xSmallClusters == pdFALSE ) && ( ulSectorsPerCluster == 1) ) )
+		{
+			FF_PRINTF( "FF_Format: Can not make a FAT%d (tried %d) with %lu sectors\n",
+				ucFATType == FF_T_FAT32 ? 32 : 16, xPreferFAT16 ? 16 : 32, ulSectorCount );
+			return FF_ERR_IOMAN_BAD_MEMSIZE | FF_MODULE_FORMAT;
+		}
+		/* No it wasn't, try next clustersize */
+		if( xSmallClusters != pdFALSE )
+		{
+			ulSectorsPerCluster <<= 1;
+		}
+		else
+		{
+			ulSectorsPerCluster >>= 1;
+		}
 	}
-	FF_ReleaseBuffer(pIoman, pBuffer);
+
+	if( ( ucFATType == FF_T_FAT32 ) && ( ulSectorCount >= 0x100000UL ) )	/* Larger than 0.5 GB */
+	{
+		int32_t lRemaining = (ulNonDataSectors + 2 * ulSectorsPerFAT) % 128;
+		if( lRemaining != 0 )
+		{
+			/* In order to get ClusterBeginLBA well aligned (on a 128 sector boundary) */
+			ulFATReservedSectors += ( 128 - lRemaining );
+			ulNonDataSectors = ulFATReservedSectors + iFAT16RootSectors;
+			ulUsableDataSectors = ulSectorCount - ulNonDataSectors - 2 * ulSectorsPerFAT;
+			ulUsableDataClusters = ulUsableDataSectors / ulSectorsPerCluster;
+		}
+	}
+	ulClusterBeginLBA	= ulHiddenSectors + ulFATReservedSectors + 2 * ulSectorsPerFAT;
+
+	pucSectorBuffer = ( uint8_t * ) ffconfigMALLOC( 512 );
+	if( pucSectorBuffer == NULL )
+	{
+		return FF_ERR_NOT_ENOUGH_MEMORY | FF_MODULE_FORMAT;
+	}
+
+/*  ======================================================================================= */
+
+	memset( pucSectorBuffer, '\0', 512 );
+
+	memcpy( pucSectorBuffer + OFS_BPB_jmpBoot_24, "\xEB\x00\x90" "FreeRTOS", 11 );   /* Includes OFS_BPB_OEMName_64 */
+
+	FF_putShort( pucSectorBuffer, OFS_BPB_BytsPerSec_16, 512 );   /* 0x00B / Only 512, 1024, 2048 or 4096 */
+	FF_putShort( pucSectorBuffer, OFS_BPB_ResvdSecCnt_16, ( uint32_t ) ulFATReservedSectors ); /*  0x00E / 1 (FAT12/16) or 32 (FAT32) */
+
+	FF_putChar( pucSectorBuffer, OFS_BPB_NumFATs_8, 2);          /* 0x010 / 2 recommended */
+	FF_putShort( pucSectorBuffer, OFS_BPB_RootEntCnt_16, ( uint32_t ) ( iFAT16RootSectors * 512 ) / 32 ); /* 0x011 / 512 (FAT12/16) or 0 (FAT32) */
+
+	/* For FAT12 and FAT16 volumes, this field contains the count of 32- */
+	/* byte directory entries in the root directory */
+
+	FF_putChar( pucSectorBuffer, OFS_BPB_Media_8, 0xF8 );         /* 0x015 / 0xF0 (rem media) also in FAT[0] low byte */
+
+	FF_putShort( pucSectorBuffer, OFS_BPB_SecPerTrk_16, 0x3F );	   /* 0x18 n.a. CF has no tracks */
+	FF_putShort( pucSectorBuffer, OFS_BPB_NumHeads_16, 255 );         /* 0x01A / n.a. 1 ? */
+	FF_putLong (pucSectorBuffer, OFS_BPB_HiddSec_32, ( uint32_t ) ulHiddenSectors ); /* 0x01C / n.a.	0 for nonparitioned volume */
+	{
+		int32_t fatBeginLBA;
+		int32_t dirBegin;
+
+		FF_putChar( pucSectorBuffer, OFS_BPB_SecPerClus_8, ( uint32_t ) ulSectorsPerCluster ); /*  0x00D / Only 1, 2, 4, 8, 16, 32, 64, 128 */
+		FF_PRINTF("FF_Format: SecCluster %lu DatSec %lu DataClus %lu ulClusterBeginLBA %lu\n",
+			ulSectorsPerCluster, ulUsableDataSectors, ulUsableDataClusters, ulClusterBeginLBA );
+
+		/* This field is the new 32-bit total count of sectors on the volume. */
+		/* This count includes the count of all sectors in all four regions of the volume */
+		FF_putShort( pucSectorBuffer, OFS_BPB_TotSec16_16, 0 );        /* 0x013 / xxx (FAT12/16) or 0 (FAT32) */
+
+		FF_putLong (pucSectorBuffer, OFS_BPB_TotSec32_32, ulSectorCount ); /* 0x020 / >= 0x10000 */
+
+		if( ucFATType == FF_T_FAT32 )
+		{
+			FF_putLong( pucSectorBuffer,  OFS_BPB_32_FATSz32_32, ulSectorsPerFAT );      /* 0x24 / Only when BPB_FATSz16 = 0 */
+			FF_putShort( pucSectorBuffer, OFS_BPB_32_ExtFlags_16, 0 );                               /* 0x28 / FAT32 only */
+			FF_putShort( pucSectorBuffer, OFS_BPB_32_FSVer_16, 0 );                                  /* 0x2A / 0:0 */
+			FF_putLong( pucSectorBuffer,  OFS_BPB_32_RootClus_32, ( uint32_t ) iFAT32RootClusters ); /* 0x2C / Normally 2 */
+			FF_putShort( pucSectorBuffer, OFS_BPB_32_FSInfo_16, ulFSInfo );                          /* 0x30 / Normally 1 */
+			FF_putShort( pucSectorBuffer, OFS_BPB_32_BkBootSec_16, ulBackupBootSector );             /* 0x32 / Normally 6 */
+			FF_putChar( pucSectorBuffer,  OFS_BPB_32_DrvNum_8, 0 );                                  /* 0x40 / n.a. */
+			FF_putChar( pucSectorBuffer,  OFS_BPB_32_BootSig_8, 0x29 );                              /* 0x42 / n.a. */
+			FF_putLong( pucSectorBuffer,  OFS_BPB_32_VolID_32, ( uint32_t ) ulVolumeID );            /* 0x43 / "unique" number */
+			memcpy( pucSectorBuffer + OFS_BPB_32_VolLab_88, "MY NAME    ", 11 );    /* 0x47 / "NO NAME    " */
+			memcpy( pucSectorBuffer + OFS_BPB_32_FilSysType_64, "FAT32   ", 8 );    /* 0x52 / "FAT12   " */
+		}
+		else
+		{
+			FF_putChar( pucSectorBuffer, OFS_BPB_16_DrvNum_8, 0u );         /* 0x024 / n.a. */
+			FF_putChar( pucSectorBuffer, OFS_BPB_16_Reserved1_8, 0 );      /* 0x025 / n.a. */
+			FF_putChar( pucSectorBuffer, OFS_BPB_16_BootSig_8, 0x29 );     /* 0x026 / n.a. */
+			FF_putLong (pucSectorBuffer, OFS_BPB_16_BS_VolID_32, ( uint32_t ) ulVolumeID ); /* 0x027 / "unique" number */
+
+			FF_putShort( pucSectorBuffer, OFS_BPB_FATSz16_16, ulSectorsPerFAT );		/* 0x16 */
+
+			memcpy( pucSectorBuffer + OFS_BPB_16_BS_VolLab_88, "MY NAME    ", 11 );            /* 0x02B / "NO NAME    " */
+			memcpy( pucSectorBuffer + OFS_BPB_16_FilSysType_64, "FAT16   ", 8 );           /* 0x036 / "FAT12   " */
+		}
+
+		pucSectorBuffer[510] = 0x55;
+		pucSectorBuffer[511] = 0xAA;
+
+		FF_BlockWrite( pxIOManager, ulHiddenSectors, 1, pucSectorBuffer, 0u );
+		if (ucFATType == FF_T_FAT32)
+		{
+			FF_BlockWrite( pxIOManager, ulHiddenSectors + ulBackupBootSector, 1, pucSectorBuffer, pdFALSE );
+		}
+
+		if( ucFATType == FF_T_FAT32 )
+		{
+			memset( pucSectorBuffer, '\0', 512 );
+
+			FF_putLong( pucSectorBuffer, OFS_FSI_32_LeadSig, 0x41615252 );  /* to validate that this is in fact an FSInfo sector. */
+			/* OFS_FSI_32_Reserved1		0x004 / 480 times 0 */
+			FF_putLong( pucSectorBuffer, OFS_FSI_32_StrucSig, 0x61417272 ); /* Another signature that is more localized in the */
+																	 /* sector to the location of the fields that are used. */
+			FF_putLong( pucSectorBuffer, OFS_FSI_32_Free_Count, ~0U );      /* last known free cluster count on the volume, ~0 for unknown */
+			FF_putLong( pucSectorBuffer, OFS_FSI_32_Nxt_Free, 2 );          /* cluster number at which the driver should start looking for free clusters */
+			/* OFS_FSI_32_Reserved2		0x1F0 / zero's */
+			FF_putLong( pucSectorBuffer, OFS_FSI_32_TrailSig, 0xAA550000 ); /* Will correct for endianness */
+
+			FF_BlockWrite( pxIOManager, ulHiddenSectors + ulFSInfo, 1, pucSectorBuffer, pdFALSE );
+			FF_BlockWrite( pxIOManager, ulHiddenSectors + ulFSInfo + ulBackupBootSector, 1, pucSectorBuffer, pdFALSE );
+		}
+
+		fatBeginLBA = ulHiddenSectors + ulFATReservedSectors;
+		memset( pucSectorBuffer, '\0', 512 );
+		switch( ucFATType )
+		{
+			case FF_T_FAT16:
+				FF_putShort( pucSectorBuffer, 0, 0xFFF8 ); /* First FAT entry. */
+				FF_putShort( pucSectorBuffer, 2, 0xFFFF ); /* RESERVED alloc. */
+				break;
+			case FF_T_FAT32:
+				FF_putLong( pucSectorBuffer, 0, 0x0FFFFFF8 ); /* FAT32 FAT sig. */
+				FF_putLong( pucSectorBuffer, 4, 0xFFFFFFFF ); /* RESERVED alloc. */
+				FF_putLong( pucSectorBuffer, 8, 0x0FFFFFFF ); /* Root dir allocation. */
+				break;
+			default:
+				break;
+		}
+
+		FF_BlockWrite( pxIOManager, ( uint32_t ) fatBeginLBA, 1, pucSectorBuffer, pdFALSE );
+		FF_BlockWrite( pxIOManager, ( uint32_t ) fatBeginLBA + ulSectorsPerFAT, 1, pucSectorBuffer, pdFALSE );
+
+		FF_PRINTF( "FF_Format: Clearing entire FAT (2 x %lu sectors):\n", ulSectorsPerFAT );
+		{
+		int32_t addr;
+
+			memset( pucSectorBuffer, '\0', 512 );
+			for( addr = fatBeginLBA+1;
+				 addr < ( fatBeginLBA + ( int32_t ) ulSectorsPerFAT );
+				 addr++ )
+			{
+				FF_BlockWrite( pxIOManager, ( uint32_t ) addr, 1, pucSectorBuffer, pdFALSE );
+				FF_BlockWrite( pxIOManager, ( uint32_t ) addr + ulSectorsPerFAT, 1, pucSectorBuffer, pdFALSE );
+			}
+		}
+		FF_PRINTF( "FF_Format: Clearing done\n" );
+		dirBegin = fatBeginLBA + ( 2 * ulSectorsPerFAT );
+#if( ffconfigTIME_SUPPORT != 0 )
+		{
+			FF_SystemTime_t	str_t;
+			int16_t myShort;
+
+			FF_GetSystemTime( &str_t );
+
+			myShort = ( ( str_t.Hour << 11 ) & 0xF800 ) |
+								( ( str_t.Minute  <<  5 ) & 0x07E0 ) |
+								( ( str_t.Second   /  2 ) & 0x001F );
+			FF_putShort( pucSectorBuffer, 22, ( uint32_t ) myShort );
+
+			myShort = ( ( ( str_t.Year- 1980 )  <<  9 ) & 0xFE00 ) |
+					   ( ( str_t.Month << 5 ) & 0x01E0 ) |
+					   ( str_t.Day & 0x001F );
+			FF_putShort( pucSectorBuffer, 24, ( uint32_t ) myShort);
+		}
+#endif	/* ffconfigTIME_SUPPORT */
+
+		memcpy (pucSectorBuffer, "MY_DISK    ", 11);
+		pucSectorBuffer[11] = FF_FAT_ATTR_VOLID;
+
+		{
+		int32_t lAddress;
+		int32_t lLastAddress = dirBegin + ( iFAT16RootSectors ? iFAT16RootSectors : ulSectorsPerCluster );
+
+			FF_PRINTF("FF_Format: Clearing root directory at %08lX: %lu sectors\n", dirBegin, lLastAddress - dirBegin );
+			for( lAddress = dirBegin; lAddress < lLastAddress; lAddress++ )
+			{
+				FF_BlockWrite( pxIOManager, ( uint32_t ) lAddress, 1, pucSectorBuffer, 0u );
+				if( lAddress == dirBegin )
+				{
+					memset( pucSectorBuffer, '\0', 512 );
+				}
+			}
+		}
+	}
+
+	ffconfigFREE( pucSectorBuffer );
 
 	return FF_ERR_NONE;
 }
 
+FF_Error_t FF_Partition( FF_Disk_t *pxDisk, FF_PartitionParameters_t *pParams )
+{
+	const uint32_t ulInterSpace = pParams->ulInterSpace ? pParams->ulInterSpace : 2048;  /* Hidden space between 2 extended partitions */
+	BaseType_t xPartitionNumber;
+	FF_Part_t pxPartitions[ffconfigMAX_PARTITIONS];
+	uint32_t ulPartitionOffset; /* Pointer within partition table */
+	FF_Buffer_t *pxSectorBuffer;
+	uint8_t *pucBuffer;
+	uint32_t ulSummedSizes = 0;	/* Summed sizes as a percentage or as number of sectors. */
+	BaseType_t xPartitionCount = 0;
+	BaseType_t xNeedExtended;
+	uint32_t ulReservedSpace;
+	uint32_t ulAvailable;
+	FF_IOManager_t *pxIOManager = pxDisk->pxIOManager;
 
-FF_ERROR FF_FormatPartition(FF_IOMAN *pIoman, FF_T_UINT32 ulPartitionNumber, FF_T_UINT32 ulClusterSize) {
 
-	FF_BUFFER *pBuffer;
-  	FF_T_SINT8	scPartitionCount;
-	FF_T_UINT32 maxClusters, f16MaxClusters, f32MaxClusters;
-	FF_T_UINT32 fatSize = 32; // Default to a fat32 format.
+	/* Clear caching without flushing first. */
+	FF_IOMAN_InitBufferDescriptors( pxIOManager );
 
-	FF_PARTITION_ENTRY partitionGeom;
+	/* Avoid sanity checks by FF_BlockRead/Write. */
+	pxIOManager->xPartition.ulTotalSectors = 0;
 
-	FF_T_UINT32 ulBPRLba; ///< The LBA of the boot partition record.
-
-	FF_T_UINT32 fat32Size, fat16Size, newFat32Size, newFat16Size, finalFatSize;
-	FF_T_UINT32 sectorsPerCluster = ulClusterSize / pIoman->BlkSize;
-
-	FF_T_UINT32 ulReservedSectors, ulTotalSectors;
-
-	FF_T_UINT32 ul32DataSectors, ul16DataSectors;
-	FF_T_UINT32 i;
-
-	FF_T_UINT32 ulClusterBeginLBA;
-
-	FF_ERROR	Error = FF_ERR_NONE;
-
-	// Get Partition Metrics, and pass on to FF_Format() function
-
-	pBuffer = FF_GetBuffer(pIoman, 0, FF_MODE_READ);
+	/* Get the sum of sizes and number of actual partitions. */
+	for( xPartitionNumber = 0; xPartitionNumber < ffconfigMAX_PARTITIONS; xPartitionNumber++ )
 	{
-		if(!pBuffer) {
-			return FF_ERR_DEVICE_DRIVER_FAILED | FF_FORMATPARTITION;
+		if( pParams->xSizes[ xPartitionNumber ] > 0 )
+		{
+			xPartitionCount++;
+			ulSummedSizes += pParams->xSizes[ xPartitionNumber ];
+		}
+	}
+
+	if( xPartitionCount == 0 )
+	{
+		xPartitionCount = 1;
+		if( pParams->eSizeType == eSizeIsSectors)
+		{
+			pParams->xSizes[ 0 ] = pParams->ulSectorCount;
+		}
+		else
+		{
+			pParams->xSizes[ 0 ] = 100;
 		}
 
+		ulSummedSizes = pParams->xSizes[ 0 ];
+	}
 
-		scPartitionCount = FF_PartitionCount(pBuffer->pBuffer);
+	/* Correct PrimaryCount if necessary. */
+	if( pParams->xPrimaryCount > ( ( xPartitionCount > 4 ) ? 3 : xPartitionCount ) )
+	{
+		pParams->xPrimaryCount = ( xPartitionCount > 4 ) ? 3 : xPartitionCount;
+	}
 
-		if(!scPartitionCount) {
-			// Get Partition Geom from volume boot record.
-			ulBPRLba = 0;
-			partitionGeom.ulStartLBA = FF_getShort(pBuffer->pBuffer, FF_FAT_RESERVED_SECTORS); // Get offset to start of where we can actually put the FAT table.
-			ulReservedSectors = partitionGeom.ulStartLBA;
-			partitionGeom.ulLength = (FF_T_UINT32) FF_getShort(pBuffer->pBuffer, FF_FAT_16_TOTAL_SECTORS);
+	/* Now see if extended is necessary. */
+	xNeedExtended = ( xPartitionCount > pParams->xPrimaryCount );
 
-			if(partitionGeom.ulLength == 0) { // 32-bit entry was used.
-				partitionGeom.ulLength = FF_getLong(pBuffer->pBuffer, FF_FAT_32_TOTAL_SECTORS);
+	if( xNeedExtended != pdFALSE )
+	{
+		if( pParams->ulHiddenSectors < 4096 )
+		{
+			pParams->ulHiddenSectors = 4096;
+		}
+
+		ulReservedSpace = ulInterSpace * ( xPartitionCount - pParams->xPrimaryCount );
+	}
+	else
+	{
+		ulReservedSpace = 0;
+	}
+
+	ulAvailable = pParams->ulSectorCount - pParams->ulHiddenSectors - ulReservedSpace;
+
+	/* Check validity of Sizes */
+	switch( pParams->eSizeType )
+	{
+		case eSizeIsQuota:       /* Assign a quotum (sum of Sizes is free, all disk space will be allocated) */
+			break;
+		case eSizeIsPercent:  /* Assign a percentage of the available space (sum of Sizes must be <= 100) */
+			if( ulSummedSizes > 100 )
+			{
+				return FF_FORMATPARTITION | FF_ERR_IOMAN_BAD_MEMSIZE;
 			}
+			ulSummedSizes = 100;
+			break;
+		case eSizeIsSectors:     /* Assign fixed number of sectors (512 byte each) */
+			if( ulSummedSizes > ulAvailable )
+			{
+				return FF_FORMATPARTITION | FF_ERR_IOMAN_BAD_MEMSIZE;
+			}
+			break;
+	}
 
-			ulTotalSectors = partitionGeom.ulLength;
+	{
+	BaseType_t xPartitionNumber;
+	uint32_t ulRemaining = ulAvailable;
+	uint32_t ulLBA = pParams->ulHiddenSectors;
 
-			partitionGeom.ulLength -= partitionGeom.ulStartLBA; // Remove the reserved sectors from the count.
+		/* Divide the available sectors among the partitions: */
+		memset( pxPartitions, '\0', sizeof( pxPartitions ) );
 
-		} else {
-			// Get partition Geom from the partition table entry.
-
-		}
-
-		// Calculate the max possiblenumber of clusters based on clustersize.
-		maxClusters = partitionGeom.ulLength / sectorsPerCluster;
-
-		// Determine the size of a FAT table required to support this.
-		fat32Size = (maxClusters * 4) / pIoman->BlkSize; // Potential size in sectors of a fat32 table.
-		if((maxClusters * 4) % pIoman->BlkSize) {
-			fat32Size++;
-		}
-		fat32Size *= 2;	// Officially there are 2 copies of the FAT.
-
-		fat16Size = (maxClusters * 2) / pIoman->BlkSize; // Potential size in bytes of a fat16 table.
-		if((maxClusters * 2) % pIoman->BlkSize) {
-			fat16Size++;
-		}
-		fat16Size *= 2;
-
-		// A real number of sectors to be available is therefore ~~
-		ul16DataSectors = partitionGeom.ulLength - fat16Size;
-		ul32DataSectors = partitionGeom.ulLength - fat32Size;
-
-		f16MaxClusters = ul16DataSectors / sectorsPerCluster;
-		f32MaxClusters = ul32DataSectors / sectorsPerCluster;
-
-		newFat16Size = (f16MaxClusters * 2) / pIoman->BlkSize;
-		if((f16MaxClusters * 2) % pIoman->BlkSize) {
-			newFat16Size++;
-		}
-
-		newFat32Size = (f32MaxClusters * 4) / pIoman->BlkSize;
-		if((f32MaxClusters * 4) % pIoman->BlkSize) {
-			newFat32Size++;
-		}
-
-		// Now determine if this should be fat16/32 format?
-
-		if(f16MaxClusters < 65525) {
-			fatSize = 16;
-			finalFatSize = newFat16Size;
-		} else {
-			fatSize = 32;
-			finalFatSize = newFat32Size;
-		}
-
-		FF_ReleaseBuffer(pIoman, pBuffer);
-		for(i = 0; i < finalFatSize*2; i++) { // Ensure the FAT table is clear.
-			if(i == 0) {
-				pBuffer = FF_GetBuffer(pIoman, partitionGeom.ulStartLBA, FF_MODE_WR_ONLY);
-				if(!pBuffer) {
-					return FF_ERR_DEVICE_DRIVER_FAILED;
+		for( xPartitionNumber = 0; xPartitionNumber < xPartitionCount; xPartitionNumber++ )
+		{
+			if( pParams->xSizes[ xPartitionNumber ] > 0 )
+			{
+				uint32_t ulSize;
+				switch( pParams->eSizeType )
+				{
+					case eSizeIsQuota:       /* Assign a quotum (sum of Sizes is free, all disk space will be allocated) */
+					case eSizeIsPercent:  /* Assign a percentage of the available space (sum of Sizes must be <= 100) */
+						ulSize = ( uint32_t ) ( ( ( uint64_t ) pParams->xSizes[ xPartitionNumber ] * ulAvailable) / ulSummedSizes );
+						break;
+					case eSizeIsSectors:     /* Assign fixed number of sectors (512 byte each) */
+					default:                  /* Just for the compiler(s) */
+						ulSize = pParams->xSizes[ xPartitionNumber ];
+						break;
 				}
 
-				memset(pBuffer->pBuffer, 0, pIoman->BlkSize);
-			} else {
-				FF_BlockWrite(pIoman, partitionGeom.ulStartLBA+i, 1, pBuffer->pBuffer, FF_FALSE);
-			}
-		}
+				if( ulSize > ulRemaining )
+				{
+					ulSize = ulRemaining;
+				}
 
-		switch(fatSize) {
-		case 16: {
-			FF_putShort(pBuffer->pBuffer, 0, 0xFFF8); // First FAT entry.
-			FF_putShort(pBuffer->pBuffer, 2, 0xFFFF); // RESERVED alloc.
-			break;
-		}
-
-		case 32: {
-			FF_putLong(pBuffer->pBuffer, 0, 0x0FFFFFF8); // FAT32 FAT sig.
-			FF_putLong(pBuffer->pBuffer, 4, 0xFFFFFFFF); // RESERVED alloc.
-			FF_putLong(pBuffer->pBuffer, 8, 0x0FFFFFFF); // Root dir allocation.
-			break;
-		}
-
-		default:
-			break;
-		}
-
-		FF_ReleaseBuffer(pIoman, pBuffer);
-
-
-		// Clear and initialise the root dir.
-		ulClusterBeginLBA = partitionGeom.ulStartLBA + (finalFatSize*2);
-
-		for(i = 0; i < sectorsPerCluster; i++) {
-			if(i == 0) {
-				pBuffer = FF_GetBuffer(pIoman, ulClusterBeginLBA, FF_MODE_WR_ONLY);
-				memset(pBuffer->pBuffer, 0, pIoman->BlkSize);
-			} else  {
-				FF_BlockWrite(pIoman, ulClusterBeginLBA+i, 1, pBuffer->pBuffer, FF_FALSE);
-			}
-
-		}
-
-		FF_ReleaseBuffer(pIoman, pBuffer);
-
-		// Correctly modify the second FAT item again.
-		pBuffer = FF_GetBuffer(pIoman, partitionGeom.ulStartLBA + finalFatSize, FF_MODE_WRITE);
-		{
-			switch(fatSize) {
-			case 16: {
-				FF_putShort(pBuffer->pBuffer, 0, 0xFFF8);
-				FF_putShort(pBuffer->pBuffer, 2, 0xFFFF);
-				break;
-			}
-			   
-			case 32:
-				FF_putLong(pBuffer->pBuffer, 0, 0x0FFFFFF8);
-				FF_putLong(pBuffer->pBuffer, 4, 0xFFFFFFFF);
-				FF_putLong(pBuffer->pBuffer, 8, 0x0FFFFFFF); // Root dir allocation.
-			}
-		}
-		FF_ReleaseBuffer(pIoman, pBuffer);
-
-
-		// Modify the fields in the VBR/PBR for correct mounting.
-		pBuffer = FF_GetBuffer(pIoman, ulBPRLba, FF_MODE_WRITE); 		// Modify the FAT descriptions.
-		{
-
-			// -- First section Common vars to Fat12/16 and 32.
-			memset(pBuffer->pBuffer, 0, pIoman->BlkSize); 				// Clear the boot record.
-
-			FF_putChar(pBuffer->pBuffer, 0, 0xEB);						// Place the Jump to bootstrap x86 instruction.
-			FF_putChar(pBuffer->pBuffer, 1, 0x3C);						// Even though we won't populate the bootstrap code.
-			FF_putChar(pBuffer->pBuffer, 2, 0x90);						// Some devices look for this as a signature.
-
-			memcpy(((FF_T_UINT8 *)pBuffer->pBuffer+3), "FULLFAT2", 8); // Place the FullFAT OEM code.
-
-			FF_putShort(pBuffer->pBuffer, 11, pIoman->BlkSize);
-			FF_putChar(pBuffer->pBuffer, 13, (FF_T_UINT8) sectorsPerCluster);
-
-			FF_putShort(pBuffer->pBuffer, FF_FAT_RESERVED_SECTORS, (FF_T_UINT16)partitionGeom.ulStartLBA); 	// Number of reserved sectors. (1 for fat12/16, 32 for f32).
-			FF_putShort(pBuffer->pBuffer, FF_FAT_NUMBER_OF_FATS, 2); 	// Always 2 copies.
-
-
-			//FF_putShort(pBuffer->pBuffer, 19, 0);						// Number of sectors in partition if size < 32mb.
-
-			FF_putChar(pBuffer->pBuffer, 21, 0xF8);             		// Media type -- HDD.
-		   
-
-			FF_putShort(pBuffer->pBuffer, 510, 0xAA55);					// MBR sig.
-			FF_putLong(pBuffer->pBuffer, 32, partitionGeom.ulLength+partitionGeom.ulStartLBA); // Total sectors of this partition.
-
-			if(fatSize == 32) {
-				FF_putShort(pBuffer->pBuffer, 36, (FF_T_UINT16)finalFatSize);		// Number of sectors per fat. 
-				FF_putShort(pBuffer->pBuffer, 44, 2);					// Root dir cluster (2).
-				FF_putShort(pBuffer->pBuffer, 48, 1);					// FSINFO sector at LBA1.
-				FF_putShort(pBuffer->pBuffer, 50, 6);					// 0 for no backup boot sector.
-				FF_putChar(pBuffer->pBuffer, 66, 0x29);					// Indicate extended signature is present.
-				memcpy(((FF_T_UINT8 *)pBuffer->pBuffer+71), "FullFAT2-V", 10); // Volume name.
-				memcpy(((FF_T_UINT8 *)pBuffer->pBuffer+81), "FAT32   ", 8);
-
-				// Put backup boot sector.
-				FF_BlockWrite(pIoman, 6, 1, pBuffer->pBuffer, FF_FALSE);
-			} else {
-				FF_putChar(pBuffer->pBuffer, 38, 0x28);					// Signal this contains an extended signature.
-				memcpy(((FF_T_UINT8 *)pBuffer->pBuffer+43), "FullFAT2-V", 10); // Volume name.
-				memcpy(((FF_T_UINT8 *)pBuffer->pBuffer+54), "FAT16   ", 8);
-				FF_putShort(pBuffer->pBuffer, FF_FAT_16_SECTORS_PER_FAT, (FF_T_UINT16) finalFatSize);
-				FF_putShort(pBuffer->pBuffer, 17, 512);				 		// Number of Dir entries. (FAT32 0).
-				//FF_putShort(pBuffer->pBuffer, FF_FAT_ROOT_ENTRY_COUNT, 
+				ulRemaining -= ulSize;
+				pxPartitions[ xPartitionNumber ].ulSectorCount = ulSize;
+				pxPartitions[ xPartitionNumber ].ucActive = 0x80;
+				pxPartitions[ xPartitionNumber ].ulStartLBA = ulLBA; /* ulStartLBA might still change for logical partitions */
+				pxPartitions[ xPartitionNumber ].ucPartitionID = 0x0B;
+				ulLBA += ulSize;
 			}
 		}
 	}
-	FF_ReleaseBuffer(pIoman, pBuffer);
 
-	if(fatSize == 32) {
-		// Finally if FAT32, create an FSINFO sector.
-		pBuffer = FF_GetBuffer(pIoman, 1, FF_MODE_WRITE);
+	if( xNeedExtended != pdFALSE )
+	{
+		/* Create at least 1 extended/logical partition */
+		int index;
+		/* Start of the big extended partition */
+		unsigned extendedLBA = pParams->ulHiddenSectors;
+		/* Where to write the table */
+		uint32_t ulLBA = 0;
+		/* Contents of the table */
+		FF_Part_t writeParts[4];
+
+		for( index = -1; index < xPartitionCount; index++ )
 		{
-			memset(pBuffer->pBuffer, 0, pIoman->BlkSize);
-			FF_putLong(pBuffer->pBuffer, 0, 0x41615252);	// FSINFO sect magic number.
-			FF_putLong(pBuffer->pBuffer, 484, 0x61417272);	// FSINFO second sig.
-			// Calculate total sectors, -1 for the root dir allocation. (Free sectors count).
-			FF_putLong(pBuffer->pBuffer, 488, ((ulTotalSectors - (ulReservedSectors + (2*finalFatSize))) / sectorsPerCluster)-1);
-			FF_putLong(pBuffer->pBuffer, 492, 2);			// Hint for next free cluster.
-			FF_putShort(pBuffer->pBuffer, 510, 0xAA55);
+		uint32_t ulNextLBA;
+
+			memset (writeParts, '\0', sizeof writeParts );
+			if( index < 0 )
+			{
+			/* we're at secor 0: */
+			/* write primary partitions, if any */
+			/* create big extended partition */
+			BaseType_t xPartitionNumber;
+			uint32_t ulStartLBA = pParams->ulHiddenSectors;
+				for( xPartitionNumber = 0; xPartitionNumber < pParams->xPrimaryCount; xPartitionNumber++ )
+				{
+					writeParts[ xPartitionNumber ].ulStartLBA = ulStartLBA;
+					writeParts[ xPartitionNumber ].ulSectorCount = pxPartitions[ xPartitionNumber ].ulSectorCount;
+					writeParts[ xPartitionNumber ].ucActive = 0x80;
+					writeParts[ xPartitionNumber ].ucPartitionID = 0x0B;
+					ulStartLBA += writeParts[ xPartitionNumber ].ulSectorCount;
+					index++;
+				}
+				extendedLBA = ulStartLBA;
+				writeParts[ xPartitionNumber ].ulStartLBA = ulStartLBA;
+				writeParts[ xPartitionNumber ].ulSectorCount = pParams->ulSectorCount - ulStartLBA;
+				writeParts[ xPartitionNumber ].ucActive = 0x80;
+				writeParts[ xPartitionNumber ].ucPartitionID = 0x05;
+				ulNextLBA = ulStartLBA;
+			}
+			else
+			{
+				/* Create a logical partition with "ulSectorCount" sectors: */
+				writeParts[ 0 ].ulStartLBA = ulInterSpace;
+				writeParts[ 0 ].ulSectorCount = pxPartitions[index].ulSectorCount;
+				writeParts[ 0 ].ucActive = 0x80;
+				writeParts[ 0 ].ucPartitionID = 0x0B;
+				if( index < xPartitionCount - 1 )
+				{
+					/* Next extended partition */
+					writeParts[ 1 ].ulStartLBA = ulInterSpace + ulLBA - extendedLBA + writeParts[ 0 ].ulSectorCount;
+					writeParts[ 1 ].ulSectorCount = pxPartitions[index+1].ulSectorCount + ulInterSpace;
+					writeParts[ 1 ].ucActive = 0x80;
+					writeParts[ 1 ].ucPartitionID = 0x05;
+				}
+				ulNextLBA = writeParts[ 1 ].ulStartLBA + extendedLBA;
+			}
+			pxSectorBuffer = FF_GetBuffer(pxIOManager, ( uint32_t ) ulLBA, ( uint8_t ) FF_MODE_WRITE );
+			{
+				if( pxSectorBuffer == NULL )
+				{
+					return FF_ERR_DEVICE_DRIVER_FAILED;
+				}
+			}
+			pucBuffer = pxSectorBuffer->pucBuffer;
+			memset ( pucBuffer, 0, 512 );
+			memcpy ( pucBuffer + OFS_BPB_jmpBoot_24, "\xEB\x00\x90" "FreeRTOS", 11 );   /* Includes OFS_BPB_OEMName_64 */
+
+			ulPartitionOffset = OFS_PTABLE_PART_0;
+			for( xPartitionNumber = 0; xPartitionNumber < 4; xPartitionNumber++, ulPartitionOffset += 16 )
+			{
+				FF_putChar( pucBuffer, ulPartitionOffset + OFS_PART_ACTIVE_8,            writeParts[ xPartitionNumber ].ucActive );         /* 0x01BE 0x80 if active */
+				FF_putChar( pucBuffer, ulPartitionOffset + OFS_PART_START_HEAD_8,        1 );         /* 0x001 / 0x01BF */
+				FF_putShort(pucBuffer, ulPartitionOffset + OFS_PART_START_SEC_TRACK_16,  1 );  /* 0x002 / 0x01C0 */
+				FF_putChar( pucBuffer, ulPartitionOffset + OFS_PART_ID_NUMBER_8,         writeParts[ xPartitionNumber ].ucPartitionID );       /* 0x004 / 0x01C2 */
+				FF_putChar( pucBuffer, ulPartitionOffset + OFS_PART_ENDING_HEAD_8,       0xFE );     /* 0x005 / 0x01C3 */
+				FF_putShort(pucBuffer, ulPartitionOffset + OFS_PART_ENDING_SEC_TRACK_16, writeParts[ xPartitionNumber ].ulSectorCount );   /* 0x006 / 0x01C4 */
+				FF_putLong (pucBuffer, ulPartitionOffset + OFS_PART_STARTING_LBA_32,     writeParts[ xPartitionNumber ].ulStartLBA );  /* 0x008 / 0x01C6 This is important */
+				FF_putLong (pucBuffer, ulPartitionOffset + OFS_PART_LENGTH_32,           writeParts[ xPartitionNumber ].ulSectorCount );  /* 0x00C / 0x01CA Equal to total sectors */
+			}
+			pucBuffer[510] = 0x55;
+			pucBuffer[511] = 0xAA;
+
+			FF_ReleaseBuffer(pxIOManager, pxSectorBuffer );
+			FF_FlushCache( pxIOManager );
+			ulLBA = ulNextLBA;
 		}
-		FF_ReleaseBuffer(pIoman, pBuffer);
+	}
+	else
+	{
+		pxSectorBuffer = FF_GetBuffer( pxIOManager, 0, ( uint8_t ) FF_MODE_WRITE );
+		{
+			if( pxSectorBuffer == NULL )
+			{
+				return FF_ERR_DEVICE_DRIVER_FAILED;
+			}
+		}
+
+		pucBuffer = pxSectorBuffer->pucBuffer;
+		memset (pucBuffer, 0, 512 );
+		memcpy (pucBuffer + OFS_BPB_jmpBoot_24, "\xEB\x00\x90" "FreeRTOS", 11 );   /* Includes OFS_BPB_OEMName_64 */
+		ulPartitionOffset = OFS_PTABLE_PART_0;
+
+		for( xPartitionNumber = 0; xPartitionNumber < 4; xPartitionNumber++, ulPartitionOffset += 16 )
+		{
+			FF_putChar(  pucBuffer, ulPartitionOffset + OFS_PART_ACTIVE_8,            pxPartitions[ xPartitionNumber ].ucActive );         /* 0x01BE 0x80 if active */
+			FF_putChar(  pucBuffer, ulPartitionOffset + OFS_PART_START_HEAD_8,        1 );         /* 0x001 / 0x01BF */
+			FF_putShort( pucBuffer, ulPartitionOffset + OFS_PART_START_SEC_TRACK_16,  1 );  /* 0x002 / 0x01C0 */
+			FF_putChar(  pucBuffer, ulPartitionOffset + OFS_PART_ID_NUMBER_8,         pxPartitions[ xPartitionNumber ].ucPartitionID );       /* 0x004 / 0x01C2 */
+			FF_putChar(  pucBuffer, ulPartitionOffset + OFS_PART_ENDING_HEAD_8,       0xFE );     /* 0x005 / 0x01C3 */
+			FF_putShort( pucBuffer, ulPartitionOffset + OFS_PART_ENDING_SEC_TRACK_16, pxPartitions[ xPartitionNumber ].ulSectorCount );   /* 0x006 / 0x01C4 */
+			FF_putLong(  pucBuffer, ulPartitionOffset + OFS_PART_STARTING_LBA_32,     pxPartitions[ xPartitionNumber ].ulStartLBA );  /* 0x008 / 0x01C6 This is important */
+			FF_putLong(  pucBuffer, ulPartitionOffset + OFS_PART_LENGTH_32,           pxPartitions[ xPartitionNumber ].ulSectorCount );  /* 0x00C / 0x01CA Equal to total sectors */
+		}
+		pucBuffer[ 510 ] = 0x55;
+		pucBuffer[ 511 ] = 0xAA;
+
+		FF_ReleaseBuffer( pxIOManager, pxSectorBuffer );
+		FF_FlushCache( pxIOManager );
 	}
 
-	FF_FlushCache(pIoman);
-
-	return Error;
+	return FF_ERR_NONE;
 }
-
