@@ -54,7 +54,7 @@ endchoice
 
 config TOOLCHAIN
 	string "Toolchain prefix"
-	default "/opt/btdk/bin/arm-eabi-bt-"
+	default "arm-none-eabi-"
 
 
 choice
