@@ -201,6 +201,14 @@ BT_s32 BT_VolumeWrite(BT_HANDLE hVolume, BT_u32 ulAddress, BT_u32 ulBlocks, void
 }
 BT_EXPORT_SYMBOL(BT_VolumeWrite);
 
+BT_ERROR BT_GetVolumeGeometry(BT_HANDLE hVolume, BT_BLOCK_GEOMETRY *pGeometry) {
+	BT_GetBlockGeometry(hVolume->blkdev, pGeometry);
+	if(pGeometry) {
+		pGeometry->ulTotalBlocks = hVolume->ulTotalBlocks;
+	}
+}
+BT_EXPORT_SYMBOL(BT_GetVolumeGeometry);
+
 static BT_ERROR bt_volume_inode_cleanup(BT_HANDLE hVolume) {
 	hVolume->ulReferenceCount -= 1;
 	return BT_ERR_NONE;
