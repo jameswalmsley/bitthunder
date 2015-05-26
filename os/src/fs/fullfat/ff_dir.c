@@ -61,7 +61,7 @@
 
 #include "ff_headers.h"
 
-#include <stdio.h>
+//#include <stdio.h>
 
 #if( ffconfigUNICODE_UTF16_SUPPORT != 0 )
 #include <wchar.h>
@@ -131,7 +131,7 @@ static BaseType_t FF_ValidLongChar( char cChar );
 	static void FF_MakeNameCompliant( char *pcName );
 #endif
 
-#if ( FF_NOSTRCASECMP == 0 ) && !defined( WIN32 )
+#if ( FF_NOSTRCASECMP == 1 ) && !defined( WIN32 )
 	static portINLINE unsigned char prvToLower( unsigned char c )
 	{
 	unsigned char cReturnChar;
@@ -3361,4 +3361,3 @@ uint8_t	pucEntryBuffer[ FF_SIZEOF_DIRECTORY_ENTRY ];
 	}	/* FF_DirHashed() */
 #endif /* ffconfigHASH_CACHE */
 /*-----------------------------------------------------------*/
-

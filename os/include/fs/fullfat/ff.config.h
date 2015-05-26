@@ -6,14 +6,29 @@
 #include <bt_bsp_config.h>
 
 #ifdef BT_CONFIG_BIG_ENDIAN
-#define FF_BIG_ENDIAN
+#define ffconfigBYTE_ORDER  pdFREERTOS_BIG_ENDIAN
 #endif
 
 #ifdef BT_CONFIG_LITTLE_ENDIAN
-#define FF_LITTLE_ENDIAN
+#define ffconfigBYTE_ORDER  pdFREERTOS_LITTLE_ENDIAN
 #endif
 
-#define FF_INLINE static inline
+#define	ffconfigHAS_CWD						0
+
+#define FF_INLINE inline
+#define portINLINE  FF_INLINE
+
+#define BaseType_t  BT_s32
+#define UBaseType_t BT_u32
+#define TickType_t  BT_TICK
+
+#define pdFALSE     0
+#define pdTRUE      1
+//typedef BT_u32 time_t;
+
+#define pdMS_TO_TICKS(x)    (((TickType_t) x * BT_CONFIG_KERNEL_TICK_RATE) / (TickType_t) 1000)
+
+#define FF_PRINTF   BT_kPrint
 
 #ifdef BT_CONFIG_FS_FULLFAT_ALLOC_DEFAULT
 #define FF_ALLOC_DEFAULT
@@ -24,28 +39,32 @@
 #endif
 
 #ifdef BT_CONFIG_FS_FULLFAT_LFN_SUPPORT
-#define FF_LFN_SUPPORT
+#define ffconfigLFN_SUPPORT                 1
 #endif
 
-#define FF_TIME_SUPPORT
+#define ffconfigTIME_SUPPORT                1
 
-#define FF_WRITE_FREE_COUNT
+#define ffconfigWRITE_FREE_COUNT            1
 
-#define FF_FSINFO_TRUSTED
+#define ffconfigFSINFO_TRUSTED              1
 
 #define FF_DRIVER_BUSY_SLEEP BT_CONFIG_FS_FULLFAT_DRIVER_BUSY_SLEEP
 
-#define FF_MALLOC(aSize)	BT_kMalloc(aSize)
-#define FF_FREE(aPtr)		BT_kFree(aPtr)
+#define ffconfigMALLOC(aSize)	            BT_kMalloc(aSize)
+#define ffconfigFREE(aPtr)		            BT_kFree(aPtr)
 
-#define FF_FINDAPI_ALLOW_WILDCARDS
+#define ffconfigFINDAPI_ALLOW_WILDCARDS     1
 
-#define FF_SHORTNAME_CASE
+#define ffconfigSHORTNAME_CASE              1
 
-#define FF_DEBUG
+#define ffconfigDEBUG                       1
 
-#define FF_NOSTRCASECMP
+#define FF_NOSTRCASECMP                     0
 
-#define FF_OPTIMISE_UNALIGNED_ACCESS
+#define ffconfigOPTIMISE_UNALIGNED_ACCESS   1
+
+#define ffconfigWRITE_BOTH_FATS             1
+
+#define configASSERT(x)
 
 #endif

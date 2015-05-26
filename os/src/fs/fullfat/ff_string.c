@@ -739,3 +739,90 @@ UBaseType_t FF_Utf32GetUtf16Len( const uint32_t *utf32String )
 	}	/* FF_Utf32stoUtf8s() */
 #endif /* ffconfigNOT_USED_FOR_NOW */
 /*-----------------------------------------------------------*/
+
+
+/*
+	This is a better Wild-card compare function, that works perfectly, and is much more efficient.
+	This function was contributed by one of our commercial customers.
+*/
+#ifdef ffconfigNOT_USED_FOR_NOW
+FF_T_BOOL FF_wildcompare(const FF_T_WCHAR *pszWildCard, const FF_T_WCHAR *pszString) {
+    register const FF_T_WCHAR *pszWc 	= NULL;
+	register const FF_T_WCHAR *pszStr 	= NULL;	// Encourage the string pointers to be placed in memory.
+    do {
+        if ( *pszWildCard == '*' ) {
+			while(*(1 + pszWildCard++) == '*'); // Eat up multiple '*''s
+			pszWc = (pszWildCard - 1);
+            pszStr = pszString;
+        }
+		if (*pszWildCard == '?' && !*pszString) {
+			return FF_FALSE;	// False when the string is ended, yet a ? charachter is demanded.
+		}
+#ifdef FF_WILDCARD_CASE_INSENSITIVE
+        if (*pszWildCard != '?' && tolower(*pszWildCard) != tolower(*pszString)) {
+#else
+		if (*pszWildCard != '?' && *pszWildCard != *pszString) {
+#endif
+			if (pszWc == NULL) {
+				return FF_FALSE;
+			}
+            pszWildCard = pszWc;
+            pszString = pszStr++;
+        }
+
+		if(!*pszWildCard || !*pszString) {
+			break;
+		}
+    } while ( *pszWildCard++ && *pszString++ );
+
+	while(*pszWildCard == '*') {
+		pszWildCard++;
+	}
+
+	if(!*pszWildCard) {	// WildCard is at the end. (Terminated)
+		return FF_TRUE;	// Therefore this must be a match.
+	}
+
+	return FF_FALSE;	// If not, then return FF_FALSE!
+}
+#else
+BaseType_t FF_wildcompare(const char *pszWildCard, const char *pszString) {
+    register const char *pszWc 	= NULL;
+	register const char *pszStr 	= NULL;	// Encourage the string pointers to be placed in memory.
+    do {
+        if ( *pszWildCard == '*' ) {
+			while(*(1 + pszWildCard++) == '*'); // Eat up multiple '*''s
+			pszWc = (pszWildCard - 1);
+            pszStr = pszString;
+        }
+		if (*pszWildCard == '?' && !*pszString) {
+			return pdFALSE;	// False when the string is ended, yet a ? charachter is demanded.
+		}
+#ifdef FF_WILDCARD_CASE_INSENSITIVE
+        if (*pszWildCard != '?' && tolower((FF_T_INT32)*pszWildCard) != tolower((FF_T_INT32)*pszString)) {
+#else
+		if (*pszWildCard != '?' && *pszWildCard != *pszString) {
+#endif
+			if (pszWc == NULL) {
+				return pdFALSE;
+			}
+            pszWildCard = pszWc;
+            pszString = pszStr++;
+        }
+
+		if(!*pszWildCard || !*pszString) {
+			break;
+		}
+	} while ( *pszWildCard++ && *pszString++ );
+
+	while(*pszWildCard == '*') {
+		pszWildCard++;
+	}
+
+	if(!*pszWildCard) {	// WildCard is at the end. (Terminated)
+		return pdTRUE;	// Therefore this must be a match.
+	}
+
+	return pdFALSE;	// If not, then return FF_FALSE!
+}
+#endif

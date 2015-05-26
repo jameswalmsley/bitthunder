@@ -49,12 +49,8 @@
  *
  */
 
-#include <stdio.h>
-#include <time.h>
+#include <bitthunder.h>
 #include <string.h>
-
-#include "FreeRTOS.h"
-#include "task.h"
 
 #include "ff_time.h"
 
@@ -84,20 +80,20 @@
 
 int32_t	FF_GetSystemTime( FF_SystemTime_t *pxTime )
 {
-	FF_TimeStruct_t xTimeStruct;
+	struct bt_tm time;
+	struct bt_timeval tv;
 
-	/* Fetch the current time. */
-	time_t secs = FreeRTOS_time( NULL );
+	bt_gettimeofday(&tv, NULL);
+	bt_time_to_tm(tv.tv_sec, &time);
+	time.tm_year += 1900;
+	time.tm_mon += 1;
 
-	/* Fill the fields in 'xTimeStruct'. */
-	FreeRTOS_gmtime_r( &secs, &xTimeStruct );
-
-	pxTime->Hour = xTimeStruct.tm_hour;
-	pxTime->Minute = xTimeStruct.tm_min;
-	pxTime->Second = xTimeStruct.tm_sec;
-	pxTime->Day = xTimeStruct.tm_mday;
-	pxTime->Month = xTimeStruct.tm_mon + 1;
-	pxTime->Year = xTimeStruct.tm_year + 1900;
+	pxTime->Hour		= time.tm_hour;
+	pxTime->Minute	= time.tm_min;
+	pxTime->Second	= time.tm_sec;
+	pxTime->Day		= time.tm_mday;
+	pxTime->Month	= time.tm_mon;
+	pxTime->Year		= time.tm_year;
 
 	return 0;
 }	/* FF_GetSystemTime() */
@@ -313,4 +309,3 @@ uint32_t ulResult;
 }
 
 #endif	/* ffconfigTIME_SUPPORT */
-

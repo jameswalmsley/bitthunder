@@ -49,17 +49,11 @@
  *
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stdint.h>
 
 /* Scheduler include files. */
-#include "FreeRTOS.h"
+#include <bitthunder.h>
 #include "ff_headers.h"
-
-#if ( INCLUDE_vTaskDelay != 1 )
-	#error Missing some FreeRTOS define
-#endif
 
 /*-----------------------------------------------------------*/
 
@@ -68,7 +62,7 @@ BaseType_t FF_TrySemaphore( void *pxSemaphore, uint32_t ulTime_ms )
 BaseType_t xReturn;
 
 	configASSERT( pxSemaphore );
-	xReturn = xSemaphoreTakeRecursive(  ( SemaphoreHandle_t ) pxSemaphore, pdMS_TO_TICKS( ulTime_ms ) );
+	xReturn = BT_PendMutexRecursive(pxSemaphore, ulTime_ms);
 	return xReturn;
 }
 /*-----------------------------------------------------------*/
@@ -76,18 +70,18 @@ BaseType_t xReturn;
 void FF_PendSemaphore( void *pxSemaphore )
 {
 	configASSERT( pxSemaphore );
-	xSemaphoreTakeRecursive( ( SemaphoreHandle_t ) pxSemaphore, portMAX_DELAY );
+	BT_PendMutexRecursive(pxSemaphore, BT_INFINITE_TIMEOUT);
 }
 /*-----------------------------------------------------------*/
 
 void FF_ReleaseSemaphore( void *pxSemaphore )
 {
 	configASSERT( pxSemaphore );
-	xSemaphoreGiveRecursive( ( SemaphoreHandle_t ) pxSemaphore );
+	BT_ReleaseMutexRecursive(pxSemaphore);
 }
 /*-----------------------------------------------------------*/
 
 void FF_Sleep( uint32_t ulTime_ms )
 {
-	vTaskDelay( pdMS_TO_TICKS( ulTime_ms ) );
+	BT_ThreadSleep(ulTime_ms);
 }

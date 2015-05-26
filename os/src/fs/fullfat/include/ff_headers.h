@@ -80,14 +80,6 @@ extern "C" {
 /* See if any older defines with a prefix "FF_" are still defined: */
 #include "ff_old_config_defines.h"
 
-#ifndef configUSE_RECURSIVE_MUTEXES
-	#error configUSE_RECURSIVE_MUTEXES must be set to 1 in FreeRTOSConfig.h
-#else
-	#if( configUSE_RECURSIVE_MUTEXES != 1 )
-		#error configUSE_RECURSIVE_MUTEXES must be set to 1 in FreeRTOSConfig.h
-	#endif
-#endif /* configUSE_RECURSIVE_MUTEXES */
-
 #ifdef	__cplusplus
 }	// extern "C"
 #endif

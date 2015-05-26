@@ -61,7 +61,6 @@
  *	Destroying a FreeRTOS+FAT IO object.
  **/
 
-#include <time.h>
 #include <string.h>
 
 #include "ff_headers.h"
@@ -111,7 +110,7 @@ static BaseType_t prvHasActiveHandles( FF_IOManager_t *pxIOManager );
  *	@Return	Returns a pointer to an FF_IOManager_t type object. NULL on xError, check the contents of
  *	@Return pError
  **/
-FF_IOManager_t *FF_CreateIOManger( FF_CreationParameters_t *pxParameters, FF_Error_t *pError )
+FF_IOManager_t *FF_CreateIOManager( FF_CreationParameters_t *pxParameters, FF_Error_t *pError )
 {
 FF_IOManager_t *pxIOManager = NULL;
 FF_Error_t xError;
@@ -176,20 +175,20 @@ uint32_t usSectorSize = pxParameters->ulSectorSize;
 			memset( pxIOManager->pucCacheMem, '\0', ulCacheSize );
 		}
 	}
-	
+
 	if( FF_isERR( xError ) == pdFALSE )
 	{
 		pxIOManager->usSectorSize = usSectorSize;
 		pxIOManager->usCacheSize = ( uint16_t ) ( ulCacheSize / ( uint32_t ) usSectorSize );
 
-		/* Malloc() memory for buffer objects. FreeRTOS+FAT never refers to a 
-		buffer directly but uses buffer objects instead. Allows for thread 
+		/* Malloc() memory for buffer objects. FreeRTOS+FAT never refers to a
+		buffer directly but uses buffer objects instead. Allows for thread
 		safety. */
 		pxIOManager->pxBuffers = ( FF_Buffer_t * ) ffconfigMALLOC( sizeof( FF_Buffer_t ) * pxIOManager->usCacheSize );
 
 		if( pxIOManager->pxBuffers != NULL )
 		{
-			/* From now on a call to FF_IOMAN_InitBufferDescriptors will clear 
+			/* From now on a call to FF_IOMAN_InitBufferDescriptors will clear
 			pxBuffers. */
 			pxIOManager->ucFlags |= FF_IOMAN_ALLOC_BUFDESCR;
 
@@ -802,7 +801,7 @@ static BaseType_t prvIsValidMedia( uint8_t media )
 {
 BaseType_t xResult;
 	/*
-	 * 0xF8 is the standard value for “fixed” (non-removable) media. For
+	 * 0xF8 is the standard value for ï¿½fixedï¿½ (non-removable) media. For
 	 * removable media, 0xF0 is frequently used. The legal values for this
 	 * field are 0xF0, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFE, and
 	 * 0xFF. The only other important point is that whatever value is put
@@ -1317,7 +1316,7 @@ partsFound.iCount = 0;
 	{
 		if( pxIOManager == NULL )
 		{
-			xError = FF_ERR_NULL_POINTER | FF_MOUNTPARTITION;
+			xError = FF_ERR_NULL_POINTER | FF_MOUNT;
 			break;
 		}
 
@@ -1348,13 +1347,13 @@ partsFound.iCount = 0;
 
 		if( xPartitionCount == 0 )
 		{
-			xError = FF_ERR_IOMAN_NO_MOUNTABLE_PARTITION | FF_MOUNTPARTITION;
+			xError = FF_ERR_IOMAN_NO_MOUNTABLE_PARTITION | FF_MOUNT;
 			break;
 		}
 
 		if( xPartitionNumber >= xPartitionCount )
 		{
-			xError = FF_ERR_IOMAN_INVALID_PARTITION_NUM | FF_MOUNTPARTITION;
+			xError = FF_ERR_IOMAN_INVALID_PARTITION_NUM | FF_MOUNT;
 			break;
 		}
 
@@ -1376,7 +1375,7 @@ partsFound.iCount = 0;
 		pxBuffer = FF_GetBuffer( pxIOManager, pxPartition->ulBeginLBA, FF_MODE_READ );
 		if( pxBuffer == NULL )
 		{
-			xError = FF_ERR_DEVICE_DRIVER_FAILED | FF_MOUNTPARTITION;
+			xError = FF_ERR_DEVICE_DRIVER_FAILED | FF_MOUNT;
 			break;
 		}
 
@@ -1387,7 +1386,7 @@ partsFound.iCount = 0;
 			xError = FF_ReleaseBuffer( pxIOManager, pxBuffer );
 			if( FF_isERR( xError ) == pdFALSE )
 			{
-				xError = FF_ERR_IOMAN_INVALID_FORMAT | FF_MOUNTPARTITION;
+				xError = FF_ERR_IOMAN_INVALID_FORMAT | FF_MOUNT;
 			}
 			break;
 		}
@@ -1430,7 +1429,7 @@ partsFound.iCount = 0;
 		FF_ReleaseBuffer( pxIOManager, pxBuffer );	/* Release the buffer finally! */
 		if( pxPartition->usBlkSize == 0 )
 		{
-			xError = FF_ERR_IOMAN_INVALID_FORMAT | FF_MOUNTPARTITION;
+			xError = FF_ERR_IOMAN_INVALID_FORMAT | FF_MOUNT;
 			break;
 		}
 
@@ -1453,7 +1452,7 @@ partsFound.iCount = 0;
 		*/
 		if( pxPartition->ulSectorsPerCluster == 0 )
 		{
-			xError = FF_ERR_IOMAN_INVALID_FORMAT | FF_MOUNTPARTITION;
+			xError = FF_ERR_IOMAN_INVALID_FORMAT | FF_MOUNT;
 			break;
 		}
 
@@ -1566,7 +1565,7 @@ FF_IOManager_t *pxIOManager;
 
 	if( pxDisk->pxIOManager == NULL )
 	{
-		xError = FF_ERR_NULL_POINTER | FF_UNMOUNTPARTITION;
+		xError = FF_ERR_NULL_POINTER | FF_UNMOUNT;
 	}
 	else if( pxDisk->pxIOManager->xPartition.ucPartitionMounted == 0 )
 	{
@@ -1580,12 +1579,12 @@ FF_IOManager_t *pxIOManager;
 			if( prvHasActiveHandles( pxIOManager ) != 0 )
 			{
 				/* Active handles found on the cache. */
-				xError = FF_ERR_IOMAN_ACTIVE_HANDLES | FF_UNMOUNTPARTITION;
+				xError = FF_ERR_IOMAN_ACTIVE_HANDLES | FF_UNMOUNT;
 			}
 			else if( pxIOManager->FirstFile != NULL )
 			{
 				/* Open files in this partition. */
-				xError = FF_ERR_IOMAN_ACTIVE_HANDLES | FF_UNMOUNTPARTITION;
+				xError = FF_ERR_IOMAN_ACTIVE_HANDLES | FF_UNMOUNT;
 			}
 			else
 			{
@@ -1608,7 +1607,7 @@ FF_IOManager_t *pxIOManager;
 							pxBuffer = FF_GetBuffer( pxIOManager, pxIOManager->xPartition.ulFATBeginLBA + uxIndex, FF_MODE_READ );
 							if( !pxBuffer )
 							{
-								xError = FF_ERR_DEVICE_DRIVER_FAILED | FF_UNMOUNTPARTITION;
+								xError = FF_ERR_DEVICE_DRIVER_FAILED | FF_UNMOUNT;
 								break;
 							}
 							for( y = 0; y < pxIOManager->xPartition.ucNumFATS; y++ )

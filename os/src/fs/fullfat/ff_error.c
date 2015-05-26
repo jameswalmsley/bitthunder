@@ -57,11 +57,11 @@
  *	@brief		Used to return human readable strings for FreeRTOS+FAT error codes.
  *
  **/
-#include <stdio.h>
+//#include <stdio.h>
 
 /* _HT_ with the new GNU settings, the prototype of [v]snprintf()
 is not included in stdio.h Don't know why. */
-int snprintf( char *, size_t, const char *, ... );
+int snprintf( char *, int, const char *, ... );
 
 #include "ff_headers.h"
 
@@ -323,19 +323,19 @@ const char *FF_GetErrDescription( FF_Error_t iErrorCode, char *apBuf, int aMaxle
 	if( FF_isERR( iErrorCode ) )
 	{
 #if( ffconfigHAS_FUNCTION_TAB != 0 )
-		snprintf (apBuf, ( size_t ) aMaxlen, "%s::%s::%s",
+		snprintf (apBuf, ( int ) aMaxlen, "%s::%s::%s",
 			FF_GetErrModule( iErrorCode ),
 			FF_GetErrFunction( iErrorCode ),
 			FF_GetErrMessage( iErrorCode ));
 #else
-		snprintf (apBuf, ( size_t ) aMaxlen, "%s::%s",
+		snprintf (apBuf, ( int ) aMaxlen, "%s::%s",
 			FF_GetErrModule( iErrorCode ),
 			FF_GetErrMessage( iErrorCode ));
 #endif /* ffconfigHAS_FUNCTION_TAB */
 	}
 	else
 	{
-		snprintf (apBuf, ( size_t ) aMaxlen, "No error");
+		snprintf (apBuf, ( int ) aMaxlen, "No error");
 	}
 	return apBuf;
 }

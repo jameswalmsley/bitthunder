@@ -59,7 +59,8 @@
 #ifndef _FF_TIME_H_
 #define _FF_TIME_H_
 
-#include <time.h>
+#include <stdint.h>
+typedef uint32_t	time_t;
 
 #include "FreeRTOSFATConfig.h"
 
@@ -108,4 +109,3 @@ typedef struct
 int32_t	FF_GetSystemTime(FF_SystemTime_t *pxTime);
 
 #endif
-

@@ -108,8 +108,8 @@
 #define FF_DESTROYIOMAN				( ( 2		<< FF_FUNCTION_SHIFT ) | FF_MODULE_IOMAN )
 #define FF_REGISTERBLKDEVICE		( ( 3		<< FF_FUNCTION_SHIFT ) | FF_MODULE_IOMAN )
 #define FF_UNREGISTERBLKDEVICE		( ( 4		<< FF_FUNCTION_SHIFT ) | FF_MODULE_IOMAN )
-#define FF_MOUNTPARTITION			( ( 5		<< FF_FUNCTION_SHIFT ) | FF_MODULE_IOMAN )
-#define FF_UNMOUNTPARTITION			( ( 6		<< FF_FUNCTION_SHIFT ) | FF_MODULE_IOMAN )
+#define FF_MOUNT					( ( 5		<< FF_FUNCTION_SHIFT ) | FF_MODULE_IOMAN )
+#define FF_UNMOUNT					( ( 6		<< FF_FUNCTION_SHIFT ) | FF_MODULE_IOMAN )
 #define FF_FLUSHCACHE				( ( 7		<< FF_FUNCTION_SHIFT ) | FF_MODULE_IOMAN )
 #define FF_GETPARTITIONBLOCKSIZE	( ( 8		<< FF_FUNCTION_SHIFT ) | FF_MODULE_IOMAN )
 #define FF_BLOCKREAD				( ( 9		<< FF_FUNCTION_SHIFT ) | FF_MODULE_IOMAN )
@@ -211,7 +211,7 @@
 #define FF_ERR_IOMAN_BAD_MEMSIZE			12	/* The memory size was not a multiple of the blocksize. */
 #define FF_ERR_IOMAN_DEV_ALREADY_REGD		13	/* Device was already registered. Use FF_UnRegister() to re-use this IOMAN with another device. */
 #define FF_ERR_IOMAN_NO_MOUNTABLE_PARTITION	14	/* A mountable partition could not be found on the device. */
-#define FF_ERR_IOMAN_INVALID_FORMAT			15	
+#define FF_ERR_IOMAN_INVALID_FORMAT			15
 #define FF_ERR_IOMAN_INVALID_PARTITION_NUM	16	/* The partition number provided was out of range. */
 #define FF_ERR_IOMAN_NOT_FAT_FORMATTED		17	/* The partition did not look like a FAT partition. */
 #define FF_ERR_IOMAN_DEV_INVALID_BLKSIZE	18	/* IOMAN object BlkSize is not compatible with the blocksize of this device driver. */

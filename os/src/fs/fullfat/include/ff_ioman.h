@@ -1,4 +1,4 @@
-/*
+#/*
  * FreeRTOS+FAT Labs Build 150406 (C) 2015 Real Time Engineers ltd.
  * Authors include James Walmsley, Hein Tibosch and Richard Barry
  *
@@ -299,7 +299,7 @@ typedef struct xFF_CREATION_PARAMETERS
 /*---------- PROTOTYPES (in order of appearance). */
 
 /* PUBLIC (Interfaces): */
-FF_IOManager_t *FF_CreateIOManger( FF_CreationParameters_t *pxParameters, FF_Error_t *pError );
+FF_IOManager_t *FF_CreateIOManager( FF_CreationParameters_t *pxParameters, FF_Error_t *pError );
 FF_Error_t FF_DeleteIOManager( FF_IOManager_t *pxIOManager);
 FF_Error_t FF_Mount( FF_Disk_t *pxDisk, BaseType_t xPartitionNumber );
 FF_Error_t FF_Unmount( FF_Disk_t *pxDisk );
