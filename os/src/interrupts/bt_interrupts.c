@@ -185,7 +185,9 @@ BT_ERROR BT_SetInterruptAffinity(BT_u32 ulIRQ, BT_u32 ulCPU, BT_BOOL bReceive) {
 BT_EXPORT_SYMBOL(BT_SetInterruptAffinity);
 
 BT_ERROR BT_EnableInterrupts() {
-	g_oController.BT_IF_IRQ_OPS(hIRQ)->pfnEnableInterrupts(g_oController.hIRQ);
+	if(g_oController.BT_IF_IRQ_OPS(hIRQ)->pfnEnableInterrupts) {
+		g_oController.BT_IF_IRQ_OPS(hIRQ)->pfnEnableInterrupts(g_oController.hIRQ);
+	}
 	return BT_ERR_NONE;
 }
 BT_EXPORT_SYMBOL(BT_EnableInterrupts);
@@ -197,7 +199,7 @@ BT_ERROR BT_DisableInterrupts() {
 BT_EXPORT_SYMBOL(BT_DisableInterrupts);
 
 BT_u32 BT_MaskInterrupts() {
-	if(g_oController.hIRQ) {
+	if(g_oController.hIRQ && g_oController.BT_IF_IRQ_OPS(hIRQ)->pfnMaskInterrupts) {
 		return g_oController.BT_IF_IRQ_OPS(hIRQ)->pfnMaskInterrupts(g_oController.hIRQ);
 	}
 	return 0;
@@ -205,7 +207,7 @@ BT_u32 BT_MaskInterrupts() {
 BT_EXPORT_SYMBOL(BT_MaskInterrupts);
 
 BT_ERROR BT_UnmaskInterrupts(BT_u32 ulNewMaskValue) {
-	if(g_oController.hIRQ) {
+	if(g_oController.hIRQ && g_oController.BT_IF_IRQ_OPS(hIRQ)->pfnUnmaskInterrupts) {
 		g_oController.BT_IF_IRQ_OPS(hIRQ)->pfnUnmaskInterrupts(g_oController.hIRQ, ulNewMaskValue);
 	}
 	return BT_ERR_NONE;
