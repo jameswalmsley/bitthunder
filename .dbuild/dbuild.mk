@@ -159,8 +159,14 @@ kconfig-info:
 
 .PHONY: mkconfig
 mkconfig:
-	@mkdir -p $(CONFIG_HEADER_PATH)
-	$(BUILD_ROOT).dbuild/scripts/mkconfig/mkconfig $(BASE)/ > $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME)
+	$(Q)mkdir -p $(CONFIG_HEADER_PATH)
+	$(Q)$(BUILD_ROOT).dbuild/scripts/mkconfig/mkconfig $(BASE)/ > $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME)
+
+$(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME): $(CONFIG_PATH)/.config | dbuild_splash
+	$(Q)$(PRETTY) --dbuild "CONF" $(MODULE_NAME) $(subst $(BASE)/,"",$@)
+	$(Q)$(MAKE) mkconfig
+
+$(OBJECTS): $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME)
 
 .PHONY: menuconfig
 menuconfig: $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig

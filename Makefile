@@ -128,3 +128,5 @@ endif
 clean: clean_images
 clean_images: | dbuild_splash
 	$(Q)rm $(PRM_FLAGS) $(PROJECT_DIR)/vmthunder.elf $(PROJECT_DIR)/vmthunder.img $(PROJECT_DIR)/vmthunder.elf $(PROJECT_DIR)/vmthunder.list $(PROJECT_DIR)/vmthunder.map $(PROJECT_DIR)/vmthunder.syms $(PRM_PIPE)
+
+$(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME): MODULE_NAME:=$(MODULE_NAME)
