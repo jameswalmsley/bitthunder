@@ -5,7 +5,7 @@
 #include <btlinker_config.h>
 #include <asm/assembly.h>
 
-.section .bt.init					// The HEAD of the kernel is placed by the .bt.init section.
+.section .bt.init.vectors					// The HEAD of the kernel is placed by the .bt.init section.
 .globl bt_reset
 
 .extern __bt_mmu_table_start
@@ -64,6 +64,8 @@ _bt_vector_second_table:
 #endif
 	.word	fiq
 _bt_vector_table_end:
+
+.section .bt.init
 
 bt_reset:
 	/*
@@ -204,6 +206,7 @@ Sync:	ldr	r1, [r0]
 .set MMUCRVAL,	0b01000000000101	/* Enable IDC, and MMU */
 
 #ifndef BT_CONFIG_USE_VIRTUAL_ADDRESSING
+#ifndef BT_CONFIG_ARCH_ARM_ARMv6
 	/*
 	 *	In the case we are using normal memory, we need a reasonable identity mapping.
 	 *	We shall loop over the entire address space, and if the current address falls within
@@ -274,6 +277,7 @@ skip_ram:
 	data_sync
 	instr_sync
 
+#endif
 #endif
 
 #ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
