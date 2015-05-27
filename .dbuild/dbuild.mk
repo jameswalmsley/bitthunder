@@ -147,22 +147,42 @@ else
 	@echo " Version ($(DBUILD_VERSION_MAJOR).$(DBUILD_VERSION_MINOR).$(DBUILD_VERSION_REVISION) - $(DBUILD_VERSION_NAME))"
 endif
 
+
+
+.PHONY: kconfig-info
+kconfig-info:
+	@echo "Source code: https://github.com/jameswalmsley/kconfig-frontends (supported)"
+	@echo "Source code: http://ymorin.is-a-geek.org/projects/kconfig-frontends (original)"
+	@echo "MAC OSX    : brew tap PX4/homebrew-px4"
+	@echo "MAC OSX    : brew update"
+	@echo "MAC OSX    : brew install kconfig-frontends"
+
+.PHONY: mkconfig
+mkconfig:
+	@mkdir -p $(CONFIG_HEADER_PATH)
+	$(BUILD_ROOT).dbuild/scripts/mkconfig/mkconfig $(BASE)/ > $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME)
+
+.PHONY: menuconfig
 menuconfig: $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig
-	which kconfig-mconf > /dev/null || { echo "You need to compile and install kconfig-frontends: https://github.com/jameswalmsley/kconfig-frontends"; false; }
+	@which kconfig-mconf > /dev/null || { echo "*** kconfig-frontends is not installed"; $(MAKE) kconfig-info ; false; }
 ifneq ($(CONFIG_PATH),$(BASE))
 	touch $(CONFIG_PATH)/.config
 	-cp $(BASE)/.config $(CONFIG_PATH)/.config.bak
 	cp $(CONFIG_PATH)/.config $(BASE)/.config
 endif
 	cd $(BASE)/ && CONFIG_=$(CONFIG_) PROJECT_DIR=$(PROJECT_DIR) kconfig-mconf Kconfig
-	@mkdir -p $(CONFIG_HEADER_PATH)
-	$(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig $(BASE)/ > $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME)
+	$(MAKE) mkconfig
 ifneq ($(CONFIG_PATH),$(BASE))
 	cp $(BASE)/.config $(CONFIG_PATH)/.config
 	-cp $(CONFIG_PATH)/.config.bak $(BASE)/.config
 endif
 
-.PHONY: menuconfig
+.PHONY: oldconfig
+oldconfig:
+	@which kconfig-conf > /dev/null || { echo "You need to compile and install kconfig-frontends"; false; }
+	@cd $(BASE)/ && CONFIG_=$(CONFIG_) PROJECT_DIR=$(PROJECT_DIR) kconfig-conf --oldconfig Kconfig .config
+
+
 
 $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig: $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig.c
 	$(Q)gcc $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig.c $(DBUILD_ROOT).dbuild/scripts/mkconfig/cfgparser.c $(DBUILD_ROOT).dbuild/scripts/mkconfig/cfgdefine.c -o $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig
