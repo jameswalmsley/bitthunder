@@ -10,23 +10,24 @@
     } > BT_LINKER_INIT_SECTION
 #endif
 
-    .init : {							// This is the kernel HEAD section.
-		__bt_init_start = .;
-		KEEP(*(.bt.init))
-		KEEP(*(.bt.init.vectors))
-		KEEP(*(.bt.init.vectors.*))
-		KEEP(*(.init))
-		__bt_init_end = .;
+    .bt.init : {
+        __bt_init_start = .;
+        KEEP(*(.bt.init.vectors))
+        KEEP(*(.bt.init.vectors.*))
+        KEEP(*(.bt.init))
+        KEEP(*(.bt.init*))
+        KEEP(*(.init))
+        __bt_init_end = .;
+
+        __bt_arch_init_start = .;
+        KEEP(*(.bt.arch.init))
+        KEEP(*(.bt.arch.init.*))
+        __bt_arch_init_end = .;
+
     } > BT_LINKER_INIT_SECTION
 
-       .bt.arch.init : {
-	    __bt_arch_init_start = .;
-		KEEP(*(.bt.arch.init))
-		KEEP(*(.bt.arch.init.*))
-		__bt_arch_init_end = .;
-	} > BT_LINKER_INIT_SECTION
 
-	.bt.arch.devices : {
+    .bt.arch.devices : {
 	    __bt_arch_devices_start = .;
 		KEEP(*(.bt.arch.devices))
 		KEEP(*(.bt.arch.devices.*))
