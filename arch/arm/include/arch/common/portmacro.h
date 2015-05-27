@@ -5,6 +5,8 @@
 
 #if (defined BT_CONFIG_ARCH_ARM_CORTEX_A9) && (defined BT_CONFIG_KERNEL_FREERTOS_CA9_MODERN_PORT)
 #include <portmacro-ca9.h>
+#elif (defined BT_CONFIG_ARCH_ARM_ARM11)
+#include <portmacro-arm11.h>
 #else
 
 #ifdef __cplusplus

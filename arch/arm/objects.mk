@@ -44,7 +44,7 @@ BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX_A9)	+= $(BUILD_DIR)/arch/arm/com
 #
 ifeq ($(BT_CONFIG_KERNEL_FREERTOS), y)
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_ARM11)		+= $(BUILD_DIR)/arch/arm/common/freertos-arm11.o
-BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_ARM11)		+= $(BUILD_DIR)/arch/arm/common/freertos-arm11-portisr.o
+BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_ARM11)		+= $(BUILD_DIR)/arch/arm/common/freertos-arm11-asm.o
 $(BUILD_DIR)/arch/arm/common/freertos-arm11-portisr.o: CFLAGS_REMOVE += -fstack-usage
 ifeq ($(BT_CONFIG_KERNEL_FREERTOS_CA9_MODERN_PORT), y)
 BT_ARCH_ARM_OBJECTS-$(BT_CONFIG_ARCH_ARM_CORTEX_A9)	+= $(BUILD_DIR)/arch/arm/common/freertos-ca9-asm.o
