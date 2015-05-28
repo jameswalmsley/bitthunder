@@ -14,8 +14,14 @@ typedef struct _BT_RESOURCE {
 	const char 	*szpName;
 	union {
 		struct {
-			BT_u32	ulStart;
-			BT_u32	ulEnd;
+			union {
+				BT_u32	ulStart;
+				void   *pStart;
+			};
+			union {
+				BT_u32	ulEnd;
+				void   *pEnd;
+			};
 		};
 		void		*pParam;
 		BT_u32		ulConfigFlags;
