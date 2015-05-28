@@ -5,6 +5,7 @@ MACH_BCM2835_OBJECTS += $(BUILD_DIR)/arch/arm/mach/bcm2835/bcm2835.o			# Provide
 MACH_BCM2835_OBJECTS += $(BUILD_DIR)/arch/arm/mach/bcm2835/irq_chip.o
 MACH_BCM2835_OBJECTS += $(BUILD_DIR)/arch/arm/mach/bcm2835/timer.o
 MACH_BCM2835_OBJECTS += $(BUILD_DIR)/arch/arm/mach/bcm2835/gpio.o
+MACH_BCM2835_OBJECTS += $(BUILD_DIR)/arch/arm/mach/bcm2835/uart.o
 
 
 

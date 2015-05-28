@@ -1,0 +1,47 @@
+#ifndef _BCM2835_AUX_H_
+#define _BCM2835_AUX_H_
+
+#include <bt_struct.h>
+
+typedef struct {
+    BT_u32  AUX_IRQ;
+    BT_u32  AUX_ENABLES;
+    #define BCM2835_AUX_ENABLES_MU      0x00000001
+    #define BCM2835_AUX_ENABLES_SPI1    0x00000002
+    #define BCM2835_AUX_ENABLES_SPI2    0x00000004
+
+    BT_STRUCT_RESERVED_u32(0, 0x4, 0x40);
+
+    BT_u32  AUX_MU_IO;
+    BT_u32  AUX_MU_IER;
+    BT_u32  AUX_MU_IIR;
+    BT_u32  AUX_MU_LCR;
+    BT_u32  AUX_MU_MCR;
+    BT_u32  AUX_MU_LSR;
+    BT_u32  AUX_MU_MSR;
+    BT_u32  AUX_MU_SCRATCH;
+    BT_u32  AUX_MU_CNTL;
+    BT_u32  AUX_MU_STAT;
+    BT_u32  AUX_MU_BAUD;
+
+    BT_STRUCT_RESERVED_u32(1, 0x68, 0x80);
+
+    BT_u32  AUX_SPI0_CNTL0;
+    BT_u32  AUX_SPI0_CNTL1;
+    BT_u32  AUX_SPI0_STAT;
+    BT_u32  AUX_SPI0_IO;
+    BT_u32  AUX_SPI0_PEEK;
+
+    BT_STRUCT_RESERVED_u32(2, 0x94, 0xc0);
+
+    BT_u32  AUX_SPI1_CNTL0;
+    BT_u32  AUX_SPI1_CNTL1;
+    BT_u32  AUX_SPI1_STAT;
+    BT_u32  AUX_SPI1_IO;
+    BT_u32  AUX_SPI1_PEEK;
+
+} BCM2835_AUX_REGS;
+
+
+
+#endif

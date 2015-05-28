@@ -1,4 +1,5 @@
 #include <bitthunder.h>
+#include "gpio.h"
 #include "devman/bt_integrated_device.h"
 
 
@@ -59,8 +60,28 @@ static const BT_INTEGRATED_DEVICE bcm2835_cpu_timer_device = {
 	.pResources = oTimerResources,
 };
 
+static const BT_RESOURCE oUartResources[] = {
+	{
+		.ulStart = 0x20215000,
+		.ulEnd	 = 0x20215000 + BT_SIZE_4K - 1,
+		.ulFlags = BT_RESOURCE_MEM,
+	},
+};
+
+static const BT_INTEGRATED_DEVICE bcm2835_uart_0_device = {
+	.name = "bcm2835,aux,uart",
+	.ulTotalResources = BT_ARRAY_SIZE(oUartResources),
+	.pResources = oUartResources,
+};
 
 static BT_ERROR bcm2835_init(struct _BT_MACHINE_DESCRIPTION *pMachine) {
+
+	volatile BCM2835_GPIO_REGS *pRegs = bt_ioremap((bcm2835_gpio_resources[0].pStart), BT_SIZE_4K);
+
+	// UART enable gpios
+	pRegs->GPFSEL[1] &= ~(7 << 12);
+	pRegs->GPFSEL[1] |= 2 << 12;
+
 	return BT_ERR_NONE;
 }
 
@@ -74,5 +95,5 @@ BT_MACHINE_START(ARM, BCM2835, "Broadcom 2835 System-on-chip")
 	.pfnMachineInit			= bcm2835_init,
 	.pInterruptController 	= &bcm2835_intc_device,
 	.pSystemTimer 			= &bcm2835_cpu_timer_device,
+	.pBootLogger 			= &bcm2835_uart_0_device,
 BT_MACHINE_END
-
