@@ -118,12 +118,14 @@ else
 	@$(MAKE) defconfig
 endif
 
-mrproper:
+mrproper: clean
 ifneq ($(PROJECT_CONFIG),y)
 	$(Q)rm $(PRM_FLAGS) $(PROJECT_DIR)/.config $(BASE)/bt_bsp_config.h $(PRM_PIPE)
 else
 	$(Q)rm $(PRM_FLAGS) $(PROJECT_DIR)/.config $(PROJECT_DIR)/include/bt_bsp_config.h $(PRM_PIPE)
 endif
+
+distclean: mrproper
 
 clean: clean_images
 clean_images: | dbuild_splash
