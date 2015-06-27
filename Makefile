@@ -103,7 +103,7 @@ project.info:
 defconfig:
 ifdef BT_CONFIG_BOARD_DEFCONFIG_FILE
 	@echo "Copying $(ARCH)/mach/$(SUBARCH)/boards/$(BT_CONFIG_BOARD_DEFCONFIG_FILE) to .config"
-	@cp $(BASE)/arch/$(ARCH)/mach/$(SUBARCH)/boards/$(BT_CONFIG_BOARD_DEFCONFIG_FILE) $(BASE)/.config
+	@cp $(BASE)/arch/$(ARCH)/mach/$(SUBARCH)/boards/$(BT_CONFIG_BOARD_DEFCONFIG_FILE) $(PROJECT_DIR)/.config
 else
 	@echo "No default board configuration for $(ARCH)/$(SUBARCH)"
 endif
@@ -112,7 +112,7 @@ endif
 upconfig:
 ifdef BT_CONFIG_BOARD_DEFCONFIG_FILE
 	@echo "Updating $(ARCH)/mach/$(SUBARCH)/boards/$(BT_CONFIG_BOARD_DEFCONFIG_FILE) from .config"
-	@cp $(BASE)/.config $(BASE)/arch/$(ARCH)/mach/$(SUBARCH)/boards/$(BT_CONFIG_BOARD_DEFCONFIG_FILE)
+	@cp $(PROJECT_DIR)/.config $(BASE)/arch/$(ARCH)/mach/$(SUBARCH)/boards/$(BT_CONFIG_BOARD_DEFCONFIG_FILE)
 else
 	# Print the defconfig error message.
 	@$(MAKE) defconfig
