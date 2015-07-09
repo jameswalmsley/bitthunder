@@ -152,7 +152,7 @@ menu "Build Configuration"
 
 config BUILD_NOSTDLIB
 	   bool "Disable stdlib linking"
-	   default n
+	   default y
 	   ---help---
 	   Should be enabled for a pure standalone kernel.
 
