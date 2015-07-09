@@ -47,7 +47,7 @@ include $(BASE)/os/src/helpers/objects.mk
 
 
 ifeq ($(BT_CONFIG_OS),y)
-include $(BASE)/arch/$(ARCH)/mach/$(SUBARCH)/.config.mk
+-include $(BASE)/arch/$(ARCH)/mach/$(SUBARCH)/.config.mk
 include $(BASE)/arch/$(ARCH)/mach/$(SUBARCH)/objects.mk
 include $(BASE)/arch/$(ARCH)/objects.mk
 endif
