@@ -1,5 +1,4 @@
-#SUB_OBJDIRS += $(BASE)/arch/$(ARCH)/mach/$(SUBARCH)/
-
+CFLAGS += -I $(BASE)/arch/arm/include/
 
 #
 #	Interrupt Controller Implementations

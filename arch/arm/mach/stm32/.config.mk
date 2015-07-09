@@ -1,5 +1,3 @@
-CFLAGS += -I $(BASE)/arch/arm/include/
-
 BT_CONFIG_ARCH_ARM_CORTEX-M3=y
 BT_CONFIG_ARCH_ARM_USE_NVIC=y
 
