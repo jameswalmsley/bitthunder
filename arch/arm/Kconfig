@@ -14,6 +14,11 @@ config MACH_BCM2835
 	bool "BCM2835 (Raspberryi Pi)"
 	select ARCH_ARM_ARM11
 
+config MACH_IMX
+	bool "IMX (6) Freescale"
+	select ARCH_ARM_CORTEX_A9
+	select ARCH_HAVE_FPU
+
 config MACH_LPC11xx
 	bool "LPC11xx Series"
 	select ARCH_ARM_CORTEX_M0
@@ -170,6 +175,8 @@ config KERNEL_FREERTOS_CA9_MODERN_PORT
 
 endif
 
+source arch/arm/common/Kconfig
+
 if MACH_STM32
 source arch/arm/mach/stm32/Kconfig
 endif
@@ -190,6 +197,10 @@ if MACH_BCM2835
 source arch/arm/mach/bcm2835/Kconfig
 endif
 
+if MACH_IMX
+source arch/arm/mach/imx/Kconfig
+endif
+
 if MACH_ZYNQ
 source arch/arm/mach/zynq/Kconfig
 endif
@@ -197,6 +208,7 @@ endif
 config SUBARCH
     string
 	default "bcm2835" if MACH_BCM2835
+	default "imx"	  if MACH_IMX
 	default "lpc11xx" if MACH_LPC11xx
 	default "lpc17xx" if MACH_LPC17xx
 	default "lm3sxx"  if MACH_LM3Sxx

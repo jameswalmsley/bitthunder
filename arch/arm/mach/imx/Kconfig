@@ -1,0 +1,104 @@
+config MACH_IMX_PLATFORM
+	bool
+	default y
+	select ARCH_ARM_CORTEX_A9
+	select ARCH_ARM_IRQ_STACK
+	select HAS_MMU
+	select ARCH_ARM_HAS_NEON
+	select LINKER_MEMORY_DEFINED
+	select LINKER_MACH_RAM
+	select LINKER_MACH_BSS_SECTION_IN_RAM
+	select LINKER_MACH_DATA_SECTION_IN_RAM
+	select LINKER_MACH_INIT_SECTION_IN_RAM
+	select LINKER_MACH_TEXT_SECTION_IN_RAM
+	select ARCH_ARM_USE_GIC
+
+config ARCH_ARM_CORTEX_A9_MPCORE_BASE
+	hex
+	default 0x00A00000
+
+config ARCH_ARM_GIC_TOTAL_IRQS
+	int
+	default	160
+
+config MACH_RAM_START
+	hex
+	default 0x0
+
+config MACH_RAM_SIZE
+	hex
+	default 0x10800000
+
+config CPU_CORES
+	int
+	default 4
+
+comment "Freescale IMX options"
+
+choice
+	prompt "IMX Series Variant"
+	default MACH_IMX_6Q
+
+config MACH_IMX_6Q
+    bool "IMX6Q"
+
+config MACH_IMX_6D
+	bool "IMX6D"
+
+config MACH_IMX_6S
+	bool "IMX6S"
+
+endchoice
+
+config MACH_IMX_SYSCLOCK_FREQ
+	int "System clock frequency"
+	default 33333333
+
+menu "Peripheral Selection"
+
+
+comment "UART devices"
+config MACH_IMX_UART
+	bool
+	default n
+
+config MACH_IMX_UART_0
+    bool "Use UART(0) peripheral"
+	select MACH_IMX_UART
+	default n
+
+config MACH_IMX_UART_0_INODE_NAME
+	string "UART(0) devfs name"
+	default "serial0"
+	depends on MACH_IMX_UART_0
+
+config MACH_ZYNQ_UART_1
+    bool "Use UART(1) peripheral"
+	select MACH_IMX_UART
+	default n
+
+config MACH_IMX_UART_1_INODE_NAME
+	string "UART(1) devfs name"
+	default "serial1"
+	depends on MACH_IMX_UART_1
+
+endmenu
+
+choice
+	prompt "Boot Logger Device"
+	default MACH_IMX_BOOTLOG_NULL
+	---help---
+	Selects which device should be used for the boot logger (boot console).
+
+config MACH_IMX_BOOTLOG_UART_0
+    bool "UART(0)"
+	select MACH_IMX_UART_0
+
+config MACH_IMX_BOOTLOG_UART_1
+    bool "UART(1)"
+	select MACH_IMX_UART_1
+
+config MACH_IMX_BOOTLOG_NULL
+    bool "/dev/null"
+
+endchoice
