@@ -83,18 +83,14 @@ $(BUILD_DIR)/arch/arm/common/freertos-arm11-portisr.o: CFLAGS += -I $(BASE)/arch
 
 $(BUILD_DIR)/arch/arm/common/freertos-arm.o: CFLAGS += -I $(BASE)/kernel/FreeRTOS/Source/include/
 $(BUILD_DIR)/arch/arm/common/freertos-arm.o: CFLAGS += -I $(BASE)/arch/arm/include/arch/common/
-$(BUILD_DIR)/arch/arm/common/freertos-arm.o: CFLAGS += -D $(BT_CONFIG_FREERTOS_PORT_ARCH)
 $(BUILD_DIR)/arch/arm/common/freertos-arm.o: CFLAGS_REMOVE += -mthumb
 $(BUILD_DIR)/arch/arm/common/freertos-ca9.o: CFLAGS += -I $(BASE)/kernel/FreeRTOS/Source/include/
 $(BUILD_DIR)/arch/arm/common/freertos-ca9.o: CFLAGS += -I $(BASE)/arch/arm/include/arch/common/
-$(BUILD_DIR)/arch/arm/common/freertos-ca9.o: CFLAGS += -D $(BT_CONFIG_FREERTOS_PORT_ARCH)
 $(BUILD_DIR)/arch/arm/common/freertos-ca9.o: CFLAGS_REMOVE += -mthumb
 $(BUILD_DIR)/arch/arm/common/freertos-m0.o: CFLAGS += -I $(BASE)/kernel/FreeRTOS/Source/include/
 $(BUILD_DIR)/arch/arm/common/freertos-m0.o: CFLAGS += -I $(BASE)/arch/arm/include/arch/common/
-$(BUILD_DIR)/arch/arm/common/freertos-m0.o: CFLAGS += -D $(BT_CONFIG_FREERTOS_PORT_ARCH)
 $(BUILD_DIR)/arch/arm/common/freertos-m3.o: CFLAGS += -I $(BASE)/kernel/FreeRTOS/Source/include/
 $(BUILD_DIR)/arch/arm/common/freertos-m3.o: CFLAGS += -I $(BASE)/arch/arm/include/arch/common/
-$(BUILD_DIR)/arch/arm/common/freertos-m3.o: CFLAGS += -D $(BT_CONFIG_FREERTOS_PORT_ARCH)
 
 
 
