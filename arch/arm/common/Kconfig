@@ -1,0 +1,3 @@
+config ARCH_ARM_USE_GIC
+    bool
+    default n
