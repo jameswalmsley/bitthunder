@@ -12,6 +12,10 @@ config MACH_ZYNQ_PLATFORM
 	select LINKER_MACH_INIT_SECTION_IN_RAM
 	select LINKER_MACH_TEXT_SECTION_IN_RAM
 
+config ARCH_ARM_PL310_BASE
+	hex
+	default 0xF8F02000
+
 config MACH_RAM_START
 	hex
 	default 0x0
