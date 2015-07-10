@@ -87,8 +87,8 @@ BT_INTEGRATED_DRIVER_DEF gt_driver = {
 
 static const BT_RESOURCE gt_resources[] = {
 	{
-		.ulStart			= 0xF8F00200,
-		.ulEnd				= 0xF8F00200 + BT_SIZE_4K - 1,
+		.ulStart			= BT_CONFIG_ARCH_ARM_CORTEX_A9_MPCORE_BASE + 0x0200,
+		.ulEnd				= BT_CONFIG_ARCH_ARM_CORTEX_A9_MPCORE_BASE + 0x0200 + BT_SIZE_4K - 1,
 		.ulFlags			= BT_RESOURCE_MEM,
 	},
 };

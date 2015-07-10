@@ -52,13 +52,13 @@ BT_INTEGRATED_DEVICE_DEF oZynq_gpio_device = {
 
 static const BT_RESOURCE oZynq_intc_resources[] = {
 	{
-		.ulStart 			= BT_CONFIG_ARCH_ARM_GIC_BASE,
-		.ulEnd	 			= BT_CONFIG_ARCH_ARM_GIC_BASE + BT_SIZE_4K - 1,
+		.ulStart 			= BT_CONFIG_ARCH_ARM_CORTEX_A9_MPCORE_BASE + 0x0100,
+		.ulEnd	 			= BT_CONFIG_ARCH_ARM_CORTEX_A9_MPCORE_BASE + 0x0100 + BT_SIZE_4K - 1,
 		.ulFlags 			= BT_RESOURCE_MEM,
 	},
 	{
-		.ulStart			= BT_CONFIG_ARCH_ARM_GIC_DIST_BASE,
-		.ulEnd				= BT_CONFIG_ARCH_ARM_GIC_DIST_BASE + BT_SIZE_4K - 1,
+		.ulStart			= BT_CONFIG_ARCH_ARM_CORTEX_A9_MPCORE_BASE + 0x1000,
+		.ulEnd				= BT_CONFIG_ARCH_ARM_CORTEX_A9_MPCORE_BASE + 0x1000 + BT_SIZE_4K - 1,
 		.ulFlags			= BT_RESOURCE_MEM,
 	},
 	{
@@ -82,8 +82,8 @@ static const BT_INTEGRATED_DEVICE oZynq_intc_device = {
 
 static const BT_RESOURCE oZynq_cpu_timer_resources[] = {
 	{
-		.ulStart			= 0xF8F00600,
-		.ulEnd				= 0xF8F006FF + BT_SIZE_4K - 1,
+		.ulStart			= BT_CONFIG_ARCH_ARM_CORTEX_A9_MPCORE_BASE + 0x0600,
+		.ulEnd				= BT_CONFIG_ARCH_ARM_CORTEX_A9_MPCORE_BASE + 0x06FF + BT_SIZE_4K - 1,
 		.ulFlags			= BT_RESOURCE_MEM,
 	},
 	{
