@@ -18,3 +18,6 @@ info.subdirs:
 info.flags:
 	@echo "LDFLAGS   : " $(LDFLAGS)
 	@echo "CFLAGS    : " $(CFLAGS)
+
+info.os:
+	@echo "DBUILD_OS : " $(DBUILD_OS)
