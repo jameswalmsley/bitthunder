@@ -125,7 +125,6 @@ include $(DBUILD_ROOT).dbuild/cpp-objects.mk
 include $(DBUILD_ROOT).dbuild/asm-objects.mk
 include $(DBUILD_ROOT).dbuild/info.mk
 
-
 #
 #	Provide a default target named all,
 #	This is dependent on $(TARGETS), $(MODULE_TARGET) and $(SUBDIRS)
@@ -161,24 +160,31 @@ kconfig-info:
 .PHONY: mkconfig
 mkconfig:
 	$(Q)mkdir -p $(CONFIG_HEADER_PATH)
-	$(Q)$(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig $(BASE)/ > $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME)
+	$(Q)$(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig$(OS_EXT) $(BASE)/ > $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME)
 
-$(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME): $(CONFIG_PATH)/.config $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig | dbuild_splash
+$(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME): $(CONFIG_PATH)/.config $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig$(OS_EXT) | dbuild_splash
 $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME):
 	$(Q)$(PRETTY) --dbuild "CONF" $(MODULE_NAME) $(subst $(BASE)/,"",$@)
 	$(Q)$(MAKE) mkconfig
 
 $(OBJECTS): $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME)
 
+MCONF:=kconfig-mconf
+ifeq ($(DBUILD_OS), WIN32)
+MCONF:=$(BASE)/scrips/kconfig-win32/kconfig-mconf.exe
+endif
+
 .PHONY: menuconfig
-menuconfig: $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig
+menuconfig: $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig$(OS_EXT)
+ifneq ($(DBUILD_OS), WIN32)
 	@which kconfig-mconf > /dev/null || { echo "*** kconfig-frontends is not installed"; $(MAKE) kconfig-info ; false; }
+endif
 ifneq ($(CONFIG_PATH),$(BASE))
 	touch $(CONFIG_PATH)/.config
 	-cp $(BASE)/.config $(CONFIG_PATH)/.config.bak
 	cp $(CONFIG_PATH)/.config $(BASE)/.config
 endif
-	cd $(BASE)/ && CONFIG_=$(CONFIG_) PROJECT_DIR=$(PROJECT_DIR) kconfig-mconf Kconfig
+	cd $(BASE)/ && CONFIG_=$(CONFIG_) PROJECT_DIR=$(PROJECT_DIR) $(MCONF) Kconfig
 	$(MAKE) mkconfig
 ifneq ($(CONFIG_PATH),$(BASE))
 	cp $(BASE)/.config $(CONFIG_PATH)/.config
@@ -190,10 +196,8 @@ oldconfig:
 	@which kconfig-conf > /dev/null || { echo "You need to compile and install kconfig-frontends"; false; }
 	@cd $(BASE)/ && CONFIG_=$(CONFIG_) PROJECT_DIR=$(PROJECT_DIR) kconfig-conf --oldconfig Kconfig .config
 
-
-
-$(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig: $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig.c
-	$(Q)gcc $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig.c $(DBUILD_ROOT).dbuild/scripts/mkconfig/cfgparser.c $(DBUILD_ROOT).dbuild/scripts/mkconfig/cfgdefine.c -o $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig
+$(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig$(OS_EXT): $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig.c
+	$(Q)gcc $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig.c $(DBUILD_ROOT).dbuild/scripts/mkconfig/cfgparser.c $(DBUILD_ROOT).dbuild/scripts/mkconfig/cfgdefine.c -o $@
 
 
 #
