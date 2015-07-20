@@ -4,8 +4,13 @@ ifeq ($(OS),Windows_NT)
 	DBUILD_OS:=WIN32
 else
     UNAME_S := $(shell uname -s)
+    UNAME_M := $(shell uname -m)
     ifeq ($(UNAME_S),Linux)
-        DBUILD_OS:=LINUX
+	ifeq ($(UNAME_M),x86_64)
+	DBUILD_OS:=LINUX_64
+	else
+        DBUILD_OS:=LINUX_32
+	endif
     endif
     ifeq ($(UNAME_S),Darwin)
         DBUILD_OS:=OSX
