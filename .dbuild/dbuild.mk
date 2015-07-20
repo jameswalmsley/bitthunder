@@ -114,6 +114,7 @@ $(TARGETS) $(TARGET_DEPS): .config.mk
 
 $(TARGETS): objects.mk .config.mk
 
+include $(DBUILD_ROOT).dbuild/os-detect.mk
 include $(DBUILD_ROOT).dbuild/verbosity.mk
 include $(DBUILD_ROOT).dbuild/pretty.mk
 include $(DBUILD_ROOT).dbuild/subdirs.mk
