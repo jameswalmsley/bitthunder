@@ -214,7 +214,11 @@ static BT_ERROR uart_set_power_state(BT_HANDLE hUart, BT_POWER_STATE ePowerState
  *	It is called from the BT_GetPowerState() API!
  **/
 static BT_ERROR uart_get_power_state(BT_HANDLE hUart, BT_POWER_STATE *pePowerState) {
-	return BT_POWER_STATE_AWAKE;
+	if(pePowerState) {
+		*pePowerState = BT_POWER_STATE_AWAKE;
+	}
+	
+	return BT_ERR_NONE;
 }
 
 /**
@@ -683,10 +687,6 @@ static const BT_IF_POWER oPowerInterface = {
 	.pfnGetPowerState = uart_get_power_state,					///< This gets the current power state.
 };
 
-static const BT_DEV_IFS oConfigInterface = {
-	(BT_DEV_INTERFACE) &oUartConfigInterface,
-};
-
 static const BT_IF_DEVICE oDeviceInterface = {
 	&oPowerInterface,											///< Device does not support powerstate functionality.
 	BT_DEV_IF_T_UART,											///< Allow configuration through the UART api.
@@ -705,7 +705,7 @@ static const BT_IF_FILE oFileInterface = {
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
 	.oIfs = {
-		(BT_HANDLE_INTERFACE) &oDeviceInterface,
+		.pDevIF = &oDeviceInterface,
 	},
 	.pFileIF = &oFileInterface,
 	.eType = BT_HANDLE_T_DEVICE,								///< Handle Type!
