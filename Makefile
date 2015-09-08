@@ -67,6 +67,13 @@ $(PROJECT_DIR)/vmthunder.syms: $(PROJECT_DIR)/vmthunder.elf
 	$(Q)$(PRETTY) SYMS $(MODULE_NAME) $(subst $(PROJECT_DIR)/,"",$@)
 	$(Q)$(OBJDUMP) -t $(PROJECT_DIR)/vmthunder.elf > $@
 
+$(PROJECT_DIR)/vmthunder.exports: $(PROJECT_DIR)/vmthunder.elf
+	$(Q)$(PRETTY) SYMS $(MODULE_NAME) $(subst $(PROJECT_DIR)/,"",$@)
+	$(Q)$(BASE)/scripts/symbol_status.sh $(PROJECT_DIR)/vmthunder.elf > $@
+
+.PHONY:checksyms
+checksyms:$(PROJECT_DIR)/vmthunder.exports
+
 $(OBJECTS) $(OBJECTS-y): $(PROJECT_DIR)/.config
 
 project.init:
@@ -129,6 +136,6 @@ distclean: mrproper
 
 clean: clean_images
 clean_images: | dbuild_splash
-	$(Q)rm $(PRM_FLAGS) $(PROJECT_DIR)/vmthunder.elf $(PROJECT_DIR)/vmthunder.img $(PROJECT_DIR)/vmthunder.elf $(PROJECT_DIR)/vmthunder.list $(PROJECT_DIR)/vmthunder.map $(PROJECT_DIR)/vmthunder.syms $(PRM_PIPE)
+	$(Q)rm $(PRM_FLAGS) $(PROJECT_DIR)/vmthunder.elf $(PROJECT_DIR)/vmthunder.img $(PROJECT_DIR)/vmthunder.elf $(PROJECT_DIR)/vmthunder.list $(PROJECT_DIR)/vmthunder.map $(PROJECT_DIR)/vmthunder.syms $(PROJECT_DIR)/vmthunder.exports $(PRM_PIPE)
 
 $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME): MODULE_NAME:=$(MODULE_NAME)
