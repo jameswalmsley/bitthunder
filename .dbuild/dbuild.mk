@@ -158,7 +158,7 @@ kconfig-info:
 	@echo "MAC OSX    : brew install kconfig-frontends"
 
 .PHONY: mkconfig
-mkconfig:
+mkconfig: $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig
 	$(Q)mkdir -p $(CONFIG_HEADER_PATH)
 	$(Q)$(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig $(BASE)/ > $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME)
 
