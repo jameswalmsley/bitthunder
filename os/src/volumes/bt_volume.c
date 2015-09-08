@@ -202,7 +202,7 @@ BT_s32 BT_VolumeWrite(BT_HANDLE hVolume, BT_u32 ulAddress, BT_u32 ulBlocks, void
 BT_EXPORT_SYMBOL(BT_VolumeWrite);
 
 BT_ERROR BT_GetVolumeGeometry(BT_HANDLE hVolume, BT_BLOCK_GEOMETRY *pGeometry) {
-	BT_GetBlockGeometry(hVolume->blkdev, pGeometry);
+	BT_GetBlockGeometry((BT_HANDLE) hVolume->blkdev, pGeometry);
 	if(pGeometry) {
 		pGeometry->ulTotalBlocks = hVolume->ulTotalBlocks;
 	}
