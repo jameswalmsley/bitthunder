@@ -1,0 +1,35 @@
+choice
+    prompt "ZYNQ Boards"
+    default ZYNQ_ZEDBOARD
+
+config ZYNQ_MICROZED
+    bool "MicroZED"
+    ---help---
+        Support for the MicroZED board
+
+config ZYNQ_ZEDBOARD
+    bool "Zedboard"
+    ---help---
+        Support for the ZEDBOARD
+
+config ZYNQ_ZC702
+    bool "Xilinx ZC702"
+    ---help---
+        Support for ZC702
+
+config ZYNQ_ZC706
+    bool "Xilinx ZX706"
+    ---help---
+        Support for ZC706
+
+config ZYNQ_ZYBO
+    bool "Zybo Board"
+    ---help---
+        Support for the ZyboBoard
+
+endchoice
+
+config BOARD_DEFCONFIG_FILE
+    string
+    default "zedboard.defconfig" if ZYNQ_ZEDBOARD
+    default "microzed.defconfig" if ZYNQ_MICROZED

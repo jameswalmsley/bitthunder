@@ -28,6 +28,8 @@ config CPU_CORES
 	int
 	default 2
 
+source arch/arm/mach/zynq/boards/Kconfig
+
 comment "Zynq Platform Options"
 
 choice

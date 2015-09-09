@@ -24,10 +24,11 @@ $(BUILD_DIR)/arch/arm/mach/zynq/zynq.o: CFLAGS += -DBT_CONFIG_ARCH_ARM_GIC_DIST_
 $(BUILD_DIR)/arch/arm/mach/zynq/zynq.o: CFLAGS += -DBT_CONFIG_ARCH_ARM_GIC_TOTAL_IRQS=$(BT_CONFIG_ARCH_ARM_GIC_TOTAL_IRQS)
 $(BUILD_DIR)/arch/arm/mach/zynq/early_console.o: CFLAGS += -fPIC
 
+include $(BASE)/arch/arm/mach/zynq/boards/objects.mk
+
 MACH_ZYNQ_OBJECTS += $(MACH_ZYNQ_OBJECTS-y)
 
 $(MACH_ZYNQ_OBJECTS): MODULE_NAME="HAL"
-
 
 OBJECTS += $(MACH_ZYNQ_OBJECTS)
 
