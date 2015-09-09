@@ -37,7 +37,7 @@ $(PROJECT_DIR)/.config:
 	$(Q)echo " ******************************************************"
 	@false;
 
-all: $(PROJECT_DIR)/vmthunder.elf $(PROJECT_DIR)/vmthunder.img $(PROJECT_DIR)/vmthunder.syms
+all: $(PROJECT_DIR)/vmthunder.elf $(PROJECT_DIR)/vmthunder.img $(PROJECT_DIR)/vmthunder.syms $(PROJECT_DIR)/vmthunder.exports
 	$(Q)$(SIZE) $(PROJECT_DIR)/vmthunder.elf
 
 ifeq ($(BT_CONFIG_BUILD_DISASSEMBLE), y)
@@ -136,7 +136,8 @@ distclean: mrproper
 
 clean: clean_images
 clean_images: | dbuild_splash
-	$(Q)rm $(PRM_FLAGS) $(PROJECT_DIR)/vmthunder.elf $(PROJECT_DIR)/vmthunder.img $(PROJECT_DIR)/vmthunder.elf $(PROJECT_DIR)/vmthunder.list $(PROJECT_DIR)/vmthunder.map $(PROJECT_DIR)/vmthunder.syms $(PROJECT_DIR)/vmthunder.exports $(PRM_PIPE)
 	$(Q)rm -rf $(PROJECT_DIR)/build
+	$(Q)rm $(PRM_FLAGS) $(PROJECT_DIR)/vmthunder.elf $(PROJECT_DIR)/vmthunder.img $(PROJECT_DIR)/vmthunder.elf $(PROJECT_DIR)/vmthunder.list $(PROJECT_DIR)/vmthunder.map $(PROJECT_DIR)/vmthunder.syms $(PROJECT_DIR)/vmthunder.exports $(PRM_PIPE)
+	$(Q)rm -rf $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME) $(PRM_PIPE)
 
 $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME): MODULE_NAME:=$(MODULE_NAME)
