@@ -20,14 +20,14 @@ typedef BT_u16	BT_le16;
 typedef struct {
 	BT_u8	u8_0;
 	BT_u8	u8_1;
-} BT_LE_SHORT;
+} BT_LE_16;
 
 typedef struct {
 	BT_u8	u8_0;
 	BT_u8	u8_1;
 	BT_u8	u8_2;
 	BT_u8 	u8_3;
-} BT_LE_LONG;
+} BT_LE_32;
 
 typedef struct {
 	BT_u8	u8_0;
@@ -38,19 +38,19 @@ typedef struct {
 	BT_u8	u8_5;
 	BT_u8	u8_6;
 	BT_u8 	u8_7;
-} BT_LE_LONGLONG;
+} BT_LE_64;
 
 typedef struct {
 	BT_u8	u8_1;
 	BT_u8	u8_0;
-} BT_BE_SHORT;
+} BT_BE_16;
 
 typedef struct {
 	BT_u8	u8_3;
 	BT_u8	u8_2;
 	BT_u8	u8_1;
 	BT_u8 	u8_0;
-} BT_BE_LONG;
+} BT_BE_32;
 
 typedef struct {
 	BT_u8	u8_7;
@@ -61,21 +61,21 @@ typedef struct {
 	BT_u8	u8_2;
 	BT_u8	u8_1;
 	BT_u8 	u8_0;
-} BT_BE_LONGLONG;
+} BT_BE_64;
 #endif
 
 #if defined (BT_CONFIG_BIG_ENDIAN)
 typedef struct {
 	BT_u8	u8_1;
 	BT_u8	u8_0;
-} BT_LE_SHORT;
+} BT_LE_16;
 
 typedef struct {
 	BT_u8	u8_3;
 	BT_u8	u8_2;
 	BT_u8	u8_1;
 	BT_u8 	u8_0;
-} BT_LE_LONG;
+} BT_LE_32;
 
 typedef struct {
 	BT_u8	u8_7;
@@ -86,19 +86,19 @@ typedef struct {
 	BT_u8	u8_2;
 	BT_u8	u8_1;
 	BT_u8 	u8_0;
-} BT_LE_LONGLONG;
+} BT_LE_64;
 
 typedef struct {
 	BT_u8	u8_0;
 	BT_u8	u8_1;
-} BT_BE_SHORT;
+} BT_BE_16;
 
 typedef struct {
 	BT_u8	u8_0;
 	BT_u8	u8_1;
 	BT_u8	u8_2;
 	BT_u8 	u8_3;
-} BT_BE_LONG;
+} BT_BE_32;
 
 typedef struct {
 	BT_u8	u8_0;
@@ -109,37 +109,37 @@ typedef struct {
 	BT_u8	u8_5;
 	BT_u8	u8_6;
 	BT_u8 	u8_7;
-} BT_BE_LONGLONG;
+} BT_BE_64;
 #endif
 
 typedef union {
 	BT_le16 		u16;
-	BT_LE_SHORT		bytes;
+	BT_LE_16		bytes;
 } BT_LE_UN16;
 
 typedef union {
 	BT_le32			u32;
-	BT_LE_LONG		bytes;
+	BT_LE_32		bytes;
 } BT_LE_UN32;
 
 typedef union {
 	BT_le64			u64;
-	BT_LE_LONGLONG	bytes;
+	BT_LE_64		bytes;
 } BT_LE_UN64;
 
 typedef union {
 	BT_be16 		u16;
-	BT_BE_SHORT		bytes;
+	BT_BE_16		bytes;
 } BT_BE_UN16;
 
 typedef union {
 	BT_be32			u32;
-	BT_BE_LONG		bytes;
+	BT_BE_32		bytes;
 } BT_BE_UN32;
 
 typedef union {
 	BT_be64			u64;
-	BT_BE_LONGLONG	bytes;
+	BT_BE_64		bytes;
 } BT_BE_UN64;
 
 #ifdef BT_CONFIG_BIG_ENDIAN
@@ -178,7 +178,30 @@ BT_u16	bt_be16_to_cpu(BT_be16 u16);
 #define bt_le16_to_cpu(__le16)	(__le16)
 #endif
 
-BT_u32 BT_GetLongLE		(void *pBuffer, BT_u32 ulOffset);
-BT_u16 BT_GetShortLE	(void *pBuffer, BT_u32 ulOffset);
+/**
+ *	Return LE words in CPU format using an offset API.
+ *	These functions are never optimised for the matched endianess case!!
+ **/
+BT_u64 	BT_Get64LE 		(void *pBuffer, BT_u32 ulOffset);
+BT_u32 	BT_Get32LE		(void *pBuffer, BT_u32 ulOffset);
+BT_u16 	BT_Get16LE		(void *pBuffer, BT_u32 ulOffset);
+
+BT_u64 	BT_Get64BE 		(void *pBuffer, BT_u32 ulOffset);
+BT_u32 	BT_Get32BE		(void *pBuffer, BT_u32 ulOffset);
+BT_u16 	BT_Get16BE 		(void *pBuffer, BT_u32 ulOffset);
+
+// Provide a matching API for getting bytes.
+BT_u8 	BT_Get8			(void *pBuffer, BT_u32 ulOffset);
+
+void 	BT_Put64LE		(void *pBuffer, BT_u32 ulOffset, BT_u64 value);
+void 	BT_Put32LE		(void *pBuffer, BT_u32 ulOffset, BT_u32 value);
+void 	BT_Put16LE 		(void *pBuffer, BT_u32 ulOffset, BT_u16 value);
+
+void 	BT_Put64BE		(void *pBuffer, BT_u32 ulOffset, BT_u64 value);
+void 	BT_Put32BE		(void *pBuffer, BT_u32 ulOffset, BT_u32 value);
+void 	BT_Put16BE 		(void *pBuffer, BT_u32 ulOffset, BT_u16 value);
+
+// Provide a matching API for putting bytes.
+void 	BT_Put8			(void *pBuffer, BT_u32 ulOffset, BT_u8 value);
 
 #endif
