@@ -42,8 +42,8 @@ static int bt_ps(BT_HANDLE hShell, int argc, char **argv) {
 		for(i = 0; i < total_processes; i++) {
 			BT_GetProcessTime(&oTime, i);
 			float fPercentage = ((float)runtimes[i].ullRuntimeCounter / ((float)runtime / 100.0));
-			BT_u32 ulLen = sprintf(pBuf, "%-6d%-31s%5.1f%%", oTime.ulPID, oTime.name, fPercentage);
-			ulLen += sprintf(pBuf+ulLen, "%11d\n", oTime.ulThreads);
+			BT_u32 ulLen = bt_sprintf(pBuf, "%-6d%-31s%5.1f%%", oTime.ulPID, oTime.name, fPercentage);
+			ulLen += bt_sprintf(pBuf+ulLen, "%11d\n", oTime.ulThreads);
 			bt_fprintf(hStdout, pBuf);
 			fTotal += fPercentage;
 			nTotal += oTime.ulThreads;
@@ -53,11 +53,11 @@ static int bt_ps(BT_HANDLE hShell, int argc, char **argv) {
 				struct bt_thread_time thread_time;
 				BT_GetProcessThreadTime(&thread_time, i, threads);
 				fPercentage = ((float)thread_time.ullRunTimeCounter / ((float)oTime.ullRunTimeCounter / 100.0));
-				ulLen  = sprintf(pBuf, "%d.%-3d -> %-31s%5.1f%%\n", oTime.ulPID, threads, thread_time.name ? thread_time.name : "unamed-thread", fPercentage);
+				ulLen  = bt_sprintf(pBuf, "%d.%-3d -> %-31s%5.1f%%\n", oTime.ulPID, threads, thread_time.name ? thread_time.name : "unamed-thread", fPercentage);
 				bt_fprintf(hStdout, pBuf);
 			}
 		}
-		sprintf(pBuf, "      TOTAL                          %5.1f%%%11d\n", fTotal, nTotal);
+		bt_sprintf(pBuf, "      TOTAL                          %5.1f%%%11d\n", fTotal, nTotal);
 		bt_fprintf(hStdout, pBuf);
 		BT_kFree(pBuf);
 	}

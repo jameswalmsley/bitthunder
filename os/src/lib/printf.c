@@ -464,7 +464,7 @@ static void sputchar(int c, void * p) {
 	*ptr += 1;
 }
 
-void
+int
 bt_sprintf(char * s, const char *fmt, ...)
 {
 	char *str = s;
@@ -476,5 +476,7 @@ bt_sprintf(char * s, const char *fmt, ...)
 	bt_kvprintf(fmt, sputchar, &str, 10, ap);
 	*(str) = 0;
 	va_end(ap);
+
+	return strlen(s);
 }
 BT_EXPORT_SYMBOL(bt_sprintf);

@@ -106,7 +106,7 @@ static char *evaluate_command(BT_HANDLE hShell, char *input) {
 		return NULL;
 	}
 
-	int len = snprintf(output, 64, "%d", (int) retval);
+	int len = bt_sprintf(output, "%d", (int) retval);
 	output[len] = '\0';
 
 	return output;

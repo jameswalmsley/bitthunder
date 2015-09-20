@@ -407,7 +407,7 @@ static void sd_manager_sm(void *pData) {
 
 
 				char buffer[10];
-				sprintf(buffer, "mmc%d", (int) pHost->ulHostID);
+				bt_sprintf(buffer, "mmc%d", (int) pHost->ulHostID);
 
 				if (pHost->pOps->pfnDeselect)
 					pHost->pOps->pfnDeselect(pHost->hHost);

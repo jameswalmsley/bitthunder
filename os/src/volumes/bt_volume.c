@@ -126,7 +126,7 @@ BT_ERROR BT_EnumerateVolumes(BT_BLKDEV_DESCRIPTOR *blk) {
 		bt_list_add(&hVolume->item, &blk->volumes);
 
 		BT_i8 *iname = BT_kMalloc(strlen(blk->node.szpName) + 10);;
-		sprintf(iname, "%s%d", blk->node.szpName, 0);
+		bt_sprintf(iname, "%s%d", blk->node.szpName, 0);
 
 		init_devfs_node(hVolume);
 
@@ -154,7 +154,7 @@ BT_ERROR BT_EnumerateVolumes(BT_BLKDEV_DESCRIPTOR *blk) {
 			bt_list_add(&hVolume->item, &blk->volumes);
 
 			BT_i8 *iname = BT_kMalloc(strlen(blk->node.szpName) + 10);
-			sprintf(iname, "%s%lu", blk->node.szpName, i);
+			bt_sprintf(iname, "%s%lu", blk->node.szpName, i);
 
 			init_devfs_node(hVolume);
 
