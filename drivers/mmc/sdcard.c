@@ -221,12 +221,12 @@ static void sd_manager_sm(void *pData) {
 
 				tCID *CID = (tCID*)oCommand.response;
 
-				BT_kPrint("SDCARD: Manufacturer ID       : %d\r", CID->MID);
-				BT_kPrint("SDCARD: OEM/Application ID    : %s\r", CID->OID);
-				BT_kPrint("SDCARD: Productname           : %s\r", CID->PNM);
-				BT_kPrint("SDCARD: Product revision      : %d.%d\r", CID->PRVMajor, CID->PRVMinor);
-				BT_kPrint("SDCARD: Product serial number : %d\r", CID->PSN);
-				BT_kPrint("SDCARD: Manufacturing date    : %d.%d\r", CID->Month, CID->Year+2000);
+				BT_kDebug("Manufacturer ID       : %d\r", CID->MID);
+				BT_kDebug("OEM/Application ID    : %s\r", CID->OID);
+				BT_kDebug("Productname           : %s\r", CID->PNM);
+				BT_kDebug("Product revision      : %d.%d\r", CID->PRVMajor, CID->PRVMinor);
+				BT_kDebug("Product serial number : %d\r", CID->PSN);
+				BT_kDebug("Manufacturing date    : %d.%d\r", CID->Month, CID->Year+2000);
 
 				// We can use the information in the CID register to get things like the CARD S/N etc and manufacturer code.
 				BT_kDebug("CID reg %08x:%08x:%08x:%08x", oCommand.response[3], oCommand.response[2], oCommand.response[1], oCommand.response[0]);
