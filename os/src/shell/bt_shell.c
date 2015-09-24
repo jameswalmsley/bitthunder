@@ -592,3 +592,20 @@ BT_ERROR BT_Shell(BT_HANDLE hShell) {
 	return Error;
 }
 BT_EXPORT_SYMBOL(BT_Shell);
+
+BT_ERROR BT_ShellProcessSubcommands(BT_HANDLE hShell, int argc, char **argv, const struct bt_shell_subcommand *subcmds) {
+
+	if(argc < 2) {
+		return BT_ERR_NONE;
+	}
+
+	while(subcmds->name) {
+		if(!strcmp(argv[0+1], subcmds->name)) {
+			return subcmds->fn_command(hShell, argc-1, argv+1);
+		}
+		subcmds++;
+	}
+
+	return BT_ERR_NONE;
+}
+BT_EXPORT_SYMBOL(BT_ShellProcessSubcommands);
