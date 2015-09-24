@@ -221,12 +221,16 @@ static void sd_manager_sm(void *pData) {
 
 				tCID *CID = (tCID*)oCommand.response;
 
-				BT_kDebug("Manufacturer ID       : %d\r", CID->MID);
-				BT_kDebug("OEM/Application ID    : %s\r", CID->OID);
-				BT_kDebug("Productname           : %s\r", CID->PNM);
-				BT_kDebug("Product revision      : %d.%d\r", CID->PRVMajor, CID->PRVMinor);
-				BT_kDebug("Product serial number : %d\r", CID->PSN);
-				BT_kDebug("Manufacturing date    : %d.%d\r", CID->Month, CID->Year+2000);
+				char pnm[6];
+				memcpy(pnm, CID->PNM, 5);
+				pnm[5] = '\0';
+
+				BT_kDebug("Manufacturer ID       : %d", CID->MID);
+				BT_kDebug("OEM/Application ID    : 0x%1x%1x", CID->OID[0], CID->OID[1]);
+				BT_kDebug("Productname           : %s", pnm);
+				BT_kDebug("Product revision      : %d.%d", CID->PRVMajor, CID->PRVMinor);
+				BT_kDebug("Product serial number : %d", CID->PSN);
+				BT_kDebug("Manufacturing date    : %d.%d", CID->Month, CID->Year+2000);
 
 				// We can use the information in the CID register to get things like the CARD S/N etc and manufacturer code.
 				BT_kDebug("CID reg %08x:%08x:%08x:%08x", oCommand.response[3], oCommand.response[2], oCommand.response[1], oCommand.response[0]);
@@ -317,6 +321,12 @@ static void sd_manager_sm(void *pData) {
 				else {
 					BT_kDebug("SDCARD: Unrecognised CSD register structure version.");
 				}
+
+				BT_kDebug("Block Size            : %lu", ulBlockSize);
+				BT_kDebug("Total Blocks          : %lu", ulBlocks);
+				BT_kDebug("Total Size (bytes)    : %llu", (BT_u64) (ulBlocks * ulBlockSize));
+				BT_kDebug("Total Size (mb)       : %llu", (BT_u64) ((ulBlocks * ulBlockSize) / 1024 / 1024));
+
 
 				if (!(pHost->pOps->ulCapabilites1 & BT_MMC_SPI_MODE)) {
 					oCommand.arg = pHost->rca << 16;
