@@ -72,6 +72,15 @@ BT_ERROR BT_DeviceRegister(struct bt_devfs_node *node, const char *szpName) {
 }
 BT_EXPORT_SYMBOL(BT_DeviceRegister);
 
+BT_ERROR BT_DeviceUnregister(struct bt_devfs_node *node) {
+
+	bt_list_del(&node->item);
+	BT_kFree(node->szpName);
+
+	return BT_ERR_NONE;
+}
+BT_EXPORT_SYMBOL(BT_DeviceUnregister);
+
 struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;
 };

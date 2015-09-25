@@ -41,6 +41,7 @@ typedef struct _BT_DEVFS_INODE {
 BT_HANDLE BT_DeviceOpen(const char *szpDevicePath, BT_ERROR *pError);
 
 BT_ERROR BT_DeviceRegister(struct bt_devfs_node *node, const char *szpName);
+BT_ERROR BT_DeviceUnregister(struct bt_devfs_node *node);
 BT_i8 *BT_GetInodeName(BT_HANDLE h, BT_ERROR *pError);
 
 #endif
