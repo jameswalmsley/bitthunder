@@ -99,6 +99,10 @@ static inline void bt_list_splice_tail_init(struct bt_list_head *list,
 #define bt_list_for_each(pos, head) \
 	for(pos = (head)->next; pos != (head); pos = pos->next)
 
+#define bt_list_for_each_safe(pos, n, head) \
+	for(pos = (head)->next, n = pos->next; pos != (head); \
+			pos = n, n = pos->next)
+
 #define bt_list_for_each_entry(pos, head, member)						\
 	for(pos = bt_list_entry((head)->next, typeof(*pos), member);		\
 		&pos->member != (head);											\
