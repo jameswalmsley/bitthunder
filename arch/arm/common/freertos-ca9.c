@@ -476,4 +476,7 @@ void FreeRTOS_Tick_Handler( void )
 /*-----------------------------------------------------------*/
 
 
+void vPortReset( void ) {
+
+}
 
