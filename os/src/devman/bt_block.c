@@ -12,7 +12,7 @@ BT_DEF_MODULE_AUTHOR		("James Walmsley")
 BT_DEF_MODULE_EMAIL			("james@fullfat-fs.co.uk")
 
 struct _BT_OPAQUE_HANDLE {
-	BT_HANDLE_HEADER 		h;
+	BT_BLKDEV_DESCRIPTOR 	b;
 };
 
 static BT_LIST_HEAD(g_block_devices);
@@ -22,8 +22,8 @@ static const BT_IF_HANDLE oHandleInterface;
 static BT_HANDLE devfs_open(struct bt_devfs_node *node, BT_ERROR *pError) {
 
 	BT_BLKDEV_DESCRIPTOR *blk = bt_container_of(node, BT_BLKDEV_DESCRIPTOR, node);
-	if(!blk->ulRefCount) {
-		blk->ulRefCount += 1;
+	if(!blk->ulReferenceCount) {
+		blk->ulReferenceCount += 1;
 		BT_AttachHandle(NULL, &oHandleInterface, (BT_HANDLE) &blk->h);
 		return (BT_HANDLE) blk;
 	}
@@ -54,7 +54,7 @@ BT_s32 BT_BlockRead(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *p
 
 	BT_BLKDEV_DESCRIPTOR *blkdev = (BT_BLKDEV_DESCRIPTOR *) hBlock;
 
-	const BT_IF_BLOCK *pOps = blkdev->hBlkDev->h.pIf->oIfs.pDevIF->pBlockIF;
+	const BT_IF_BLOCK *pOps = blkdev->hBlkDev->b.h.pIf->oIfs.pDevIF->pBlockIF;
 
 	BT_kMutexPend(blkdev->kMutex, BT_INFINITE_TIMEOUT);
 	BT_s32 ret = pOps->pfnReadBlocks(blkdev->hBlkDev, ulAddress, ulBlocks, pBuffer);
@@ -71,7 +71,7 @@ BT_s32 BT_BlockWrite(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *
 
 	BT_BLKDEV_DESCRIPTOR *blkdev = (BT_BLKDEV_DESCRIPTOR *) hBlock;
 
-	const BT_IF_BLOCK *pOps = blkdev->hBlkDev->h.pIf->oIfs.pDevIF->pBlockIF;
+	const BT_IF_BLOCK *pOps = blkdev->hBlkDev->b.h.pIf->oIfs.pDevIF->pBlockIF;
 
 	BT_kMutexPend(blkdev->kMutex, BT_INFINITE_TIMEOUT);
 	BT_s32 ret = pOps->pfnWriteBlocks(blkdev->hBlkDev, ulAddress, ulBlocks, pBuffer);
@@ -135,8 +135,8 @@ static BT_ERROR bt_blockdev_cleanup(BT_HANDLE hBlockDev) {
 
 	BT_BLKDEV_DESCRIPTOR *blk = (BT_BLKDEV_DESCRIPTOR *) hBlockDev;
 
-	if(blk->ulRefCount) {
-		blk->ulRefCount -= 1;
+	if(blk->ulReferenceCount) {
+		blk->ulReferenceCount -= 1;
 	}
 
 	return BT_ERR_NONE;

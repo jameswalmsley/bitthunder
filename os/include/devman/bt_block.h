@@ -24,7 +24,7 @@ typedef struct _BT_BLKDEV_DESCRIPTOR {
 	BT_BLOCK_GEOMETRY 		oGeometry;
 	BT_HANDLE				hBlkDev;
 	BT_HANDLE 				hInode;
-	BT_u32					ulRefCount;
+	BT_u32					ulReferenceCount;
 	void 				   *kMutex;
 } BT_BLKDEV_DESCRIPTOR;
 
@@ -34,5 +34,7 @@ BT_s32 BT_BlockRead			(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void
 BT_s32 BT_BlockWrite		(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer);
 BT_ERROR BT_GetBlockGeometry(BT_HANDLE hBlock, BT_BLOCK_GEOMETRY *pGeometry);
 BT_HANDLE BT_BlockGetInode	(BT_HANDLE hDevice);
+
+
 
 #endif
