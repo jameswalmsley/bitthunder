@@ -69,6 +69,11 @@ config SHELL_CMD_FLASHTOOL
 	depends on SHELL
 	default n
 
+config SHELL_CMD_FORMAT
+	bool "format"
+	depends on SHELL
+	default n
+
 config SHELL_CMD_FREE
 	bool "free"
 	depends on SHELL
@@ -123,12 +128,12 @@ config SHELL_CMD_MD5SUM
 	depends on SHELL
 	default n
 	select FILE
-	
+
 config SHELL_CMD_MD5SUM_BUFFER_SIZE
 	int "md5sum buffer size"
 	depends on SHELL_CMD_MD5SUM
 	default 4194304
-	
+
 
 config SHELL_CMD_MEMCAT
 	bool "memcat"

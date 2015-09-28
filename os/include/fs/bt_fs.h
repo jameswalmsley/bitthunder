@@ -26,6 +26,10 @@ BT_u32 BT_GetModeFlags(const BT_i8 *mode);
 BT_HANDLE BT_Open(const BT_i8 *szpPath, BT_u32 mode, BT_ERROR *pError);
 #define BT_OpenFile(path, mode_string, perror)	BT_Open(path, BT_GetModeFlags(mode_string), perror)
 
+/**
+ *	@device Must be a standard volume.
+ **/
+BT_ERROR BT_Format(const BT_i8 *device, const BT_i8 *filesystem);
 BT_ERROR BT_Mount(const BT_i8 *src, const BT_i8 *target, const BT_i8 *filesystem, BT_u32 mountflags, const void *data);
 BT_ERROR BT_MkDir(const BT_i8 *szpPath);
 BT_ERROR BT_RmDir(const BT_i8 *szpPath);
