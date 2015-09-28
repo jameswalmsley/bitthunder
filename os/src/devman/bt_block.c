@@ -150,6 +150,7 @@ static BT_ERROR bt_blockdev_cleanup(BT_HANDLE hBlockDev) {
 
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,
+	.ulFlags = BT_HANDLE_FLAGS_NO_DESTROY,
 	.eType = BT_HANDLE_T_BLOCK,
 	.pfnCleanup = bt_blockdev_cleanup,
 };
