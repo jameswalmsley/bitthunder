@@ -35,12 +35,16 @@ OBJECTS += $(MACH_ZYNQ_OBJECTS)
 #
 #	ZYNQ Platform Specific targets
 #
+.PHONY:BOOT.BIN.info
 BOOT.BIN.info:
 	@echo "ZYNQ FSBL Boot Image generator"
 	@echo "Generates a BOOT.BIN image with the BitThunder vmthunder.img file as the [BOOTLOADER] target."
 	@echo "This allows the Zynq BOOT ROM to load BitThunder (Usually BootThunder) as the main bootloader."
 
-BOOT.BIN: $(PROJECT_DIR)/vmthunder.elf
+.PHONY:BOOT.BIN
+BOOT.BIN: $(PROJECT_DIR)/BOOT.BIN
+$(PROJECT_DIR)/BOOT.BIN: $(PROJECT_DIR)/vmthunder.elf
+	$(Q)$(PRETTY) BOOTGEN Zynq $(subst $(PROJECT_DIR)/,"",$@)
 	$(Q)cp $(PROJECT_DIR)/vmthunder.elf $(BASE)/arch/arm/mach/zynq/tools/
 	$(Q)echo "the_ROM_image:" 					>  $(BASE)/arch/arm/mach/zynq/tools/temp.bif
 	$(Q)echo "{"								>> $(BASE)/arch/arm/mach/zynq/tools/temp.bif
@@ -51,3 +55,9 @@ BOOT.BIN: $(PROJECT_DIR)/vmthunder.elf
 	$(Q)cp $(PROJECT_DIR)/BOOT.BIN.init $(BASE)/arch/arm/mach/zynq/tools/
 	$(Q)cd $(BASE)/arch/arm/mach/zynq/tools/ && TOOLCHAIN=$(BT_CONFIG_TOOLCHAIN) python ./bootgen.py temp.bif
 	$(Q)cp $(BASE)/arch/arm/mach/zynq/tools/BOOT.BIN $(PROJECT_DIR)/
+
+clean: zynq_clean
+zynq_clean: | dbuild_splash
+	$(Q)rm $(PRM_FLAGS) $(PROJECT_DIR)/BOOT.BIN $(PRM_PIPE)
+
+all: $(PROJECT_DIR)/BOOT.BIN

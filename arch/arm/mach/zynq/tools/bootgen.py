@@ -55,7 +55,7 @@ for line in file:
 
 for item in item_list:
     bootgen.process_item(item)
-    print item.binfile.strip()
+    #print item.binfile.strip()
 
 if bootloader == None:
     print("Error: no image was marked as the bootloader.");
