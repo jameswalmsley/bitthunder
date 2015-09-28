@@ -27,6 +27,7 @@ BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_MD5SUM) 	+= $(BUILD_DIR)/os/src/shell/comman
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_MEMCAT) 	+= $(BUILD_DIR)/os/src/shell/commands/memcat.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_MKDIR)		+= $(BUILD_DIR)/os/src/shell/commands/mkdir.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_MOUNT)		+= $(BUILD_DIR)/os/src/shell/commands/mount.o
+BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_PARTITION)	+= $(BUILD_DIR)/os/src/shell/commands/partition.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_PS)			+= $(BUILD_DIR)/os/src/shell/commands/ps.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_PWD)		+= $(BUILD_DIR)/os/src/shell/commands/pwd.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_SETENV)	  	+= $(BUILD_DIR)/os/src/shell/commands/setenv.o

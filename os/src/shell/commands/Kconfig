@@ -148,6 +148,11 @@ config SHELL_CMD_MOUNT
 	default n
 	select FILE
 
+config SHELL_CMD_PARTITION
+	bool "partition"
+	depends on SHELL
+	default n
+
 config SHELL_CMD_PS
 	bool "ps"
 	depends on SHELL
