@@ -6,13 +6,12 @@
 
 #define BT_VERSION_MAJOR	0
 #define BT_VERSION_MINOR	9
-#define BT_VERSION_REVISION	1
+#define BT_VERSION_REVISION	2
 #ifndef BT_VERSION_SUFFIX
 #define BT_VERSION_SUFFIX	"stable"
 #endif
 
-#define BT_VERSION_NAME		"Picasso"
+#define BT_VERSION_NAME		"Alkalili"
 #define BT_VERSION_STRING	"BitThunder v"BT_V(BT_VERSION_MAJOR)"."BT_V(BT_VERSION_MINOR)"."BT_V(BT_VERSION_REVISION)"-("BT_VERSION_SUFFIX")"
-
 
 #endif
