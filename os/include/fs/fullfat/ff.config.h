@@ -5,6 +5,10 @@
 #include <mm/bt_heap.h>
 #include <bt_bsp_config.h>
 
+#define sprintf bt_sprintf
+
+#define FF_BITTHUNDER
+
 #ifdef BT_CONFIG_BIG_ENDIAN
 #define ffconfigBYTE_ORDER  pdFREERTOS_BIG_ENDIAN
 #endif
