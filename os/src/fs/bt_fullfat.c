@@ -129,11 +129,9 @@ static BT_HANDLE fullfat_mount(BT_HANDLE hFS, BT_HANDLE hVolume, const void *dat
 
 	BT_BLOCK_GEOMETRY oGeom;
 
-
-
 	BT_GetVolumeGeometry(hVolume, &oGeom);
 
-	pMount->hSem = BT_CreateMutex(NULL);
+	pMount->hSem = BT_kMutexCreate();
 
 	FF_CreationParameters_t oFFParams = {
 		.pucCacheMemory 	= pMount->pBlockCache,

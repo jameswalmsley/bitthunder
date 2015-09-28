@@ -62,7 +62,7 @@ BaseType_t FF_TrySemaphore( void *pxSemaphore, uint32_t ulTime_ms )
 BaseType_t xReturn;
 
 	configASSERT( pxSemaphore );
-	xReturn = BT_PendMutexRecursive(pxSemaphore, ulTime_ms);
+	xReturn = BT_kMutexPend(pxSemaphore, ulTime_ms);
 	return xReturn;
 }
 /*-----------------------------------------------------------*/
@@ -70,14 +70,14 @@ BaseType_t xReturn;
 void FF_PendSemaphore( void *pxSemaphore )
 {
 	configASSERT( pxSemaphore );
-	BT_PendMutexRecursive(pxSemaphore, BT_INFINITE_TIMEOUT);
+	BT_kMutexPend(pxSemaphore, BT_INFINITE_TIMEOUT);
 }
 /*-----------------------------------------------------------*/
 
 void FF_ReleaseSemaphore( void *pxSemaphore )
 {
 	configASSERT( pxSemaphore );
-	BT_ReleaseMutexRecursive(pxSemaphore);
+	BT_kMutexRelease(pxSemaphore);
 }
 /*-----------------------------------------------------------*/
 
