@@ -83,10 +83,16 @@ BT_EXPORT_SYMBOL(BT_BlockWrite);
 
 BT_ERROR BT_GetBlockGeometry(BT_HANDLE hBlock, BT_BLOCK_GEOMETRY *pGeometry) {
 
-	BT_BLKDEV_DESCRIPTOR *blkdev = (BT_BLKDEV_DESCRIPTOR *) hBlock;
-	*pGeometry = blkdev->oGeometry;
+	if(!isHandleValid(hBlock)) {
+		return BT_ERR_INVALID_HANDLE;
+	}
 
-	return BT_ERR_GENERIC;
+	BT_BLKDEV_DESCRIPTOR *blkdev = (BT_BLKDEV_DESCRIPTOR *) hBlock;
+	if(pGeometry) {
+		*pGeometry = blkdev->oGeometry;
+	}
+
+	return BT_ERR_NONE;
 }
 BT_EXPORT_SYMBOL(BT_GetBlockGeometry);
 
