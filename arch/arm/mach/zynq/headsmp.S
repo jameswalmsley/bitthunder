@@ -12,7 +12,6 @@
  * 	@author	James Walmsley	<james@fullfat-fs.co.uk>
  **/
 
-.section .bt.init.vectors.trampoline
 .globl zynq_trampoline
 zynq_trampoline:
 	ldr	r4,	zynq_trampoline_jump		// 	Load the jump address into r4
