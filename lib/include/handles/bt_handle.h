@@ -39,7 +39,7 @@ typedef struct _BT_HANDLE_HEADER {
 	//BT_u32 					ulFlags;			///<
 } BT_HANDLE_HEADER;
 
-#define BT_HANDLE_TYPE(x)	(x->h.pIf->eType)
+#define BT_HANDLE_TYPE(x)	(((BT_HANDLE_HEADER *) (x))->pIf->eType)
 
 /**
  *	@brief	Attach a BT_HANDLE to a process.
