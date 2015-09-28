@@ -134,6 +134,35 @@ BT_MOUNTPOINT *BT_GetMountPoint(const BT_i8 *szpPath) {
 }
 BT_EXPORT_SYMBOL(BT_GetMountPoint);
 
+BT_ERROR BT_Format(const BT_i8 *device, const BT_i8 *filesystem) {
+
+	BT_ERROR Error = BT_ERR_NONE;
+
+	BT_FILESYSTEM *fs = getfs(filesystem);
+	if(!fs) {
+		return BT_ERR_INVALID_VALUE;	// Filesystem not supported.
+	}
+
+	const BT_IF_FS *pFs = fs->hFS->h.pIf->oIfs.pFilesystemIF;
+
+	if(!pFs->pfnFormat) {
+		return BT_ERR_UNIMPLEMENTED;	// Filesystem does not implement a format method.
+	}
+
+	BT_HANDLE hVolume = BT_Open(device, 0, &Error);
+	if(!hVolume) {
+		return Error;
+	}
+
+	pFs->pfnFormat(fs->hFS, hVolume);	// Filesystem should detect if Volume or Part and format accordingly.
+
+
+	BT_CloseHandle(hVolume);
+
+	return BT_ERR_NONE;
+}
+BT_EXPORT_SYMBOL(BT_Format);
+
 BT_ERROR BT_Mount(const BT_i8 *src, const BT_i8 *target, const BT_i8 *filesystem, BT_u32 mountflags, const void *data) {
 	BT_ERROR Error;
 
