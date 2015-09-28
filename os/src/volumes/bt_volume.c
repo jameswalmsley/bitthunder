@@ -76,11 +76,12 @@ static void init_devfs_node(BT_HANDLE hVolume) {
 	hVolume->v.node.pOps = &oDevfsOps;
 }
 
-BT_ERROR BT_EnumerateVolumes(BT_BLKDEV_DESCRIPTOR *blk) {
+BT_ERROR BT_EnumerateVolumes(BT_HANDLE hBlock) {
 
 	BT_ERROR Error = BT_ERR_NONE;
 	BT_s32 ret;
 
+	BT_BLKDEV_DESCRIPTOR *blk = (BT_BLKDEV_DESCRIPTOR *) hBlock;
 
 	struct bt_list_head *pos, *next;
 	bt_list_for_each_safe(pos, next, &blk->volumes) {
