@@ -149,6 +149,8 @@ static BT_HANDLE fullfat_mount(BT_HANDLE hFS, BT_HANDLE hVolume, const void *dat
 		Error = BT_ERR_GENERIC;
 		goto err_free_out;
 	}
+	
+	pMount->oFFDisk.pxIOManager = pMount->pIoman;
 
 	ffError = FF_Mount(&pMount->oFFDisk, 0);
 	if(ffError) {
@@ -341,7 +343,7 @@ static BT_HANDLE fullfat_opendir(BT_HANDLE hMount, const BT_i8 *szpPath, BT_ERRO
 
 	BT_FF_MOUNT *pMount = (BT_FF_MOUNT *) hMount;
 	FF_Error_t ffError = FF_FindFirst(pMount->pIoman, &pDir->oDirent, szpPath);
-	if(ffError) {
+	if(ffError && FF_GETERROR(ffError) != FF_ERR_DIR_END_OF_DIR) {
 		*pError = BT_ERR_GENERIC;
 		goto err_free_out;
 	}
