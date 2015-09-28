@@ -19,6 +19,7 @@
 #include "devman/bt_i2c.h"
 #include "devman/bt_mtd.h"
 #include "volumes/bt_volume.h"
+#include "volumes/bt_partition.h"
 #include "gpio/bt_gpio.h"
 #include "timers/bt_timers.h"
 #include "process/bt_mutex.h"
