@@ -225,8 +225,22 @@ __BT_WEAK int main(int argc, char **argv) {
 	BT_SetStdout(hUart);
 #endif
 
+#ifdef BT_CONFIG_INIT_WELCOME
 	while(1) {
 		BT_kPrint("Welcome to BitThunder");
 		BT_ThreadSleep(1000);
 	}
+#endif
+
+#ifdef BT_CONFIG_INIT_SHELL
+	BT_HANDLE hShell = BT_ShellCreate(BT_GetStdin(), BT_GetStdout(), "BitThunder-$ ", 0, NULL);
+	BT_Shell(hShell);
+#endif
+
+#ifdef BT_CONFIG_INIT_FORK
+	while(1) {
+		BT_kPrint("Could not fork: /system/init - filesystem not mounted.");
+		BT_ThreadSleep(1000);
+	}
+#endif
 }

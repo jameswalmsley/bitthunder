@@ -35,6 +35,34 @@ config INHERIT_STDIO_FROM_KERNEL
 	Leave the stdin/stdout file descriptors used as the boot-logger open before starting
 	the main process. The main process will then inherit these file-descriptors.
 
+choice
+	prompt "Kernel init Behaviour"
+	default INIT_WELCOME
+	---help---
+	The kernel init behaviour effectively defines what happens in the Kernel's main()
+	function implementation. All options will be overridden if a project provides it's
+	owm main() function in the kernel build.
+
+config INIT_WELCOME
+	bool "Welcome Message"
+    ---help---
+	Prints "Welcome to BitThunder" every second. This is used for getting started and testing
+	purposes.
+
+config INIT_SHELL
+    bool "Kernel Shell"
+	---help---
+	Provide an interactive kernel shell on the stdin/stdout boot-console. This is useful
+	for some embedded projects like bootloaders.
+
+config INIT_FORK
+	bool "Fork /system/init"
+	---help---
+	Forks an executable in /system/init, i.e. a typical init process. This init option is only
+	compatible with MMU based systems.
+
+endchoice
+
 menu "Subsystems"
 config BLOCK
     bool "Block device support"
@@ -56,7 +84,7 @@ config DIR
 config I2C
     bool "I2C subsystem"
 	default n
-	
+
 config ADC
     bool "ADC subsystem"
 	default n
@@ -64,7 +92,7 @@ config ADC
 config DAC
     bool "DAC subsystem"
 	default n
-	
+
 config QEI
     bool "QEI subsystem"
 	default n
