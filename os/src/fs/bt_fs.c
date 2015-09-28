@@ -378,15 +378,42 @@ err_out:
 BT_EXPORT_SYMBOL(BT_Open);
 
 BT_ERROR BT_MkDir(const BT_i8 *szpPath) {
-	BT_MOUNTPOINT *pMount = BT_GetMountPoint(szpPath);
-	if(!pMount) {
-		return BT_ERR_GENERIC;
+
+	BT_ERROR Error = BT_ERR_NONE;
+
+	BT_i8 *absolute_path = (BT_i8 *) szpPath;
+
+#ifdef BT_CONFIG_PROCESS_CWD
+	absolute_path = BT_kMalloc(BT_PATH_MAX);
+	if(!absolute_path) {
+		Error = BT_ERR_GENERIC;
+		goto err_out;
 	}
 
-	const BT_i8 *path = get_relative_path(pMount, szpPath);
+	Error = to_absolute_path(absolute_path, BT_PATH_MAX, szpPath, BT_FALSE);
+	if(Error) {
+		goto err_free_out;
+	}
+#endif
+
+	BT_MOUNTPOINT *pMount = BT_GetMountPoint(absolute_path);
+	if(!pMount) {
+		Error = BT_ERR_GENERIC;
+		goto err_free_out;
+	}
+
+	const BT_i8 *path = get_relative_path(pMount, absolute_path);
 
 	const BT_IF_FS *pFS = pMount->pFS->hFS->h.pIf->oIfs.pFilesystemIF;
-	return pFS->pfnMkDir(pMount->hMount, path);
+	Error = pFS->pfnMkDir(pMount->hMount, path);
+
+err_free_out:
+#ifdef BT_CONFIG_PROCESS_CWD
+	BT_kFree(absolute_path);
+err_out:
+#endif
+
+	return Error;
 }
 BT_EXPORT_SYMBOL(BT_MkDir);
 
