@@ -82,6 +82,14 @@ BT_ERROR BT_EnumerateVolumes(BT_BLKDEV_DESCRIPTOR *blk) {
 	BT_s32 ret;
 
 
+	struct bt_list_head *pos, *next;
+	bt_list_for_each_safe(pos, next, &blk->volumes) {
+
+		BT_VOLUME_DESCRIPTOR *v = bt_container_of(pos, BT_VOLUME_DESCRIPTOR, item);
+		BT_UnregisterVolume((BT_HANDLE) v);
+	}
+
+
 	BT_u8 *pMBR = BT_kMalloc(blk->oGeometry.ulBlockSize);
 	if(!pMBR) {
 		Error = BT_ERR_NO_MEMORY;
