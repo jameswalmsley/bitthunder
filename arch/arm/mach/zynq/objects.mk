@@ -58,6 +58,6 @@ $(PROJECT_DIR)/BOOT.BIN: $(PROJECT_DIR)/vmthunder.elf
 
 clean: zynq_clean
 zynq_clean: | dbuild_splash
-	$(Q)rm $(PRM_FLAGS) $(PROJECT_DIR)/BOOT.BIN $(PRM_PIPE)
+	$(Q)rm $(PRM_FLAGS) $(PROJECT_DIR)/BOOT.BIN $(PROJECT_DIR)/BOOT.BIN.init $(PRM_PIPE)
 
 all: $(PROJECT_DIR)/BOOT.BIN
