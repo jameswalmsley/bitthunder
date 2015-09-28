@@ -149,6 +149,7 @@ BT_ERROR BT_GetThreadTime(BT_HANDLE hThread, struct bt_thread_time *time) {
 	time->name = hThread->thread.name;
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_GetThreadTime);
 
 static const BT_IF_HANDLE oHandleInterface = {
 	BT_MODULE_DEF_INFO,

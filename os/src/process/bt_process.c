@@ -217,6 +217,7 @@ BT_ERROR BT_GetProcessThreadTime(struct bt_thread_time *time, BT_u32 pid, BT_u32
 
 	return BT_ERR_NONE;
 }
+BT_EXPORT_SYMBOL(BT_GetProcessThreadTime);
 
 BT_u32 BT_GetTotalProcesses() {
 	return total_processes;
