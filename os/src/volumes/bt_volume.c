@@ -16,20 +16,8 @@ BT_DEF_MODULE_DESCRIPTION	("Volume manager for BitThunder")
 BT_DEF_MODULE_AUTHOR		("James Walmsley")
 BT_DEF_MODULE_EMAIL			("james@fullfat-fs.co.uk")
 
-typedef enum _BT_VOLUME_TYPE {
-	BT_VOLUME_NORMAL,
-	BT_VOLUME_PARTITION,
-} BT_VOLUME_TYPE;
-
 struct _BT_OPAQUE_HANDLE {
-	BT_HANDLE_HEADER 		h;
-	struct bt_list_head  	item;
-	struct bt_devfs_node 	node;
-	BT_VOLUME_TYPE 			eType;
-	BT_BLKDEV_DESCRIPTOR   *blkdev;
-	BT_u32					ulTotalBlocks;
-	BT_HANDLE				hInode;
-	BT_u32					ulReferenceCount;
+	BT_VOLUME_DESCRIPTOR 	v;
 };
 
 typedef struct _BT_PARTITION {
@@ -42,9 +30,9 @@ static const BT_IF_HANDLE oHandleInterface;
 
 static BT_HANDLE devfs_open(struct bt_devfs_node *dev_node, BT_ERROR *pError) {
 
-	struct _BT_OPAQUE_HANDLE *h = bt_container_of(dev_node, struct _BT_OPAQUE_HANDLE, node);
-	if(!h->ulReferenceCount) {
-		h->ulReferenceCount += 1;
+	struct _BT_OPAQUE_HANDLE *h = bt_container_of(dev_node, struct _BT_OPAQUE_HANDLE, v.node);
+	if(!h->v.ulReferenceCount) {
+		h->v.ulReferenceCount += 1;
 
 		BT_AttachHandle(NULL, &oHandleInterface, h);
 
@@ -85,7 +73,7 @@ static BT_u32 BT_PartitionCount(BT_u8 *pBuffer) {
 }
 
 static void init_devfs_node(BT_HANDLE hVolume) {
-	hVolume->node.pOps = &oDevfsOps;
+	hVolume->v.node.pOps = &oDevfsOps;
 }
 
 BT_ERROR BT_EnumerateVolumes(BT_BLKDEV_DESCRIPTOR *blk) {
@@ -118,19 +106,19 @@ BT_ERROR BT_EnumerateVolumes(BT_BLKDEV_DESCRIPTOR *blk) {
 			return BT_ERR_NO_MEMORY;
 		}
 
-		hVolume->eType 			= BT_VOLUME_NORMAL;
-		hVolume->ulTotalBlocks 	= blk->oGeometry.ulTotalBlocks;
-		hVolume->blkdev         = blk;
-		hVolume->ulReferenceCount = 0;
+		hVolume->v.eType 			= BT_VOLUME_NORMAL;
+		hVolume->v.ulTotalBlocks 	= blk->oGeometry.ulTotalBlocks;
+		hVolume->v.blkdev         	= blk;
+		hVolume->v.ulReferenceCount = 0;
 
-		bt_list_add(&hVolume->item, &blk->volumes);
+		bt_list_add(&hVolume->v.item, &blk->volumes);
 
 		BT_i8 *iname = BT_kMalloc(strlen(blk->node.szpName) + 10);;
 		bt_sprintf(iname, "%s%d", blk->node.szpName, 0);
 
 		init_devfs_node(hVolume);
 
-		BT_DeviceRegister(&hVolume->node, iname);
+		BT_DeviceRegister(&hVolume->v.node, iname);
 
 		BT_kFree(iname);
 
@@ -144,21 +132,21 @@ BT_ERROR BT_EnumerateVolumes(BT_BLKDEV_DESCRIPTOR *blk) {
 
 			BT_PARTITION *pPart = (BT_PARTITION *) hVolume;
 
-			hVolume->eType 				= BT_VOLUME_PARTITION;
-			pPart->ulBaseAddress 		= BT_GetLongLE(pMBR, (IBM_MBR_PTBL + (16 * i) + IBM_MBR_PTBL_LBA));
+			hVolume->v.eType 				= BT_VOLUME_PARTITION;
+			pPart->ulBaseAddress 		= BT_Get32LE(pMBR, (IBM_MBR_PTBL + (16 * i) + IBM_MBR_PTBL_LBA));
 			pPart->ulPartitionNumber 	= i;
-			hVolume->ulTotalBlocks		= BT_GetLongLE(pMBR, (IBM_MBR_PTBL + (16 * i) + IBM_MBR_PTBL_SECTORS));
-			hVolume->blkdev     		= blk;
-			hVolume->ulReferenceCount 	= 0;
+			hVolume->v.ulTotalBlocks		= BT_Get32LE(pMBR, (IBM_MBR_PTBL + (16 * i) + IBM_MBR_PTBL_SECTORS));
+			hVolume->v.blkdev     		= blk;
+			hVolume->v.ulReferenceCount 	= 0;
 
-			bt_list_add(&hVolume->item, &blk->volumes);
+			bt_list_add(&hVolume->v.item, &blk->volumes);
 
 			BT_i8 *iname = BT_kMalloc(strlen(blk->node.szpName) + 10);
 			bt_sprintf(iname, "%s%lu", blk->node.szpName, i);
 
 			init_devfs_node(hVolume);
 
-			BT_DeviceRegister(&hVolume->node, iname);
+			BT_DeviceRegister(&hVolume->v.node, iname);
 
 			BT_kFree(iname);
 		}
@@ -176,41 +164,56 @@ err_out:
 }
 BT_EXPORT_SYMBOL(BT_EnumerateVolumes);
 
+BT_BOOL BT_isVolumeBusy(BT_HANDLE hVolume) {
+	return (hVolume->v.ulReferenceCount > 0);
+}
+BT_EXPORT_SYMBOL(BT_isVolumeBusy);
+
+BT_RegisterVolume(BT_HANDLE hVolume) {
+
+}
+BT_EXPORT_SYMBOL(BT_RegisterVolume);
+
+BT_UnregisterVolume(BT_HANDLE hVolume) {
+
+	BT_DeviceUnregister(&hVolume->v.node);
+}
+BT_EXPORT_SYMBOL(BT_UnregisterVolume);
 
 BT_s32 BT_VolumeRead(BT_HANDLE hVolume, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer) {
 
-	if(hVolume->eType == BT_VOLUME_NORMAL) {
-		return BT_BlockRead((BT_HANDLE) hVolume->blkdev, ulAddress, ulBlocks, pBuffer);
+	if(hVolume->v.eType == BT_VOLUME_NORMAL) {
+		return BT_BlockRead((BT_HANDLE) hVolume->v.blkdev, ulAddress, ulBlocks, pBuffer);
 	}
 
 	BT_PARTITION *pPart = (BT_PARTITION *)  hVolume;
 
-	return BT_BlockRead((BT_HANDLE) hVolume->blkdev, ulAddress + pPart->ulBaseAddress, ulBlocks, pBuffer);
+	return BT_BlockRead((BT_HANDLE) hVolume->v.blkdev, ulAddress + pPart->ulBaseAddress, ulBlocks, pBuffer);
 }
 BT_EXPORT_SYMBOL(BT_VolumeRead);
 
 BT_s32 BT_VolumeWrite(BT_HANDLE hVolume, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer) {
 
-	if(hVolume->eType == BT_VOLUME_NORMAL) {
-		return BT_BlockWrite((BT_HANDLE) hVolume->blkdev, ulAddress, ulBlocks, pBuffer);
+	if(hVolume->v.eType == BT_VOLUME_NORMAL) {
+		return BT_BlockWrite((BT_HANDLE) hVolume->v.blkdev, ulAddress, ulBlocks, pBuffer);
 	}
 
 	BT_PARTITION *pPart = (BT_PARTITION *)  hVolume;
 
-	return BT_BlockWrite((BT_HANDLE) hVolume->blkdev, ulAddress + pPart->ulBaseAddress, ulBlocks, pBuffer);
+	return BT_BlockWrite((BT_HANDLE) hVolume->v.blkdev, ulAddress + pPart->ulBaseAddress, ulBlocks, pBuffer);
 }
 BT_EXPORT_SYMBOL(BT_VolumeWrite);
 
 BT_ERROR BT_GetVolumeGeometry(BT_HANDLE hVolume, BT_BLOCK_GEOMETRY *pGeometry) {
-	BT_GetBlockGeometry((BT_HANDLE) hVolume->blkdev, pGeometry);
+	BT_GetBlockGeometry((BT_HANDLE) hVolume->v.blkdev, pGeometry);
 	if(pGeometry) {
-		pGeometry->ulTotalBlocks = hVolume->ulTotalBlocks;
+		pGeometry->ulTotalBlocks = hVolume->v.ulTotalBlocks;
 	}
 }
 BT_EXPORT_SYMBOL(BT_GetVolumeGeometry);
 
 static BT_ERROR bt_volume_inode_cleanup(BT_HANDLE hVolume) {
-	hVolume->ulReferenceCount -= 1;
+	hVolume->v.ulReferenceCount -= 1;
 	return BT_ERR_NONE;
 }
 

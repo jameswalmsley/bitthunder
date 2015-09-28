@@ -1,6 +1,21 @@
 #ifndef _BT_VOLUME_H_
 #define _BT_VOLUME_H_
 
+typedef enum _BT_VOLUME_TYPE {
+	BT_VOLUME_NORMAL,
+	BT_VOLUME_PARTITION,
+} BT_VOLUME_TYPE;
+
+typedef struct _BT_VOLUME_DESCRIPTOR {
+    BT_HANDLE_HEADER        h;
+    struct bt_list_head     item;
+    struct bt_devfs_node    node;
+    BT_VOLUME_TYPE 			eType;
+    BT_u32                  ulTotalBlocks;
+    BT_BLKDEV_DESCRIPTOR   *blkdev;
+    BT_u32                  ulReferenceCount;
+    void                   *kMutex;
+} BT_VOLUME_DESCRIPTOR;
 
 
 BT_ERROR 	BT_EnumerateVolumes	(BT_BLKDEV_DESCRIPTOR *blk);
