@@ -127,6 +127,7 @@ BT_ERROR BT_EnumerateVolumes(BT_BLKDEV_DESCRIPTOR *blk) {
 		init_devfs_node(hVolume);
 
 		BT_DeviceRegister(&hVolume->v.node, iname);
+		BT_kDebug("Adding a volume: %s", iname);
 
 		BT_kFree(iname);
 
@@ -155,6 +156,7 @@ BT_ERROR BT_EnumerateVolumes(BT_BLKDEV_DESCRIPTOR *blk) {
 			init_devfs_node(hVolume);
 
 			BT_DeviceRegister(&hVolume->v.node, iname);
+			BT_kDebug("Adding a partition: %s", iname);
 
 			BT_kFree(iname);
 		}
