@@ -70,6 +70,47 @@ static int32_t fullfat_writeblocks(uint8_t *pBuffer, uint32_t Address, uint32_t 
 	return retval;
 }
 
+static BT_ERROR fullfat_format(BT_HANDLE hFS, BT_HANDLE hVolume) {
+
+	BT_ERROR Error;
+	FF_Error_t ffError;
+
+	BT_BLOCK_GEOMETRY oGeom;
+	BT_GetVolumeGeometry(hVolume, &oGeom);
+
+	BT_FF_MOUNT oContext;
+	oContext.pBlockCache = BT_kMalloc(oGeom.ulBlockSize*2);
+
+	oContext.hSem = BT_kMutexCreate();
+	oContext.hVolume = hVolume;
+
+	FF_CreationParameters_t oFFParams = {
+		.pucCacheMemory 	= oContext.pBlockCache,
+		.ulMemorySize 		= oGeom.ulBlockSize*2,
+		.ulSectorSize		= oGeom.ulBlockSize,
+		.fnWriteBlocks		= fullfat_writeblocks,
+		.fnReadBlocks		= fullfat_readblocks,
+		.pxDisk				= &oContext.oFFDisk,
+		.pvSemaphore		= oContext.hSem,
+		.xBlockDeviceIsReentrant = 1,
+	};
+
+	oContext.pIoman = FF_CreateIOManager(&oFFParams, &ffError);
+	if(!oContext.pIoman) {
+		Error = BT_ERR_GENERIC;
+		goto err_free_out;
+	}
+
+	oContext.oFFDisk.pxIOManager = oContext.pIoman;
+
+	FF_FormatRegion(&oContext.oFFDisk, 0, 0, 0, oGeom.ulTotalBlocks);
+
+err_free_out:
+	BT_CloseHandle(oContext.hSem);
+
+	return BT_ERR_NONE;
+}
+
 static BT_HANDLE fullfat_mount(BT_HANDLE hFS, BT_HANDLE hVolume, const void *data, BT_ERROR *pError) {
 
 	FF_Error_t ffError;
@@ -483,6 +524,7 @@ static const BT_IF_FILE oFileOperations = {
 
 static const BT_IF_FS oFilesystemInterface = {
 	.name 			= "vfat",
+	.pfnFormat 		= fullfat_format,
 	.pfnMount 		= fullfat_mount,
 	.pfnUnmount 	= fullfat_unmount,
 	.pfnOpen		= fullfat_open,
