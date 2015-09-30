@@ -11,10 +11,12 @@
 #include "uart.h"
 #include "gpio.h"
 
+#include "stm32f1xx.h"
+
 static const BT_RESOURCE oSTM32_gpio_resources[] = {
 	{
-		.ulStart 			= BT_CONFIG_MACH_STM32_GPIO_BASE,
-		.ulEnd 				= BT_CONFIG_MACH_STM32_GPIO_BASE + BT_SIZE_4K - 1,
+		.ulStart 			= GPIOA_BASE,
+		.ulEnd 				= GPIOA_BASE + BT_SIZE_4K - 1,
 		.ulFlags 			= BT_RESOURCE_MEM,
 	},
 	{
