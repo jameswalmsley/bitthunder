@@ -7,6 +7,16 @@ MACH_STM32_OBJECTS += $(BUILD_DIR)/arch/arm/mach/stm32/uart.o
 MACH_STM32_OBJECTS += $(BUILD_DIR)/arch/arm/mach/stm32/timer.o
 MACH_STM32_OBJECTS += $(BUILD_DIR)/arch/arm/mach/stm32/gpio.o
 
+
+#
+#	STM32 HAL drivers.
+#
+MACH_STM32_OBJECTS += $(BUILD_DIR)/arch/arm/mach/stm32/hal/stm32f1xx_hal_uart.o
+MACH_STM32_OBJECTS += $(BUILD_DIR)/arch/arm/mach/stm32/hal/stm32f1xx_hal_usart.o
+
+$(MACH_STM32_OBJECTS): CFLAGS += -I $(BASE)/arch/arm/mach/stm32/hal/inc/ -D STM32F100xB
+$(MACH_STM32_OBJECTS): CFLAGS += -I $(BASE)/arch/arm/mach/stm32/CMSIS/Include
+
 MACH_STM32_OBJECTS += $(MACH_STM32_OBJECTS-y)
 
 $(MACH_STM32_OBJECTS): MODULE_NAME="HAL"
