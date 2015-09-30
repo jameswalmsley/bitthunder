@@ -4,10 +4,42 @@ config MACH_STM32_PLATFORM
 	bool
 	default y
     select LINKER_MACH_BSS_SECTION_IN_SRAM
+	select LINKER_MEMORY_DEFINED
+	select LINKER_MACH_FLASH
+	select LINKER_MACH_SRAM
+	select LINKER_MACH_INIT_SECTION_IN_FLASH
+	select LINKER_MACH_TEXT_SECTION_IN_FLASH
+	select LINKER_MACH_DATA_SECTION_IN_SRAM
+	select LINKER_MACH_BSS_SECTION_IN_SRAM
+
+
+config MACH_FLASH_START
+	hex
+	default 0x08000000
+
+config MACH_FLASH_SIZE
+	hex
+	default 0x20000
+
+config MACH_SRAM_START
+	hex
+	default 0x20000000
+
+config MACH_SRAM_SIZE
+	hex
+	default 0x2000
+
+config LINKER_STACK_SIZE
+	hex
+	default 0x100
 
 config ARCH_ARM_SYSTICK_SRC0_DIV
     int
     default 8
+
+config MACH_PRIORITY_BITS
+	int
+	default 3
 
 choice
 	prompt "systick clock source"
@@ -33,10 +65,3 @@ config ARCH_ARM_SYSTICK_CLKSRC
 config MACH_STM32_TOTAL_GPIOS
     int
 	default 80
-
-#
-#	These have been added here as quick hacks.
-#
-config MACH_STM32_GPIO_BASE
-    hex
-	default 0x40010800
