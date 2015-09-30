@@ -12,6 +12,7 @@ config MACH_STM32_PLATFORM
 	select LINKER_MACH_DATA_SECTION_IN_SRAM
 	select LINKER_MACH_BSS_SECTION_IN_SRAM
 
+source arch/arm/mach/stm32/boards/Kconfig
 
 config MACH_FLASH_START
 	hex

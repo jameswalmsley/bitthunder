@@ -1,0 +1,15 @@
+choice
+    prompt "STM32 Boards"
+    default STM32VL_DISCOVERY
+
+config STM32VL_DISCOVERY
+    bool "STM32VL-Discovery"
+    ---help---
+        The original discovery boards, with stlink-v1.
+
+endchoice
+
+config BOARD_DEFCONFIG_FILE
+    string
+    default "stm32vl-discovery.defconfig" if STM32VL_DISCOVERY
+    
