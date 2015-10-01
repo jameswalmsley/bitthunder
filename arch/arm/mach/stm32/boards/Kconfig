@@ -7,9 +7,14 @@ config STM32VL_DISCOVERY
     ---help---
         The original discovery boards, with stlink-v1.
 
+config STM32F4_DISCOVERY
+    bool "STM32F4-Discovery"
+    ---help---
+        The F4 series discovery board.
+
 endchoice
 
 config BOARD_DEFCONFIG_FILE
     string
     default "stm32vl-discovery.defconfig" if STM32VL_DISCOVERY
-    
+    default "stm32f4-discovery.defconfig" if STM32F4_DISCOVERY
