@@ -1,0 +1,23 @@
+if MACH_STM32_STM32F1xx
+    source arch/arm/mach/stm32/ports/Kconfig.f1xx
+endif
+
+menu "Port A configuration"
+	source arch/arm/mach/stm32/ports/Kconfig.portA
+endmenu
+
+menu "Port B configuration"
+	source arch/arm/mach/stm32/ports/Kconfig.portB
+endmenu
+
+menu "Port C configuration"
+	source arch/arm/mach/stm32/ports/Kconfig.portC
+endmenu
+
+menu "Port D configuration"
+	source arch/arm/mach/stm32/ports/Kconfig.portD
+endmenu
+
+menu "Port E configuration"
+	source arch/arm/mach/stm32/ports/Kconfig.portE
+endmenu

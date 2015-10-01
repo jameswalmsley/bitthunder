@@ -1,0 +1,1055 @@
+#
+#   PE0
+#
+menu "PE0"
+
+choice STM32_PE0_FUNCTION
+    prompt "Function"
+    default STM32_PE0_GPIO
+
+    config STM32_PE0_GPIO
+        bool "GPIO"
+
+    config STM32_PE0_AF
+        bool "Alternate Function (peripheral)"
+        ---help---
+        Select this if you want to use a peripheral signal with this pin.
+        You must further correctly configure the pin
+
+endchoice
+
+choice STM32_PE0_MODE
+    prompt "PE0 Mode"
+    default STM32_PE0_MODE_INPUT
+
+    config STM32_PE0_MODE_INPUT
+        bool "Input"
+
+    config STM32_PE0_MODE_OUTPUT_2MHz
+        bool "Output -  2MHz"
+
+    config STM32_PE0_MODE_OUTPUT_10MHz
+        bool "Output - 10MHz"
+
+    config STM32_PE0_MODE_OUTPUT_50MHz
+        bool "Output - 50MHz"
+
+endchoice
+
+choice STM32_PE0_CONF
+    prompt "PE0 Config"
+    default STM32_PE0_CONF_INPUT_FLOATING if STM32_PE0_MODE_INPUT
+    default STM32_PE0_CONF_OUTPUT_PP if !STM32_PE0_MODE_INPUT
+
+    config STM32_PE0_CONF_INPUT_FLOATING
+        bool "Floating Input"
+        depends on STM32_PE0_MODE_INPUT
+
+    config STM32_PE0_CONF_INPUT_ANALOG
+        bool "Analog Input"
+        depends on STM32_PE0_MODE_INPUT
+
+    config STM32_PE0_CONF_INPUT_PUPD
+        bool "Input with pull-up/pull-down"
+        depends on STM32_PE0_MODE_INPUT
+
+    config STM32_PE0_CONF_OUTPUT_PP
+        bool "Output - push-pull"
+        depends on !STM32_PE0_MODE_INPUT
+
+    config STM32_PE0_CONF_OUTPUT_OD
+        bool "Output - open-drain"
+        depends on !STM32_PE0_MODE_INPUT
+
+endchoice
+endmenu
+
+#
+#   PE1
+#
+menu "PE1"
+
+choice STM32_PE1_FUNCTION
+    prompt "Function"
+    default STM32_PE1_GPIO
+
+    config STM32_PE1_GPIO
+        bool "GPIO"
+
+    config STM32_PE1_AF
+        bool "Alternate Function (peripheral)"
+        ---help---
+        Select this if you want to use a peripheral signal with this pin.
+        You must further correctly configure the pin
+
+endchoice
+
+choice STM32_PE1_MODE
+    prompt "PE1 Mode"
+    default STM32_PE1_MODE_INPUT
+
+    config STM32_PE1_MODE_INPUT
+        bool "Input"
+
+    config STM32_PE1_MODE_OUTPUT_2MHz
+        bool "Output -  2MHz"
+
+    config STM32_PE1_MODE_OUTPUT_10MHz
+        bool "Output - 10MHz"
+
+    config STM32_PE1_MODE_OUTPUT_50MHz
+        bool "Output - 50MHz"
+
+endchoice
+
+choice STM32_PE1_CONF
+    prompt "PE1 Config"
+    default STM32_PE1_CONF_INPUT_FLOATING if STM32_PE1_MODE_INPUT
+    default STM32_PE1_CONF_OUTPUT_PP if !STM32_PE1_MODE_INPUT
+
+    config STM32_PE1_CONF_INPUT_FLOATING
+        bool "Floating Input"
+        depends on STM32_PE1_MODE_INPUT
+
+    config STM32_PE1_CONF_INPUT_ANALOG
+        bool "Analog Input"
+        depends on STM32_PE1_MODE_INPUT
+
+    config STM32_PE1_CONF_INPUT_PUPD
+        bool "Input with pull-up/pull-down"
+        depends on STM32_PE1_MODE_INPUT
+
+    config STM32_PE1_CONF_OUTPUT_PP
+        bool "Output - push-pull"
+        depends on !STM32_PE1_MODE_INPUT
+
+    config STM32_PE1_CONF_OUTPUT_OD
+        bool "Output - open-drain"
+        depends on !STM32_PE1_MODE_INPUT
+
+endchoice
+endmenu
+
+#
+#   PE2
+#
+menu "PE2"
+
+choice STM32_PE2_FUNCTION
+    prompt "Function"
+    default STM32_PE2_GPIO
+
+    config STM32_PE2_GPIO
+        bool "GPIO"
+
+    config STM32_PE2_AF
+        bool "Alternate Function (peripheral)"
+        ---help---
+        Select this if you want to use a peripheral signal with this pin.
+        You must further correctly configure the pin
+
+endchoice
+
+choice STM32_PE2_MODE
+    prompt "PE2 Mode"
+    default STM32_PE2_MODE_INPUT
+
+    config STM32_PE2_MODE_INPUT
+        bool "Input"
+
+    config STM32_PE2_MODE_OUTPUT_2MHz
+        bool "Output -  2MHz"
+
+    config STM32_PE2_MODE_OUTPUT_10MHz
+        bool "Output - 10MHz"
+
+    config STM32_PE2_MODE_OUTPUT_50MHz
+        bool "Output - 50MHz"
+
+endchoice
+
+choice STM32_PE2_CONF
+    prompt "PE2 Config"
+    default STM32_PE2_CONF_INPUT_FLOATING if STM32_PE2_MODE_INPUT
+    default STM32_PE2_CONF_OUTPUT_PP if !STM32_PE2_MODE_INPUT
+
+    config STM32_PE2_CONF_INPUT_FLOATING
+        bool "Floating Input"
+        depends on STM32_PE2_MODE_INPUT
+
+    config STM32_PE2_CONF_INPUT_ANALOG
+        bool "Analog Input"
+        depends on STM32_PE2_MODE_INPUT
+
+    config STM32_PE2_CONF_INPUT_PUPD
+        bool "Input with pull-up/pull-down"
+        depends on STM32_PE2_MODE_INPUT
+
+    config STM32_PE2_CONF_OUTPUT_PP
+        bool "Output - push-pull"
+        depends on !STM32_PE2_MODE_INPUT
+
+    config STM32_PE2_CONF_OUTPUT_OD
+        bool "Output - open-drain"
+        depends on !STM32_PE2_MODE_INPUT
+
+endchoice
+endmenu
+
+#
+#   PE3
+#
+menu "PE3"
+
+choice STM32_PE3_FUNCTION
+    prompt "Function"
+    default STM32_PE3_GPIO
+
+    config STM32_PE3_GPIO
+        bool "GPIO"
+
+    config STM32_PE3_AF
+        bool "Alternate Function (peripheral)"
+        ---help---
+        Select this if you want to use a peripheral signal with this pin.
+        You must further correctly configure the pin
+
+endchoice
+
+choice STM32_PE3_MODE
+    prompt "PE3 Mode"
+    default STM32_PE3_MODE_INPUT
+
+    config STM32_PE3_MODE_INPUT
+        bool "Input"
+
+    config STM32_PE3_MODE_OUTPUT_2MHz
+        bool "Output -  2MHz"
+
+    config STM32_PE3_MODE_OUTPUT_10MHz
+        bool "Output - 10MHz"
+
+    config STM32_PE3_MODE_OUTPUT_50MHz
+        bool "Output - 50MHz"
+
+endchoice
+
+choice STM32_PE3_CONF
+    prompt "PE3 Config"
+    default STM32_PE3_CONF_INPUT_FLOATING if STM32_PE3_MODE_INPUT
+    default STM32_PE3_CONF_OUTPUT_PP if !STM32_PE3_MODE_INPUT
+
+    config STM32_PE3_CONF_INPUT_FLOATING
+        bool "Floating Input"
+        depends on STM32_PE3_MODE_INPUT
+
+    config STM32_PE3_CONF_INPUT_ANALOG
+        bool "Analog Input"
+        depends on STM32_PE3_MODE_INPUT
+
+    config STM32_PE3_CONF_INPUT_PUPD
+        bool "Input with pull-up/pull-down"
+        depends on STM32_PE3_MODE_INPUT
+
+    config STM32_PE3_CONF_OUTPUT_PP
+        bool "Output - push-pull"
+        depends on !STM32_PE3_MODE_INPUT
+
+    config STM32_PE3_CONF_OUTPUT_OD
+        bool "Output - open-drain"
+        depends on !STM32_PE3_MODE_INPUT
+
+endchoice
+endmenu
+
+#
+#   PE4
+#
+menu "PE4"
+
+choice STM32_PE4_FUNCTION
+    prompt "Function"
+    default STM32_PE4_GPIO
+
+    config STM32_PE4_GPIO
+        bool "GPIO"
+
+    config STM32_PE4_AF
+        bool "Alternate Function (peripheral)"
+        ---help---
+        Select this if you want to use a peripheral signal with this pin.
+        You must further correctly configure the pin
+
+endchoice
+
+choice STM32_PE4_MODE
+    prompt "PE4 Mode"
+    default STM32_PE4_MODE_INPUT
+
+    config STM32_PE4_MODE_INPUT
+        bool "Input"
+
+    config STM32_PE4_MODE_OUTPUT_2MHz
+        bool "Output -  2MHz"
+
+    config STM32_PE4_MODE_OUTPUT_10MHz
+        bool "Output - 10MHz"
+
+    config STM32_PE4_MODE_OUTPUT_50MHz
+        bool "Output - 50MHz"
+
+endchoice
+
+choice STM32_PE4_CONF
+    prompt "PE4 Config"
+    default STM32_PE4_CONF_INPUT_FLOATING if STM32_PE4_MODE_INPUT
+    default STM32_PE4_CONF_OUTPUT_PP if !STM32_PE4_MODE_INPUT
+
+    config STM32_PE4_CONF_INPUT_FLOATING
+        bool "Floating Input"
+        depends on STM32_PE4_MODE_INPUT
+
+    config STM32_PE4_CONF_INPUT_ANALOG
+        bool "Analog Input"
+        depends on STM32_PE4_MODE_INPUT
+
+    config STM32_PE4_CONF_INPUT_PUPD
+        bool "Input with pull-up/pull-down"
+        depends on STM32_PE4_MODE_INPUT
+
+    config STM32_PE4_CONF_OUTPUT_PP
+        bool "Output - push-pull"
+        depends on !STM32_PE4_MODE_INPUT
+
+    config STM32_PE4_CONF_OUTPUT_OD
+        bool "Output - open-drain"
+        depends on !STM32_PE4_MODE_INPUT
+
+endchoice
+endmenu
+
+#
+#   PE5
+#
+menu "PE5"
+
+choice STM32_PE5_FUNCTION
+    prompt "Function"
+    default STM32_PE5_GPIO
+
+    config STM32_PE5_GPIO
+        bool "GPIO"
+
+    config STM32_PE5_AF
+        bool "Alternate Function (peripheral)"
+        ---help---
+        Select this if you want to use a peripheral signal with this pin.
+        You must further correctly configure the pin
+
+endchoice
+
+choice STM32_PE5_MODE
+    prompt "PE5 Mode"
+    default STM32_PE5_MODE_INPUT
+
+    config STM32_PE5_MODE_INPUT
+        bool "Input"
+
+    config STM32_PE5_MODE_OUTPUT_2MHz
+        bool "Output -  2MHz"
+
+    config STM32_PE5_MODE_OUTPUT_10MHz
+        bool "Output - 10MHz"
+
+    config STM32_PE5_MODE_OUTPUT_50MHz
+        bool "Output - 50MHz"
+
+endchoice
+
+choice STM32_PE5_CONF
+    prompt "PE5 Config"
+    default STM32_PE5_CONF_INPUT_FLOATING if STM32_PE5_MODE_INPUT
+    default STM32_PE5_CONF_OUTPUT_PP if !STM32_PE5_MODE_INPUT
+
+    config STM32_PE5_CONF_INPUT_FLOATING
+        bool "Floating Input"
+        depends on STM32_PE5_MODE_INPUT
+
+    config STM32_PE5_CONF_INPUT_ANALOG
+        bool "Analog Input"
+        depends on STM32_PE5_MODE_INPUT
+
+    config STM32_PE5_CONF_INPUT_PUPD
+        bool "Input with pull-up/pull-down"
+        depends on STM32_PE5_MODE_INPUT
+
+    config STM32_PE5_CONF_OUTPUT_PP
+        bool "Output - push-pull"
+        depends on !STM32_PE5_MODE_INPUT
+
+    config STM32_PE5_CONF_OUTPUT_OD
+        bool "Output - open-drain"
+        depends on !STM32_PE5_MODE_INPUT
+
+endchoice
+endmenu
+
+#
+#   PE6
+#
+menu "PE6"
+
+choice STM32_PE6_FUNCTION
+    prompt "Function"
+    default STM32_PE6_GPIO
+
+    config STM32_PE6_GPIO
+        bool "GPIO"
+
+    config STM32_PE6_AF
+        bool "Alternate Function (peripheral)"
+        ---help---
+        Select this if you want to use a peripheral signal with this pin.
+        You must further correctly configure the pin
+
+endchoice
+
+choice STM32_PE6_MODE
+    prompt "PE6 Mode"
+    default STM32_PE6_MODE_INPUT
+
+    config STM32_PE6_MODE_INPUT
+        bool "Input"
+
+    config STM32_PE6_MODE_OUTPUT_2MHz
+        bool "Output -  2MHz"
+
+    config STM32_PE6_MODE_OUTPUT_10MHz
+        bool "Output - 10MHz"
+
+    config STM32_PE6_MODE_OUTPUT_50MHz
+        bool "Output - 50MHz"
+
+endchoice
+
+choice STM32_PE6_CONF
+    prompt "PE6 Config"
+    default STM32_PE6_CONF_INPUT_FLOATING if STM32_PE6_MODE_INPUT
+    default STM32_PE6_CONF_OUTPUT_PP if !STM32_PE6_MODE_INPUT
+
+    config STM32_PE6_CONF_INPUT_FLOATING
+        bool "Floating Input"
+        depends on STM32_PE6_MODE_INPUT
+
+    config STM32_PE6_CONF_INPUT_ANALOG
+        bool "Analog Input"
+        depends on STM32_PE6_MODE_INPUT
+
+    config STM32_PE6_CONF_INPUT_PUPD
+        bool "Input with pull-up/pull-down"
+        depends on STM32_PE6_MODE_INPUT
+
+    config STM32_PE6_CONF_OUTPUT_PP
+        bool "Output - push-pull"
+        depends on !STM32_PE6_MODE_INPUT
+
+    config STM32_PE6_CONF_OUTPUT_OD
+        bool "Output - open-drain"
+        depends on !STM32_PE6_MODE_INPUT
+
+endchoice
+endmenu
+
+#
+#   PE7
+#
+menu "PE7"
+
+choice STM32_PE7_FUNCTION
+    prompt "Function"
+    default STM32_PE7_GPIO
+
+    config STM32_PE7_GPIO
+        bool "GPIO"
+
+    config STM32_PE7_AF
+        bool "Alternate Function (peripheral)"
+        ---help---
+        Select this if you want to use a peripheral signal with this pin.
+        You must further correctly configure the pin
+
+endchoice
+
+choice STM32_PE7_MODE
+    prompt "PE7 Mode"
+    default STM32_PE7_MODE_INPUT
+
+    config STM32_PE7_MODE_INPUT
+        bool "Input"
+
+    config STM32_PE7_MODE_OUTPUT_2MHz
+        bool "Output -  2MHz"
+
+    config STM32_PE7_MODE_OUTPUT_10MHz
+        bool "Output - 10MHz"
+
+    config STM32_PE7_MODE_OUTPUT_50MHz
+        bool "Output - 50MHz"
+
+endchoice
+
+choice STM32_PE7_CONF
+    prompt "PE7 Config"
+    default STM32_PE7_CONF_INPUT_FLOATING if STM32_PE7_MODE_INPUT
+    default STM32_PE7_CONF_OUTPUT_PP if !STM32_PE7_MODE_INPUT
+
+    config STM32_PE7_CONF_INPUT_FLOATING
+        bool "Floating Input"
+        depends on STM32_PE7_MODE_INPUT
+
+    config STM32_PE7_CONF_INPUT_ANALOG
+        bool "Analog Input"
+        depends on STM32_PE7_MODE_INPUT
+
+    config STM32_PE7_CONF_INPUT_PUPD
+        bool "Input with pull-up/pull-down"
+        depends on STM32_PE7_MODE_INPUT
+
+    config STM32_PE7_CONF_OUTPUT_PP
+        bool "Output - push-pull"
+        depends on !STM32_PE7_MODE_INPUT
+
+    config STM32_PE7_CONF_OUTPUT_OD
+        bool "Output - open-drain"
+        depends on !STM32_PE7_MODE_INPUT
+
+endchoice
+endmenu
+
+#
+#   PE8
+#
+menu "PE8"
+
+choice STM32_PE8_FUNCTION
+    prompt "Function"
+    default STM32_PE8_GPIO
+
+    config STM32_PE8_GPIO
+        bool "GPIO"
+
+    config STM32_PE8_AF
+        bool "Alternate Function (peripheral)"
+        ---help---
+        Select this if you want to use a peripheral signal with this pin.
+        You must further correctly configure the pin
+
+endchoice
+
+choice STM32_PE8_MODE
+    prompt "PE8 Mode"
+    default STM32_PE8_MODE_INPUT
+
+    config STM32_PE8_MODE_INPUT
+        bool "Input"
+
+    config STM32_PE8_MODE_OUTPUT_2MHz
+        bool "Output -  2MHz"
+
+    config STM32_PE8_MODE_OUTPUT_10MHz
+        bool "Output - 10MHz"
+
+    config STM32_PE8_MODE_OUTPUT_50MHz
+        bool "Output - 50MHz"
+
+endchoice
+
+choice STM32_PE8_CONF
+    prompt "PE8 Config"
+    default STM32_PE8_CONF_INPUT_FLOATING if STM32_PE8_MODE_INPUT
+    default STM32_PE8_CONF_OUTPUT_PP if !STM32_PE8_MODE_INPUT
+
+    config STM32_PE8_CONF_INPUT_FLOATING
+        bool "Floating Input"
+        depends on STM32_PE8_MODE_INPUT
+
+    config STM32_PE8_CONF_INPUT_ANALOG
+        bool "Analog Input"
+        depends on STM32_PE8_MODE_INPUT
+
+    config STM32_PE8_CONF_INPUT_PUPD
+        bool "Input with pull-up/pull-down"
+        depends on STM32_PE8_MODE_INPUT
+
+    config STM32_PE8_CONF_OUTPUT_PP
+        bool "Output - push-pull"
+        depends on !STM32_PE8_MODE_INPUT
+
+    config STM32_PE8_CONF_OUTPUT_OD
+        bool "Output - open-drain"
+        depends on !STM32_PE8_MODE_INPUT
+
+endchoice
+endmenu
+
+#
+#   PE9
+#
+menu "PE9"
+
+choice STM32_PE9_FUNCTION
+    prompt "Function"
+    default STM32_PE9_GPIO
+
+    config STM32_PE9_GPIO
+        bool "GPIO"
+
+    config STM32_PE9_AF
+        bool "Alternate Function (peripheral)"
+        ---help---
+        Select this if you want to use a peripheral signal with this pin.
+        You must further correctly configure the pin
+
+endchoice
+
+choice STM32_PE9_MODE
+    prompt "PE9 Mode"
+    default STM32_PE9_MODE_INPUT
+
+    config STM32_PE9_MODE_INPUT
+        bool "Input"
+
+    config STM32_PE9_MODE_OUTPUT_2MHz
+        bool "Output -  2MHz"
+
+    config STM32_PE9_MODE_OUTPUT_10MHz
+        bool "Output - 10MHz"
+
+    config STM32_PE9_MODE_OUTPUT_50MHz
+        bool "Output - 50MHz"
+
+endchoice
+
+choice STM32_PE9_CONF
+    prompt "PE9 Config"
+    default STM32_PE9_CONF_INPUT_FLOATING if STM32_PE9_MODE_INPUT
+    default STM32_PE9_CONF_OUTPUT_PP if !STM32_PE9_MODE_INPUT
+
+    config STM32_PE9_CONF_INPUT_FLOATING
+        bool "Floating Input"
+        depends on STM32_PE9_MODE_INPUT
+
+    config STM32_PE9_CONF_INPUT_ANALOG
+        bool "Analog Input"
+        depends on STM32_PE9_MODE_INPUT
+
+    config STM32_PE9_CONF_INPUT_PUPD
+        bool "Input with pull-up/pull-down"
+        depends on STM32_PE9_MODE_INPUT
+
+    config STM32_PE9_CONF_OUTPUT_PP
+        bool "Output - push-pull"
+        depends on !STM32_PE9_MODE_INPUT
+
+    config STM32_PE9_CONF_OUTPUT_OD
+        bool "Output - open-drain"
+        depends on !STM32_PE9_MODE_INPUT
+
+endchoice
+endmenu
+
+#
+#   PE10
+#
+menu "PE10"
+
+choice STM32_PE10_FUNCTION
+    prompt "Function"
+    default STM32_PE10_GPIO
+
+    config STM32_PE10_GPIO
+        bool "GPIO"
+
+    config STM32_PE10_AF
+        bool "Alternate Function (peripheral)"
+        ---help---
+        Select this if you want to use a peripheral signal with this pin.
+        You must further correctly configure the pin
+
+endchoice
+
+choice STM32_PE10_MODE
+    prompt "PE10 Mode"
+    default STM32_PE10_MODE_INPUT
+
+    config STM32_PE10_MODE_INPUT
+        bool "Input"
+
+    config STM32_PE10_MODE_OUTPUT_2MHz
+        bool "Output -  2MHz"
+
+    config STM32_PE10_MODE_OUTPUT_10MHz
+        bool "Output - 10MHz"
+
+    config STM32_PE10_MODE_OUTPUT_50MHz
+        bool "Output - 50MHz"
+
+endchoice
+
+choice STM32_PE10_CONF
+    prompt "PE10 Config"
+    default STM32_PE10_CONF_INPUT_FLOATING if STM32_PE10_MODE_INPUT
+    default STM32_PE10_CONF_OUTPUT_PP if !STM32_PE10_MODE_INPUT
+
+    config STM32_PE10_CONF_INPUT_FLOATING
+        bool "Floating Input"
+        depends on STM32_PE10_MODE_INPUT
+
+    config STM32_PE10_CONF_INPUT_ANALOG
+        bool "Analog Input"
+        depends on STM32_PE10_MODE_INPUT
+
+    config STM32_PE10_CONF_INPUT_PUPD
+        bool "Input with pull-up/pull-down"
+        depends on STM32_PE10_MODE_INPUT
+
+    config STM32_PE10_CONF_OUTPUT_PP
+        bool "Output - push-pull"
+        depends on !STM32_PE10_MODE_INPUT
+
+    config STM32_PE10_CONF_OUTPUT_OD
+        bool "Output - open-drain"
+        depends on !STM32_PE10_MODE_INPUT
+
+endchoice
+endmenu
+
+#
+#   PE11
+#
+menu "PE11"
+
+choice STM32_PE11_FUNCTION
+    prompt "Function"
+    default STM32_PE11_GPIO
+
+    config STM32_PE11_GPIO
+        bool "GPIO"
+
+    config STM32_PE11_AF
+        bool "Alternate Function (peripheral)"
+        ---help---
+        Select this if you want to use a peripheral signal with this pin.
+        You must further correctly configure the pin
+
+endchoice
+
+choice STM32_PE11_MODE
+    prompt "PE11 Mode"
+    default STM32_PE11_MODE_INPUT
+
+    config STM32_PE11_MODE_INPUT
+        bool "Input"
+
+    config STM32_PE11_MODE_OUTPUT_2MHz
+        bool "Output -  2MHz"
+
+    config STM32_PE11_MODE_OUTPUT_10MHz
+        bool "Output - 10MHz"
+
+    config STM32_PE11_MODE_OUTPUT_50MHz
+        bool "Output - 50MHz"
+
+endchoice
+
+choice STM32_PE11_CONF
+    prompt "PE11 Config"
+    default STM32_PE11_CONF_INPUT_FLOATING if STM32_PE11_MODE_INPUT
+    default STM32_PE11_CONF_OUTPUT_PP if !STM32_PE11_MODE_INPUT
+
+    config STM32_PE11_CONF_INPUT_FLOATING
+        bool "Floating Input"
+        depends on STM32_PE11_MODE_INPUT
+
+    config STM32_PE11_CONF_INPUT_ANALOG
+        bool "Analog Input"
+        depends on STM32_PE11_MODE_INPUT
+
+    config STM32_PE11_CONF_INPUT_PUPD
+        bool "Input with pull-up/pull-down"
+        depends on STM32_PE11_MODE_INPUT
+
+    config STM32_PE11_CONF_OUTPUT_PP
+        bool "Output - push-pull"
+        depends on !STM32_PE11_MODE_INPUT
+
+    config STM32_PE11_CONF_OUTPUT_OD
+        bool "Output - open-drain"
+        depends on !STM32_PE11_MODE_INPUT
+
+endchoice
+endmenu
+
+#
+#   PE12
+#
+menu "PE12"
+
+choice STM32_PE12_FUNCTION
+    prompt "Function"
+    default STM32_PE12_GPIO
+
+    config STM32_PE12_GPIO
+        bool "GPIO"
+
+    config STM32_PE12_AF
+        bool "Alternate Function (peripheral)"
+        ---help---
+        Select this if you want to use a peripheral signal with this pin.
+        You must further correctly configure the pin
+
+endchoice
+
+choice STM32_PE12_MODE
+    prompt "PE12 Mode"
+    default STM32_PE12_MODE_INPUT
+
+    config STM32_PE12_MODE_INPUT
+        bool "Input"
+
+    config STM32_PE12_MODE_OUTPUT_2MHz
+        bool "Output -  2MHz"
+
+    config STM32_PE12_MODE_OUTPUT_10MHz
+        bool "Output - 10MHz"
+
+    config STM32_PE12_MODE_OUTPUT_50MHz
+        bool "Output - 50MHz"
+
+endchoice
+
+choice STM32_PE12_CONF
+    prompt "PE12 Config"
+    default STM32_PE12_CONF_INPUT_FLOATING if STM32_PE12_MODE_INPUT
+    default STM32_PE12_CONF_OUTPUT_PP if !STM32_PE12_MODE_INPUT
+
+    config STM32_PE12_CONF_INPUT_FLOATING
+        bool "Floating Input"
+        depends on STM32_PE12_MODE_INPUT
+
+    config STM32_PE12_CONF_INPUT_ANALOG
+        bool "Analog Input"
+        depends on STM32_PE12_MODE_INPUT
+
+    config STM32_PE12_CONF_INPUT_PUPD
+        bool "Input with pull-up/pull-down"
+        depends on STM32_PE12_MODE_INPUT
+
+    config STM32_PE12_CONF_OUTPUT_PP
+        bool "Output - push-pull"
+        depends on !STM32_PE12_MODE_INPUT
+
+    config STM32_PE12_CONF_OUTPUT_OD
+        bool "Output - open-drain"
+        depends on !STM32_PE12_MODE_INPUT
+
+endchoice
+endmenu
+
+#
+#   PE13
+#
+menu "PE13"
+
+choice STM32_PE13_FUNCTION
+    prompt "Function"
+    default STM32_PE13_GPIO
+
+    config STM32_PE13_GPIO
+        bool "GPIO"
+
+    config STM32_PE13_AF
+        bool "Alternate Function (peripheral)"
+        ---help---
+        Select this if you want to use a peripheral signal with this pin.
+        You must further correctly configure the pin
+
+endchoice
+
+choice STM32_PE13_MODE
+    prompt "PE13 Mode"
+    default STM32_PE13_MODE_INPUT
+
+    config STM32_PE13_MODE_INPUT
+        bool "Input"
+
+    config STM32_PE13_MODE_OUTPUT_2MHz
+        bool "Output -  2MHz"
+
+    config STM32_PE13_MODE_OUTPUT_10MHz
+        bool "Output - 10MHz"
+
+    config STM32_PE13_MODE_OUTPUT_50MHz
+        bool "Output - 50MHz"
+
+endchoice
+
+choice STM32_PE13_CONF
+    prompt "PE13 Config"
+    default STM32_PE13_CONF_INPUT_FLOATING if STM32_PE13_MODE_INPUT
+    default STM32_PE13_CONF_OUTPUT_PP if !STM32_PE13_MODE_INPUT
+
+    config STM32_PE13_CONF_INPUT_FLOATING
+        bool "Floating Input"
+        depends on STM32_PE13_MODE_INPUT
+
+    config STM32_PE13_CONF_INPUT_ANALOG
+        bool "Analog Input"
+        depends on STM32_PE13_MODE_INPUT
+
+    config STM32_PE13_CONF_INPUT_PUPD
+        bool "Input with pull-up/pull-down"
+        depends on STM32_PE13_MODE_INPUT
+
+    config STM32_PE13_CONF_OUTPUT_PP
+        bool "Output - push-pull"
+        depends on !STM32_PE13_MODE_INPUT
+
+    config STM32_PE13_CONF_OUTPUT_OD
+        bool "Output - open-drain"
+        depends on !STM32_PE13_MODE_INPUT
+
+endchoice
+endmenu
+
+#
+#   PE14
+#
+menu "PE14"
+
+choice STM32_PE14_FUNCTION
+    prompt "Function"
+    default STM32_PE14_GPIO
+
+    config STM32_PE14_GPIO
+        bool "GPIO"
+
+    config STM32_PE14_AF
+        bool "Alternate Function (peripheral)"
+        ---help---
+        Select this if you want to use a peripheral signal with this pin.
+        You must further correctly configure the pin
+
+endchoice
+
+choice STM32_PE14_MODE
+    prompt "PE14 Mode"
+    default STM32_PE14_MODE_INPUT
+
+    config STM32_PE14_MODE_INPUT
+        bool "Input"
+
+    config STM32_PE14_MODE_OUTPUT_2MHz
+        bool "Output -  2MHz"
+
+    config STM32_PE14_MODE_OUTPUT_10MHz
+        bool "Output - 10MHz"
+
+    config STM32_PE14_MODE_OUTPUT_50MHz
+        bool "Output - 50MHz"
+
+endchoice
+
+choice STM32_PE14_CONF
+    prompt "PE14 Config"
+    default STM32_PE14_CONF_INPUT_FLOATING if STM32_PE14_MODE_INPUT
+    default STM32_PE14_CONF_OUTPUT_PP if !STM32_PE14_MODE_INPUT
+
+    config STM32_PE14_CONF_INPUT_FLOATING
+        bool "Floating Input"
+        depends on STM32_PE14_MODE_INPUT
+
+    config STM32_PE14_CONF_INPUT_ANALOG
+        bool "Analog Input"
+        depends on STM32_PE14_MODE_INPUT
+
+    config STM32_PE14_CONF_INPUT_PUPD
+        bool "Input with pull-up/pull-down"
+        depends on STM32_PE14_MODE_INPUT
+
+    config STM32_PE14_CONF_OUTPUT_PP
+        bool "Output - push-pull"
+        depends on !STM32_PE14_MODE_INPUT
+
+    config STM32_PE14_CONF_OUTPUT_OD
+        bool "Output - open-drain"
+        depends on !STM32_PE14_MODE_INPUT
+
+endchoice
+endmenu
+
+#
+#   PE15
+#
+menu "PE15"
+
+choice STM32_PE15_FUNCTION
+    prompt "Function"
+    default STM32_PE15_GPIO
+
+    config STM32_PE15_GPIO
+        bool "GPIO"
+
+    config STM32_PE15_AF
+        bool "Alternate Function (peripheral)"
+        ---help---
+        Select this if you want to use a peripheral signal with this pin.
+        You must further correctly configure the pin
+
+endchoice
+
+choice STM32_PE15_MODE
+    prompt "PE15 Mode"
+    default STM32_PE15_MODE_INPUT
+
+    config STM32_PE15_MODE_INPUT
+        bool "Input"
+
+    config STM32_PE15_MODE_OUTPUT_2MHz
+        bool "Output -  2MHz"
+
+    config STM32_PE15_MODE_OUTPUT_10MHz
+        bool "Output - 10MHz"
+
+    config STM32_PE15_MODE_OUTPUT_50MHz
+        bool "Output - 50MHz"
+
+endchoice
+
+choice STM32_PE15_CONF
+    prompt "PE15 Config"
+    default STM32_PE15_CONF_INPUT_FLOATING if STM32_PE15_MODE_INPUT
+    default STM32_PE15_CONF_OUTPUT_PP if !STM32_PE15_MODE_INPUT
+
+    config STM32_PE15_CONF_INPUT_FLOATING
+        bool "Floating Input"
+        depends on STM32_PE15_MODE_INPUT
+
+    config STM32_PE15_CONF_INPUT_ANALOG
+        bool "Analog Input"
+        depends on STM32_PE15_MODE_INPUT
+
+    config STM32_PE15_CONF_INPUT_PUPD
+        bool "Input with pull-up/pull-down"
+        depends on STM32_PE15_MODE_INPUT
+
+    config STM32_PE15_CONF_OUTPUT_PP
+        bool "Output - push-pull"
+        depends on !STM32_PE15_MODE_INPUT
+
+    config STM32_PE15_CONF_OUTPUT_OD
+        bool "Output - open-drain"
+        depends on !STM32_PE15_MODE_INPUT
+
+endchoice
+endmenu

@@ -66,3 +66,7 @@ config ARCH_ARM_SYSTICK_CLKSRC
 config MACH_STM32_TOTAL_GPIOS
     int
 	default 80
+
+menu "GPIO Configuration"
+source arch/arm/mach/stm32/ports/Kconfig
+endmenu
