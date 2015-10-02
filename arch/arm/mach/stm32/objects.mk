@@ -5,6 +5,7 @@ MACH_STM32_OBJECTS += $(BUILD_DIR)/arch/arm/mach/stm32/stm32.o			# Provides mach
 MACH_STM32_OBJECTS += $(BUILD_DIR)/arch/arm/mach/stm32/uart.o
 MACH_STM32_OBJECTS += $(BUILD_DIR)/arch/arm/mach/stm32/timer.o
 MACH_STM32_OBJECTS += $(BUILD_DIR)/arch/arm/mach/stm32/gpio.o
+MACH_STM32_OBJECTS += $(BUILD_DIR)/arch/arm/mach/stm32/stm32_gpio_init.o
 
 
 #

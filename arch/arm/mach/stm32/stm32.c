@@ -13,6 +13,17 @@
 
 #include "stm32f1xx.h"
 
+extern void stm32_gpio_init();
+
+static BT_ERROR stm32_machine_init() {
+	// set cpu clock freq
+	stm32_gpio_init();
+}
+
+static BT_u32 stm32_get_cpu_clock_frequency() {
+	return 8000000;
+}
+
 static const BT_RESOURCE oSTM32_gpio_resources[] = {
 	{
 		.ulStart 			= GPIOA_BASE,
@@ -91,14 +102,10 @@ static const BT_INTEGRATED_DEVICE oSTM32_systick_device = {
 	.pResources				= oSTM32_systick_resources,
 };
 
-static BT_u32 stm32_get_cpu_clock_frequency() {
-	return 8000000;
-}
-
 BT_MACHINE_START(ARM, CORTEX_M3, "STM32 Family Micro-controllers")
     .ulSystemClockHz 			= 8000000,
 	.pfnGetCpuClockFrequency 	= stm32_get_cpu_clock_frequency,
-
+	.pfnMachineInit 			= stm32_machine_init,
 	.pInterruptController		= &oSTM32_nvic_device,
 
 	.pSystemTimer 				= &oSTM32_systick_device,
