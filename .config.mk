@@ -36,6 +36,9 @@ $(OBJECTS) $(OBJECTS-y): CFLAGS += -march=$(CC_MARCH)
 $(OBJECTS) $(OBJECTS-y): CFLAGS += -mtune=$(CC_MTUNE) $(CC_TCFLAGS) $(CC_OPTIMISE) $(CC_MFPU) $(CC_FPU_ABI)
 $(OBJECTS) $(OBJECTS-y): CFLAGS += $(CC_MACHFLAGS)
 $(OBJECTS) $(OBJECTS-y): CFLAGS += -D BT_VERSION_SUFFIX="\"$(GIT_DESCRIBE)\""
+ifeq ($(BT_CONFIG_READABLE_ASM),y)
+$(OBJECTS) $(OBJECTS-y): CFLAGS += -fno-reorder-blocks -fno-ipa-cp-clone -fno-partial-inlining
+endif
 
 $(OBJECTS) $(OBJECTS-y): CFLAGS += -nostdlib -fno-builtin -fdata-sections -ffunction-sections
 $(OBJECTS) $(OBJECTS-y): CFLAGS += -I $(BASE)/include/
