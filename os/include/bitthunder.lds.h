@@ -249,7 +249,7 @@
 } > BT_LINKER_TEXT_SECTION
 #endif
 
-.ARM.exidx : {
+.ARM.exidx (NOLOAD) : {
    __exidx_start = .;
    KEEP(*(.ARM.exidx*))
    KEEP(*(.gnu.linkonce.armexidix.*.*))
