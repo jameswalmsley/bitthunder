@@ -23,6 +23,7 @@ BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_IFCONFIG)	+= $(BUILD_DIR)/os/src/shell/comma
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_IOMEM)		+= $(BUILD_DIR)/os/src/shell/commands/iomem.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_LOAD) 		+= $(BUILD_DIR)/os/src/shell/commands/load.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_LOAD_FPGA) 	+= $(BUILD_DIR)/os/src/shell/commands/load_fpga.o
+BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_LOOP) 	+= $(BUILD_DIR)/os/src/shell/commands/loop.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_LS)			+= $(BUILD_DIR)/os/src/shell/commands/ls.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_MD5SUM) 	+= $(BUILD_DIR)/os/src/shell/commands/md5sum.o
 BT_OS_OBJECTS-$(BT_CONFIG_SHELL_CMD_MEMCAT) 	+= $(BUILD_DIR)/os/src/shell/commands/memcat.o
