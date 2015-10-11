@@ -17,7 +17,11 @@
      * 	the first copy of the table for starting other processors.
 	 */
 _bt_vector_table:
-	ldr pc, =(BT_LINKER_KERNEL_ENTRY + 0x80)	// Reset vector
+#ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
+  ldr pc, =(bt_reset - BT_CONFIG_RAM_VIRT + BT_CONFIG_RAM_PHYS)
+#else
+	ldr pc, =bt_reset	// Reset vector
+#endif
 	ldr	pc, [pc, #24]							// undefined instruction vector
 	ldr pc, [pc, #24]							// SVC handler
 	ldr pc, [pc, #24]							// Prefetch abort handler
@@ -42,7 +46,11 @@ _bt_vector_table:
 	.align	5									// Guarantee that 2nd table falls on a 32byte boundary.
 
 _bt_vector_second_table:
-	ldr pc, =(BT_LINKER_KERNEL_ENTRY + 0x80)	// Reset vector
+#ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
+  ldr pc, =(bt_reset - BT_CONFIG_RAM_VIRT + BT_CONFIG_RAM_PHYS)
+#else
+	ldr pc, =bt_reset	// Reset vector
+#endif
 	ldr	pc, [pc, #24]							// undefined instruction vector
 	ldr pc, [pc, #24]							// SVC handler
 	ldr pc, [pc, #24]							// Prefetch abort handler
