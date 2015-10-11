@@ -26,6 +26,7 @@
 *****************************************************************************/
 
 #include "ps7_init_gpl.h"
+#include <bitthunder.h>
 
 unsigned long ps7_pll_init_data_3_0[] = {
     // START: top
@@ -13087,7 +13088,7 @@ unsigned long mask_read(unsigned long add , unsigned long mask ) {
 int
 ps7_config(unsigned long * ps7_config_init)
 {
-    unsigned long *ptr = ps7_config_init;
+    unsigned long *ptr = (unsigned long *) bt_virt_to_phys(ps7_config_init);
 
     unsigned long  opcode;            // current instruction ..
     unsigned long  args[16];           // no opcode has so many args ...
@@ -13161,12 +13162,6 @@ ps7_config(unsigned long * ps7_config_init)
     return finish;
 }
 
-unsigned long *ps7_mio_init_data = ps7_mio_init_data_3_0;
-unsigned long *ps7_pll_init_data = ps7_pll_init_data_3_0;
-unsigned long *ps7_clock_init_data = ps7_clock_init_data_3_0;
-unsigned long *ps7_ddr_init_data = ps7_ddr_init_data_3_0;
-unsigned long *ps7_peripherals_init_data = ps7_peripherals_init_data_3_0;
-
 int
 ps7_post_config()
 {
@@ -13212,6 +13207,12 @@ ps7_init()
   unsigned long si_ver = ps7GetSiliconVersion ();
   int ret;
   //int pcw_ver = 0;
+
+  unsigned long *ps7_mio_init_data = ps7_mio_init_data_3_0;
+  unsigned long *ps7_pll_init_data = ps7_pll_init_data_3_0;
+  unsigned long *ps7_clock_init_data = ps7_clock_init_data_3_0;
+  unsigned long *ps7_ddr_init_data = ps7_ddr_init_data_3_0;
+  unsigned long *ps7_peripherals_init_data = ps7_peripherals_init_data_3_0;
 
   if (si_ver == PCW_SILICON_VERSION_1) {
     ps7_mio_init_data = ps7_mio_init_data_1_0;
