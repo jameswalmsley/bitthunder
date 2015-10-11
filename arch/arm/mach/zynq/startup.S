@@ -64,7 +64,11 @@ _relocate_loop:
 
 
 	// Now we can JUMP to 0x0010_0000 relative address.
+#ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
+	ldr		r0, =(_relocate_stage_a_target - BT_CONFIG_RAM_VIRT + BT_CONFIG_RAM_PHYS)
+#else
 	ldr		r0, =_relocate_stage_a_target
+#endif
 	ldr 	r1, =0x00100000
 	add		r0, r0, r1
 	mov		pc, r0
@@ -92,7 +96,11 @@ _relocate_loop_2:
 	subs	r3, r3, #1
 	bge		_relocate_loop_2
 
+#ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
+	ldr		pc, =(_relocate_stage_b_target - BT_CONFIG_RAM_VIRT + BT_CONFIG_RAM_PHYS)	// Jump back into linked-space!
+#else
 	ldr		pc, =_relocate_stage_b_target	// Jump back into linked-space!
+#endif
 _relocate_stage_b_target:
 	mov		r0, r0
 	mov		r0, r0
