@@ -94,7 +94,11 @@ bt_reset:
 	 *	This should be the Physical Address!
 	 */
 	bl	_bt_startup_init_hook
+#ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
+  ldr sp,=(_stack  - BT_CONFIG_RAM_VIRT + BT_CONFIG_RAM_PHYS)
+#else
 	ldr sp,=_stack
+#endif
 
 #ifdef BT_CONFIG_ARCH_ARM_FULL_INIT
 
@@ -212,6 +216,19 @@ Sync:	ldr	r1, [r0]
 #define UNCACHED_MEM 	0x00000c02
 
 .set MMUCRVAL,	0b01000000000101	/* Enable IDC, and MMU */
+
+#ifdef BT_CONFIG_ARCH_ARM_FULL_INIT
+	ldr	r0,=L2CCCrtl
+	ldr	r1,[r0]
+	mov	r2, #L2CCControl
+	orr	r1,r1,r2
+	str	r1,[r0]
+
+	mov	r0, r0
+	mrc	p15, 0, r1, c1, c0, 2		/* read cp access control register (CACR) into r1 */
+	orr	r1, r1, #(0xf << 20)		/* enable full access for p10 & p11 */
+	mcr	p15, 0, r1, c1, c0, 2		/* write back into CACR */
+#endif
 
 #ifndef BT_CONFIG_USE_VIRTUAL_ADDRESSING
 #ifndef BT_CONFIG_ARCH_ARM_ARMv6
@@ -342,19 +359,10 @@ _mmu_init_loop3:
 	ldr		pc, jump_target
 	jump_target:	.word	jump_to_virtual
 jump_to_virtual:
-#endif
-
-#ifdef BT_CONFIG_ARCH_ARM_FULL_INIT
-	ldr	r0,=L2CCCrtl
-	ldr	r1,[r0]
-	mov	r2, #L2CCControl
-	orr	r1,r1,r2
-	str	r1,[r0]
-
-	mov	r0, r0
-	mrc	p15, 0, r1, c1, c0, 2		/* read cp access control register (CACR) into r1 */
-	orr	r1, r1, #(0xf << 20)		/* enable full access for p10 & p11 */
-	mcr	p15, 0, r1, c1, c0, 2		/* write back into CACR */
+  ldr r0,=(BT_CONFIG_RAM_PHYS)
+  subs sp, sp, r0
+  ldr r0,=(BT_CONFIG_RAM_VIRT)
+  add sp, sp, r0
 #endif
 
 #ifdef BT_CONFIG_ARCH_ARM_HAS_NEON
