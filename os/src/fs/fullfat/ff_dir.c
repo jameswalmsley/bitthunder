@@ -581,7 +581,7 @@ uint32_t xResult = 0ul;
 					FF_ShortNameExpand( pxDirEntry->pcFileName );
 				}
 				#endif /* ffconfigUNICODE_UTF16_SUPPORT */
-				#if defined( ffconfigLFN_SUPPORT )
+				#if( ffconfigLFN_SUPPORT != 0 )
 				{
 					xLFNTotal = 0;
 				}
@@ -685,16 +685,31 @@ uint32_t FF_FindDir( FF_IOManager_t *pxIOManager, const char *pcPath, uint16_t p
 {
 uint16_t it = 0;         /* Re-entrancy Variables for FF_strtok( ). */
 BaseType_t last = pdFALSE;
+#if (ffconfigNAMES_ON_HEAP != 0)
+FF_DirEnt_t *pMyDir;
+#else
 FF_DirEnt_t MyDir;
+FF_DirEnt_t *pMyDir = &MyDir;
+#endif
 FF_FindParams_t  xFindParams;
 FF_Error_t xError;
 BaseType_t xFound;
 
 #if( ffconfigUNICODE_UTF16_SUPPORT != 0 )
+#if (ffconfigNAMES_ON_HEAP != 0)
+	FF_T_WCHAR *pmytoken;
+#else
 	FF_T_WCHAR mytoken[ ffconfigMAX_FILENAME ];
+	FF_T_WCHAR *pmytoken = mytoken;
+#endif
 	FF_T_WCHAR *token;
 #else
+#if (ffconfigNAMES_ON_HEAP != 0)
+	char *pmytoken;
+#else
 	char mytoken[ ffconfigMAX_FILENAME ];
+	char *pmytoken = mytoken;
+#endif
 	char *pcToken;
 #endif
 
@@ -749,21 +764,36 @@ BaseType_t xFound;
 	}
 	if( xFound == pdFALSE )
 	{
-		pcToken = FF_strtok( pcPath, mytoken, &it, &last, pathLen );
+#if (ffconfigNAMES_ON_HEAP != 0)
+#if (ffconfigUNICODE_UTF16_SUPPORT != 0)
+
+		pmytoken = ffconfigMALLOC(sizeof(FF_T_WCHAR)*ffconfigMAX_FILENAME);
+#else
+		pmytoken = ffconfigMALLOC(sizeof(char)*ffconfigMAX_FILENAME);
+#endif
+		pMyDir = ffconfigMALLOC(sizeof(FF_DirEnt_t));
+#endif
+		pcToken = FF_strtok( pcPath, pmytoken, &it, &last, pathLen );
 
 		do
 		{
-			MyDir.usCurrentItem = 0;
-			xFindParams.ulDirCluster = FF_FindEntryInDir( pxIOManager, &xFindParams, pcToken, ( uint8_t ) FF_FAT_ATTR_DIR, &MyDir, &xError );
+			pMyDir->usCurrentItem = 0;
+			xFindParams.ulDirCluster = FF_FindEntryInDir( pxIOManager, &xFindParams, pcToken, ( uint8_t ) FF_FAT_ATTR_DIR, pMyDir, &xError );
 
 			if( xFindParams.ulDirCluster == 0ul )
 			{
 				break;
 			}
 
-			pcToken = FF_strtok( pcPath, mytoken, &it, &last, pathLen );
+			pcToken = FF_strtok( pcPath, pmytoken, &it, &last, pathLen );
 
 		} while( pcToken != NULL );
+
+#if (ffconfigNAMES_ON_HEAP != 0)
+		ffconfigFREE(pMyDir);
+		ffconfigFREE(pmytoken);
+#endif
+
 		if( ( pcToken != NULL ) &&
 			( ( FF_isERR( xError ) == pdFALSE ) || ( FF_GETERROR( xError ) == FF_ERR_DIR_END_OF_DIR ) ) )
 		{
@@ -1246,9 +1276,10 @@ uint8_t ucEntryBuffer[ FF_SIZEOF_DIRECTORY_ENTRY ];
 FF_FetchContext_t	xFetchContext;
 FF_Error_t				xError;
 
-#ifndef ffconfigLFN_SUPPORT
+#if( ffconfigLFN_SUPPORT == 0 )
 	BaseType_t xLFNCount;
 #endif
+
 	xError = FF_InitEntryFetch( pxIOManager, ulDirCluster, &xFetchContext );
 
 	if( FF_isERR( xError ) == pdFALSE )
@@ -2186,7 +2217,12 @@ uint16_t NameLen;
 int32_t FF_FindShortName( FF_IOManager_t *pxIOManager, FF_FindParams_t *pxFindParams )
 {
 char MyShortName[ 13 ];
+#if (ffconfigNAMES_ON_HEAP != 0)
+FF_DirEnt_t *pMyDir;
+#else
 FF_DirEnt_t MyDir;
+FF_DirEnt_t *pMyDir = &MyDir;
+#endif
 FF_Error_t xResult = 0;
 BaseType_t xIndex, x, y;
 uint16_t NameLen;
@@ -2224,7 +2260,10 @@ uint32_t ulCluster;
 				FF_ShortNameExpand( pcFileName );
 			}
 			#endif
-			ulCluster = FF_FindEntryInDir( pxIOManager, pxFindParams, pcFileName, 0x00, &MyDir, &xResult );
+#if (ffconfigNAMES_ON_HEAP != 0)
+			pMyDir = ffconfigMALLOC(sizeof(FF_DirEnt_t));
+#endif
+			ulCluster = FF_FindEntryInDir( pxIOManager, pxFindParams, pcFileName, 0x00, pMyDir, &xResult );
 
 			/* END_OF_DIR is not a fatal error, it only means that the entry was not found. */
 			if( ( FF_isERR( xResult ) == pdFALSE ) || ( FF_GETERROR( xResult ) == FF_ERR_DIR_END_OF_DIR ) )
@@ -2242,6 +2281,9 @@ uint32_t ulCluster;
 			{
 				/* There was an error, which will be returned. */
 			}
+#if (ffconfigNAMES_ON_HEAP != 0)
+			ffconfigFREE(pMyDir);
+#endif
 		}
 	}
 	else
@@ -2829,34 +2871,50 @@ uint32_t FF_CreateFile( FF_IOManager_t *pxIOManager, FF_FindParams_t *pxFindPara
 uint32_t FF_CreateFile( FF_IOManager_t *pxIOManager, FF_FindParams_t *pxFindParams, char *pcFileName, FF_DirEnt_t *pxDirEntry, FF_Error_t *pxError )
 #endif
 {
-FF_DirEnt_t MyFile;
+#if (ffconfigNAMES_ON_HEAP != 0)
+FF_DirEnt_t *pMyFile;
+#else
+FF_DirEnt_t *pMyFile = &MyFile;	// TODO: Use alloca() to conditionally allocate this on the stack if pxDirEntry is not NULL!
+#endif
 FF_Error_t xTempError, xError = FF_ERR_NONE;
 uint32_t ulResult;
 
-	memset ( &MyFile, '\0', sizeof( MyFile ) );
+#if (ffconfigNAMES_ON_HEAP != 0)
+	if(pxDirEntry) {
+		pMyFile = pxDirEntry;
+	} else {
+		pMyFile = ffconfigMALLOC(sizeof(FF_DirEnt_t));
+	}
+#endif
+
+	memset ( pMyFile, '\0', sizeof( *pMyFile ) );
 
 	#if( ffconfigUNICODE_UTF16_SUPPORT != 0 )
 	{
-		wcsncpy( MyFile.pcFileName, pcFileName, ffconfigMAX_FILENAME );
+		wcsncpy( pMyFile->pcFileName, pcFileName, ffconfigMAX_FILENAME );
 	}
 	#else
 	{
-		strncpy( MyFile.pcFileName, pcFileName, ffconfigMAX_FILENAME );
+		strncpy( pMyFile->pcFileName, pcFileName, ffconfigMAX_FILENAME );
 	}
 	#endif
 
-	MyFile.ulObjectCluster = FF_CreateClusterChain( pxIOManager, &xError );
+	pMyFile->ulObjectCluster = FF_CreateClusterChain( pxIOManager, &xError );
 
 	if( FF_isERR( xError ) == pdFALSE )
 	{
-		xError = FF_CreateDirent( pxIOManager, pxFindParams, &MyFile );
+		xError = FF_CreateDirent( pxIOManager, pxFindParams, pMyFile );
 		if( FF_isERR( xError ) == pdFALSE )
 		{
 			/* The new file now has a cluster chain and it has an entry
 			in its directory.  Copy data to a pointer provided by caller: */
 			if( pxDirEntry != NULL )
 			{
-				memcpy( pxDirEntry, &MyFile, sizeof( FF_DirEnt_t ) );
+#if (ffconfigNAMES_ON_HEAP != 0)
+				// No memcpy required, as pMyFile is pxDirEntry!
+#else
+				memcpy( pxDirEntry, pMyFile, sizeof( FF_DirEnt_t ) );	// TODO : Use of alloca, would prevent this memcpy to bre required!
+#endif
 			}
 		}
 		else
@@ -2865,8 +2923,8 @@ uint32_t ulResult;
 			Unlink the file's cluster chain: */
 			FF_lockFAT( pxIOManager );
 			{
-				FF_UnlinkClusterChain( pxIOManager, MyFile.ulObjectCluster, 0 );
-				MyFile.ulObjectCluster = 0ul;
+				FF_UnlinkClusterChain( pxIOManager, pMyFile->ulObjectCluster, 0 );
+				pMyFile->ulObjectCluster = 0ul;
 			}
 			FF_unlockFAT( pxIOManager );
 		}
@@ -2876,13 +2934,18 @@ uint32_t ulResult;
 		{
 			xError = xTempError;
 		}
+#if (ffconfigNAMES_ON_HEAP != 0)
+		if(!pxDirEntry) {
+			ffconfigFREE(pMyFile);
+		}
+#endif
 	}
 
 	*pxError = xError;
 
 	if( FF_isERR( xError ) == pdFALSE )
 	{
-		ulResult = MyFile.ulObjectCluster;
+		ulResult = pMyFile->ulObjectCluster;
 	}
 	else
 	{
@@ -2911,7 +2974,12 @@ FF_Error_t FF_MkDir( FF_IOManager_t *pxIOManager, const FF_T_WCHAR *pcPath )
 FF_Error_t FF_MkDir( FF_IOManager_t *pxIOManager, const char *pcPath )
 #endif
 {
+#if (ffconfigNAMES_ON_HEAP != 0)
+FF_DirEnt_t *pMyDir;
+#else
 FF_DirEnt_t	MyDir;
+FF_DirEnt_t *pMyDir = &MyDir;
+#endif
 
 #if( ffconfigUNICODE_UTF16_SUPPORT != 0 )
 	const FF_T_WCHAR *DirName;
@@ -2928,6 +2996,10 @@ FF_FindParams_t xFindParams;
 	memset ( &xFindParams, '\0', sizeof( xFindParams ) );
 	/* Inform the functions that the entry will be created if not found */
 	xFindParams.ulFlags |= FIND_FLAG_CREATE_FLAG;
+
+#if (ffconfigNAMES_ON_HEAP != 0)
+	pMyDir = ffconfigMALLOC(sizeof(*pMyDir));
+#endif
 
 	/* Open a do {} while ( pdFALSE ) loop */
 	do
@@ -2977,12 +3049,13 @@ FF_FindParams_t xFindParams;
 			xError = ( FF_Error_t ) ( FF_ERR_DIR_INVALID_PATH | FF_MKDIR );
 			break;
 		}
-		memset( &MyDir, '\0', sizeof( MyDir ) );
+
+		memset( pMyDir, '\0', sizeof( *pMyDir ) );
 
 		/* Will set flags FIND_FLAG_FITS_SHORT and FIND_FLAG_SIZE_OK */
 		FF_CreateShortName( &xFindParams, DirName );
 
-		if( FF_FindEntryInDir( pxIOManager, &xFindParams, DirName, 0x00, &MyDir, &xError ) )
+		if( FF_FindEntryInDir( pxIOManager, &xFindParams, DirName, 0x00, pMyDir, &xError ) )
 		{
 			if( FF_isERR( xError ) == pdFALSE )
 			{
@@ -2998,23 +3071,23 @@ FF_FindParams_t xFindParams;
 
 		#if( ffconfigUNICODE_UTF16_SUPPORT != 0 )
 		{
-			wcsncpy( MyDir.pcFileName, DirName, ffconfigMAX_FILENAME );
+			wcsncpy( pMyDir->pcFileName, DirName, ffconfigMAX_FILENAME );
 		}
 		#else
 		{
-			strncpy( MyDir.pcFileName, DirName, ffconfigMAX_FILENAME );
+			strncpy( pMyDir->pcFileName, DirName, ffconfigMAX_FILENAME );
 		}
 		#endif
 
-		MyDir.ulFileSize = 0;
-		MyDir.ucAttrib = FF_FAT_ATTR_DIR;
-		MyDir.ulObjectCluster = FF_CreateClusterChain( pxIOManager, &xError );
+		pMyDir->ulFileSize = 0;
+		pMyDir->ucAttrib = FF_FAT_ATTR_DIR;
+		pMyDir->ulObjectCluster = FF_CreateClusterChain( pxIOManager, &xError );
 
 		/* Give all entries a proper time stamp, looks nicer than 1 Jan 1970 */
 		#if( ffconfigTIME_SUPPORT != 0 )
 		{
-			FF_GetSystemTime( &MyDir.xCreateTime );
-			FF_GetSystemTime( &MyDir.xModifiedTime );
+			FF_GetSystemTime( &(pMyDir->xCreateTime) );
+			FF_GetSystemTime( &(pMyDir->xModifiedTime) );
 		}
 		#endif
 
@@ -3022,24 +3095,24 @@ FF_FindParams_t xFindParams;
 		{
 			break;
 		}
-		if( MyDir.ulObjectCluster == 0UL )
+		if( pMyDir->ulObjectCluster == 0UL )
 		{
 			/* Couldn't allocate any space for the dir! */
 			xError = ( FF_Error_t ) ( FF_ERR_DIR_EXTEND_FAILED | FF_MKDIR );
 			break;
 		}
 
-		xError = FF_ClearCluster( pxIOManager, MyDir.ulObjectCluster );
+		xError = FF_ClearCluster( pxIOManager, pMyDir->ulObjectCluster );
 		if( FF_isERR( xError ) == pdFALSE )
 		{
-			xError = FF_CreateDirent( pxIOManager, &xFindParams, &MyDir );
+			xError = FF_CreateDirent( pxIOManager, &xFindParams, pMyDir );
 		}
 
 		if( FF_isERR( xError ) )
 		{
 			FF_lockFAT( pxIOManager );
 			{
-				FF_UnlinkClusterChain( pxIOManager, MyDir.ulObjectCluster, 0 );
+				FF_UnlinkClusterChain( pxIOManager, pMyDir->ulObjectCluster, 0 );
 			}
 			FF_unlockFAT( pxIOManager );
 			FF_FlushCache( pxIOManager );	/* Don't override error. */
@@ -3050,8 +3123,8 @@ FF_FindParams_t xFindParams;
 		memset( pucEntryBuffer + 1, ' ', 10 );
 		memset( pucEntryBuffer + 11, 0, 21 );
 
-		ObjectCluster = MyDir.ulObjectCluster;
-		xError = FF_PutEntry( pxIOManager, ( uint16_t ) 0u, ObjectCluster, &MyDir, pucEntryBuffer );
+		ObjectCluster = pMyDir->ulObjectCluster;
+		xError = FF_PutEntry( pxIOManager, ( uint16_t ) 0u, ObjectCluster, pMyDir, pucEntryBuffer );
 
 		if( FF_isERR( xError ) == pdFALSE )
 		{
@@ -3059,28 +3132,32 @@ FF_FindParams_t xFindParams;
 
 			if( xFindParams.ulDirCluster == pxIOManager->xPartition.ulRootDirCluster )
 			{
-				MyDir.ulObjectCluster = 0;
+				pMyDir->ulObjectCluster = 0;
 			}
 			else
 			{
-				MyDir.ulObjectCluster = xFindParams.ulDirCluster;
+				pMyDir->ulObjectCluster = xFindParams.ulDirCluster;
 			}
-			xError = FF_PutEntry( pxIOManager, 1, ObjectCluster, &MyDir, pucEntryBuffer );
+			xError = FF_PutEntry( pxIOManager, 1, ObjectCluster, pMyDir, pucEntryBuffer );
 
-			MyDir.ulObjectCluster = ObjectCluster;
+			pMyDir->ulObjectCluster = ObjectCluster;
 		}
 
 		if( FF_isERR( xError ) )
 		{
 			FF_lockFAT( pxIOManager );
 			{
-				FF_UnlinkClusterChain( pxIOManager, MyDir.ulObjectCluster, 0 );
+				FF_UnlinkClusterChain( pxIOManager, pMyDir->ulObjectCluster, 0 );
 			}
 			FF_unlockFAT( pxIOManager );
 		}
 		FF_FlushCache( pxIOManager );
 	}
 	while( pdFALSE );
+
+#if (ffconfigNAMES_ON_HEAP != 0)
+	ffconfigFREE(pMyDir);
+#endif
 
 	return xError;
 }	/* FF_MkDir() */

@@ -69,6 +69,8 @@
 
 #define ffconfigWRITE_BOTH_FATS             1
 
+#define	ffconfigNAMES_ON_HEAP				BT_CONFIG_FS_FULLFAT_LFN_ON_HEAP
+
 #define configASSERT(x)
 
 #endif

@@ -234,15 +234,30 @@ FF_FILE *FF_Open( FF_IOManager_t *pxIOManager, const char *pcPath, uint8_t ucMod
 {
 FF_FILE *pxFile = NULL;
 FF_FILE *pxFileChain;
+#if (ffconfigNAMES_ON_HEAP != 0)
+FF_DirEnt_t *pxDirEntry;
+#else
 FF_DirEnt_t xDirEntry;
+FF_DirEnt_t *pxDirEntry = &xDirEntry;
+#endif
 uint32_t ulFileCluster;
 FF_Error_t xError;
 BaseType_t xIndex;
 FF_FindParams_t xFindParams;
 #if( ffconfigUNICODE_UTF16_SUPPORT != 0 )
+#if (ffconfigNAMES_ON_HEAP != 0)
+	FF_T_WCHAR *pfilename;
+#else
 	FF_T_WCHAR pcFileName[ ffconfigMAX_FILENAME ];
+	FF_T_WCHAR *pfilename = pcFileName;
+#endif
+#else
+#if (ffconfigNAMES_ON_HEAP != 0)
+	char *pfilename;
 #else
 	char pcFileName[ ffconfigMAX_FILENAME ];
+	char *pfilename = pcFileName;
+#endif
 #endif
 
 	memset( &xFindParams, '\0', sizeof xFindParams );
@@ -275,8 +290,15 @@ FF_FindParams_t xFindParams;
 			xIndex--;
 		}
 
+#if (ffconfigNAMES_ON_HEAP != 0)
+#if (ffconfigUNICODE_UTF16_SUPPORT != 0)
+		pfilename = ffconfigMALLOC(sizeof(FF_T_WCHAR)*ffconfigMAX_FILENAME);
+#else
+		pfilename = ffconfigMALLOC(sizeof(char)*ffconfigMAX_FILENAME);
+#endif
+#endif
 		/* Copy the file name, i.e. the string that comes after the last separator. */
-		STRNCPY( pcFileName, pcPath + xIndex + 1, ffconfigMAX_FILENAME );
+		STRNCPY( pfilename, pcPath + xIndex + 1, ffconfigMAX_FILENAME );
 
 		if( xIndex == 0 )
 		{
@@ -286,7 +308,7 @@ FF_FindParams_t xFindParams;
 		}
 
 		/* FF_CreateShortName() might set flags FIND_FLAG_FITS_SHORT and FIND_FLAG_SIZE_OK. */
-		FF_CreateShortName( &xFindParams, pcFileName );
+		FF_CreateShortName( &xFindParams, pfilename );
 
 		/* Lookup the path and find the cluster pointing to the directory: */
 		xFindParams.ulDirCluster = FF_FindDir( pxIOManager, pcPath, xIndex, &xError );
@@ -307,16 +329,20 @@ FF_FindParams_t xFindParams;
 		/* Copy the Mode Bits. */
 		pxFile->ucMode = ucMode;
 
+#if (ffconfigNAMES_ON_HEAP != 0)
+		pxDirEntry = ffconfigMALLOC(sizeof(*pxDirEntry));
+#endif
+
 		/* See if the file does exist within the given directory. */
-		ulFileCluster = FF_FindEntryInDir( pxIOManager, &xFindParams, pcFileName, 0x00, &xDirEntry, &xError );
+		ulFileCluster = FF_FindEntryInDir( pxIOManager, &xFindParams, pfilename, 0x00, pxDirEntry, &xError );
 
 		if( ulFileCluster == 0ul )
 		{
 			/* If cluster 0 was returned, it might be because the file has no allocated cluster,
 			i.e. only a directory entry and no stored data. */
-			if( STRLEN( pcFileName ) == STRLEN( xDirEntry.pcFileName ) )
+			if( STRLEN( pfilename ) == STRLEN( pxDirEntry->pcFileName ) )
 			{
-				if( ( xDirEntry.ulFileSize == 0 ) && ( FF_strmatch( pcFileName, xDirEntry.pcFileName, ( BaseType_t ) STRLEN( pcFileName ) ) == pdTRUE ) )
+				if( ( pxDirEntry->ulFileSize == 0 ) && ( FF_strmatch( pfilename, pxDirEntry->pcFileName, ( BaseType_t ) STRLEN( pfilename ) ) == pdTRUE ) )
 				{
 					/* It is the file, give it a pseudo cluster number '1'. */
 					ulFileCluster = 1;
@@ -337,10 +363,10 @@ FF_FindParams_t xFindParams;
 			}
 			else
 			{
-				ulFileCluster = FF_CreateFile( pxIOManager, &xFindParams, pcFileName, &xDirEntry, &xError );
+				ulFileCluster = FF_CreateFile( pxIOManager, &xFindParams, pfilename, pxDirEntry, &xError );
 				if( FF_isERR( xError ) == pdFALSE )
 				{
-					xDirEntry.usCurrentItem += 1;
+					pxDirEntry->usCurrentItem += 1;
 				}
 			}
 		}
@@ -350,13 +376,13 @@ FF_FindParams_t xFindParams;
 	{
 		/* Now the file exists, or it has been created.
 		Check if the Mode flags are allowed: */
-		if( ( xDirEntry.ucAttrib == FF_FAT_ATTR_DIR ) && ( ( ucMode & FF_MODE_DIR ) == 0 ) )
+		if( ( pxDirEntry->ucAttrib == FF_FAT_ATTR_DIR ) && ( ( ucMode & FF_MODE_DIR ) == 0 ) )
 		{
 			/* Not the object, File Not Found! */
 			xError = FF_ERR_FILE_OBJECT_IS_A_DIR | FF_OPEN;
 		}
 		/*---------- Ensure Read-Only files don't get opened for Writing. */
-		else if( ( ( ucMode & ( FF_MODE_WRITE | FF_MODE_APPEND ) ) != 0 ) && ( ( xDirEntry.ucAttrib & FF_FAT_ATTR_READONLY ) != 0 ) )
+		else if( ( ( ucMode & ( FF_MODE_WRITE | FF_MODE_APPEND ) ) != 0 ) && ( ( pxDirEntry->ucAttrib & FF_FAT_ATTR_READONLY ) != 0 ) )
 		{
 			xError = FF_ERR_FILE_IS_READ_ONLY | FF_OPEN;
 		}
@@ -367,15 +393,15 @@ FF_FindParams_t xFindParams;
 		pxFile->pxIOManager = pxIOManager;
 		pxFile->ulFilePointer = 0;
 		/* Despite the warning output by MSVC - it is not possible to get here
-		if xDirEntry has not been initialised. */
-		pxFile->ulObjectCluster = xDirEntry.ulObjectCluster;
-		pxFile->ulFileSize = xDirEntry.ulFileSize;
+		if pxDirEntry has not been initialised. */
+		pxFile->ulObjectCluster = pxDirEntry->ulObjectCluster;
+		pxFile->ulFileSize = pxDirEntry->ulFileSize;
 		pxFile->ulCurrentCluster = 0;
 		pxFile->ulAddrCurrentCluster = pxFile->ulObjectCluster;
 
 		pxFile->pxNext = NULL;
 		pxFile->ulDirCluster = xFindParams.ulDirCluster;
-		pxFile->usDirEntry = xDirEntry.usCurrentItem - 1;
+		pxFile->usDirEntry = pxDirEntry->usCurrentItem - 1;
 		pxFile->ulChainLength = 0;
 		pxFile->ulEndOfChain = 0;
 		pxFile->ulValidFlags &= ~( FF_VALID_FLAG_DELETED );
@@ -432,6 +458,9 @@ FF_PRINTF("FF_Open[%s]: Conflicting WR mode\n", pcPath );
 		FF_ReleaseSemaphore( pxIOManager->pvSemaphore );
 	}
 
+	ffconfigFREE(pxDirEntry);
+	ffconfigFREE(pfilename);
+
 	if( FF_isERR( xError ) != pdFALSE )
 	{
 		if( pxFile != NULL )
@@ -468,7 +497,7 @@ BaseType_t FF_isDirEmpty ( FF_IOManager_t * pxIOManager, const FF_T_WCHAR *pcPat
 BaseType_t FF_isDirEmpty ( FF_IOManager_t * pxIOManager, const char *pcPath )
 #endif
 {
-FF_DirEnt_t	xDirEntry;
+FF_DirEnt_t	*pxDirEntry;
 FF_Error_t	xError = FF_ERR_NONE;
 BaseType_t xReturn;
 
@@ -478,7 +507,8 @@ BaseType_t xReturn;
 	}
 	else
 	{
-		xError = FF_FindFirst( pxIOManager, &xDirEntry, pcPath );
+		pxDirEntry = ffconfigMALLOC(sizeof(*pxDirEntry));
+		xError = FF_FindFirst( pxIOManager, pxDirEntry, pcPath );
 
 		/* Assume the directory is empty until a file is
 		encountered with a name other than ".." or "." */
@@ -490,16 +520,21 @@ BaseType_t xReturn;
 			 * "." and "..", check it, not just count them
 			 */
 		#if( ffconfigUNICODE_UTF16_SUPPORT != 0 )
-			if( ( wcscmp( xDirEntry.pcFileName, L".." ) != 0 ) && ( wcscmp( xDirEntry.pcFileName, L"." ) != 0 ) )
+			if( ( wcscmp( pxDirEntry->pcFileName, L".." ) != 0 ) && ( wcscmp( pxDirEntry->pcFileName, L"." ) != 0 ) )
 		#else
-			if( ( strcmp( xDirEntry.pcFileName, ".." ) != 0 ) && ( strcmp( xDirEntry.pcFileName, "." ) != 0 ) )
+			if( ( strcmp( pxDirEntry->pcFileName, ".." ) != 0 ) && ( strcmp( pxDirEntry->pcFileName, "." ) != 0 ) )
 		#endif
 			{
 				xReturn = pdFALSE;
 				break;
 			}
-			xError = FF_FindNext( pxIOManager, &xDirEntry );
+			xError = FF_FindNext( pxIOManager, pxDirEntry );
 		}
+
+#if (ffconfigNAMES_ON_HEAP != 0)
+		ffconfigFREE(pxDirEntry);
+#endif
+
 	}
 
 	return xReturn;
@@ -779,7 +814,12 @@ FF_Error_t FF_Move( FF_IOManager_t *pxIOManager, const char	*szSourceFile,
 {
 FF_Error_t xError;
 FF_FILE *pSrcFile, *pxDestFile;
+#if (ffconfigNAMES_ON_HEAP != 0)
+FF_DirEnt_t *pMyFile = NULL;
+#else
 FF_DirEnt_t MyFile;
+FF_DirEnt_t *pMyFile = &MyFile;
+#endif
 uint8_t EntryBuffer[32];
 BaseType_t xIndex;
 uint32_t ulDirCluster = 0ul;
@@ -842,10 +882,14 @@ FF_FetchContext_t xFetchContext;
 				xError = FF_FetchEntryWithContext( pxIOManager, pSrcFile->usDirEntry, &xFetchContext, EntryBuffer );
 				if( FF_isERR( xError ) == pdFALSE )
 				{
-					MyFile.ucAttrib = FF_getChar( EntryBuffer, ( uint16_t ) ( FF_FAT_DIRENT_ATTRIB ) );
-					MyFile.ulFileSize = pSrcFile->ulFileSize;
-					MyFile.ulObjectCluster = pSrcFile->ulObjectCluster;
-					MyFile.usCurrentItem = 0;
+					#if (ffconfigNAMES_ON_HEAP != 0)
+						pMyFile = ffconfigMALLOC(sizeof(*pMyFile));
+					#endif
+
+					pMyFile->ucAttrib = FF_getChar( EntryBuffer, ( uint16_t ) ( FF_FAT_DIRENT_ATTRIB ) );
+					pMyFile->ulFileSize = pSrcFile->ulFileSize;
+					pMyFile->ulObjectCluster = pSrcFile->ulObjectCluster;
+					pMyFile->usCurrentItem = 0;
 
 					xIndex = ( BaseType_t ) STRLEN( szDestinationFile );
 
@@ -859,7 +903,7 @@ FF_FetchContext_t xFetchContext;
 						xIndex--;
 					}
 
-					STRNCPY( MyFile.pcFileName, ( szDestinationFile + xIndex + 1 ), ffconfigMAX_FILENAME );
+					STRNCPY( pMyFile->pcFileName, ( szDestinationFile + xIndex + 1 ), ffconfigMAX_FILENAME );
 
 					if( xIndex == 0 )
 					{
@@ -885,7 +929,7 @@ FF_FetchContext_t xFetchContext;
 				{
 					/* Destination Dir was found, we can now create the new entry. */
 					xFindParams.ulDirCluster = ulDirCluster;
-					xError = FF_CreateDirent( pxIOManager, &xFindParams, &MyFile );
+					xError = FF_CreateDirent( pxIOManager, &xFindParams, pMyFile );
 				}
 
 				if( FF_isERR( xError ) == pdFALSE )
@@ -935,6 +979,12 @@ FF_FetchContext_t xFetchContext;
 			FF_Close( pSrcFile );
 		}
 	}
+
+#if (ffconfigNAMES_ON_HEAP != 0)
+	if(pMyFile) {
+		ffconfigFREE(pMyFile);
+	}
+#endif
 
 	{
 	FF_Error_t xTempError;
@@ -1142,7 +1192,12 @@ uint32_t ulBytesPerCluster = pxIOManager->xPartition.usBlkSize * pxIOManager->xP
 uint32_t ulTotalClustersNeeded = ( Size + ulBytesPerCluster - 1 ) / ulBytesPerCluster;
 uint32_t ulClusterToExtend;
 BaseType_t xIndex;
+#if (ffconfigNAMES_ON_HEAP != 0)
+FF_DirEnt_t *pxOriginalEntry;
+#else
 FF_DirEnt_t xOriginalEntry;
+FF_DirEnt_t *pxOriginalEntry = &xOriginalEntry;
+#endif
 FF_Error_t xError = FF_ERR_NONE;
 FF_FATBuffers_t xFATBuffers;
 
@@ -1159,14 +1214,17 @@ FF_FATBuffers_t xFATBuffers;
 
 			if( FF_isERR( xError ) == pdFALSE )
 			{
+#if (ffconfigNAMES_ON_HEAP != 0)
+				pxOriginalEntry = ffconfigMALLOC(sizeof(*pxOriginalEntry));
+#endif
 				/* The directory denotes the address of the first data cluster of every file.
 				Now change it to 'ulAddrCurrentCluster': */
-				xError = FF_GetEntry( pxIOManager, pxFile->usDirEntry, pxFile->ulDirCluster, &xOriginalEntry );
+				xError = FF_GetEntry( pxIOManager, pxFile->usDirEntry, pxFile->ulDirCluster, pxOriginalEntry );
 
 				if( FF_isERR( xError ) == pdFALSE )
 				{
-					xOriginalEntry.ulObjectCluster = pxFile->ulAddrCurrentCluster;
-					xError = FF_PutEntry( pxIOManager, pxFile->usDirEntry, pxFile->ulDirCluster, &xOriginalEntry, NULL );
+					pxOriginalEntry->ulObjectCluster = pxFile->ulAddrCurrentCluster;
+					xError = FF_PutEntry( pxIOManager, pxFile->usDirEntry, pxFile->ulDirCluster, pxOriginalEntry, NULL );
 
 					if( FF_isERR( xError ) == pdFALSE )
 					{
@@ -1176,6 +1234,10 @@ FF_FATBuffers_t xFATBuffers;
 						pxFile->ulEndOfChain = pxFile->ulAddrCurrentCluster;
 					}
 				}
+
+#if (ffconfigNAMES_ON_HEAP != 0)
+				ffconfigFREE(pxOriginalEntry);
+#endif
 			}
 		}
 		else
@@ -2432,7 +2494,12 @@ FF_Error_t FF_CheckValid( FF_FILE *pxFile )
 	**/
 	FF_Error_t FF_SetFileTime( FF_FILE *pxFile, FF_SystemTime_t *pxTime, UBaseType_t uxWhat )
 	{
-	FF_DirEnt_t	xOriginalEntry;
+#if (ffconfigNAMES_ON_HEAP != 0)
+	FF_DirEnt_t	*pxOriginalEntry;
+#else
+	FF_DirEnt_t xOriginalEntry;
+	FF_DirEnt_t *pxOriginalEntry = &xOriginalEntry;
+#endif
 	FF_Error_t	xError;
 
 		xError = FF_CheckValid( pxFile );
@@ -2448,27 +2515,34 @@ FF_Error_t FF_CheckValid( FF_FILE *pxFile )
 			}
 			else
 			{
+				#if (ffconfigNAMES_ON_HEAP != 0)
+				pxOriginalEntry = ffconfigMALLOC(sizeof(*pxOriginalEntry));
+				#endif
 				/* Update the Dirent! */
-				xError = FF_GetEntry( pxFile->pxIOManager, pxFile->usDirEntry, pxFile->ulDirCluster, &xOriginalEntry );
+				xError = FF_GetEntry( pxFile->pxIOManager, pxFile->usDirEntry, pxFile->ulDirCluster, pxOriginalEntry );
 				if( FF_isERR( xError ) == pdFALSE )
 				{
 					if( uxWhat & ETimeCreate )
 					{
-						xOriginalEntry.xCreateTime = *pxTime;		/*/< Date and Time Created. */
+						pxOriginalEntry->xCreateTime = *pxTime;		/*/< Date and Time Created. */
 					}
 
 					if( uxWhat & ETimeMod )
 					{
-						xOriginalEntry.xModifiedTime = *pxTime;	/*/< Date and Time Modified. */
+						pxOriginalEntry->xModifiedTime = *pxTime;	/*/< Date and Time Modified. */
 					}
 
 					if( uxWhat & ETimeAccess )
 					{
-						xOriginalEntry.xAccessedTime = *pxTime;	/*/< Date of Last Access. */
+						pxOriginalEntry->xAccessedTime = *pxTime;	/*/< Date of Last Access. */
 					}
 
-					xError = FF_PutEntry( pxFile->pxIOManager, pxFile->usDirEntry, pxFile->ulDirCluster, &xOriginalEntry, NULL );
+					xError = FF_PutEntry( pxFile->pxIOManager, pxFile->usDirEntry, pxFile->ulDirCluster, pxOriginalEntry, NULL );
 				}
+
+				#if (ffconfigNAMES_ON_HEAP != 0)
+				ffconfigFREE(pxOriginalEntry);
+				#endif
 
 				if( FF_isERR( xError ) == pdFALSE )
 				{
@@ -2501,15 +2575,30 @@ FF_Error_t FF_CheckValid( FF_FILE *pxFile )
 	FF_Error_t FF_SetTime ( FF_IOManager_t * pxIOManager, const char *pcPath, FF_SystemTime_t *pxTime, UBaseType_t uxWhat )
 	#endif	/* ffconfigUNICODE_UTF16_SUPPORT */
 	{
-	FF_DirEnt_t xOriginalEntry;
+#if (ffconfigNAMES_ON_HEAP != 0)
+	FF_DirEnt_t *pxOriginalEntry;
+#else
+	FF_DirEnt_t xOriginalEntry = NULL;
+	FF_DirEnt_t *pxOriginalEntry = &xOriginalEntry;
+#endif
 	FF_Error_t xError;
 	uint32_t ulFileCluster;
 	BaseType_t xIndex;
 	FF_FindParams_t xFindParams;
 	#if( ffconfigUNICODE_UTF16_SUPPORT != 0 )
+	#if (ffconfigNAMES_ON_HEAP != 0)
+		FF_T_WCHAR *pfilename;
+	#else
 		FF_T_WCHAR pcFileName[ffconfigMAX_FILENAME];
+		FF_T_WCHAR *pfilename = pcFileName;
+	#endif
+	#else
+	#if (ffconfigNAMES_ON_HEAP != 0)
+		char *pfilename;
 	#else
 		char pcFileName[ffconfigMAX_FILENAME];
+		char *pfilename = pcFileName;
+	#endif
 	#endif	/* ffconfigUNICODE_UTF16_SUPPORT */
 
 		xIndex = ( BaseType_t ) STRLEN( pcPath );
@@ -2526,7 +2615,15 @@ FF_Error_t FF_CheckValid( FF_FILE *pxFile )
 			xIndex--;
 		}
 
-		STRNCPY( pcFileName, ( pcPath + xIndex + 1 ), ffconfigMAX_FILENAME );
+#if (ffconfigNAMES_ON_HEAP != 0)
+#if (ffconfigUNICODE_UTF16_SUPPORT != 0)
+		pfilename = ffconfigMALLOC(sizeof(FF_T_WCHAR)*ffconfigMAX_FILENAME);
+#else
+		pfilename = ffconfigMALLOC(sizeof(char)*ffconfigMAX_FILENAME);
+#endif
+#endif
+
+		STRNCPY( pfilename, ( pcPath + xIndex + 1 ), ffconfigMAX_FILENAME );
 
 		if( xIndex == 0 )
 		{
@@ -2542,7 +2639,10 @@ FF_Error_t FF_CheckValid( FF_FILE *pxFile )
 			}
 			else
 			{
-				ulFileCluster = FF_FindEntryInDir( pxIOManager, &xFindParams, pcFileName, 0, &xOriginalEntry, &xError );
+				#if (ffconfigNAMES_ON_HEAP != 0)
+				pxOriginalEntry = ffconfigMALLOC(sizeof(*pxOriginalEntry));
+				#endif
+				ulFileCluster = FF_FindEntryInDir( pxIOManager, &xFindParams, pfilename, 0, pxOriginalEntry, &xError );
 				if( ( FF_isERR( xError ) == pdFALSE ) || ( FF_GETERROR( xError ) == FF_ERR_DIR_END_OF_DIR ) )
 				{
 					if( ulFileCluster == 0ul )
@@ -2551,6 +2651,10 @@ FF_Error_t FF_CheckValid( FF_FILE *pxFile )
 						xError = FF_ERR_FILE_NOT_FOUND | FF_SETTIME;
 					}
 				}
+
+				#if (ffconfigNAMES_ON_HEAP != 0)
+				ffconfigFREE(pfilename);
+				#endif
 			}
 		}
 
@@ -2559,26 +2663,32 @@ FF_Error_t FF_CheckValid( FF_FILE *pxFile )
 			/* Update the Dirent! */
 			if( uxWhat & ETimeCreate )
 			{
-				xOriginalEntry.xCreateTime = *pxTime;			/*/< Date and Time Created. */
+				pxOriginalEntry->xCreateTime = *pxTime;			/*/< Date and Time Created. */
 			}
 
 			if( uxWhat & ETimeMod )
 			{
-				xOriginalEntry.xModifiedTime = *pxTime;		/*/< Date and Time Modified. */
+				pxOriginalEntry->xModifiedTime = *pxTime;		/*/< Date and Time Modified. */
 			}
 
 			if( uxWhat & ETimeAccess )
 			{
-				xOriginalEntry.xAccessedTime = *pxTime;		/*/< Date of Last Access. */
+				pxOriginalEntry->xAccessedTime = *pxTime;		/*/< Date of Last Access. */
 			}
 
-			xError = FF_PutEntry( pxIOManager, xOriginalEntry.usCurrentItem - 1, xFindParams.ulDirCluster, &xOriginalEntry, NULL );
+			xError = FF_PutEntry( pxIOManager, pxOriginalEntry->usCurrentItem - 1, xFindParams.ulDirCluster, pxOriginalEntry, NULL );
 
 			if( FF_isERR( xError ) == pdFALSE )
 			{
 				xError = FF_FlushCache( pxIOManager );			/* Ensure all modified blocks are flushed to disk! */
 			}
 		}
+
+		#if (ffconfigNAMES_ON_HEAP != 0)
+		if(pxOriginalEntry) {
+			ffconfigFREE(pxOriginalEntry);
+		}
+		#endif
 
 		return xError;
 	}	/* FF_SetTime() */
@@ -2591,7 +2701,12 @@ FF_Error_t FF_SetPerm( FF_IOManager_t * pxIOManager, const FF_T_WCHAR * pcPath, 
 FF_Error_t FF_SetPerm( FF_IOManager_t * pxIOManager, const char *pcPath, UBaseType_t aPerm )
 #endif
 {
+#if (ffconfigNAMES_ON_HEAP != 0)
+FF_DirEnt_t *pxOriginalEntry;
+#else
 FF_DirEnt_t xOriginalEntry;
+FF_DirEnt_t *pxOriginalEntry = &xOriginalEntry;
+#endif
 FF_Error_t xError;
 uint32_t ulFileCluster;
 BaseType_t xIndex;
@@ -2623,6 +2738,10 @@ FF_FindParams_t xFindParams;
 		xIndex = 1;
 	}
 
+	#if (ffconfigNAMES_ON_HEAP != 0)
+	pxOriginalEntry = ffconfigMALLOC(sizeof(*pxOriginalEntry));
+	#endif
+
 	/* Open a do {} while( pdFALSE ) loop to allow the use of break statements. */
 	do
 	{
@@ -2638,7 +2757,7 @@ FF_FindParams_t xFindParams;
 			break;
 		}
 
-		ulFileCluster = FF_FindEntryInDir( pxIOManager, &xFindParams, pcFileName, 0, &xOriginalEntry, &xError );
+		ulFileCluster = FF_FindEntryInDir( pxIOManager, &xFindParams, pcFileName, 0, pxOriginalEntry, &xError );
 		if( FF_isERR( xError ) )
 		{
 			break;
@@ -2660,9 +2779,9 @@ FF_FindParams_t xFindParams;
 		/*	#define FF_FAT_ATTR_LFN				0x0F */
 	#define FF_FAT_ATTR_USER	( ( uint8_t ) FF_FAT_ATTR_READONLY | FF_FAT_ATTR_HIDDEN | FF_FAT_ATTR_SYSTEM | FF_FAT_ATTR_ARCHIVE )
 		/* Update the Dirent! */
-		xOriginalEntry.ucAttrib &= ~FF_FAT_ATTR_USER;
-		xOriginalEntry.ucAttrib |= ( aPerm & FF_FAT_ATTR_USER );
-		xError = FF_PutEntry( pxIOManager, xOriginalEntry.usCurrentItem - 1, xFindParams.ulDirCluster, &xOriginalEntry, NULL );
+		pxOriginalEntry->ucAttrib &= ~FF_FAT_ATTR_USER;
+		pxOriginalEntry->ucAttrib |= ( aPerm & FF_FAT_ATTR_USER );
+		xError = FF_PutEntry( pxIOManager, pxOriginalEntry->usCurrentItem - 1, xFindParams.ulDirCluster, pxOriginalEntry, NULL );
 
 		if( FF_isERR( xError ) == pdFALSE )
 		{
@@ -2670,6 +2789,10 @@ FF_FindParams_t xFindParams;
 		}
 	}
 	while( pdFALSE );
+
+	#if (ffconfigNAMES_ON_HEAP != 0)
+	ffconfigFREE(pxOriginalEntry);
+	#endif
 
 	return xError;
 }	/* FF_SetPerm() */
@@ -2688,7 +2811,12 @@ FF_FindParams_t xFindParams;
 FF_Error_t FF_Close( FF_FILE *pxFile )
 {
 FF_FILE *pxFileChain;
+#if (ffconfigNAMES_ON_HEAP != 0)
+FF_DirEnt_t *pxOriginalEntry;
+#else
 FF_DirEnt_t xOriginalEntry;
+FF_DirEnt_t *pxOriginalEntry = &xOriginalEntry;
+#endif
 FF_Error_t xError;
 
 	/* Opening a do {} while( 0 )  loop to allow the use of the break statement. */
@@ -2771,20 +2899,28 @@ FF_Error_t xError;
 			/* Get the directory entry and update it to show the new file size */
 			if( FF_isERR( xError ) == pdFALSE )
 			{
-				xError = FF_GetEntry( pxFile->pxIOManager, pxFile->usDirEntry, pxFile->ulDirCluster, &xOriginalEntry );
+				#if (ffconfigNAMES_ON_HEAP != 0)
+				pxOriginalEntry = ffconfigMALLOC(sizeof(*pxOriginalEntry));
+				#endif
+
+				xError = FF_GetEntry( pxFile->pxIOManager, pxFile->usDirEntry, pxFile->ulDirCluster, pxOriginalEntry );
 
 				/* Now update the directory entry */
 				if( ( FF_isERR( xError ) == pdFALSE ) &&
-					( ( pxFile->ulFileSize != xOriginalEntry.ulFileSize ) || ( pxFile->ulFileSize == 0UL ) ) )
+					( ( pxFile->ulFileSize != pxOriginalEntry->ulFileSize ) || ( pxFile->ulFileSize == 0UL ) ) )
 				{
 					if( pxFile->ulFileSize == 0UL )
 					{
-						xOriginalEntry.ulObjectCluster = 0;
+						pxOriginalEntry->ulObjectCluster = 0;
 					}
 
-					xOriginalEntry.ulFileSize = pxFile->ulFileSize;
-					xError = FF_PutEntry( pxFile->pxIOManager, pxFile->usDirEntry, pxFile->ulDirCluster, &xOriginalEntry, NULL );
+					pxOriginalEntry->ulFileSize = pxFile->ulFileSize;
+					xError = FF_PutEntry( pxFile->pxIOManager, pxFile->usDirEntry, pxFile->ulDirCluster, pxOriginalEntry, NULL );
 				}
+
+				#if (ffconfigNAMES_ON_HEAP != 0)
+				ffconfigFREE(pxOriginalEntry);
+				#endif
 			}
 
 			if( FF_isERR( xError ) == pdFALSE )

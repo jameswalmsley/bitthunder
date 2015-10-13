@@ -28,6 +28,11 @@ config FS_FULLFAT_LFN_SUPPORT
     bool "LFN (Long filename) Support"
 	default y
 
+config FS_FULLFAT_LFN_ON_HEAP
+    bool "LFN Names on heap"
+	default n
+	depends on FS_FULLFAT_LFN_SUPPORT 
+
 choice
 	prompt "Allocation Algorithm"
 	default FS_FULLFAT_ALLOC_DEFAULT
