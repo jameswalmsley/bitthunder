@@ -69,7 +69,7 @@ $(PROJECT_DIR)/vmthunder.syms: $(PROJECT_DIR)/vmthunder.elf
 
 $(PROJECT_DIR)/vmthunder.exports: $(PROJECT_DIR)/vmthunder.elf
 	$(Q)$(PRETTY) SYMS $(MODULE_NAME) $(subst $(PROJECT_DIR)/,"",$@)
-	$(Q)$(BASE)/scripts/symbol_status.sh $(PROJECT_DIR)/vmthunder.elf > $@
+	$(Q)$(BASE)/scripts/symbol_status.sh $(PROJECT_DIR)/vmthunder.elf $(BASE) > $@
 
 .PHONY:checksyms
 checksyms:$(PROJECT_DIR)/vmthunder.exports

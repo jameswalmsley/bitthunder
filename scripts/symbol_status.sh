@@ -16,7 +16,7 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 SYMBOLS=$(readelf --wide -s $1 | grep " GLOBAL " | grep "[bB][tT]" | rev | cut -d " " -f1 | rev | sort)
-EXPORTED=$(git grep BT_EXPORT_SYMBOL | cut -d \( -f2 | cut -d \) -f1 | sort)
+EXPORTED=$(git --git-dir=$2/.git --work-tree=$2 grep BT_EXPORT_SYMBOL | cut -d \( -f2 | cut -d \) -f1 | sort)
 IGNORED=$(cat $DIR/symbol_status.ignore | cut -d : -f1)
 
 for SYMBOL in $SYMBOLS; do
