@@ -33,9 +33,13 @@ static int bt_md5sum(BT_HANDLE hShell, int argc, char **argv) {
 		struct bt_md5_context ctx;
 		bt_md5_init(&ctx);
 
-		BT_u32 read;
-		while((read = BT_Read(hFile, 0, BT_CONFIG_SHELL_CMD_MD5SUM_BUFFER_SIZE, buffer))) {
+		BT_s32 read;
+		while((read = BT_Read(hFile, 0, BT_CONFIG_SHELL_CMD_MD5SUM_BUFFER_SIZE, buffer)) > 0) {
 			bt_md5_append(&ctx, buffer, read);
+		}
+
+		if(read < 0) {
+			BT_PRSHELL("Error reading from file, md5sum may be corrupt.\n");
 		}
 
 		BT_u8 digest[16];
