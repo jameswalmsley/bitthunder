@@ -61,11 +61,12 @@ err_out:
 static BT_ERROR marvell_phy_init(struct bt_phy_device *phy) {
 
 	BT_ERROR Error = BT_ERR_NONE;
-
+#ifdef BT_CONFIG_OF
 	struct bt_device_node *phy_node = bt_of_integrated_get_node(phy->pDevice);
 	if(phy_node) {
 		BT_kPrint("Found a phy_node in the device tree");
 	}
+#endif
 
 	// Apply any init reg values from the device tree if available.
 	BT_u32 i;

@@ -372,18 +372,24 @@ static BT_BOOL phy_sm(struct bt_phy_device *phy) {
 		// Signal to the MAC that speed or link state has changed on the PHY.
 		// This allows the MAC to change its RX/TXD clocks, or stop processing data when PHY is down.
 
-		const BT_DEV_IF_EMAC *mac_ops = BT_IF_EMAC_OPS(phy->active_mac);
-		mac_ops->adjust_link(phy->active_mac, phy);
-
-		if(phy->link) {
-			phy->eState = BT_PHY_UP;
-		} else {
-			phy->eState = BT_PHY_DOWN;
+		if(!phy->active_mac) {
+			break;
 		}
+		
+		const BT_DEV_IF_EMAC *mac_ops = BT_IF_EMAC_OPS(phy->active_mac);
+		if(mac_ops) {
+			mac_ops->adjust_link(phy->active_mac, phy);
 
-		// Notify the netif and stack of link state change
-		BT_NET_IF *netif = BT_GetNetifFromHandle(phy->active_mac, &Error);
-		bt_netif_adjust_link(netif);
+			if(phy->link) {
+				phy->eState = BT_PHY_UP;
+			} else {
+				phy->eState = BT_PHY_DOWN;
+			}
+
+			// Notify the netif and stack of link state change
+			BT_NET_IF *netif = BT_GetNetifFromHandle(phy->active_mac, &Error);
+			bt_netif_adjust_link(netif);
+		}
 		break;
 	}
 
