@@ -239,6 +239,7 @@ BT_ERROR BT_Mount(const BT_i8 *src, const BT_i8 *target, const BT_i8 *filesystem
 
 		hMount = pFs->pfnMount(fs->hFS, hVolume, data, &Error);
 		if(!hMount) {
+			BT_CloseHandle(hVolume);
 			return BT_ERR_NO_MEMORY;
 		}
 	} else {
@@ -252,6 +253,7 @@ BT_ERROR BT_Mount(const BT_i8 *src, const BT_i8 *target, const BT_i8 *filesystem
 			}
 		}
 		if(!hMount) {
+			BT_CloseHandle(hVolume);
 			return BT_ERR_GENERIC;
 		}
 	}
