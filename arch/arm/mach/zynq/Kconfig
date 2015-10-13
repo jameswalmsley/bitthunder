@@ -127,7 +127,7 @@ config MACH_ZYNQ_GEM_0
     bool "Use GEM (MAC) 0 peripheral"
 	default n
 
-config MACH_ZYNQ_GEM_0_PHY_ADDR
+config MACH_ZYNQ_GEM_0_PHY_ADDRESS
 	int "GEM 0 PHY Address"
 	default 5
 	depends on MACH_ZYNQ_GEM_0
@@ -136,7 +136,7 @@ config MACH_ZYNQ_GEM_1
 	bool "Use GEM (MAC) 1 peripheral"
 	default n
 
-config MACH_ZYNQ_GEM_1_PHY_ADDR
+config MACH_ZYNQ_GEM_1_PHY_ADDRESS
 	bool "GEM 1 PHY Address"
 	default 7
 	depends on MACH_ZYNQ_GEM_1
