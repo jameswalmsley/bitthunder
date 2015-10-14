@@ -53,4 +53,9 @@ config RAM_VIRT
 	default 0xC0000000 if USE_VIRTUAL_ADDRESSING
 	default 0x0
 
+config TRACE_MALLOC
+	bool "Trace calls to BT_kMalloc() / BT_kFree()"
+	default n
+
+
 endmenu
