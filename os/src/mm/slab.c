@@ -18,6 +18,10 @@
 #include <mm/bt_page.h>
 #include <string.h>
 
+#ifdef BT_TRACE_MALLOC
+#undef BT_kMalloc
+#undef BT_kFree
+#endif
 
 #define SLAB_LOCK(cache)	if(cache->slab_mutex) BT_kMutexPend(cache->slab_mutex, BT_INFINITE_TIMEOUT)
 #define SLAB_UNLOCK(cache)	if(cache->slab_mutex) BT_kMutexRelease(cache->slab_mutex)

@@ -20,6 +20,10 @@
 #ifndef _BT_HEAP_H_
 #define _BT_HEAP_H_
 
+#ifdef BT_CONFIG_TRACE_MALLOC
+#define BT_TRACE_MALLOC
+#endif
+
 /**
  *	@kernel
  *	@public
@@ -35,6 +39,14 @@
  *	@return NULL (0) if allocation fails.
  **/
 void *BT_kMalloc(BT_u32 ulSize);
+#ifdef BT_TRACE_MALLOC
+#define BT_kMalloc(_size) \
+	({\
+		void *p = BT_kMalloc(_size);\
+		BT_kPrint("%s:%d :: BT_kMalloc(%d) : %p", __func__, __LINE__, _size, p);\
+		p;\
+	})
+#endif
 
 /**
  *	@kernel
@@ -47,7 +59,13 @@ void *BT_kMalloc(BT_u32 ulSize);
  *	@param[in]	ptr	Pointer to the memory to be free'd.
  **/
 void BT_kFree(void *ptr);
-
+#ifdef BT_TRACE_MALLOC
+#define BT_kFree(_p)\
+	({\
+		BT_kPrint("%s:%d :: BT_kFree(%p)", __func__, __LINE__, _p);\
+		BT_kFree(_p);\
+	})
+#endif
 /**
  *	@kernel
  *	@public

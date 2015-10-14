@@ -6,6 +6,11 @@
  **/
 #include <bitthunder.h>
 
+#ifdef BT_TRACE_MALLOC
+#undef BT_kMalloc
+#undef BT_kFree
+#endif
+
 extern void * _heap_start;
 extern void * _heap_end;
 
