@@ -2029,7 +2029,6 @@ FF_FetchContext_t xFetchContext;
 				FF_putLong( pucEntryBuffer,  FF_FAT_DIRENT_FILESIZE,  pxDirEntry->ulFileSize );
 				#if( ffconfigTIME_SUPPORT != 0 )
 				{
-					FF_GetSystemTime( &pxDirEntry->xAccessedTime );	/*/< Date of Last Access. */
 					FF_PlaceTime( pucEntryBuffer, FF_FAT_DIRENT_LASTACC_DATE, &pxDirEntry->xAccessedTime );
 					FF_PlaceDate( pucEntryBuffer, FF_FAT_DIRENT_LASTACC_DATE, &pxDirEntry->xAccessedTime );	/* Last accessed date. */
 					FF_PlaceTime( pucEntryBuffer, FF_FAT_DIRENT_CREATE_TIME,  &pxDirEntry->xCreateTime );

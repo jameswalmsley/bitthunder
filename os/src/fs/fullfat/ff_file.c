@@ -1224,6 +1224,10 @@ FF_FATBuffers_t xFATBuffers;
 				if( FF_isERR( xError ) == pdFALSE )
 				{
 					pxOriginalEntry->ulObjectCluster = pxFile->ulAddrCurrentCluster;
+#if (ffconfigTIME_SUPPORT != 0)
+					FF_GetSystemTime(pxOriginalEntry->xAccessedTime);
+					pxOriginalEntry->xModifiedTime = pxOriginalEntry->xAccessedTime;
+#endif
 					xError = FF_PutEntry( pxIOManager, pxFile->usDirEntry, pxFile->ulDirCluster, pxOriginalEntry, NULL );
 
 					if( FF_isERR( xError ) == pdFALSE )
@@ -2918,6 +2922,10 @@ FF_Error_t xError;
 					}
 
 					pxOriginalEntry->ulFileSize = pxFile->ulFileSize;
+#if (ffconfigTIME_SUPPORT != 0)
+					FF_GetSystemTime(&pxOriginalEntry->xAccessedTime);
+					pxOriginalEntry->xModifiedTime = pxOriginalEntry->xAccessedTime;
+#endif
 					xError = FF_PutEntry( pxFile->pxIOManager, pxFile->usDirEntry, pxFile->ulDirCluster, pxOriginalEntry, NULL );
 				}
 
