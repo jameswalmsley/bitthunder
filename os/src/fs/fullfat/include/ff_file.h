@@ -106,6 +106,7 @@ typedef struct _FF_FILE
 
 #define FF_VALID_FLAG_INVALID	0x00000001
 #define FF_VALID_FLAG_DELETED	0x00000002
+#define FF_VALID_FLAG_MODIFIED  0x00000004	///< Flag set whenever a a file is modified. Filesize may not have changed.
 
 /*---------- PROTOTYPES */
 /* PUBLIC (Interfaces): */

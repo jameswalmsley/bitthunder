@@ -2052,6 +2052,7 @@ FF_Error_t xError;
 	if( FF_isERR( xError ) == pdFALSE )
 	{
 		pxIOManager = pxFile->pxIOManager;
+		pxFile->ulValidFlags |= FF_VALID_FLAG_MODIFIED;
 
 		/* Open a do{} while( 0 ) loop to allow the use of breaks */
 		do
@@ -2265,6 +2266,8 @@ FF_Error_t xResult;
 					}
 				}
 			}
+
+			pxFile->ulValidFlags |= FF_VALID_FLAG_MODIFIED;
 
 			ulRelBlockPos = FF_getMinorBlockEntry( pxFile->pxIOManager, pxFile->ulFilePointer, 1 );
 
@@ -2907,7 +2910,7 @@ FF_Error_t xError;
 
 				/* Now update the directory entry */
 				if( ( FF_isERR( xError ) == pdFALSE ) &&
-					( ( pxFile->ulFileSize != pxOriginalEntry->ulFileSize ) || ( pxFile->ulFileSize == 0UL ) ) )
+					( ( pxFile->ulFileSize != pxOriginalEntry->ulFileSize ) || ( pxFile->ulFileSize == 0UL ) || ( pxFile->ulValidFlags & FF_VALID_FLAG_MODIFIED ) ) )
 				{
 					if( pxFile->ulFileSize == 0UL )
 					{
