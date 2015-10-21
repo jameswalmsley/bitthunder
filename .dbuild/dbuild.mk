@@ -160,9 +160,9 @@ kconfig-info:
 .PHONY: mkconfig
 mkconfig: $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig
 	$(Q)mkdir -p $(CONFIG_HEADER_PATH)
-	$(Q)$(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig $(BASE)/ > $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME)
+	$(Q)$(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig $(PROJECT_DIR)/ > $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME)
 
-$(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME): $(CONFIG_PATH)/.config $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig | dbuild_splash
+$(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME): $(PROJECT_DIR)/.config $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig | dbuild_splash
 $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME):
 	$(Q)$(PRETTY) --dbuild "CONF" $(MODULE_NAME) $(subst $(BASE)/,"",$@)
 	$(Q)$(MAKE) mkconfig
@@ -183,6 +183,7 @@ ifneq ($(CONFIG_PATH),$(BASE))
 	cp $(BASE)/.config $(CONFIG_PATH)/.config
 	-cp $(CONFIG_PATH)/.config.bak $(BASE)/.config
 endif
+	$(Q)$(MAKE) mkconfig
 
 .PHONY: oldconfig
 oldconfig:
