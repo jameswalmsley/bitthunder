@@ -458,8 +458,10 @@ FF_PRINTF("FF_Open[%s]: Conflicting WR mode\n", pcPath );
 		FF_ReleaseSemaphore( pxIOManager->pvSemaphore );
 	}
 
+#if (ffconfigNAMES_ON_HEAP != 0)
 	ffconfigFREE(pxDirEntry);
 	ffconfigFREE(pfilename);
+#endif
 
 	if( FF_isERR( xError ) != pdFALSE )
 	{
@@ -1225,7 +1227,7 @@ FF_FATBuffers_t xFATBuffers;
 				{
 					pxOriginalEntry->ulObjectCluster = pxFile->ulAddrCurrentCluster;
 #if (ffconfigTIME_SUPPORT != 0)
-					FF_GetSystemTime(pxOriginalEntry->xAccessedTime);
+					FF_GetSystemTime(&pxOriginalEntry->xAccessedTime);
 					pxOriginalEntry->xModifiedTime = pxOriginalEntry->xAccessedTime;
 #endif
 					xError = FF_PutEntry( pxIOManager, pxFile->usDirEntry, pxFile->ulDirCluster, pxOriginalEntry, NULL );
@@ -2583,9 +2585,9 @@ FF_Error_t FF_CheckValid( FF_FILE *pxFile )
 	#endif	/* ffconfigUNICODE_UTF16_SUPPORT */
 	{
 #if (ffconfigNAMES_ON_HEAP != 0)
-	FF_DirEnt_t *pxOriginalEntry;
+	FF_DirEnt_t *pxOriginalEntry = NULL;
 #else
-	FF_DirEnt_t xOriginalEntry = NULL;
+	FF_DirEnt_t xOriginalEntry;
 	FF_DirEnt_t *pxOriginalEntry = &xOriginalEntry;
 #endif
 	FF_Error_t xError;

@@ -2873,6 +2873,7 @@ uint32_t FF_CreateFile( FF_IOManager_t *pxIOManager, FF_FindParams_t *pxFindPara
 #if (ffconfigNAMES_ON_HEAP != 0)
 FF_DirEnt_t *pMyFile;
 #else
+FF_DirEnt_t MyFile;
 FF_DirEnt_t *pMyFile = &MyFile;	// TODO: Use alloca() to conditionally allocate this on the stack if pxDirEntry is not NULL!
 #endif
 FF_Error_t xTempError, xError = FF_ERR_NONE;
