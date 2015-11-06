@@ -56,6 +56,14 @@ void BT_kTaskYield() {
 	}
 }
 
+BT_BOOL BT_kTaskNotify(struct bt_thread *thread, BT_u32 ulValue, BT_NOTIFY_ACTION eNotifyAction) {
+	return (BT_BOOL) xTaskNotify(thread->pKThreadID, ulValue, eNotifyAction);
+}
+
+BT_u32 BT_kTaskNotifyTake(BT_BOOL bClearCountOnExit, BT_TICK oTimeoutTicks) {
+	return (BT_u32) ulTaskNotifyTake(bClearCountOnExit, oTimeoutTicks);
+}
+
 void *BT_kGetThreadTag(void *pThreadID) {
 	return xTaskGetApplicationTaskTag((xTaskHandle) pThreadID);
 }

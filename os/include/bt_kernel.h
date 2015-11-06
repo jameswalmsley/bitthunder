@@ -28,6 +28,18 @@ BT_TICK		BT_kTickCount		(void);
 void		BT_kTaskDelay		(BT_TICK ulTicks);
 void		BT_kTaskDelayUntil 	(BT_TICK *pulPreviousWakeTime, BT_TICK ulTimeIncrement);
 void 		BT_kTaskYield		(void);
+
+typedef enum {
+	BT_NOTIFY_NOACTION = 0,
+	BT_NOTIFY_SET_BITS,
+	BT_NOTIFY_INCREMENT,
+	BT_NOTIFY_SET_VALUE_OVERWRITE,
+	BT_NOTIFY_SET_VALUE_NO_OVERWRITE
+} BT_NOTIFY_ACTION;
+
+BT_BOOL 	BT_kTaskNotify		(struct bt_thread *thread, BT_u32 ulValue, BT_NOTIFY_ACTION eNotifyAction);
+BT_u32 		BT_kTaskNotifyTake	(BT_BOOL bClearCountOnExit, BT_TICK oTimeoutTicks);
+
 void 	   *BT_kGetThreadTag	(void *pThreadID);
 void		BT_kSetThreadTag	(void *pThreadID, void *pTagData);
 
