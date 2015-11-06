@@ -19,7 +19,6 @@ struct _BT_OPAQUE_HANDLE {
 	BT_THREAD_CONFIG 	oConfig;
 	BT_FN_THREAD_ENTRY 	pfnStartRoutine;
 	void 			   *pThreadParam;
-	void 			   *pKThreadID;
 	BT_ERROR			lastThreadError;
 };
 
@@ -32,7 +31,7 @@ static void threadStartup(void *pParam) {
 	BT_HANDLE hThread = (BT_HANDLE) pParam;
 
 	if(hThread->pfnStartRoutine) {
-		BT_kSetThreadTag(hThread->pKThreadID, &hThread->thread);	// Tag the task structure.
+		BT_kSetThreadTag(hThread->thread.pKThreadID, &hThread->thread);	// Tag the task structure.
 		curthread = &hThread->thread;
 #ifdef BT_CONFIG_USE_VIRTUAL_ADDRESSING
 		if(curtask && curtask->map) {
@@ -42,7 +41,7 @@ static void threadStartup(void *pParam) {
 		hThread->lastThreadError = hThread->pfnStartRoutine(hThread, hThread->pThreadParam);
 	}
 
-	void *pKThreadID = hThread->pKThreadID;
+	void *pKThreadID = hThread->thread.pKThreadID;
 	if(!(hThread->oConfig.ulFlags & BT_THREAD_FLAGS_NO_CLEANUP)) {
 		BT_CloseHandle(hThread);
 	}
@@ -54,7 +53,7 @@ static const BT_IF_HANDLE oHandleInterface;
 
 static BT_ERROR thread_cleanup(BT_HANDLE hThread) {
 	bt_list_del(&hThread->h.item);
-	BT_kTaskDelete(hThread->pKThreadID);	// Schedule thread to be deleted completely.
+	BT_kTaskDelete(hThread->thread.pKThreadID);	// Schedule thread to be deleted completely.
 	return BT_ERR_NONE;
 }
 
@@ -81,8 +80,8 @@ BT_HANDLE BT_CreateProcessThread(BT_HANDLE hProcess, BT_FN_THREAD_ENTRY pfnStart
 	hThread->oConfig.pParam = hThread;
 	hThread->pfnStartRoutine = pfnStartRoutine;
 
-	hThread->pKThreadID = BT_kTaskCreate(threadStartup, NULL, &hThread->oConfig, &Error);
-	if(!hThread->pKThreadID) {
+	hThread->thread.pKThreadID = BT_kTaskCreate(threadStartup, NULL, &hThread->oConfig, &Error);
+	if(!hThread->thread.pKThreadID) {
 		BT_DetachHandle(hThread);
 		BT_DestroyHandle(hThread);
 		return NULL;
@@ -142,6 +141,11 @@ void BT_SetThreadTag(void *tag) {
 	curthread->tag = tag;
 }
 BT_EXPORT_SYMBOL(BT_SetThreadTag);
+
+struct bt_thread *BT_GetThreadDescripter(BT_HANDLE hThread) {
+	return &hThread->thread;
+}
+BT_EXPORT_SYMBOL(BT_GetThreadDescripter);
 
 BT_ERROR BT_GetThreadTime(BT_HANDLE hThread, struct bt_thread_time *time) {
 	time->ullRunTimeCounter = hThread->thread.ullRunTimeCounter;
