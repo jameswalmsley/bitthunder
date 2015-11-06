@@ -5,6 +5,8 @@
 #include <process/bt_threads.h>
 #include <devman/bt_device.h>
 
+typedef void *	BT_EVGROUP_T;
+
 typedef struct _bt_kernel_params {
 	const char *cmdline;
 #ifdef BT_CONFIG_OF
@@ -39,6 +41,11 @@ typedef enum {
 
 BT_BOOL 	BT_kTaskNotify		(struct bt_thread *thread, BT_u32 ulValue, BT_NOTIFY_ACTION eNotifyAction);
 BT_u32 		BT_kTaskNotifyTake	(BT_BOOL bClearCountOnExit, BT_TICK oTimeoutTicks);
+
+BT_EVGROUP_T BT_kEventGroupCreate	(void);
+void 		BT_kEventGroupDelete(const BT_EVGROUP_T oEventGroup);
+BT_u32 		BT_kEventGroupWaitBits(const BT_EVGROUP_T oEventGroup, const BT_u32 ulBitsToWaitFor, const BT_BOOL bClearCountOnExit, const BT_BOOL bWaitForAllBits, BT_TICK oTimeoutTicks);
+BT_u32 		BT_kEventGroupSetBits(const BT_EVGROUP_T oEventGroup, const BT_u32 ulBitsToSet);
 
 void 	   *BT_kGetThreadTag	(void *pThreadID);
 void		BT_kSetThreadTag	(void *pThreadID, void *pTagData);

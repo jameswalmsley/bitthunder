@@ -64,6 +64,22 @@ BT_u32 BT_kTaskNotifyTake(BT_BOOL bClearCountOnExit, BT_TICK oTimeoutTicks) {
 	return (BT_u32) ulTaskNotifyTake(bClearCountOnExit, oTimeoutTicks);
 }
 
+BT_EVGROUP_T BT_kEventGroupCreate(void) {
+	return (BT_EVGROUP_T) xEventGroupCreate();
+}
+
+void BT_kEventGroupDelete(const BT_EVGROUP_T oEventGroup) {
+	vEventGroupDelete(oEventGroup);
+}
+
+BT_u32 BT_kEventGroupWaitBits(const BT_EVGROUP_T oEventGroup, const BT_u32 ulBitsToWaitFor, const BT_BOOL bClearCountOnExit, const BT_BOOL bWaitForAllBits, BT_TICK oTimeoutTicks) {
+	return xEventGroupWaitBits(oEventGroup, ulBitsToWaitFor, bClearCountOnExit, bWaitForAllBits, oTimeoutTicks);
+}
+
+BT_u32 BT_kEventGroupSetBits(const BT_EVGROUP_T oEventGroup, const BT_u32 ulBitsToSet) {
+	return xEventGroupSetBits(oEventGroup, ulBitsToSet);
+}
+
 void *BT_kGetThreadTag(void *pThreadID) {
 	return xTaskGetApplicationTaskTag((xTaskHandle) pThreadID);
 }
