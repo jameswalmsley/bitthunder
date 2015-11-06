@@ -46,8 +46,8 @@ void		BT_kSetThreadTag	(void *pThreadID, void *pTagData);
 void 	   *BT_kMutexCreate		(void);
 void 	   *BT_kRecursiveMutexCreate(void);
 void	    BT_kMutexDestroy	(void *pMutex);
-BT_BOOL		BT_kMutexPend		(void *pMutex, BT_u32 ulTimeout);
-BT_BOOL		BT_kMutexAcquire	(void *pMutex, BT_u32 ulTimeout);
+BT_BOOL		BT_kMutexPend		(void *pMutex, BT_TICK oTimeoutTicks);
+#define 	BT_kMutexAcquire 	BT_kMutexPend
 BT_BOOL		BT_kMutexRelease	(void *pMutex);
 BT_BOOL		BT_kMutexPendRecursive		(void *pMutex, BT_u32 ulTimeout);
 BT_BOOL		BT_kMutexReleaseRecursive	(void *pMutex);
