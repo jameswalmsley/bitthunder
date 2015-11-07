@@ -29,7 +29,7 @@ struct bt_block_request {
 	BT_u32					ulAddress;
 	BT_u32 					ulBlocks;
 	void 				   *pBuffer;
-	BT_BOOL					bDone;
+	volatile BT_BOOL		bDone;
 	BT_s32					retval;
 };
 #endif
@@ -80,9 +80,10 @@ static void bt_block_exec_request(BT_HANDLE hBlock, struct bt_block_request *req
 	BT_BLKDEV_DESCRIPTOR *blkdev = (BT_BLKDEV_DESCRIPTOR *) hBlock;
 
 	bt_block_schedule(req);
-	//BT_kMutexPend(blkdev->kMutex, BT_INFINITE_TIMEOUT);
-	//BT_kMutexRelease(blkdev->kMutex);
-	BT_kEventGroupWaitBits(g_event_group, 1, BT_TRUE, BT_FALSE, BT_INFINITE_TIMEOUT);
+
+	while(req->bDone != BT_TRUE) {
+		BT_kEventGroupWaitBits(g_event_group, 1, BT_TRUE, BT_FALSE, BT_INFINITE_TIMEOUT);
+	}
 }
 #endif
 
@@ -121,9 +122,12 @@ BT_s32 BT_BlockRead(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *p
 BT_EXPORT_SYMBOL(BT_BlockRead);
 
 BT_s32 BT_BlockWrite(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer) {
+
 	if(!isHandleValid(hBlock)) {
 		return BT_ERR_INVALID_HANDLE;
 	}
+
+#ifndef BT_CONFIG_BLOCK_SCHEDULER
 
 	BT_BLKDEV_DESCRIPTOR *blkdev = (BT_BLKDEV_DESCRIPTOR *) hBlock;
 
@@ -134,6 +138,20 @@ BT_s32 BT_BlockWrite(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *
 	BT_kMutexRelease(blkdev->kMutex);
 
 	return ret;
+
+#else
+	struct bt_block_request req;
+	req.hBlock = hBlock;
+	req.write_nRead = BT_TRUE;
+	req.ulAddress = ulAddress;
+	req.ulBlocks = ulBlocks;
+	req.pBuffer = pBuffer;
+	req.bDone = BT_FALSE;
+
+	bt_block_exec_request(hBlock, &req);
+
+	return req.retval;
+#endif
 }
 BT_EXPORT_SYMBOL(BT_BlockWrite);
 
@@ -221,26 +239,29 @@ static BT_ERROR block_scheduler(BT_HANDLE hThread, void *pParam) {
 
 		BT_kMutexPend(g_list_mutex, BT_INFINITE_TIMEOUT);
 		{
-		struct bt_list_head *pos, *next;
-		bt_list_for_each_safe(pos, next, &g_requests) {
-			struct bt_block_request *req = (struct bt_block_request *) pos;
-			BT_BLKDEV_DESCRIPTOR *blkdev = (BT_BLKDEV_DESCRIPTOR *) req->hBlock;
-			const BT_IF_BLOCK *pOps = blkdev->hBlkDev->b.h.pIf->oIfs.pDevIF->pBlockIF;
+			struct bt_list_head *pos, *next;
+			bt_list_for_each_safe(pos, next, &g_requests) {
+				struct bt_block_request *req = (struct bt_block_request *) pos;
+				BT_BLKDEV_DESCRIPTOR *blkdev = (BT_BLKDEV_DESCRIPTOR *) req->hBlock;
+				const BT_IF_BLOCK *pOps = blkdev->hBlkDev->b.h.pIf->oIfs.pDevIF->pBlockIF;
 
-			if(req->write_nRead) {
-				req->retval = pOps->pfnWriteBlocks(blkdev->hBlkDev, req->ulAddress, req->ulBlocks, req->pBuffer);
-			} else {
-				req->retval = pOps->pfnReadBlocks(blkdev->hBlkDev, req->ulAddress, req->ulBlocks, req->pBuffer);
+				BT_kMutexRelease(g_list_mutex);
+				{
+					if(req->write_nRead) {
+						req->retval = pOps->pfnWriteBlocks(blkdev->hBlkDev, req->ulAddress, req->ulBlocks, req->pBuffer);
+					} else {
+						req->retval = pOps->pfnReadBlocks(blkdev->hBlkDev, req->ulAddress, req->ulBlocks, req->pBuffer);
+					}
+				}
+				BT_kMutexPend(g_list_mutex, BT_INFINITE_TIMEOUT);
+
+				bt_list_del(&req->item);
+
+				req->bDone = BT_TRUE;
+				BT_kEventGroupSetBits(g_event_group, 1);
 			}
-
-			bt_list_del(&req->item);
-
-			req->bDone = BT_TRUE;
-			BT_kEventGroupSetBits(g_event_group, 1);
 		}
-	}
-	BT_kMutexRelease(g_list_mutex);
-
+		BT_kMutexRelease(g_list_mutex);
 	}
 }
 
