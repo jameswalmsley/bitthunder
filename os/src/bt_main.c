@@ -42,6 +42,57 @@ struct _BT_OPAQUE_HANDLE {
 	BT_HANDLE_HEADER h;
 };
 
+BT_ERROR bt_system_init(BT_HANDLE hThread, void *pParam) {
+
+	BT_ERROR Error = BT_ERR_NONE;
+	BT_HANDLE hUart = (BT_HANDLE) pParam;
+
+	BT_kPrint("Start Loading kernel modules...");
+	Error = BT_InitialiseKernelModules(hUart);
+
+#ifdef BT_CONFIG_CACHE_MAINTENANCE
+	BT_DCacheFlush();	// Flush the cache now, to ensure all memory pools are coherent.
+#endif
+
+	BT_kPrint("Enumerate integrated devices");
+	Error = BT_ProbeIntegratedDevices(hUart);
+
+	BT_kPrint("Enter user-mode, and start user-space application...");
+
+	BT_kPrint("Relinquish control of the boot UART device...(Goodbye)");
+
+	BT_Flush(hUart);
+
+#ifndef BT_CONFIG_INHERIT_STDIO_FROM_KERNEL
+	BT_SetStdin(NULL);
+	BT_SetStdout(NULL);
+	BT_SetStderr(NULL);
+
+	if (hUart) {
+		BT_CloseHandle(hUart);
+	}
+#endif
+
+	/*
+	 *	Sync-point - Wait until all sub-systems are ready.
+	 */
+#ifdef BT_CONFIG_MULTITHREADED_INIT
+	//BT_kEventGroupWaitBits(g_kernel_params.init_group, BT_SYSTEM_INIT_BIT_MASK, BT_TRUE, BT_TRUE, BT_INFINITE_TIMEOUT);
+	BT_kEventGroupSetBits(g_kernel_params.init_group, BT_SYSTEM_INIT_USER_READY);
+#endif
+
+	BT_THREAD_CONFIG oThreadConfig = {
+		.ulStackDepth 	= BT_CONFIG_MAIN_TASK_STACK_DEPTH,
+		.ulPriority		= BT_CONFIG_MAIN_TASK_PRIORITY,
+	};
+
+#ifndef BT_CONFIG_KERNEL_NONE
+	BT_CreateProcess((BT_FN_THREAD_ENTRY) main, "MAIN", &oThreadConfig, &Error);
+#else
+	main(0, NULL);
+#endif
+}
+
 int bt_main(BT_u32 machid, const void *fdt) {
 
 	BT_ERROR 	Error;
@@ -127,50 +178,23 @@ int bt_main(BT_u32 machid, const void *fdt) {
 	BT_SetStderr(hUart);
 
 	BT_kPrint("%s (%s)", BT_VERSION_STRING, BT_VERSION_NAME);
-
 	BT_kPrint("Command line: %s", g_kernel_params.cmdline);
 
-	BT_kPrint("Start Loading kernel modules...");
-	Error = BT_InitialiseKernelModules(hUart);
-
-#ifdef BT_CONFIG_CACHE_MAINTENANCE
-	BT_DCacheFlush();	// Flush the cache now, to ensure all memory pools are coherent.
-#endif
-
-	BT_kPrint("Enumerate integrated devices");
-	Error = BT_ProbeIntegratedDevices(hUart);
-
-	BT_kPrint("Enter user-mode, and start user-space application...");
-
-	BT_kPrint("Relinquish control of the boot UART device...(Goodbye)");
-
-	BT_Flush(hUart);
-
-#ifndef BT_CONFIG_INHERIT_STDIO_FROM_KERNEL
-	BT_SetStdin(NULL);
-	BT_SetStdout(NULL);
-	BT_SetStderr(NULL);
-
-	if (hUart) {
-		BT_CloseHandle(hUart);
-	}
-#endif
-
-#ifndef BT_CONFIG_KERNEL_NONE
 	BT_THREAD_CONFIG oThreadConfig = {
 		.ulStackDepth 	= BT_CONFIG_MAIN_TASK_STACK_DEPTH,
 		.ulPriority		= BT_CONFIG_MAIN_TASK_PRIORITY,
+		.pParam 		= hUart,
 	};
 
-	BT_CreateProcess((BT_FN_THREAD_ENTRY) main, "MAIN", &oThreadConfig, &Error);
+	g_kernel_params.init_group = BT_kEventGroupCreate();
 
+	BT_CreateThread(bt_system_init, &oThreadConfig, NULL);
 	BT_StartScheduler();
-#else
-	main(0, NULL);
-#endif
 
 	// Write a debug message to the debugger port,
 	// It was not possible to start the scheduler.
+
+	BT_kPrint("Failed to start the scheduler.");
 
 	return BT_ERR_NONE;
 }

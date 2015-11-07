@@ -15,6 +15,12 @@ typedef struct _bt_kernel_params {
 	struct bt_list_head	all_of_nodes;	///< Linked list through all of_ nodes.
 #endif
 	bt_paddr_t 	coherent;
+#ifdef BT_CONFIG_MULTITHREADED_INIT
+	#define BT_SYSTEM_INIT_BIT_MASK		0x00000001
+	#define BT_SYSTEM_INIT_USER_READY	0x00800000
+	BT_EVGROUP_T	init_group;		///< Bits relevant to different sub-systems...
+#endif
+
 } bt_kernel_params;
 
 typedef void (*BT_FN_TASK_ENTRY)(void *pParam);
