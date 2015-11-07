@@ -72,6 +72,14 @@ config BLOCK
     bool "Block device support"
 	default n
 
+config BLOCK_SCHEDULER
+	bool "Block device manager to use an I/O scheduler"
+	default n
+
+config BLOCK_SCHEDULER_THREAD_PER_DEVICE
+	bool "Scheduler thread per device"
+	default n
+
 config VOLUME
     bool "Volume / Partition Manager"
 	default n

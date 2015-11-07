@@ -15,6 +15,25 @@ struct _BT_OPAQUE_HANDLE {
 	BT_BLKDEV_DESCRIPTOR 	b;
 };
 
+#ifdef BT_CONFIG_BLOCK_SCHEDULER
+static BT_LIST_HEAD(g_requests);
+
+static void *g_list_mutex = NULL;
+static struct bt_thread *g_block_thread;
+static BT_EVGROUP_T g_event_group = NULL;
+
+struct bt_block_request {
+	struct bt_list_head 	item;
+	BT_HANDLE 				hBlock;
+	BT_BOOL					write_nRead;
+	BT_u32					ulAddress;
+	BT_u32 					ulBlocks;
+	void 				   *pBuffer;
+	BT_BOOL					bDone;
+	BT_s32					retval;
+};
+#endif
+
 static BT_LIST_HEAD(g_block_devices);
 
 static const BT_IF_HANDLE oHandleInterface;
@@ -46,11 +65,34 @@ static BT_BOOL isHandleValid(BT_HANDLE hBlock) {
 	return BT_FALSE;
 }
 
+#ifdef BT_CONFIG_BLOCK_SCHEDULER
+static void bt_block_schedule(struct bt_block_request *req) {
+	BT_kMutexPend(g_list_mutex, BT_INFINITE_TIMEOUT);
+	{
+		bt_list_add(&req->item, &g_requests);
+	}
+	BT_kMutexRelease(g_list_mutex);
+
+	BT_kTaskNotify(g_block_thread, 0, BT_NOTIFY_INCREMENT);
+}
+
+static void bt_block_exec_request(BT_HANDLE hBlock, struct bt_block_request *req) {
+	BT_BLKDEV_DESCRIPTOR *blkdev = (BT_BLKDEV_DESCRIPTOR *) hBlock;
+
+	bt_block_schedule(req);
+	//BT_kMutexPend(blkdev->kMutex, BT_INFINITE_TIMEOUT);
+	//BT_kMutexRelease(blkdev->kMutex);
+	BT_kEventGroupWaitBits(g_event_group, 1, BT_TRUE, BT_FALSE, BT_INFINITE_TIMEOUT);
+}
+#endif
+
 BT_s32 BT_BlockRead(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *pBuffer) {
 
 	if(!isHandleValid(hBlock)) {
 		return BT_ERR_INVALID_HANDLE;
 	}
+
+#ifndef BT_CONFIG_BLOCK_SCHEDULER
 
 	BT_BLKDEV_DESCRIPTOR *blkdev = (BT_BLKDEV_DESCRIPTOR *) hBlock;
 
@@ -61,6 +103,20 @@ BT_s32 BT_BlockRead(BT_HANDLE hBlock, BT_u32 ulAddress, BT_u32 ulBlocks, void *p
 	BT_kMutexRelease(blkdev->kMutex);
 
 	return ret;
+#else
+	struct bt_block_request req;
+	req.hBlock = hBlock;
+	req.write_nRead = BT_FALSE;
+	req.ulAddress = ulAddress;
+	req.ulBlocks = ulBlocks;
+	req.pBuffer = pBuffer;
+	req.bDone = BT_FALSE;
+
+	bt_block_exec_request(hBlock, &req);	// Block until operation complete.
+
+	return req.retval;
+
+#endif
 }
 BT_EXPORT_SYMBOL(BT_BlockRead);
 
@@ -154,3 +210,58 @@ static const BT_IF_HANDLE oHandleInterface = {
 	.eType = BT_HANDLE_T_BLOCK,
 	.pfnCleanup = bt_blockdev_cleanup,
 };
+
+#ifdef BT_CONFIG_BLOCK_SCHEDULER
+static BT_ERROR block_scheduler(BT_HANDLE hThread, void *pParam) {
+
+	BT_kDebug("Started the block scheduler (basic)");
+
+	while(1) {
+		BT_kTaskNotifyTake(BT_FALSE, BT_INFINITE_TIMEOUT);
+
+		BT_kMutexPend(g_list_mutex, BT_INFINITE_TIMEOUT);
+		{
+		struct bt_list_head *pos, *next;
+		bt_list_for_each_safe(pos, next, &g_requests) {
+			struct bt_block_request *req = (struct bt_block_request *) pos;
+			BT_BLKDEV_DESCRIPTOR *blkdev = (BT_BLKDEV_DESCRIPTOR *) req->hBlock;
+			const BT_IF_BLOCK *pOps = blkdev->hBlkDev->b.h.pIf->oIfs.pDevIF->pBlockIF;
+
+			if(req->write_nRead) {
+				req->retval = pOps->pfnWriteBlocks(blkdev->hBlkDev, req->ulAddress, req->ulBlocks, req->pBuffer);
+			} else {
+				req->retval = pOps->pfnReadBlocks(blkdev->hBlkDev, req->ulAddress, req->ulBlocks, req->pBuffer);
+			}
+
+			bt_list_del(&req->item);
+
+			req->bDone = BT_TRUE;
+			BT_kEventGroupSetBits(g_event_group, 1);
+		}
+	}
+	BT_kMutexRelease(g_list_mutex);
+
+	}
+}
+
+BT_ERROR bt_block_init() {
+	g_list_mutex = BT_kMutexCreate();
+	g_event_group = BT_kEventGroupCreate();
+
+	BT_ERROR Error = BT_ERR_NONE;
+
+	BT_THREAD_CONFIG oConfig;
+	oConfig.ulStackDepth 	= 128;
+	oConfig.ulPriority 		= BT_CONFIG_INTERRUPTS_SOFTIRQ_PRIORITY;
+
+	BT_HANDLE hThread = BT_CreateThread(block_scheduler, &oConfig, &Error);
+	g_block_thread = BT_GetThreadDescripter(hThread);
+
+	return Error;
+}
+
+BT_MODULE_INIT_0_DEF oModuleEntry = {
+	BT_MODULE_NAME,
+	bt_block_init,
+};
+#endif
