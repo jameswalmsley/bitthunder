@@ -17,6 +17,9 @@ BT_DEF_MODULE_EMAIL			("james@fullfat-fs.co.uk")
 
 static void led_task(BT_HANDLE hThread, void *pParam) {
 
+	bt_kernel_params *kp = bt_get_kernel_params();
+	BT_kEventGroupWaitBits(kp->init_group, BT_SYSTEM_INIT_USER_READY, BT_FALSE, BT_TRUE, BT_INFINITE_TIMEOUT);
+
 	BT_GpioSetDirection(BT_CONFIG_ALIVE_LED_GPIO, BT_GPIO_DIR_OUTPUT);
 
 	BT_TICK ticks = BT_kTickCount();
