@@ -56,6 +56,30 @@ void BT_kTaskYield() {
 	}
 }
 
+BT_BOOL BT_kTaskNotify(struct bt_thread *thread, BT_u32 ulValue, BT_NOTIFY_ACTION eNotifyAction) {
+	return (BT_BOOL) xTaskNotify(thread->pKThreadID, ulValue, eNotifyAction);
+}
+
+BT_u32 BT_kTaskNotifyTake(BT_BOOL bClearCountOnExit, BT_TICK oTimeoutTicks) {
+	return (BT_u32) ulTaskNotifyTake(bClearCountOnExit, oTimeoutTicks);
+}
+
+BT_EVGROUP_T BT_kEventGroupCreate(void) {
+	return (BT_EVGROUP_T) xEventGroupCreate();
+}
+
+void BT_kEventGroupDelete(const BT_EVGROUP_T oEventGroup) {
+	vEventGroupDelete(oEventGroup);
+}
+
+BT_u32 BT_kEventGroupWaitBits(const BT_EVGROUP_T oEventGroup, const BT_u32 ulBitsToWaitFor, const BT_BOOL bClearCountOnExit, const BT_BOOL bWaitForAllBits, BT_TICK oTimeoutTicks) {
+	return xEventGroupWaitBits(oEventGroup, ulBitsToWaitFor, bClearCountOnExit, bWaitForAllBits, oTimeoutTicks);
+}
+
+BT_u32 BT_kEventGroupSetBits(const BT_EVGROUP_T oEventGroup, const BT_u32 ulBitsToSet) {
+	return xEventGroupSetBits(oEventGroup, ulBitsToSet);
+}
+
 void *BT_kGetThreadTag(void *pThreadID) {
 	return xTaskGetApplicationTaskTag((xTaskHandle) pThreadID);
 }
@@ -84,14 +108,6 @@ BT_BOOL BT_kMutexPend(void *pMutex, BT_TICK oTimeoutTicks) {
 		return BT_TRUE;
 	}
 
-	return BT_FALSE;
-}
-
-BT_BOOL BT_kMutexAcquire(void *pMutex, BT_TICK oTimeoutTicks) {
-
-	if(xSemaphoreTake(pMutex, oTimeoutTicks) == pdPASS) {
-		return BT_TRUE;
-	}
 	return BT_FALSE;
 }
 

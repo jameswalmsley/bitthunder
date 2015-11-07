@@ -103,6 +103,7 @@
 #define configIDLE_SHOULD_YIELD		1
 #define configUSE_APPLICATION_TASK_TAG	1
 #define configGENERATE_RUN_TIME_STATS	0
+#define configUSE_TASK_NOTIFICATIONS	1
 
 /* Co-routine definitions. */
 #define configUSE_CO_ROUTINES 		0

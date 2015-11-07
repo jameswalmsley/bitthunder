@@ -9,6 +9,7 @@ struct bt_thread {
 	void		   *tag;						///< A Tag item used e.g. by newlib for reent structures.
 	const BT_i8    *name;
 	BT_u64			ullRunTimeCounter;
+	void 		   *pKThreadID;					///< FreeRTOS task handle.
 };
 
 struct bt_thread_time {
@@ -40,6 +41,7 @@ BT_HANDLE BT_CreateProcessThread(BT_HANDLE hProcess, BT_FN_THREAD_ENTRY pfnStart
 
 BT_HANDLE BT_GetThreadHandle(void);
 BT_HANDLE BT_GetThreadProcessHandle(BT_HANDLE hThread);
+struct bt_thread *BT_GetThreadDescripter(BT_HANDLE hThread);
 
 BT_ERROR BT_ThreadSleepUntil(BT_TICK *pulPreviousWakeTime, BT_u32 ulTimeMs);
 BT_ERROR BT_ThreadSleep(BT_u32 ulTimeMs);
