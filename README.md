@@ -1,5 +1,8 @@
 # BitThunder
 
+[![Build status](https://git.bitthunder.org/VitalElement/bitthunder/badges/ci/build.svg)](https://git.bitthunder.org/VitalElement/bitthunder/commits/ci)
+
+
 A Reliable Real-Time Operating System & Application Framework
 
 (c) 2012-2014 James Walmsley <james@fullfat-fs.co.uk>
