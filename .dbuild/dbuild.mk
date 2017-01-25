@@ -169,10 +169,12 @@ $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME):
 
 $(OBJECTS): $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME)
 
+CONF:=kconfig-conf
 MCONF:=kconfig-mconf
 MCONF_TERM:=
 ifeq ($(DBUILD_OS), LINUX_64)
 MCONF:=$(BASE)/scripts/kconfig-linux64/kconfig-mconf
+CONF:=$(BASE)/scripts/kconfig-linux64/kconfig-conf
 MCONF_TERM:=TERM=xterm-color
 endif
 ifeq ($(DBUILD_OS), WIN32)
@@ -201,8 +203,8 @@ endif
 
 .PHONY: oldconfig
 oldconfig:
-	@which kconfig-conf > /dev/null || { echo "You need to compile and install kconfig-frontends"; false; }
-	@cd $(BASE)/ && CONFIG_=$(CONFIG_) PROJECT_DIR=$(PROJECT_DIR) kconfig-conf --oldconfig Kconfig .config
+	#@which kconfig-conf > /dev/null || { echo "You need to compile and install kconfig-frontends"; false; }
+	cd $(BASE)/ && CONFIG_=$(CONFIG_) PROJECT_DIR=$(PROJECT_DIR) $(CONF) --olddefconfig Kconfig .config
 
 $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig$(OS_EXT): $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig.c
 	$(Q)gcc $(DBUILD_ROOT).dbuild/scripts/mkconfig/mkconfig.c $(DBUILD_ROOT).dbuild/scripts/mkconfig/cfgparser.c $(DBUILD_ROOT).dbuild/scripts/mkconfig/cfgdefine.c -o $@
