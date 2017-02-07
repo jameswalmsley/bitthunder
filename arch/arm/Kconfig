@@ -11,7 +11,7 @@ choice
 	default MACH_ZYNQ
 
 config MACH_BCM2835
-	bool "BCM2835 (Raspberryi Pi)"
+	bool "BCM2835 (Raspberry Pi)"
 	select ARCH_ARM_ARM11
 
 config MACH_LPC11xx
