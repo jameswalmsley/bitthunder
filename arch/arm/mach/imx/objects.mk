@@ -1,9 +1,13 @@
-MACH_IMX_OBJECTS += $(BUILD_DIR)/arch/arm/mach/$(SUBARCH)/imx6.o			# Provides machine description.
+ARCH_BD := $(BUILD_DIR)/arch/arm/mach/$(SUBARCH)
+
+MACH_IMX_OBJECTS += $(ARCH_BD)/imx6.o			# Provides machine description.
 MACH_IMX_OBJECTS += $(ARCH_BD)/gpio.o
 
 MACH_IMX_OBJECTS += $(MACH_IMX_OBJECTS-y)
 
 $(MACH_IMX_OBJECTS): MODULE_NAME="IMX"
+
+OBJECTS += $(MACH_IMX_OBJECTS)
 
 .PHONY:
 vmthunder.imx: $(PROJECT_DIR)/vmthunder.imx
@@ -23,5 +27,4 @@ endif
 	$(Q)gcc -E -P $(CFLAGS) - < $< > $@
 	$(POST_CC)
 
-OBJECTS += $(MACH_IMX_OBJECTS)
 all: $(PROJECT_DIR)/vmthunder.imx
