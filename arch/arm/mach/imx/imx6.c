@@ -1,5 +1,9 @@
 #include <bitthunder.h>
 
+BT_INTEGRATED_DEVICE_DEF imx_gpio_device = {
+	.name 	= "imx,gpio",
+};
+
 
 static const BT_RESOURCE imx_intc_resources[] = {
 	{
