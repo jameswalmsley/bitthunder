@@ -1,0 +1,21 @@
+choice
+    prompt "IMX6 Boards"
+    default CGT_QMX6_PN016104
+
+config CGT_QMX6_PN016104
+    bool "Congatec QMX6 PN-016104"
+    ---help---
+        QMX6 Q7 Module from Congatec
+
+endchoice
+
+config BOARD_DEFCONFIG_FILE
+    string
+    default "cgt_qmx6.pn016104.defconfig" if CGT_QMX6_PN016104
+
+config BOARD_DCD_CONFIG_FILE
+    string
+    default "cgt_qmx6.pn016104.imx.cfg" if CGT_QMX6_PN016104
+
+
+

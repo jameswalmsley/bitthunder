@@ -13,6 +13,8 @@ config MACH_IMX_PLATFORM
 	select LINKER_MACH_TEXT_SECTION_IN_RAM
 	select ARCH_ARM_USE_GIC
 
+source arch/arm/mach/imx/boards/Kconfig
+
 config ARCH_ARM_CORTEX_A9_MPCORE_BASE
 	hex
 	default 0x00A00000
