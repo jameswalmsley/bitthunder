@@ -28,6 +28,8 @@
 
 #define BT_SIZE_1K		(1024)
 #define BT_SIZE_4K		(BT_SIZE_1K * 4)
+#define BT_SIZE_8K		(BT_SIZE_1K * 8)
+#define BT_SIZE_16K		(BT_SIZE_16K * 16)
 
 /*
  *	@id		The reserved member number, e.g. reserved_1 ....
