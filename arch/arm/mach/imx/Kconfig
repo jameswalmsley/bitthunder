@@ -31,6 +31,14 @@ config MACH_RAM_SIZE
 	hex
 	default 0x10800000
 
+config MACH_SRAM_START
+	hex
+	default 0x00908000
+
+config MACH_SRAM_SIZE
+	hex
+	default 0x40000
+
 config CPU_CORES
 	int
 	default 4
