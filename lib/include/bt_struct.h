@@ -46,12 +46,19 @@
 
 
 
-
-
-
-
-
-
-
+/*
+ *      These macro's are really useful!
+ *      With these, a driver can simply define registers with masks,
+ *      and these macro's will handle the reset for getting and setting the fields.
+ *
+ *      The operations will all optimise away to shifts, unless you have a really bad
+ *      compiler.
+ *
+ *      Even without optimisations a stadard arm-gcc compiler outputs the same ASM
+ *      for the equivalent hand-written op. (e.g. (field & mask) >> mask_shift).
+ */
+#define BT_MASK_SHIFT(mask)             ((mask) & ~((mask) << 1))
+#define BT_GETBITS(field, mask)           ((field & mask) / BT_MASK_SHIFT(mask))
+#define BT_SETBITS(field, mask, val)      (field |= ((val * BT_MASK_SHIFT(mask)) & mask));
 
 #endif
