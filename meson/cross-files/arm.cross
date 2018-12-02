@@ -1,0 +1,15 @@
+[binaries]
+c = 'arm-none-eabi-gcc'
+cpp = 'arm-none-eabi-g++'
+ar = 'arm-none-eabi-ar'
+strip = 'arm-none-eabi-strip'
+
+[host_machine]
+system = 'none'
+cpu_family = 'arm'
+cpu = 'cortex-a9'
+endian = 'little'
+
+[properties]
+c_args = ['-march=armv7-a', '-mfloat-abi=soft', '-mfpu=neon']
+link_args = ['-march=armv7-a', '-mfloat-abi=soft', '-mfpu=neon']
