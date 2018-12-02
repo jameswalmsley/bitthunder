@@ -1,10 +1,15 @@
 project('bitthunder', 'c',
 	version : '1.0',
-	default_options : ['warning_level=3'])
+	default_options : ['warning_level=1'])
 
 
 vm_sources = []
 vm_includes = []
+bt_config = configuration_data()
+cfg = run_command('cat', '.config').stdout().strip().split('\n')
+foreach item : cfg
+	bt_config.set(item, 1)
+endforeach
 
 subdir('lib')
 subdir('os')

@@ -145,4 +145,8 @@ clean_images: | dbuild_splash
 	$(Q)rm -rf $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME) $(PRM_PIPE)
 	$(Q)rm -rf $(PROJECT_DIR)/linktree
 
+.PHONY: meson
+meson:
+	CC=gcc $(BASE)/meson/meson/meson.py --cross-file $(BASE)/meson/cross-files/arm.cross builddir
+
 $(CONFIG_HEADER_PATH)/$(CONFIG_HEADER_NAME): MODULE_NAME:=$(MODULE_NAME)

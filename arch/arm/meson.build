@@ -10,3 +10,6 @@ vm_sources += 'arch/arm/common/cpuinit.S'
 vm_sources += 'arch/arm/common/gic.c'
 vm_sources += 'arch/arm/common/freertos-ca9.c'
 vm_sources += 'arch/arm/common/freertos-ca9-asm.S'
+
+
+subdir('mach')
