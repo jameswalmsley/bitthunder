@@ -28,6 +28,10 @@ config CPU_CORES
 	int
 	default 2
 
+config ARCH_ARM_GIC_TOTAL_IRQS
+	int
+	default 95
+
 source arch/arm/mach/zynq/boards/Kconfig
 
 comment "Zynq Platform Options"
