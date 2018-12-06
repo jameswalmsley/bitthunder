@@ -95,6 +95,8 @@ config DIR
 
 config I2C
     bool "I2C subsystem"
+	select SOFTIRQ
+	select TASKLETS
 	default n
 
 config ADC
