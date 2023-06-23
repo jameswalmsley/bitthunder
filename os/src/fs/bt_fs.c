@@ -203,7 +203,7 @@ BT_ERROR BT_Mount(const BT_i8 *src, const BT_i8 *target, const BT_i8 *filesystem
 	if(!src) {
 		const BT_IF_FS *pFs = fs->hFS->h.pIf->oIfs.pFilesystemIF;
 
-		if(!fs->hFS->h.pIf->oIfs.pFilesystemIF->ulFlags & BT_FS_FLAG_NODEV) {
+		if(!(fs->hFS->h.pIf->oIfs.pFilesystemIF->ulFlags & BT_FS_FLAG_NODEV)) {
 			return BT_ERR_GENERIC;
 		}
 
