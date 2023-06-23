@@ -244,6 +244,7 @@ BT_ERROR BT_Mount(const BT_i8 *src, const BT_i8 *target, const BT_i8 *filesystem
 		}
 	} else {
 		struct bt_list_head *pos;
+		hMount = NULL;
 		bt_list_for_each(pos, &g_filesystems) {
 			fs = (BT_FILESYSTEM *) pos;
 			const BT_IF_FS *pFs = fs->hFS->h.pIf->oIfs.pFilesystemIF;
